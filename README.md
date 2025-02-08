@@ -4,6 +4,13 @@ Tips and tricks for extending the Ableton Move.
 
 The code in this repository will run an additional webserver alongside the official one. When run on the move, it is accessible at move.local:666.
 
+## Current Features
+
+- Create a choke kit from an uploaded .WAV file of up to 16 slices
+    - Downloadable as an `.ablpresetbundle`
+    - Or placed directly on your device
+- Manually refresh your Move's library (useful when making manual changes to files)
+
 ## Installation
 
 ### Requirements
@@ -36,6 +43,7 @@ python3 move-webserver.py
 ```
 
 the server is now accessible at http://move.local:666
+
 # Other tips
 
 Check the Wiki for more information as it is disovered about the Move: <https://github.com/charlesvestal/extending-move/wiki>
