@@ -16,6 +16,23 @@ class MyServer(BaseHTTPRequestHandler):
             self.end_headers()
             with open(os.path.join("templates", "index.html"), "r") as f:
                 self.wfile.write(bytes(f.read(), "utf-8"))
+        elif self.path.startswith("/static/"):
+            file_path = self.path.lstrip('/')
+            if os.path.exists(file_path) and os.path.isfile(file_path):
+                self.send_response(200)
+                if file_path.endswith(".css"):
+                    self.send_header("Content-Type", "text/css")
+                elif file_path.endswith(".js"):
+                    self.send_header("Content-Type", "application/javascript")
+                else:
+                    self.send_header("Content-Type", "application/octet-stream")
+                self.end_headers()
+                with open(file_path, "rb") as f:
+                    self.wfile.write(f.read())
+            else:
+                self.send_response(404)
+                self.end_headers()
+                self.wfile.write(bytes("404 Not Found", "utf-8"))
         elif self.path == "/slice":
             self.send_response(200)
             self.send_header("Content-type", "text/html")
@@ -165,7 +182,7 @@ class MyServer(BaseHTTPRequestHandler):
                         # No need to check if preset exists; process_kit has already handled it.
                         # Respond with success message
                         print(f"Preset placed at {preset_output_file}.")
-
+    
                         # Refresh the library after automatic placement
                         refresh_success, refresh_message = refresh_library()
                         if refresh_success:
