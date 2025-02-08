@@ -139,11 +139,17 @@
                                     start: i * sliceDuration,
                                     end: (i + 1) * sliceDuration,
                                     color: 'rgba(0, 255, 0, 0.2)', // change color as desired
+                                    drag: false,
+                                    // resize: false
                                 });
                             }
                         }
                     });
-
+                    // Play region on click
+                    wavesurfer.on('region-click', function(region, e) {
+                        e.stopPropagation(); // Prevent the event from bubbling
+                        region.play();
+                    });
                     // Store this instance on the element to avoid re-initializing
                     waveform.waveSurferInstance = wavesurfer;
                 }
