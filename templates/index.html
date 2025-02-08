@@ -1,9 +1,13 @@
+<!DOCTYPE html>
 <html>
     <head>
         <title>Move - Extended</title>
         <link rel="stylesheet" href="/style.css">
-        <!-- Include WaveSurfer.js from CDN -->
-        <script src="https://unpkg.com/wavesurfer.js"></script>
+        
+        <!-- Include WaveSurfer core and the Regions plugin -->
+        <script src="https://unpkg.com/wavesurfer.js@6/dist/wavesurfer.js"></script>
+        <script src="https://unpkg.com/wavesurfer.js@6/dist/plugin/wavesurfer.regions.js"></script>
+
         <script>
             function openTab(evt, tabName) {
                 var i, tabcontent, tablinks;
@@ -94,12 +98,16 @@
             function initializeWaveform() {
                 const waveform = document.getElementById('waveform');
                 if (waveform && !waveform.waveSurferInstance) {
+                    // Create WaveSurfer instance with the Regions plugin
                     const wavesurfer = WaveSurfer.create({
                         container: '#waveform',
                         waveColor: 'violet',
                         progressColor: 'purple',
                         height: 128,
                         responsive: true,
+                        plugins: [
+                            WaveSurfer.regions.create({}) // Enable the Regions plugin
+                        ]
                     });
 
                     // Load waveform when a file is selected
@@ -108,11 +116,35 @@
                         fileInput.addEventListener('change', function(e) {
                             const file = e.target.files[0];
                             if (file) {
+                                // Clear existing regions before loading a new file
+                                wavesurfer.clearRegions();
                                 wavesurfer.loadBlob(file);
                             }
                         });
                     }
 
+                    // Once audio is ready, create regions based on num_slices
+                    wavesurfer.on('ready', function() {
+                        const numSlicesInput = document.getElementById('num_slices');
+                        if (!numSlicesInput) return;
+
+                        const numSlices = parseInt(numSlicesInput.value);
+                        if (numSlices > 0) {
+                            const duration = wavesurfer.getDuration();
+                            const sliceDuration = duration / numSlices;
+
+                            // Create a region for each slice
+                            for (let i = 0; i < numSlices; i++) {
+                                wavesurfer.addRegion({
+                                    start: i * sliceDuration,
+                                    end: (i + 1) * sliceDuration,
+                                    color: 'rgba(0, 255, 0, 0.2)', // change color as desired
+                                });
+                            }
+                        }
+                    });
+
+                    // Store this instance on the element to avoid re-initializing
                     waveform.waveSurferInstance = wavesurfer;
                 }
             }
