@@ -1,8 +1,44 @@
 # extending-move
-Tips and tricks for extending the Ableton Move. 
 
-Check the Wiki for more information: https://github.com/charlesvestal/extending-move/wiki
+Tips and tricks for extending the Ableton Move.
 
+The code in this repository will run an additional webserver alongside the official one. When run on the move, it is accessible at move.local:666.
+
+## Installation
+
+### Requirements
+Begin by gaining ssh access to your move: <https://github.com/charlesvestal/extending-move/wiki/00--Accessing-Move>
+
+First, login as root, and install pip using the script at <https://bootstrap.pypa.io/get-pip.py>
+
+`wget https://bootstrap.pypa.io/get-pip.py`
+
+Login as the ableton user. We then need to set the system to use a tmpdir on the larger user partition, as it will run out of space downloading packages if using the root one.
+
+```
+mkdir -p ~/tmp
+export TMPDIR=~/tmp
+```
+
+then, install scipy
+
+`pip install --no-cache-dir scipy`
+
+### Script Installation
+
+copy the files in this repository to `/data/UserData/extending-move`
+
+still as the ableton user, navigate to the directory and start the server
+
+```
+cd /data/UserData/extending-move
+python3 move-webserver.py
+```
+
+the server is now accessible at http://move.local:666
+# Other tips
+
+Check the Wiki for more information as it is disovered about the Move: <https://github.com/charlesvestal/extending-move/wiki>
 
 # Disclaimer
 
