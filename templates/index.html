@@ -45,23 +45,54 @@
                 evt.currentTarget.className += " active";
 
                 // Dynamically load the content
-                fetchContent(tabName);
+                fetchContent(tabName).then(() => {
+                    attachFormHandler(tabName);
+                });
             }
 
-            function fetchContent(tabName) {
-                fetch(`/${tabName.toLowerCase()}`)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
+            async function fetchContent(tabName) {
+                try {
+                    const response = await fetch(`/${tabName.toLowerCase()}`);
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    const data = await response.text();
+                    document.getElementById(tabName).innerHTML = data;
+                } catch (error) {
+                    document.getElementById(tabName).innerHTML = `<p style="color: red;">Error loading content: ${error}</p>`;
+                }
+            }
+
+            function attachFormHandler(tabName) {
+                const form = document.querySelector(`#${tabName} form`);
+                if (form) {
+                    form.addEventListener('submit', async function(event) {
+                        event.preventDefault(); // Prevent the default form submission
+
+                        const formData = new FormData(form);
+                        const url = `/${tabName.toLowerCase()}`;
+                        const method = form.method.toUpperCase();
+
+                        try {
+                            const response = await fetch(url, {
+                                method: method,
+                                body: formData
+                            });
+
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+
+                            const result = await response.text();
+                            document.getElementById(tabName).innerHTML = result;
+
+                            // Re-attach the form handler in case of multiple submissions
+                            attachFormHandler(tabName);
+                        } catch (error) {
+                            document.getElementById(tabName).innerHTML = `<p style="color: red;">Error submitting form: ${error}</p>`;
                         }
-                        return response.text();
-                    })
-                    .then(data => {
-                        document.getElementById(tabName).innerHTML = data;
-                    })
-                    .catch(error => {
-                        document.getElementById(tabName).innerHTML = `<p style="color: red;">Error loading content: ${error}</p>`;
                     });
+                }
             }
 
             // Open the default tab when the page loads
