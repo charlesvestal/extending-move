@@ -174,7 +174,7 @@ def update_drumcell_sample_uris(data, slice_paths, current_index=0, base_uri="Sa
     The slices are used in document order.
     Returns the updated current_index.
     
-    If there are not enough slice files, the remaining drum cells are left unchanged.
+    If there are not enough slice files, the remaining drum cells are left with sampleUri as null.
     """
     if isinstance(data, dict):
         if data.get("kind") == "drumCell" and "deviceData" in data and "sampleUri" in data["deviceData"]:
@@ -185,6 +185,9 @@ def update_drumcell_sample_uris(data, slice_paths, current_index=0, base_uri="Sa
                 data["deviceData"]["sampleUri"] = new_uri
                 print(f"Updated drumCell sampleUri to {new_uri}")
                 current_index += 1
+            else:
+                data["deviceData"]["sampleUri"] = None
+                print("No slice available. Set drumCell sampleUri to null.")
         for key, value in data.items():
             current_index = update_drumcell_sample_uris(value, slice_paths, current_index, base_uri)
     elif isinstance(data, list):
@@ -254,7 +257,7 @@ def process_kit(input_wav, preset_name=None, num_slices=16, keep_files=False):
     # Slice the input WAV file.
     slice_paths = slice_wav(input_wav, samples_folder, num_slices=num_slices)
 
-    # Update the kit template: Replace each drum cell's sampleUri with "Samples/<URI-encoded-slice-filename>".
+    # Update the kit template: Replace each drum cell's sampleUri with "Samples/<URI-encoded-slice-filename>" or leave null.
     update_drumcell_sample_uris(kit_template, slice_paths, base_uri="Samples/")
 
     # Write the updated preset JSON to Preset.ablpreset.
