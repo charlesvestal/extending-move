@@ -3,7 +3,7 @@
         <title>Slice Kit</title>
     </head>
     <body>
-        <h2>Choose a WAV file to generate a Choke Kit</h2>
+        <h2>Choose a WAV file to slice into a Choke Kit</h2>
         {message_html}
         <form enctype="multipart/form-data" method="post">
             <input type="hidden" name="action" value="slice"/>
@@ -14,7 +14,7 @@
             <input id="num_slices" name="num_slices" type="number" min="1" max="16" value="16" required/>
             <br/><br/>
             <button type="submit" name="mode" value="download">Download .ablpresetbundle</button>
-            <button type="submit" name="mode" value="auto_place">Save preset on Move</button>
+            <button type="submit" name="mode" value="auto_place">Save Preset directly on Move</button>
         </form>
     </body>
 </html>
