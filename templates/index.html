@@ -9,7 +9,7 @@
         <script src="https://unpkg.com/wavesurfer.js@6/dist/plugin/wavesurfer.regions.js"></script>
 
         <script>
-            let wavesurfer;      // For the main WaveSurfer instance
+            let wavesurfer;       // The main WaveSurfer instance
             let audioReady = false; // Flag to track whether audio is loaded
 
             function openTab(evt, tabName) {
@@ -97,11 +97,13 @@
                 }
             }
 
-            // Create or retrieve the WaveSurfer instance
+            /**
+             * Initialize (or reuse) the WaveSurfer instance when "Slice" tab is opened.
+             */
             function initializeWaveform() {
                 const waveform = document.getElementById('waveform');
                 
-                // If there's a placeholder for waveform and no existing wavesurfer, create it
+                // If there's a placeholder and no existing WaveSurfer instance, create it
                 if (waveform && !waveform.waveSurferInstance) {
                     wavesurfer = WaveSurfer.create({
                         container: '#waveform',
@@ -112,30 +114,34 @@
                         plugins: [WaveSurfer.regions.create({})]
                     });
 
-                    // When audio is first loaded, set flag and create initial slices
+                    // Set flag and create initial contiguous slices when audio is loaded
                     wavesurfer.on('ready', () => {
                         audioReady = true;
-                        recalcSlices();
+                        createContiguousRegions();
                     });
 
-                    // Listen for region clicks to play that slice
+                    // Listen for region clicks to play just that slice
                     wavesurfer.on('region-click', (region, e) => {
                         e.stopPropagation(); 
                         region.play();
                     });
 
-                    // Store this instance to avoid re-initializing
+                    // Whenever the user finishes resizing a region,
+                    // force them to remain contiguous (no overlap/gap).
+                    wavesurfer.on('region-update-end', keepRegionsContiguous);
+
+                    // Store this instance on the waveform element
                     waveform.waveSurferInstance = wavesurfer;
                 }
 
                 // Listen for changes in num_slices input to recalc slices
                 const numSlicesInput = document.getElementById('num_slices');
                 if (numSlicesInput) {
-                    // Change event fires when user leaves the field or presses Enter
-                    // If you want "live" updates while typing, use "input" instead
                     numSlicesInput.addEventListener('change', function() {
                         if (audioReady) {
-                            recalcSlices();
+                            wavesurfer.stop();       // Stop playback if audio is playing
+                            wavesurfer.clearRegions(); 
+                            createContiguousRegions(); 
                         }
                     });
                 }
@@ -146,7 +152,7 @@
                     fileInput.addEventListener('change', (e) => {
                         const file = e.target.files[0];
                         if (file) {
-                            // Clear old regions and load new file
+                            // Clear old regions, reset flag, and load new file
                             wavesurfer.clearRegions();
                             audioReady = false;
                             wavesurfer.loadBlob(file);
@@ -155,31 +161,80 @@
                 }
             }
 
-            // Recalculate slices based on the current value in num_slices
-            function recalcSlices() {
-                if (!audioReady || !wavesurfer) return;
-
+            /**
+             * Create contiguous slices from 0 to the end of the file
+             * based on the number of slices in the num_slices input.
+             */
+            function createContiguousRegions() {
                 const numSlicesInput = document.getElementById('num_slices');
                 if (!numSlicesInput) return;
 
                 const numSlices = parseInt(numSlicesInput.value, 10) || 0;
+                if (!audioReady || !wavesurfer || numSlices <= 0) return;
 
-                // Clear existing slices
-                wavesurfer.clearRegions();
+                const duration = wavesurfer.getDuration();
+                const sliceDuration = duration / numSlices;
 
-                if (numSlices > 0) {
-                    const duration = wavesurfer.getDuration();
-                    const sliceDuration = duration / numSlices;
-                    for (let i = 0; i < numSlices; i++) {
-                        wavesurfer.addRegion({
-                            start: i * sliceDuration,
-                            end: (i + 1) * sliceDuration,
-                            color: 'rgba(0, 255, 0, 0.2)',
-                            drag: false,
-                            //resize: false
-                        });
-                    }
+                for (let i = 0; i < numSlices; i++) {
+                    wavesurfer.addRegion({
+                        start: i * sliceDuration,
+                        end: (i + 1) * sliceDuration,
+                        color: 'rgba(0, 255, 0, 0.2)',
+                        drag: false  // let users resize edges, but not move the entire slice
+                        // omit "resize: false" so edges are resizable
+                    });
                 }
+            }
+
+            /**
+             * Ensure all regions remain contiguous after resizing:
+             * - The end of one region is the start of the next.
+             * - The first region starts at 0, and the last region ends at the full duration.
+             */
+            function keepRegionsContiguous(updatedRegion) {
+                // Get all regions, sorted by start time
+                const regions = Object.values(wavesurfer.regions.list)
+                    .sort((a, b) => a.start - b.start);
+
+                // Find which region was just updated
+                const idx = regions.findIndex(r => r.id === updatedRegion.id);
+                if (idx === -1) return;
+
+                const duration = wavesurfer.getDuration();
+
+                // Clamp the updated region within [0, duration]
+                if (updatedRegion.start < 0) {
+                    updatedRegion.update({ start: 0 });
+                }
+                if (updatedRegion.end > duration) {
+                    updatedRegion.update({ end: duration });
+                }
+
+                // If there's a previous region, snap its end to this region's start
+                if (idx > 0) {
+                    const prev = regions[idx - 1];
+                    prev.update({ end: updatedRegion.start });
+                } else {
+                    // If this is the first region, ensure it starts at 0
+                    updatedRegion.update({ start: 0 });
+                }
+
+                // If there's a next region, snap its start to this region's end
+                if (idx < regions.length - 1) {
+                    const next = regions[idx + 1];
+                    next.update({ start: updatedRegion.end });
+                } else {
+                    // If this is the last region, ensure it ends at total duration
+                    updatedRegion.update({ end: duration });
+                }
+            }
+
+            // Recalculate slices if needed (this is left for legacy calls in your code)
+            function recalcSlices() {
+                if (!audioReady || !wavesurfer) return;
+                wavesurfer.stop();
+                wavesurfer.clearRegions();
+                createContiguousRegions();
             }
 
             // Open the default tab when the page loads
