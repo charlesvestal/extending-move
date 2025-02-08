@@ -249,109 +249,88 @@ def process_kit(input_wav, preset_name=None, num_slices=16, keep_files=False,
     - num_slices: Number of slices to generate.
     - keep_files: Whether to keep intermediate files.
     - mode: "download" or "auto_place".
+    
+    Returns:
+    A dictionary with keys:
+    - 'success': bool
+    - 'bundle_path': str (only for download mode)
+    - 'message': str
     """
-    # If preset_name is provided, use it; otherwise, default to the input WAV file's base name.
-    if preset_name:
-        preset = preset_name
-    else:
-        preset = os.path.splitext(os.path.basename(input_wav))[0]
-        print(f"No preset name provided; defaulting to '{preset}'.")
+    try:
+        # If preset_name is provided, use it; otherwise, default to the input WAV file's base name.
+        if preset_name:
+            preset = preset_name
+        else:
+            preset = os.path.splitext(os.path.basename(input_wav))[0]
+            print(f"No preset name provided; defaulting to '{preset}'.")
 
-    # Check if Samples folder or Preset.ablpreset file exist.
-    existing_outputs = []
-    if mode == "download":
-        if os.path.exists("Samples"):
-            existing_outputs.append("Samples")
-        if os.path.exists("Preset.ablpreset"):
-            existing_outputs.append("Preset.ablpreset")
-    elif mode == "auto_place":
-        samples_target_dir = "/data/UserData/UserLibrary/Samples/Preset Samples"
-        presets_target_dir = "/data/UserData/UserLibrary/Track Presets"
-        preset_output_file = os.path.join(presets_target_dir, f"{preset}.ablpreset")
-        if os.path.exists(samples_target_dir):
-            pass  # We'll handle individual files
-        if os.path.exists(preset_output_file):
-            existing_outputs.append(preset_output_file)
+        # Currently only "Choke Kit" is supported.
+        kit_type = "Choke Kit"
+        kit_template = generate_choke_kit_template(preset)
 
-    if existing_outputs:
-        print(f"The following files/folders already exist: {', '.join(existing_outputs)}. Deleting them.")
-        for item in existing_outputs:
-            if os.path.isdir(item):
-                shutil.rmtree(item)
-                print(f"Deleted existing folder: {item}")
+        if mode == "download":
+            samples_folder = "Samples"         # Slices will be exported here.
+            preset_output_file = "Preset.ablpreset"  # Updated preset JSON file.
+            bundle_filename = f"{preset}.ablpresetbundle"  # Final bundle ZIP filename.
+
+            # Slice the input WAV file.
+            slice_paths = slice_wav(input_wav, samples_folder, num_slices=num_slices, target_directory=samples_folder)
+
+            # Update the kit template: Replace each drum cell's sampleUri with "Samples/<URI-encoded-slice-filename>" or leave null.
+            update_drumcell_sample_uris(kit_template, slice_paths, base_uri="Samples/")
+
+            # Write the updated preset JSON to Preset.ablpreset.
+            try:
+                with open(preset_output_file, "w") as f:
+                    json.dump(kit_template, f, indent=2)
+                print(f"Updated preset written to {preset_output_file}")
+            except Exception as e:
+                print(f"Failed to write preset file '{preset_output_file}': {e}")
+                return {'success': False, 'message': f"Could not write preset file '{preset_output_file}': {e}"}
+
+            # Create a bundle (ZIP) that contains Preset.ablpreset and the Samples folder.
+            create_bundle(preset_output_file, samples_folder, bundle_filename)
+            print(f"Created bundle: {bundle_filename}")
+
+            return {'success': True, 'bundle_path': bundle_filename, 'message': "Preset bundle created successfully."}
+
+        elif mode == "auto_place":
+            samples_target_dir = "/data/UserData/UserLibrary/Samples/Preset Samples"
+            presets_target_dir = "/data/UserData/UserLibrary/Track Presets"
+            preset_output_file = os.path.join(presets_target_dir, f"{preset}.ablpreset")
+
+            # Slice the input WAV file.
+            slice_paths = slice_wav(input_wav, samples_target_dir, num_slices=num_slices, target_directory=samples_target_dir)
+
+            # Update the kit template: Replace each drum cell's sampleUri with "ableton:/user-library/Samples/Preset%20Samples/<URI-encoded-slice-filename>" or leave null.
+            update_drumcell_sample_uris(kit_template, slice_paths, base_uri="ableton:/user-library/Samples/Preset%20Samples/")
+
+            # Write the updated preset JSON to the target preset path.
+            try:
+                with open(preset_output_file, "w") as f:
+                    json.dump(kit_template, f, indent=2)
+                print(f"Updated preset written to {preset_output_file}")
+            except Exception as e:
+                print(f"Failed to write preset file '{preset_output_file}': {e}")
+                return {'success': False, 'message': f"Could not write preset file '{preset_output_file}': {e}"}
+
+            # Refresh the library after automatic placement
+            refresh_success, refresh_message = refresh_library()
+            if refresh_success:
+                combined_message = "Preset automatically placed successfully. " + refresh_message
+                combined_message_type = "success"
             else:
-                try:
-                    os.remove(item)
-                    print(f"Deleted existing file: {item}")
-                except Exception as e:
-                    print(f"Failed to delete {item}: {e}")
-                    raise RuntimeError(f"Could not delete existing preset '{item}'.") from e
+                combined_message = f"Preset automatically placed successfully, but failed to refresh library: {refresh_message}"
+                combined_message_type = "error"
 
-    # Currently only "Choke Kit" is supported.
-    kit_type = "Choke Kit"
-    kit_template = generate_choke_kit_template(preset)
+            return {'success': True, 'message': combined_message}
 
-    if mode == "download":
-        samples_folder = "Samples"         # Slices will be exported here.
-        preset_output_file = "Preset.ablpreset"  # Updated preset JSON file.
-        bundle_filename = f"{preset}.ablpresetbundle"  # Final bundle ZIP filename.
+        else:
+            return {'success': False, 'message': "Invalid mode. Must be 'download' or 'auto_place'."}
 
-        # Slice the input WAV file.
-        slice_paths = slice_wav(input_wav, samples_folder, num_slices=num_slices, target_directory=samples_folder)
-
-        # Update the kit template: Replace each drum cell's sampleUri with "Samples/<URI-encoded-slice-filename>" or leave null.
-        update_drumcell_sample_uris(kit_template, slice_paths, base_uri="Samples/")
-
-        # Write the updated preset JSON to Preset.ablpreset.
-        try:
-            with open(preset_output_file, "w") as f:
-                json.dump(kit_template, f, indent=2)
-            print(f"Updated preset written to {preset_output_file}")
-        except Exception as e:
-            print(f"Failed to write preset file '{preset_output_file}': {e}")
-            raise RuntimeError(f"Could not write preset file '{preset_output_file}'.") from e
-
-        # Create a bundle (ZIP) that contains Preset.ablpreset and the Samples folder.
-        create_bundle(preset_output_file, samples_folder, bundle_filename)
-        print(f"Created bundle: {bundle_filename}")
-
-        # Optionally clean up intermediate files.
-        if not keep_files:
-            if os.path.exists("Samples"):
-                shutil.rmtree("Samples")
-                print("Deleted Samples folder.")
-            if os.path.exists(preset_output_file):
-                os.remove(preset_output_file)
-                print("Deleted Preset.ablpreset file.")
-
-    elif mode == "auto_place":
-        samples_target_dir = "/data/UserData/UserLibrary/Samples/Preset Samples"
-        presets_target_dir = "/data/UserData/UserLibrary/Track Presets"
-        preset_output_file = os.path.join(presets_target_dir, f"{preset}.ablpreset")
-
-        # Slice the input WAV file.
-        slice_paths = slice_wav(input_wav, samples_target_dir, num_slices=num_slices, target_directory=samples_target_dir)
-
-        # Update the kit template: Replace each drum cell's sampleUri with "ableton:/user-library/Samples/Preset%20Samples/<URI-encoded-slice-filename>" or leave null.
-        update_drumcell_sample_uris(kit_template, slice_paths, base_uri="ableton:/user-library/Samples/Preset%20Samples/")
-
-        # Write the updated preset JSON to the target preset path.
-        try:
-            with open(preset_output_file, "w") as f:
-                json.dump(kit_template, f, indent=2)
-            print(f"Updated preset written to {preset_output_file}")
-        except Exception as e:
-            print(f"Failed to write preset file '{preset_output_file}': {e}")
-            raise RuntimeError(f"Could not write preset file '{preset_output_file}'.") from e
-
-        # Optionally clean up intermediate files.
-        if not keep_files:
-            # Do not delete slice files in auto_place mode
-            # If you want to clean up other temporary files, add here
-            print("Auto_place mode: Keeping slice files as per user request.")
-
-    else:
-        raise ValueError("Invalid mode. Must be 'download' or 'auto_place'.")
+    except Exception as e:
+        print(f"Error during kit processing: {e}")
+        return {'success': False, 'message': f"Error processing kit: {e}"}
 
 # ==========================
 # 6. REFRESH LIBRARY
