@@ -271,7 +271,7 @@ def process_kit(input_wav, preset_name=None, num_slices=16, keep_files=False,
             pass  # We'll handle individual files
         if os.path.exists(preset_output_file):
             existing_outputs.append(preset_output_file)
-    
+
     if existing_outputs:
         print(f"The following files/folders already exist: {', '.join(existing_outputs)}. Deleting them.")
         for item in existing_outputs:
@@ -279,8 +279,12 @@ def process_kit(input_wav, preset_name=None, num_slices=16, keep_files=False,
                 shutil.rmtree(item)
                 print(f"Deleted existing folder: {item}")
             else:
-                os.remove(item)
-                print(f"Deleted existing file: {item}")
+                try:
+                    os.remove(item)
+                    print(f"Deleted existing file: {item}")
+                except Exception as e:
+                    print(f"Failed to delete {item}: {e}")
+                    raise RuntimeError(f"Could not delete existing preset '{item}'.") from e
 
     # Currently only "Choke Kit" is supported.
     kit_type = "Choke Kit"
@@ -321,7 +325,7 @@ def process_kit(input_wav, preset_name=None, num_slices=16, keep_files=False,
         preset_output_file = os.path.join(presets_target_dir, f"{preset}.ablpreset")
 
         # Slice the input WAV file.
-        slice_paths = slice_wav(input_wav, "/data/UserData/UserLibrary/Samples/Preset Samples", num_slices=num_slices)
+        slice_paths = slice_wav(input_wav, "/data/UserData/UserLibrary/Samples/Preset Samples", num_slices=num_slices, target_directory="/data/UserData/UserLibrary/Samples/Preset Samples")
 
         # Update the kit template: Replace each drum cell's sampleUri with "ableton:/user-library/Samples/Preset%20Samples/<URI-encoded-slice-filename>" or leave null.
         update_drumcell_sample_uris(kit_template, slice_paths, base_uri="ableton:/user-library/Samples/Preset%20Samples/")
