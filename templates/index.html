@@ -121,8 +121,13 @@
 
                     // Set flag and create initial contiguous slices when audio is loaded
                     wavesurfer.on('ready', () => {
-                        audioReady = true;
-                        createContiguousRegions();
+                        if (wavesurfer.getDuration() > 0) {
+                            audioReady = true;
+                            createContiguousRegions();
+                            addResetSlicesButton();
+                        } else {
+                            audioReady = false;
+                        }
                     });
 
                     // Listen for region clicks to play just that slice
@@ -161,9 +166,6 @@
                         }
                     });
                 }
-
-                // Add "Reset Slices" button
-                addResetSlicesButton();
             }
 
             /**
@@ -175,6 +177,9 @@
 
                 // Check if the button already exists
                 if (document.getElementById('reset-slices')) return;
+
+                // Only add button if audio is loaded
+                if (wavesurfer.getDuration() <= 0) return;
 
                 const resetButton = document.createElement('button');
                 resetButton.id = 'reset-slices';
@@ -273,9 +278,8 @@
                 } else {
                     // If this is the last region, allow its end to be adjusted
                     // Do not enforce end=duration if being resized from the right
-                    // if (!updatedRegion.resize || updatedRegion.resize !== 'right') {
-                    //     updatedRegion.update({ end: duration });
-                    // }
+                    // Previously removed the enforcement to allow adjustment
+                    // No additional action needed
                 }
 
                 // Do not enforce start=0 for the first region
