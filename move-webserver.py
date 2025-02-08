@@ -215,38 +215,50 @@ class MyServer(BaseHTTPRequestHandler):
             elif message_type == "error":
                 message_html = f'<p style="color: red;">{message}</p>'
         
-        return f"""
-            <html>
-                <head>
-                    <title>Upload WAV File</title>
-                </head>
-                <body>
-                    <h2>Upload a WAV file to generate a kit</h2>
-                    {message_html}
-                    <form enctype="multipart/form-data" method="post">
-                        <input type="hidden" name="action" value="slice"/>
-                        <label for="file">Select WAV file:</label>
-                        <input id="file" name="file" type="file" accept=".wav" required/>
-                        <br/><br/>
-                        <label for="num_slices">Number of slices (1-16):</label>
-                        <input id="num_slices" name="num_slices" type="number" min="1" max="16" value="16" required/>
-                        <br/><br/>
-                        <label for="mode">Select Mode:</label>
-                        <input type="radio" id="download" name="mode" value="download" checked>
-                        <label for="download">Download .ablpreset</label>
-                        <input type="radio" id="auto_place" name="mode" value="auto_place">
-                        <label for="auto_place">Automatically place preset</label>
-                        <br/><br/>
-                        <input type="submit" value="Slice"/>
-                    </form>
-                    <hr/>
-                    <form method="post">
-                        <input type="hidden" name="action" value="refresh_library"/>
-                        <input type="submit" value="Refresh Library"/>
-                    </form>
-                </body>
-            </html>
-        """
+        # Read the form template
+        template_path = os.path.join("templates", "form.html")
+        if not os.path.exists(template_path):
+            # Fallback to original form if template does not exist
+            return f"""
+                <html>
+                    <head>
+                        <title>Upload WAV File</title>
+                    </head>
+                    <body>
+                        <h2>Upload a WAV file to generate a kit</h2>
+                        {message_html}
+                        <form enctype="multipart/form-data" method="post">
+                            <input type="hidden" name="action" value="slice"/>
+                            <label for="file">Select WAV file:</label>
+                            <input id="file" name="file" type="file" accept=".wav" required/>
+                            <br/><br/>
+                            <label for="num_slices">Number of slices (1-16):</label>
+                            <input id="num_slices" name="num_slices" type="number" min="1" max="16" value="16" required/>
+                            <br/><br/>
+                            <label for="mode">Select Mode:</label>
+                            <input type="radio" id="download" name="mode" value="download" checked>
+                            <label for="download">Download .ablpreset</label>
+                            <input type="radio" id="auto_place" name="mode" value="auto_place">
+                            <label for="auto_place">Automatically place preset</label>
+                            <br/><br/>
+                            <input type="submit" value="Slice"/>
+                        </form>
+                        <hr/>
+                        <form method="post">
+                            <input type="hidden" name="action" value="refresh_library"/>
+                            <input type="submit" value="Refresh Library"/>
+                        </form>
+                    </body>
+                </html>
+            """
+
+        with open(template_path, "r") as f:
+            html_content = f.read()
+
+        # Replace placeholder with message_html
+        html_content = html_content.replace("{message_html}", message_html)
+
+        return html_content
 
 if __name__ == "__main__":
     print("Starting webserver")
