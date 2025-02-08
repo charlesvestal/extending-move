@@ -10,6 +10,7 @@ The code in this repository will run an additional webserver alongside the offic
     - Choose the slice points for each drum pad
     - Download the preset as an `.ablpresetbundle`
     - Or have it generated directly on your device
+- Choose a sample and generate a reversed version
 - Manually refresh your Move's library (useful when making manual changes to files)
 
 ## Installation
