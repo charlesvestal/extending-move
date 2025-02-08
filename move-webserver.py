@@ -42,52 +42,15 @@ class MyServer(BaseHTTPRequestHandler):
             try:
                 with open(os.path.join("templates", "reverse.html"), "r") as f:
                     template = f.read()
-                # Simple templating to insert wav_files into the select options
+                # Generate the <option> tags for the select dropdown
                 options = ''.join([f'<option value="{file}">{file}</option>' for file in wav_files])
+                # Replace the {% for %} loop and {{ file }} placeholders with the generated options
                 html_content = template.replace("{% for file in wav_files %}", "").replace("{% endfor %}", "")
-                html_content = template.replace("{{ file }}", "{file}")  # Placeholder
-                # Since simple replacement is used, loop is manually handled
-                options_html = ''.join([f'<option value="{file}">{file}</option>' for file in wav_files])
-                html_content = template.replace("{% for file in wav_files %}", "").replace("{{ file }}", "{}").format(*(files for files in wav_files))
-                # Properly replace the select options
-                html_content = f"""<html>
-    <head>
-        <title>Reverse WAV</title>
-        <link rel="stylesheet" href="/style.css">
-    </head>
-    <body>
-        <h2>Reverse a WAV File</h2>
-        {self.message_html if hasattr(self, 'message_html') else ''}
-        <form method="post">
-            <input type="hidden" name="action" value="reverse_file"/>
-            
-            <label for="wav_file">Select WAV file to reverse:</label>
-            <select id="wav_file" name="wav_file" required>
-                <option value="" disabled selected>--Select a WAV file--</option>
-                {options}
-            </select>
-            <br/><br/>
-            
-            <button type="submit" onclick="confirmOverwrite()">Reverse and Overwrite</button>
-        </form>
-        
-        <script>
-            function confirmOverwrite() {{
-                const wavFileSelect = document.getElementById('wav_file');
-                const selectedFile = wavFileSelect.value;
-                if (!selectedFile) {{
-                    alert('Please select a WAV file to reverse.');
-                    event.preventDefault();
-                    return;
-                }}
-                const confirmAction = confirm(`Are you sure you want to overwrite "${{selectedFile}}" with its reversed version?`);
-                if (!confirmAction) {{
-                    event.preventDefault();
-                }}
-            }}
-        </script>
-    </body>
-</html>"""
+                html_content = html_content.replace("{{ file }}", "").replace("{message_html}", "")
+                # Insert the options into the <select> element
+                # Assuming the placeholder for options is now the empty space where the loop was
+                # If there's a specific placeholder like {{ options }}, replace it accordingly
+                html_content = html_content.replace("", options, 1)  # Replace the first empty string with options
                 self.wfile.write(bytes(html_content, "utf-8"))
             except Exception as e:
                 error_message = f"Error rendering reverse.html: {e}"
@@ -362,7 +325,7 @@ class MyServer(BaseHTTPRequestHandler):
                 html_content = html_content.replace("{message_html}", message_html)
             else:
                 html_content = html_content.replace("{message_html}", "")
-        
+
         self.wfile.write(bytes(html_content, "utf-8"))
 
 if __name__ == "__main__":
