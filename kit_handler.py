@@ -147,64 +147,83 @@ def slice_wav(input_wav, out_dir, regions=None, num_slices=16, target_directory=
     """
     samplerate, data = wavfile.read(input_wav)
     total_samples = data.shape[0]
+    duration = total_samples / samplerate
+    print(f"Sampling rate: {samplerate} Hz")
+    print(f"Total samples: {total_samples}")
+    print(f"Duration: {duration} seconds")
     
     os.makedirs(target_directory, exist_ok=True)
     base = os.path.splitext(os.path.basename(input_wav))[0]
     slice_paths = []
 
     if regions is not None:
-        # Use provided regions for slicing
+        if not isinstance(regions, list):
+            print("Error: 'regions' should be a list of dictionaries with 'start' and 'end' keys.")
+            return slice_paths
+        # Sort regions by start time
+        regions = sorted(regions, key=lambda r: r.get('start', 0))
+        print(f"Number of regions received: {len(regions)}")
         for idx, region in enumerate(regions):
             start_time = region.get('start')
             end_time = region.get('end', start_time + 1)  # Default to 1 second if end not provided
+
+            if not isinstance(start_time, (int, float)) or not isinstance(end_time, (int, float)):
+                print(f"Warning: Region {idx+1} has invalid 'start' or 'end' times. Skipping.")
+                continue
+
+            # Ensure start_time is less than end_time
+            if start_time >= end_time:
+                print(f"Warning: Region {idx+1} start_time >= end_time. Skipping.")
+                continue
+
+            # Clamp times to the duration of the audio
+            start_time = max(0, start_time)
+            end_time = min(duration, end_time)
+
             start_sample = int(start_time * samplerate)
             end_sample = int(end_time * samplerate)
-            
-            # Ensure sample indices are within bounds
-            start_sample = max(0, start_sample)
-            end_sample = min(total_samples, end_sample)
-            
+
             # Prevent zero-length slices
             if end_sample <= start_sample:
                 print(f"Warning: Slice {idx+1} has zero length. Skipping.")
                 continue
-            
+
             slice_data = data[start_sample:end_sample]
             filename = f"{base}_slice_{idx+1:02d}.wav"
             path = os.path.join(target_directory, filename)
-            
+
             # Ensure unique filename
             unique_path = get_unique_filename(path)
             wavfile.write(unique_path, samplerate, slice_data)
-            print(f"Exported slice {idx+1} to {unique_path}")
+            print(f"Exported slice {idx+1}: {unique_path} (Start: {start_time}s, End: {end_time}s)")
             slice_paths.append(unique_path)
     else:
         # Fallback to equal slicing based on num_slices
-        duration = total_samples / samplerate
+        print("No regions provided. Falling back to equal slicing.")
         slice_duration = duration / num_slices
         for i in range(num_slices):
             start_time = i * slice_duration
             end_time = (i + 1) * slice_duration
             start_sample = int(start_time * samplerate)
             end_sample = int(end_time * samplerate)
-            
-            # Ensure sample indices are within bounds
-            start_sample = max(0, start_sample)
-            end_sample = min(total_samples, end_sample)
-            
+
+            # Clamp times to the duration of the audio
+            start_time = max(0, start_time)
+            end_time = min(duration, end_time)
+
             # Prevent zero-length slices
             if end_sample <= start_sample:
                 print(f"Warning: Slice {i+1} has zero length. Skipping.")
                 continue
-            
+
             slice_data = data[start_sample:end_sample]
             filename = f"{base}_slice_{i+1:02d}.wav"
             path = os.path.join(target_directory, filename)
-            
+
             # Ensure unique filename
             unique_path = get_unique_filename(path)
             wavfile.write(unique_path, samplerate, slice_data)
-            print(f"Exported slice {i+1} to {unique_path}")
+            print(f"Exported slice {i+1}: {unique_path} (Start: {start_time}s, End: {end_time}s)")
             slice_paths.append(unique_path)
     return slice_paths
 
@@ -301,6 +320,7 @@ def process_kit(input_wav, preset_name=None, regions=None, num_slices=None, keep
         # Parse regions if they are a JSON string
         if isinstance(regions, str):
             regions = json.loads(regions)
+            print(f"Parsed regions from JSON string: {regions}")
         
         # If preset_name is provided, use it; otherwise, default to the input WAV file's base name.
         if preset_name:
@@ -318,13 +338,15 @@ def process_kit(input_wav, preset_name=None, regions=None, num_slices=None, keep
             bundle_filename = f"{preset}.ablpresetbundle"  # Final bundle ZIP filename.
 
             # Slice the input WAV file.
-            if regions:
+            if regions and isinstance(regions, list) and len(regions) > 0:
                 slice_paths = slice_wav(input_wav, samples_folder, regions=regions, target_directory=samples_folder)
+                print(f"Sliced WAV using regions: {slice_paths}")
             else:
                 # Fallback to equal slicing if regions not provided
                 if num_slices is None:
                     num_slices = 16
                 slice_paths = slice_wav(input_wav, samples_folder, num_slices=num_slices, target_directory=samples_folder)
+                print(f"Sliced WAV using num_slices={num_slices}: {slice_paths}")
 
             # Update the kit template: Replace each drum cell's sampleUri with "Samples/<URI-encoded-slice-filename>" or leave null.
             update_drumcell_sample_uris(kit_template, slice_paths, base_uri="Samples/")
@@ -350,13 +372,15 @@ def process_kit(input_wav, preset_name=None, regions=None, num_slices=None, keep
             preset_output_file = os.path.join(presets_target_dir, f"{preset}.ablpreset")
 
             # Slice the input WAV file.
-            if regions:
+            if regions and isinstance(regions, list) and len(regions) > 0:
                 slice_paths = slice_wav(input_wav, samples_target_dir, regions=regions, target_directory=samples_target_dir)
+                print(f"Sliced WAV using regions: {slice_paths}")
             else:
                 # Fallback to equal slicing if regions not provided
                 if num_slices is None:
                     num_slices = 16
                 slice_paths = slice_wav(input_wav, samples_target_dir, num_slices=num_slices, target_directory=samples_target_dir)
+                print(f"Sliced WAV using num_slices={num_slices}: {slice_paths}")
 
             # Update the kit template: Replace each drum cell's sampleUri with "ableton:/user-library/Samples/Preset%20Samples/<URI-encoded-slice-filename>" or leave null.
             update_drumcell_sample_uris(kit_template, slice_paths, base_uri="ableton:/user-library/Samples/Preset%20Samples/")
