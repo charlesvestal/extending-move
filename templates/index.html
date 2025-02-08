@@ -9,6 +9,9 @@
         <script src="https://unpkg.com/wavesurfer.js@6/dist/plugin/wavesurfer.regions.js"></script>
 
         <script>
+            let wavesurfer;      // For the main WaveSurfer instance
+            let audioReady = false; // Flag to track whether audio is loaded
+
             function openTab(evt, tabName) {
                 var i, tabcontent, tablinks;
                 tabcontent = document.getElementsByClassName("tabcontent");
@@ -94,64 +97,88 @@
                 }
             }
 
-            // Initialize WaveSurfer
+            // Create or retrieve the WaveSurfer instance
             function initializeWaveform() {
                 const waveform = document.getElementById('waveform');
+                
+                // If there's a placeholder for waveform and no existing wavesurfer, create it
                 if (waveform && !waveform.waveSurferInstance) {
-                    // Create WaveSurfer instance with the Regions plugin
-                    const wavesurfer = WaveSurfer.create({
+                    wavesurfer = WaveSurfer.create({
                         container: '#waveform',
                         waveColor: 'violet',
                         progressColor: 'purple',
                         height: 128,
                         responsive: true,
-                        plugins: [
-                            WaveSurfer.regions.create({}) // Enable the Regions plugin
-                        ]
+                        plugins: [WaveSurfer.regions.create({})]
                     });
 
-                    // Load waveform when a file is selected
-                    const fileInput = document.getElementById('file');
-                    if (fileInput) {
-                        fileInput.addEventListener('change', function(e) {
-                            const file = e.target.files[0];
-                            if (file) {
-                                // Clear existing regions before loading a new file
-                                wavesurfer.clearRegions();
-                                wavesurfer.loadBlob(file);
-                            }
-                        });
-                    }
-
-                    // Once audio is ready, create regions based on num_slices
-                    wavesurfer.on('ready', function() {
-                        const numSlicesInput = document.getElementById('num_slices');
-                        if (!numSlicesInput) return;
-
-                        const numSlices = parseInt(numSlicesInput.value);
-                        if (numSlices > 0) {
-                            const duration = wavesurfer.getDuration();
-                            const sliceDuration = duration / numSlices;
-
-                            // Create a region for each slice
-                            for (let i = 0; i < numSlices; i++) {
-                                wavesurfer.addRegion({
-                                    start: i * sliceDuration,
-                                    end: (i + 1) * sliceDuration,
-                                    color: 'rgba(0, 255, 0, 0.2)', // change color as desired
-                                    drag: false,
-                                    // resize: false
-                                });
-                            }
-                        }
+                    // When audio is first loaded, set flag and create initial slices
+                    wavesurfer.on('ready', () => {
+                        audioReady = true;
+                        recalcSlices();
                     });
-                    // Play region on click
-                    wavesurfer.on('region-click', function(region, e) {
-                        e.stopPropagation(); // Prevent the event from bubbling
+
+                    // Listen for region clicks to play that slice
+                    wavesurfer.on('region-click', (region, e) => {
+                        e.stopPropagation(); 
                         region.play();
                     });
-                    // Store this instance on the element to avoid re-initializing
+
+                    // Store this instance to avoid re-initializing
                     waveform.waveSurferInstance = wavesurfer;
+                }
+
+                // Listen for changes in num_slices input to recalc slices
+                const numSlicesInput = document.getElementById('num_slices');
+                if (numSlicesInput) {
+                    // Change event fires when user leaves the field or presses Enter
+                    // If you want "live" updates while typing, use "input" instead
+                    numSlicesInput.addEventListener('change', function() {
+                        if (audioReady) {
+                            recalcSlices();
+                        }
+                    });
+                }
+
+                // Listen for a new file selection
+                const fileInput = document.getElementById('file');
+                if (fileInput) {
+                    fileInput.addEventListener('change', (e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                            // Clear old regions and load new file
+                            wavesurfer.clearRegions();
+                            audioReady = false;
+                            wavesurfer.loadBlob(file);
+                        }
+                    });
+                }
+            }
+
+            // Recalculate slices based on the current value in num_slices
+            function recalcSlices() {
+                if (!audioReady || !wavesurfer) return;
+
+                const numSlicesInput = document.getElementById('num_slices');
+                if (!numSlicesInput) return;
+
+                const numSlices = parseInt(numSlicesInput.value, 10) || 0;
+
+                // Clear existing slices
+                wavesurfer.clearRegions();
+
+                if (numSlices > 0) {
+                    const duration = wavesurfer.getDuration();
+                    const sliceDuration = duration / numSlices;
+                    for (let i = 0; i < numSlices; i++) {
+                        wavesurfer.addRegion({
+                            start: i * sliceDuration,
+                            end: (i + 1) * sliceDuration,
+                            color: 'rgba(0, 255, 0, 0.2)',
+                            drag: false,
+                            //resize: false
+                        });
+                    }
                 }
             }
 
