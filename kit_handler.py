@@ -17,7 +17,7 @@ def generate_choke_kit_template(preset_name):
     Each cell gets a placeholder sampleUri that will be updated later.
     The top-level "name" is set to preset_name.
     Receiving notes are assigned from 36 to 51.
-    
+
     Each drum cell's device has a parameters object that includes:
          "Voice_Envelope_Hold": 60.0
     """
@@ -139,11 +139,10 @@ def generate_choke_kit_template(preset_name):
 # ==========================
 # 2. AUDIO SLICING
 # ==========================
-def slice_wav(input_wav, out_dir, regions, target_directory="./Samples"):
+def slice_wav(input_wav, out_dir, regions=None, num_slices=16, target_directory="./Samples"):
     """
-    Reads the input WAV file, splits it into parts based on the provided regions,
-    and writes them to out_dir.
-    If target_directory is provided, slices are saved there instead of out_dir.
+    Reads the input WAV file, splits it into parts based on the provided regions or number of slices,
+    and writes them to target_directory.
     Returns a list of file paths (one per slice).
     """
     samplerate, data = wavfile.read(input_wav)
@@ -153,25 +152,49 @@ def slice_wav(input_wav, out_dir, regions, target_directory="./Samples"):
     base = os.path.splitext(os.path.basename(input_wav))[0]
     slice_paths = []
 
-    for idx, region in enumerate(regions):
-        start_time = region.get('start')
-        end_time = region.get('end', start_time + 1)  # Default to 1 second if end not provided
-        start_sample = int(start_time * samplerate)
-        end_sample = int(end_time * samplerate)
-        
-        # Ensure sample indices are within bounds
-        start_sample = max(0, start_sample)
-        end_sample = min(total_samples, end_sample)
-        
-        slice_data = data[start_sample:end_sample]
-        filename = f"{base}_slice_{idx+1:02d}.wav"
-        path = os.path.join(target_directory, filename)
-        
-        # Ensure unique filename
-        unique_path = get_unique_filename(path)
-        wavfile.write(unique_path, samplerate, slice_data)
-        print(f"Exported slice {idx+1} to {unique_path}")
-        slice_paths.append(unique_path)
+    if regions is not None:
+        # Use provided regions for slicing
+        for idx, region in enumerate(regions):
+            start_time = region.get('start')
+            end_time = region.get('end', start_time + 1)  # Default to 1 second if end not provided
+            start_sample = int(start_time * samplerate)
+            end_sample = int(end_time * samplerate)
+            
+            # Ensure sample indices are within bounds
+            start_sample = max(0, start_sample)
+            end_sample = min(total_samples, end_sample)
+            
+            slice_data = data[start_sample:end_sample]
+            filename = f"{base}_slice_{idx+1:02d}.wav"
+            path = os.path.join(target_directory, filename)
+            
+            # Ensure unique filename
+            unique_path = get_unique_filename(path)
+            wavfile.write(unique_path, samplerate, slice_data)
+            print(f"Exported slice {idx+1} to {unique_path}")
+            slice_paths.append(unique_path)
+    else:
+        # Fallback to equal slicing based on num_slices
+        slice_duration = wavfile.read(input_wav)[0] / num_slices
+        for i in range(num_slices):
+            start_time = i * slice_duration
+            end_time = (i + 1) * slice_duration
+            start_sample = int(start_time * samplerate)
+            end_sample = int(end_time * samplerate)
+            
+            # Ensure sample indices are within bounds
+            start_sample = max(0, start_sample)
+            end_sample = min(total_samples, end_sample)
+            
+            slice_data = data[start_sample:end_sample]
+            filename = f"{base}_slice_{i+1:02d}.wav"
+            path = os.path.join(target_directory, filename)
+            
+            # Ensure unique filename
+            unique_path = get_unique_filename(path)
+            wavfile.write(unique_path, samplerate, slice_data)
+            print(f"Exported slice {i+1} to {unique_path}")
+            slice_paths.append(unique_path)
     return slice_paths
 
 def get_unique_filename(path):
@@ -243,7 +266,7 @@ def create_bundle(preset_filename, samples_folder, bundle_name):
 # ==========================
 # 5. PROCESS KIT GENERATION
 # ==========================
-def process_kit(input_wav, preset_name=None, regions=None, keep_files=False, 
+def process_kit(input_wav, preset_name=None, regions=None, num_slices=None, keep_files=False, 
                mode="download"):
     """
     Processes the kit generation by slicing the WAV file, updating the kit template,
@@ -253,6 +276,7 @@ def process_kit(input_wav, preset_name=None, regions=None, keep_files=False,
     - input_wav: Path to the input WAV file.
     - preset_name: Name of the preset.
     - regions: List of regions with 'start' and 'end' times for slicing.
+    - num_slices: Number of equal slices to create if regions are not provided.
     - keep_files: Whether to keep intermediate files.
     - mode: "download" or "auto_place".
     
@@ -269,7 +293,6 @@ def process_kit(input_wav, preset_name=None, regions=None, keep_files=False,
         else:
             preset = os.path.splitext(os.path.basename(input_wav))[0]
             print(f"No preset name provided; defaulting to '{preset}'.")
-
         # Currently only "Choke Kit" is supported.
         kit_type = "Choke Kit"
         kit_template = generate_choke_kit_template(preset)
@@ -281,10 +304,12 @@ def process_kit(input_wav, preset_name=None, regions=None, keep_files=False,
 
             # Slice the input WAV file.
             if regions:
-                slice_paths = slice_wav(input_wav, samples_folder, regions, target_directory=samples_folder)
+                slice_paths = slice_wav(input_wav, samples_folder, regions=regions, target_directory=samples_folder)
             else:
                 # Fallback to equal slicing if regions not provided
-                slice_paths = slice_wav(input_wav, samples_folder, num_slices=16, target_directory=samples_folder)
+                if num_slices is None:
+                    num_slices = 16
+                slice_paths = slice_wav(input_wav, samples_folder, num_slices=num_slices, target_directory=samples_folder)
 
             # Update the kit template: Replace each drum cell's sampleUri with "Samples/<URI-encoded-slice-filename>" or leave null.
             update_drumcell_sample_uris(kit_template, slice_paths, base_uri="Samples/")
@@ -311,10 +336,12 @@ def process_kit(input_wav, preset_name=None, regions=None, keep_files=False,
 
             # Slice the input WAV file.
             if regions:
-                slice_paths = slice_wav(input_wav, samples_target_dir, regions, target_directory=samples_target_dir)
+                slice_paths = slice_wav(input_wav, samples_target_dir, regions=regions, target_directory=samples_target_dir)
             else:
                 # Fallback to equal slicing if regions not provided
-                slice_paths = slice_wav(input_wav, samples_target_dir, num_slices=16, target_directory=samples_target_dir)
+                if num_slices is None:
+                    num_slices = 16
+                slice_paths = slice_wav(input_wav, samples_target_dir, num_slices=num_slices, target_directory=samples_target_dir)
 
             # Update the kit template: Replace each drum cell's sampleUri with "ableton:/user-library/Samples/Preset%20Samples/<URI-encoded-slice-filename>" or leave null.
             update_drumcell_sample_uris(kit_template, slice_paths, base_uri="ableton:/user-library/Samples/Preset%20Samples/")
