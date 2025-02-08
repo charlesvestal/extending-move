@@ -158,22 +158,16 @@ class MyServer(BaseHTTPRequestHandler):
                 elif mode == "auto_place":
                     preset_output_file = os.path.join("/data/UserData/UserLibrary/Track Presets", f"{preset_name}.ablpreset")
                     
-                    if os.path.exists(preset_output_file):
-                        print(f"Preset already exists at {preset_output_file}.")
-                        self.send_response(409)
-                        self.end_headers()
-                        self.wfile.write(bytes("Conflict: Preset already exists.", "utf-8"))
-                        os.remove(filepath)
-                        return
-                    else:
-                        print(f"Preset placed at {preset_output_file}.")
-                        self.send_response(200)
-                        self.end_headers()
-                        self.wfile.write(bytes("Preset automatically placed successfully.", "utf-8"))
-                        
-                        # Clean up uploaded file
-                        os.remove(filepath)
-                        print("Uploaded file cleanup completed.")
+                    # No need to check if preset exists; process_kit has already handled it.
+                    # Respond with success message
+                    print(f"Preset placed at {preset_output_file}.")
+                    self.send_response(200)
+                    self.end_headers()
+                    self.wfile.write(bytes("Preset automatically placed successfully.", "utf-8"))
+                    
+                    # Clean up uploaded file
+                    os.remove(filepath)
+                    print("Uploaded file cleanup completed.")
             except Exception as e:
                 print(f"Error during kit processing: {e}")
                 self.send_response(500)
