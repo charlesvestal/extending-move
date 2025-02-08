@@ -7,14 +7,15 @@
         {message_html}
         <form enctype="multipart/form-data" method="post">
             <input type="hidden" name="action" value="slice"/>
+            <input type="hidden" name="mode" id="mode" value="download"/>
             <label for="file">Select WAV file:</label>
             <input id="file" name="file" type="file" accept=".wav" required/>
             <br/><br/>
             <label for="num_slices">Number of slices (1-16):</label>
             <input id="num_slices" name="num_slices" type="number" min="1" max="16" value="16" required/>
             <br/><br/>
-            <button type="submit" name="mode" value="download">Download .ablpresetbundle</button>
-            <button type="submit" name="mode" value="auto_place">Save Preset directly on Move</button>
+            <button type="submit" onclick="document.getElementById('mode').value = 'download'">Download .ablpresetbundle</button>
+            <button type="submit" onclick="document.getElementById('mode').value = 'auto_place'">Save Preset directly on Move</button>
         </form>
     </body>
 </html>
