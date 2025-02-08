@@ -43,9 +43,28 @@
                 }
                 document.getElementById(tabName).style.display = "block";
                 evt.currentTarget.className += " active";
+
+                // Cargar dinámicamente el contenido
+                fetchContent(tabName);
             }
 
-            // Open the default tab
+            function fetchContent(tabName) {
+                fetch(`/${tabName.toLowerCase()}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.text();
+                    })
+                    .then(data => {
+                        document.getElementById(tabName).innerHTML = data;
+                    })
+                    .catch(error => {
+                        document.getElementById(tabName).innerHTML = `<p style="color: red;">Error al cargar el contenido: ${error}</p>`;
+                    });
+            }
+
+            // Abrir la pestaña predeterminada al cargar la página
             window.onload = function() {
                 document.getElementById("defaultOpen").click();
             }
@@ -59,13 +78,11 @@
         </div>
 
         <div id="Slice" class="tabcontent">
-            <!-- Slice form will be loaded here via iframe -->
-            <iframe src="/slice" style="width:100%; height:600px; border:none;"></iframe>
+            <!-- El contenido del formulario Slice Kit se cargará aquí dinámicamente -->
         </div>
 
         <div id="Refresh" class="tabcontent">
-            <!-- Refresh form will be loaded here via iframe -->
-            <iframe src="/refresh" style="width:100%; height:200px; border:none;"></iframe>
+            <!-- El contenido del formulario Refresh Library se cargará aquí dinámicamente -->
         </div>
     </body>
 </html>
