@@ -178,20 +178,28 @@
                 const sliceDuration = duration / numSlices;
 
                 for (let i = 0; i < numSlices; i++) {
-                    wavesurfer.addRegion({
+                    let regionOptions = {
                         start: i * sliceDuration,
                         end: (i + 1) * sliceDuration,
                         color: 'rgba(0, 255, 0, 0.2)',
                         drag: false  // let users resize edges, but not move the entire slice
                         // omit "resize: false" so edges are resizable
-                    });
+                    };
+
+                    // Allow the first region to resize its start
+                    if (i === 0) {
+                        regionOptions.resize = 'left';
+                    }
+
+                    wavesurfer.addRegion(regionOptions);
                 }
             }
 
             /**
              * Ensure all regions remain contiguous after resizing:
              * - The end of one region is the start of the next.
-             * - The first region starts at 0, and the last region ends at the full duration.
+             * - The first region can start after 0 if adjusted.
+             * - The last region ends at the full duration.
              */
             function keepRegionsContiguous(updatedRegion) {
                 // Get all regions, sorted by start time
@@ -212,23 +220,23 @@
                     updatedRegion.update({ end: duration });
                 }
 
-                // If there's a previous region, snap its end to this region's start
                 if (idx > 0) {
+                    // If not the first region, snap its start to the end of the previous region
                     const prev = regions[idx - 1];
                     prev.update({ end: updatedRegion.start });
-                } else {
-                    // If this is the first region, ensure it starts at 0
-                    updatedRegion.update({ start: 0 });
                 }
 
-                // If there's a next region, snap its start to this region's end
                 if (idx < regions.length - 1) {
+                    // If not the last region, snap its end to the start of the next region
                     const next = regions[idx + 1];
                     next.update({ start: updatedRegion.end });
                 } else {
                     // If this is the last region, ensure it ends at total duration
                     updatedRegion.update({ end: duration });
                 }
+
+                // Do not enforce start=0 for the first region
+                // Thus, allowing the first region to have its start adjusted
             }
 
             // Recalculate slices if needed (this is left for legacy calls in your code)
