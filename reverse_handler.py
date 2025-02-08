@@ -16,7 +16,7 @@ def get_wav_files(directory="/data/UserData/UserLibrary/Samples"):
 def reverse_wav_file(filename, directory="/data/UserData/UserLibrary/Samples"):
     """
     Reverses the WAV file specified by filename in the given directory.
-    Overwrites the original file with its reversed version.
+    Creates a new file with the suffix '_reverse.wav'.
     Returns a tuple (success: bool, message: str).
     """
     filepath = os.path.join(directory, filename)
@@ -25,6 +25,15 @@ def reverse_wav_file(filename, directory="/data/UserData/UserLibrary/Samples"):
         return False, f"File does not exist: {filepath}"
     
     try:
+        # Determine new filename
+        base, ext = os.path.splitext(filename)
+        new_filename = f"{base}_reverse{ext}"
+        new_filepath = os.path.join(directory, new_filename)
+        
+        # Check if the new file already exists to prevent overwriting
+        if os.path.exists(new_filepath):
+            return False, f"Reversed file already exists: {new_filename}"
+        
         with wave.open(filepath, 'rb') as wf:
             params = wf.getparams()
             n_channels, sampwidth, framerate, n_frames, comptype, compname = params
@@ -58,13 +67,13 @@ def reverse_wav_file(filename, directory="/data/UserData/UserLibrary/Samples"):
         # Convert reversed data back to bytes
         reversed_frames = reversed_data.tobytes()
         
-        # Write the reversed frames back to the WAV file
-        with wave.open(filepath, 'wb') as wf:
+        # Write the reversed frames to the new WAV file
+        with wave.open(new_filepath, 'wb') as wf:
             wf.setparams(params)
             wf.writeframes(reversed_frames)
         
-        print(f"Successfully reversed the file: {filepath}")
-        return True, f"Successfully reversed the file: {filename}"
+        print(f"Successfully reversed the file: {new_filepath}")
+        return True, f"Successfully created reversed file: {new_filename}"
     except Exception as e:
         print(f"Error reversing file {filepath}: {e}")
         return False, f"Error reversing file {filename}: {e}"
