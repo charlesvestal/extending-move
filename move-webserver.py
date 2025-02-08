@@ -1,6 +1,7 @@
 # Move extra tools
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import os
+import json
 import shutil
 import cgi
 from kit_handler import process_kit, refresh_library
@@ -137,12 +138,31 @@ class MyServer(BaseHTTPRequestHandler):
                             self.respond_with_form(self.path, message, message_type)
                             return
 
+                    # Start of new code to handle regions
+                    regions = None
+                    if 'regions' in form:
+                        regions_str = form.getvalue('regions')
+                        try:
+                            regions = json.loads(regions_str)
+                            print(f"Received regions: {regions}")
+                        except json.JSONDecodeError:
+                            message = "Invalid regions format. Regions should be a valid JSON."
+                            message_type = "error"
+                            os.remove(filepath)  # Clean up uploaded file
+                            self.respond_with_form(self.path, message, message_type)
+                            return
+                    # End of new code
+
+                    if regions:
+                        num_slices = None  # Optionally disable num_slices if regions are used
+
                     print(f"Processing kit generation with {num_slices} slices and mode '{mode}'...")
                     # Process the uploaded WAV file
                     result = process_kit(
                         input_wav=filepath,
                         preset_name=preset_name,
-                        num_slices=num_slices,
+                        regions=regions,           # Pass regions here
+                        num_slices=num_slices, 
                         keep_files=False,
                         mode=mode
                     )
