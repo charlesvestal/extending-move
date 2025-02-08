@@ -1,6 +1,7 @@
 import os
 import wave
 import numpy as np
+from refresh_handler import refresh_library
 
 def get_wav_files(directory="/data/UserData/UserLibrary/Samples"):
     """
@@ -11,6 +12,7 @@ def get_wav_files(directory="/data/UserData/UserLibrary/Samples"):
         return []
     
     wav_files = [f for f in os.listdir(directory) if f.lower().endswith('.wav') and os.path.isfile(os.path.join(directory, f))]
+    print(f"WAV files found in {directory}: {wav_files}")  # Debugging statement
     return wav_files
 
 def reverse_wav_file(filename, directory="/data/UserData/UserLibrary/Samples"):
@@ -73,7 +75,15 @@ def reverse_wav_file(filename, directory="/data/UserData/UserLibrary/Samples"):
             wf.writeframes(reversed_frames)
         
         print(f"Successfully reversed the file: {new_filepath}")
-        return True, f"Successfully created reversed file: {new_filename}"
+        
+        # Refresh the library after creating the reversed file
+        refresh_success, refresh_message = refresh_library()
+        if refresh_success:
+            combined_message = f"Successfully created reversed file: {new_filename}. Library refreshed successfully."
+        else:
+            combined_message = f"Successfully created reversed file: {new_filename}. Library refresh failed: {refresh_message}"
+        
+        return True, combined_message
     except Exception as e:
         print(f"Error reversing file {filepath}: {e}")
         return False, f"Error reversing file {filename}: {e}"

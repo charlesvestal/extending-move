@@ -38,6 +38,7 @@ class MyServer(BaseHTTPRequestHandler):
             self.send_header("Content-type", "text/html")
             self.end_headers()
             wav_files = get_wav_files()
+            print(f"WAV files found: {wav_files}")  # Debugging statement
             # Render reverse.html with the list of wav_files
             try:
                 with open(os.path.join("templates", "reverse.html"), "r") as f:
