@@ -30,6 +30,12 @@ class MyServer(BaseHTTPRequestHandler):
             with open(os.path.join("templates", "refresh.html"), "r") as f:
                 html_content = f.read().replace("{message_html}", "")
                 self.wfile.write(bytes(html_content, "utf-8"))
+        elif self.path == "/style.css":
+            self.send_response(200)
+            self.send_header("Content-type", "text/css")
+            self.end_headers()
+            with open(os.path.join("templates", "style.css"), "r") as f:
+                self.wfile.write(bytes(f.read(), "utf-8"))
         else:
             self.send_response(404)
             self.end_headers()
@@ -165,7 +171,7 @@ class MyServer(BaseHTTPRequestHandler):
                         # No need to check if preset exists; process_kit has already handled it.
                         # Respond with success message
                         print(f"Preset placed at {preset_output_file}.")
-
+    
                         # Refresh the library after automatic placement
                         refresh_success, refresh_message = refresh_library()
                         if refresh_success:
