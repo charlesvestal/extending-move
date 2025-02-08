@@ -1,0 +1,25 @@
+name: Create Repository Archive
+
+on:
+  push:
+    branches:
+      - main  # Trigger on push to the main branch
+
+jobs:
+  create-archive:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create tar.gz archive
+        run: |
+          # Create a tar.gz archive of the entire repository
+          tar -czvf extending-move.tar.gz .
+
+      - name: Upload archive as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: extending-move
+          path: extending-move.tar.gz
