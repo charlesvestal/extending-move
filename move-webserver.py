@@ -45,10 +45,10 @@ class MyServer(BaseHTTPRequestHandler):
                 # Simple templating to insert wav_files into the select options
                 options = ''.join([f'<option value="{file}">{file}</option>' for file in wav_files])
                 html_content = template.replace("{% for file in wav_files %}", "").replace("{% endfor %}", "")
-                html_content = html_content.replace("{{ file }}", "{file}")  # Placeholder
+                html_content = template.replace("{{ file }}", "{file}")  # Placeholder
                 # Since simple replacement is used, loop is manually handled
                 options_html = ''.join([f'<option value="{file}">{file}</option>' for file in wav_files])
-                html_content = html_content.replace("{% for file in wav_files %}", "").replace("{{ file }}", "{}").format(*(files for files in wav_files))
+                html_content = template.replace("{% for file in wav_files %}", "").replace("{{ file }}", "{}").format(*(files for files in wav_files))
                 # Properly replace the select options
                 html_content = f"""<html>
     <head>
@@ -80,7 +80,7 @@ class MyServer(BaseHTTPRequestHandler):
                     event.preventDefault();
                     return;
                 }}
-                const confirmAction = confirm(`Are you sure you want to overwrite "${selectedFile}" with its reversed version?`);
+                const confirmAction = confirm(`Are you sure you want to overwrite "${{selectedFile}}" with its reversed version?`);
                 if (!confirmAction) {{
                     event.preventDefault();
                 }}
