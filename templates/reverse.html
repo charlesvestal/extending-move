@@ -12,9 +12,7 @@
             <label for="wav_file">Select WAV file to reverse:</label>
             <select id="wav_file" name="wav_file" required>
                 <option value="" disabled selected>--Select a WAV file--</option>
-                {% for file in wav_files %}
-                <option value="{{ file }}">{{ file }}</option>
-                {% endfor %}
+                {{ options }}
             </select>
             <br/><br/>
             
