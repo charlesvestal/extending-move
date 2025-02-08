@@ -164,6 +164,11 @@ def slice_wav(input_wav, out_dir, regions=None, num_slices=16, target_directory=
             start_sample = max(0, start_sample)
             end_sample = min(total_samples, end_sample)
             
+            # Prevent zero-length slices
+            if end_sample <= start_sample:
+                print(f"Warning: Slice {idx+1} has zero length. Skipping.")
+                continue
+            
             slice_data = data[start_sample:end_sample]
             filename = f"{base}_slice_{idx+1:02d}.wav"
             path = os.path.join(target_directory, filename)
@@ -175,7 +180,8 @@ def slice_wav(input_wav, out_dir, regions=None, num_slices=16, target_directory=
             slice_paths.append(unique_path)
     else:
         # Fallback to equal slicing based on num_slices
-        slice_duration = wavfile.read(input_wav)[0] / num_slices
+        duration = total_samples / samplerate
+        slice_duration = duration / num_slices
         for i in range(num_slices):
             start_time = i * slice_duration
             end_time = (i + 1) * slice_duration
@@ -185,6 +191,11 @@ def slice_wav(input_wav, out_dir, regions=None, num_slices=16, target_directory=
             # Ensure sample indices are within bounds
             start_sample = max(0, start_sample)
             end_sample = min(total_samples, end_sample)
+            
+            # Prevent zero-length slices
+            if end_sample <= start_sample:
+                print(f"Warning: Slice {i+1} has zero length. Skipping.")
+                continue
             
             slice_data = data[start_sample:end_sample]
             filename = f"{base}_slice_{i+1:02d}.wav"
@@ -287,6 +298,10 @@ def process_kit(input_wav, preset_name=None, regions=None, num_slices=None, keep
     - 'message': str
     """
     try:
+        # Parse regions if they are a JSON string
+        if isinstance(regions, str):
+            regions = json.loads(regions)
+        
         # If preset_name is provided, use it; otherwise, default to the input WAV file's base name.
         if preset_name:
             preset = preset_name
