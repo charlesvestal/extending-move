@@ -1,25 +1,29 @@
-name: Create Repository Archive
+name: Upload Repository Artifacts
 
 on:
+  # You can customize these triggers based on your needs
   push:
-    branches:
-      - main  # Trigger on push to the main branch
-  workflow_dispatch:  # Allow manual triggering
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  # Allow manual triggering
+  workflow_dispatch:
 
 jobs:
-  create-archive:
+  upload-artifacts:
     runs-on: ubuntu-latest
-
+    
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Create tar.gz archive (excluding Git and hidden files)
-        run: |
-          tar -czvf extending-move.tar.gz --exclude='.git' --exclude='.github' --exclude='.*' .
-
-      - name: Upload archive as artifact
+      - uses: actions/checkout@v4
+      
+      # Upload the artifacts
+      - name: Upload repository artifacts
         uses: actions/upload-artifact@v4
         with:
           name: extending-move
-          path: extending-move.tar.gz
+          path: |
+            **
+            !.*/
+            !.*
+          compression-level: 6
+          retention-days: 90
