@@ -302,9 +302,13 @@ def process_kit(input_wav, preset_name=None, num_slices=16, keep_files=False,
         update_drumcell_sample_uris(kit_template, slice_paths, base_uri="Samples/")
 
         # Write the updated preset JSON to Preset.ablpreset.
-        with open(preset_output_file, "w") as f:
-            json.dump(kit_template, f, indent=2)
-        print(f"Updated preset written to {preset_output_file}")
+        try:
+            with open(preset_output_file, "w") as f:
+                json.dump(kit_template, f, indent=2)
+            print(f"Updated preset written to {preset_output_file}")
+        except Exception as e:
+            print(f"Failed to write preset file '{preset_output_file}': {e}")
+            raise RuntimeError(f"Could not write preset file '{preset_output_file}'.") from e
 
         # Create a bundle (ZIP) that contains Preset.ablpreset and the Samples folder.
         create_bundle(preset_output_file, samples_folder, bundle_filename)
@@ -325,22 +329,25 @@ def process_kit(input_wav, preset_name=None, num_slices=16, keep_files=False,
         preset_output_file = os.path.join(presets_target_dir, f"{preset}.ablpreset")
 
         # Slice the input WAV file.
-        slice_paths = slice_wav(input_wav, "/data/UserData/UserLibrary/Samples/Preset Samples", num_slices=num_slices, target_directory="/data/UserData/UserLibrary/Samples/Preset Samples")
+        slice_paths = slice_wav(input_wav, samples_target_dir, num_slices=num_slices, target_directory=samples_target_dir)
 
         # Update the kit template: Replace each drum cell's sampleUri with "ableton:/user-library/Samples/Preset%20Samples/<URI-encoded-slice-filename>" or leave null.
         update_drumcell_sample_uris(kit_template, slice_paths, base_uri="ableton:/user-library/Samples/Preset%20Samples/")
 
         # Write the updated preset JSON to the target preset path.
-        with open(preset_output_file, "w") as f:
-            json.dump(kit_template, f, indent=2)
-        print(f"Updated preset written to {preset_output_file}")
+        try:
+            with open(preset_output_file, "w") as f:
+                json.dump(kit_template, f, indent=2)
+            print(f"Updated preset written to {preset_output_file}")
+        except Exception as e:
+            print(f"Failed to write preset file '{preset_output_file}': {e}")
+            raise RuntimeError(f"Could not write preset file '{preset_output_file}'.") from e
 
         # Optionally clean up intermediate files.
         if not keep_files:
-            for path in slice_paths:
-                if os.path.exists(path):
-                    os.remove(path)
-                    print(f"Deleted slice file: {path}")
+            # Do not delete slice files in auto_place mode
+            # If you want to clean up other temporary files, add here
+            print("Auto_place mode: Keeping slice files as per user request.")
 
     else:
         raise ValueError("Invalid mode. Must be 'download' or 'auto_place'.")
