@@ -4,7 +4,8 @@ import os
 import json
 import shutil
 import cgi
-from kit_handler import process_kit, refresh_library
+from kit_handler import process_kit
+from refresh_handler import refresh_library
 
 hostName = "0.0.0.0"
 serverPort = 666
