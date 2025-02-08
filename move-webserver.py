@@ -6,6 +6,7 @@ import shutil
 import cgi
 from kit_handler import process_kit
 from refresh_handler import refresh_library
+from reverse_handler import get_wav_files, reverse_wav_file
 
 hostName = "0.0.0.0"
 serverPort = 666
@@ -32,6 +33,67 @@ class MyServer(BaseHTTPRequestHandler):
             with open(os.path.join("templates", "refresh.html"), "r") as f:
                 html_content = f.read().replace("{message_html}", "")
                 self.wfile.write(bytes(html_content, "utf-8"))
+        elif self.path == "/reverse":
+            self.send_response(200)
+            self.send_header("Content-type", "text/html")
+            self.end_headers()
+            wav_files = get_wav_files()
+            # Render reverse.html with the list of wav_files
+            try:
+                with open(os.path.join("templates", "reverse.html"), "r") as f:
+                    template = f.read()
+                # Simple templating to insert wav_files into the select options
+                options = ''.join([f'<option value="{file}">{file}</option>' for file in wav_files])
+                html_content = template.replace("{% for file in wav_files %}", "").replace("{% endfor %}", "")
+                html_content = html_content.replace("{{ file }}", "{file}")  # Placeholder
+                # Since simple replacement is used, loop is manually handled
+                options_html = ''.join([f'<option value="{file}">{file}</option>' for file in wav_files])
+                html_content = html_content.replace("{% for file in wav_files %}", "").replace("{{ file }}", "{}").format(*(files for files in wav_files))
+                # Properly replace the select options
+                html_content = f"""<html>
+    <head>
+        <title>Reverse WAV</title>
+        <link rel="stylesheet" href="/style.css">
+    </head>
+    <body>
+        <h2>Reverse a WAV File</h2>
+        {self.message_html if hasattr(self, 'message_html') else ''}
+        <form method="post">
+            <input type="hidden" name="action" value="reverse_file"/>
+            
+            <label for="wav_file">Select WAV file to reverse:</label>
+            <select id="wav_file" name="wav_file" required>
+                <option value="" disabled selected>--Select a WAV file--</option>
+                {options}
+            </select>
+            <br/><br/>
+            
+            <button type="submit" onclick="confirmOverwrite()">Reverse and Overwrite</button>
+        </form>
+        
+        <script>
+            function confirmOverwrite() {{
+                const wavFileSelect = document.getElementById('wav_file');
+                const selectedFile = wavFileSelect.value;
+                if (!selectedFile) {{
+                    alert('Please select a WAV file to reverse.');
+                    event.preventDefault();
+                    return;
+                }}
+                const confirmAction = confirm(`Are you sure you want to overwrite "${selectedFile}" with its reversed version?`);
+                if (!confirmAction) {{
+                    event.preventDefault();
+                }}
+            }}
+        </script>
+    </body>
+</html>"""
+                self.wfile.write(bytes(html_content, "utf-8"))
+            except Exception as e:
+                error_message = f"Error rendering reverse.html: {e}"
+                self.send_response(500)
+                self.end_headers()
+                self.wfile.write(bytes(f"<html><body><p style='color: red;'>{error_message}</p></body></html>", "utf-8"))
         elif self.path == "/style.css":
             self.send_response(200)
             self.send_header("Content-type", "text/css")
@@ -44,7 +106,7 @@ class MyServer(BaseHTTPRequestHandler):
             self.wfile.write(bytes("404 Not Found", "utf-8"))
 
     def do_POST(self):
-        if self.path in ["/slice", "/refresh"]:
+        if self.path in ["/slice", "/refresh", "/reverse"]:
             content_type = self.headers.get('Content-Type')
             if not content_type:
                 self.send_response(400)
@@ -218,6 +280,37 @@ class MyServer(BaseHTTPRequestHandler):
                     message = f"Error refreshing library: {e}"
                     message_type = "error"
                     self.respond_with_form(self.path, message, message_type)
+
+            elif action == "reverse_file" and self.path == "/reverse":
+                print("Processing reverse WAV file request...")
+                try:
+                    wav_file = form.getvalue('wav_file')
+                    if not wav_file:
+                        message = "Bad Request: No WAV file selected."
+                        message_type = "error"
+                        self.respond_with_form(self.path, message, message_type)
+                        return
+
+                    # Path is fixed to /data/UserData/UserLibrary/Samples
+                    directory = "/data/UserData/UserLibrary/Samples"
+                    if not os.path.isdir(directory):
+                        message = f"Server Error: Directory does not exist: {directory}"
+                        message_type = "error"
+                        self.respond_with_form(self.path, message, message_type)
+                        return
+
+                    success, msg = reverse_wav_file(wav_file, directory=directory)
+                    if success:
+                        message = msg
+                        message_type = "success"
+                    else:
+                        message = msg
+                        message_type = "error"
+
+                    self.respond_with_form(self.path, message, message_type)
+                except Exception as e:
+                    self.respond_with_form(self.path, f"Error processing reverse WAV file: {e}", "error")
+
             else:
                 message = "Bad Request: Unknown action or incorrect path."
                 message_type = "error"
@@ -234,6 +327,8 @@ class MyServer(BaseHTTPRequestHandler):
             template_file = "slice.html"
         elif path == "/refresh":
             template_file = "refresh.html"
+        elif path == "/reverse":
+            template_file = "reverse.html"
         else:
             # Default to index.html if path is unrecognized
             template_file = "index.html"
@@ -245,21 +340,29 @@ class MyServer(BaseHTTPRequestHandler):
             self.wfile.write(bytes(f"<html><body><p>{message}</p></body></html>", "utf-8"))
             return
 
-        with open(template_path, "r") as f:
-            html_content = f.read()
+        try:
+            with open(template_path, "r") as f:
+                html_content = f.read()
+        except Exception as e:
+            error_message = f"Error reading template file: {e}"
+            self.send_response(500)
+            self.end_headers()
+            self.wfile.write(bytes(f"<html><body><p style='color: red;'>{error_message}</p></body></html>", "utf-8"))
+            return
 
-        # Replace placeholder with message_html
-        if message:
-            if message_type == "success":
-                message_html = f'<p style="color: green;">{message}</p>'
-            elif message_type == "error":
-                message_html = f'<p style="color: red;">{message}</p>'
+        # Insert the message_html
+        if "{message_html}" in html_content:
+            if message:
+                if message_type == "success":
+                    message_html = f'<p style="color: green;">{message}</p>'
+                elif message_type == "error":
+                    message_html = f'<p style="color: red;">{message}</p>'
+                else:
+                    message_html = f'<p>{message}</p>'
+                html_content = html_content.replace("{message_html}", message_html)
             else:
-                message_html = f'<p>{message}</p>'
-            html_content = html_content.replace("{message_html}", message_html)
-        else:
-            html_content = html_content.replace("{message_html}", "")
-
+                html_content = html_content.replace("{message_html}", "")
+        
         self.wfile.write(bytes(html_content, "utf-8"))
 
 if __name__ == "__main__":
