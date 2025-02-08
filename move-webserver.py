@@ -165,14 +165,21 @@ class MyServer(BaseHTTPRequestHandler):
 
             elif action == "refresh_library":
                 print("Refreshing library...")
-                success, refresh_message = refresh_library()
-                if success:
-                    message = refresh_message
-                    message_type = "success"
-                else:
-                    message = refresh_message
+                # Ensure no file upload is required for this action
+                try:
+                    success, refresh_message = refresh_library()
+                    if success:
+                        message = refresh_message
+                        message_type = "success"
+                    else:
+                        message = refresh_message
+                        message_type = "error"
+                    self.respond_with_form(message, message_type)
+                except Exception as e:
+                    print(f"Error during library refresh: {e}")
+                    message = f"Error refreshing library: {e}"
                     message_type = "error"
-                self.respond_with_form(message, message_type)
+                    self.respond_with_form(message, message_type)
             else:
                 message = "Bad Request: Unknown action."
                 message_type = "error"
@@ -208,6 +215,7 @@ class MyServer(BaseHTTPRequestHandler):
                     <h2>Upload a WAV file to generate a kit</h2>
                     {message_html}
                     <form enctype="multipart/form-data" method="post">
+                        <input type="hidden" name="action" value="slice"/>
                         <label for="file">Select WAV file:</label>
                         <input id="file" name="file" type="file" accept=".wav" required/>
                         <br/><br/>
@@ -221,7 +229,11 @@ class MyServer(BaseHTTPRequestHandler):
                         <label for="auto_place">Automatically place preset</label>
                         <br/><br/>
                         <input type="submit" name="action" value="slice"/>
-                        <input type="submit" name="action" value="refresh_library"/>
+                    </form>
+                    <hr/>
+                    <form method="post">
+                        <input type="hidden" name="action" value="refresh_library"/>
+                        <input type="submit" value="Refresh Library"/>
                     </form>
                 </body>
             </html>
