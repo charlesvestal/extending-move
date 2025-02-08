@@ -28,6 +28,12 @@ class MyServer(BaseHTTPRequestHandler):
                             <label for="num_slices">Number of slices (1-16):</label>
                             <input id="num_slices" name="num_slices" type="number" min="1" max="16" value="16" required/>
                             <br/><br/>
+                            <label for="mode">Select Mode:</label>
+                            <input type="radio" id="download" name="mode" value="download" checked>
+                            <label for="download">Download .ablpreset</label>
+                            <input type="radio" id="auto_place" name="mode" value="auto_place">
+                            <label for="auto_place">Automatically place preset</label>
+                            <br/><br/>
                             <input type="submit" value="Upload"/>
                         </form>
                     </body>
@@ -104,35 +110,70 @@ class MyServer(BaseHTTPRequestHandler):
                     os.remove(filepath)  # Clean up uploaded file
                     return
 
-            print(f"Processing kit generation with {num_slices} slices...")
+            # Retrieve mode
+            mode = "download"  # default
+            if 'mode' in form:
+                mode_value = form.getvalue('mode')
+                if mode_value in ["download", "auto_place"]:
+                    mode = mode_value
+                else:
+                    self.send_response(400)
+                    self.end_headers()
+                    self.wfile.write(bytes("Bad Request: Invalid mode selected", "utf-8"))
+                    os.remove(filepath)  # Clean up uploaded file
+                    return
+
+            print(f"Processing kit generation with {num_slices} slices and mode '{mode}'...")
             # Process the uploaded WAV file
             try:
                 preset_name = os.path.splitext(filename)[0]
-                process_kit(filepath, preset_name=preset_name, num_slices=num_slices, keep_files=False)
-                bundle_filename = f"{preset_name}.ablpresetbundle"
-                bundle_path = os.path.join(os.getcwd(), bundle_filename)
+                process_kit(filepath, preset_name=preset_name, num_slices=num_slices, keep_files=False, mode=mode)
+
+                if mode == "download":
+                    bundle_filename = f"{preset_name}.ablpresetbundle"
+                    bundle_path = os.path.join(os.getcwd(), bundle_filename)
+                    
+                    if os.path.exists(bundle_path):
+                        print(f"Bundle created at {bundle_path}. Sending to client...")
+                        with open(bundle_path, "rb") as f:
+                            bundle_data = f.read()
+                        
+                        self.send_response(200)
+                        self.send_header("Content-Type", "application/zip")
+                        self.send_header("Content-Disposition", f"attachment; filename={bundle_filename}")
+                        self.send_header("Content-Length", str(len(bundle_data)))
+                        self.end_headers()
+                        self.wfile.write(bundle_data)
+                        
+                        # Clean up uploaded file and bundle
+                        os.remove(filepath)
+                        os.remove(bundle_path)
+                        print("Cleanup completed.")
+                    else:
+                        print("Failed to create bundle.")
+                        self.send_response(500)
+                        self.end_headers()
+                        self.wfile.write(bytes("Failed to create bundle.", "utf-8"))
                 
-                if os.path.exists(bundle_path):
-                    print(f"Bundle created at {bundle_path}. Sending to client...")
-                    with open(bundle_path, "rb") as f:
-                        bundle_data = f.read()
+                elif mode == "auto_place":
+                    preset_output_file = os.path.join("/data/UserData/UserLibrary/Track Presets", f"{preset_name}.ablpreset")
                     
-                    self.send_response(200)
-                    self.send_header("Content-Type", "application/zip")
-                    self.send_header("Content-Disposition", f"attachment; filename={bundle_filename}")
-                    self.send_header("Content-Length", str(len(bundle_data)))
-                    self.end_headers()
-                    self.wfile.write(bundle_data)
-                    
-                    # Clean up uploaded file and bundle
-                    os.remove(filepath)
-                    os.remove(bundle_path)
-                    print("Cleanup completed.")
-                else:
-                    print("Failed to create bundle.")
-                    self.send_response(500)
-                    self.end_headers()
-                    self.wfile.write(bytes("Failed to create bundle.", "utf-8"))
+                    if os.path.exists(preset_output_file):
+                        print(f"Preset already exists at {preset_output_file}.")
+                        self.send_response(409)
+                        self.end_headers()
+                        self.wfile.write(bytes("Conflict: Preset already exists.", "utf-8"))
+                        os.remove(filepath)
+                        return
+                    else:
+                        print(f"Preset placed at {preset_output_file}.")
+                        self.send_response(200)
+                        self.end_headers()
+                        self.wfile.write(bytes("Preset automatically placed successfully.", "utf-8"))
+                        
+                        # Clean up uploaded file
+                        os.remove(filepath)
+                        print("Uploaded file cleanup completed.")
             except Exception as e:
                 print(f"Error during kit processing: {e}")
                 self.send_response(500)
