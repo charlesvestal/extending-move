@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main  # Trigger on push to the main branch
+  workflow_dispatch:  # Allow manual triggering
 
 jobs:
   create-archive:
