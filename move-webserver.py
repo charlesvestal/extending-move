@@ -29,26 +29,27 @@ class MyServer(BaseHTTPRequestHandler):
                 self.wfile.write(bytes("Bad Request: Content-Type header missing", "utf-8"))
                 return
 
-            ctype, pdict = cgi.parse_header(content_type)
-            if ctype != 'multipart/form-data':
-                self.send_response(400)
-                self.end_headers()
-                self.wfile.write(bytes("Bad Request: Expected multipart/form-data", "utf-8"))
-                return
-
-            pdict['boundary'] = bytes(pdict['boundary'], "utf-8")
-            pdict['CONTENT-LENGTH'] = int(self.headers.get('Content-Length'))
-            print("Parsing multipart form data...")
-            form = cgi.FieldStorage(fp=self.rfile, headers=self.headers, environ={
-                'REQUEST_METHOD': 'POST',
-                'CONTENT_TYPE': content_type,
-            })
-
             # Initialize message variables
             message = ""
             message_type = ""  # "success" or "error"
 
             # Determine action based on the submit button pressed
+            # To parse the form data correctly based on Content-Type
+            try:
+                form = cgi.FieldStorage(
+                    fp=self.rfile,
+                    headers=self.headers,
+                    environ={
+                        'REQUEST_METHOD': 'POST',
+                        'CONTENT_TYPE': content_type,
+                    }
+                )
+            except Exception as e:
+                self.send_response(400)
+                self.end_headers()
+                self.wfile.write(bytes(f"Bad Request: {e}", "utf-8"))
+                return
+
             action = form.getvalue('action')
             if not action:
                 message = "Bad Request: No action specified."
