@@ -79,15 +79,30 @@
                                 body: formData
                             });
 
-                            if (!response.ok) {
-                                throw new Error('Network response was not ok');
+                            // Check if the response is an attachment
+                            const contentDisposition = response.headers.get('Content-Disposition');
+                            if (contentDisposition && contentDisposition.includes('attachment')) {
+                                const blob = await response.blob();
+                                const urlBlob = window.URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                a.href = urlBlob;
+                                const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
+                                const filename = filenameMatch ? filenameMatch[1] : 'download.zip';
+                                a.download = filename;
+                                document.body.appendChild(a);
+                                a.click();
+                                a.remove();
+                                window.URL.revokeObjectURL(urlBlob);
+                            } else {
+                                if (!response.ok) {
+                                    throw new Error('Network response was not ok');
+                                }
+                                const result = await response.text();
+                                document.getElementById(tabName).innerHTML = result;
+
+                                // Re-attach the form handler in case of multiple submissions
+                                attachFormHandler(tabName);
                             }
-
-                            const result = await response.text();
-                            document.getElementById(tabName).innerHTML = result;
-
-                            // Re-attach the form handler in case of multiple submissions
-                            attachFormHandler(tabName);
                         } catch (error) {
                             document.getElementById(tabName).innerHTML = `<p style="color: red;">Error submitting form: ${error}</p>`;
                         }
