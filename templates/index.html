@@ -161,11 +161,39 @@
                         }
                     });
                 }
+
+                // Add "Reset Slices" button
+                addResetSlicesButton();
             }
 
             /**
-             * Create contiguous slices from 0 to the end of the file
-             * based on the number of slices in the num_slices input.
+             * Create and append the "Reset Slices" button below the waveform.
+             */
+            function addResetSlicesButton() {
+                const waveform = document.getElementById('waveform');
+                if (!waveform) return;
+
+                // Check if the button already exists
+                if (document.getElementById('reset-slices')) return;
+
+                const resetButton = document.createElement('button');
+                resetButton.id = 'reset-slices';
+                resetButton.innerText = 'Reset Slices';
+                resetButton.style.marginTop = '10px';
+                resetButton.style.padding = '10px 20px';
+                resetButton.style.fontSize = '16px';
+                resetButton.style.cursor = 'pointer';
+
+                resetButton.addEventListener('click', () => {
+                    recalcSlices();
+                });
+
+                waveform.parentNode.appendChild(resetButton);
+            }
+
+            /**
+             * Create contiguous slices based on the first and last regions' start and end points.
+             * If no regions exist, use the full duration of the audio.
              */
             function createContiguousRegions() {
                 const numSlicesInput = document.getElementById('num_slices');
@@ -174,13 +202,24 @@
                 const numSlices = parseInt(numSlicesInput.value, 10) || 0;
                 if (!audioReady || !wavesurfer || numSlices <= 0) return;
 
-                const duration = wavesurfer.getDuration();
-                const sliceDuration = duration / numSlices;
+                let slicingStart = 0;
+                let slicingEnd = wavesurfer.getDuration();
+
+                const regions = Object.values(wavesurfer.regions.list)
+                    .sort((a, b) => a.start - b.start);
+
+                if (regions.length > 0) {
+                    slicingStart = regions[0].start;
+                    slicingEnd = regions[regions.length - 1].end;
+                }
+
+                const slicingDuration = slicingEnd - slicingStart;
+                const sliceDuration = slicingDuration / numSlices;
 
                 for (let i = 0; i < numSlices; i++) {
                     let regionOptions = {
-                        start: i * sliceDuration,
-                        end: (i + 1) * sliceDuration,
+                        start: slicingStart + i * sliceDuration,
+                        end: slicingStart + (i + 1) * sliceDuration,
                         color: 'rgba(0, 255, 0, 0.2)',
                         drag: false  // let users resize edges, but not move the entire slice
                         // omit "resize: false" so edges are resizable
