@@ -141,7 +141,7 @@ class MyServer(BaseHTTPRequestHandler):
                     # No need to check if preset exists; process_kit has already handled it.
                     # Respond with success message
                     print(f"Preset placed at {preset_output_file}.")
-                    message = "Preset automáticamente colocado exitosamente."
+                    message = "Preset automatically placed successfully."
                     message_type = "success"
                     self.respond_with_form(message, message_type)
                     
