@@ -151,9 +151,17 @@ class MyServer(BaseHTTPRequestHandler):
                         # No need to check if preset exists; process_kit has already handled it.
                         # Respond with success message
                         print(f"Preset placed at {preset_output_file}.")
-                        message = "Preset automatically placed successfully."
-                        message_type = "success"
-                        self.respond_with_form(message, message_type)
+
+                        # Refresh the library after automatic placement
+                        refresh_success, refresh_message = refresh_library()
+                        if refresh_success:
+                            combined_message = "Preset automatically placed successfully. " + refresh_message
+                            combined_message_type = "success"
+                        else:
+                            combined_message = f"Preset automatically placed successfully, but failed to refresh library: {refresh_message}"
+                            combined_message_type = "error"
+                        
+                        self.respond_with_form(combined_message, combined_message_type)
                         
                         # Clean up uploaded file
                         os.remove(filepath)
