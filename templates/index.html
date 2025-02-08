@@ -1,0 +1,71 @@
+<html>
+    <head>
+        <title>Main Page</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+            }
+            .tab {
+                overflow: hidden;
+                border-bottom: 1px solid #ccc;
+                background-color: #f1f1f1;
+            }
+            .tab button {
+                background-color: inherit;
+                border: none;
+                outline: none;
+                cursor: pointer;
+                padding: 14px 16px;
+                transition: 0.3s;
+                font-size: 17px;
+            }
+            .tab button:hover {
+                background-color: #ddd;
+            }
+            .tab button.active {
+                background-color: #ccc;
+            }
+            .tabcontent {
+                display: none;
+                padding: 20px;
+            }
+        </style>
+        <script>
+            function openTab(evt, tabName) {
+                var i, tabcontent, tablinks;
+                tabcontent = document.getElementsByClassName("tabcontent");
+                for (i = 0; i < tabcontent.length; i++) {
+                    tabcontent[i].style.display = "none";
+                }
+                tablinks = document.getElementsByClassName("tablinks");
+                for (i = 0; i < tablinks.length; i++) {
+                    tablinks[i].className = tablinks[i].className.replace(" active", "");
+                }
+                document.getElementById(tabName).style.display = "block";
+                evt.currentTarget.className += " active";
+            }
+
+            // Open the default tab
+            window.onload = function() {
+                document.getElementById("defaultOpen").click();
+            }
+        </script>
+    </head>
+    <body>
+        <h1>Welcome to the Kit Generator</h1>
+        <div class="tab">
+            <button class="tablinks" onclick="openTab(event, 'Slice')" id="defaultOpen">Slice Kit</button>
+            <button class="tablinks" onclick="openTab(event, 'Refresh')">Refresh Library</button>
+        </div>
+
+        <div id="Slice" class="tabcontent">
+            <!-- Slice form will be loaded here via iframe -->
+            <iframe src="/slice" style="width:100%; height:600px; border:none;"></iframe>
+        </div>
+
+        <div id="Refresh" class="tabcontent">
+            <!-- Refresh form will be loaded here via iframe -->
+            <iframe src="/refresh" style="width:100%; height:200px; border:none;"></iframe>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,25 @@
+<html>
+    <head>
+        <title>Slice Kit</title>
+    </head>
+    <body>
+        <h2>Upload a WAV file to generate a kit</h2>
+        {message_html}
+        <form enctype="multipart/form-data" method="post">
+            <input type="hidden" name="action" value="slice"/>
+            <label for="file">Select WAV file:</label>
+            <input id="file" name="file" type="file" accept=".wav" required/>
+            <br/><br/>
+            <label for="num_slices">Number of slices (1-16):</label>
+            <input id="num_slices" name="num_slices" type="number" min="1" max="16" value="16" required/>
+            <br/><br/>
+            <label for="mode">Select Mode:</label>
+            <input type="radio" id="download" name="mode" value="download" checked>
+            <label for="download">Download .ablpreset</label>
+            <input type="radio" id="auto_place" name="mode" value="auto_place">
+            <label for="auto_place">Automatically place preset</label>
+            <br/><br/>
+            <input type="submit" value="Slice"/>
+        </form>
+    </body>
+</html>
