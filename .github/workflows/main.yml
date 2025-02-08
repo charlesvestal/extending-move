@@ -14,10 +14,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Create tar.gz archive
+      - name: Create tar.gz archive (excluding Git and hidden files)
         run: |
-          # Create a tar.gz archive of the entire repository
-          tar -czvf extending-move.tar.gz .
+          tar -czvf extending-move.tar.gz --exclude='.git' --exclude='.github' --exclude='.*' .
 
       - name: Upload archive as artifact
         uses: actions/upload-artifact@v4
