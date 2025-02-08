@@ -191,6 +191,11 @@
                         regionOptions.resize = 'left';
                     }
 
+                    // Allow the last region to resize its end
+                    if (i === numSlices - 1) {
+                        regionOptions.resize = 'right';
+                    }
+
                     wavesurfer.addRegion(regionOptions);
                 }
             }
@@ -231,8 +236,11 @@
                     const next = regions[idx + 1];
                     next.update({ start: updatedRegion.end });
                 } else {
-                    // If this is the last region, ensure it ends at total duration
-                    updatedRegion.update({ end: duration });
+                    // If this is the last region, allow its end to be adjusted
+                    // Do not enforce end=duration if being resized from the right
+                    // if (!updatedRegion.resize || updatedRegion.resize !== 'right') {
+                    //     updatedRegion.update({ end: duration });
+                    // }
                 }
 
                 // Do not enforce start=0 for the first region
