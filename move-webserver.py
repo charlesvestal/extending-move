@@ -2,7 +2,7 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import os
 import shutil
-from urllib.parse import parse_qs
+import cgi
 from kit_handler import process_kit
 
 hostName = "0.0.0.0"
@@ -40,116 +40,80 @@ class MyServer(BaseHTTPRequestHandler):
 
     def do_POST(self):
         if self.path == "/":
-            content_length = int(self.headers['Content-Length'])
-            content_type = self.headers['Content-Type']
+            content_type = self.headers.get('Content-Type')
+            if not content_type:
+                self.send_response(400)
+                self.end_headers()
+                self.wfile.write(bytes("Bad Request: Content-Type header missing", "utf-8"))
+                return
 
-            if not content_type.startswith("multipart/form-data"):
+            ctype, pdict = cgi.parse_header(content_type)
+            if ctype != 'multipart/form-data':
                 self.send_response(400)
                 self.end_headers()
                 self.wfile.write(bytes("Bad Request: Expected multipart/form-data", "utf-8"))
                 return
 
-            boundary = content_type.split("boundary=")[1].encode()
-            remainbytes = content_length
-            fields = {}
-            files = {}
+            pdict['boundary'] = bytes(pdict['boundary'], "utf-8")
+            pdict['CONTENT-LENGTH'] = int(self.headers.get('Content-Length'))
+            print("Parsing multipart form data...")
+            form = cgi.FieldStorage(fp=self.rfile, headers=self.headers, environ={
+                'REQUEST_METHOD': 'POST',
+                'CONTENT_TYPE': content_type,
+            })
 
-            while remainbytes > 0:
-                line = self.rfile.readline()
-                remainbytes -= len(line)
-                if boundary in line:
-                    # Read Content-Disposition
-                    disposition = self.rfile.readline()
-                    remainbytes -= len(disposition)
-                    disposition = disposition.decode()
-                    # Get field name
-                    if 'filename="' in disposition:
-                        # It's a file
-                        filename = disposition.split('filename="')[1].split('"')[0]
-                        filepath = os.path.join("uploads", filename)
-                        os.makedirs("uploads", exist_ok=True)
+            # Retrieve file
+            if 'file' not in form:
+                self.send_response(400)
+                self.end_headers()
+                self.wfile.write(bytes("Bad Request: No file field in form", "utf-8"))
+                return
 
-                        # Skip Content-Type line
-                        line = self.rfile.readline()
-                        remainbytes -= len(line)
-                        # Skip empty line
-                        line = self.rfile.readline()
-                        remainbytes -= len(line)
+            file_field = form['file']
+            if not isinstance(file_field, cgi.FieldStorage):
+                self.send_response(400)
+                self.end_headers()
+                self.wfile.write(bytes("Bad Request: File field is not valid", "utf-8"))
+                return
 
-                        # Read the file
-                        try:
-                            with open(filepath, "wb") as out_file:
-                                preline = self.rfile.readline()
-                                remainbytes -= len(preline)
-                                while remainbytes > 0:
-                                    line = self.rfile.readline()
-                                    remainbytes -= len(line)
-                                    if boundary in line:
-                                        preline = preline.rstrip(b'\r\n')
-                                        out_file.write(preline)
-                                        break
-                                    else:
-                                        out_file.write(preline)
-                                        preline = line
-                            files['file'] = filepath
-                        except Exception as e:
-                            self.send_response(500)
-                            self.end_headers()
-                            self.wfile.write(bytes(f"Failed to write file: {e}", "utf-8"))
-                            return
-                    else:
-                        # It's a form field
-                        field_name = disposition.split('name="')[1].split('"')[0]
-                        # Skip Content-Type line if exists
-                        line = self.rfile.readline()
-                        remainbytes -= len(line)
-                        if line.strip().startswith(b'Content-Type'):
-                            # Read and skip Content-Type line
-                            line = self.rfile.readline()
-                            remainbytes -= len(line)
-                        # Skip empty line
-                        line = self.rfile.readline()
-                        remainbytes -= len(line)
-                        # Read the field value
-                        value = b''
-                        while True:
-                            line = self.rfile.readline()
-                            remainbytes -= len(line)
-                            if boundary in line:
-                                value = value.rstrip(b'\r\n')
-                                break
-                            else:
-                                value += line
-                        fields[field_name] = value.decode()
-
-            # Check if file was uploaded
-            if 'file' not in files:
+            if not file_field.filename:
                 self.send_response(400)
                 self.end_headers()
                 self.wfile.write(bytes("Bad Request: No file uploaded", "utf-8"))
                 return
 
-            # Get num_slices
+            filename = os.path.basename(file_field.filename)
+            upload_dir = "uploads"
+            os.makedirs(upload_dir, exist_ok=True)
+            filepath = os.path.join(upload_dir, filename)
+            print(f"Saving uploaded file to {filepath}...")
+            with open(filepath, "wb") as f:
+                shutil.copyfileobj(file_field.file, f)
+
+            # Retrieve num_slices
             num_slices = 16  # default
-            if 'num_slices' in fields:
+            if 'num_slices' in form:
                 try:
-                    num_slices = int(fields['num_slices'])
+                    num_slices = int(form.getvalue('num_slices'))
                     if not (1 <= num_slices <= 16):
                         raise ValueError
                 except ValueError:
                     self.send_response(400)
                     self.end_headers()
                     self.wfile.write(bytes("Bad Request: Number of slices must be an integer between 1 and 16", "utf-8"))
+                    os.remove(filepath)  # Clean up uploaded file
                     return
 
+            print(f"Processing kit generation with {num_slices} slices...")
             # Process the uploaded WAV file
             try:
-                preset_name = os.path.splitext(os.path.basename(files['file']))[0]
-                process_kit(files['file'], preset_name=preset_name, num_slices=num_slices, keep_files=False)
+                preset_name = os.path.splitext(filename)[0]
+                process_kit(filepath, preset_name=preset_name, num_slices=num_slices, keep_files=False)
                 bundle_filename = f"{preset_name}.ablpresetbundle"
                 bundle_path = os.path.join(os.getcwd(), bundle_filename)
                 
                 if os.path.exists(bundle_path):
+                    print(f"Bundle created at {bundle_path}. Sending to client...")
                     with open(bundle_path, "rb") as f:
                         bundle_data = f.read()
                     
@@ -161,13 +125,16 @@ class MyServer(BaseHTTPRequestHandler):
                     self.wfile.write(bundle_data)
                     
                     # Clean up uploaded file and bundle
-                    os.remove(files['file'])
+                    os.remove(filepath)
                     os.remove(bundle_path)
+                    print("Cleanup completed.")
                 else:
+                    print("Failed to create bundle.")
                     self.send_response(500)
                     self.end_headers()
                     self.wfile.write(bytes("Failed to create bundle.", "utf-8"))
             except Exception as e:
+                print(f"Error during kit processing: {e}")
                 self.send_response(500)
                 self.end_headers()
                 self.wfile.write(bytes(f"Error processing kit: {e}", "utf-8"))
@@ -179,12 +146,10 @@ class MyServer(BaseHTTPRequestHandler):
 if __name__ == "__main__":
     print("Starting webserver")
     webServer = HTTPServer((hostName, serverPort), MyServer)
-    print("Server started http://%s:%s" % (hostName, serverPort))
-
+    print(f"Server started http://{hostName}:{serverPort}")
     try:
         webServer.serve_forever()
     except KeyboardInterrupt:
         pass
-
     webServer.server_close()
     print("Server stopped.")
