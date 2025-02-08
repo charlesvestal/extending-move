@@ -14,31 +14,7 @@ class MyServer(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header("Content-type", "text/html")
             self.end_headers()
-            self.wfile.write(bytes("""
-                <html>
-                    <head>
-                        <title>Upload WAV File</title>
-                    </head>
-                    <body>
-                        <h2>Upload a WAV file to generate a kit</h2>
-                        <form enctype="multipart/form-data" method="post">
-                            <label for="file">Select WAV file:</label>
-                            <input id="file" name="file" type="file" accept=".wav" required/>
-                            <br/><br/>
-                            <label for="num_slices">Number of slices (1-16):</label>
-                            <input id="num_slices" name="num_slices" type="number" min="1" max="16" value="16" required/>
-                            <br/><br/>
-                            <label for="mode">Select Mode:</label>
-                            <input type="radio" id="download" name="mode" value="download" checked>
-                            <label for="download">Download .ablpreset</label>
-                            <input type="radio" id="auto_place" name="mode" value="auto_place">
-                            <label for="auto_place">Automatically place preset</label>
-                            <br/><br/>
-                            <input type="submit" value="Slice"/>
-                        </form>
-                    </body>
-                </html>
-            """, "utf-8"))
+            self.wfile.write(bytes(self.build_form(), "utf-8"))
         else:
             self.send_response(404)
             self.end_headers()
@@ -68,24 +44,28 @@ class MyServer(BaseHTTPRequestHandler):
                 'CONTENT_TYPE': content_type,
             })
 
+            # Initialize message variables
+            message = ""
+            message_type = ""  # "success" or "error"
+
             # Retrieve file
             if 'file' not in form:
-                self.send_response(400)
-                self.end_headers()
-                self.wfile.write(bytes("Bad Request: No file field in form", "utf-8"))
+                message = "Bad Request: No file field in form."
+                message_type = "error"
+                self.respond_with_form(message, message_type)
                 return
 
             file_field = form['file']
             if not isinstance(file_field, cgi.FieldStorage):
-                self.send_response(400)
-                self.end_headers()
-                self.wfile.write(bytes("Bad Request: File field is not valid", "utf-8"))
+                message = "Bad Request: File field is not valid."
+                message_type = "error"
+                self.respond_with_form(message, message_type)
                 return
 
             if not file_field.filename:
-                self.send_response(400)
-                self.end_headers()
-                self.wfile.write(bytes("Bad Request: No file uploaded", "utf-8"))
+                message = "Bad Request: No file uploaded."
+                message_type = "error"
+                self.respond_with_form(message, message_type)
                 return
 
             filename = os.path.basename(file_field.filename)
@@ -104,10 +84,10 @@ class MyServer(BaseHTTPRequestHandler):
                     if not (1 <= num_slices <= 16):
                         raise ValueError
                 except ValueError:
-                    self.send_response(400)
-                    self.end_headers()
-                    self.wfile.write(bytes("Bad Request: Number of slices must be an integer between 1 and 16", "utf-8"))
+                    message = "Bad Request: Number of slices must be an integer between 1 and 16."
+                    message_type = "error"
                     os.remove(filepath)  # Clean up uploaded file
+                    self.respond_with_form(message, message_type)
                     return
 
             # Retrieve mode
@@ -117,10 +97,10 @@ class MyServer(BaseHTTPRequestHandler):
                 if mode_value in ["download", "auto_place"]:
                     mode = mode_value
                 else:
-                    self.send_response(400)
-                    self.end_headers()
-                    self.wfile.write(bytes("Bad Request: Invalid mode selected", "utf-8"))
+                    message = "Bad Request: Invalid mode selected."
+                    message_type = "error"
                     os.remove(filepath)  # Clean up uploaded file
+                    self.respond_with_form(message, message_type)
                     return
 
             print(f"Processing kit generation with {num_slices} slices and mode '{mode}'...")
@@ -151,9 +131,9 @@ class MyServer(BaseHTTPRequestHandler):
                         print("Cleanup completed.")
                     else:
                         print("Failed to create bundle.")
-                        self.send_response(500)
-                        self.end_headers()
-                        self.wfile.write(bytes("Failed to create bundle.", "utf-8"))
+                        message = "Failed to create bundle."
+                        message_type = "error"
+                        self.respond_with_form(message, message_type)
                 
                 elif mode == "auto_place":
                     preset_output_file = os.path.join("/data/UserData/UserLibrary/Track Presets", f"{preset_name}.ablpreset")
@@ -161,22 +141,70 @@ class MyServer(BaseHTTPRequestHandler):
                     # No need to check if preset exists; process_kit has already handled it.
                     # Respond with success message
                     print(f"Preset placed at {preset_output_file}.")
-                    self.send_response(200)
-                    self.end_headers()
-                    self.wfile.write(bytes("Preset automatically placed successfully.", "utf-8"))
+                    message = "Preset automáticamente colocado exitosamente."
+                    message_type = "success"
+                    self.respond_with_form(message, message_type)
                     
                     # Clean up uploaded file
                     os.remove(filepath)
                     print("Uploaded file cleanup completed.")
             except Exception as e:
                 print(f"Error during kit processing: {e}")
-                self.send_response(500)
-                self.end_headers()
-                self.wfile.write(bytes(f"Error processing kit: {e}", "utf-8"))
+                message = f"Error processing kit: {e}"
+                message_type = "error"
+                self.respond_with_form(message, message_type)
         else:
             self.send_response(404)
             self.end_headers()
             self.wfile.write(bytes("404 Not Found", "utf-8"))
+
+    def respond_with_form(self, message, message_type):
+        """
+        Sends back the form page with an inline message.
+        """
+        self.send_response(200)
+        self.send_header("Content-type", "text/html")
+        self.end_headers()
+        html_content = self.build_form(message, message_type)
+        self.wfile.write(bytes(html_content, "utf-8"))
+
+    def build_form(self, message="", message_type=""):
+        """
+        Builds the HTML form with an optional message.
+        """
+        message_html = ""
+        if message:
+            if message_type == "success":
+                message_html = f'<p style="color: green;">{message}</p>'
+            elif message_type == "error":
+                message_html = f'<p style="color: red;">{message}</p>'
+        
+        return f"""
+            <html>
+                <head>
+                    <title>Upload WAV File</title>
+                </head>
+                <body>
+                    <h2>Upload a WAV file to generate a kit</h2>
+                    {message_html}
+                    <form enctype="multipart/form-data" method="post">
+                        <label for="file">Select WAV file:</label>
+                        <input id="file" name="file" type="file" accept=".wav" required/>
+                        <br/><br/>
+                        <label for="num_slices">Number of slices (1-16):</label>
+                        <input id="num_slices" name="num_slices" type="number" min="1" max="16" value="16" required/>
+                        <br/><br/>
+                        <label for="mode">Select Mode:</label>
+                        <input type="radio" id="download" name="mode" value="download" checked>
+                        <label for="download">Download .ablpreset</label>
+                        <input type="radio" id="auto_place" name="mode" value="auto_place">
+                        <label for="auto_place">Automatically place preset</label>
+                        <br/><br/>
+                        <input type="submit" value="Slice"/>
+                    </form>
+                </body>
+            </html>
+        """
 
 if __name__ == "__main__":
     print("Starting webserver")
