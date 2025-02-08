@@ -54,6 +54,11 @@
                         event.preventDefault(); // Prevent the default form submission
 
                         const formData = new FormData(form);
+
+                        // Collect regions data from WaveSurfer
+                        const regionsArray = Object.values(wavesurfer.regions.list).map(region => ({ start: region.start, end: region.end }));
+                        formData.append('regions', JSON.stringify(regionsArray));
+
                         const url = `/${tabName.toLowerCase()}`;
                         const method = form.method.toUpperCase();
 
@@ -129,9 +134,6 @@
                     // Whenever the user finishes resizing a region,
                     // force them to remain contiguous (no overlap/gap).
                     wavesurfer.on('region-update-end', keepRegionsContiguous);
-
-                    // Store this instance on the waveform element
-                    waveform.waveSurferInstance = wavesurfer;
                 }
 
                 // Listen for changes in num_slices input to recalc slices
