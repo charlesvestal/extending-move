@@ -7,8 +7,9 @@ The code in this repository will run an additional webserver alongside the offic
 ## Current Features
 
 - Create a choke kit from an uploaded .WAV file of up to 16 slices
-    - Downloadable as an `.ablpresetbundle`
-    - Or placed directly on your device
+    - Choose the slice points for each drum pad
+    - Download the preset as an `.ablpresetbundle`
+    - Or have it generated directly on your device
 - Manually refresh your Move's library (useful when making manual changes to files)
 
 ## Installation
