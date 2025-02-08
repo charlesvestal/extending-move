@@ -237,7 +237,7 @@ class MyServer(BaseHTTPRequestHandler):
                         <input type="radio" id="auto_place" name="mode" value="auto_place">
                         <label for="auto_place">Automatically place preset</label>
                         <br/><br/>
-                        <input type="submit" name="action" value="slice"/>
+                        <input type="submit" value="Slice"/>
                     </form>
                     <hr/>
                     <form method="post">
