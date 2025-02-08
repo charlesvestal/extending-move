@@ -2,8 +2,6 @@
     <head>
         <title>Slice Kit</title>
         <link rel="stylesheet" href="/style.css">
-        <!-- Include WaveSurfer.js from CDN -->
-        <script src="https://unpkg.com/wavesurfer.js"></script>
     </head>
     <body>
         <h2>Choose a WAV file to slice into a Choke Kit</h2>
@@ -23,24 +21,5 @@
         
         <!-- Waveform container -->
         <div id="waveform" style="width: 100%; height: 128px;"></div>
-        
-        <script>
-            // Initialize WaveSurfer
-            const wavesurfer = WaveSurfer.create({
-                container: '#waveform',
-                waveColor: 'violet',
-                progressColor: 'purple',
-                height: 128,
-                responsive: true,
-            });
-
-            // Load waveform when a file is selected
-            document.getElementById('file').addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (file) {
-                    wavesurfer.loadBlob(file);
-                }
-            });
-        </script>
     </body>
 </html>

@@ -2,6 +2,8 @@
     <head>
         <title>Move - Extended</title>
         <link rel="stylesheet" href="/style.css">
+        <!-- Include WaveSurfer.js from CDN -->
+        <script src="https://unpkg.com/wavesurfer.js"></script>
         <script>
             function openTab(evt, tabName) {
                 var i, tabcontent, tablinks;
@@ -19,6 +21,9 @@
                 // Dynamically load the content
                 fetchContent(tabName).then(() => {
                     attachFormHandler(tabName);
+                    if (tabName === 'Slice') {
+                        initializeWaveform();
+                    }
                 });
             }
 
@@ -74,11 +79,41 @@
 
                                 // Re-attach the form handler in case of multiple submissions
                                 attachFormHandler(tabName);
+                                if (tabName === 'Slice') {
+                                    initializeWaveform();
+                                }
                             }
                         } catch (error) {
                             document.getElementById(tabName).innerHTML = `<p style="color: red;">Error submitting form: ${error}</p>`;
                         }
                     });
+                }
+            }
+
+            // Initialize WaveSurfer
+            function initializeWaveform() {
+                const waveform = document.getElementById('waveform');
+                if (waveform && !waveform.waveSurferInstance) {
+                    const wavesurfer = WaveSurfer.create({
+                        container: '#waveform',
+                        waveColor: 'violet',
+                        progressColor: 'purple',
+                        height: 128,
+                        responsive: true,
+                    });
+
+                    // Load waveform when a file is selected
+                    const fileInput = document.getElementById('file');
+                    if (fileInput) {
+                        fileInput.addEventListener('change', function(e) {
+                            const file = e.target.files[0];
+                            if (file) {
+                                wavesurfer.loadBlob(file);
+                            }
+                        });
+                    }
+
+                    waveform.waveSurferInstance = wavesurfer;
                 }
             }
 
