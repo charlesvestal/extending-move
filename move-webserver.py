@@ -44,13 +44,8 @@ class MyServer(BaseHTTPRequestHandler):
                     template = f.read()
                 # Generate the <option> tags for the select dropdown
                 options = ''.join([f'<option value="{file}">{file}</option>' for file in wav_files])
-                # Replace the {% for %} loop and {{ file }} placeholders with the generated options
-                html_content = template.replace("{% for file in wav_files %}", "").replace("{% endfor %}", "")
-                html_content = html_content.replace("{{ file }}", "").replace("{message_html}", "")
-                # Insert the options into the <select> element
-                # Assuming the placeholder for options is now the empty space where the loop was
-                # If there's a specific placeholder like {{ options }}, replace it accordingly
-                html_content = html_content.replace("", options, 1)  # Replace the first empty string with options
+                # Replace the {{ options }} placeholder with the generated options
+                html_content = template.replace("{{ options }}", options).replace("{message_html}", "")
                 self.wfile.write(bytes(html_content, "utf-8"))
             except Exception as e:
                 error_message = f"Error rendering reverse.html: {e}"
