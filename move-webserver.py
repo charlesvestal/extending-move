@@ -21,13 +21,15 @@ class MyServer(BaseHTTPRequestHandler):
             self.send_header("Content-type", "text/html")
             self.end_headers()
             with open(os.path.join("templates", "slice.html"), "r") as f:
-                self.wfile.write(bytes(f.read(), "utf-8"))
+                html_content = f.read().replace("{message_html}", "")
+                self.wfile.write(bytes(html_content, "utf-8"))
         elif self.path == "/refresh":
             self.send_response(200)
             self.send_header("Content-type", "text/html")
             self.end_headers()
             with open(os.path.join("templates", "refresh.html"), "r") as f:
-                self.wfile.write(bytes(f.read(), "utf-8"))
+                html_content = f.read().replace("{message_html}", "")
+                self.wfile.write(bytes(html_content, "utf-8"))
         else:
             self.send_response(404)
             self.end_headers()
