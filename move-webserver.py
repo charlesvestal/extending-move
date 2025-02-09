@@ -8,6 +8,8 @@ from kit_handler import process_kit
 from refresh_handler import refresh_library
 from reverse_handler import get_wav_files, reverse_wav_file
 
+BASE_SAMPLES_DIR = "/data/UserData/UserLibrary/Samples"
+
 hostName = "0.0.0.0"
 serverPort = 666
 
@@ -37,7 +39,7 @@ class MyServer(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header("Content-type", "text/html")
             self.end_headers()
-            wav_files = get_wav_files()
+            wav_files = get_wav_files(directory=BASE_SAMPLES_DIR)
             print(f"WAV files found: {wav_files}")  # Debugging statement
             # Render reverse.html with the list of wav_files
             try:
@@ -250,15 +252,23 @@ class MyServer(BaseHTTPRequestHandler):
                         self.respond_with_form(self.path, message, message_type)
                         return
 
-                    # Path is fixed to /data/UserData/UserLibrary/Samples
-                    directory = "/data/UserData/UserLibrary/Samples"
+                    directory = BASE_SAMPLES_DIR
                     if not os.path.isdir(directory):
                         message = f"Server Error: Directory does not exist: {directory}"
                         message_type = "error"
                         self.respond_with_form(self.path, message, message_type)
                         return
 
-                    success, msg = reverse_wav_file(wav_file, directory=directory)
+                    # Verify the file exists within BASE_SAMPLES_DIR
+                    file_path = os.path.join(directory, wav_file)
+                    if not os.path.isfile(file_path):
+                        message = f"Server Error: File does not exist: {wav_file}"
+                        message_type = "error"
+                        self.respond_with_form(self.path, message, message_type)
+                        return
+
+                    # Call reverse_wav_file with relative filename and directory
+                    success, msg = reverse_wav_file(filename=wav_file, directory=directory)
                     if success:
                         message = msg
                         message_type = "success"

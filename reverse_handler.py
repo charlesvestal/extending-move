@@ -1,21 +1,23 @@
 import os
 import wave
 import numpy as np
+
 from refresh_handler import refresh_library
 
-def get_wav_files(directory="/data/UserData/UserLibrary/Samples"):
+def get_wav_files(directory):
     """
     Retrieves a list of WAV files from the specified directory.
     """
-    if not os.path.isdir(directory):
-        print(f"Directory does not exist: {directory}")
-        return []
-    
-    wav_files = [f for f in os.listdir(directory) if f.lower().endswith('.wav') and os.path.isfile(os.path.join(directory, f))]
-    print(f"WAV files found in {directory}: {wav_files}")  # Debugging statement
+    wav_files = []
+    for root, _, files in os.walk(directory):
+        for file in files:
+            if file.lower().endswith('.wav'):
+                relative_path = os.path.relpath(os.path.join(root, file), directory)
+                wav_files.append(relative_path)
+    print(f"Recursively found WAV files: {wav_files}")  # Debugging statement
     return wav_files
 
-def reverse_wav_file(filename, directory="/data/UserData/UserLibrary/Samples"):
+def reverse_wav_file(filename, directory):
     """
     Reverses the WAV file specified by filename in the given directory.
     Creates a new file with the suffix '_reverse.wav'.
