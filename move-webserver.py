@@ -258,7 +258,15 @@ class MyServer(BaseHTTPRequestHandler):
                         self.respond_with_form(self.path, message, message_type)
                         return
 
-                    success, msg = reverse_wav_file(wav_file, directory=directory)
+                    # Construct the full path by joining the base directory with the relative path
+                    full_path = os.path.join(directory, wav_file)
+                    if not os.path.isfile(full_path):
+                        message = f"Server Error: File does not exist: {wav_file}"
+                        message_type = "error"
+                        self.respond_with_form(self.path, message, message_type)
+                        return
+
+                    success, msg = reverse_wav_file(full_path, directory=directory)
                     if success:
                         message = msg
                         message_type = "success"
