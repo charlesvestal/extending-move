@@ -35,3 +35,6 @@ echo "Copying working files (excluding ignored and Git history) to ${REMOTE_USER
     ssh "${REMOTE_USER}@${REMOTE_HOST}" "tar -xz -C '${REMOTE_DIR}'"
 
 echo "Files copied successfully."
+
+# Restart the webserver
+sh restart-webserver.sh
