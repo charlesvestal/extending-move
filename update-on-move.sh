@@ -29,7 +29,13 @@ fi
 
 echo "Copying working files (excluding ignored and Git history) to ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}..."
 # Create a tar archive of the files (using null-delimited file names) and stream it via SSH.
+# Filter out the specified files using grep -z.
 ( git ls-files -z && git ls-files --others --exclude-standard -z ) | \
+    grep -z -v -e '^install-on-move\.command$' \
+                -e '^install-on-move\.sh$' \
+                -e '^restart-webserver\.sh$' \
+                -e '^update-on-move\.command$' \
+                -e '^update-on-move\.sh$' | \
     tar --null -T - -czf - | \
     ssh "${REMOTE_USER}@${REMOTE_HOST}" "tar -xz -C '${REMOTE_DIR}'"
 
