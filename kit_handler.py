@@ -398,10 +398,10 @@ def process_kit(input_wav, preset_name=None, regions=None, num_slices=None, keep
             # Refresh the library after automatic placement
             refresh_success, refresh_message = refresh_library()
             if refresh_success:
-                combined_message = "Preset automatically placed successfully. " + refresh_message
+                combined_message = f"Preset {preset} automatically placed successfully. " + refresh_message
                 combined_message_type = "success"
             else:
-                combined_message = f"Preset automatically placed successfully, but failed to refresh library: {refresh_message}"
+                combined_message = f"Preset {preset} automatically placed successfully, but failed to refresh library: {refresh_message}"
                 combined_message_type = "error"
 
             return {'success': True, 'message': combined_message}
