@@ -58,13 +58,13 @@ def generate_wav_options(directory):
 
 def inspect_drum_racks(directory):
     """
-    Inspects all JSON files in the specified directory and returns a list of filenames
+    Inspects all JSON and .ablpreset files in the specified directory and returns a list of filenames
     that contain a drumRack.
     """
     drum_rack_files = []
     for root, _, files in os.walk(directory):
         for file in files:
-            if file.lower().endswith('.json'):
+            if file.lower().endswith(('.json', '.ablpreset')):
                 filepath = os.path.join(root, file)
                 try:
                     with open(filepath, 'r') as f:
@@ -122,7 +122,7 @@ class MyServer(BaseHTTPRequestHandler):
                 drum_rack_files = inspect_drum_racks(TRACK_PRESETS_DIR)
                 with open(os.path.join("templates", "drum_rack_inspector.html"), "r") as f:
                     template = f.read()
-                files_html = ''.join([f'<li>{file}</li>' for file in drum_rack_files]) if drum_rack_files else '<li>没有找到包含 drumRack 的 JSON 文件。</li>'
+                files_html = ''.join([f'<li>{file}</li>' for file in drum_rack_files]) if drum_rack_files else '<li>没有找到包含 drumRack 的 JSON 或 .ablpreset 文件。</li>'
                 html_content = template.replace("{{ drum_rack_files }}", files_html).replace("{message_html}", "")
                 self.wfile.write(bytes(html_content, "utf-8"))
             except Exception as e:
