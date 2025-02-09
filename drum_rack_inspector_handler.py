@@ -6,15 +6,40 @@ TRACK_PRESETS_DIR = "/data/UserData/UserLibrary/Track Presets"
 
 def inspect_drum_racks(directory):
     """
-    Returns a list of relative file paths to all .ablpreset files in the specified directory.
+    Returns a list of relative file paths to all .ablpreset files containing a drumRack in the specified directory.
     """
     ablpreset_files = []
     for root, _, files in os.walk(directory):
         for file in files:
             if file.lower().endswith('.ablpreset'):
-                filepath = os.path.relpath(os.path.join(root, file), directory)
-                ablpreset_files.append(filepath)
+                filepath = os.path.join(root, file)
+                try:
+                    with open(filepath, 'r') as f:
+                        data = json.load(f)
+                    if contains_drum_rack(data):
+                        relative_path = os.path.relpath(filepath, directory)
+                        ablpreset_files.append(relative_path)
+                except json.JSONDecodeError:
+                    print(f"Invalid JSON in file: {filepath}")
+                except Exception as e:
+                    print(f"Error reading file {filepath}: {e}")
     return ablpreset_files
+
+def contains_drum_rack(data):
+    """
+    Checks if the JSON data contains a drumRack.
+    """
+    if isinstance(data, dict):
+        if data.get('kind') == 'drumRack':
+            return True
+        for value in data.values():
+            if isinstance(value, (dict, list)) and contains_drum_rack(value):
+                return True
+    elif isinstance(data, list):
+        for item in data:
+            if contains_drum_rack(item):
+                return True
+    return False
 
 def extract_sample_uris(data):
     """
