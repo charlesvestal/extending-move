@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # Move extra tools
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import os
@@ -8,7 +9,40 @@ from kit_handler import process_kit
 from refresh_handler import refresh_library
 from reverse_handler import get_wav_files, reverse_wav_file
 
+# Additional imports for PID management
+import atexit
+import signal
+import sys
+import time
+
 BASE_SAMPLES_DIR = "/data/UserData/UserLibrary/Samples"
+
+# Define the PID file location.
+PID_FILE = os.path.expanduser('~/extending-move/move-webserver.pid')
+
+def write_pid():
+    """Write the current process PID to the PID_FILE."""
+    pid = os.getpid()
+    try:
+        with open(PID_FILE, 'w') as f:
+            f.write(str(pid))
+        print(f"PID {pid} written to {PID_FILE}")
+    except Exception as e:
+        print(f"Error writing PID file: {e}")
+
+def remove_pid():
+    """Remove the PID file."""
+    try:
+        if os.path.exists(PID_FILE):
+            os.remove(PID_FILE)
+            print(f"PID file {PID_FILE} removed.")
+    except Exception as e:
+        print(f"Error removing PID file: {e}")
+
+def handle_exit(signum, frame):
+    """Handle termination signals gracefully."""
+    print(f"Received signal {signum}, exiting gracefully.")
+    sys.exit(0)
 
 hostName = "0.0.0.0"
 serverPort = 666
@@ -326,6 +360,13 @@ class MyServer(BaseHTTPRequestHandler):
         self.wfile.write(bytes(html_content, "utf-8"))
 
 if __name__ == "__main__":
+    # Write the PID file and register its removal on exit.
+    write_pid()
+    atexit.register(remove_pid)
+    # Handle SIGTERM and SIGINT to ensure graceful shutdown.
+    signal.signal(signal.SIGTERM, handle_exit)
+    signal.signal(signal.SIGINT, handle_exit)
+    
     print("Starting webserver")
     webServer = HTTPServer((hostName, serverPort), MyServer)
     print(f"Server started http://{hostName}:{serverPort}")
