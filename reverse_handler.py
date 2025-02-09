@@ -3,6 +3,7 @@ import wave
 import numpy as np
 
 BASE_SAMPLES_DIR = "/data/UserData/UserLibrary/Samples"
+
 from refresh_handler import refresh_library
 
 def get_wav_files(directory=BASE_SAMPLES_DIR):

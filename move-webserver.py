@@ -251,7 +251,7 @@ class MyServer(BaseHTTPRequestHandler):
                         return
 
                     # Path is fixed to /data/UserData/UserLibrary/Samples
-                    directory = "/data/UserData/UserLibrary/Samples"
+                    directory = "/Users/charlesvestal/Documents/GitHub/extending-move/"
                     if not os.path.isdir(directory):
                         message = f"Server Error: Directory does not exist: {directory}"
                         message_type = "error"
