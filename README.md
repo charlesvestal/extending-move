@@ -18,14 +18,22 @@ The code in this repository will run an additional webserver alongside the offic
 
 ## Installation
 
-### Requirements
+This project includes a number of scripts to aid in installation and updating these tools:
+
+`install-on-move.sh` can be executed to perform the "Manual Installation" steps below.
+`updated-on-move.sh` will copy the files from the current directory and restart the webserver on your Move.
+`restart-webserver.sh` will restart the webserver on your Move.
+
+NOTE: these scripts should be executed from a computer, not your Move itself.
+
+### Manual Installation
 Begin by gaining ssh access to your move: <https://github.com/charlesvestal/extending-move/wiki/00--Accessing-Move>
 
-First, login as root, and install pip using the script at <https://bootstrap.pypa.io/get-pip.py>
+First, login as the ableton user, and install pip using the script at <https://bootstrap.pypa.io/get-pip.py>
 
 `wget https://bootstrap.pypa.io/get-pip.py`
 
-Login as the ableton user. We then need to set the system to use a tmpdir on the larger user partition, as it will run out of space downloading packages if using the root one.
+We then need to set the system to use a tmpdir on the larger user partition, as it will run out of space downloading packages if using the root one.
 
 ```
 mkdir -p ~/tmp
