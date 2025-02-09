@@ -5,9 +5,11 @@ import os
 import json
 import shutil
 import cgi
+from collections import deque
 from kit_handler import process_kit
 from refresh_handler import refresh_library
 from reverse_handler import get_wav_files, reverse_wav_file
+from drum_rack_inspector_handler import inspect_drum_racks
 
 # Additional imports for PID management
 import atexit
@@ -56,26 +58,6 @@ def generate_wav_options(directory):
     options_html = ''.join([f'<option value="{file}">{file}</option>' for file in wav_files])
     return options_html
 
-def inspect_drum_racks(directory):
-    """
-    Inspects all JSON and .ablpreset files in the specified directory and returns a list of filenames
-    that contain a drumRack.
-    """
-    drum_rack_files = []
-    for root, _, files in os.walk(directory):
-        for file in files:
-            if file.lower().endswith(('.json', '.ablpreset')):
-                filepath = os.path.join(root, file)
-                try:
-                    with open(filepath, 'r') as f:
-                        data = json.load(f)
-                        if "drumRack" in json.dumps(data):
-                            drum_rack_files.append(os.path.relpath(filepath, directory))
-                except json.JSONDecodeError:
-                    print(f"Invalid JSON in file: {filepath}")
-                except Exception as e:
-                    print(f"Error reading file {filepath}: {e}")
-    return drum_rack_files
 
 class MyServer(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -122,7 +104,15 @@ class MyServer(BaseHTTPRequestHandler):
                 drum_rack_files = inspect_drum_racks(TRACK_PRESETS_DIR)
                 with open(os.path.join("templates", "drum_rack_inspector.html"), "r") as f:
                     template = f.read()
-                files_html = ''.join([f'<li>{file}</li>' for file in drum_rack_files]) if drum_rack_files else '<li>没有找到包含 drumRack 的 JSON 或 .ablpreset 文件。</li>'
+                files_html = ''
+                for item in drum_rack_files:
+                    file = item['file']
+                    sample_uris = item['sample_uris']
+                    sample_list = ''.join([f'<li>{uri}</li>' for uri in sample_uris])
+                    files_html += f'<h3>{file}</h3><ul>{sample_list}</ul>'
+
+                if not files_html:
+                    files_html = '<p>No drum racks with sampleUris found.</p>'
                 html_content = template.replace("{{ drum_rack_files }}", files_html).replace("{message_html}", "")
                 self.wfile.write(bytes(html_content, "utf-8"))
             except Exception as e:
