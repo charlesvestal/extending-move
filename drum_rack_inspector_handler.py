@@ -1,6 +1,8 @@
 import os
 import json
 from collections import deque
+from reverse_handler import reverse_wav_file
+from refresh_handler import refresh_library
 
 TRACK_PRESETS_DIR = "/data/UserData/UserLibrary/Track Presets"
 
@@ -78,3 +80,69 @@ def inspect_drum_rack_file(directory, relative_file_path):
     except Exception as e:
         print(f"Error reading file {filepath}: {e}")
         return []
+def reverse_sample_and_update_preset(directory, preset_relative_path, sample_uri):
+    """
+    Reverses the sample file specified by sample_uri,
+    updates the preset file to point to the reversed sample,
+    and refreshes the library.
+    Returns (success: bool, message: str)
+    """
+    sample_directory = "/data/UserData/UserLibrary/Samples"
+    preset_filepath = os.path.join(directory, preset_relative_path)
+
+    # Extract the relative path of the sample file from the sample_uri
+    sample_file_relative = sample_uri.replace("UserLibrary:", "").lstrip("/")
+
+    # Reverse the sample
+    success, message = reverse_wav_file(sample_file_relative, sample_directory)
+    if not success:
+        return False, message
+
+    # Create the new sample URI for the reversed file
+    base, ext = os.path.splitext(sample_file_relative)
+    reversed_sample_relative = f"{base}_reverse{ext}"
+    new_sample_uri = "UserLibrary:" + reversed_sample_relative
+
+    # Update the preset file to point to the reversed sample
+    try:
+        with open(preset_filepath, 'r') as f:
+            data = json.load(f)
+
+        updated = update_sample_uri_in_preset(data, sample_uri, new_sample_uri)
+        if not updated:
+            return False, "Sample URI not found in preset."
+
+        # Write the updated preset data back to the file
+        with open(preset_filepath, 'w') as f:
+            json.dump(data, f)
+
+        # Refresh the library
+        refresh_success, refresh_message = refresh_library()
+        if refresh_success:
+            return True, "Sample reversed and preset updated successfully. Library refreshed."
+        else:
+            return False, f"Sample reversed and preset updated. Library refresh failed: {refresh_message}"
+    except Exception as e:
+        print(f"Error updating preset {preset_filepath}: {e}")
+        return False, f"Error updating preset: {e}"
+
+def update_sample_uri_in_preset(data, old_uri, new_uri):
+    """
+    Recursively updates the sampleUri in the preset data from old_uri to new_uri.
+    Returns True if updated, False otherwise.
+    """
+    if isinstance(data, dict):
+        if 'sampleUri' in data and data['sampleUri'] == old_uri:
+            data['sampleUri'] = new_uri
+            return True
+        for value in data.values():
+            if isinstance(value, (dict, list)):
+                updated = update_sample_uri_in_preset(value, old_uri, new_uri)
+                if updated:
+                    return True
+    elif isinstance(data, list):
+        for item in data:
+            updated = update_sample_uri_in_preset(item, old_uri, new_uri)
+            if updated:
+                return True
+    return False

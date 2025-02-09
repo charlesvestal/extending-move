@@ -14,6 +14,7 @@ from jinja2 import Template  # Ensure Jinja2 is installed: pip install Jinja2
 from drum_rack_inspector_handler import (
     inspect_drum_racks,
     inspect_drum_rack_file,
+    reverse_sample_and_update_preset
 )
 
 # Additional imports for PID management
@@ -146,7 +147,55 @@ class MyServer(BaseHTTPRequestHandler):
             self.wfile.write(bytes("404 Not Found", "utf-8"))
 
     def do_POST(self):
-        if self.path in ["/slice", "/refresh", "/reverse"]:
+        if self.path == '/drum_rack_inspector':
+            content_type = self.headers.get('Content-Type')
+            if content_type == 'application/x-www-form-urlencoded':
+                length = int(self.headers.get('Content-Length'))
+                post_data = self.rfile.read(length)
+                params = parse_qs(post_data.decode('utf-8'))
+
+                action = params.get('action', [None])[0]
+                if action == 'reverse_sample':
+                    selected_file = params.get('selected_file', [None])[0]
+                    uri = params.get('uri', [None])[0]
+
+                    # Define the directory where presets are stored
+                    presets_directory = "/data/UserData/UserLibrary/Track Presets"
+
+                    # Call the function to reverse the sample and update the preset
+                    success, message = reverse_sample_and_update_preset(
+                        presets_directory, selected_file, uri
+                    )
+
+                    # Prepare the message to be displayed on the page
+                    message_html = f'<p class="{"success" if success else "error"}">{message}</p>'
+
+                    # Re-inspect the preset to get updated sample URIs
+                    sample_uris = inspect_drum_rack_file(presets_directory, selected_file)
+
+                    # Render the template
+                    template_path = os.path.join("templates", "drum_rack_inspector.html")
+                    with open(template_path, "r") as f:
+                        template_content = f.read()
+                    template = Template(template_content)
+                    html_content = template.render(
+                        message_html=message_html,
+                        sample_uris=sample_uris,
+                        selected_file=selected_file,
+                        ablpreset_files=None
+                    )
+
+                    # Send response
+                    self.send_response(200)
+                    self.send_header("Content-type", "text/html")
+                    self.end_headers()
+                    self.wfile.write(bytes(html_content, "utf-8"))
+                else:
+                    # Handle other actions or send an error
+                    self.send_error(400, "Invalid action")
+            else:
+                self.send_error(400, "Unsupported content type")
+        elif self.path in ["/slice", "/refresh", "/reverse"]:
             content_type = self.headers.get('Content-Type')
             if not content_type:
                 self.send_response(400)

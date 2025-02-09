@@ -10,7 +10,15 @@
             <h3>Sample URIs for {{ selected_file }}:</h3>
             <ul>
                 {% for uri in sample_uris %}
-                    <li>{{ uri }}</li>
+                    <li>
+                        {{ uri }}
+                        <form method="post" action="/drum_rack_inspector">
+                            <input type="hidden" name="action" value="reverse_sample">
+                            <input type="hidden" name="selected_file" value="{{ selected_file }}">
+                            <input type="hidden" name="uri" value="{{ uri }}">
+                            <button type="submit">Reverse Sample</button>
+                        </form>
+                    </li>
                 {% endfor %}
             </ul>
         {% else %}
