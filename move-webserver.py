@@ -13,6 +13,14 @@ BASE_SAMPLES_DIR = "/data/UserData/UserLibrary/Samples"
 hostName = "0.0.0.0"
 serverPort = 666
 
+def generate_wav_options(directory):
+    """
+    Generates HTML <option> elements for each WAV file in the directory.
+    """
+    wav_files = get_wav_files(directory)
+    options_html = ''.join([f'<option value="{file}">{file}</option>' for file in wav_files])
+    return options_html
+
 class MyServer(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == "/":
@@ -39,16 +47,11 @@ class MyServer(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header("Content-type", "text/html")
             self.end_headers()
-            wav_files = get_wav_files(directory=BASE_SAMPLES_DIR)
-            print(f"WAV files found: {wav_files}")  # Debugging statement
-            # Render reverse.html with the list of wav_files
             try:
                 with open(os.path.join("templates", "reverse.html"), "r") as f:
                     template = f.read()
-                # Generate the <option> tags for the select dropdown
-                options = ''.join([f'<option value="{file}">{file}</option>' for file in wav_files])
-                # Replace the {{ options }} placeholder with the generated options
-                html_content = template.replace("{{ options }}", options).replace("{message_html}", "")
+                options_html = generate_wav_options(BASE_SAMPLES_DIR)
+                html_content = template.replace("{{ options }}", options_html).replace("{message_html}", "")
                 self.wfile.write(bytes(html_content, "utf-8"))
             except Exception as e:
                 error_message = f"Error rendering reverse.html: {e}"
@@ -252,31 +255,19 @@ class MyServer(BaseHTTPRequestHandler):
                         self.respond_with_form(self.path, message, message_type)
                         return
 
-                    directory = BASE_SAMPLES_DIR
-                    if not os.path.isdir(directory):
-                        message = f"Server Error: Directory does not exist: {directory}"
-                        message_type = "error"
-                        self.respond_with_form(self.path, message, message_type)
-                        return
+                    success, msg = reverse_wav_file(filename=wav_file, directory=BASE_SAMPLES_DIR)
+                    message = msg
+                    message_type = "success" if success else "error"
 
-                    # Verify the file exists within BASE_SAMPLES_DIR
-                    file_path = os.path.join(directory, wav_file)
-                    if not os.path.isfile(file_path):
-                        message = f"Server Error: File does not exist: {wav_file}"
-                        message_type = "error"
-                        self.respond_with_form(self.path, message, message_type)
-                        return
-
-                    # Call reverse_wav_file with relative filename and directory
-                    success, msg = reverse_wav_file(filename=wav_file, directory=directory)
-                    if success:
-                        message = msg
-                        message_type = "success"
-                    else:
-                        message = msg
-                        message_type = "error"
-
-                    self.respond_with_form(self.path, message, message_type)
+                    options_html = generate_wav_options(BASE_SAMPLES_DIR)
+                    with open(os.path.join("templates", "reverse.html"), "r") as f:
+                        template = f.read()
+                    message_html = f'<p class="{message_type}">{message}</p>'
+                    html_content = template.replace("{{ options }}", options_html).replace("{message_html}", message_html)
+                    self.send_response(200)
+                    self.send_header("Content-type", "text/html")
+                    self.end_headers()
+                    self.wfile.write(bytes(html_content, "utf-8"))
                 except Exception as e:
                     self.respond_with_form(self.path, f"Error processing reverse WAV file: {e}", "error")
 
