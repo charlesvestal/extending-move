@@ -1,4 +1,5 @@
 import os
+import urllib.parse
 import wave
 import numpy as np
 
@@ -23,7 +24,11 @@ def reverse_wav_file(filename, directory):
     Creates a new file with the suffix '_reverse.wav'.
     Returns a tuple (success: bool, message: str).
     """
+    # URL-decode the filename
+    filename = urllib.parse.unquote(filename)
+
     filepath = os.path.join(directory, filename)
+    print(f"Attempting to reverse file: {filepath}")  # For debugging
     
     if not os.path.isfile(filepath):
         return False, f"File does not exist: {filepath}"

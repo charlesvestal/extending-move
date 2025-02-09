@@ -1,5 +1,6 @@
 import os
 import json
+import urllib.parse
 from collections import deque
 from reverse_handler import reverse_wav_file
 from refresh_handler import refresh_library
@@ -87,11 +88,23 @@ def reverse_sample_and_update_preset(directory, preset_relative_path, sample_uri
     and refreshes the library.
     Returns (success: bool, message: str)
     """
-    sample_directory = "/data/UserData/UserLibrary/Samples"
+    import urllib.parse  # Ensure this is added at the top of the file
+
+    # Handle different sample URI prefixes
+    if sample_uri.startswith("UserLibrary:"):
+        sample_file_relative = sample_uri.replace("UserLibrary:", "").lstrip("/")
+        sample_directory = "/data/UserData/UserLibrary/Samples"
+    elif sample_uri.startswith("ableton:/user-library/"):
+        sample_file_relative = sample_uri.replace("ableton:/user-library/", "").lstrip("/")
+        sample_directory = "/data/UserData/UserLibrary"
+    else:
+        # If the sample URI is in an unexpected format, return an error
+        return False, f"Unsupported sample URI format: {sample_uri}"
+
+    # URL-decode the sample file relative path
+    sample_file_relative = urllib.parse.unquote(sample_file_relative)
     preset_filepath = os.path.join(directory, preset_relative_path)
 
-    # Extract the relative path of the sample file from the sample_uri
-    sample_file_relative = sample_uri.replace("UserLibrary:", "").lstrip("/")
 
     # Reverse the sample
     success, message = reverse_wav_file(sample_file_relative, sample_directory)
@@ -101,7 +114,17 @@ def reverse_sample_and_update_preset(directory, preset_relative_path, sample_uri
     # Create the new sample URI for the reversed file
     base, ext = os.path.splitext(sample_file_relative)
     reversed_sample_relative = f"{base}_reverse{ext}"
-    new_sample_uri = "UserLibrary:" + reversed_sample_relative
+    # URL-encode the reversed sample relative path for the URI
+    reversed_sample_relative_encoded = urllib.parse.quote(reversed_sample_relative)
+
+    # Construct the new sample URI using the same prefix as the original
+    if sample_uri.startswith("UserLibrary:"):
+        new_sample_uri = "UserLibrary:" + reversed_sample_relative_encoded
+    elif sample_uri.startswith("ableton:/user-library/"):
+        new_sample_uri = "ableton:/user-library/" + reversed_sample_relative_encoded
+    else:
+        # Should not reach here, but include for completeness
+        return False, f"Unsupported sample URI format: {sample_uri}"
 
     # Update the preset file to point to the reversed sample
     try:
