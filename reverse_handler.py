@@ -1,9 +1,11 @@
 import os
 import wave
 import numpy as np
+
+BASE_SAMPLES_DIR = "/data/UserData/UserLibrary/Samples"
 from refresh_handler import refresh_library
 
-def get_wav_files(directory="/data/UserData/UserLibrary/Samples"):
+def get_wav_files(directory=BASE_SAMPLES_DIR):
     """
     Retrieves a list of WAV files from the specified directory.
     """
@@ -16,7 +18,7 @@ def get_wav_files(directory="/data/UserData/UserLibrary/Samples"):
     print(f"Recursively found WAV files: {wav_files}")  # Debugging statement
     return wav_files
 
-def reverse_wav_file(filename, directory="/data/UserData/UserLibrary/Samples"):
+def reverse_wav_file(filename, directory=BASE_SAMPLES_DIR):
     """
     Reverses the WAV file specified by filename in the given directory.
     Creates a new file with the suffix '_reverse.wav'.
