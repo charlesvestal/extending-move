@@ -6,29 +6,15 @@ TRACK_PRESETS_DIR = "/data/UserData/UserLibrary/Track Presets"
 
 def inspect_drum_racks(directory):
     """
-    Inspects all JSON and .ablpreset files in the specified directory and extracts sampleUris from drumCells.
-    Returns a list of dictionaries containing file paths and corresponding sampleUris.
+    Returns a list of relative file paths to all .ablpreset files in the specified directory.
     """
-    drum_rack_files = []
+    ablpreset_files = []
     for root, _, files in os.walk(directory):
         for file in files:
-            if file.lower().endswith(('.json', '.ablpreset')):
-                filepath = os.path.join(root, file)
-                try:
-                    with open(filepath, 'r') as f:
-                        data = json.load(f)
-
-                    sample_uris = extract_sample_uris(data)
-                    if sample_uris:
-                        drum_rack_files.append({
-                            'file': os.path.relpath(filepath, directory),
-                            'sample_uris': sample_uris
-                        })
-                except json.JSONDecodeError:
-                    print(f"Invalid JSON in file: {filepath}")
-                except Exception as e:
-                    print(f"Error reading file {filepath}: {e}")
-    return drum_rack_files
+            if file.lower().endswith('.ablpreset'):
+                filepath = os.path.relpath(os.path.join(root, file), directory)
+                ablpreset_files.append(filepath)
+    return ablpreset_files
 
 def extract_sample_uris(data):
     """
@@ -50,3 +36,19 @@ def extract_sample_uris(data):
         elif isinstance(current, list):
             queue.extend(current)
     return sample_uris
+def inspect_drum_rack_file(directory, relative_file_path):
+    """
+    Extracts sampleUris from the specified .ablpreset file.
+    """
+    filepath = os.path.join(directory, relative_file_path)
+    try:
+        with open(filepath, 'r') as f:
+            data = json.load(f)
+        sample_uris = extract_sample_uris(data)
+        return sample_uris
+    except json.JSONDecodeError:
+        print(f"Invalid JSON in file: {filepath}")
+        return []
+    except Exception as e:
+        print(f"Error reading file {filepath}: {e}")
+        return []

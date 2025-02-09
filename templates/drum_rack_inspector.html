@@ -5,9 +5,21 @@
     </head>
     <body>
         <h2>Drum Rack Inspector</h2>
-        {message_html}
-        <div>
-            {{ drum_rack_files }}
-        </div>
+        {{ message_html }}
+        {% if sample_uris %}
+            <h3>Sample URIs for {{ selected_file }}:</h3>
+            <ul>
+                {% for uri in sample_uris %}
+                    <li>{{ uri }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <h3>Select a Drum Rack preset:</h3>
+            <ul>
+                {% for file in ablpreset_files %}
+                    <li><a href="/drum_rack_inspector?file={{ file }}">{{ file }}</a></li>
+                {% endfor %}
+            </ul>
+        {% endif %}
     </body>
 </html>
