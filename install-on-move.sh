@@ -8,10 +8,10 @@ echo "**************************************************************"
 echo "*                                                            *"
 echo "*   WARNING:                                                 *"
 echo "*                                                            *"
-echo "*   Are you sure you want to install the extending-move      *"
-echo "*   packages on your Move? This is UNSUPPORTED by Ableton    *"
+echo "*   Are you sure you want to install the extend-move         *"
+echo "*   packages on your Move? This is UNSUPPORTED by Ableton      *"
 echo "*   and may cause irreparable damage to your device.         *"
-echo "*   The authors of these packages accept no liability for    *"
+echo "*   The authors of these packages accept no liability for      *"
 echo "*   any damage you incur by proceeding.                      *"
 echo "*                                                            *"
 echo "**************************************************************"
@@ -31,26 +31,42 @@ echo "Running remote setup commands on ${REMOTE_HOST} as ${REMOTE_USER}..."
 
 ssh "${REMOTE_USER}@${REMOTE_HOST}" bash <<'EOF'
 set -euo pipefail
-# Create the temporary directory and set TMPDIR
+
+# Create the temporary directory and set TMPDIR.
 echo "Creating /data/UserData/tmp and setting TMPDIR..."
 mkdir -p /data/UserData/tmp
 export TMPDIR=/data/UserData/tmp
 echo "TMPDIR is set to: $TMPDIR"
 
-# Change to /data/UserData where we want to download get-pip.py
+# Change to /data/UserData where we want to download get-pip.py.
 cd /data/UserData
 
 # Download get-pip.py using wget, overwriting if it exists.
 echo "Downloading get-pip.py..."
 wget -q -O get-pip.py https://bootstrap.pypa.io/get-pip.py
 
-# Execute get-pip.py with python3 to install pip
+# Ensure that ~/.bash_profile sources ~/.bashrc so that Bash settings persist on login.
+if ! grep -q "\.bashrc" ~/.bash_profile; then
+    echo 'if [ -f ~/.bashrc ]; then . ~/.bashrc; fi' >> ~/.bash_profile
+fi
+
+# Add /data/UserData/.local/bin to PATH for this session.
+export PATH="/data/UserData/.local/bin:$PATH"
+
+# Persist the PATH update in ~/.bashrc if it's not already present.
+if ! grep -q "/data/UserData/.local/bin" ~/.bashrc; then
+    echo 'export PATH="/data/UserData/.local/bin:$PATH"' >> ~/.bashrc
+fi
+
+# Execute get-pip.py with python3 to install pip.
 echo "Executing get-pip.py..."
 python3 /data/UserData/get-pip.py
 
-# Install scipy using pip (without using the cache)
+# Install scipy using pip (without using the cache).
 echo "Installing scipy with pip..."
 pip install --no-cache-dir scipy
+
+echo "Remote setup complete."
 EOF
 
 echo "Remote setup finished."
