@@ -9,7 +9,12 @@ from collections import deque
 from kit_handler import process_kit
 from refresh_handler import refresh_library
 from reverse_handler import get_wav_files, reverse_wav_file
-from drum_rack_inspector_handler import inspect_drum_racks
+from urllib.parse import urlparse, parse_qs
+from jinja2 import Template  # Ensure Jinja2 is installed: pip install Jinja2
+from drum_rack_inspector_handler import (
+    inspect_drum_racks,
+    inspect_drum_rack_file,
+)
 
 # Additional imports for PID management
 import atexit
@@ -96,30 +101,39 @@ class MyServer(BaseHTTPRequestHandler):
                 self.send_response(500)
                 self.end_headers()
                 self.wfile.write(bytes(f"<html><body><p style='color: red;'>{error_message}</p></body></html>", "utf-8"))
-        elif self.path == "/drum_rack_inspector":
+        elif self.path.startswith("/drum_rack_inspector"):
+            parsed_path = urlparse(self.path)
+            params = parse_qs(parsed_path.query)
+            template_path = os.path.join("templates", "drum_rack_inspector.html")
+
+            if 'file' in params:
+                selected_file = params['file'][0]
+                sample_uris = inspect_drum_rack_file(TRACK_PRESETS_DIR, selected_file)
+                with open(template_path, "r") as f:
+                    template = Template(f.read())
+                message_html = ""  # Add any messages if needed
+                html_content = template.render(
+                    message_html=message_html,
+                    sample_uris=sample_uris,
+                    selected_file=selected_file,
+                    ablpreset_files=None  # Not needed in this context
+                )
+            else:
+                ablpreset_files = inspect_drum_racks(TRACK_PRESETS_DIR)
+                with open(template_path, "r") as f:
+                    template = Template(f.read())
+                message_html = ""  # Add any messages if needed
+                html_content = template.render(
+                    message_html=message_html,
+                    sample_uris=None,
+                    selected_file=None,
+                    ablpreset_files=ablpreset_files
+                )
+
             self.send_response(200)
             self.send_header("Content-type", "text/html")
             self.end_headers()
-            try:
-                drum_rack_files = inspect_drum_racks(TRACK_PRESETS_DIR)
-                with open(os.path.join("templates", "drum_rack_inspector.html"), "r") as f:
-                    template = f.read()
-                files_html = ''
-                for item in drum_rack_files:
-                    file = item['file']
-                    sample_uris = item['sample_uris']
-                    sample_list = ''.join([f'<li>{uri}</li>' for uri in sample_uris])
-                    files_html += f'<h3>{file}</h3><ul>{sample_list}</ul>'
-
-                if not files_html:
-                    files_html = '<p>No drum racks with sampleUris found.</p>'
-                html_content = template.replace("{{ drum_rack_files }}", files_html).replace("{message_html}", "")
-                self.wfile.write(bytes(html_content, "utf-8"))
-            except Exception as e:
-                error_message = f"Error rendering drum_rack_inspector.html: {e}"
-                self.send_response(500)
-                self.end_headers()
-                self.wfile.write(bytes(f"<html><body><p style='color: red;'>{error_message}</p></body></html>", "utf-8"))
+            self.wfile.write(bytes(html_content, "utf-8"))
         elif self.path == "/style.css":
             self.send_response(200)
             self.send_header("Content-type", "text/css")

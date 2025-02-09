@@ -27,7 +27,7 @@ def extract_sample_uris(data):
         if isinstance(current, dict):
             if current.get('kind') == 'drumCell' and 'deviceData' in current:
                 device_data = current['deviceData']
-                if 'sampleUri' in device_data:
+                if isinstance(device_data, dict) and 'sampleUri' in device_data:
                     sample_uris.append(device_data['sampleUri'])
             else:
                 for value in current.values():
@@ -35,6 +35,7 @@ def extract_sample_uris(data):
                         queue.append(value)
         elif isinstance(current, list):
             queue.extend(current)
+        # Skip other data types to prevent errors
     return sample_uris
 def inspect_drum_rack_file(directory, relative_file_path):
     """
