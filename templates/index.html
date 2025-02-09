@@ -53,11 +53,16 @@
                     form.addEventListener('submit', async function(event) {
                         event.preventDefault(); // Prevent the default form submission
 
-                        const formData = new FormData(form);
+                        // Convert form data to an object
+                        const formDataObject = Object.fromEntries(new FormData(form));
 
-                        // Collect regions data from WaveSurfer
-                        const regionsArray = Object.values(wavesurfer.regions.list).map(region => ({ start: region.start, end: region.end }));
-                        formData.append('regions', JSON.stringify(regionsArray));
+                        // Collect regions data from WaveSurfer if applicable
+                        if (wavesurfer && wavesurfer.regions) {
+                            const regionsArray = Object.values(wavesurfer.regions.list).map(region => ({ start: region.start, end: region.end }));
+                            formDataObject['regions'] = JSON.stringify(regionsArray);
+                        }
+
+                        const formData = new URLSearchParams(formDataObject);
 
                         const url = `/${tabName.toLowerCase()}`;
                         const method = form.method.toUpperCase();
@@ -66,13 +71,15 @@
                             let response;
                             if (method === 'GET') {
                                 // Construct query string for GET request
-                                const queryString = new URLSearchParams(formData).toString();
-                                response = await fetch(`${url}?${queryString}`);
+                                response = await fetch(`${url}?${formData.toString()}`);
                             } else {
                                 // Handle POST request
                                 response = await fetch(url, {
                                     method: method,
-                                    body: formData
+                                    headers: {
+                                        'Content-Type': 'application/x-www-form-urlencoded'
+                                    },
+                                    body: formData.toString()
                                 });
                             }
 
