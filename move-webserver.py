@@ -16,6 +16,7 @@ import sys
 import time
 
 BASE_SAMPLES_DIR = "/data/UserData/UserLibrary/Samples"
+TRACK_PRESETS_DIR = "/data/UserData/UserLibrary/Track Presets"
 
 # Define the PID file location.
 PID_FILE = os.path.expanduser('~/extending-move/move-webserver.pid')
@@ -55,6 +56,27 @@ def generate_wav_options(directory):
     options_html = ''.join([f'<option value="{file}">{file}</option>' for file in wav_files])
     return options_html
 
+def inspect_drum_racks(directory):
+    """
+    Inspects all JSON files in the specified directory and returns a list of filenames
+    that contain a drumRack.
+    """
+    drum_rack_files = []
+    for root, _, files in os.walk(directory):
+        for file in files:
+            if file.lower().endswith('.json'):
+                filepath = os.path.join(root, file)
+                try:
+                    with open(filepath, 'r') as f:
+                        data = json.load(f)
+                        if "drumRack" in json.dumps(data):
+                            drum_rack_files.append(os.path.relpath(filepath, directory))
+                except json.JSONDecodeError:
+                    print(f"Invalid JSON in file: {filepath}")
+                except Exception as e:
+                    print(f"Error reading file {filepath}: {e}")
+    return drum_rack_files
+
 class MyServer(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == "/":
@@ -89,6 +111,22 @@ class MyServer(BaseHTTPRequestHandler):
                 self.wfile.write(bytes(html_content, "utf-8"))
             except Exception as e:
                 error_message = f"Error rendering reverse.html: {e}"
+                self.send_response(500)
+                self.end_headers()
+                self.wfile.write(bytes(f"<html><body><p style='color: red;'>{error_message}</p></body></html>", "utf-8"))
+        elif self.path == "/drum_rack_inspector":
+            self.send_response(200)
+            self.send_header("Content-type", "text/html")
+            self.end_headers()
+            try:
+                drum_rack_files = inspect_drum_racks(TRACK_PRESETS_DIR)
+                with open(os.path.join("templates", "drum_rack_inspector.html"), "r") as f:
+                    template = f.read()
+                files_html = ''.join([f'<li>{file}</li>' for file in drum_rack_files]) if drum_rack_files else '<li>没有找到包含 drumRack 的 JSON 文件。</li>'
+                html_content = template.replace("{{ drum_rack_files }}", files_html).replace("{message_html}", "")
+                self.wfile.write(bytes(html_content, "utf-8"))
+            except Exception as e:
+                error_message = f"Error rendering drum_rack_inspector.html: {e}"
                 self.send_response(500)
                 self.end_headers()
                 self.wfile.write(bytes(f"<html><body><p style='color: red;'>{error_message}</p></body></html>", "utf-8"))
@@ -323,6 +361,8 @@ class MyServer(BaseHTTPRequestHandler):
             template_file = "refresh.html"
         elif path == "/reverse":
             template_file = "reverse.html"
+        elif path == "/drum_rack_inspector":
+            template_file = "drum_rack_inspector.html"
         else:
             # Default to index.html if path is unrecognized
             template_file = "index.html"
