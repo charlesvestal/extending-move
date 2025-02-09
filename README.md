@@ -4,7 +4,7 @@ Tips, tricks and tools for extending the Ableton Move.
 
 The code in this repository will run an additional webserver alongside the official one. When run on the move, it is accessible at move.local:666.
 
-![CleanShot 2025-02-08 at 22 11 01@2x](https://github.com/user-attachments/assets/ba771ca3-1372-416b-bd5b-e2ec82b66223)
+![CleanShot 2025-02-09 at 21 17 48](https://github.com/user-attachments/assets/7b010cbb-8b26-4c53-80ed-ada875514aff)
 
 
 ## Current Features
