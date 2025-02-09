@@ -19,10 +19,9 @@ ssh "${REMOTE_USER}@${REMOTE_HOST}" "mkdir -p '${REMOTE_DIR}'" || {
 }
 
 # Check for files to copy.
-# (Tracked files are output by 'git ls-files'.
-#  Untracked-but-not-ignored files are output by 'git ls-files --others --exclude-standard'.)
-tracked=$(git ls-files -z)
-untracked=$(git ls-files --others --exclude-standard -z)
+# Use non-null separated output here to avoid warnings.
+tracked=$(git ls-files)
+untracked=$(git ls-files --others --exclude-standard)
 if [ -z "$tracked" ] && [ -z "$untracked" ]; then
     echo "No files found to copy."
     exit 0
@@ -36,5 +35,5 @@ echo "Copying working files (excluding ignored and Git history) to ${REMOTE_USER
 
 echo "Files copied successfully."
 
-# Restart the webserver
+# Restart the webserver locally.
 sh restart-webserver.sh

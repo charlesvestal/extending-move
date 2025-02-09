@@ -18,16 +18,25 @@ The code in this repository will run an additional webserver alongside the offic
 
 ## Installation
 
+### SSH Key
+
+Begin by gaining ssh access to your move: <https://github.com/charlesvestal/extending-move/wiki/00--Accessing-Move>
+
+### Automatic Installation
+
+TL;DR: double click `install-on-move.sh`.
+
 This project includes a number of scripts to aid in installation and updating these tools:
 
 `install-on-move.sh` can be executed to perform the "Manual Installation" steps below.
 `updated-on-move.sh` will copy the files from the current directory and restart the webserver on your Move.
 `restart-webserver.sh` will restart the webserver on your Move.
 
+`install-on-move.command` and `update-on-move.command` are convenience applications to run the above scripts by double clicking on MacOS or other systems that support .command files.
+
 NOTE: these scripts should be executed from a computer, not your Move itself.
 
 ### Manual Installation
-Begin by gaining ssh access to your move: <https://github.com/charlesvestal/extending-move/wiki/00--Accessing-Move>
 
 First, login as the ableton user, and install pip using the script at <https://bootstrap.pypa.io/get-pip.py>
 
