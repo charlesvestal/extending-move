@@ -24,7 +24,7 @@ Begin by gaining ssh access to your move: <https://github.com/charlesvestal/exte
 
 ### Automatic Installation
 
-TL;DR: double click `install-on-move.sh`.
+TL;DR: double click `install-on-move.command`.
 
 This project includes a number of scripts to aid in installation and updating these tools:
 
