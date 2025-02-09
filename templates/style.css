@@ -1,6 +1,14 @@
 body {
     font-family: Arial, sans-serif;
 }
+
+.success {
+    color: green;
+}
+
+.error {
+    color: red;
+}
 .tab {
     overflow: hidden;
     border-bottom: 1px solid #ccc;
