@@ -15,11 +15,14 @@
             </ul>
         {% else %}
             <h3>Select a Drum Rack preset:</h3>
-            <ul>
-                {% for file in ablpreset_files %}
-                    <li><a href="/drum_rack_inspector?file={{ file }}">{{ file }}</a></li>
-                {% endfor %}
-            </ul>
+            <form method="get" action="/drum_rack_inspector">
+                <select name="file">
+                    {% for file in ablpreset_files %}
+                        <option value="{{ file }}">{{ file }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit">Inspect</button>
+            </form>
         {% endif %}
     </body>
 </html>
