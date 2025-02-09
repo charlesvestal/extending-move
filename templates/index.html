@@ -63,10 +63,18 @@
                         const method = form.method.toUpperCase();
 
                         try {
-                            const response = await fetch(url, {
-                                method: method,
-                                body: formData
-                            });
+                            let response;
+                            if (method === 'GET') {
+                                // Construct query string for GET request
+                                const queryString = new URLSearchParams(formData).toString();
+                                response = await fetch(`${url}?${queryString}`);
+                            } else {
+                                // Handle POST request
+                                response = await fetch(url, {
+                                    method: method,
+                                    body: formData
+                                });
+                            }
 
                             // Check if the response is an attachment
                             const contentDisposition = response.headers.get('Content-Disposition');
