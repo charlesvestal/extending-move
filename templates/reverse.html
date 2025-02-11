@@ -1,38 +1,30 @@
-<html>
-    <head>
-        <title>Reverse WAV</title>
-        <link rel="stylesheet" href="/style.css">
-    </head>
-    <body>
-        <h2>Reverse a WAV File</h2>
-        {message_html}
-        <form method="post">
-            <input type="hidden" name="action" value="reverse_file"/>
-            
-            <label for="wav_file">Select WAV file to reverse:</label>
-            <select id="wav_file" name="wav_file" required>
-                <option value="" disabled selected>--Select a WAV file--</option>
-                {{ options }}
-            </select>
-            <br/><br/>
-            
-            <button type="submit" onclick="confirmOverwrite()">Create Reversed Sample</button>
-        </form>
-        
-        <script>
-            function confirmOverwrite() {
-                const wavFileSelect = document.getElementById('wav_file');
-                const selectedFile = wavFileSelect.value;
-                if (!selectedFile) {
-                    alert('Please select a WAV file to reverse.');
-                    event.preventDefault();
-                    return;
-                }
-                const confirmAction = confirm(`Are you sure you want to create a reversed version of "${selectedFile}"?`);
-                if (!confirmAction) {
-                    event.preventDefault();
-                }
-            }
-        </script>
-    </body>
-</html>
+<h2>Reverse a WAV File</h2>
+{message_html}
+<form method="post">
+    <input type="hidden" name="action" value="reverse_file"/>
+    
+    <label for="wav_file">Select WAV file to reverse:</label>
+    <select id="wav_file" name="wav_file" required>
+        <option value="" disabled selected>--Select a WAV file--</option>
+        {{ options }}
+    </select>
+    <br/><br/>
+    
+    <button type="submit" onclick="confirmOverwrite()">Create Reversed Sample</button>
+</form>
+
+<script>
+    function confirmOverwrite() {
+        const wavFileSelect = document.getElementById('wav_file');
+        const selectedFile = wavFileSelect.value;
+        if (!selectedFile) {
+            alert('Please select a WAV file to reverse.');
+            event.preventDefault();
+            return;
+        }
+        const confirmAction = confirm(`Are you sure you want to create a reversed version of "${selectedFile}"?`);
+        if (!confirmAction) {
+            event.preventDefault();
+        }
+    }
+</script>

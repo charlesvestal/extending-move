@@ -21,7 +21,7 @@ extending-move/
 │   ├── refresh_handler_class.py # Web interface for refresh
 │   └── reverse_handler_class.py # Web interface for reversal
 └── templates/             # HTML templates for each feature
-    ├── index.html        # Main navigation page
+    ├── index.html        # Main navigation page with tab system
     ├── style.css         # Shared styles
     └── feature.html      # Feature-specific templates
 ```
@@ -189,52 +189,123 @@ Key points for web handlers:
 - Format responses consistently
 - Clean up temporary files
 
-### 3. Create an HTML Template
+### 3. Create Feature Template
 
-Add a new template file in the `templates` directory named `your_feature.html`.
+Add a new template file in the `templates` directory named `your_feature.html`. The template system uses dynamic loading within tabs, so your template should ONLY include the feature's content without any HTML structure (no html, head, or body tags).
 
-Example template structure:
+Here are examples of both simple and complex templates:
 
+1. Simple Template (like refresh.html):
 ```html
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Your Feature - Move</title>
-    <link rel="stylesheet" type="text/css" href="style.css">
-</head>
-<body>
-    <div class="container">
-        <h1>Your Feature</h1>
-        
-        <!-- Display messages (required for all templates) -->
-        {message_html}
-        
-        <form action="/your-feature" method="post" enctype="multipart/form-data">
-            <!-- Add your form inputs -->
-            <input type="hidden" name="action" value="your_action">
-            
-            <!-- Example inputs -->
-            <input type="text" name="param1" required>
-            <input type="file" name="file" accept=".wav">
-            
-            <button type="submit">Process</button>
-        </form>
-        
-        <p><a href="/">Back to Home</a></p>
-    </div>
-</body>
-</html>
+<h2>Your Feature Title</h2>
+{message_html}
+<form method="post">
+    <input type="hidden" name="action" value="your_action"/>
+    <input type="submit" value="Perform Action"/>
+</form>
+```
+
+2. Template with File Selection (like reverse.html):
+```html
+<h2>Your Feature Title</h2>
+{message_html}
+<form method="post">
+    <input type="hidden" name="action" value="your_action"/>
+    
+    <label for="file_select">Select file:</label>
+    <select id="file_select" name="file_select" required>
+        <option value="" disabled selected>--Select a file--</option>
+        {{ options }}
+    </select>
+    
+    <button type="submit">Process File</button>
+</form>
+
+<script>
+    // Feature-specific JavaScript
+    function validateForm() {
+        // Your validation logic
+    }
+</script>
+```
+
+3. Complex Interactive Template (like slice.html):
+```html
+<h2>Your Feature Title</h2>
+{message_html}
+<form enctype="multipart/form-data" method="post">
+    <input type="hidden" name="action" value="your_action"/>
+    
+    <!-- File input with preview -->
+    <label for="file">Select file:</label>
+    <input id="file" name="file" type="file" accept=".wav" required/>
+    
+    <!-- Interactive controls -->
+    <label for="num_items">Number of items:</label>
+    <input id="num_items" name="num_items" type="number" 
+           min="1" max="16" value="16" required/>
+    
+    <!-- Multiple submit options -->
+    <button type="submit" onclick="setMode('download')">
+        Download Result
+    </button>
+    <button type="submit" onclick="setMode('process')">
+        Process Directly
+    </button>
+</form>
+
+<!-- Interactive UI container -->
+<div id="preview-container" style="width: 100%; height: 128px;"></div>
 ```
 
 Key points for templates:
-- Include the shared stylesheet
-- Always include the `{message_html}` placeholder for displaying messages
-- Use semantic HTML and clear structure
-- Include proper form encoding if handling file uploads
+- Omit all HTML structure tags (html, head, body) - content is loaded into tabs
+- Include the `{message_html}` placeholder for displaying messages
+- Use proper form encoding if handling file uploads
 - Add a hidden action field to identify the operation
-- Link back to the home page
+- Include any feature-specific JavaScript in the template
+- Use consistent styling (styles are loaded from shared style.css)
 
-### 4. Update move-webserver.py
+For templates with dynamic content:
+- Use `{{ variable }}` syntax for server-injected content
+- Keep JavaScript scoped to the feature's functionality
+- Initialize UI components after content is loaded
+- Clean up resources when switching tabs
+
+### 4. Update index.html
+
+Add your feature to the tab system in `index.html`:
+
+1. Add a tab button:
+```html
+<div class="tab">
+    <!-- Existing tabs -->
+    <button class="tablinks" onclick="openTab(event, 'YourFeature')">
+        Your Feature
+    </button>
+</div>
+```
+
+2. Add a tab content container:
+```html
+<div id="YourFeature" class="tabcontent">
+    <!-- Content will be loaded here dynamically -->
+</div>
+```
+
+3. If your feature needs special initialization:
+```javascript
+function openTab(evt, tabName) {
+    // Existing tab opening code...
+    
+    // Add your feature's initialization
+    if (tabName === 'YourFeature') {
+        initializeYourFeature();
+    }
+}
+```
+
+### 5. Update move-webserver.py
 
 Add your feature to the webserver using the decorator-based routing system:
 
@@ -259,9 +330,74 @@ The routing system will automatically:
 - Format messages
 - Handle errors consistently
 
-5. Update `index.html` to add a link to your feature:
-```html
-<a href="/your-feature" class="button">Your Feature</a>
+## JavaScript Integration
+
+The webserver uses a dynamic content loading system with these key components:
+
+1. Tab System:
+```javascript
+function openTab(evt, tabName) {
+    // Hide all tab content
+    var tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+    }
+    
+    // Show selected tab
+    document.getElementById(tabName).style.display = "block";
+    
+    // Load content dynamically
+    fetchContent(tabName);
+}
+```
+
+2. Dynamic Content Loading:
+```javascript
+async function fetchContent(tabName) {
+    const response = await fetch(`/${tabName.toLowerCase()}`);
+    const data = await response.text();
+    document.getElementById(tabName).innerHTML = data;
+}
+```
+
+3. Form Handling:
+```javascript
+function attachFormHandler(tabName) {
+    const form = document.querySelector(`#${tabName} form`);
+    if (form) {
+        form.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const formData = new FormData(form);
+            // Handle form submission...
+        });
+    }
+}
+```
+
+### Example: Interactive Features
+
+For features requiring interactive elements (like the Slice Kit's waveform):
+
+1. Initialize in the tab system:
+```javascript
+if (tabName === 'YourFeature') {
+    initializeFeature();
+}
+```
+
+2. Clean up when switching tabs:
+```javascript
+function cleanupFeature() {
+    // Remove event listeners
+    // Clean up UI components
+}
+```
+
+3. Handle dynamic updates:
+```javascript
+function updateFeatureUI() {
+    // Update UI based on user interactions
+}
 ```
 
 ## Best Practices
@@ -302,6 +438,20 @@ The routing system will automatically:
    - Refresh library after modifications
    - Test with Move's file structure
 
+7. **JavaScript Integration**
+   - Initialize features after dynamic loading
+   - Clean up resources when switching tabs
+   - Use event delegation for dynamic content
+   - Handle form submissions asynchronously
+   - Provide loading indicators for async operations
+
+8. **Template Structure**
+   - Keep templates focused on feature content
+   - Include necessary JavaScript in templates
+   - Use consistent form structures
+   - Handle both success and error states
+   - Support dynamic UI updates
+
 ## Conclusion
 
 Following these guidelines will help maintain consistency and reliability when extending the Move webserver. The separation between core functionality and web handling makes the code more maintainable and easier to test. Remember to:
@@ -312,3 +462,5 @@ Following these guidelines will help maintain consistency and reliability when e
 - Handle errors gracefully
 - Test thoroughly before deployment
 - Follow Move's file and preset formats
+- Support dynamic content loading
+- Clean up resources properly
