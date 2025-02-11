@@ -14,11 +14,30 @@ from handlers.reverse_handler_class import ReverseHandler
 PID_FILE = os.path.expanduser('~/extending-move/move-webserver.pid')
 
 class TemplateManager:
+    """
+    Manages HTML templates with caching and rendering capabilities.
+    
+    This class handles:
+    - Loading templates from the templates directory
+    - Caching templates to avoid repeated file reads
+    - Rendering templates with variable substitution
+    - Special case handling for specific templates
+    """
     def __init__(self, template_dir="templates"):
+        """Initialize with template directory path and empty cache."""
         self.template_dir = template_dir
         self.templates = {}
 
     def get_template(self, template_name):
+        """
+        Get a template by name, loading from disk if not cached.
+        
+        Args:
+            template_name: Name of the template file
+        
+        Returns:
+            str: The template content
+        """
         if template_name not in self.templates:
             path = os.path.join(self.template_dir, template_name)
             with open(path, "r") as f:
@@ -26,6 +45,16 @@ class TemplateManager:
         return self.templates[template_name]
 
     def render(self, template_name, **kwargs):
+        """
+        Render a template with the provided variables.
+        
+        Args:
+            template_name: Name of the template file
+            **kwargs: Variables to substitute in the template
+        
+        Returns:
+            str: The rendered template with all substitutions applied
+        """
         template = self.get_template(template_name)
         # Handle special cases
         if template_name == "reverse.html":
@@ -49,12 +78,29 @@ class TemplateManager:
         return template
 
 class RouteHandler:
+    """
+    Handles route registration and management using decorators.
+    
+    This class provides:
+    - Decorator-based route registration for GET and POST
+    - Template management integration
+    - Content type handling
+    """
     def __init__(self):
+        """Initialize with empty route collections and template manager."""
         self.get_routes = {}
         self.post_routes = {}
         self.template_manager = TemplateManager()
 
     def get(self, path, template_name=None, content_type="text/html"):
+        """
+        Decorator for registering GET route handlers.
+        
+        Args:
+            path: URL path to handle
+            template_name: Optional template to render
+            content_type: Response content type
+        """
         def decorator(handler):
             self.get_routes[path] = {
                 "handler": handler,
@@ -65,13 +111,22 @@ class RouteHandler:
         return decorator
 
     def post(self, path):
+        """
+        Decorator for registering POST route handlers.
+        
+        Args:
+            path: URL path to handle
+        """
         def decorator(handler):
             self.post_routes[path] = handler
             return handler
         return decorator
 
 def write_pid():
-    """Write the current process PID to the PID_FILE."""
+    """
+    Write the current process PID to the PID_FILE.
+    Used for process management and cleanup.
+    """
     pid = os.getpid()
     try:
         with open(PID_FILE, 'w') as f:
@@ -81,7 +136,10 @@ def write_pid():
         print(f"Error writing PID file: {e}")
 
 def remove_pid():
-    """Remove the PID file."""
+    """
+    Remove the PID file.
+    Called on server shutdown for cleanup.
+    """
     try:
         if os.path.exists(PID_FILE):
             os.remove(PID_FILE)
@@ -90,39 +148,61 @@ def remove_pid():
         print(f"Error removing PID file: {e}")
 
 def handle_exit(signum, frame):
-    """Handle termination signals gracefully."""
+    """
+    Handle termination signals gracefully.
+    Ensures clean shutdown on SIGTERM/SIGINT.
+    """
     print(f"Received signal {signum}, exiting gracefully.")
     sys.exit(0)
 
 class MyServer(BaseHTTPRequestHandler):
+    """
+    HTTP request handler for the Move webserver.
+    
+    Handles:
+    - GET/POST requests
+    - Route matching
+    - Template rendering
+    - Response formatting
+    - Error handling
+    """
     route_handler = RouteHandler()
     
-    # Initialize handlers
+    # Initialize feature handlers
     slice_handler = SliceHandler()
     refresh_handler = RefreshHandler()
     reverse_handler = ReverseHandler()
 
     @route_handler.get("/", "index.html")
     def handle_index(self):
+        """Handle GET request for index page."""
         return {}
 
     @route_handler.get("/slice", "slice.html")
     def handle_slice_get(self):
+        """Handle GET request for slice page."""
         return {}
 
     @route_handler.get("/refresh", "refresh.html")
     def handle_refresh_get(self):
+        """Handle GET request for refresh page."""
         return {}
 
     @route_handler.get("/reverse", "reverse.html")
     def handle_reverse_get(self):
+        """Handle GET request for reverse page."""
         return {"options": self.reverse_handler.get_wav_options()}
 
     @route_handler.get("/style.css", "style.css", "text/css")
     def handle_css(self):
+        """Handle GET request for stylesheet."""
         return {}
 
     def do_GET(self):
+        """
+        Handle all GET requests.
+        Matches routes and renders appropriate templates.
+        """
         route = self.route_handler.get_routes.get(self.path)
         if route:
             try:
@@ -146,7 +226,10 @@ class MyServer(BaseHTTPRequestHandler):
             self.send_error(404)
 
     def send_response_with_headers(self, status, headers, content):
-        """Helper method to send response with headers."""
+        """
+        Helper method to send response with custom headers.
+        Used primarily for file downloads.
+        """
         self.send_response(status)
         for header, value in headers:
             self.send_header(header, value)
@@ -155,17 +238,24 @@ class MyServer(BaseHTTPRequestHandler):
 
     @route_handler.post("/slice")
     def handle_slice_post(self, form):
+        """Handle POST request for slice feature."""
         return self.slice_handler.handle_post(form, self.send_response_with_headers)
 
     @route_handler.post("/refresh")
     def handle_refresh_post(self, form):
+        """Handle POST request for refresh feature."""
         return self.refresh_handler.handle_post(form)
 
     @route_handler.post("/reverse")
     def handle_reverse_post(self, form):
+        """Handle POST request for reverse feature."""
         return self.reverse_handler.handle_post(form)
 
     def do_POST(self):
+        """
+        Handle all POST requests.
+        Processes form data and delegates to appropriate handler.
+        """
         if self.path not in ["/slice", "/refresh", "/reverse"]:
             self.send_error(404)
             return

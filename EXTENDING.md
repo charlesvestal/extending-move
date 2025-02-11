@@ -26,6 +26,69 @@ extending-move/
     └── feature.html      # Feature-specific templates
 ```
 
+## Move-Specific Details
+
+### File Locations
+
+Move uses specific directories for different types of files:
+
+```
+/data/UserData/UserLibrary/
+├── Samples/              # WAV files and other audio samples
+│   └── Preset Samples/   # Samples used by presets
+└── Track Presets/        # Move preset files (.ablpreset)
+```
+
+### Preset Format
+
+Move presets (.ablpreset files) follow the schema at http://tech.ableton.com/schema/song/1.4.4/devicePreset.json. Key components include:
+
+1. Instrument Racks:
+   ```json
+   {
+     "$schema": "http://tech.ableton.com/schema/song/1.4.4/devicePreset.json",
+     "kind": "instrumentRack",
+     "name": "preset_name",
+     "chains": [...]
+   }
+   ```
+
+2. Device References:
+   ```json
+   {
+     "presetUri": null,
+     "kind": "deviceType",  // e.g., "drumCell", "reverb"
+     "parameters": {...},
+     "deviceData": {...}
+   }
+   ```
+
+3. Sample References:
+   ```json
+   "sampleUri": "ableton:/user-library/Samples/Preset%20Samples/sample.wav"
+   ```
+
+### Bundle Format
+
+When creating downloadable presets, use the .ablpresetbundle format:
+- ZIP file containing:
+  - Preset.ablpreset at root
+  - Samples/ directory with referenced WAV files
+- Use URI-encoded filenames in sample references
+
+### Library Management
+
+After modifying files in Move's library:
+1. Place files in correct directories
+2. Use D-Bus to refresh the library cache:
+   ```python
+   dbus-send --system --type=method_call \
+             --dest=com.ableton.move \
+             --print-reply \
+             /com/ableton/move/browser \
+             com.ableton.move.Browser.refreshCache
+   ```
+
 ## Adding a New Feature
 
 Here's how to add a new feature to the Move webserver:
@@ -227,6 +290,18 @@ The routing system will automatically:
    - Verify error handling works correctly
    - Test file upload limits if applicable
 
+5. **File Management**
+   - Clean up temporary files after use
+   - Use absolute paths for file operations
+   - Handle file name collisions gracefully
+   - Follow Move's directory structure
+
+6. **Move Integration**
+   - Follow Move's preset format
+   - Use correct sample URI formats
+   - Refresh library after modifications
+   - Test with Move's file structure
+
 ## Conclusion
 
 Following these guidelines will help maintain consistency and reliability when extending the Move webserver. The separation between core functionality and web handling makes the code more maintainable and easier to test. Remember to:
@@ -236,3 +311,4 @@ Following these guidelines will help maintain consistency and reliability when e
 - Create clear and user-friendly templates
 - Handle errors gracefully
 - Test thoroughly before deployment
+- Follow Move's file and preset formats
