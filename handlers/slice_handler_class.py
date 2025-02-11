@@ -6,6 +6,33 @@ from base_handler import BaseHandler
 from slice_handler import process_kit
 
 class SliceHandler(BaseHandler):
+    def __init__(self):
+        super().__init__()
+        # Create uploads directory if it doesn't exist
+        os.makedirs(self.upload_dir, exist_ok=True)
+
+    def cleanup_directory(self, directory):
+        """Clean up a directory and its contents."""
+        try:
+            if os.path.exists(directory):
+                for filename in os.listdir(directory):
+                    filepath = os.path.join(directory, filename)
+                    try:
+                        if os.path.isfile(filepath):
+                            os.remove(filepath)
+                        elif os.path.isdir(filepath):
+                            self.cleanup_directory(filepath)
+                            os.rmdir(filepath)
+                    except Exception as e:
+                        print(f"Warning: Failed to clean up {filepath}: {e}")
+                if os.path.exists(directory):  # Check if directory still exists
+                    try:
+                        os.rmdir(directory)
+                    except Exception as e:
+                        print(f"Warning: Failed to remove directory {directory}: {e}")
+        except Exception as e:
+            print(f"Warning: Error cleaning directory {directory}: {e}")
+
     def handle_post(self, form: cgi.FieldStorage, response_handler=None):
         """
         Handle POST request for slice processing.
@@ -57,10 +84,9 @@ class SliceHandler(BaseHandler):
                 mode=mode
             )
 
-            # Clean up uploaded file
-            self.cleanup_upload(filepath)
-
             if not result.get('success'):
+                # Clean up only if processing failed
+                self.cleanup_upload(filepath)
                 return self.format_error_response(result.get('message', 'Kit processing failed'))
 
             if mode == "download":
@@ -70,6 +96,10 @@ class SliceHandler(BaseHandler):
                         # Read bundle data
                         with open(bundle_path, "rb") as f:
                             bundle_data = f.read()
+
+                        # Clean up uploaded file and uploads directory after reading bundle
+                        self.cleanup_upload(filepath)
+                        self.cleanup_directory(self.upload_dir)
 
                         # If response_handler is provided, use it to send the response
                         if response_handler:
@@ -96,8 +126,13 @@ class SliceHandler(BaseHandler):
                 else:
                     return self.format_error_response("Bundle file not found")
             else:
+                # For auto_place mode, clean up after successful processing
+                self.cleanup_upload(filepath)
+                self.cleanup_directory(self.upload_dir)
                 return self.format_success_response(result.get('message', 'Kit processed successfully'))
 
         except Exception as e:
+            # Clean up in case of any error
             self.cleanup_upload(filepath)
+            self.cleanup_directory(self.upload_dir)
             return self.format_error_response(f"Error processing kit: {str(e)}")

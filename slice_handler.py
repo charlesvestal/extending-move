@@ -9,9 +9,18 @@ import zipfile
 import subprocess
 from refresh_handler import refresh_library
 
-# ==========================
-# 1. KIT TEMPLATE GENERATOR
-# ==========================
+def cleanup_temp_files(files_to_cleanup):
+    """Clean up temporary files and directories."""
+    for path in files_to_cleanup:
+        try:
+            if os.path.exists(path):
+                if os.path.isdir(path):
+                    shutil.rmtree(path)
+                else:
+                    os.remove(path)
+        except Exception as e:
+            print(f"Warning: Failed to clean up {path}: {e}")
+
 def generate_choke_kit_template(preset_name):
     """
     Generates a Choke Kit template with 16 drum cell chains.
@@ -57,7 +66,7 @@ def generate_choke_kit_template(preset_name):
     template = {
         "$schema": "http://tech.ableton.com/schema/song/1.4.4/devicePreset.json",
         "kind": "instrumentRack",
-        "name": preset_name,  # Use the chosen preset name.
+        "name": preset_name,
         "lockId": 1001,
         "lockSeal": -973461132,
         "parameters": {
@@ -137,9 +146,6 @@ def generate_choke_kit_template(preset_name):
     }
     return template
 
-# ==========================
-# 2. AUDIO SLICING
-# ==========================
 def slice_wav(input_wav, out_dir, regions=None, num_slices=16, target_directory="./Samples"):
     """
     Reads the input WAV file, splits it into parts based on the provided regions or number of slices,
@@ -161,30 +167,25 @@ def slice_wav(input_wav, out_dir, regions=None, num_slices=16, target_directory=
         if not isinstance(regions, list):
             print("Error: 'regions' should be a list of dictionaries with 'start' and 'end' keys.")
             return slice_paths
-        # Sort regions by start time
         regions = sorted(regions, key=lambda r: r.get('start', 0))
         print(f"Number of regions received: {len(regions)}")
         for idx, region in enumerate(regions):
             start_time = region.get('start')
-            end_time = region.get('end', start_time + 1)  # Default to 1 second if end not provided
+            end_time = region.get('end', start_time + 1)
 
             if not isinstance(start_time, (int, float)) or not isinstance(end_time, (int, float)):
                 print(f"Warning: Region {idx+1} has invalid 'start' or 'end' times. Skipping.")
                 continue
 
-            # Ensure start_time is less than end_time
             if start_time >= end_time:
                 print(f"Warning: Region {idx+1} start_time >= end_time. Skipping.")
                 continue
 
-            # Clamp times to the duration of the audio
             start_time = max(0, start_time)
             end_time = min(duration, end_time)
-
             start_sample = int(start_time * samplerate)
             end_sample = int(end_time * samplerate)
 
-            # Prevent zero-length slices
             if end_sample <= start_sample:
                 print(f"Warning: Slice {idx+1} has zero length. Skipping.")
                 continue
@@ -192,14 +193,11 @@ def slice_wav(input_wav, out_dir, regions=None, num_slices=16, target_directory=
             slice_data = data[start_sample:end_sample]
             filename = f"{base}_slice_{idx+1:02d}.wav"
             path = os.path.join(target_directory, filename)
-
-            # Ensure unique filename
             unique_path = get_unique_filename(path)
             wavfile.write(unique_path, samplerate, slice_data)
-            print(f"Exported slice {idx+1}: {unique_path} (Start: {start_time}s, End: {end_time}s)")
+            print(f"Exported slice {idx+1}: {unique_path}")
             slice_paths.append(unique_path)
     else:
-        # Fallback to equal slicing based on num_slices
         print("No regions provided. Falling back to equal slicing.")
         slice_duration = duration / num_slices
         for i in range(num_slices):
@@ -208,11 +206,9 @@ def slice_wav(input_wav, out_dir, regions=None, num_slices=16, target_directory=
             start_sample = int(start_time * samplerate)
             end_sample = int(end_time * samplerate)
 
-            # Clamp times to the duration of the audio
             start_time = max(0, start_time)
             end_time = min(duration, end_time)
 
-            # Prevent zero-length slices
             if end_sample <= start_sample:
                 print(f"Warning: Slice {i+1} has zero length. Skipping.")
                 continue
@@ -220,11 +216,9 @@ def slice_wav(input_wav, out_dir, regions=None, num_slices=16, target_directory=
             slice_data = data[start_sample:end_sample]
             filename = f"{base}_slice_{i+1:02d}.wav"
             path = os.path.join(target_directory, filename)
-
-            # Ensure unique filename
             unique_path = get_unique_filename(path)
             wavfile.write(unique_path, samplerate, slice_data)
-            print(f"Exported slice {i+1}: {unique_path} (Start: {start_time}s, End: {end_time}s)")
+            print(f"Exported slice {i+1}: {unique_path}")
             slice_paths.append(unique_path)
     return slice_paths
 
@@ -242,9 +236,6 @@ def get_unique_filename(path):
             return new_path
         counter += 1
 
-# ==========================
-# 3. UPDATE DRUM CELL SAMPLE URIs
-# ==========================
 def update_drumcell_sample_uris(data, slice_paths, current_index=0, base_uri="Samples/"):
     """
     Recursively walks the JSON data. When a dictionary with "kind" == "drumCell" is found
@@ -252,8 +243,6 @@ def update_drumcell_sample_uris(data, slice_paths, current_index=0, base_uri="Sa
        base_uri + URI-encoded(basename of next slice file)
     The slices are used in document order.
     Returns the updated current_index.
-    
-    If there are not enough slice files, the remaining drum cells are left with sampleUri as null.
     """
     if isinstance(data, dict):
         if data.get("kind") == "drumCell" and "deviceData" in data and "sampleUri" in data["deviceData"]:
@@ -274,96 +263,72 @@ def update_drumcell_sample_uris(data, slice_paths, current_index=0, base_uri="Sa
             current_index = update_drumcell_sample_uris(item, slice_paths, current_index, base_uri)
     return current_index
 
-# ==========================
-# 4. BUNDLE CREATION
-# ==========================
-def create_bundle(preset_filename, samples_folder, bundle_name):
+def create_bundle(preset_filename, slice_paths, bundle_name):
     """
-    Creates a ZIP file (bundle) named bundle_name (with extension .ablpresetbundle)
-    that contains the preset file and the samples folder (with its directory structure).
+    Creates a ZIP file that contains the preset file and only the specified slice files.
     """
     with zipfile.ZipFile(bundle_name, 'w', zipfile.ZIP_DEFLATED) as zf:
-        # Add the preset file at the root of the zip.
+        # Add the preset file at the root
         zf.write(preset_filename, arcname=os.path.basename(preset_filename))
-        print(f"Added {preset_filename} as {os.path.basename(preset_filename)}")
-        # Walk through the samples folder and add its files.
-        for root, dirs, files in os.walk(samples_folder):
-            for file in files:
-                fullpath = os.path.join(root, file)
-                arcname = os.path.relpath(fullpath, os.path.dirname(samples_folder))
-                zf.write(fullpath, arcname=arcname)
-                print(f"Added {fullpath} as {arcname}")
+        print(f"Added {preset_filename}")
+        
+        # Add only the specified slice files
+        for slice_path in slice_paths:
+            arcname = os.path.join("Samples", os.path.basename(slice_path))
+            zf.write(slice_path, arcname=arcname)
+            print(f"Added {slice_path} as {arcname}")
 
-# ==========================
-# 5. PROCESS KIT GENERATION
-# ==========================
 def process_kit(input_wav, preset_name=None, regions=None, num_slices=None, keep_files=False, 
                mode="download"):
     """
     Processes the kit generation by slicing the WAV file, updating the kit template,
     and creating a preset bundle or placing it automatically.
-    
-    Parameters:
-    - input_wav: Path to the input WAV file.
-    - preset_name: Name of the preset.
-    - regions: List of regions with 'start' and 'end' times for slicing.
-    - num_slices: Number of equal slices to create if regions are not provided.
-    - keep_files: Whether to keep intermediate files.
-    - mode: "download" or "auto_place".
-    
-    Returns:
-    A dictionary with keys:
-    - 'success': bool
-    - 'bundle_path': str (only for download mode)
-    - 'message': str
     """
+    temp_files = []  # Track files to clean up
     try:
-        # Parse regions if they are a JSON string
         if isinstance(regions, str):
             regions = json.loads(regions)
             print(f"Parsed regions from JSON string: {regions}")
         
-        # If preset_name is provided, use it; otherwise, default to the input WAV file's base name.
         if preset_name:
             preset = preset_name
         else:
             preset = os.path.splitext(os.path.basename(input_wav))[0]
             print(f"No preset name provided; defaulting to '{preset}'.")
-        # Currently only "Choke Kit" is supported.
-        kit_type = "Choke Kit"
+
         kit_template = generate_choke_kit_template(preset)
 
         if mode == "download":
-            samples_folder = "Samples"         # Slices will be exported here.
-            preset_output_file = "Preset.ablpreset"  # Updated preset JSON file.
-            bundle_filename = f"{preset}.ablpresetbundle"  # Final bundle ZIP filename.
+            samples_folder = "Samples"
+            preset_output_file = "Preset.ablpreset"
+            bundle_filename = f"{preset}.ablpresetbundle"
 
-            # Slice the input WAV file.
+            # Track temporary files
+            temp_files.extend([samples_folder, preset_output_file])
+
+            os.makedirs(samples_folder, exist_ok=True)
+            
             if regions and isinstance(regions, list) and len(regions) > 0:
                 slice_paths = slice_wav(input_wav, samples_folder, regions=regions, target_directory=samples_folder)
-                print(f"Sliced WAV using regions: {slice_paths}")
             else:
-                # Fallback to equal slicing if regions not provided
                 if num_slices is None:
                     num_slices = 16
                 slice_paths = slice_wav(input_wav, samples_folder, num_slices=num_slices, target_directory=samples_folder)
-                print(f"Sliced WAV using num_slices={num_slices}: {slice_paths}")
 
-            # Update the kit template: Replace each drum cell's sampleUri with "Samples/<URI-encoded-slice-filename>" or leave null.
             update_drumcell_sample_uris(kit_template, slice_paths, base_uri="Samples/")
 
-            # Write the updated preset JSON to Preset.ablpreset.
             try:
                 with open(preset_output_file, "w") as f:
                     json.dump(kit_template, f, indent=2)
-                print(f"Updated preset written to {preset_output_file}")
             except Exception as e:
-                print(f"Failed to write preset file '{preset_output_file}': {e}")
-                return {'success': False, 'message': f"Could not write preset file '{preset_output_file}': {e}"}
+                cleanup_temp_files(temp_files)
+                return {'success': False, 'message': f"Could not write preset file: {e}"}
 
-            # Create a bundle (ZIP) that contains Preset.ablpreset and the Samples folder.
-            create_bundle(preset_output_file, samples_folder, bundle_filename)
-            print(f"Created bundle: {bundle_filename}")
+            create_bundle(preset_output_file, slice_paths, bundle_filename)
+            temp_files.append(bundle_filename)
+
+            if not keep_files:
+                cleanup_temp_files(temp_files[:-1])  # Keep bundle file for download
 
             return {'success': True, 'bundle_path': bundle_filename, 'message': "Preset bundle created successfully."}
 
@@ -372,48 +337,31 @@ def process_kit(input_wav, preset_name=None, regions=None, num_slices=None, keep
             presets_target_dir = "/data/UserData/UserLibrary/Track Presets"
             preset_output_file = os.path.join(presets_target_dir, f"{preset}.ablpreset")
 
-            # Slice the input WAV file.
             if regions and isinstance(regions, list) and len(regions) > 0:
                 slice_paths = slice_wav(input_wav, samples_target_dir, regions=regions, target_directory=samples_target_dir)
-                print(f"Sliced WAV using regions: {slice_paths}")
             else:
-                # Fallback to equal slicing if regions not provided
                 if num_slices is None:
                     num_slices = 16
                 slice_paths = slice_wav(input_wav, samples_target_dir, num_slices=num_slices, target_directory=samples_target_dir)
-                print(f"Sliced WAV using num_slices={num_slices}: {slice_paths}")
 
-            # Update the kit template: Replace each drum cell's sampleUri with "ableton:/user-library/Samples/Preset%20Samples/<URI-encoded-slice-filename>" or leave null.
             update_drumcell_sample_uris(kit_template, slice_paths, base_uri="ableton:/user-library/Samples/Preset%20Samples/")
 
-            # Write the updated preset JSON to the target preset path.
             try:
                 with open(preset_output_file, "w") as f:
                     json.dump(kit_template, f, indent=2)
-                print(f"Updated preset written to {preset_output_file}")
             except Exception as e:
-                print(f"Failed to write preset file '{preset_output_file}': {e}")
-                return {'success': False, 'message': f"Could not write preset file '{preset_output_file}': {e}"}
+                cleanup_temp_files(slice_paths)  # Clean up created sample files
+                return {'success': False, 'message': f"Could not write preset file: {e}"}
 
-            # Refresh the library after automatic placement
             refresh_success, refresh_message = refresh_library()
             if refresh_success:
-                combined_message = f"Preset {preset} automatically placed successfully. " + refresh_message
-                combined_message_type = "success"
+                return {'success': True, 'message': f"Preset {preset} automatically placed successfully. {refresh_message}"}
             else:
-                combined_message = f"Preset {preset} automatically placed successfully, but failed to refresh library: {refresh_message}"
-                combined_message_type = "error"
-
-            return {'success': True, 'message': combined_message}
+                return {'success': True, 'message': f"Preset {preset} placed, but library refresh failed: {refresh_message}"}
 
         else:
             return {'success': False, 'message': "Invalid mode. Must be 'download' or 'auto_place'."}
 
     except Exception as e:
-        print(f"Error during kit processing: {e}")
+        cleanup_temp_files(temp_files)
         return {'success': False, 'message': f"Error processing kit: {e}"}
-
-# ==========================
-# 6. REFRESH LIBRARY
-# ==========================
-# The `refresh_library` function has been moved to refresh_handler.py

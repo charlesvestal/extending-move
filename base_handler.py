@@ -8,7 +8,8 @@ class BaseHandler:
     """Base class for all feature handlers."""
     
     def __init__(self):
-        self.upload_dir = "uploads"
+        # Use absolute path for uploads directory
+        self.upload_dir = os.path.abspath("uploads")
         os.makedirs(self.upload_dir, exist_ok=True)
 
     def validate_action(self, form: cgi.FieldStorage, expected_action: str) -> Tuple[bool, Optional[Dict[str, str]]]:
@@ -34,8 +35,15 @@ class BaseHandler:
             filename = os.path.basename(file_field.filename)
             filepath = os.path.join(self.upload_dir, filename)
             
+            # Ensure upload directory exists
+            os.makedirs(self.upload_dir, exist_ok=True)
+            
+            # Save the file
             with open(filepath, "wb") as f:
                 shutil.copyfileobj(file_field.file, f)
+            
+            if not os.path.exists(filepath):
+                return False, None, {"message": "File upload failed: File not saved", "message_type": "error"}
             
             return True, filepath, None
         except Exception as e:
