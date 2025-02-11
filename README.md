@@ -24,17 +24,19 @@ Begin by gaining ssh access to your move: <https://github.com/charlesvestal/exte
 
 ### Automatic Installation
 
-TL;DR: double click `install-on-move.command`.
+TL;DR: double click `utility-scripts/install-on-move.command`.
 
-This project includes a number of scripts to aid in installation and updating these tools:
+This project includes utility scripts in the `utility-scripts/` directory to aid in installation and updating:
 
-`install-on-move.sh` can be executed to perform the "Manual Installation" steps below.
-`updated-on-move.sh` will copy the files from the current directory and restart the webserver on your Move.
-`restart-webserver.sh` will restart the webserver on your Move.
+- `install-on-move.sh`: Performs initial setup and installation on your Move
+- `update-on-move.sh`: Copies the latest files and restarts the webserver
+- `restart-webserver.sh`: Restarts the webserver on your Move
 
-`install-on-move.command` and `update-on-move.command` are convenience applications to run the above scripts by double clicking on MacOS or other systems that support .command files.
+For convenience on macOS and similar systems, `.command` versions of the installation and update scripts are provided that can be executed by double-clicking:
+- `install-on-move.command`
+- `update-on-move.command`
 
-NOTE: these scripts should be executed from a computer, not your Move itself.
+NOTE: These scripts should be executed from a computer, not your Move itself.
 
 ### Manual Installation
 

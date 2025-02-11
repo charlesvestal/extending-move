@@ -20,10 +20,14 @@ extending-move/
 │   ├── slice_handler_class.py   # Web interface for slicing
 │   ├── refresh_handler_class.py # Web interface for refresh
 │   └── reverse_handler_class.py # Web interface for reversal
-└── templates/             # HTML templates for each feature
-    ├── index.html        # Main navigation page with tab system
-    ├── style.css         # Shared styles
-    └── feature.html      # Feature-specific templates
+├── templates/             # HTML templates for each feature
+│   ├── index.html        # Main navigation page with tab system
+│   ├── style.css         # Shared styles
+│   └── feature.html      # Feature-specific templates
+└── utility-scripts/       # Utility scripts for installation and management
+    ├── install-on-move.sh    # Initial setup and installation
+    ├── update-on-move.sh     # Update Move with latest changes
+    └── restart-webserver.sh   # Restart the Move webserver
 ```
 
 ## Move-Specific Details

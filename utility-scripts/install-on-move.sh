@@ -73,6 +73,6 @@ echo "Remote setup finished."
 
 # Now, on the local machine, execute update-on-move.sh using bash explicitly.
 echo "Running update-on-move.sh locally..."
-bash ./update-on-move.sh
+bash "$(dirname "$0")/update-on-move.sh"
 
 echo "Deployment and remote setup complete."
