@@ -30,4 +30,5 @@ class ReverseHandler(BaseHandler):
 
     def get_wav_options(self):
         """Get WAV file options for the template."""
-        return get_wav_files("/data/UserData/UserLibrary/Samples")
+        wav_files = get_wav_files("/data/UserData/UserLibrary/Samples")
+        return ''.join([f'<option value="{file}">{file}</option>' for file in wav_files])
