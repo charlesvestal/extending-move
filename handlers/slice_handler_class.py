@@ -2,8 +2,8 @@
 import os
 import json
 import cgi
-from base_handler import BaseHandler
-from slice_handler import process_kit
+from handlers.base_handler import BaseHandler
+from core.slice_handler import process_kit
 
 class SliceHandler(BaseHandler):
     def __init__(self):

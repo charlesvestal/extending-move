@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import cgi
-from base_handler import BaseHandler
-from reverse_handler import get_wav_files, reverse_wav_file
+from handlers.base_handler import BaseHandler
+from core.reverse_handler import get_wav_files, reverse_wav_file
 
 class ReverseHandler(BaseHandler):
     def handle_post(self, form: cgi.FieldStorage):

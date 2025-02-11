@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import cgi
-from base_handler import BaseHandler
-from refresh_handler import refresh_library
+from handlers.base_handler import BaseHandler
+from core.refresh_handler import refresh_library
 
 class RefreshHandler(BaseHandler):
     def handle_post(self, form: cgi.FieldStorage):

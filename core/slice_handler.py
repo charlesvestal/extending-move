@@ -7,7 +7,7 @@ from scipy.io import wavfile
 import numpy as np
 import zipfile
 import subprocess
-from refresh_handler import refresh_library
+from core.refresh_handler import refresh_library
 
 def cleanup_temp_files(files_to_cleanup):
     """Clean up temporary files and directories."""
