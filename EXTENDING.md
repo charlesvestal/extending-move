@@ -4,7 +4,7 @@ This guide explains how to extend the Move webserver with new features. The webs
 
 1. A handler file that contains the core logic
 2. An HTML template for the web interface
-3. Integration with the main webserver
+3. Integration with the main webserver using route decorators
 
 ## Project Structure
 
@@ -112,27 +112,25 @@ Key points for templates:
 
 ### 3. Update move-webserver.py
 
-Modify `move-webserver.py` to integrate your feature:
+The webserver uses a decorator-based routing system and template management. Here's how to integrate your feature:
 
 1. Import your handler at the top:
 ```python
 from your_feature_handler import process_your_feature
 ```
 
-2. Add GET route in the `do_GET` method:
+2. Add your routes in the MyServer class using decorators:
 ```python
-elif self.path == "/your-feature":
-    self.send_response(200)
-    self.send_header("Content-type", "text/html")
-    self.end_headers()
-    with open(os.path.join("templates", "your_feature.html"), "r") as f:
-        html_content = f.read().replace("{message_html}", "")
-        self.wfile.write(bytes(html_content, "utf-8"))
-```
+@route_handler.get("/your-feature", "your_feature.html")
+def handle_your_feature_get(self):
+    return {}  # Return any template variables needed
 
-3. Add POST handling in the `do_POST` method:
-```python
-elif action == "your_action" and self.path == "/your-feature":
+@route_handler.post("/your-feature")
+def handle_your_feature_post(self, form):
+    action = form.getvalue('action')
+    if action != "your_action":
+        return {"message": "Bad Request: Invalid action", "message_type": "error"}
+
     try:
         # Extract parameters from form
         param1 = form.getvalue('param1')
@@ -140,29 +138,28 @@ elif action == "your_action" and self.path == "/your-feature":
         # Handle file upload if needed
         if 'file' in form:
             file_field = form['file']
-            if not file_field.filename:
-                message = "No file uploaded"
-                message_type = "error"
-                self.respond_with_form(self.path, message, message_type)
-                return
+            if not isinstance(file_field, cgi.FieldStorage) or not file_field.filename:
+                return {"message": "Bad Request: Invalid file", "message_type": "error"}
                 
             # Process the file...
             
         # Call your handler
         result = process_your_feature(param1)
         
-        if result['success']:
-            message = result['message']
-            message_type = "success"
-        else:
-            message = result['message']
-            message_type = "error"
-            
-        self.respond_with_form(self.path, message, message_type)
-        
+        return {
+            "message": result.get('message', 'Operation completed successfully'),
+            "message_type": "success" if result.get('success') else "error"
+        }
+
     except Exception as e:
-        self.respond_with_form(self.path, f"Error: {str(e)}", "error")
+        return {"message": f"Error processing request: {str(e)}", "message_type": "error"}
 ```
+
+The routing system will automatically:
+- Load and cache templates
+- Handle HTTP responses
+- Format messages
+- Handle errors consistently
 
 4. Update `index.html` to add a link to your feature:
 ```html
@@ -260,45 +257,35 @@ def reverse_text(text):
 from text_handler import reverse_text
 
 # In MyServer class:
-def do_GET(self):
-    # ... existing routes ...
-    elif self.path == "/reverse-text":
-        self.send_response(200)
-        self.send_header("Content-type", "text/html")
-        self.end_headers()
-        with open(os.path.join("templates", "reverse_text.html"), "r") as f:
-            html_content = f.read().replace("{message_html}", "")
-            self.wfile.write(bytes(html_content, "utf-8"))
+@route_handler.get("/reverse-text", "reverse_text.html")
+def handle_reverse_text_get(self):
+    return {}
 
-def do_POST(self):
-    # ... existing code ...
-    elif action == "reverse_text" and self.path == "/reverse-text":
-        try:
-            text = form.getvalue('text')
-            if not text:
-                message = "No text provided"
-                message_type = "error"
-                self.respond_with_form(self.path, message, message_type)
-                return
-                
-            result = reverse_text(text)
+@route_handler.post("/reverse-text")
+def handle_reverse_text_post(self, form):
+    action = form.getvalue('action')
+    if action != "reverse_text":
+        return {"message": "Bad Request: Invalid action", "message_type": "error"}
+
+    try:
+        text = form.getvalue('text')
+        if not text:
+            return {"message": "No text provided", "message_type": "error"}
             
-            if result['success']:
-                message = f"{result['message']}: {result['result']}"
-                message_type = "success"
-            else:
-                message = result['message']
-                message_type = "error"
-                
-            self.respond_with_form(self.path, message, message_type)
-            
-        except Exception as e:
-            self.respond_with_form(self.path, f"Error: {str(e)}", "error")
+        result = reverse_text(text)
+        
+        return {
+            "message": f"{result['message']}: {result['result']}" if result['success'] else result['message'],
+            "message_type": "success" if result['success'] else "error"
+        }
+        
+    except Exception as e:
+        return {"message": f"Error: {str(e)}", "message_type": "error"}
 ```
 
 ## Conclusion
 
-Following these guidelines will help maintain consistency and reliability when extending the Move webserver. Remember to:
+Following these guidelines will help maintain consistency and reliability when extending the Move webserver. The decorator-based routing system and template management make it easy to add new features while keeping the code clean and maintainable. Remember to:
 
 - Keep feature logic in separate handler files
 - Create clear and user-friendly templates

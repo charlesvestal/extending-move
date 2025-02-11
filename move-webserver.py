@@ -16,9 +16,64 @@ import sys
 import time
 
 BASE_SAMPLES_DIR = "/data/UserData/UserLibrary/Samples"
-
-# Define the PID file location.
 PID_FILE = os.path.expanduser('~/extending-move/move-webserver.pid')
+
+class TemplateManager:
+    def __init__(self, template_dir="templates"):
+        self.template_dir = template_dir
+        self.templates = {}
+
+    def get_template(self, template_name):
+        if template_name not in self.templates:
+            path = os.path.join(self.template_dir, template_name)
+            with open(path, "r") as f:
+                self.templates[template_name] = f.read()
+        return self.templates[template_name]
+
+    def render(self, template_name, **kwargs):
+        template = self.get_template(template_name)
+        # Handle special cases
+        if template_name == "reverse.html":
+            kwargs["options"] = generate_wav_options(BASE_SAMPLES_DIR)
+            template = template.replace("{{ options }}", kwargs["options"])
+        
+        # Handle message display
+        message = kwargs.get("message", "")
+        message_type = kwargs.get("message_type", "")
+        if message:
+            if message_type == "success":
+                message_html = f'<p style="color: green;">{message}</p>'
+            elif message_type == "error":
+                message_html = f'<p style="color: red;">{message}</p>'
+            else:
+                message_html = f'<p>{message}</p>'
+        else:
+            message_html = ""
+        template = template.replace("{message_html}", message_html)
+        
+        return template
+
+class RouteHandler:
+    def __init__(self):
+        self.get_routes = {}
+        self.post_routes = {}
+        self.template_manager = TemplateManager()
+
+    def get(self, path, template_name=None, content_type="text/html"):
+        def decorator(handler):
+            self.get_routes[path] = {
+                "handler": handler,
+                "template": template_name,
+                "content_type": content_type
+            }
+            return handler
+        return decorator
+
+    def post(self, path):
+        def decorator(handler):
+            self.post_routes[path] = handler
+            return handler
+        return decorator
 
 def write_pid():
     """Write the current process PID to the PID_FILE."""
@@ -44,328 +99,197 @@ def handle_exit(signum, frame):
     print(f"Received signal {signum}, exiting gracefully.")
     sys.exit(0)
 
-hostName = "0.0.0.0"
-serverPort = 666
-
 def generate_wav_options(directory):
-    """
-    Generates HTML <option> elements for each WAV file in the directory.
-    """
+    """Generates HTML <option> elements for each WAV file in the directory."""
     wav_files = get_wav_files(directory)
-    options_html = ''.join([f'<option value="{file}">{file}</option>' for file in wav_files])
-    return options_html
+    return ''.join([f'<option value="{file}">{file}</option>' for file in wav_files])
 
 class MyServer(BaseHTTPRequestHandler):
+    route_handler = RouteHandler()
+
+    @route_handler.get("/", "index.html")
+    def handle_index(self):
+        return {}
+
+    @route_handler.get("/slice", "slice.html")
+    def handle_slice_get(self):
+        return {}
+
+    @route_handler.get("/refresh", "refresh.html")
+    def handle_refresh_get(self):
+        return {}
+
+    @route_handler.get("/reverse", "reverse.html")
+    def handle_reverse_get(self):
+        return {}
+
+    @route_handler.get("/style.css", "style.css", "text/css")
+    def handle_css(self):
+        return {}
+
     def do_GET(self):
-        if self.path == "/":
-            self.send_response(200)
-            self.send_header("Content-type", "text/html")
-            self.end_headers()
-            with open(os.path.join("templates", "index.html"), "r") as f:
-                self.wfile.write(bytes(f.read(), "utf-8"))
-        elif self.path == "/slice":
-            self.send_response(200)
-            self.send_header("Content-type", "text/html")
-            self.end_headers()
-            with open(os.path.join("templates", "slice.html"), "r") as f:
-                html_content = f.read().replace("{message_html}", "")
-                self.wfile.write(bytes(html_content, "utf-8"))
-        elif self.path == "/refresh":
-            self.send_response(200)
-            self.send_header("Content-type", "text/html")
-            self.end_headers()
-            with open(os.path.join("templates", "refresh.html"), "r") as f:
-                html_content = f.read().replace("{message_html}", "")
-                self.wfile.write(bytes(html_content, "utf-8"))
-        elif self.path == "/reverse":
-            self.send_response(200)
-            self.send_header("Content-type", "text/html")
-            self.end_headers()
+        route = self.route_handler.get_routes.get(self.path)
+        if route:
             try:
-                with open(os.path.join("templates", "reverse.html"), "r") as f:
-                    template = f.read()
-                options_html = generate_wav_options(BASE_SAMPLES_DIR)
-                html_content = template.replace("{{ options }}", options_html).replace("{message_html}", "")
-                self.wfile.write(bytes(html_content, "utf-8"))
+                handler_result = route["handler"](self)
+                if route["template"]:
+                    content = self.route_handler.template_manager.render(
+                        route["template"],
+                        **handler_result
+                    )
+                    self.send_response(200)
+                    self.send_header("Content-type", route["content_type"])
+                    self.end_headers()
+                    self.wfile.write(bytes(content, "utf-8"))
+                else:
+                    self.send_response(404)
+                    self.end_headers()
+                    self.wfile.write(bytes("404 Not Found", "utf-8"))
             except Exception as e:
-                error_message = f"Error rendering reverse.html: {e}"
-                self.send_response(500)
-                self.end_headers()
-                self.wfile.write(bytes(f"<html><body><p style='color: red;'>{error_message}</p></body></html>", "utf-8"))
-        elif self.path == "/style.css":
-            self.send_response(200)
-            self.send_header("Content-type", "text/css")
-            self.end_headers()
-            with open(os.path.join("templates", "style.css"), "r") as f:
-                self.wfile.write(bytes(f.read(), "utf-8"))
+                self.send_error(500, str(e))
         else:
-            self.send_response(404)
-            self.end_headers()
-            self.wfile.write(bytes("404 Not Found", "utf-8"))
+            self.send_error(404)
+
+    @route_handler.post("/slice")
+    def handle_slice_post(self, form):
+        action = form.getvalue('action')
+        if action != "slice":
+            return {"message": "Bad Request: Invalid action", "message_type": "error"}
+
+        mode = form.getvalue('mode')
+        if not mode or mode not in ["download", "auto_place"]:
+            return {"message": "Bad Request: Invalid mode", "message_type": "error"}
+
+        if 'file' not in form:
+            return {"message": "Bad Request: No file field in form", "message_type": "error"}
+
+        file_field = form['file']
+        if not isinstance(file_field, cgi.FieldStorage) or not file_field.filename:
+            return {"message": "Bad Request: Invalid file", "message_type": "error"}
+
+        try:
+            # Save uploaded file
+            filename = os.path.basename(file_field.filename)
+            upload_dir = "uploads"
+            os.makedirs(upload_dir, exist_ok=True)
+            filepath = os.path.join(upload_dir, filename)
+            with open(filepath, "wb") as f:
+                shutil.copyfileobj(file_field.file, f)
+
+            preset_name = os.path.splitext(filename)[0]
+            num_slices = int(form.getvalue('num_slices', 16))
+            if not (1 <= num_slices <= 16):
+                raise ValueError("Number of slices must be between 1 and 16")
+
+            regions = None
+            if 'regions' in form:
+                regions = json.loads(form.getvalue('regions'))
+                num_slices = None
+
+            result = process_kit(
+                input_wav=filepath,
+                preset_name=preset_name,
+                regions=regions,
+                num_slices=num_slices,
+                keep_files=False,
+                mode=mode
+            )
+
+            if mode == "download" and result.get('success'):
+                bundle_path = result.get('bundle_path')
+                if os.path.exists(bundle_path):
+                    with open(bundle_path, "rb") as f:
+                        bundle_data = f.read()
+                    self.send_response(200)
+                    self.send_header("Content-Type", "application/zip")
+                    self.send_header("Content-Disposition", f"attachment; filename={os.path.basename(bundle_path)}")
+                    self.send_header("Content-Length", str(len(bundle_data)))
+                    self.end_headers()
+                    self.wfile.write(bundle_data)
+                    os.remove(bundle_path)
+                    return None
+
+            return {
+                "message": result.get('message', 'Operation completed successfully'),
+                "message_type": "success" if result.get('success') else "error"
+            }
+
+        except Exception as e:
+            return {"message": f"Error processing kit: {str(e)}", "message_type": "error"}
+
+    @route_handler.post("/refresh")
+    def handle_refresh_post(self, form):
+        action = form.getvalue('action')
+        if action != "refresh_library":
+            return {"message": "Bad Request: Invalid action", "message_type": "error"}
+
+        try:
+            success, message = refresh_library()
+            return {"message": message, "message_type": "success" if success else "error"}
+        except Exception as e:
+            return {"message": f"Error refreshing library: {str(e)}", "message_type": "error"}
+
+    @route_handler.post("/reverse")
+    def handle_reverse_post(self, form):
+        action = form.getvalue('action')
+        if action != "reverse_file":
+            return {"message": "Bad Request: Invalid action", "message_type": "error"}
+
+        wav_file = form.getvalue('wav_file')
+        if not wav_file:
+            return {"message": "Bad Request: No WAV file selected", "message_type": "error"}
+
+        try:
+            success, message = reverse_wav_file(filename=wav_file, directory=BASE_SAMPLES_DIR)
+            return {"message": message, "message_type": "success" if success else "error"}
+        except Exception as e:
+            return {"message": f"Error processing reverse WAV file: {str(e)}", "message_type": "error"}
 
     def do_POST(self):
-        if self.path in ["/slice", "/refresh", "/reverse"]:
-            content_type = self.headers.get('Content-Type')
-            if not content_type:
-                self.send_response(400)
-                self.end_headers()
-                self.wfile.write(bytes("Bad Request: Content-Type header missing", "utf-8"))
-                return
-
-            # Initialize message variables
-            message = ""
-            message_type = ""  # "success" or "error"
-
-            # Determine action based on the action field
-            try:
-                form = cgi.FieldStorage(
-                    fp=self.rfile,
-                    headers=self.headers,
-                    environ={
-                        'REQUEST_METHOD': 'POST',
-                        'CONTENT_TYPE': content_type,
-                    }
-                )
-            except Exception as e:
-                self.send_response(400)
-                self.end_headers()
-                self.wfile.write(bytes(f"Bad Request: {e}", "utf-8"))
-                return
-
-            action = form.getvalue('action')
-            if not action:
-                message = "Bad Request: No action specified."
-                message_type = "error"
-                self.respond_with_form(self.path, message, message_type)
-                return
-
-            mode = form.getvalue('mode') if 'mode' in form else None
-
-            if action == "slice" and self.path == "/slice":
-                if not mode:
-                    message = "Bad Request: No mode specified."
-                    message_type = "error"
-                    self.respond_with_form(self.path, message, message_type)
-                    return
-
-                if mode not in ["download", "auto_place"]:
-                    message = "Bad Request: Invalid mode selected."
-                    message_type = "error"
-                    self.respond_with_form(self.path, message, message_type)
-                    return
-
-                # Process the kit
-                try:
-                    # Retrieve and save the uploaded file
-                    if 'file' not in form:
-                        message = "Bad Request: No file field in form."
-                        message_type = "error"
-                        self.respond_with_form(self.path, message, message_type)
-                        return
-
-                    file_field = form['file']
-                    if not isinstance(file_field, cgi.FieldStorage):
-                        message = "Bad Request: File field is not valid."
-                        message_type = "error"
-                        self.respond_with_form(self.path, message, message_type)
-                        return
-
-                    if not file_field.filename:
-                        message = "Bad Request: No file uploaded."
-                        message_type = "error"
-                        self.respond_with_form(self.path, message, message_type)
-                        return
-
-                    filename = os.path.basename(file_field.filename)
-                    upload_dir = "uploads"
-                    os.makedirs(upload_dir, exist_ok=True)
-                    filepath = os.path.join(upload_dir, filename)
-                    print(f"Saving uploaded file to {filepath}...")
-                    with open(filepath, "wb") as f:
-                        shutil.copyfileobj(file_field.file, f)
-
-                    preset_name = os.path.splitext(filename)[0]
-
-                    num_slices = 16  # default
-                    if 'num_slices' in form:
-                        try:
-                            num_slices = int(form.getvalue('num_slices'))
-                            if not (1 <= num_slices <= 16):
-                                raise ValueError
-                        except ValueError:
-                            message = "Bad Request: Number of slices must be an integer between 1 and 16."
-                            message_type = "error"
-                            os.remove(filepath)  # Clean up uploaded file
-                            self.respond_with_form(self.path, message, message_type)
-                            return
-
-                    # Start of new code to handle regions
-                    regions = None
-                    if 'regions' in form:
-                        regions_str = form.getvalue('regions')
-                        try:
-                            regions = json.loads(regions_str)
-                            print(f"Received regions: {regions}")
-                        except json.JSONDecodeError:
-                            message = "Invalid regions format. Regions should be a valid JSON."
-                            message_type = "error"
-                            os.remove(filepath)  # Clean up uploaded file
-                            self.respond_with_form(self.path, message, message_type)
-                            return
-                    # End of new code
-
-                    if regions:
-                        num_slices = None  # Optionally disable num_slices if regions are used
-
-                    print(f"Processing kit generation with {num_slices} slices and mode '{mode}'...")
-                    # Process the uploaded WAV file
-                    result = process_kit(
-                        input_wav=filepath,
-                        preset_name=preset_name,
-                        regions=regions,           # Pass regions here
-                        num_slices=num_slices, 
-                        keep_files=False,
-                        mode=mode
-                    )
-
-                    if mode == "download":
-                        if result.get('success'):
-                            bundle_path = result.get('bundle_path')
-                            if os.path.exists(bundle_path):
-                                print(f"Bundle created at {bundle_path}. Sending to client...")
-                                with open(bundle_path, "rb") as f:
-                                    bundle_data = f.read()
-
-                                self.send_response(200)
-                                self.send_header("Content-Type", "application/zip")
-                                self.send_header("Content-Disposition", f"attachment; filename={os.path.basename(bundle_path)}")
-                                self.send_header("Content-Length", str(len(bundle_data)))
-                                self.end_headers()
-                                self.wfile.write(bundle_data)
-
-                                # Clean up bundle
-                                os.remove(bundle_path)
-                                print("Cleanup completed.")
-                            else:
-                                print("Failed to create bundle.")
-                                message = "Failed to create bundle."
-                                message_type = "error"
-                                self.respond_with_form(self.path, message, message_type)
-                        else:
-                            self.respond_with_form(self.path, result.get('message', 'An error occurred.'), "error")
-                    elif mode == "auto_place":
-                        if result.get('success'):
-                            self.respond_with_form(self.path, result.get('message', 'Preset placed successfully.'), "success")
-                        else:
-                            self.respond_with_form(self.path, result.get('message', 'An error occurred.'), "error")
-                except Exception as e:
-                    self.respond_with_form(self.path, f"Error processing kit: {e}", "error")
-
-            elif action == "refresh_library" and self.path == "/refresh":
-                print("Refreshing library...")
-                # Ensure no file upload is required for this action
-                try:
-                    success, refresh_message = refresh_library()
-                    if success:
-                        message = refresh_message
-                        message_type = "success"
-                    else:
-                        message = refresh_message
-                        message_type = "error"
-                    self.respond_with_form(self.path, message, message_type)
-                except Exception as e:
-                    print(f"Error during library refresh: {e}")
-                    message = f"Error refreshing library: {e}"
-                    message_type = "error"
-                    self.respond_with_form(self.path, message, message_type)
-
-            elif action == "reverse_file" and self.path == "/reverse":
-                print("Processing reverse WAV file request...")
-                try:
-                    wav_file = form.getvalue('wav_file')
-                    if not wav_file:
-                        message = "Bad Request: No WAV file selected."
-                        message_type = "error"
-                        self.respond_with_form(self.path, message, message_type)
-                        return
-
-                    success, msg = reverse_wav_file(filename=wav_file, directory=BASE_SAMPLES_DIR)
-                    message = msg
-                    message_type = "success" if success else "error"
-
-                    options_html = generate_wav_options(BASE_SAMPLES_DIR)
-                    with open(os.path.join("templates", "reverse.html"), "r") as f:
-                        template = f.read()
-                    message_html = f'<p class="{message_type}">{message}</p>'
-                    html_content = template.replace("{{ options }}", options_html).replace("{message_html}", message_html)
-                    self.send_response(200)
-                    self.send_header("Content-type", "text/html")
-                    self.end_headers()
-                    self.wfile.write(bytes(html_content, "utf-8"))
-                except Exception as e:
-                    self.respond_with_form(self.path, f"Error processing reverse WAV file: {e}", "error")
-
-            else:
-                message = "Bad Request: Unknown action or incorrect path."
-                message_type = "error"
-                self.respond_with_form(self.path, message, message_type)
-
-    def respond_with_form(self, path, message, message_type):
-        """
-        Sends back the appropriate form page with an inline message.
-        """
-        self.send_response(200)
-        self.send_header("Content-type", "text/html")
-        self.end_headers()
-        if path == "/slice":
-            template_file = "slice.html"
-        elif path == "/refresh":
-            template_file = "refresh.html"
-        elif path == "/reverse":
-            template_file = "reverse.html"
-        else:
-            # Default to index.html if path is unrecognized
-            template_file = "index.html"
-
-        # Read the form template
-        template_path = os.path.join("templates", template_file)
-        if not os.path.exists(template_path):
-            # Fallback to a simple message if template does not exist
-            self.wfile.write(bytes(f"<html><body><p>{message}</p></body></html>", "utf-8"))
+        if self.path not in ["/slice", "/refresh", "/reverse"]:
+            self.send_error(404)
             return
 
         try:
-            with open(template_path, "r") as f:
-                html_content = f.read()
+            form = cgi.FieldStorage(
+                fp=self.rfile,
+                headers=self.headers,
+                environ={
+                    'REQUEST_METHOD': 'POST',
+                    'CONTENT_TYPE': self.headers.get('Content-Type', ''),
+                }
+            )
         except Exception as e:
-            error_message = f"Error reading template file: {e}"
-            self.send_response(500)
-            self.end_headers()
-            self.wfile.write(bytes(f"<html><body><p style='color: red;'>{error_message}</p></body></html>", "utf-8"))
+            self.send_error(400, str(e))
             return
 
-        # Insert the message_html
-        if "{message_html}" in html_content:
-            if message:
-                if message_type == "success":
-                    message_html = f'<p style="color: green;">{message}</p>'
-                elif message_type == "error":
-                    message_html = f'<p style="color: red;">{message}</p>'
-                else:
-                    message_html = f'<p>{message}</p>'
-                html_content = html_content.replace("{message_html}", message_html)
-            else:
-                html_content = html_content.replace("{message_html}", "")
+        handler = self.route_handler.post_routes.get(self.path)
+        if not handler:
+            self.send_error(404)
+            return
 
-        self.wfile.write(bytes(html_content, "utf-8"))
+        try:
+            result = handler(self, form)
+            if result is not None:  # None means the handler has already sent the response
+                content = self.route_handler.template_manager.render(
+                    os.path.basename(self.path) + ".html",
+                    **result
+                )
+                self.send_response(200)
+                self.send_header("Content-type", "text/html")
+                self.end_headers()
+                self.wfile.write(bytes(content, "utf-8"))
+        except Exception as e:
+            self.send_error(500, str(e))
 
 if __name__ == "__main__":
-    # Write the PID file and register its removal on exit.
     write_pid()
     atexit.register(remove_pid)
-    # Handle SIGTERM and SIGINT to ensure graceful shutdown.
     signal.signal(signal.SIGTERM, handle_exit)
     signal.signal(signal.SIGINT, handle_exit)
+    
+    hostName = "0.0.0.0"
+    serverPort = 666
     
     print("Starting webserver")
     webServer = HTTPServer((hostName, serverPort), MyServer)
