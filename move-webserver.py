@@ -9,7 +9,7 @@ import sys
 from handlers.slice_handler_class import SliceHandler
 from handlers.refresh_handler_class import RefreshHandler
 from handlers.reverse_handler_class import ReverseHandler
-from handlers.preset_scanner_handler_class import PresetScannerHandler
+from handlers.drum_rack_inspector_handler_class import DrumRackInspectorHandler
 
 # Define the PID file location
 PID_FILE = os.path.expanduser('~/extending-move/move-webserver.pid')
@@ -58,9 +58,14 @@ class TemplateManager:
         """
         template = self.get_template(template_name)
         # Handle special cases
-        if template_name in ["reverse.html", "preset_scanner.html"]:
+        # Handle template variables
+        if template_name in ["reverse.html", "drum_rack_inspector.html"]:
             kwargs["options"] = kwargs.get("options", "")
             template = template.replace("{{ options }}", kwargs["options"])
+            
+            if template_name == "drum_rack_inspector.html":
+                kwargs["samples_html"] = kwargs.get("samples_html", "")
+                template = template.replace("{{ samples_html }}", kwargs["samples_html"])
         
         # Handle message display
         message = kwargs.get("message", "")
@@ -173,7 +178,7 @@ class MyServer(BaseHTTPRequestHandler):
     slice_handler = SliceHandler()
     refresh_handler = RefreshHandler()
     reverse_handler = ReverseHandler()
-    preset_scanner_handler = PresetScannerHandler()
+    drum_rack_inspector_handler = DrumRackInspectorHandler()
 
     @route_handler.get("/", "index.html")
     def handle_index(self):
@@ -195,10 +200,10 @@ class MyServer(BaseHTTPRequestHandler):
         """Handle GET request for reverse page."""
         return {"options": self.reverse_handler.get_wav_options()}
 
-    @route_handler.get("/preset-scanner", "preset_scanner.html")
-    def handle_preset_scanner_get(self):
-        """Handle GET request for preset scanner page."""
-        return self.preset_scanner_handler.handle_get()
+    @route_handler.get("/drum-rack-inspector", "drum_rack_inspector.html")
+    def handle_drum_rack_inspector_get(self):
+        """Handle GET request for drum rack inspector page."""
+        return self.drum_rack_inspector_handler.handle_get()
 
     @route_handler.get("/style.css", "style.css", "text/css")
     def handle_css(self):
@@ -258,12 +263,17 @@ class MyServer(BaseHTTPRequestHandler):
         """Handle POST request for reverse feature."""
         return self.reverse_handler.handle_post(form)
 
+    @route_handler.post("/drum-rack-inspector")
+    def handle_drum_rack_inspector_post(self, form):
+        """Handle POST request for drum rack inspector feature."""
+        return self.drum_rack_inspector_handler.handle_post(form)
+
     def do_POST(self):
         """
         Handle all POST requests.
         Processes form data and delegates to appropriate handler.
         """
-        if self.path not in ["/slice", "/refresh", "/reverse", "/preset-scanner"]:
+        if self.path not in ["/slice", "/refresh", "/reverse", "/drum-rack-inspector"]:
             self.send_error(404)
             return
 
