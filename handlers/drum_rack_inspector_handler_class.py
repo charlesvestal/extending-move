@@ -93,7 +93,7 @@ class DrumRackInspectorHandler(BaseHandler):
             result = scan_for_drum_rack_presets()
             if not result['success']:
                 return ''
-            options_html = []
+            options_html = ['<option value="">--Select a Preset--</option>']
             for preset in result['presets']:
                 options_html.append(f'<option value="{preset["path"]}">{preset["name"]}</option>')
             return '\n'.join(options_html)

@@ -55,60 +55,77 @@
 
             function attachFormHandler(tabName) {
                 const form = document.querySelector(`#${tabName} form`);
-                if (form) {
+                if (!form) return;
+
+                // For DrumRackInspector, use change event on select
+                if (tabName === 'DrumRackInspector') {
+                    const select = form.querySelector('select');
+                    if (select) {
+                        select.addEventListener('change', async function(event) {
+                            event.preventDefault();
+                            await submitForm(form, tabName);
+                        });
+                    }
+                } else {
+                    // For other forms, use submit event
                     form.addEventListener('submit', async function(event) {
-                        event.preventDefault(); // Prevent the default form submission
-
-                        const formData = new FormData(form);
-
-                        // Collect regions data from WaveSurfer
-                        const regionsArray = Object.values(wavesurfer.regions.list).map(region => ({ start: region.start, end: region.end }));
-                        formData.append('regions', JSON.stringify(regionsArray));
-
-                        const url = `/${tabName.replace(/([A-Z])/g, '-$1')
-                            .toLowerCase()
-                            .replace(/^-/, '')}`;
-                        const method = form.method.toUpperCase();
-
-                        try {
-                            const response = await fetch(url, {
-                                method: method,
-                                body: formData
-                            });
-
-                            // Check if the response is an attachment
-                            const contentDisposition = response.headers.get('Content-Disposition');
-                            if (contentDisposition && contentDisposition.includes('attachment')) {
-                                const blob = await response.blob();
-                                const urlBlob = window.URL.createObjectURL(blob);
-                                const a = document.createElement('a');
-                                a.href = urlBlob;
-                                const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
-                                const filename = filenameMatch ? filenameMatch[1] : 'download.zip';
-                                a.download = filename;
-                                document.body.appendChild(a);
-                                a.click();
-                                a.remove();
-                                window.URL.revokeObjectURL(urlBlob);
-                            } else {
-                                if (!response.ok) {
-                                    throw new Error('Network response was not ok');
-                                }
-                                const result = await response.text();
-                                document.getElementById(tabName).innerHTML = result;
-
-                                // Re-attach the form handler in case of multiple submissions
-                                attachFormHandler(tabName);
-                                if (tabName === 'Slice') {
-                                    initializeWaveform();
-                                } else if (tabName === 'DrumRackInspector') {
-                                    initializeDrumRackWaveforms();
-                                }
-                            }
-                        } catch (error) {
-                            document.getElementById(tabName).innerHTML = `<p style="color: red;">Error submitting form: ${error}</p>`;
-                        }
+                        event.preventDefault();
+                        await submitForm(form, tabName);
                     });
+                }
+            }
+
+            async function submitForm(form, tabName) {
+                const formData = new FormData(form);
+
+                // Collect regions data from WaveSurfer if in Slice tab
+                if (tabName === 'Slice' && wavesurfer) {
+                    const regionsArray = Object.values(wavesurfer.regions.list).map(region => ({ start: region.start, end: region.end }));
+                    formData.append('regions', JSON.stringify(regionsArray));
+                }
+
+                const url = `/${tabName.replace(/([A-Z])/g, '-$1')
+                    .toLowerCase()
+                    .replace(/^-/, '')}`;
+                const method = form.method.toUpperCase();
+
+                try {
+                    const response = await fetch(url, {
+                        method: method,
+                        body: formData
+                    });
+
+                    // Check if the response is an attachment
+                    const contentDisposition = response.headers.get('Content-Disposition');
+                    if (contentDisposition && contentDisposition.includes('attachment')) {
+                        const blob = await response.blob();
+                        const urlBlob = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = urlBlob;
+                        const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
+                        const filename = filenameMatch ? filenameMatch[1] : 'download.zip';
+                        a.download = filename;
+                        document.body.appendChild(a);
+                        a.click();
+                        a.remove();
+                        window.URL.revokeObjectURL(urlBlob);
+                    } else {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        const result = await response.text();
+                        document.getElementById(tabName).innerHTML = result;
+
+                        // Re-attach the form handler in case of multiple submissions
+                        attachFormHandler(tabName);
+                        if (tabName === 'Slice') {
+                            initializeWaveform();
+                        } else if (tabName === 'DrumRackInspector') {
+                            initializeDrumRackWaveforms();
+                        }
+                    }
+                } catch (error) {
+                    document.getElementById(tabName).innerHTML = `<p style="color: red;">Error submitting form: ${error}</p>`;
                 }
             }
 
@@ -313,15 +330,7 @@
                     // If not the last region, snap its end to the start of the next region
                     const next = regions[idx + 1];
                     next.update({ start: updatedRegion.end });
-                } else {
-                    // If this is the last region, allow its end to be adjusted
-                    // Do not enforce end=duration if being resized from the right
-                    // Previously removed the enforcement to allow adjustment
-                    // No additional action needed
                 }
-
-                // Do not enforce start=0 for the first region
-                // Thus, allowing the first region to have its start adjusted
             }
 
             // Recalculate slices if needed (this is left for legacy calls in your code)

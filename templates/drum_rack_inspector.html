@@ -1,31 +1,21 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Drum Rack Inspector</title>
-    <link rel="stylesheet" type="text/css" href="style.css">
-</head>
-<body>
-    <div class="container">
-        <h1>Drum Rack Inspector</h1>
-        
-        <form method="POST" action="/drum-rack-inspector">
-            <input type="hidden" name="action" value="select_preset">
-            <div class="form-group">
-                <label for="preset_select">Select a Drum Rack:</label>
-                <select name="preset_select" id="preset_select">
-                    {{ options }}
-                </select>
-            </div>
-            <button type="submit" class="button">View Samples</button>
-        </form>
-
-        <div class="message">
-            {message_html}
+<div class="container">
+    <h1>Drum Rack Inspector</h1>
+    
+    <form method="POST" action="/drum-rack-inspector" class="preset-form">
+        <input type="hidden" name="action" value="select_preset">
+        <div class="form-group">
+            <label for="preset_select">Select a Drum Rack:</label>
+            <select name="preset_select" id="preset_select">
+                {{ options }}
+            </select>
         </div>
+    </form>
 
-        <div class="samples-container">
-            {{ samples_html }}
-        </div>
+    <div class="message">
+        {message_html}
     </div>
-</body>
-</html>
+
+    <div class="samples-container">
+        {{ samples_html }}
+    </div>
+</div>

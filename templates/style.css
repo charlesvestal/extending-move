@@ -39,6 +39,48 @@ body {
     padding: 20px;
 }
 
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.container h1 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.preset-form {
+    margin-bottom: 30px;
+}
+
+.form-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    font-weight: bold;
+    color: #666;
+    min-width: 150px;
+}
+
+.form-group select {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    max-width: 500px;
+}
+
+.form-group select:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
 .drum-grid {
     display: flex;
     flex-direction: column;
