@@ -45,5 +45,9 @@ tar -czf - \
 
 echo "Files copied successfully."
 
+# Set proper permissions on the remote machine
+echo "Setting proper permissions..."
+ssh "${REMOTE_USER}@${REMOTE_HOST}" "chmod +x '${REMOTE_DIR}/move-webserver.py' && chmod -R 755 '${REMOTE_DIR}/static'"
+
 # Restart the webserver using the utility script
 "${SCRIPT_DIR}/restart-webserver.sh"
