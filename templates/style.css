@@ -13,7 +13,7 @@ body {
 .tab {
     overflow: hidden;
     border-bottom: 1px solid #ccc;
-    background-color: #f1f1f1;
+    /* background-color: #f1f1f1; */
 }
 
 .tab button {
@@ -31,7 +31,8 @@ body {
 }
 
 .tab button.active {
-    background-color: #ccc;
+    /* background-color: #ccc; */
+    color:rgba(255 118 77);
 }
 
 .tabcontent {
@@ -39,46 +40,50 @@ body {
     padding: 20px;
 }
 
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-.container h1 {
+h2 {
     margin-bottom: 20px;
     color: #333;
 }
 
-.preset-form {
+form {
     margin-bottom: 30px;
 }
 
-.form-group {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
-.form-group label {
+label {
     font-weight: bold;
     color: #666;
-    min-width: 150px;
+    margin-right: 10px;
 }
 
-.form-group select {
-    flex: 1;
+select, input[type="number"], input[type="file"] {
     padding: 8px;
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 14px;
-    max-width: 500px;
+    margin-bottom: 10px;
 }
 
-.form-group select:focus {
-    outline: none;
-    border-color: #007bff;
+select {
+    min-width: 200px;
+}
+
+button, input[type="submit"] {
+    padding: 8px 16px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-right: 10px;
+}
+
+.tablinks {
+    color:black;
+}
+
+button:hover, input[type="submit"]:hover {
+    background-color: #0056b3;
 }
 
 .drum-grid {
@@ -87,7 +92,7 @@ body {
     gap: 10px;
     width: 100%;
     max-width: 1200px;
-    margin: 0 auto;
+    margin: 20px auto;
 }
 
 .drum-grid-row {
@@ -98,7 +103,7 @@ body {
 }
 
 .drum-cell {
-    flex: 0 0 calc(25% - 8px); /* 4 cells per row with 10px gap */
+    flex: 0 0 calc(25% - 8px);
     background: #f5f5f5;
     border: 1px solid #ddd;
     border-radius: 4px;
