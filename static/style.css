@@ -129,9 +129,10 @@ button:hover, input[type="submit"]:hover {
 }
 
 .sample-name {
-    font-size: 0.9em;
+    font-size: 0.3em;
+    font-family: 'Courier New', Courier, monospace;
     color: #333;
-    word-break: break-word;
+    word-break: break-all;
 }
 
 .download-link {

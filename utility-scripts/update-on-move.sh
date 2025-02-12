@@ -40,7 +40,7 @@ echo "Creating project files archive..."
 tar -czf - \
     --exclude='.git' \
     --exclude='utility-scripts' \
-    core handlers templates move-webserver.py | \
+    core handlers templates static move-webserver.py | \
     ssh "${REMOTE_USER}@${REMOTE_HOST}" "cd '${REMOTE_DIR}' && tar -xzf -"
 
 echo "Files copied successfully."
