@@ -205,10 +205,44 @@ class MyServer(BaseHTTPRequestHandler):
         """Handle GET request for drum rack inspector page."""
         return self.drum_rack_inspector_handler.handle_get()
 
-    @route_handler.get("/style.css", "style.css", "text/css")
-    def handle_css(self):
-        """Handle GET request for stylesheet."""
-        return {}
+    def handle_static_file(self, path):
+        """Handle requests for static files."""
+        try:
+            # Remove the leading '/static/' from the path
+            relative_path = path[8:]  # len('/static/') = 8
+            
+            # Construct the full path to the static file
+            full_path = os.path.join('static', relative_path)
+            
+            # Security check: ensure the requested path is within the static directory
+            real_path = os.path.realpath(full_path)
+            if not real_path.startswith(os.path.realpath('static')):
+                self.send_error(403, "Access denied")
+                return
+            
+            if not os.path.exists(real_path):
+                self.send_error(404, "File not found")
+                return
+                
+            # Read and serve the file
+            with open(real_path, 'rb') as f:
+                content = f.read()
+                
+            # Determine content type based on file extension
+            content_type = 'text/plain'
+            if real_path.endswith('.css'):
+                content_type = 'text/css'
+            elif real_path.endswith('.js'):
+                content_type = 'text/javascript'
+                
+            self.send_response(200)
+            self.send_header('Content-Type', content_type)
+            self.send_header('Content-Length', str(len(content)))
+            self.end_headers()
+            self.wfile.write(content)
+            
+        except Exception as e:
+            self.send_error(500, str(e))
 
     def handle_sample_request(self, path):
         """Handle requests for sample files."""
@@ -274,6 +308,9 @@ class MyServer(BaseHTTPRequestHandler):
         """
         if self.path.startswith('/samples/'):
             self.handle_sample_request(self.path)
+            return
+        elif self.path.startswith('/static/'):
+            self.handle_static_file(self.path)
             return
             
         route = self.route_handler.get_routes.get(self.path)

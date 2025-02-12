@@ -1,21 +1,14 @@
-<div class="container">
-    <h1>Drum Rack Inspector</h1>
-    
-    <form method="POST" action="/drum-rack-inspector" class="preset-form">
-        <input type="hidden" name="action" value="select_preset">
-        <div class="form-group">
-            <label for="preset_select">Select a Drum Rack:</label>
-            <select name="preset_select" id="preset_select">
-                {{ options }}
-            </select>
-        </div>
-    </form>
+<h2>Drum Rack Inspector</h2>
+{message_html}
 
-    <div class="message">
-        {message_html}
-    </div>
+<form method="POST" action="/drum-rack-inspector">
+    <input type="hidden" name="action" value="select_preset">
+    <label for="preset_select">Select a Drum Rack:</label>
+    <select name="preset_select" id="preset_select">
+        {{ options }}
+    </select>
+</form>
 
-    <div class="samples-container">
-        {{ samples_html }}
-    </div>
+<div class="samples-container">
+    {{ samples_html }}
 </div>
