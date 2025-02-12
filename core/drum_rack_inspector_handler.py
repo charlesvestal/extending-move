@@ -22,7 +22,9 @@ def get_drum_cell_samples(preset_path):
 
         samples = []
         
-        def process_drum_cells(data, pad_number=0):
+        pad_counter = [1]  # Use list to allow modification in nested function
+        
+        def process_drum_cells(data):
             if isinstance(data, dict):
                 if data.get('kind') == 'drumCell':
                     # Extract sample URI and convert to filename
@@ -35,22 +37,18 @@ def get_drum_cell_samples(preset_path):
                     else:
                         sample_name = "No sample loaded"
                     
-                    # Get the receiving note (pad number) from drumZoneSettings
-                    receiving_note = data.get('drumZoneSettings', {}).get('receivingNote', 0)
-                    if receiving_note:
-                        # Convert MIDI note to pad number (1-16)
-                        pad_number = receiving_note - 35  # MIDI notes start at 36 for pad 1
-                    
+                    # Simply use incrementing counter for pad numbers
                     samples.append({
-                        'pad': pad_number,
+                        'pad': pad_counter[0],
                         'sample': sample_name
                     })
+                    pad_counter[0] += 1
                     
                 for value in data.values():
-                    process_drum_cells(value, pad_number)
+                    process_drum_cells(value)
             elif isinstance(data, list):
                 for item in data:
-                    process_drum_cells(item, pad_number)
+                    process_drum_cells(item)
 
         process_drum_cells(preset_data)
         
