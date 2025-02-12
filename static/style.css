@@ -13,7 +13,7 @@ body {
 .tab {
     overflow: hidden;
     border-bottom: 1px solid #ccc;
-    background-color: #f1f1f1;
+    /* background-color: #f1f1f1; */
 }
 
 .tab button {
@@ -31,7 +31,8 @@ body {
 }
 
 .tab button.active {
-    background-color: #ccc;
+    /* background-color: #ccc; */
+    color:rgba(255 118 77);
 }
 
 .tabcontent {
@@ -75,6 +76,10 @@ button, input[type="submit"] {
     cursor: pointer;
     font-size: 14px;
     margin-right: 10px;
+}
+
+.tablinks {
+    color:black;
 }
 
 button:hover, input[type="submit"]:hover {

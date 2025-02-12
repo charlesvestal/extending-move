@@ -121,7 +121,20 @@ async function submitForm(form, tabName) {
 /**
  * Initialize waveforms for drum rack samples
  */
+// Keep track of all drum rack waveform instances
+let drumRackWaveforms = [];
+
 function initializeDrumRackWaveforms() {
+    // Clear previous instances
+    drumRackWaveforms.forEach(ws => {
+        try {
+            ws.destroy();
+        } catch (e) {
+            console.error('Error destroying wavesurfer instance:', e);
+        }
+    });
+    drumRackWaveforms = [];
+
     const containers = document.querySelectorAll('.waveform-container');
     containers.forEach(container => {
         const audioPath = container.getAttribute('data-audio-path');
@@ -135,13 +148,36 @@ function initializeDrumRackWaveforms() {
             responsive: true,
             normalize: true,
             minPxPerSec: 50,
-            barWidth: 2
+            barWidth: 2,
+            interact: false, // Disable seeking
+            hideScrollbar: true // Hide the scrollbar
         });
         
+        // Store wavesurfer instance in container for easy access
+        container.wavesurfer = wavesurfer;
+        drumRackWaveforms.push(wavesurfer);
+        
+        // Load the audio file
         wavesurfer.load(audioPath);
         
+        // Handle finish event to reset state
+        wavesurfer.on('finish', () => {
+            wavesurfer.stop();
+        });
+        
+        // Handle click event
         container.addEventListener('click', () => {
-            wavesurfer.playPause();
+            // Stop all waveforms first
+            drumRackWaveforms.forEach(ws => {
+                if (ws.isPlaying()) {
+                    ws.stop();
+                }
+            });
+            
+            // Always start from beginning
+            wavesurfer.stop();
+            wavesurfer.seekTo(0);
+            requestAnimationFrame(() => wavesurfer.play(0));
         });
     });
 }
