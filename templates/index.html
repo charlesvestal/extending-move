@@ -30,6 +30,8 @@
                     attachFormHandler(tabName);
                     if (tabName === 'Slice') {
                         initializeWaveform();
+                    } else if (tabName === 'DrumRackInspector') {
+                        initializeDrumRackWaveforms();
                     }
                 });
             }
@@ -99,6 +101,8 @@
                                 attachFormHandler(tabName);
                                 if (tabName === 'Slice') {
                                     initializeWaveform();
+                                } else if (tabName === 'DrumRackInspector') {
+                                    initializeDrumRackWaveforms();
                                 }
                             }
                         } catch (error) {
@@ -106,6 +110,34 @@
                         }
                     });
                 }
+            }
+
+            /**
+             * Initialize waveforms for drum rack samples
+             */
+            function initializeDrumRackWaveforms() {
+                const containers = document.querySelectorAll('.waveform-container');
+                containers.forEach(container => {
+                    const audioPath = container.getAttribute('data-audio-path');
+                    if (!audioPath) return;
+                    
+                    const wavesurfer = WaveSurfer.create({
+                        container: container,
+                        waveColor: 'violet',
+                        progressColor: 'purple',
+                        height: 64,
+                        responsive: true,
+                        normalize: true,
+                        minPxPerSec: 50,
+                        barWidth: 2
+                    });
+                    
+                    wavesurfer.load(audioPath);
+                    
+                    container.addEventListener('click', () => {
+                        wavesurfer.playPause();
+                    });
+                });
             }
 
             /**

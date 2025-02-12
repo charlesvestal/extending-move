@@ -33,7 +33,7 @@ class DrumRackInspectorHandler(BaseHandler):
             print(f"Found samples: {result['samples']}")  # Debug log
             print("\nProcessing samples for display:")  # Debug log
             samples_html = '<table class="samples-table">'
-            samples_html += '<tr><th>Pad</th><th>Sample</th><th>Action</th></tr>'
+            samples_html += '<tr><th>Pad</th><th>Sample</th><th>Waveform</th><th>Action</th></tr>'
             for sample in result['samples']:
                 print(f"\nSample: {sample}")  # Debug log
                 print(f"Sample path: {sample.get('path', 'No path')}")  # Debug log
@@ -46,7 +46,11 @@ class DrumRackInspectorHandler(BaseHandler):
                     action = f'<a href="{web_path}" target="_blank">Download</a>'
                 else:
                     action = 'No sample'
-                samples_html += f'<tr><td>Pad {sample["pad"]}</td><td>{sample["sample"]}</td><td>{action}</td></tr>'
+                # Create unique ID for waveform container
+                waveform_id = f'waveform-{sample["pad"]}'
+                # Add waveform container with fixed dimensions
+                waveform_container = f'<div id="{waveform_id}" class="waveform-container" style="width: 300px; height: 64px;" data-audio-path="{web_path if "web_path" in locals() else ""}"></div>'
+                samples_html += f'<tr><td>Pad {sample["pad"]}</td><td>{sample["sample"]}</td><td>{waveform_container}</td><td>{action}</td></tr>'
             samples_html += '</table>'
 
             return {
