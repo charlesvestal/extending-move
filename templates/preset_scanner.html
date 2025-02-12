@@ -1,0 +1,34 @@
+<h2>Drum Rack Preset Scanner</h2>
+{message_html}
+
+<div class="preset-scanner">
+    <form method="post">
+        <input type="hidden" name="action" value="select_preset"/>
+        
+        <label for="preset_select">Select a Drum Rack Preset:</label>
+        <select id="preset_select" name="preset_select" required>
+            <option value="" disabled selected>--Select a preset--</option>
+            {{ options }}
+        </select>
+    </form>
+</div>
+
+<style>
+.preset-scanner {
+    margin: 20px 0;
+}
+
+.preset-scanner select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: white;
+}
+
+.preset-scanner label {
+    display: block;
+    margin-bottom: 5px;
+}
+</style>

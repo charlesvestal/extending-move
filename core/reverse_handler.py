@@ -2,7 +2,7 @@ import os
 import wave
 import numpy as np
 
-from refresh_handler import refresh_library
+from core.refresh_handler import refresh_library
 
 def get_wav_files(directory):
     """

@@ -36,7 +36,11 @@
 
             async function fetchContent(tabName) {
                 try {
-                    const response = await fetch(`/${tabName.toLowerCase()}`);
+                    // Convert tab name to URL format (lowercase and preserve hyphens)
+                    const urlPath = tabName.split('-')
+                        .map(part => part.toLowerCase())
+                        .join('-');
+                    const response = await fetch(`/${urlPath}`);
                     if (!response.ok) {
                         throw new Error('Network response was not ok');
                     }
@@ -59,7 +63,9 @@
                         const regionsArray = Object.values(wavesurfer.regions.list).map(region => ({ start: region.start, end: region.end }));
                         formData.append('regions', JSON.stringify(regionsArray));
 
-                        const url = `/${tabName.toLowerCase()}`;
+                        const url = `/${tabName.split('-')
+                            .map(part => part.toLowerCase())
+                            .join('-')}`;
                         const method = form.method.toUpperCase();
 
                         try {
@@ -306,6 +312,7 @@
             <button class="tablinks" onclick="openTab(event, 'Slice')" id="defaultOpen">Slice Kit</button>
             <button class="tablinks" onclick="openTab(event, 'Reverse')">Reverse WAV</button>
             <button class="tablinks" onclick="openTab(event, 'Refresh')">Refresh Library</button>
+            <button class="tablinks" onclick="openTab(event, 'Preset-Scanner')">Preset Scanner</button>
         </div>
 
         <div id="Slice" class="tabcontent">
@@ -318,6 +325,10 @@
 
         <div id="Reverse" class="tabcontent">
             <!-- The Reverse WAV form content will be loaded here dynamically -->
+        </div>
+
+        <div id="Preset-Scanner" class="tabcontent">
+            <!-- The Preset Scanner form content will be loaded here dynamically -->
         </div>
     </body>
 </html>

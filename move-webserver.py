@@ -9,6 +9,7 @@ import sys
 from handlers.slice_handler_class import SliceHandler
 from handlers.refresh_handler_class import RefreshHandler
 from handlers.reverse_handler_class import ReverseHandler
+from handlers.preset_scanner_handler_class import PresetScannerHandler
 
 # Define the PID file location
 PID_FILE = os.path.expanduser('~/extending-move/move-webserver.pid')
@@ -172,6 +173,7 @@ class MyServer(BaseHTTPRequestHandler):
     slice_handler = SliceHandler()
     refresh_handler = RefreshHandler()
     reverse_handler = ReverseHandler()
+    preset_scanner_handler = PresetScannerHandler()
 
     @route_handler.get("/", "index.html")
     def handle_index(self):
@@ -192,6 +194,11 @@ class MyServer(BaseHTTPRequestHandler):
     def handle_reverse_get(self):
         """Handle GET request for reverse page."""
         return {"options": self.reverse_handler.get_wav_options()}
+
+    @route_handler.get("/preset-scanner", "preset_scanner.html")
+    def handle_preset_scanner_get(self):
+        """Handle GET request for preset scanner page."""
+        return self.preset_scanner_handler.handle_get()
 
     @route_handler.get("/style.css", "style.css", "text/css")
     def handle_css(self):
@@ -256,7 +263,7 @@ class MyServer(BaseHTTPRequestHandler):
         Handle all POST requests.
         Processes form data and delegates to appropriate handler.
         """
-        if self.path not in ["/slice", "/refresh", "/reverse"]:
+        if self.path not in ["/slice", "/refresh", "/reverse", "/preset-scanner"]:
             self.send_error(404)
             return
 
