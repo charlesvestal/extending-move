@@ -17,14 +17,17 @@ class ReverseHandler(BaseHandler):
             return self.format_error_response("Bad Request: No WAV file selected")
 
         try:
-            success, message = reverse_wav_file(
+            success, message, new_path = reverse_wav_file(
                 filename=wav_file,
                 directory="/data/UserData/UserLibrary/Samples"
             )
-            if success:
-                return self.format_success_response(message)
-            else:
+            if not success:
                 return self.format_error_response(message)
+                
+            # Include the new path in the success message if it's different from the original
+            if new_path and new_path != wav_file:
+                message = f"{message}\nNew file path: {new_path}"
+            return self.format_success_response(message)
         except Exception as e:
             return self.format_error_response(f"Error processing reverse WAV file: {str(e)}")
 

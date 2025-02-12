@@ -134,20 +134,16 @@ class DrumRackInspectorHandler(BaseHandler):
             sample_filename = os.path.basename(sample_path)
             
             # Reverse the sample
-            success, message = reverse_wav_file(sample_filename, sample_dir)
+            success, message, new_path = reverse_wav_file(sample_filename, sample_dir)
             if not success:
                 return self.format_error_response(f"Failed to reverse sample: {message}")
                 
-            # Get the reversed sample path
-            base, ext = os.path.splitext(sample_path)
-            reversed_path = f"{base}_reverse{ext}"
-            
-            # Update the preset to use the reversed sample
+            # Update the preset to use the new sample path
             pad_number = form.getvalue('pad_number')
             if not pad_number:
                 return self.format_error_response("Missing pad number")
                 
-            success, update_message = update_drum_cell_sample(preset_path, pad_number, reversed_path)
+            success, update_message = update_drum_cell_sample(preset_path, pad_number, new_path)
             if not success:
                 return self.format_error_response(f"Failed to update preset: {update_message}")
                 

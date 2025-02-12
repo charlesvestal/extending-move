@@ -19,24 +19,40 @@ def get_wav_files(directory):
 
 def reverse_wav_file(filename, directory):
     """
-    Reverses the WAV file specified by filename in the given directory.
-    Creates a new file with the suffix '_reverse.wav'.
-    Returns a tuple (success: bool, message: str).
+    Handles reversing and un-reversing WAV files.
+    If the file ends with _reverse.wav, attempts to switch back to the original.
+    Otherwise, creates a reversed version.
+    Returns a tuple (success: bool, message: str, new_path: str).
     """
     filepath = os.path.join(directory, filename)
     
     if not os.path.isfile(filepath):
-        return False, f"File does not exist: {filepath}"
+        return False, f"File does not exist: {filepath}", None
+        
+    base, ext = os.path.splitext(filename)
     
     try:
-        # Determine new filename
-        base, ext = os.path.splitext(filename)
-        new_filename = f"{base}_reverse{ext}"
+        # Check if this is a reversed file
+        if base.endswith('_reverse') or base.endswith('_reversed'):
+            # Try to find and switch to original file
+            suffix_len = 8 if base.endswith('_reverse') else 9  # '_reverse' or '_reversed'
+            original_base = base[:-suffix_len]  # Remove the suffix
+            original_filename = f"{original_base}{ext}"
+            original_filepath = os.path.join(directory, original_filename)
+            
+            if os.path.exists(original_filepath):
+                return True, f"Switched to original file: {original_filename}", original_filepath
+            else:
+                return False, f"Original file not found: {original_filename}", None
+        
+        # This is an original file, create reversed version
+        # Always use '_reversed' for consistency
+        new_filename = f"{base}_reversed{ext}"
         new_filepath = os.path.join(directory, new_filename)
         
-        # Check if the new file already exists to prevent overwriting
+        # Check if the reversed file already exists
         if os.path.exists(new_filepath):
-            return False, f"Reversed file already exists: {new_filename}"
+            return True, f"Using existing reversed file: {new_filename}", new_filepath
         
         with wave.open(filepath, 'rb') as wf:
             params = wf.getparams()
@@ -85,7 +101,7 @@ def reverse_wav_file(filename, directory):
         else:
             combined_message = f"Successfully created reversed file: {new_filename}. Library refresh failed: {refresh_message}"
         
-        return True, combined_message
+        return True, combined_message, new_filepath
     except Exception as e:
         print(f"Error reversing file {filepath}: {e}")
-        return False, f"Error reversing file {filename}: {e}"
+        return False, f"Error reversing file {filename}: {e}", None
