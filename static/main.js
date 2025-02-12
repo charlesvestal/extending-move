@@ -46,13 +46,25 @@ function attachFormHandler(tabName) {
     const form = document.querySelector(`#${tabName} form`);
     if (!form) return;
 
-    // For DrumRackInspector, use change event on select
+    // For DrumRackInspector
     if (tabName === 'DrumRackInspector') {
+        // Handle preset selection change
         const select = form.querySelector('select');
         if (select) {
             select.addEventListener('change', async function(event) {
                 event.preventDefault();
                 await submitForm(form, tabName);
+            });
+        }
+        
+        // Handle all forms in the drum grid (for reverse buttons)
+        const drumGrid = document.querySelector('.drum-grid');
+        if (drumGrid) {
+            drumGrid.addEventListener('submit', async function(event) {
+                if (event.target.matches('form')) {
+                    event.preventDefault();
+                    await submitForm(event.target, tabName);
+                }
             });
         }
     } else {

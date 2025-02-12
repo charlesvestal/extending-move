@@ -3,6 +3,64 @@ import os
 import json
 import urllib.parse
 
+def update_drum_cell_sample(preset_path, pad_number, new_sample_path):
+    """
+    Update the sample URI for a specific drum cell in a preset.
+    
+    Args:
+        preset_path: Path to the .ablpreset file
+        pad_number: The pad number to update
+        new_sample_path: The new sample path to set
+        
+    Returns:
+        tuple: (success: bool, message: str)
+    """
+    try:
+        with open(preset_path, 'r') as f:
+            preset_data = json.load(f)
+            
+        current_pad = [1]  # Use list to allow modification in nested function
+        found = [False]  # Track if we found and updated the correct pad
+        
+        def update_drum_cells(data):
+            if isinstance(data, dict):
+                if data.get('kind') == 'drumCell':
+                    if current_pad[0] == int(pad_number):
+                        # Convert system path to Ableton URI format
+                        if new_sample_path.startswith('/data/UserData/UserLibrary/Samples/'):
+                            uri = new_sample_path.replace('/data/UserData/UserLibrary/Samples/', 'ableton:/user-library/Samples/')
+                        else:
+                            uri = 'file://' + new_sample_path
+                            
+                        # Update the sample URI
+                        if 'deviceData' not in data:
+                            data['deviceData'] = {}
+                        data['deviceData']['sampleUri'] = uri
+                        found[0] = True
+                    current_pad[0] += 1
+                    
+                for value in data.values():
+                    if not found[0]:  # Only continue searching if we haven't found it yet
+                        update_drum_cells(value)
+            elif isinstance(data, list):
+                for item in data:
+                    if not found[0]:  # Only continue searching if we haven't found it yet
+                        update_drum_cells(item)
+                        
+        update_drum_cells(preset_data)
+        
+        if not found[0]:
+            return False, f"Could not find pad {pad_number} in preset"
+            
+        # Save the modified preset
+        with open(preset_path, 'w') as f:
+            json.dump(preset_data, f, indent=2)
+            
+        return True, f"Updated sample URI for pad {pad_number}"
+        
+    except Exception as e:
+        return False, f"Error updating drum cell sample: {e}"
+
 def get_drum_cell_samples(preset_path):
     """
     Extract sample information from a preset's drum cells.

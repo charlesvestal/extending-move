@@ -151,6 +151,27 @@ button:hover, input[type="submit"]:hover {
     text-decoration: underline;
 }
 
+.sample-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: 4px;
+}
+
+.reverse-button {
+    font-size: 0.8em;
+    padding: 4px 8px;
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.reverse-button:hover {
+    background-color: #5a6268;
+}
+
 .waveform-container {
     flex: 1;
     background: #fff;
