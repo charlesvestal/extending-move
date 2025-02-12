@@ -21,38 +21,35 @@ PID_FILE="/data/UserData/extending-move/move-webserver.pid"
 WEB_SERVER_CMD="cd /data/UserData/extending-move && PYTHONPATH=/data/UserData/extending-move python3 move-webserver.py"
 LOG_FILE="/data/UserData/extending-move/move-webserver.log"
 
-# Check if the PID file exists and attempt to stop the process
-if [ -f "$PID_FILE" ]; then
-    PID=$(cat "$PID_FILE")
-    echo "Found webserver PID: $PID. Attempting to stop it gracefully..."
-    
-    # Send SIGTERM
-    kill "$PID" || echo "Warning: Failed to send SIGTERM to process $PID."
-    
-    # Wait up to 10 seconds for graceful shutdown
-    TIMEOUT=10
-    while kill -0 "$PID" 2>/dev/null && [ $TIMEOUT -gt 0 ]; do
-        sleep 1
-        TIMEOUT=$((TIMEOUT - 1))
-    done
-    
-    # If still running, force kill it
-    if kill -0 "$PID" 2>/dev/null; then
-        echo "Process did not terminate gracefully; forcing termination."
-        kill -9 "$PID"
-    else
-        echo "Webserver process $PID terminated gracefully."
-    fi
-    
-    # Remove the PID file.
-    rm -f "$PID_FILE"
-else
-    echo "No PID file found; webserver may not be running."
-fi
+# Kill any existing webserver processes
+pkill -f 'python3 move-webserver.py' || true
+rm -f "$PID_FILE"
+
+# Clean up any old log file
+rm -f "$LOG_FILE"
 
 # Start the webserver in the background using nohup and setsid for full detachment.
 echo "Starting the webserver..."
+cd /data/UserData/extending-move
 nohup setsid bash -c "$WEB_SERVER_CMD" > "$LOG_FILE" 2>&1 &
 NEW_PID=$!
-echo "Webserver started with PID: $NEW_PID"
+
+# Wait a moment for the server to start
+sleep 2
+
+# Check if the server started successfully
+if ! ps -p $NEW_PID > /dev/null; then
+    echo "Error: Server failed to start. Check logs:"
+    cat "$LOG_FILE"
+    exit 1
+fi
+
+# Verify the server is listening
+if ! netstat -tln | grep -q ':666'; then
+    echo "Error: Server not listening on port 666. Check logs:"
+    cat "$LOG_FILE"
+    exit 1
+fi
+
+echo "Webserver started successfully with PID: $NEW_PID"
 EOF
