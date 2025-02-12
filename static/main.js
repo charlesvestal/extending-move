@@ -66,6 +66,7 @@ function attachFormHandler(tabName) {
 
 async function submitForm(form, tabName) {
     const formData = new FormData(form);
+    const selectedValue = form.querySelector('select')?.value; // Store selected value
 
     // Collect regions data from WaveSurfer if in Slice tab
     if (tabName === 'Slice' && wavesurfer) {
@@ -107,6 +108,15 @@ async function submitForm(form, tabName) {
 
             // Re-attach the form handler in case of multiple submissions
             attachFormHandler(tabName);
+
+            // Restore selected value if it exists
+            if (selectedValue) {
+                const select = document.querySelector(`#${tabName} select`);
+                if (select) {
+                    select.value = selectedValue;
+                }
+            }
+
             if (tabName === 'Slice') {
                 initializeWaveform();
             } else if (tabName === 'DrumRackInspector') {

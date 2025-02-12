@@ -111,10 +111,8 @@ button:hover, input[type="submit"]:hover {
 }
 
 .pad-info {
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
     align-items: center;
 }
 
@@ -123,18 +121,24 @@ button:hover, input[type="submit"]:hover {
     color: #666;
 }
 
+.sample-info {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
 .sample-name {
     font-size: 0.9em;
     color: #333;
     word-break: break-word;
-    flex: 1;
-    min-width: 0;
 }
 
 .download-link {
     font-size: 0.8em;
     color: #007bff;
     text-decoration: none;
+    align-self: flex-start;
 }
 
 .download-link:hover {

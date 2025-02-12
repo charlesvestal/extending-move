@@ -61,10 +61,12 @@ class DrumRackInspectorHandler(BaseHandler):
                             cell_html += f'''
                                 <div class="pad-info">
                                     <span class="pad-number">Pad {pad_num}</span>
+                                </div>
+                                <div id="{waveform_id}" class="waveform-container" data-audio-path="{web_path}"></div>
+                                <div class="sample-info">
                                     <span class="sample-name">{sample["sample"]}</span>
                                     <a href="{web_path}" target="_blank" class="download-link">Download</a>
                                 </div>
-                                <div id="{waveform_id}" class="waveform-container" data-audio-path="{web_path}"></div>
                             '''
                         else:
                             cell_html += f'<div class="pad-info"><span class="pad-number">Pad {pad_num}</span><span>No sample</span></div>'
