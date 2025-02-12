@@ -12,23 +12,45 @@ This guide explains how to extend the Move webserver with new features. The webs
 extending-move/
 ├── move-webserver.py      # Main webserver that handles routing and requests
 ├── core/                  # Core functionality for each feature
-│   ├── slice_handler.py   # Core slicing functionality
-│   ├── refresh_handler.py # Core refresh functionality
-│   └── reverse_handler.py # Core WAV reversal functionality
+│   ├── slice_handler.py         # Sample slicing and kit creation
+│   ├── refresh_handler.py       # Library refresh functionality
+│   ├── reverse_handler.py       # WAV file reversal
+│   └── drum_rack_inspector.py   # Preset inspection and modification
 ├── handlers/              # Web handlers for each feature
-│   ├── base_handler.py    # Base class for all handlers
-│   ├── slice_handler_class.py   # Web interface for slicing
-│   ├── refresh_handler_class.py # Web interface for refresh
-│   └── reverse_handler_class.py # Web interface for reversal
+│   ├── base_handler.py           # Base class for all handlers
+│   ├── slice_handler_class.py    # Slice kit creation interface
+│   ├── refresh_handler_class.py  # Library refresh interface
+│   ├── reverse_handler_class.py  # WAV reversal interface
+│   └── drum_rack_inspector_handler_class.py  # Preset inspection interface
 ├── templates/             # HTML templates for each feature
-│   ├── index.html        # Main navigation page with tab system
-│   ├── style.css         # Shared styles
-│   └── feature.html      # Feature-specific templates
+│   ├── index.html              # Main navigation page with tab system
+│   ├── style.css              # Shared styles
+│   ├── slice.html            # Complex interactive template with waveform
+│   ├── reverse.html          # File selection with AJAX handling
+│   ├── refresh.html          # Simple action template
+│   └── drum_rack_inspector.html  # Grid layout with multiple actions
 └── utility-scripts/       # Utility scripts for installation and management
     ├── install-on-move.sh    # Initial setup and installation
     ├── update-on-move.sh     # Update Move with latest changes
     └── restart-webserver.sh   # Restart the Move webserver
 ```
+
+Each feature typically consists of three components:
+1. **Core Handler** (core/): Contains the core logic and functionality
+   - File operations (e.g., slicing, reversing)
+   - Preset manipulation (e.g., reading, modifying)
+   - Library management
+   
+2. **Web Handler** (handlers/): Manages web interface and requests
+   - Form handling and validation
+   - File uploads
+   - Response formatting
+   
+3. **Template** (templates/): Defines the user interface
+   - Simple forms (e.g., refresh.html)
+   - File selection (e.g., reverse.html)
+   - Complex interactive UIs (e.g., slice.html)
+   - Grid layouts (e.g., drum_rack_inspector.html)
 
 ## Move-Specific Details
 
@@ -209,7 +231,7 @@ Here are examples of both simple and complex templates:
 </form>
 ```
 
-2. Template with File Selection (like reverse.html):
+2. Template with File Selection and AJAX (like reverse.html):
 ```html
 <h2>Your Feature Title</h2>
 {message_html}
@@ -226,14 +248,63 @@ Here are examples of both simple and complex templates:
 </form>
 
 <script>
-    // Feature-specific JavaScript
-    function validateForm() {
-        // Your validation logic
-    }
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        const submitButton = form.querySelector('button[type="submit"]');
+        
+        submitButton.addEventListener('click', function(event) {
+            event.preventDefault();
+            const fileSelect = document.getElementById('file_select');
+            const selectedFile = fileSelect.value;
+            if (!selectedFile) {
+                alert('Please select a file.');
+                return;
+            }
+            const confirmAction = confirm(`Are you sure you want to process "${selectedFile}"?`);
+            if (confirmAction) {
+                // Let the main.js AJAX handler take over
+                form.dispatchEvent(new Event('submit'));
+            }
+        });
+    });
 </script>
 ```
 
-3. Complex Interactive Template (like slice.html):
+3. Template with Grid Layout and Actions (like drum_rack_inspector.html):
+```html
+<h2>Your Feature Title</h2>
+{message_html}
+
+<form method="POST">
+    <input type="hidden" name="action" value="select_item">
+    <label for="item_select">Select Item:</label>
+    <select name="item_select" id="item_select">
+        {{ options }}
+    </select>
+</form>
+
+<div class="grid-container">
+    {{ grid_html }}
+</div>
+
+<!-- Example of dynamically generated grid cell -->
+<div class="grid-cell">
+    <div class="cell-info">
+        <span class="cell-number">Cell 1</span>
+    </div>
+    <div class="preview-container" data-preview-path="{{ preview_path }}"></div>
+    <div class="cell-actions">
+        <a href="{{ download_path }}" class="action-button">Download</a>
+        <form method="POST" action="/your-feature">
+            <input type="hidden" name="action" value="process_item">
+            <input type="hidden" name="item_path" value="{{ item_path }}">
+            <button type="submit" class="action-button">Process</button>
+        </form>
+    </div>
+</div>
+```
+
+4. Complex Interactive Template (like slice.html):
 ```html
 <h2>Your Feature Title</h2>
 {message_html}

@@ -1,6 +1,6 @@
 # extending-move
 
-Tips, tricks and tools for extending the Ableton Move.
+Tools for extending the Ableton Move.
 
 The code in this repository will run an additional webserver alongside the official one. When run on the move, it is accessible at move.local:666.
 
@@ -13,7 +13,14 @@ The code in this repository will run an additional webserver alongside the offic
     - Choose the slice points for each drum pad
     - Download the preset as an `.ablpresetbundle`
     - Or have it generated directly on your device
-- Choose a sample and generate a reversed version
+- Inspect and modify drum rack presets
+    - View all samples in a drum rack
+    - Download individual samples
+    - Create reversed versions of samples directly in the preset
+- Reverse WAV files
+    - Create reversed versions of any WAV file
+    - Toggle between original and reversed versions
+    - Automatically updates library with new files
 - Manually refresh your Move's library (useful when making manual changes to files)
 
 ## Installation
