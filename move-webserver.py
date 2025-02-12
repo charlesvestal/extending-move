@@ -58,7 +58,7 @@ class TemplateManager:
         """
         template = self.get_template(template_name)
         # Handle special cases
-        if template_name == "reverse.html":
+        if template_name in ["reverse.html", "preset_scanner.html"]:
             kwargs["options"] = kwargs.get("options", "")
             template = template.replace("{{ options }}", kwargs["options"])
         

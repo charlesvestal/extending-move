@@ -37,9 +37,9 @@
             async function fetchContent(tabName) {
                 try {
                     // Convert tab name to URL format (lowercase and preserve hyphens)
-                    const urlPath = tabName.split('-')
-                        .map(part => part.toLowerCase())
-                        .join('-');
+                    const urlPath = tabName.replace(/([A-Z])/g, '-$1')  // Add hyphens before capitals
+                        .toLowerCase()  // Convert to lowercase
+                        .replace(/^-/, '');  // Remove leading hyphen if present
                     const response = await fetch(`/${urlPath}`);
                     if (!response.ok) {
                         throw new Error('Network response was not ok');
@@ -63,9 +63,9 @@
                         const regionsArray = Object.values(wavesurfer.regions.list).map(region => ({ start: region.start, end: region.end }));
                         formData.append('regions', JSON.stringify(regionsArray));
 
-                        const url = `/${tabName.split('-')
-                            .map(part => part.toLowerCase())
-                            .join('-')}`;
+                        const url = `/${tabName.replace(/([A-Z])/g, '-$1')
+                            .toLowerCase()
+                            .replace(/^-/, '')}`;
                         const method = form.method.toUpperCase();
 
                         try {
