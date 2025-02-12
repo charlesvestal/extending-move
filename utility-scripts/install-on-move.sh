@@ -73,6 +73,11 @@ echo "Remote setup finished."
 
 # Now, on the local machine, execute update-on-move.sh using bash explicitly.
 echo "Running update-on-move.sh locally..."
-bash "$(dirname "$0")/update-on-move.sh"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
+if [ ! -f "${SCRIPT_DIR}/update-on-move.sh" ]; then
+    echo "Error: update-on-move.sh not found in ${SCRIPT_DIR}"
+    exit 1
+fi
+"${SCRIPT_DIR}/update-on-move.sh"
 
 echo "Deployment and remote setup complete."

@@ -28,14 +28,22 @@ if [ -z "$tracked" ] && [ -z "$untracked" ]; then
 fi
 
 echo "Copying working files (excluding ignored and Git history) to ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}..."
-# Create a tar archive of the files (using null-delimited file names) and stream it via SSH.
-# Filter out the utility scripts directory using grep -z.
-( git ls-files -z && git ls-files --others --exclude-standard -z ) | \
-    grep -z -v '^utility-scripts/' | \
-    tar --null -T - -czf - | \
+# Get the repository root directory and script directory
+REPO_ROOT=$(git rev-parse --show-toplevel)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
+
+# Change to the repository root
+cd "${REPO_ROOT}"
+
+echo "Creating project files archive..."
+# Create a tar archive of the project files and stream it via SSH
+tar -czf - \
+    --exclude='.git' \
+    --exclude='utility-scripts' \
+    core handlers templates move-webserver.py | \
     ssh "${REMOTE_USER}@${REMOTE_HOST}" "cd '${REMOTE_DIR}' && tar -xzf -"
 
 echo "Files copied successfully."
 
-# Restart the webserver locally.
-sh "$(dirname "$0")/restart-webserver.sh"
+# Restart the webserver using the utility script
+"${SCRIPT_DIR}/restart-webserver.sh"
