@@ -210,11 +210,61 @@ class MyServer(BaseHTTPRequestHandler):
         """Handle GET request for stylesheet."""
         return {}
 
+    def handle_sample_request(self, path):
+        """Handle requests for sample files."""
+        try:
+            # Remove the leading '/samples/' from the path
+            relative_path = path[9:]  # len('/samples/') = 9
+            
+            # URL decode the path
+            from urllib.parse import unquote
+            relative_path = unquote(relative_path)
+            
+            # Construct the full path to the samples directory
+            base_samples_dir = '/data/UserData/UserLibrary/Samples/Preset Samples'
+            full_path = os.path.join(base_samples_dir, relative_path)
+            
+            # Security check: ensure the requested path is within the samples directory
+            real_path = os.path.realpath(full_path)
+            
+            # Debug logging
+            print(f"Debug - Sample request:")
+            print(f"Original path: {path}")
+            print(f"Relative path: {relative_path}")
+            print(f"Full path: {full_path}")
+            print(f"Real path: {real_path}")
+            print(f"Base dir: {base_samples_dir}")
+            print(f"File exists: {os.path.exists(real_path)}")
+            if not real_path.startswith(os.path.realpath(base_samples_dir)):
+                self.send_error(403, "Access denied")
+                return
+            
+            if not os.path.exists(real_path):
+                self.send_error(404, "File not found")
+                return
+                
+            # Read and serve the file
+            with open(real_path, 'rb') as f:
+                content = f.read()
+                
+            self.send_response(200)
+            self.send_header('Content-Type', 'audio/wav')
+            self.send_header('Content-Length', str(len(content)))
+            self.end_headers()
+            self.wfile.write(content)
+            
+        except Exception as e:
+            self.send_error(500, str(e))
+
     def do_GET(self):
         """
         Handle all GET requests.
         Matches routes and renders appropriate templates.
         """
+        if self.path.startswith('/samples/'):
+            self.handle_sample_request(self.path)
+            return
+            
         route = self.route_handler.get_routes.get(self.path)
         if route:
             try:
