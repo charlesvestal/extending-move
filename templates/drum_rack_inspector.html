@@ -1,46 +1,31 @@
-<h2>Drum Rack Inspector</h2>
-{message_html}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Drum Rack Inspector</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Drum Rack Inspector</h1>
+        
+        <form method="POST" action="/drum-rack-inspector">
+            <input type="hidden" name="action" value="select_preset">
+            <div class="form-group">
+                <label for="preset_select">Select a Drum Rack:</label>
+                <select name="preset_select" id="preset_select">
+                    {{ options }}
+                </select>
+            </div>
+            <button type="submit" class="button">View Samples</button>
+        </form>
 
-<form method="post">
-    <input type="hidden" name="action" value="select_preset"/>
-    
-    <label for="preset_select">Select a Drum Rack:</label>
-    <select id="preset_select" name="preset_select" required>
-        <option value="" disabled selected>--Select a preset--</option>
-        {{ options }}
-    </select>
-    <br/><br/>
-    <button type="submit">View Samples</button>
-</form>
+        <div class="message">
+            {message_html}
+        </div>
 
-<div id="samples-container">
-    {{ samples_html }}
-</div>
-
-<style>
-.samples-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-}
-
-.samples-table th,
-.samples-table td {
-    padding: 8px;
-    text-align: left;
-    border: 1px solid #ddd;
-}
-
-.samples-table th {
-    background-color: #f5f5f5;
-    font-weight: bold;
-}
-
-.samples-table tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
-.samples-table tr:hover {
-    background-color: #f0f0f0;
-}
-</style>
+        <div class="samples-container">
+            {{ samples_html }}
+        </div>
+    </div>
+</body>
+</html>

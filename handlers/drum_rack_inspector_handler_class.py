@@ -29,17 +29,10 @@ class DrumRackInspectorHandler(BaseHandler):
             if not result['success']:
                 return self.format_error_response(result['message'])
 
-            # Generate HTML table for samples
-            samples_html = '<table class="samples-table">'
-            samples_html += '<tr><th>Pad</th><th>Sample</th></tr>'
-            for sample in result['samples']:
-                samples_html += f'<tr><td>Pad {sample["pad"]}</td><td>{sample["sample"]}</td></tr>'
-            samples_html += '</table>'
-
             return {
                 'options': self.get_preset_options(),
                 'message': result['message'],
-                'samples_html': samples_html
+                'samples': result['samples']
             }
 
         except Exception as e:
@@ -51,8 +44,10 @@ class DrumRackInspectorHandler(BaseHandler):
             result = scan_for_drum_rack_presets()
             if not result['success']:
                 return ''
-            return ''.join([f'<option value="{preset["path"]}">{preset["name"]}</option>' 
-                          for preset in result['presets']])
+            options_html = []
+            for preset in result['presets']:
+                options_html.append(f'<option value="{preset["path"]}">{preset["name"]}</option>')
+            return '\n'.join(options_html)
         except Exception as e:
             print(f"Error getting preset options: {e}")
             return ''

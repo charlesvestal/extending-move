@@ -64,8 +64,17 @@ class TemplateManager:
             template = template.replace("{{ options }}", kwargs["options"])
             
             if template_name == "drum_rack_inspector.html":
-                kwargs["samples_html"] = kwargs.get("samples_html", "")
-                template = template.replace("{{ samples_html }}", kwargs["samples_html"])
+                # Format samples into HTML if present
+                samples = kwargs.get("samples", [])
+                if samples:
+                    samples_html = '<table class="samples-table">'
+                    samples_html += '<tr><th>Pad</th><th>Sample</th></tr>'
+                    for sample in samples:
+                        samples_html += f'<tr><td>Pad {sample["pad"]}</td><td>{sample["sample"]}</td></tr>'
+                    samples_html += '</table>'
+                else:
+                    samples_html = ''
+                template = template.replace("{{ samples_html }}", samples_html)
         
         # Handle message display
         message = kwargs.get("message", "")
