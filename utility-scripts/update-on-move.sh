@@ -33,7 +33,7 @@ echo "Copying working files (excluding ignored and Git history) to ${REMOTE_USER
 ( git ls-files -z && git ls-files --others --exclude-standard -z ) | \
     grep -z -v '^utility-scripts/' | \
     tar --null -T - -czf - | \
-    ssh "${REMOTE_USER}@${REMOTE_HOST}" "tar -xz -C '${REMOTE_DIR}'"
+    ssh "${REMOTE_USER}@${REMOTE_HOST}" "cd '${REMOTE_DIR}' && tar -xzf -"
 
 echo "Files copied successfully."
 
