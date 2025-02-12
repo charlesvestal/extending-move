@@ -27,20 +27,35 @@ def get_drum_cell_samples(preset_path):
         def process_drum_cells(data):
             if isinstance(data, dict):
                 if data.get('kind') == 'drumCell':
-                    # Extract sample URI and convert to filename
+                    # Extract sample URI
                     sample_uri = data.get('deviceData', {}).get('sampleUri', '')
+                    print(f"\nProcessing drum cell:")  # Debug log
+                    print(f"Sample URI: {sample_uri}")  # Debug log
                     if sample_uri:
-                        # Extract filename from URI
-                        sample_name = os.path.basename(sample_uri.split('/')[-1])
-                        # URL decode the filename
+                        # Handle Ableton URI format
+                        if sample_uri.startswith('ableton:/user-library/Samples/'):
+                            # Convert ableton:/user-library/Samples/ to /data/UserData/UserLibrary/Samples/
+                            sample_path = sample_uri.replace('ableton:/user-library/Samples/', '/data/UserData/UserLibrary/Samples/')
+                        else:
+                            # Fallback to original file:// handling
+                            sample_path = sample_uri.split('file://')[-1]
+                        
+                        print(f"After path translation - Path: {sample_path}")  # Debug log
+                        sample_name = os.path.basename(sample_path)
+                        # URL decode both
+                        sample_path = urllib.parse.unquote(sample_path)
                         sample_name = urllib.parse.unquote(sample_name)
+                        print(f"Final decoded path: {sample_path}")  # Debug log
+                        print(f"Final decoded name: {sample_name}")  # Debug log
                     else:
+                        sample_path = ""
                         sample_name = "No sample loaded"
                     
                     # Simply use incrementing counter for pad numbers
                     samples.append({
                         'pad': pad_counter[0],
-                        'sample': sample_name
+                        'sample': sample_name,
+                        'path': sample_path
                     })
                     pad_counter[0] += 1
                     
