@@ -80,9 +80,17 @@ if [ ! -f "${SCRIPT_DIR}/update-on-move.sh" ]; then
 fi
 "${SCRIPT_DIR}/update-on-move.sh"
 
-echo -e "\nDeployment and remote setup complete."
-echo -e "\nYour new Move tools are now available at: http://move.local:666"
-echo -n "Would you like to open the tools in your browser? (y/n): "
+echo
+echo "**************************************************************"
+echo "*                                                            *"
+echo "*   Deployment and remote setup complete.                    *"
+echo "*                                                            *"
+echo "*   Your new Move tools are now available at:                *"
+echo "*   http://move.local:666                                    *"
+echo "*                                                            *"
+echo "**************************************************************"
+echo
+printf "Would you like to open the tools in your browser? (y/n): "
 read -r response
 if [ "$response" = "y" ] || [ "$response" = "Y" ]; then
     open "http://move.local:666"
