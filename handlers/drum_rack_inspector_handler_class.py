@@ -32,26 +32,51 @@ class DrumRackInspectorHandler(BaseHandler):
 
             print(f"Found samples: {result['samples']}")  # Debug log
             print("\nProcessing samples for display:")  # Debug log
-            samples_html = '<table class="samples-table">'
-            samples_html += '<tr><th>Pad</th><th>Sample</th><th>Waveform</th><th>Action</th></tr>'
+            # Create a grid container
+            samples_html = '<div class="drum-grid">'
+            
+            # Sort samples by pad number and create a 16-element list (some pads might be empty)
+            grid_samples = [None] * 16
             for sample in result['samples']:
-                print(f"\nSample: {sample}")  # Debug log
-                print(f"Sample path: {sample.get('path', 'No path')}")  # Debug log
-                print(f"Starts with check: {sample.get('path', '').startswith('/data/UserData/UserLibrary/Samples/')}")  # Debug log
-                if sample.get('path') and sample['path'].startswith('/data/UserData/UserLibrary/Samples/'):
-                    # Convert full path to web path by removing the base directory and "Preset Samples" folder
-                    web_path = '/samples/' + sample['path'].replace('/data/UserData/UserLibrary/Samples/Preset Samples/', '', 1)
-                    # URL encode the path for use in URL
-                    web_path = urllib.parse.quote(web_path)
-                    action = f'<a href="{web_path}" target="_blank">Download</a>'
-                else:
-                    action = 'No sample'
-                # Create unique ID for waveform container
-                waveform_id = f'waveform-{sample["pad"]}'
-                # Add waveform container with fixed dimensions
-                waveform_container = f'<div id="{waveform_id}" class="waveform-container" style="width: 300px; height: 64px;" data-audio-path="{web_path if "web_path" in locals() else ""}"></div>'
-                samples_html += f'<tr><td>Pad {sample["pad"]}</td><td>{sample["sample"]}</td><td>{waveform_container}</td><td>{action}</td></tr>'
-            samples_html += '</table>'
+                pad_num = int(sample['pad'])
+                if 1 <= pad_num <= 16:
+                    grid_samples[pad_num - 1] = sample
+            
+            # Generate grid cells in reverse row order (bottom to top)
+            for row in range(3, -1, -1):  # 3,2,1,0 for the four rows
+                samples_html += '<div class="drum-grid-row">'
+                for col in range(4):  # 0,1,2,3 for the four columns
+                    pad_index = row * 4 + col  # Calculate index in grid_samples
+                    pad_num = pad_index + 1  # Actual pad number (1-16)
+                    
+                    sample = grid_samples[pad_index]
+                    cell_html = '<div class="drum-cell">'
+                    
+                    if sample:
+                        print(f"\nSample: {sample}")  # Debug log
+                        if sample.get('path') and sample['path'].startswith('/data/UserData/UserLibrary/Samples/'):
+                            web_path = '/samples/' + sample['path'].replace('/data/UserData/UserLibrary/Samples/Preset Samples/', '', 1)
+                            web_path = urllib.parse.quote(web_path)
+                            waveform_id = f'waveform-{pad_num}'
+                            cell_html += f'''
+                                <div class="pad-info">
+                                    <span class="pad-number">Pad {pad_num}</span>
+                                    <span class="sample-name">{sample["sample"]}</span>
+                                    <a href="{web_path}" target="_blank" class="download-link">Download</a>
+                                </div>
+                                <div id="{waveform_id}" class="waveform-container" data-audio-path="{web_path}"></div>
+                            '''
+                        else:
+                            cell_html += f'<div class="pad-info"><span class="pad-number">Pad {pad_num}</span><span>No sample</span></div>'
+                    else:
+                        cell_html += f'<div class="pad-info"><span class="pad-number">Pad {pad_num}</span><span>Empty</span></div>'
+                    
+                    cell_html += '</div>'
+                    samples_html += cell_html
+                
+                samples_html += '</div>'
+            
+            samples_html += '</div>'
 
             return {
                 'options': self.get_preset_options(),
