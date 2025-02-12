@@ -64,17 +64,8 @@ class TemplateManager:
             template = template.replace("{{ options }}", kwargs["options"])
             
             if template_name == "drum_rack_inspector.html":
-                # Format samples into HTML if present
-                samples = kwargs.get("samples", [])
-                if samples:
-                    samples_html = '<table class="samples-table">'
-                    samples_html += '<tr><th>Pad</th><th>Sample</th></tr>'
-                    for sample in samples:
-                        samples_html += f'<tr><td>Pad {sample["pad"]}</td><td>{sample["sample"]}</td></tr>'
-                    samples_html += '</table>'
-                else:
-                    samples_html = ''
-                template = template.replace("{{ samples_html }}", samples_html)
+                kwargs["samples_html"] = kwargs.get("samples_html", "")
+                template = template.replace("{{ samples_html }}", kwargs["samples_html"])
         
         # Handle message display
         message = kwargs.get("message", "")
@@ -307,8 +298,10 @@ class MyServer(BaseHTTPRequestHandler):
         try:
             result = handler(self, form)
             if result is not None:  # None means the handler has already sent the response
+                # Convert hyphenated path to underscore for template name
+                template_name = os.path.basename(self.path).replace("-", "_") + ".html"
                 content = self.route_handler.template_manager.render(
-                    os.path.basename(self.path) + ".html",
+                    template_name,
                     **result
                 )
                 self.send_response(200)

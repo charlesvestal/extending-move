@@ -29,10 +29,17 @@ class DrumRackInspectorHandler(BaseHandler):
             if not result['success']:
                 return self.format_error_response(result['message'])
 
+            print(f"Found samples: {result['samples']}")  # Debug log
+            samples_html = '<table class="samples-table">'
+            samples_html += '<tr><th>Pad</th><th>Sample</th></tr>'
+            for sample in result['samples']:
+                samples_html += f'<tr><td>Pad {sample["pad"]}</td><td>{sample["sample"]}</td></tr>'
+            samples_html += '</table>'
+
             return {
                 'options': self.get_preset_options(),
                 'message': result['message'],
-                'samples': result['samples']
+                'samples_html': samples_html  # Changed from 'samples' to 'samples_html'
             }
 
         except Exception as e:
