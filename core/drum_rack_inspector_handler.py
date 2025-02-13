@@ -27,10 +27,13 @@ def update_drum_cell_sample(preset_path, pad_number, new_sample_path):
                 if data.get('kind') == 'drumCell':
                     if current_pad[0] == int(pad_number):
                         # Convert system path to Ableton URI format
-                        if new_sample_path.startswith('/data/UserData/UserLibrary/Samples/'):
-                            uri = new_sample_path.replace('/data/UserData/UserLibrary/Samples/', 'ableton:/user-library/Samples/')
+                        # Encode the new sample path
+                        encoded_path = urllib.parse.quote(new_sample_path)
+                        
+                        if encoded_path.startswith('/data/UserData/UserLibrary/Samples/'):
+                            uri = encoded_path.replace('/data/UserData/UserLibrary/Samples/', 'ableton:/user-library/Samples/')
                         else:
-                            uri = 'file://' + new_sample_path
+                            uri = 'file://' + encoded_path
                             
                         # Update the sample URI
                         if 'deviceData' not in data:
