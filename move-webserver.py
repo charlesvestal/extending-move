@@ -10,6 +10,7 @@ from handlers.slice_handler_class import SliceHandler
 from handlers.refresh_handler_class import RefreshHandler
 from handlers.reverse_handler_class import ReverseHandler
 from handlers.drum_rack_inspector_handler_class import DrumRackInspectorHandler
+from handlers.restore_handler_class import RestoreHandler
 
 # Define the PID file location
 PID_FILE = os.path.expanduser('~/extending-move/move-webserver.pid')
@@ -48,26 +49,25 @@ class TemplateManager:
     def render(self, template_name, **kwargs):
         """
         Render a template with the provided variables.
-        
+
         Args:
             template_name: Name of the template file
             **kwargs: Variables to substitute in the template
-        
+
         Returns:
             str: The rendered template with all substitutions applied
         """
         template = self.get_template(template_name)
-        # Handle special cases
-        # Handle template variables
-        if template_name in ["reverse.html", "drum_rack_inspector.html"]:
-            kwargs["options"] = kwargs.get("options", "")
+
+        # Ensure all templates correctly replace `{{ options }}`
+        if "options" in kwargs:
             template = template.replace("{{ options }}", kwargs["options"])
-            
-            if template_name == "drum_rack_inspector.html":
-                kwargs["samples_html"] = kwargs.get("samples_html", "")
-                template = template.replace("{{ samples_html }}", kwargs["samples_html"])
-        
-        # Handle message display
+
+        # Ensure `{{ samples_html }}` is replaced if used
+        if "samples_html" in kwargs:
+            template = template.replace("{{ samples_html }}", kwargs["samples_html"])
+
+        # Ensure message replacement works properly in ALL templates
         message = kwargs.get("message", "")
         message_type = kwargs.get("message_type", "")
         if message:
@@ -79,8 +79,9 @@ class TemplateManager:
                 message_html = f'<p>{message}</p>'
         else:
             message_html = ""
-        template = template.replace("{message_html}", message_html)
         
+        template = template.replace("{message_html}", message_html)
+
         return template
 
 class RouteHandler:
@@ -179,6 +180,14 @@ class MyServer(BaseHTTPRequestHandler):
     refresh_handler = RefreshHandler()
     reverse_handler = ReverseHandler()
     drum_rack_inspector_handler = DrumRackInspectorHandler()
+    restore_handler = RestoreHandler()
+
+    @route_handler.get("/restore", "restore.html")
+    def handle_restore_get(self):
+        """Handles GET request for the restore page."""
+        context = self.restore_handler.handle_get()
+        print(f"DEBUG: Rendering restore.html with options -> {context['options']}")  # ✅ Debug print
+        return context
 
     @route_handler.get("/", "index.html")
     def handle_index(self):
@@ -346,6 +355,11 @@ class MyServer(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(content)
 
+    @route_handler.post("/restore")
+    def handle_restore_post(self, form):
+        """Handles POST request for restoring an .ablbundle file."""
+        return self.restore_handler.handle_post(form)
+
     @route_handler.post("/slice")
     def handle_slice_post(self, form):
         """Handle POST request for slice feature."""
@@ -371,7 +385,7 @@ class MyServer(BaseHTTPRequestHandler):
         Handle all POST requests.
         Processes form data and delegates to appropriate handler.
         """
-        if self.path not in ["/slice", "/refresh", "/reverse", "/drum-rack-inspector"]:
+        if self.path not in ["/slice", "/refresh", "/reverse", "/drum-rack-inspector", "/restore"]:
             self.send_error(404)
             return
 

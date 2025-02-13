@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Restore Set</title>
+    <script>
+    async function restoreSet(event) {
+        event.preventDefault();
+        let formData = new FormData(event.target);
+        let response = await fetch("/restore", {
+            method: "POST",
+            body: formData
+        });
+        let result = await response.text();
+        document.getElementById("result-message").innerHTML = result;
+    }
+    </script>
+</head>
+<body>
+    <h1>Restore Move Set (.ablbundle)</h1>
+    <form action="/restore" method="post" enctype="multipart/form-data" onsubmit="restoreSet(event)">
+        <label for="ablbundle">Select .ablbundle file:</label>
+        <input type="file" name="ablbundle" required>
+        <br>
+        <label for="mset_index">Restore to pad:</label>
+        <select name="mset_index">
+            {{ options }}
+        </select>
+        <br>
+        <label for="mset_color">Pad Color (1-26):</label>
+        <input type="number" name="mset_color" min="1" max="26" required>
+        <br>
+        <input type="hidden" name="action" value="restore_ablbundle">
+        <button type="submit">Upload & Restore</button>
+    </form>
+    <p>{message_html}</p>
+    <div id="result-message" style="color: red;"></div>
+    <img src="/static/img/move_pads.png" id="padids" style="width: 30%;">
+</body>
+</html>
