@@ -24,7 +24,7 @@ class RestoreHandler(BaseHandler):
             
             return {
                 "options": self.generate_pad_options(free_pads),
-                "message": f"Available Pads: {', '.join(map(str, free_pads))}" if free_pads else "No pads available."
+                "message": f"Available pads: {', '.join(map(str, free_pads))}" if free_pads else "No pads available."
             }
         
         except Exception as e:
