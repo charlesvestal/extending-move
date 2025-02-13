@@ -8,6 +8,7 @@ import signal
 import sys
 from handlers.slice_handler_class import SliceHandler
 from handlers.refresh_handler_class import RefreshHandler
+from handlers.sample_editor_handler import SampleEditorHandler
 from handlers.reverse_handler_class import ReverseHandler
 from handlers.drum_rack_inspector_handler_class import DrumRackInspectorHandler
 
@@ -179,6 +180,7 @@ class MyServer(BaseHTTPRequestHandler):
     refresh_handler = RefreshHandler()
     reverse_handler = ReverseHandler()
     drum_rack_inspector_handler = DrumRackInspectorHandler()
+    sample_editor_handler = SampleEditorHandler()
 
     @route_handler.get("/", "index.html")
     def handle_index(self):
@@ -193,6 +195,11 @@ class MyServer(BaseHTTPRequestHandler):
     @route_handler.get("/refresh", "refresh.html")
     def handle_refresh_get(self):
         """Handle GET request for refresh page."""
+        return {}
+    
+    @route_handler.get("/sample-editor", "sample_editor.html")
+    def handle_sample_editor_get(self):
+        """Handle GET request for sample_editor page."""
         return {}
 
     @route_handler.get("/reverse", "reverse.html")
@@ -234,6 +241,8 @@ class MyServer(BaseHTTPRequestHandler):
                 content_type = 'text/css'
             elif real_path.endswith('.js'):
                 content_type = 'text/javascript'
+            elif real_path.endswith('.html'):
+                content_type = 'text/html'
                 
             self.send_response(200)
             self.send_header('Content-Type', content_type)
@@ -360,6 +369,11 @@ class MyServer(BaseHTTPRequestHandler):
     def handle_reverse_post(self, form):
         """Handle POST request for reverse feature."""
         return self.reverse_handler.handle_post(form)
+    
+    @route_handler.post("/sample-editor")
+    def handle_sample_editor_post(self, form):
+        """Handle POST request for sample-editor feature."""
+        return self.sample_editor_handler.handle_post(form)
 
     @route_handler.post("/drum-rack-inspector")
     def handle_drum_rack_inspector_post(self, form):
@@ -371,7 +385,7 @@ class MyServer(BaseHTTPRequestHandler):
         Handle all POST requests.
         Processes form data and delegates to appropriate handler.
         """
-        if self.path not in ["/slice", "/refresh", "/reverse", "/drum-rack-inspector"]:
+        if self.path not in ["/slice", "/refresh", "/sample-editor", "/reverse", "/drum-rack-inspector"]:
             self.send_error(404)
             return
 
