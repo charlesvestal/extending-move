@@ -148,6 +148,7 @@
 				if (e.files[0].type == "audio/mp3"
 					|| e.files[0].type == "audio/wave"
 					|| e.files[0].type == "audio/wav"
+					|| e.files[0].type == "audio/x-wav"
 					|| e.files[0].type == "audio/mpeg"
 					|| e.files[0].type == "audio/aiff"
 					|| e.files[0].type == "audio/flac"
