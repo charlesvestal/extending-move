@@ -9,7 +9,7 @@
     <input id="file" name="file" type="file" accept=".wav" required/>
     <br/><br/>
     
-    <div class="chord-info">
+    <!-- <div class="chord-info">
         <h3>Chords that will be generated:</h3>
         <div class="chord-grid">
             {% for chord in chords %}
@@ -19,7 +19,7 @@
             </div>
             {% endfor %}
         </div>
-    </div>
+    </div> -->
     <br/>
     
     <button type="submit" onclick="document.getElementById('mode').value = 'download'">
@@ -30,7 +30,7 @@
     </button>
 </form>
 
-<!-- Preview section -->
+<!-- Preview section
 <div class="preview-section">
     <h3>Preview</h3>
     <img src="/static/img/move_pads.png" alt="Move Pads" class="pads-preview"/>
@@ -39,7 +39,7 @@
         <div class="pad-label">{{ chord.name }}</div>
         {% endfor %}
     </div>
-</div>
+</div> -->
 
 <style type="text/css">
     .chord-info {
