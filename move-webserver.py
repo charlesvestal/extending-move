@@ -11,6 +11,7 @@ from handlers.refresh_handler_class import RefreshHandler
 from handlers.reverse_handler_class import ReverseHandler
 from handlers.drum_rack_inspector_handler_class import DrumRackInspectorHandler
 from handlers.restore_handler_class import RestoreHandler
+from handlers.chord_handler_class import ChordHandler
 
 # Define the PID file location
 PID_FILE = os.path.expanduser('~/extending-move/move-webserver.pid')
@@ -181,6 +182,12 @@ class MyServer(BaseHTTPRequestHandler):
     reverse_handler = ReverseHandler()
     drum_rack_inspector_handler = DrumRackInspectorHandler()
     restore_handler = RestoreHandler()
+    chord_handler = ChordHandler()
+
+    @route_handler.get("/chord", "chord.html")
+    def handle_chord_get(self):
+        """Handle GET request for chord page."""
+        return self.chord_handler.handle_get()
 
     @route_handler.get("/restore", "restore.html")
     def handle_restore_get(self):
@@ -355,6 +362,11 @@ class MyServer(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(content)
 
+    @route_handler.post("/chord")
+    def handle_chord_post(self, form):
+        """Handle POST request for chord feature."""
+        return self.chord_handler.handle_post(form, self.send_response_with_headers)
+
     @route_handler.post("/restore")
     def handle_restore_post(self, form):
         """Handles POST request for restoring an .ablbundle file."""
@@ -385,7 +397,7 @@ class MyServer(BaseHTTPRequestHandler):
         Handle all POST requests.
         Processes form data and delegates to appropriate handler.
         """
-        if self.path not in ["/slice", "/refresh", "/reverse", "/drum-rack-inspector", "/restore"]:
+        if self.path not in ["/slice", "/refresh", "/reverse", "/drum-rack-inspector", "/restore", "/chord"]:
             self.send_error(404)
             return
 
