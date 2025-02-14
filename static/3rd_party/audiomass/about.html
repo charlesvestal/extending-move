@@ -104,13 +104,13 @@
 <h1>Introducing AudioMass (<a href="https://audiomass.co" target="_blank">https://audiomass.co</a>) an open-source web based audio and waveform editing tool.</h1>
 
 
-<img class="top" src="/about/audiomass_top.jpg" />
+<img class="top" src="./about/audiomass_top.jpg" />
 
 
 <p>AudioMass lets you record, or use your existing audio tracks, and modify them by trimming, cutting, pasting or applying a plethora of effects, from compression and paragraphic equalizers to reverb, delay and distortion fx. AudioMass also supports more than 20 hotkeys combinations and a dynamic responsive interface to ensure ease of use and that your producivity remains high.
 it is written solely in plain old-school javascript, weights approximately 65kb and has no backend or framework dependencies.</p>
 
-<img class="mid" src="/about/audiomass_support.jpg" />
+<img class="mid" src="./about/audiomass_support.jpg" />
 <p>It also has very good browser and device support.</p>
 
 
@@ -146,21 +146,21 @@ it is written solely in plain old-school javascript, weights approximately 65kb 
 <p>To get started, drag and drop an audio file, or try the included sample.<br />
 Once the file is loaded and you can view the waveform, zoom in, pan around, or select a region.</p>
 
-<img class="mid" src="/about/audiomass_2.jpg" />
+<img class="mid" src="./about/audiomass_2.jpg" />
 
 
 <h3>Recording Audio</h3>
 
 <p>To record audio, simply press the Recording button, or the <i>[R]</i> key.</p>
 
-<img class="mid" src="/about/audiomass_3.jpg" />
+<img class="mid" src="./about/audiomass_3.jpg" />
 
 
 <h3>Exporting to mp3</h3>
 
 <p>In order to export back to mp3, click on 'File', then 'Export to mp3', and follow the modal's instructions.</p>
 
-<img class="mid" src="/about/audiomass_4.jpg" />
+<img class="mid" src="./about/audiomass_4.jpg" />
 
 </div>
 
@@ -177,11 +177,11 @@ It started as a personal small tool for quick visualization of waveforms. Later 
 <p>In general I am a big fan of the interfaces of DAWs <i>(Digital Audio Workstations)</i>, they are extremely, complex, intricate, versatile, and they manage to remain visually pleasant even through their infinite options and knobs. Many times I feel the web has taken a very wrong turn, as amazing interfaces such as...
 
 <p class="nomarg">Sonar</p>
-<img class="mid" src="/about/sonar.jpg" />
+<img class="mid" src="./about/sonar.jpg" />
 
 <br />
 <p class="nomarg">Fruity loops</p>
-<img class="mid" src="/about/fruity.png" />
+<img class="mid" src="./about/fruity.png" />
 
 <br />
 
@@ -276,7 +276,7 @@ It might be a bit too verbose, but it worked very well for structuring AudioMass
 <p>One thing I love about DAW interfaces, is that every window can be pulled out of the main host. I fondly remember having 3 screens full of VST plugins. So can we do the same in the browser?</p>
 
 
-<video src="/about/dock_ui.mp4" autoplay muted playsinline controls loop></video>
+<video src="./about/dock_ui.mp4" autoplay muted playsinline controls loop></video>
 
 
 <p>Yes! And it is using some of the oldest tricks in the book. Essentially we create a pop-up window with <i>window.open</i> and just pass buffers to its <i>documentWindow</i> object. Surprisingly it is quite performant on all browsers except IE Edge. I believe they are serializing in ascii or base64 every packet or something. Also Chrome has an interesting bug where you can't pass more than 512 byte buffers.</p>
