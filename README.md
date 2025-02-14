@@ -22,6 +22,9 @@ The code in this repository will run an additional webserver alongside the offic
     - Toggle between original and reversed versions
     - Automatically updates library with new files
 - Manually refresh your Move's library (useful when making manual changes to files)
+- Restore Move Sets (.ablbundle)
+    - Upload and restore Move Sets to available pads
+    - Choose pad color
 
 ## Installation
 
