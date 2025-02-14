@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import cgi
 from handlers.base_handler import BaseHandler
-from core.reverse_handler import get_wav_files, reverse_wav_file
+from core.reverse_handler import reverse_wav_file
 
 class ReverseHandler(BaseHandler):
     def handle_post(self, form: cgi.FieldStorage):
@@ -30,8 +30,3 @@ class ReverseHandler(BaseHandler):
             return self.format_success_response(message)
         except Exception as e:
             return self.format_error_response(f"Error processing reverse WAV file: {str(e)}")
-
-    def get_wav_options(self):
-        """Get WAV file options for the template."""
-        wav_files = get_wav_files("/data/UserData/UserLibrary/Samples")
-        return ''.join([f'<option value="{file}">{file}</option>' for file in wav_files])

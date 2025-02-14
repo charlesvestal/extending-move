@@ -4,19 +4,6 @@ import numpy as np
 
 from core.refresh_handler import refresh_library
 
-def get_wav_files(directory):
-    """
-    Retrieves a list of WAV files from the specified directory.
-    """
-    wav_files = []
-    for root, _, files in os.walk(directory):
-        for file in files:
-            if file.lower().endswith('.wav'):
-                relative_path = os.path.relpath(os.path.join(root, file), directory)
-                wav_files.append(relative_path)
-    ## print(f"Recursively found WAV files: {wav_files}")  # Debugging statement
-    return wav_files
-
 def reverse_wav_file(filename, directory):
     """
     Handles reversing and un-reversing WAV files.

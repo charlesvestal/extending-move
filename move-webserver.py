@@ -204,11 +204,6 @@ class MyServer(BaseHTTPRequestHandler):
         """Handle GET request for refresh page."""
         return {}
 
-    @route_handler.get("/reverse", "reverse.html")
-    def handle_reverse_get(self):
-        """Handle GET request for reverse page."""
-        return {"options": self.reverse_handler.get_wav_options()}
-
     @route_handler.get("/drum-rack-inspector", "drum_rack_inspector.html")
     def handle_drum_rack_inspector_get(self):
         """Handle GET request for drum rack inspector page."""
@@ -369,11 +364,6 @@ class MyServer(BaseHTTPRequestHandler):
     def handle_refresh_post(self, form):
         """Handle POST request for refresh feature."""
         return self.refresh_handler.handle_post(form)
-
-    @route_handler.post("/reverse")
-    def handle_reverse_post(self, form):
-        """Handle POST request for reverse feature."""
-        return self.reverse_handler.handle_post(form)
 
     @route_handler.post("/drum-rack-inspector")
     def handle_drum_rack_inspector_post(self, form):
