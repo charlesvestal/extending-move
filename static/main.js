@@ -42,9 +42,21 @@ async function fetchContent(tabName) {
     }
 }
 
+function initializeRestoreForm() {
+    const select = document.querySelector('select[name="mset_index"]');
+    if (select && select.options.length > 0 && !select.value) {
+        select.selectedIndex = 0;
+    }
+}
+
 function attachFormHandler(tabName) {
     const form = document.querySelector(`#${tabName} form`);
     if (!form) return;
+
+    // Initialize restore form if applicable
+    if (tabName === 'Restore') {
+        initializeRestoreForm();
+    }
 
     // For DrumRackInspector
     if (tabName === 'DrumRackInspector') {
@@ -133,6 +145,8 @@ async function submitForm(form, tabName) {
                 initializeWaveform();
             } else if (tabName === 'DrumRackInspector') {
                 initializeDrumRackWaveforms();
+            } else if (tabName === 'Restore') {
+                initializeRestoreForm();
             }
         }
     } catch (error) {

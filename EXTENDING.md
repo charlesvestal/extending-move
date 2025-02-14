@@ -15,12 +15,14 @@ extending-move/
 │   ├── slice_handler.py         # Sample slicing and kit creation
 │   ├── refresh_handler.py       # Library refresh functionality
 │   ├── reverse_handler.py       # WAV file reversal
+│   ├── restore_handler.py       # Move Set restoration
 │   └── drum_rack_inspector.py   # Preset inspection and modification
 ├── handlers/              # Web handlers for each feature
 │   ├── base_handler.py           # Base class for all handlers
 │   ├── slice_handler_class.py    # Slice kit creation interface
 │   ├── refresh_handler_class.py  # Library refresh interface
 │   ├── reverse_handler_class.py  # WAV reversal interface
+│   ├── restore_handler_class.py  # Move Set restoration interface
 │   └── drum_rack_inspector_handler_class.py  # Preset inspection interface
 ├── templates/             # HTML templates for each feature
 │   ├── index.html              # Main navigation page with tab system
@@ -28,6 +30,7 @@ extending-move/
 │   ├── slice.html            # Complex interactive template with waveform
 │   ├── reverse.html          # File selection with AJAX handling
 │   ├── refresh.html          # Simple action template
+│   ├── restore.html          # File upload with dynamic options
 │   └── drum_rack_inspector.html  # Grid layout with multiple actions
 └── utility-scripts/       # Utility scripts for installation and management
     ├── install-on-move.sh    # Initial setup and installation
@@ -231,7 +234,42 @@ Here are examples of both simple and complex templates:
 </form>
 ```
 
-2. Template with File Selection and AJAX (like reverse.html):
+2. Template with File Upload and Dynamic Options (like restore.html):
+```html
+<h2>Restore Move Set</h2>
+{message_html}
+<form action="/restore" method="post" enctype="multipart/form-data">
+    <input type="hidden" name="action" value="restore_ablbundle"/>
+    
+    <label for="ablbundle">Select .ablbundle file:</label>
+    <input type="file" name="ablbundle" accept=".ablbundle" required>
+    
+    <label for="mset_index">Restore to pad:</label>
+    <select name="mset_index">
+        {{ options }}  <!-- Dynamically populated with available pads -->
+    </select>
+    
+    <label for="mset_color">Pad Color (1-26):</label>
+    <input type="number" name="mset_color" min="1" max="26" value="1" required>
+    
+    <button type="submit">Upload & Restore</button>
+</form>
+
+<script>
+    // Ensure first option is selected after form submission
+    function initializeRestoreForm() {
+        const select = document.querySelector('select[name="mset_index"]');
+        if (select && select.options.length > 0 && !select.value) {
+            select.selectedIndex = 0;
+        }
+    }
+    
+    // Initialize form when loaded
+    document.addEventListener('DOMContentLoaded', initializeRestoreForm);
+</script>
+```
+
+3. Template with File Selection and AJAX (like reverse.html):
 ```html
 <h2>Your Feature Title</h2>
 {message_html}
