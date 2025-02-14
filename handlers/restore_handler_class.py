@@ -72,6 +72,8 @@ class RestoreHandler(BaseHandler):
             result = restore_ablbundle(filepath, pad_selected, pad_color)
             self.cleanup_upload(filepath)
             if result["success"]:
+                # Add 1 to pad_selected for display since we subtracted 1 earlier
+                result["message"] = result["message"].replace(f"pad ID {pad_selected}", f"pad ID {pad_selected + 1}")
                 _, ids = list_msets(return_free_ids=True)
                 free_pads = sorted([pad_id + 1 for pad_id in ids.get("free", [])])
                 options = self.generate_pad_options(free_pads)
