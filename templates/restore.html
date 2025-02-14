@@ -19,7 +19,7 @@
     <h1>Restore Move Set (.ablbundle)</h1>
     <form action="/restore" method="post" enctype="multipart/form-data" onsubmit="restoreSet(event)">
         <label for="ablbundle">Select .ablbundle file:</label>
-        <input type="file" name="ablbundle" required>
+        <input type="file" name="ablbundle" accept=".ablbundle" required>
         <br>
         <label for="mset_index">Restore to pad:</label>
         <select name="mset_index">
