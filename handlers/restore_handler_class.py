@@ -93,7 +93,8 @@ class RestoreHandler(BaseHandler):
         """
         if not free_pads:
             return '<option value="" disabled>No pads available</option>'
-        return ''.join([f'<option value="{pad}">{pad}</option>' for pad in free_pads])
+        options = [f'<option value="{pad}" {"selected" if pad == free_pads[0] else ""}>{pad}</option>' for pad in free_pads]
+        return ''.join(options)
 
     def format_success_response(self, message, options):
         return {
