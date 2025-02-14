@@ -72,7 +72,10 @@ class RestoreHandler(BaseHandler):
             result = restore_ablbundle(filepath, pad_selected, pad_color)
             self.cleanup_upload(filepath)
             if result["success"]:
-                return self.format_success_response(result["message"])
+                _, ids = list_msets(return_free_ids=True)
+                free_pads = sorted([pad_id + 1 for pad_id in ids.get("free", [])])
+                options = self.generate_pad_options(free_pads)
+                return self.format_success_response(result["message"], options)
             else:
                 return self.format_error_response(result["message"])
         except Exception as e:
@@ -91,3 +94,9 @@ class RestoreHandler(BaseHandler):
         if not free_pads:
             return '<option value="" disabled>No pads available</option>'
         return ''.join([f'<option value="{pad}">{pad}</option>' for pad in free_pads])
+
+    def format_success_response(self, message, options):
+        return {
+            "message": f"<p style='color: green;'>{message}</p>",
+            "options": options
+        }
