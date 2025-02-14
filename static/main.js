@@ -49,6 +49,29 @@ function initializeRestoreForm() {
     }
 }
 
+async function handleRestoreSubmit(form) {
+    const formData = new FormData(form);
+    try {
+        const response = await fetch("/restore", {
+            method: "POST",
+            body: formData
+        });
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const result = await response.text();
+        const resultMessage = document.getElementById("result-message");
+        if (resultMessage) {
+            resultMessage.innerHTML = result;
+        }
+    } catch (error) {
+        const resultMessage = document.getElementById("result-message");
+        if (resultMessage) {
+            resultMessage.innerHTML = `Error: ${error.message}`;
+        }
+    }
+}
+
 function attachFormHandler(tabName) {
     const form = document.querySelector(`#${tabName} form`);
     if (!form) return;
@@ -79,6 +102,12 @@ function attachFormHandler(tabName) {
                 }
             });
         }
+    } else if (tabName === 'Restore') {
+        // Special handling for restore form
+        form.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            await handleRestoreSubmit(form);
+        });
     } else {
         // For other forms, use submit event
         form.addEventListener('submit', async function(event) {
