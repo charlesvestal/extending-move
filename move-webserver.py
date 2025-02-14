@@ -8,7 +8,7 @@ import signal
 import sys
 from handlers.slice_handler_class import SliceHandler
 from handlers.refresh_handler_class import RefreshHandler
-from handlers.sample_editor_handler import SampleEditorHandler
+from handlers.sample_editor_handler_class import SampleEditorHandler
 from handlers.reverse_handler_class import ReverseHandler
 from handlers.drum_rack_inspector_handler_class import DrumRackInspectorHandler
 
@@ -60,7 +60,7 @@ class TemplateManager:
         template = self.get_template(template_name)
         # Handle special cases
         # Handle template variables
-        if template_name in ["reverse.html", "drum_rack_inspector.html"]:
+        if template_name in ["reverse.html", "drum_rack_inspector.html", "sample_editor.html"]:
             kwargs["options"] = kwargs.get("options", "")
             template = template.replace("{{ options }}", kwargs["options"])
             
@@ -200,7 +200,7 @@ class MyServer(BaseHTTPRequestHandler):
     @route_handler.get("/sample-editor", "sample_editor.html")
     def handle_sample_editor_get(self):
         """Handle GET request for sample_editor page."""
-        return {}
+        return {"options": self.sample_editor_handler.get_wav_files()}
 
     @route_handler.get("/reverse", "reverse.html")
     def handle_reverse_get(self):
@@ -215,9 +215,10 @@ class MyServer(BaseHTTPRequestHandler):
     def handle_static_file(self, path):
         """Handle requests for static files."""
         try:
+            # Remove any URL parameters
+            path = path.split('?')[0]
             # Remove the leading '/static/' from the path
-            relative_path = path[8:]  # len('/static/') = 8
-            
+            relative_path = '/'.join(path.split('/')[2:])
             # Construct the full path to the static file
             full_path = os.path.join('static', relative_path)
             
@@ -253,18 +254,47 @@ class MyServer(BaseHTTPRequestHandler):
         except Exception as e:
             self.send_error(500, str(e))
 
-    def handle_sample_request(self, path):
+
+    def handle_list_samples_request(self, path):
+        dir = "/data/UserData/UserLibrary/Samples"
+        try:
+            wav_files = []
+            for root, _, files in os.walk(dir):
+                for file in files:
+                    if file.lower().endswith('.wav'):
+                        relative_path = os.path.relpath(os.path.join(root, file), dir)
+                        wav_files.append(relative_path)
+        ## print(f"Recursively found WAV files: {wav_files}")  # Debugging statement
+            content = json.dumps(wav_files)
+            content = content.encode('utf-8')
+
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/json')
+            self.send_header('Content-Length', str(len(content)))
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Access-Control-Allow-Methods', 'GET, OPTIONS')
+            self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+            self.end_headers()
+            self.wfile.write(content)
+        
+        except Exception as e:
+            self.send_error(500, str(e))
+
+    def handle_sample_request(self, url, base_samples_dir):
         """Handle requests for sample files."""
         try:
+            from urllib.parse import unquote
+            path  = unquote(url)
+
             # Remove the leading '/samples/' from the path
-            relative_path = path[9:]  # len('/samples/') = 9
+            relative_path = '/'.join(path.split('/')[2:])
+
             
             # URL decode the path
-            from urllib.parse import unquote
-            relative_path = unquote(relative_path)
+      
+            # relative_path = unquote(relative_path)
             
             # Construct the full path to the samples directory
-            base_samples_dir = '/data/UserData/UserLibrary/Samples/Preset Samples'
             full_path = os.path.join(base_samples_dir, relative_path)
             
             # Security check: ensure the requested path is within the samples directory
@@ -272,7 +302,7 @@ class MyServer(BaseHTTPRequestHandler):
             
             # Debug logging
             print(f"Debug - Sample request:")
-            print(f"Original path: {path}")
+            print(f"Original path: {url}")
             print(f"Relative path: {relative_path}")
             print(f"Full path: {full_path}")
             print(f"Real path: {real_path}")
@@ -315,8 +345,14 @@ class MyServer(BaseHTTPRequestHandler):
         Handle all GET requests.
         Matches routes and renders appropriate templates.
         """
+        if self.path.startswith('/list_samples/'):
+            self.handle_list_samples_request(self.path)
+            return
         if self.path.startswith('/samples/'):
-            self.handle_sample_request(self.path)
+            self.handle_sample_request(self.path, '/data/UserData/UserLibrary/Samples/Preset Samples')
+            return
+        if self.path.startswith('/all_samples/'):
+            self.handle_sample_request(self.path, '/data/UserData/UserLibrary/Samples/')
             return
         elif self.path.startswith('/static/'):
             self.handle_static_file(self.path)

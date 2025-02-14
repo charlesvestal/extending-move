@@ -707,6 +707,19 @@
 					input.click ();
 			});
 		})();
+
+		app.listenFor ('RequestSaveAsNewOnMove', function() {
+			wavesurfer.pause();
+			console.log('RequestSaveAsNewOnMove');
+
+			console.log(app.engine.filename);
+			console.log(app.engine.url);
+		});
+
+		app.listenFor ('RequestOverwriteOnMove', function() {
+			wavesurfer.pause();
+			console.log('RequestOverwriteOnMove');
+		});
 		
 		wavesurfer.container.addEventListener('dblclick', function(e){
 			app.fireEvent ('RequestSelect', false, 
