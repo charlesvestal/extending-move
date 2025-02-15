@@ -11,6 +11,7 @@ from handlers.refresh_handler_class import RefreshHandler
 from handlers.reverse_handler_class import ReverseHandler
 from handlers.drum_rack_inspector_handler_class import DrumRackInspectorHandler
 from handlers.restore_handler_class import RestoreHandler
+from core.synth_preset_inspector_handler import SynthPresetInspectorHandler
 
 # Define the PID file location
 PID_FILE = os.path.expanduser('~/extending-move/move-webserver.pid')
@@ -181,6 +182,7 @@ class MyServer(BaseHTTPRequestHandler):
     reverse_handler = ReverseHandler()
     drum_rack_inspector_handler = DrumRackInspectorHandler()
     restore_handler = RestoreHandler()
+    synth_preset_inspector_handler = SynthPresetInspectorHandler()
 
     @route_handler.get("/restore", "restore.html")
     def handle_restore_get(self):
@@ -213,6 +215,11 @@ class MyServer(BaseHTTPRequestHandler):
     def handle_drum_rack_inspector_get(self):
         """Handle GET request for drum rack inspector page."""
         return self.drum_rack_inspector_handler.handle_get()
+
+    @route_handler.get("/synth-presets", "synth_preset_inspector.html")
+    def handle_synth_preset_inspector_get(self):
+        """Handle GET request for synth preset inspector page."""
+        return self.synth_preset_inspector_handler.handle()
 
     def handle_static_file(self, path):
         """Handle requests for static files."""
@@ -250,6 +257,31 @@ class MyServer(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(content)
             
+        except Exception as e:
+            self.send_error(500, str(e))
+
+    def handle_preset_data_request(self, path):
+        """Handle requests for preset data."""
+        from urllib.parse import parse_qs, unquote
+        try:
+            query = parse_qs(self.path.split('?')[1])
+            preset_path = unquote(query['path'][0])
+            
+            with open(preset_path) as f:
+                data = json.load(f)
+                device_kind = data.get("Device", {}).get("DeviceKind", "").lower()
+                polyphony = data.get("Device", {}).get(
+                    "MonoPoly" if device_kind == "wavetable" 
+                    else "Global_VoiceMode"
+                )
+                
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(bytes(json.dumps({
+                    "polyphony": polyphony
+                }), "utf-8"))
+                
         except Exception as e:
             self.send_error(500, str(e))
 
@@ -315,7 +347,10 @@ class MyServer(BaseHTTPRequestHandler):
         Handle all GET requests.
         Matches routes and renders appropriate templates.
         """
-        if self.path.startswith('/samples/'):
+        if self.path.startswith('/preset-data'):
+            self.handle_preset_data_request(self.path)
+            return
+        elif self.path.startswith('/samples/'):
             self.handle_sample_request(self.path)
             return
         elif self.path.startswith('/static/'):

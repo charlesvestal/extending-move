@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Synth Preset Inspector</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="inspector">
+        <h2>Synth Preset Inspector</h2>
+        <select id="synth-preset-select">
+            {{ options }}
+        </select>
+        <div id="polyphony-display" class="result-box"></div>
+    </div>
+    <script src="/static/synth.js"></script>
+</body>
+</html>
