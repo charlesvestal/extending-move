@@ -1752,6 +1752,7 @@
 				app.engine.wavesurfer.backend.logFrequencies = true;
 			};
 
+			type=1;
 			if (!type)
 			{
 				var makePopup = function ( dat ) {
@@ -1849,7 +1850,7 @@
 						setEvents ( curr_win, url );
 					}
 				};
-				iframe.src = '/' + url + '.html?iframe=1';
+				iframe.src = "./" + url + '.html?iframe=1';
 			}
 			// ---
 
