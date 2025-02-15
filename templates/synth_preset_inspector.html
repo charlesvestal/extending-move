@@ -9,10 +9,15 @@
 <body>
     <div class="inspector">
         <h2>Synth Preset Inspector</h2>
-        <select id="synth-preset-select">
-            {{ options }}
-        </select>
-        <div id="polyphony-display" class="result-box"></div>
+        <form method="POST" action="/synth-presets">
+            <input type="hidden" name="action" value="select_preset">
+            <select name="preset_select" id="preset-select">
+                {{ options }}
+            </select>
+        </form>
+        <div class="result-box">
+            {{ polyphony_html }}
+        </div>
     </div>
     <script src="/static/synth.js"></script>
 </body>

@@ -162,7 +162,7 @@
                     "Global_Transpose": 12,
                     "Global_UnisonVoiceDepth": 0.3799999952316284,
                     "Global_VoiceCount": "8",
-                    "Global_VoiceMode": "Mono",
+                    "Global_VoiceMode": "Poly",
                     "Global_VolVelMod": 0.10000000149011612,
                     "Global_Volume": 0.5555555820465088,
                     "Lfo_Amount": 1.0,

@@ -68,6 +68,10 @@ class TemplateManager:
         if "samples_html" in kwargs:
             template = template.replace("{{ samples_html }}", kwargs["samples_html"])
 
+        # Handle polyphony_html replacement
+        if "polyphony_html" in kwargs:
+            template = template.replace("{{ polyphony_html }}", kwargs["polyphony_html"])
+
         # Ensure message replacement works properly in ALL templates
         message = kwargs.get("message", "")
         message_type = kwargs.get("message_type", "")
@@ -269,18 +273,39 @@ class MyServer(BaseHTTPRequestHandler):
             
             with open(preset_path) as f:
                 data = json.load(f)
-                device_kind = data.get("Device", {}).get("DeviceKind", "").lower()
-                polyphony = data.get("Device", {}).get(
-                    "MonoPoly" if device_kind == "wavetable" 
-                    else "Global_VoiceMode"
-                )
                 
+                def find_device(data):
+                    if "chains" in data:
+                        for chain in data["chains"]:
+                            if "devices" in chain:
+                                for device in chain["devices"]:
+                                    kind = device.get("kind", "").lower()
+                                    if kind in {"wavetable", "drift"}:
+                                        return device
+                                    # Recurse into nested instrument racks
+                                    if kind == "instrumentrack":
+                                        nested_device = find_device(device)
+                                        if nested_device:
+                                            return nested_device
+                    return None
+                
+                device = find_device(data)
+                if device:
+                    device_kind = device.get("kind", "").lower()
+                    polyphony = device.get("parameters", {}).get(
+                        "MonoPoly" if device_kind == "wavetable" 
+                        else "Global_VoiceMode",
+                        "Unknown"
+                    )
+                else:
+                    polyphony = "Unknown"
+                
+                response_data = {"polyphony": polyphony}
+                print(f"[DEBUG] Sending preset data response: {response_data}")
                 self.send_response(200)
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
-                self.wfile.write(bytes(json.dumps({
-                    "polyphony": polyphony
-                }), "utf-8"))
+                self.wfile.write(bytes(json.dumps(response_data), "utf-8"))
                 
         except Exception as e:
             self.send_error(500, str(e))

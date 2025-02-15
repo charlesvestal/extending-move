@@ -69,10 +69,14 @@ class SynthPresetInspectorHandler(BaseHandler):
                     error(f"Unexpected error processing {preset_path}: {str(e)}")
                     continue
         
-        options = []
+        options_html = []
         for preset in presets:
-            options.append(f'<option value="{preset["path"]}">{preset["name"]}</option>')
+            options_html.append(f'<option value="{preset["path"]}">{preset["name"]}</option>')
+        
+        initial_polyphony = presets[0]["polyphony"] if presets else "Unknown"
+        polyphony_html = f'<p>Polyphony: {initial_polyphony}</p>'
         
         return {
-            "options": "\n".join(options)
+            "options": "\n".join(options_html),
+            "polyphony_html": polyphony_html
         }
