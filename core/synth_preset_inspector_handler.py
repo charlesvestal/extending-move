@@ -64,7 +64,7 @@ class SynthPresetInspectorHandler(BaseHandler):
 
     def handle(self):
         presets = []
-        preset_dir = Path("examples/Track Presets")  # Update path for server deployment
+        preset_dir = Path("/data/UserData/UserLibrary/Track Presets")  # Update path for server deployment
         debug(f"Looking for presets in: {preset_dir.absolute()}")
         debug(f"Found these files: {list(preset_dir.glob('**/*.ablpreset'))}")
         
