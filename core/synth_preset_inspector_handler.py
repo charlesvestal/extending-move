@@ -17,6 +17,51 @@ class SynthPresetInspectorHandler(BaseHandler):
     def __init__(self):
         super().__init__()
         
+    def toggle_polyphony(self, preset_path):
+        """Toggle the polyphony value between Mono and Poly for a preset."""
+        try:
+            with open(preset_path) as f:
+                data = json.load(f)
+
+            def find_and_update_device(data):
+                if "chains" in data:
+                    for chain in data["chains"]:
+                        if "devices" in chain:
+                            for device in chain["devices"]:
+                                kind = device.get("kind", "").lower()
+                                if kind in {"wavetable", "drift"}:
+                                    params = device.get("parameters", {})
+                                    if kind == "wavetable":
+                                        current = params.get("MonoPoly", "Mono")
+                                        params["MonoPoly"] = "Poly" if current == "Mono" else "Mono"
+                                    else:  # drift
+                                        current = params.get("Global_VoiceMode", "Mono")
+                                        params["Global_VoiceMode"] = "Poly" if current == "Mono" else "Mono"
+                                    return device
+                                elif kind == "instrumentrack":
+                                    result = find_and_update_device(device)
+                                    if result:
+                                        return result
+                return None
+
+            device = find_and_update_device(data)
+            if device:
+                with open(preset_path, 'w') as f:
+                    json.dump(data, f, indent=2)
+                
+                device_kind = device.get("kind", "").lower()
+                polyphony = device.get("parameters", {}).get(
+                    "MonoPoly" if device_kind == "wavetable" 
+                    else "Global_VoiceMode",
+                    "Unknown"
+                )
+                return {"polyphony": polyphony}
+            
+            return {"error": "No wavetable or drift device found"}
+        except Exception as e:
+            error(f"Error toggling polyphony: {str(e)}")
+            return {"error": str(e)}
+
     def handle(self):
         presets = []
         preset_dir = Path("examples/Track Presets")  # Update path for server deployment

@@ -440,11 +440,37 @@ class MyServer(BaseHTTPRequestHandler):
         """Handle POST request for drum rack inspector feature."""
         return self.drum_rack_inspector_handler.handle_post(form)
 
+    def handle_toggle_polyphony_request(self, path):
+        """Handle request to toggle polyphony for a preset."""
+        try:
+            content_length = int(self.headers.get('Content-Length', 0))
+            body = self.rfile.read(content_length)
+            data = json.loads(body)
+            preset_path = data.get('path')
+            
+            if not preset_path:
+                self.send_error(400, "Missing preset path")
+                return
+            
+            result = self.synth_preset_inspector_handler.toggle_polyphony(preset_path)
+            
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            self.wfile.write(bytes(json.dumps(result), "utf-8"))
+            
+        except Exception as e:
+            self.send_error(500, str(e))
+
     def do_POST(self):
         """
         Handle all POST requests.
         Processes form data and delegates to appropriate handler.
         """
+        if self.path == "/toggle-polyphony":
+            self.handle_toggle_polyphony_request(self.path)
+            return
+            
         if self.path not in ["/slice", "/refresh", "/reverse", "/drum-rack-inspector", "/restore"]:
             self.send_error(404)
             return
