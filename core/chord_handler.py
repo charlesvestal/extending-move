@@ -10,22 +10,47 @@ from core.refresh_handler import refresh_library
 
 # Define common chords and their semitone intervals from root
 CHORDS = {
-    'C': [0, 4, 7],        # C E G
-    'F': [5, 9, 0],        # F A C
-    'G': [7, 11, 2],       # G B D
-    'Am': [9, 0, 4],       # A C E
-    'Dm': [2, 5, 9],       # D F A
-    'Em': [4, 7, 11],      # E G B
-    'C7': [0, 4, 7, 10],   # C E G Bb
-    'F7': [5, 9, 0, 3],    # F A C Eb
-    'G7': [7, 11, 2, 5],   # G B D F
-    'Am7': [9, 0, 4, 7],   # A C E G
-    'Dm7': [2, 5, 9, 0],   # D F A C
-    'Em7': [4, 7, 11, 2],  # E G B D
-    'Bdim': [11, 2, 5],    # B D F
-    'Caug': [0, 4, 8],     # C E G#
-    'Csus4': [0, 5, 7],    # C F G
-    'Cadd9': [0, 4, 7, 2]  # C E G D
+    # Cm9: minor triad (0,3,7) + minor 7 (10) + add9 (2) + octave extensions
+    'Cm9': [-12, 0, 3, 7, 10, 15],
+
+    # Fm: F = 5; minor triad with octave extensions
+    'Fm': [-7, 5, 8, 17],
+
+    # AbMaj7: Ab = 8; major triad with octave extensions
+    'AbMaj7': [-4, 8, 15, 19],
+
+    # Bb11 sus: Bb = 10; suspended 4 with octave extensions
+    'Bb11 sus': [-2, 10, 15, 17, 20, 22],
+
+    # EbMaj9: Eb = 3; major 9th with octave extensions
+    'EbMaj9': [-9, 3, 7, 10, 15, 19],
+
+    # Fm7: F = 5; minor 7th with octave extensions
+    'Fm7': [-7, 5, 8, 12, 15],
+
+    # G7#9: G = 7; dominant 7#9 with octave extensions
+    'G7#9': [-5, 7, 11, 14, 17, 22],
+
+    # C7#5: C = 0; dominant 7#5 with octave extensions
+    'C7#5': [-12, 0, 4, 8, 22],
+
+    # Fm9: F = 5; minor 9th with octave extensions
+    'Fm9': [-7, 5, 8, 12, 15, 19],
+
+    # DbMaj7: Db = 1; major 7th with octave extensions
+    'DbMaj7': [-11, 1, 5, 8, 13],
+
+    # Bbm7: Bb = 10; minor 7th with octave extensions
+    'Bbm7': [-2, 10, 13, 17, 20],
+
+    # C7sus: C dominant 7 sus4 with octave extensions
+    'C7sus': [-12, 0, 5, 7, 22],
+
+    # C: standard C major triad with octave extensions
+    'C': [-12, 0, 4, 7, 12],
+
+    # Fm add9: F = 5; minor add9 with octave extensions
+    'Fm add9': [-7, 5, 8, 12, 19]
 }
 
 def pitch_wav(data, sample_rate, semitones):
