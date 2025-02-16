@@ -55,18 +55,39 @@ def pitch_wav(data, sample_rate, semitones):
     
     return pitched_data, sample_rate
 
-def normalize_audio(data):
+def normalize_audio(data, target_dB=None):
     """
     Normalize audio data to prevent clipping.
     
+    If target_dB is provided, the audio will be normalized so that its peak amplitude 
+    corresponds to that value in dBFS (decibels relative to full scale).
+    If target_dB is None, the audio is normalized to full scale (0 dBFS).
+    
     Args:
-        data: Audio data as numpy array
+        data (numpy.ndarray): Audio data array.
+        target_dB (float, optional): Desired peak amplitude in dBFS (e.g., -10 for -10 dBFS). Defaults to None.
     
     Returns:
         numpy.ndarray: Normalized audio data
     """
+    # Maximum representable value for the data type (e.g., 32767 for int16)
     max_val = np.iinfo(data.dtype).max
-    scale = max_val / np.max(np.abs(data))
+
+    # Find the current peak amplitude of the data
+    current_peak = np.max(np.abs(data))
+    
+    # If target_dB is provided, calculate the target peak amplitude.
+    # Otherwise, use full scale normalization.
+    if target_dB is not None:
+        # dBFS calculation: target_peak = max_val * 10^(target_dB/20)
+        target_peak = max_val * (10 ** (target_dB / 20))
+    else:
+        target_peak = max_val
+
+    # Calculate the scaling factor
+    scale = target_peak / current_peak
+
+    # Apply scaling and cast back to original data type
     return (data * scale).astype(data.dtype)
 
 def generate_chord_samples(input_wav, target_directory):
@@ -99,7 +120,7 @@ def generate_chord_samples(input_wav, target_directory):
         chord_notes = []
         for interval in intervals:
             pitched_data, _ = pitch_wav(data, sample_rate, interval)
-            chord_notes.append(pitched_data)
+            chord_notes.append(normalize_audio(pitched_data, target_dB=-10))
         
         # Pad shorter arrays to match the longest
         max_length = max(len(note) for note in chord_notes)
