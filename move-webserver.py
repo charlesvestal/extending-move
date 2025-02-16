@@ -201,6 +201,11 @@ class MyServer(BaseHTTPRequestHandler):
         """Handle GET request for index page."""
         return {}
 
+    @route_handler.get("/chord", "chord.html")
+    def handle_chord_get(self):
+        """Handle GET request for chord page."""
+        return self.chord_handler.handle_get()
+
     @route_handler.get("/slice", "slice.html")
     def handle_slice_get(self):
         """Handle GET request for slice page."""
@@ -391,6 +396,11 @@ class MyServer(BaseHTTPRequestHandler):
     def handle_drum_rack_inspector_post(self, form):
         """Handle POST request for drum rack inspector feature."""
         return self.drum_rack_inspector_handler.handle_post(form)
+
+    @route_handler.post("/chord")
+    def handle_chord_post(self, form):
+        """Handle POST request for chord feature."""
+        return self.chord_handler.handle_post(form, self.send_response_with_headers)
 
     def do_POST(self):
         """
