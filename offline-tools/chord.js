@@ -326,13 +326,12 @@ document.getElementById('wavFileInput').addEventListener('change', async functio
             });
             ws.load(url);
             // Toggle play/pause on click
-            previewContainer.addEventListener('click', function() {
-                if (ws.isPlaying()) {
-                    ws.pause();
-                } else {
-                    ws.play();
-                }
-            });
+            previewContainer.addEventListener('click', function(e) {
+              e.stopPropagation();
+              ws.stop();
+              ws.seekTo(0);
+              requestAnimationFrame(() => ws.play(0));
+              });
             window.chordWaveforms.push(ws);
         }
     }
