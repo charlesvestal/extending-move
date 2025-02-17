@@ -447,12 +447,20 @@ document.getElementById('wavFileInput').addEventListener('change', async functio
             // Toggle play/pause on click
             previewContainer.addEventListener('click', function(e) {
               e.stopPropagation();
-                  if (ws && ws.backend) {
-                      ws.stop();
-                      ws.seekTo(0);
-                      requestAnimationFrame(() => ws.play(0));
-                  }
-              });
+              // Stop all other chord waveform instances
+              if (window.chordWaveforms && window.chordWaveforms.length) {
+                  window.chordWaveforms.forEach(instance => {
+                      if (instance && instance !== ws) {
+                          instance.stop();
+                      }
+                  });
+              }
+              if (ws && ws.backend) {
+                  ws.stop();
+                  ws.seekTo(0);
+                  requestAnimationFrame(() => ws.play(0));
+              }
+            });
             window.chordWaveforms.push(ws);
         }
     }
