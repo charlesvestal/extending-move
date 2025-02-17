@@ -279,6 +279,19 @@ document.getElementById('generatePreset').addEventListener('click', async () => 
 
 // Process chord samples for preview when a file is uploaded
 document.getElementById('wavFileInput').addEventListener('change', async function(e) {
+    // Clear any previously generated waveform previews
+    if (window.chordWaveforms && window.chordWaveforms.length) {
+        window.chordWaveforms.forEach(ws => ws.destroy());
+    }
+    window.chordWaveforms = [];
+
+    // Clear the inner HTML of all preview containers (assuming IDs "chord-preview-1" to "chord-preview-16")
+    for (let i = 1; i <= 16; i++) {
+        const container = document.getElementById(`chord-preview-${i}`);
+        if (container) {
+            container.innerHTML = "";
+        }
+    }
     const file = e.target.files[0];
     if (!file) return;
     
