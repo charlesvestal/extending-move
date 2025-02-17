@@ -27,7 +27,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
 </head>
 <body>
-  <h2>Offline Slice and Preset Generator</h2>
+  <h2>Ableton Move Slice Kit Generator</h2>
   <input type="file" id="wavFileInput" accept=".wav"><br>
   <label for="num_slices">Number of slices (1-16): </label>
   <input id="num_slices" type="number" min="1" max="16" value="16"><br>
@@ -39,6 +39,15 @@
     let wavesurfer;
     let audioReady = false;
     let fileBlob = null;
+    
+    // Debounce function to limit how often a function is called
+    function debounce(func, wait) {
+      let timeout;
+      return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+      };
+    }
     
     function initWaveSurfer() {
       if (wavesurfer) {
@@ -311,6 +320,20 @@
         document.body.removeChild(a);
       });
     });
+    
+    // New resize handler: force update of canvas width attributes on each resize.
+    window.addEventListener('resize', debounce(() => {
+      if (wavesurfer && wavesurfer.drawer && wavesurfer.drawer.wrapper) {
+        const container = document.getElementById('waveform');
+        const newWidth = container.clientWidth;
+        // Update all canvas elements inside the drawer wrapper.
+        const canvases = wavesurfer.drawer.wrapper.querySelectorAll('canvas');
+        canvases.forEach(canvas => {
+          canvas.width = newWidth;
+        });
+        wavesurfer.drawBuffer();
+      }
+    }, 300));
   </script>
 </body>
 </html>
