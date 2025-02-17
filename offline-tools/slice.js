@@ -40,7 +40,7 @@ function createContiguousRegions() {
       start: i * sliceDuration,
       end: (i + 1) * sliceDuration,
       color: 'rgba(0, 255, 0, 0.2)',
-      drag: true,
+      drag: false,
       resize: true
     };
     if (i === 0) { 
