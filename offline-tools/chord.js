@@ -19,12 +19,16 @@ const baseChordTypes = {
   "m7b5":[-12, 0, 3, 6, 10],       // Half-diminished (m7b5)
   "6":   [-12, 0, 4, 7, 9],        // 6 chord
   "m6":  [-12, 0, 3, 7, 9],        // Minor 6
-  "add9":[-12, 0, 4, 7, 14]        // add9 chord
+  "add9":[-12, 0, 4, 7, 14],        // add9 chord
+  "7#9":  [-12, 0, 4, 7, 10, 15],   // Dominant 7 with sharp 9
+  "7#5":  [-12, 0, 4, 8, 10],        // Dominant 7 with sharp 5
+  "11sus": [-12, 0, 5, 7, 10, 17],   // 11 suspended chord
+  "madd9": [-12, 0, 3, 7, 14]        // Minor add9 chord
 };
 
-// List of keys (using sharps); you can adjust to include flats if desired.
-const keys = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-const keyOffsets = { "C": 0, "C#": 1, "D": 2, "D#": 3, "E": 4, "F": 5, "F#": 6, "G": 7, "G#": 8, "A": 9, "A#": 10, "B": 11 };
+// List of keys using flats for accidentals (as preferred in the default chords)
+const keys = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
+const keyOffsets = { "C": 0, "Db": 1, "D": 2, "Eb": 3, "E": 4, "F": 5, "Gb": 6, "G": 7, "Ab": 8, "A": 9, "Bb": 10, "B": 11 };
 
 // Build the CHORDS object by transposing each base chord type for every key.
 const CHORDS = {};
@@ -46,18 +50,18 @@ if (!window.selectedChords) {
     const defaultChords = [
         "Cm9",
         "Fm",
-        "AbMaj7",
-        "Bb11 sus",
-        "EbMaj9",
+        "Abmaj7",
+        "Bb11sus",
+        "Ebmaj9",
         "Fm7",
         "G7#9",
         "C7#5",
         "Fm9",
-        "DbMaj7",
+        "Dbmaj7",
         "Bbm7",
         "C7sus",
         "C",
-        "Fm add9"
+        "Fmadd9"
     ];
     window.selectedChords = [];
     for (let i = 0; i < 16; i++) {
