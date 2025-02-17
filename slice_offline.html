@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Ableton Move Slice Kit Generator</title>
+  <style>
+    /* Minimal styling */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    #waveform {
+      width: 100%;
+      height: 128px;
+      background: #f5f5f5;
+      border: 1px solid #ddd;
+      margin-bottom: 10px;
+    }
+    input, button {
+      margin: 5px;
+    }
+  </style>
+  <!-- Include Wavesurfer.js v6 and its regions plugin -->
+  <script src="https://unpkg.com/wavesurfer.js@6/dist/wavesurfer.js"></script>
+  <script src="https://unpkg.com/wavesurfer.js@6/dist/plugin/wavesurfer.regions.js"></script>
+  <!-- Include JSZip -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+</head>
+<body>
+  <h2>Offline Slice and Preset Generator</h2>
+  <input type="file" id="wavFileInput" accept=".wav"><br>
+  <label for="num_slices">Number of slices (1-16): </label>
+  <input id="num_slices" type="number" min="1" max="16" value="16"><br>
+  <div id="waveform"></div>
+  <button id="resetSlices">Reset Slices</button>
+  <button id="generatePreset">Download Preset</button>
+  
+  <script>
+    let wavesurfer;
+    let audioReady = false;
+    let fileBlob = null;
+    
+    function initWaveSurfer() {
+      if (wavesurfer) {
+        wavesurfer.destroy();
+      }
+      wavesurfer = WaveSurfer.create({
+        container: '#waveform',
+        waveColor: 'violet',
+        progressColor: 'purple',
+        height: 128,
+        plugins: [
+          WaveSurfer.regions.create({})
+        ]
+      });
+      
+      wavesurfer.on('ready', () => {
+        if (wavesurfer.getDuration() > 0) {
+          audioReady = true;
+          createContiguousRegions();
+        }
+      });
+      
+      wavesurfer.on('region-update-end', keepRegionsContiguous);
+      
+      wavesurfer.on('region-click', (region, e) => {
+        e.stopPropagation();
+        region.play();
+      });
+    }
+    
+    function createContiguousRegions() {
+      const numSlicesInput = document.getElementById('num_slices');
+      const numSlices = parseInt(numSlicesInput.value, 10) || 16;
+      wavesurfer.clearRegions();
+      const duration = wavesurfer.getDuration();
+      const sliceDuration = duration / numSlices;
+      for (let i = 0; i < numSlices; i++) {
+        let regionOptions = {
+          start: i * sliceDuration,
+          end: (i + 1) * sliceDuration,
+          color: 'rgba(0, 255, 0, 0.2)',
+          drag: true,
+          resize: true
+        };
+        // For first region, restrict left resize; for last, restrict right resize.
+        if (i === 0) { 
+          regionOptions.resize = 'right'; 
+        } else if (i === numSlices - 1) {
+          regionOptions.resize = 'left';
+        }
+        wavesurfer.addRegion(regionOptions);
+      }
+    }
+    
+    // Keep regions contiguous with their immediate neighbors but don't force boundaries
+    function keepRegionsContiguous(updatedRegion) {
+      let regions = Object.values(wavesurfer.regions.list).sort((a, b) => a.start - b.start);
+      const idx = regions.findIndex(r => r.id === updatedRegion.id);
+      if (idx > 0) {
+        regions[idx - 1].update({ end: updatedRegion.start });
+      }
+      if (idx < regions.length - 1) {
+        regions[idx + 1].update({ start: updatedRegion.end });
+      }
+    }
+    
+    document.getElementById('resetSlices').addEventListener('click', () => {
+      if (audioReady) {
+        wavesurfer.clearRegions();
+        createContiguousRegions();
+      }
+    });
+    
+    document.getElementById('num_slices').addEventListener('change', function() {
+      if (audioReady) {
+        wavesurfer.clearRegions();
+        createContiguousRegions();
+      }
+    });
+    
+    document.getElementById('wavFileInput').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        fileBlob = file;
+        initWaveSurfer();
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          wavesurfer.loadBlob(file);
+        };
+        reader.readAsArrayBuffer(file);
+      }
+    });
+    
+    // Generate the preset template using the valid structure
+    function generatePresetTemplate(presetName) {
+      let preset = {
+        "$schema": "http://tech.ableton.com/schema/song/1.4.4/devicePreset.json",
+        "kind": "instrumentRack",
+        "name": presetName,
+        "lockId": 1001,
+        "lockSeal": -973461132,
+        "parameters": {
+          "Enabled": true,
+          "Macro0": 0.0,
+          "Macro1": 0.0,
+          "Macro2": 0.0,
+          "Macro3": 0.0,
+          "Macro4": 0.0,
+          "Macro5": 0.0,
+          "Macro6": 0.0,
+          "Macro7": 0.0
+        },
+        "chains": [
+          {
+            "name": "",
+            "color": 0,
+            "devices": [
+              {
+                "presetUri": null,
+                "kind": "drumRack",
+                "name": "",
+                "lockId": 1001,
+                "lockSeal": 830049224,
+                "parameters": {
+                  "Enabled": true,
+                  "Macro0": 0.0,
+                  "Macro1": 0.0,
+                  "Macro2": 0.0,
+                  "Macro3": 0.0,
+                  "Macro4": 0.0,
+                  "Macro5": 0.0,
+                  "Macro6": 0.0,
+                  "Macro7": 0.0
+                },
+                "chains": [],
+                "returnChains": [
+                  {
+                    "name": "",
+                    "color": 0,
+                    "devices": [
+                      {
+                        "presetUri": null,
+                        "kind": "reverb",
+                        "name": "",
+                        "parameters": {},
+                        "deviceData": {}
+                      }
+                    ],
+                    "mixer": {
+                      "pan": 0.0,
+                      "solo-cue": false,
+                      "speakerOn": true,
+                      "volume": 0.0,
+                      "sends": [
+                        {
+                          "isEnabled": false,
+                          "amount": -70.0
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "presetUri": null,
+                "kind": "saturator",
+                "name": "Saturator",
+                "parameters": {},
+                "deviceData": {}
+              }
+            ],
+            "mixer": {
+              "pan": 0.0,
+              "solo-cue": false,
+              "speakerOn": true,
+              "volume": 0.0,
+              "sends": []
+            }
+          }
+        ]
+      };
+      
+      // Create 16 drum cell chains (for MIDI notes 36 to 51)
+      for (let i = 0; i < 16; i++) {
+        let drumCellChain = {
+          "name": "",
+          "color": 0,
+          "devices": [
+            {
+              "presetUri": null,
+              "kind": "drumCell",
+              "name": "",
+              "parameters": {
+                "Voice_Envelope_Hold": 60.0,
+                "Voice_PlaybackStart": 0.0,
+                "Voice_Envelope_Decay": 0.0
+              },
+              "deviceData": {
+                "sampleUri": null
+              }
+            }
+          ],
+          "mixer": {
+            "pan": 0.0,
+            "solo-cue": false,
+            "speakerOn": true,
+            "volume": 0.0,
+            "sends": [
+              {
+                "isEnabled": true,
+                "amount": -70.0
+              }
+            ]
+          },
+          "drumZoneSettings": {
+            "receivingNote": 36 + i,
+            "sendingNote": 60,
+            "chokeGroup": 1
+          }
+        };
+        preset.chains[0].devices[0].chains.push(drumCellChain);
+      }
+      
+      return preset;
+    }
+    
+    // Update each drum cell's parameters with slice info and reference the WAV file in Samples/ (URL encoded)
+    function updateDrumCellParameters(template, slices_info, sampleFileName) {
+      let drumChains = template.chains[0].devices[0].chains;
+      for (let i = 0; i < drumChains.length; i++) {
+        let drumCell = drumChains[i].devices[0];
+        if (i < slices_info.length) {
+          drumCell.parameters["Voice_PlaybackStart"] = slices_info[i].offset;
+          drumCell.parameters["Voice_Envelope_Hold"] = slices_info[i].hold;
+          drumCell.parameters["Voice_Envelope_Decay"] = 0.0;
+          drumCell.deviceData["sampleUri"] = "Samples/" + encodeURIComponent(sampleFileName);
+        } else {
+          drumCell.deviceData["sampleUri"] = null;
+        }
+      }
+    }
+    
+    document.getElementById('generatePreset').addEventListener('click', () => {
+      if (!audioReady) {
+        alert("Audio not loaded.");
+        return;
+      }
+      const duration = wavesurfer.getDuration();
+      let regions = Object.values(wavesurfer.regions.list).sort((a, b) => a.start - b.start);
+      let slices_info = regions.map(region => ({
+        offset: region.start / duration,
+        hold: region.end - region.start
+      }));
+      let presetName = fileBlob ? fileBlob.name.replace(/\.[^/.]+$/, "") : "Preset";
+      let preset = generatePresetTemplate(presetName);
+      updateDrumCellParameters(preset, slices_info, fileBlob ? fileBlob.name : "sample.wav");
+      
+      let zip = new JSZip();
+      zip.file("Preset.ablpreset", JSON.stringify(preset, null, 2));
+      if (fileBlob) {
+        zip.file("Samples/" + fileBlob.name, fileBlob);
+      }
+      
+      zip.generateAsync({type:"blob"}).then(function(content) {
+        let a = document.createElement("a");
+        a.href = URL.createObjectURL(content);
+        a.download = presetName + ".ablpresetbundle";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      });
+    });
+  </script>
+</body>
+</html>
