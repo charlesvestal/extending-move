@@ -43,10 +43,25 @@ for (let i = 0; i < keys.length; i++) {
 // --- End of new CHORDS generation code
 
 if (!window.selectedChords) {
-    let keys = Object.keys(CHORDS);
+    const defaultChords = [
+        "Cm9",
+        "Fm",
+        "AbMaj7",
+        "Bb11 sus",
+        "EbMaj9",
+        "Fm7",
+        "G7#9",
+        "C7#5",
+        "Fm9",
+        "DbMaj7",
+        "Bbm7",
+        "C7sus",
+        "C",
+        "Fm add9"
+    ];
     window.selectedChords = [];
     for (let i = 0; i < 16; i++) {
-        window.selectedChords[i] = keys[i] || "";
+        window.selectedChords[i] = defaultChords[i] || "";
     }
 }
 
