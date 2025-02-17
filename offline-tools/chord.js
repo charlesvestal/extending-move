@@ -127,6 +127,13 @@ function populateChordList() {
     }
   }
   listElem.appendChild(gridContainer);
+
+  // After building the grid, update the waveform preview for each pad using the default selection.
+  for (let padNumber = 1; padNumber <= 16; padNumber++) {
+      if (window.selectedChords[padNumber - 1]) {
+          regenerateChordPreview(padNumber);
+      }
+  }
 }
 
 document.addEventListener('DOMContentLoaded', function() {
