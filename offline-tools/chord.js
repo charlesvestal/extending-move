@@ -17,6 +17,14 @@ const CHORDS = {
   'Fm add9': [-7, 5, 8, 12, 19]
 };
 
+if (!window.selectedChords) {
+    let keys = Object.keys(CHORDS);
+    window.selectedChords = [];
+    for (let i = 0; i < 16; i++) {
+        window.selectedChords[i] = keys[i] || "";
+    }
+}
+
 function populateChordList() {
   const listElem = document.getElementById('chordList');
   listElem.innerHTML = '';
@@ -52,9 +60,26 @@ function populateChordList() {
       cell.style.border = '1px solid #ccc';
       cell.style.padding = '10px';
       cell.style.textAlign = 'center';
-      cell.innerHTML = `<div class="chord-label">${padNumber}${row[colIndex] ? ": " + row[colIndex] : ""}</div>
+
+      // Build a dropdown <select> with all available chords
+      let availableChords = Object.keys(CHORDS);
+      let selectHTML = '<select id="chord-select-' + padNumber + '">';
+      availableChords.forEach(chord => {
+          selectHTML += '<option value="' + chord + '">' + chord + '</option>';
+      });
+      selectHTML += '</select>';
+
+      cell.innerHTML = `<div class="chord-label">${padNumber}: ${selectHTML}</div>
                         <div class="chord-preview" id="chord-preview-${padNumber}" style="height: 50px; cursor: pointer;"></div>`;
       gridContainer.appendChild(cell);
+
+      // Set the select's value to the current selection and attach a change listener
+      const selectElem = cell.querySelector(`#chord-select-${padNumber}`);
+      selectElem.value = window.selectedChords[padNumber - 1];
+      selectElem.addEventListener('change', function() {
+          window.selectedChords[padNumber - 1] = this.value;
+          regenerateChordPreview(padNumber);
+      });
     }
   }
   listElem.appendChild(gridContainer);
@@ -64,6 +89,41 @@ document.addEventListener('DOMContentLoaded', function() {
     populateChordList();
 });
 
+async function regenerateChordPreview(padNumber) {
+    if (!window.decodedBuffer) return;
+    const selectedChord = window.selectedChords[padNumber - 1];
+    const intervals = CHORDS[selectedChord];
+    const blob = await processChordSample(window.decodedBuffer, intervals);
+    const url = URL.createObjectURL(blob);
+    const previewContainer = document.getElementById(`chord-preview-${padNumber}`);
+    if (previewContainer) {
+        // Destroy any existing waveform for this cell
+        if (window.chordWaveforms && window.chordWaveforms[padNumber - 1]) {
+            window.chordWaveforms[padNumber - 1].destroy();
+            window.chordWaveforms[padNumber - 1] = null;
+        }
+        const ws = WaveSurfer.create({
+            container: previewContainer,
+            waveColor: '#888',
+            progressColor: '#555',
+            height: 50,
+            responsive: true,
+            interact: true,
+            normalize: true,
+            cursorWidth: 0
+        });
+        ws.load(url);
+        previewContainer.addEventListener('click', function(e) {
+            e.stopPropagation();
+            ws.stop();
+            ws.seekTo(0);
+            requestAnimationFrame(() => ws.play(0));
+        });
+        if (!window.chordWaveforms) window.chordWaveforms = [];
+        window.chordWaveforms[padNumber - 1] = ws;
+    }
+}
+
 /**
  * Generates a Chord preset using the shared base preset and drum cell chains.
  * @param {string} presetName - The preset name.
@@ -72,9 +132,8 @@ document.addEventListener('DOMContentLoaded', function() {
  */
 function generateChordPreset(presetName, sampleFilenames) {
   const preset = generateBasePreset(presetName);
-  const chordKeys = Object.keys(CHORDS);
-  for (let i = 0; i < chordKeys.length; i++) {
-    const chordName = chordKeys[i];
+  for (let i = 0; i < window.selectedChords.length; i++) {
+    const chordName = window.selectedChords[i];
     const chain = createDrumCellChain(
       36 + i,
       chordName,
@@ -300,6 +359,7 @@ document.getElementById('wavFileInput').addEventListener('change', async functio
     const arrayBuffer = await file.arrayBuffer();
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const decodedBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+    window.decodedBuffer = decodedBuffer;
     const chordNames = Object.keys(CHORDS);
     
     // Clear any previous chord waveform instances
