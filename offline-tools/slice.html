@@ -23,6 +23,7 @@
 <body>
   <div class="container">
     <h2>Ableton Move Slice Kit Generator</h2>
+    <p>Select a WAV file to slice onto pads as a Choke Kit ablpreset.</p>
     <input type="file" id="wavFileInput" accept=".wav"><br>
     <label for="num_slices">Number of slices (1-16): </label>
     <input id="num_slices" type="number" min="1" max="16" value="16"><br>
@@ -30,6 +31,9 @@
     <button id="resetSlices">Reset Slices</button>
     <button id="generatePreset">Download Preset</button>
   </div>
+
+  <small> by <a href="mailto:charles@charles.pizza">charlesv</a> with some help from some friends</small>
+
   <!-- Shared JavaScript -->
   <script src="shared.js"></script>
   <!-- Slice tool specific JavaScript -->

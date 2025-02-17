@@ -32,36 +32,11 @@
   <div class="container">
     <h1>Ableton Move Tools</h1>
     <div class="tool-links">
-      <a href="#" onclick="loadTool('chord.html')">Chord Kit Generator</a>
-      <a href="#" onclick="loadTool('slice.html')">Slice Kit Generator</a>
+      <a href="#" href="chord.html">Chord Kit Generator</a>
+      <a href="#" href="slice.html">Slice Kit Generator</a>
     </div>
-    <iframe id="toolFrame" src="chord.html"></iframe>
   </div>
 
-  <script>
-    function loadTool(page) {
-      document.getElementById('toolFrame').src = page;
-      var toolName = page.split('.')[0]; // e.g., "chord" or "slice"
-      history.pushState({tool: page}, "", "/" + toolName);
-    }
-
-    // On page load, check if the current URL indicates a specific tool.
-    window.addEventListener("DOMContentLoaded", function(){
-      var path = location.pathname;
-      var toolPage = "chord.html"; // default tool
-      if (path === "/chord" || path === "/slice") {
-        toolPage = path.substring(1) + ".html"; // e.g., "chord.html"
-      }
-      document.getElementById("toolFrame").src = toolPage;
-      history.replaceState({tool: toolPage}, "", path);
-    });
-
-    // Update iframe when the user navigates back/forward.
-    window.addEventListener("popstate", function(event){
-      if (event.state && event.state.tool) {
-        document.getElementById("toolFrame").src = event.state.tool;
-      }
-    });
-  </script>
+  <small> by <a href="https://charles.pizza">charlesv</a> with some help from some friends</small>
 </body>
 </html>

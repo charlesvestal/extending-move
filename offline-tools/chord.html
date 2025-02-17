@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Ableton Move Chord Kit Generator (Web Audio API)</title>
+  <title>Ableton Move Chord Kit Generator</title>
   <link rel="stylesheet" href="shared.css">
   <style>
     /* Tool-specific styles for Chord */
@@ -22,8 +22,8 @@
 </head>
 <body>
   <div class="container">
-    <h2>Ableton Move Chord Kit Generator (Web Audio API)</h2>
-    <p>Select a WAV file to generate a chord kit preset bundle.</p>
+    <h2>Ableton Move Chord Kit Generator</h2>
+    <p>Select a WAV file to generate chords for a Choke Kit ablpreset.</p>
     <input type="file" id="wavFileInput" accept=".wav"><br>
     <label for="presetName">Preset Name (optional): </label>
     <input type="text" id="presetName" placeholder="Preset name"><br>
@@ -31,10 +31,13 @@
     
     <div class="chord-list">
       <h3>Chords to be generated:</h3>
+
       <ul id="chordList"></ul>
     </div>
   </div>
   
+  <small> by <a href="mailto:charles@charles.pizza">charlesv</a> with some help from some friends</small>
+
   <!-- Shared JavaScript -->
   <script src="shared.js"></script>
   <!-- Chord tool specific JavaScript -->

@@ -411,8 +411,8 @@ document.getElementById('wavFileInput').addEventListener('change', async functio
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const decodedBuffer = await audioCtx.decodeAudioData(arrayBuffer);
     window.decodedBuffer = decodedBuffer;
-    const chordNames = Object.keys(CHORDS);
-    
+    const chordNames = window.selectedChords;
+        
     // Clear any previous chord waveform instances
     window.chordWaveforms = [];
     
