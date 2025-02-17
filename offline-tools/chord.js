@@ -166,6 +166,14 @@ async function regenerateChordPreview(padNumber) {
         ws.load(url);
         previewContainer.addEventListener('click', function(e) {
             e.stopPropagation();
+            // Stop all other chord waveform instances
+            if (window.chordWaveforms && window.chordWaveforms.length) {
+                window.chordWaveforms.forEach(instance => {
+                    if (instance && instance !== ws) {
+                        instance.stop();
+                    }
+                });
+            }
             ws.stop();
             ws.seekTo(0);
             requestAnimationFrame(() => ws.play(0));
