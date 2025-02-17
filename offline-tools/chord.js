@@ -61,7 +61,9 @@ if (!window.selectedChords) {
         "Bbm7",
         "C7sus",
         "C",
-        "Fmadd9"
+        "Fmadd9",
+        "C",
+        "C"
     ];
     window.selectedChords = [];
     for (let i = 0; i < 16; i++) {
@@ -361,7 +363,7 @@ document.getElementById('generatePreset').addEventListener('click', async () => 
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   const decodedBuffer = await audioCtx.decodeAudioData(arrayBuffer);
 
-  const chordNames = Object.keys(CHORDS);
+  const chordNames = window.selectedChords;
   let sampleFilenames = [];
   let processedSamples = {};
   for (let chordName of chordNames) {
