@@ -231,7 +231,8 @@ function initializeDrumRackWaveforms() {
         });
         
         // Handle click event
-        container.addEventListener('click', () => {
+        container.addEventListener('click', function(e) {
+            e.stopPropagation();
             // Stop all waveforms first
             drumRackWaveforms.forEach(ws => {
                 if (ws.isPlaying()) {
