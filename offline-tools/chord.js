@@ -60,7 +60,9 @@ function populateChordList() {
   listElem.appendChild(gridContainer);
 }
 
-populateChordList();
+document.addEventListener('DOMContentLoaded', function() {
+    populateChordList();
+});
 
 /**
  * Generates a Chord preset using the shared base preset and drum cell chains.
@@ -277,46 +279,48 @@ document.getElementById('generatePreset').addEventListener('click', async () => 
 
 // Process chord samples for preview when a file is uploaded
 document.getElementById('wavFileInput').addEventListener('change', async function(e) {
-   const file = e.target.files[0];
-   if (!file) return;
-   
-   const arrayBuffer = await file.arrayBuffer();
-   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-   const decodedBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-   const chordNames = Object.keys(CHORDS);
-   
-   // Clear any previous chord waveform instances
-   window.chordWaveforms = [];
-   
-   // Process each chord sample and create its waveform preview
-   for (let i = 0; i < chordNames.length; i++) {
-       const chordName = chordNames[i];
-       processChordSample(decodedBuffer, CHORDS[chordName]).then(blob => {
-           const url = URL.createObjectURL(blob);
-           const padNumber = i + 1;  // Assuming grid order follows the chord array order
-           const previewContainer = document.getElementById(`chord-preview-${padNumber}`);
-           if (previewContainer) {
-               const ws = WaveSurfer.create({
-                   container: previewContainer,
-                   waveColor: '#888',
-                   progressColor: '#555',
-                   height: 50,
-                   responsive: true,
-                   interact: true,
-                   normalize: true,
-                   cursorWidth: 0
-               });
-               ws.load(url);
-               // When the preview container is clicked, toggle play/pause
-               previewContainer.addEventListener('click', function() {
-                   if (ws.isPlaying()) {
-                       ws.pause();
-                   } else {
-                       ws.play();
-                   }
-               });
-               window.chordWaveforms.push(ws);
-           }
-       });
-   }
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    console.log("File selected:", file);
+    
+    const arrayBuffer = await file.arrayBuffer();
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const decodedBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+    const chordNames = Object.keys(CHORDS);
+    
+    // Clear any previous chord waveform instances
+    window.chordWaveforms = [];
+    
+    // Process each chord sample and create its waveform preview sequentially
+    for (let i = 0; i < chordNames.length; i++) {
+        const chordName = chordNames[i];
+        console.log("Processing chord:", chordName);
+        const blob = await processChordSample(decodedBuffer, CHORDS[chordName]);
+        const url = URL.createObjectURL(blob);
+        const padNumber = i + 1;  // Adjust this if your grid order differs
+        const previewContainer = document.getElementById(`chord-preview-${padNumber}`);
+        if (previewContainer) {
+            const ws = WaveSurfer.create({
+                container: previewContainer,
+                waveColor: '#888',
+                progressColor: '#555',
+                height: 50,
+                responsive: true,
+                interact: true,
+                normalize: true,
+                cursorWidth: 0
+            });
+            ws.load(url);
+            // Toggle play/pause on click
+            previewContainer.addEventListener('click', function() {
+                if (ws.isPlaying()) {
+                    ws.pause();
+                } else {
+                    ws.play();
+                }
+            });
+            window.chordWaveforms.push(ws);
+        }
+    }
 });
