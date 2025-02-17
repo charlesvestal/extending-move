@@ -20,11 +20,43 @@ const CHORDS = {
 function populateChordList() {
   const listElem = document.getElementById('chordList');
   listElem.innerHTML = '';
-  for (const chord in CHORDS) {
-    const li = document.createElement('li');
-    li.textContent = chord + " (" + CHORDS[chord].join(", ") + ")";
-    listElem.appendChild(li);
+
+  // Get chord keys and ensure there are 16 items (fill with empty strings if needed)
+  let chordKeys = Object.keys(CHORDS);
+  while (chordKeys.length < 16) {
+    chordKeys.push("");
   }
+
+  // Partition the array into 4 rows (each row: pads 1-4, 5-8, etc.)
+  let rows = [];
+  for (let i = 0; i < 4; i++) {
+    rows.push(chordKeys.slice(i * 4, i * 4 + 4));
+  }
+
+  // Reverse rows so that the first row becomes the bottom row (pads 1-4)
+  rows.reverse();
+
+  // Create a grid container using CSS Grid
+  const gridContainer = document.createElement('div');
+  gridContainer.style.display = 'grid';
+  gridContainer.style.gridTemplateColumns = 'repeat(4, 1fr)';
+  gridContainer.style.gridGap = '5px';
+
+  // Populate the grid with cells showing pad number and chord name
+  for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+    const row = rows[rowIndex];
+    for (let colIndex = 0; colIndex < row.length; colIndex++) {
+      // Calculate pad number: bottom row (rows[3]) are pads 1-4, then 5-8, etc.
+      const padNumber = (rows.length - rowIndex - 1) * 4 + (colIndex + 1);
+      const cell = document.createElement('div');
+      cell.style.border = '1px solid #ccc';
+      cell.style.padding = '10px';
+      cell.style.textAlign = 'center';
+      cell.textContent = padNumber + (row[colIndex] ? ": " + row[colIndex] : "");
+      gridContainer.appendChild(cell);
+    }
+  }
+  listElem.appendChild(gridContainer);
 }
 
 populateChordList();
