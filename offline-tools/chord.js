@@ -328,9 +328,11 @@ document.getElementById('wavFileInput').addEventListener('change', async functio
             // Toggle play/pause on click
             previewContainer.addEventListener('click', function(e) {
               e.stopPropagation();
-              ws.stop();
-              ws.seekTo(0);
-              requestAnimationFrame(() => ws.play(0));
+                  if (ws && ws.backend) {
+                      ws.stop();
+                      ws.seekTo(0);
+                      requestAnimationFrame(() => ws.play(0));
+                  }
               });
             window.chordWaveforms.push(ws);
         }
