@@ -1,21 +1,46 @@
 /* Chord tool specific functions and event handlers */
 
-const CHORDS = {
-  'Cm9': [-12, 0, 3, 7, 10, 15],
-  'Fm': [-7, 5, 8, 17],
-  'AbMaj7': [-4, 8, 15, 19],
-  'Bb11 sus': [-2, 10, 15, 17, 20, 22],
-  'EbMaj9': [-9, 3, 7, 10, 15, 19],
-  'Fm7': [-7, 5, 8, 12, 15],
-  'G7#9': [-5, 7, 11, 14, 17, 22],
-  'C7#5': [-12, 0, 4, 8, 22],
-  'Fm9': [-7, 5, 8, 12, 15, 19],
-  'DbMaj7': [-11, 1, 5, 8, 13],
-  'Bbm7': [-2, 10, 13, 17, 20],
-  'C7sus': [-12, 0, 5, 7, 22],
-  'C': [-12, 0, 4, 7, 12],
-  'Fm add9': [-7, 5, 8, 12, 19]
+// --- New Code: Generate a complete CHORDS object for every key (assume C as pitch 0)
+// Define base chord types relative to C. Each array includes:
+//   a lower-octave note (–12), the root (0), and then chord tones.
+const baseChordTypes = {
+  "":    [-12, 0, 4, 7, 12],       // Major
+  "m":   [-12, 0, 3, 7, 12],       // Minor
+  "dim": [-12, 0, 3, 6, 12],       // Diminished
+  "aug": [-12, 0, 4, 8, 12],       // Augmented
+  "7":   [-12, 0, 4, 7, 10],       // Dominant 7
+  "maj7":[-12, 0, 4, 7, 11],       // Major 7
+  "m7":  [-12, 0, 3, 7, 10],       // Minor 7
+  "sus2":[-12, 0, 2, 7, 12],       // Sus2
+  "sus4":[-12, 0, 5, 7, 12],       // Sus4
+  "7sus":[-12, 0, 5, 7, 10],       // Dominant 7 with sus4
+  "m9":  [-12, 0, 3, 7, 10, 15],   // Minor 9
+  "maj9":[-12, 0, 4, 7, 11, 14],   // Major 9
+  "m7b5":[-12, 0, 3, 6, 10],       // Half-diminished (m7b5)
+  "6":   [-12, 0, 4, 7, 9],        // 6 chord
+  "m6":  [-12, 0, 3, 7, 9],        // Minor 6
+  "add9":[-12, 0, 4, 7, 14]        // add9 chord
 };
+
+// List of keys (using sharps); you can adjust to include flats if desired.
+const keys = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+const keyOffsets = { "C": 0, "C#": 1, "D": 2, "D#": 3, "E": 4, "F": 5, "F#": 6, "G": 7, "G#": 8, "A": 9, "A#": 10, "B": 11 };
+
+// Build the CHORDS object by transposing each base chord type for every key.
+const CHORDS = {};
+for (let i = 0; i < keys.length; i++) {
+  const key = keys[i];
+  const offset = keyOffsets[key];
+  for (let variation in baseChordTypes) {
+    // For an empty variation, the chord name is just the key.
+    const chordName = key + (variation === "" ? "" : variation);
+    const baseIntervals = baseChordTypes[variation];
+    // Transpose by adding the key's offset to each interval.
+    const transposed = baseIntervals.map(interval => interval + offset);
+    CHORDS[chordName] = transposed;
+  }
+}
+// --- End of new CHORDS generation code
 
 if (!window.selectedChords) {
     let keys = Object.keys(CHORDS);
