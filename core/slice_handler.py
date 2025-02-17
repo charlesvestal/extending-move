@@ -290,13 +290,14 @@ def get_unique_filename(path):
             return new_path
         counter += 1
 
-def update_drumcell_sample_uris(data, slice_paths, current_index=0, base_uri="Samples/"):
+def update_drumcell_sample_uris(data, slices_info, sliced_filename, current_index=0, base_uri="Samples/"):
     """
-    Update drum cell sample URIs in a Move preset with slice file paths.
+    Update drum cell sample URIs and playback parameters in a Move preset.
     
     Args:
         data: Move preset data structure to update
-        slice_paths: List of paths to slice files
+        slices_info: List of (offset, hold) tuples for each slice
+        sliced_filename: Path to the single sliced WAV file
         current_index: Current slice index (for recursive calls)
         base_uri: Base URI for sample references
     
@@ -304,28 +305,33 @@ def update_drumcell_sample_uris(data, slice_paths, current_index=0, base_uri="Sa
         int: Updated current_index
     
     This function recursively walks the preset structure, finding drum cells
-    and updating their sampleUri fields to point to the slice files.
-    The URI format depends on the mode:
-    - Download mode: "Samples/slice_file.wav"
-    - Auto-place mode: "ableton:/user-library/Samples/Preset%20Samples/slice_file.wav"
+    and updating their sampleUri and playback parameters. All cells reference
+    the same WAV file but with different playback start points and durations.
     """
+    from urllib.parse import quote
     if isinstance(data, dict):
         if data.get("kind") == "drumCell" and "deviceData" in data and "sampleUri" in data["deviceData"]:
-            if current_index < len(slice_paths):
-                filename = os.path.basename(slice_paths[current_index])
+            if slices_info and current_index < len(slices_info):
+                filename = os.path.basename(sliced_filename)
                 encoded_filename = quote(filename)
                 new_uri = base_uri + encoded_filename
                 data["deviceData"]["sampleUri"] = new_uri
-                print(f"Updated drumCell sampleUri to {new_uri}")
+                if "parameters" not in data:
+                    data["parameters"] = {}
+                offset, hold = slices_info[current_index]
+                data["parameters"]["Voice_PlaybackStart"] = offset
+                data["parameters"]["Voice_Envelope_Hold"] = hold
+                data["parameters"]["Voice_Envelope_Decay"] = 0.0
+                print(f"Updated drumCell sampleUri to {new_uri} with Voice_PlaybackStart {offset} and Voice_Envelope_Hold {hold}")
                 current_index += 1
             else:
                 data["deviceData"]["sampleUri"] = None
-                print("No slice available. Set drumCell sampleUri to null.")
+                print("No slice info available. Set drumCell sampleUri to null.")
         for key, value in data.items():
-            current_index = update_drumcell_sample_uris(value, slice_paths, current_index, base_uri)
+            current_index = update_drumcell_sample_uris(value, slices_info, sliced_filename, current_index, base_uri)
     elif isinstance(data, list):
         for item in data:
-            current_index = update_drumcell_sample_uris(item, slice_paths, current_index, base_uri)
+            current_index = update_drumcell_sample_uris(item, slices_info, sliced_filename, current_index, base_uri)
     return current_index
 
 def create_bundle(preset_filename, slice_paths, bundle_name):
@@ -410,16 +416,36 @@ def process_kit(input_wav, preset_name=None, regions=None, num_slices=None, keep
 
             os.makedirs(samples_folder, exist_ok=True)
             
-            # Slice the WAV file
-            if regions and isinstance(regions, list) and len(regions) > 0:
-                slice_paths = slice_wav(input_wav, samples_folder, regions=regions, target_directory=samples_folder)
-            else:
-                if num_slices is None:
-                    num_slices = 16
-                slice_paths = slice_wav(input_wav, samples_folder, num_slices=num_slices, target_directory=samples_folder)
+            # Copy the entire WAV file with -sliced suffix
+            os.makedirs(samples_folder, exist_ok=True)
+            base = os.path.splitext(os.path.basename(input_wav))[0]
+            sliced_wav = os.path.join(samples_folder, base + "-sliced.wav")
+            shutil.copy2(input_wav, sliced_wav)
 
-            # Update the template with slice paths
-            update_drumcell_sample_uris(kit_template, slice_paths, base_uri="Samples/")
+            # Compute total duration of the WAV file
+            from scipy.io import wavfile
+            samplerate, data = wavfile.read(sliced_wav)
+            total_duration = len(data) / samplerate
+
+            if regions:
+                slices_info = []
+                for region in regions:
+                    start = float(region.get("start", 0))
+                    end = float(region.get("end", start))
+                    hold = end - start
+                    offset = start / total_duration if total_duration > 0 else 0
+                    slices_info.append((offset, hold))
+            else:
+                num_slices = num_slices if num_slices is not None else 16
+                slice_duration = total_duration / num_slices
+                slices_info = []
+                for i in range(num_slices):
+                    offset = i / num_slices
+                    hold = slice_duration
+                    slices_info.append((offset, hold))
+
+            # Update the template using the single sliced file and slices_info
+            update_drumcell_sample_uris(kit_template, slices_info, sliced_wav, base_uri="Samples/")
 
             # Save the preset file
             try:
@@ -430,7 +456,7 @@ def process_kit(input_wav, preset_name=None, regions=None, num_slices=None, keep
                 return {'success': False, 'message': f"Could not write preset file: {e}"}
 
             # Create the bundle
-            create_bundle(preset_output_file, slice_paths, bundle_filename)
+            create_bundle(preset_output_file, [sliced_wav], bundle_filename)
             temp_files.append(bundle_filename)
 
             # Clean up temporary files except the bundle
@@ -445,23 +471,40 @@ def process_kit(input_wav, preset_name=None, regions=None, num_slices=None, keep
             presets_target_dir = "/data/UserData/UserLibrary/Track Presets"
             preset_output_file = os.path.join(presets_target_dir, f"{preset}.ablpreset")
 
-            # Slice the WAV file directly to target directory
-            if regions and isinstance(regions, list) and len(regions) > 0:
-                slice_paths = slice_wav(input_wav, samples_target_dir, regions=regions, target_directory=samples_target_dir)
-            else:
-                if num_slices is None:
-                    num_slices = 16
-                slice_paths = slice_wav(input_wav, samples_target_dir, num_slices=num_slices, target_directory=samples_target_dir)
+            os.makedirs(samples_target_dir, exist_ok=True)
+            base = os.path.splitext(os.path.basename(input_wav))[0]
+            sliced_wav = os.path.join(samples_target_dir, base + "-sliced.wav")
+            shutil.copy2(input_wav, sliced_wav)
 
-            # Update the template with Move library paths
-            update_drumcell_sample_uris(kit_template, slice_paths, base_uri="ableton:/user-library/Samples/Preset%20Samples/")
+            from scipy.io import wavfile
+            samplerate, data = wavfile.read(sliced_wav)
+            total_duration = len(data) / samplerate
+
+            if regions:
+                slices_info = []
+                for region in regions:
+                    start = float(region.get("start", 0))
+                    end = float(region.get("end", start))
+                    hold = end - start
+                    offset = start / total_duration if total_duration > 0 else 0
+                    slices_info.append((offset, hold))
+            else:
+                num_slices = num_slices if num_slices is not None else 16
+                slice_duration = total_duration / num_slices
+                slices_info = []
+                for i in range(num_slices):
+                    offset = i / num_slices
+                    hold = slice_duration
+                    slices_info.append((offset, hold))
+
+            update_drumcell_sample_uris(kit_template, slices_info, sliced_wav, base_uri="ableton:/user-library/Samples/Preset%20Samples/")
 
             # Save the preset file
             try:
                 with open(preset_output_file, "w") as f:
                     json.dump(kit_template, f, indent=2)
             except Exception as e:
-                cleanup_temp_files(slice_paths)  # Clean up created sample files
+                cleanup_temp_files([sliced_wav])  # Clean up created sample files
                 return {'success': False, 'message': f"Could not write preset file: {e}"}
 
             # Refresh the library to show new files
