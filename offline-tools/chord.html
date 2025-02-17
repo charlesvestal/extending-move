@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Ableton Move Chord Kit Generator (Web Audio API)</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+    }
+    input, button {
+      margin: 5px 0;
+      font-size: 1em;
+    }
+    .chord-list {
+      margin-top: 20px;
+    }
+    .chord-list ul {
+      list-style: none;
+      padding: 0;
+    }
+    .chord-list li {
+      padding: 5px;
+      border-bottom: 1px solid #ddd;
+    }
+  </style>
+  <!-- Include JSZip -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+  <script>
+    // Inline AudioBuffer to WAV conversion function.
+    // This implementation is based on https://github.com/Jam3/audiobuffer-to-wav
+    function toWav(buffer, opt) {
+      opt = opt || {}
+      var numChannels = buffer.numberOfChannels;
+      var sampleRate = buffer.sampleRate;
+      var format = opt.float32 ? 3 : 1;
+      var bitDepth = format === 3 ? 32 : 16;
+      var result;
+      if (numChannels === 2) {
+        result = interleave(buffer.getChannelData(0), buffer.getChannelData(1));
+      } else {
+        result = buffer.getChannelData(0);
+      }
+      return encodeWAV(result, numChannels, sampleRate, format, bitDepth);
+    }
+    function interleave(inputL, inputR) {
+      var length = inputL.length + inputR.length;
+      var result = new Float32Array(length);
+      var index = 0, inputIndex = 0;
+      while (index < length) {
+        result[index++] = inputL[inputIndex];
+        result[index++] = inputR[inputIndex];
+        inputIndex++;
+      }
+      return result;
+    }
+    function encodeWAV(samples, numChannels, sampleRate, format, bitDepth) {
+      var bytesPerSample = bitDepth / 8;
+      var blockAlign = numChannels * bytesPerSample;
+      var buffer = new ArrayBuffer(44 + samples.length * bytesPerSample);
+      var view = new DataView(buffer);
+      /* RIFF identifier */
+      writeString(view, 0, 'RIFF');
+      /* RIFF chunk length */
+      view.setUint32(4, 36 + samples.length * bytesPerSample, true);
+      /* RIFF type */
+      writeString(view, 8, 'WAVE');
+      /* format chunk identifier */
+      writeString(view, 12, 'fmt ');
+      /* format chunk length */
+      view.setUint32(16, 16, true);
+      /* sample format (raw) */
+      view.setUint16(20, format, true);
+      /* channel count */
+      view.setUint16(22, numChannels, true);
+      /* sample rate */
+      view.setUint32(24, sampleRate, true);
+      /* byte rate (sample rate * block align) */
+      view.setUint32(28, sampleRate * blockAlign, true);
+      /* block align (channel count * bytes per sample) */
+      view.setUint16(32, blockAlign, true);
+      /* bits per sample */
+      view.setUint16(34, bitDepth, true);
+      /* data chunk identifier */
+      writeString(view, 36, 'data');
+      /* data chunk length */
+      view.setUint32(40, samples.length * bytesPerSample, true);
+      if (format === 1) { // Raw PCM
+        floatTo16BitPCM(view, 44, samples);
+      } else {
+        writeFloat32(view, 44, samples);
+      }
+      return buffer;
+    }
+    function floatTo16BitPCM(output, offset, input) {
+      for (var i = 0; i < input.length; i++, offset += 2) {
+        var s = Math.max(-1, Math.min(1, input[i]));
+        output.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+      }
+    }
+    function writeFloat32(output, offset, input) {
+      for (var i = 0; i < input.length; i++, offset += 4) {
+        output.setFloat32(offset, input[i], true);
+      }
+    }
+    function writeString(view, offset, string) {
+      for (var i = 0; i < string.length; i++) {
+        view.setUint8(offset + i, string.charCodeAt(i));
+      }
+    }
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h2>Ableton Move Chord Kit Generator (Web Audio API)</h2>
+    <p>Select a WAV file to generate a chord kit preset bundle.</p>
+    <input type="file" id="wavFileInput" accept=".wav"><br>
+    <label for="presetName">Preset Name (optional): </label>
+    <input type="text" id="presetName" placeholder="Preset name"><br>
+    <button id="generatePreset">Download .ablpresetbundle</button>
+    
+    <div class="chord-list">
+      <h3>Chords to be generated:</h3>
+      <ul id="chordList"></ul>
+    </div>
+  </div>
+  
+  <script>
+    // Define the chord dictionary (as in your Python logic)
+    const CHORDS = {
+      'Cm9': [-12, 0, 3, 7, 10, 15],
+      'Fm': [-7, 5, 8, 17],
+      'AbMaj7': [-4, 8, 15, 19],
+      'Bb11 sus': [-2, 10, 15, 17, 20, 22],
+      'EbMaj9': [-9, 3, 7, 10, 15, 19],
+      'Fm7': [-7, 5, 8, 12, 15],
+      'G7#9': [-5, 7, 11, 14, 17, 22],
+      'C7#5': [-12, 0, 4, 8, 22],
+      'Fm9': [-7, 5, 8, 12, 15, 19],
+      'DbMaj7': [-11, 1, 5, 8, 13],
+      'Bbm7': [-2, 10, 13, 17, 20],
+      'C7sus': [-12, 0, 5, 7, 22],
+      'C': [-12, 0, 4, 7, 12],
+      'Fm add9': [-7, 5, 8, 12, 19]
+    };
+
+    // Populate the chord list for display
+    function populateChordList() {
+      const listElem = document.getElementById('chordList');
+      listElem.innerHTML = '';
+      for (const chord in CHORDS) {
+        const li = document.createElement('li');
+        li.textContent = chord + " (" + CHORDS[chord].join(", ") + ")";
+        listElem.appendChild(li);
+      }
+    }
+    populateChordList();
+
+    /**
+     * Pitch shift an AudioBuffer by a given number of semitones using the Web Audio API.
+     * This uses an OfflineAudioContext to render the buffer at an adjusted playbackRate.
+     * @param {AudioBuffer} buffer - The original audio buffer.
+     * @param {number} semitoneShift - The number of semitones to shift.
+     * @returns {Promise<AudioBuffer>} - The pitch-shifted AudioBuffer.
+     */
+    async function pitchShiftOffline(buffer, semitoneShift) {
+      const factor = Math.pow(2, semitoneShift / 12);
+      const newLength = Math.floor(buffer.length / factor);
+      const offlineCtx = new OfflineAudioContext(
+        buffer.numberOfChannels,
+        newLength,
+        buffer.sampleRate
+      );
+      const source = offlineCtx.createBufferSource();
+      source.buffer = buffer;
+      source.playbackRate.value = factor;
+      source.connect(offlineCtx.destination);
+      source.start(0);
+      return offlineCtx.startRendering();
+    }
+
+    /**
+     * Mix an array of AudioBuffers into one by summing their samples.
+     * Zero pads shorter buffers.
+     * @param {AudioBuffer[]} buffers - Array of AudioBuffers to mix.
+     * @returns {AudioBuffer} - The mixed AudioBuffer.
+     */
+    function mixAudioBuffers(buffers) {
+      if (buffers.length === 0) return null;
+      const numChannels = buffers[0].numberOfChannels;
+      const sampleRate = buffers[0].sampleRate;
+      const maxLength = Math.max(...buffers.map(b => b.length));
+      // Create a new buffer using an AudioContext.
+      const tempCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const mixedBuffer = tempCtx.createBuffer(numChannels, maxLength, sampleRate);
+      for (let channel = 0; channel < numChannels; channel++) {
+        const mixedData = mixedBuffer.getChannelData(channel);
+        for (let i = 0; i < maxLength; i++) {
+          let sum = 0;
+          buffers.forEach(buffer => {
+            const data = buffer.getChannelData(channel);
+            if (i < data.length) {
+              sum += data[i];
+            }
+          });
+          mixedData[i] = sum;
+        }
+      }
+      return mixedBuffer;
+    }
+
+    /**
+     * Normalize an AudioBuffer so that its maximum absolute sample value equals targetPeak.
+     * @param {AudioBuffer} buffer - The AudioBuffer to normalize.
+     * @param {number} targetPeak - Target peak amplitude (default 0.9).
+     * @returns {AudioBuffer} - The normalized AudioBuffer.
+     */
+    function normalizeAudioBuffer(buffer, targetPeak = 0.9) {
+      const numChannels = buffer.numberOfChannels;
+      let maxVal = 0;
+      for (let channel = 0; channel < numChannels; channel++) {
+        const data = buffer.getChannelData(channel);
+        for (let i = 0; i < data.length; i++) {
+          maxVal = Math.max(maxVal, Math.abs(data[i]));
+        }
+      }
+      const gain = maxVal > 0 ? targetPeak / maxVal : 1;
+      for (let channel = 0; channel < numChannels; channel++) {
+        const data = buffer.getChannelData(channel);
+        for (let i = 0; i < data.length; i++) {
+          data[i] *= gain;
+        }
+      }
+      return buffer;
+    }
+
+    /**
+     * Process a chord sample by pitch shifting for each interval,
+     * mixing the resulting buffers, normalizing the mix,
+     * and converting the final AudioBuffer into a WAV blob.
+     * @param {AudioBuffer} buffer - The original audio buffer.
+     * @param {number[]} intervals - Array of semitone shifts.
+     * @returns {Promise<Blob>} - A Promise resolving to a WAV Blob.
+     */
+    async function processChordSample(buffer, intervals) {
+      const pitchedBuffers = [];
+      for (let semitone of intervals) {
+        const pitched = await pitchShiftOffline(buffer, semitone);
+        pitchedBuffers.push(pitched);
+      }
+      const mixed = mixAudioBuffers(pitchedBuffers);
+      const normalized = normalizeAudioBuffer(mixed, 0.9);
+      // Convert AudioBuffer to WAV using the inline toWav function.
+      const wavData = toWav(normalized);
+      return new Blob([new DataView(wavData)], { type: 'audio/wav' });
+    }
+
+    // Handle the generate preset button click.
+    document.getElementById('generatePreset').addEventListener('click', async () => {
+      const fileInput = document.getElementById('wavFileInput');
+      const presetNameInput = document.getElementById('presetName');
+      if (!fileInput.files || fileInput.files.length === 0) {
+        alert("Please select a WAV file.");
+        return;
+      }
+      const file = fileInput.files[0];
+      let baseName = file.name.replace(/\.[^/.]+$/, "");
+      let presetName = presetNameInput.value.trim() || baseName;
+
+      // Read and decode the WAV file.
+      const arrayBuffer = await file.arrayBuffer();
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const decodedBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+
+      // Process chord samples for each chord.
+      const chordNames = Object.keys(CHORDS);
+      let sampleFilenames = [];
+      let processedSamples = {};
+      for (let chordName of chordNames) {
+        const intervals = CHORDS[chordName];
+        const blob = await processChordSample(decodedBuffer, intervals);
+        let safeChordName = chordName.replace(/\s+/g, '');
+        let filename = `${baseName}_chord_${safeChordName}.wav`;
+        sampleFilenames.push(filename);
+        processedSamples[chordName] = blob;
+      }
+
+      // Generate the preset JSON object.
+      function generateChordPreset(presetName, sampleFilenames) {
+        let drumCells = [];
+        const chordKeys = Object.keys(CHORDS);
+        chordKeys.forEach((chordName, index) => {
+          let cell = {
+            "name": chordName,
+            "color": 0,
+            "devices": [
+              {
+                "presetUri": null,
+                "kind": "drumCell",
+                "name": chordName,
+                "parameters": {"Voice_Envelope_Hold": 60.0},
+                "deviceData": {
+                "sampleUri": "Samples/" + encodeURIComponent(sampleFilenames[index])                   }
+              }
+            ],
+            "mixer": {
+              "pan": 0.0,
+              "solo-cue": false,
+              "speakerOn": true,
+              "volume": 0.0,
+              "sends": [{"isEnabled": true, "amount": -70.0}]
+            },
+            "drumZoneSettings": {
+              "receivingNote": 36 + index,
+              "sendingNote": 60,
+              "chokeGroup": 1
+            }
+          };
+          drumCells.push(cell);
+        });
+        return {
+          "$schema": "http://tech.ableton.com/schema/song/1.4.4/devicePreset.json",
+          "kind": "instrumentRack",
+          "name": presetName,
+          "lockId": 1001,
+          "lockSeal": -973461132,
+          "parameters": {
+            "Enabled": true,
+            "Macro0": 0.0,
+            "Macro1": 0.0,
+            "Macro2": 0.0,
+            "Macro3": 0.0,
+            "Macro4": 0.0,
+            "Macro5": 0.0,
+            "Macro6": 0.0,
+            "Macro7": 0.0
+          },
+          "chains": [
+            {
+              "name": "",
+              "color": 0,
+              "devices": [
+                {
+                  "presetUri": null,
+                  "kind": "drumRack",
+                  "name": "",
+                  "lockId": 1001,
+                  "lockSeal": 830049224,
+                  "parameters": {
+                    "Enabled": true,
+                    "Macro0": 0.0,
+                    "Macro1": 0.0,
+                    "Macro2": 0.0,
+                    "Macro3": 0.0,
+                    "Macro4": 0.0,
+                    "Macro5": 0.0,
+                    "Macro6": 0.0,
+                    "Macro7": 0.0
+                  },
+                  "chains": drumCells,
+                  "returnChains": [
+                    {
+                      "name": "",
+                      "color": 0,
+                      "devices": [
+                        {
+                          "presetUri": null,
+                          "kind": "reverb",
+                          "name": "",
+                          "parameters": {},
+                          "deviceData": {}
+                        }
+                      ],
+                      "mixer": {
+                        "pan": 0.0,
+                        "solo-cue": false,
+                        "speakerOn": true,
+                        "volume": 0.0,
+                        "sends": [{"isEnabled": false, "amount": -70.0}]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "presetUri": null,
+                  "kind": "saturator",
+                  "name": "Saturator",
+                  "parameters": {},
+                  "deviceData": {}
+                }
+              ],
+              "mixer": {
+                "pan": 0.0,
+                "solo-cue": false,
+                "speakerOn": true,
+                "volume": 0.0,
+                "sends": []
+              }
+            }
+          ]
+        };
+      }
+      const preset = generateChordPreset(presetName, sampleFilenames);
+      const presetJson = JSON.stringify(preset, null, 2);
+
+      // Package the preset and processed chord samples into a zip bundle.
+      const zip = new JSZip();
+      zip.file("Preset.ablpreset", presetJson);
+      const samplesFolder = zip.folder("Samples");
+      for (let chordName of chordNames) {
+        let safeChordName = chordName.replace(/\s+/g, '');
+        let filename = `${baseName}_chord_${safeChordName}.wav`;
+        const blob = processedSamples[chordName];
+        samplesFolder.file(filename, blob);
+      }
+      zip.generateAsync({ type: "blob" }).then(function(content) {
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(content);
+        a.download = presetName + ".ablpresetbundle";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      });
+    });
+  </script>
+</body>
+</html>
