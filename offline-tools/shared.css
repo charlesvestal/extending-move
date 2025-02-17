@@ -7,6 +7,16 @@ body {
   color: #333;
 }
 
+.chord-label {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.chord-preview {
+  cursor: pointer;
+  /* You can add additional styling as needed */
+}
+
 .container {
   max-width: 800px;
   margin: 0 auto;

@@ -52,7 +52,8 @@ function populateChordList() {
       cell.style.border = '1px solid #ccc';
       cell.style.padding = '10px';
       cell.style.textAlign = 'center';
-      cell.textContent = padNumber + (row[colIndex] ? ": " + row[colIndex] : "");
+      cell.innerHTML = `<div class="chord-label">${padNumber}${row[colIndex] ? ": " + row[colIndex] : ""}</div>
+                        <div class="chord-preview" id="chord-preview-${padNumber}" style="height: 50px; cursor: pointer;"></div>`;
       gridContainer.appendChild(cell);
     }
   }
@@ -272,4 +273,50 @@ document.getElementById('generatePreset').addEventListener('click', async () => 
     a.click();
     document.body.removeChild(a);
   });
+});
+
+// Process chord samples for preview when a file is uploaded
+document.getElementById('wavFileInput').addEventListener('change', async function(e) {
+   const file = e.target.files[0];
+   if (!file) return;
+   
+   const arrayBuffer = await file.arrayBuffer();
+   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+   const decodedBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+   const chordNames = Object.keys(CHORDS);
+   
+   // Clear any previous chord waveform instances
+   window.chordWaveforms = [];
+   
+   // Process each chord sample and create its waveform preview
+   for (let i = 0; i < chordNames.length; i++) {
+       const chordName = chordNames[i];
+       processChordSample(decodedBuffer, CHORDS[chordName]).then(blob => {
+           const url = URL.createObjectURL(blob);
+           const padNumber = i + 1;  // Assuming grid order follows the chord array order
+           const previewContainer = document.getElementById(`chord-preview-${padNumber}`);
+           if (previewContainer) {
+               const ws = WaveSurfer.create({
+                   container: previewContainer,
+                   waveColor: '#888',
+                   progressColor: '#555',
+                   height: 50,
+                   responsive: true,
+                   interact: true,
+                   normalize: true,
+                   cursorWidth: 0
+               });
+               ws.load(url);
+               // When the preview container is clicked, toggle play/pause
+               previewContainer.addEventListener('click', function() {
+                   if (ws.isPlaying()) {
+                       ws.pause();
+                   } else {
+                       ws.play();
+                   }
+               });
+               window.chordWaveforms.push(ws);
+           }
+       });
+   }
 });
