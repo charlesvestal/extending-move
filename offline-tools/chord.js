@@ -1,3 +1,4 @@
+//v180220250205
 /* Chord tool specific functions and event handlers */
 
 // --- New Code: Generate a complete CHORDS object for every key (assume C as pitch 0)
