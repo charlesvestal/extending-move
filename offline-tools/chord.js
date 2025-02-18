@@ -353,6 +353,9 @@ document.getElementById('generatePreset').addEventListener('click', async () => 
   document.getElementById('loadingIndicator').style.display = 'block';
   document.getElementById('progressPercent').textContent = '0%';
   
+  let totalChords = window.selectedChords.length;
+  let processedCount = 0;
+  
   const fileInput = document.getElementById('wavFileInput');
   const presetNameInput = document.getElementById('presetName');
   if (!fileInput.files || fileInput.files.length === 0) {
@@ -377,6 +380,10 @@ document.getElementById('generatePreset').addEventListener('click', async () => 
     let filename = `${baseName}_chord_${safeChordName}.wav`;
     sampleFilenames.push(filename);
     processedSamples[chordName] = blob;
+    
+    processedCount++;
+    let progressPercent = Math.round((processedCount / totalChords) * 50); // first 50% for chord processing
+    document.getElementById('progressPercent').textContent = progressPercent + "%";
   }
 
   const preset = generateChordPreset(presetName, sampleFilenames);
@@ -392,7 +399,8 @@ document.getElementById('generatePreset').addEventListener('click', async () => 
     samplesFolder.file(filename, blob);
   }
   zip.generateAsync({ type: "blob" }, function(metadata) {
-    document.getElementById('progressPercent').textContent = Math.round(metadata.percent) + "%";
+    let zipProgress = 50 + Math.round(metadata.percent / 2);
+    document.getElementById('progressPercent').textContent = zipProgress + "%";
   }).then(function(content) {
     document.getElementById('loadingIndicator').style.display = 'none';
     const a = document.createElement("a");
