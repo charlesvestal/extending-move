@@ -28,6 +28,9 @@
     <label for="presetName">Preset Name (optional): </label>
     <input type="text" id="presetName" placeholder="Preset name"><br>
     <button id="generatePreset">Download Preset</button>
+    <div id="loadingIndicator" style="display:none; margin-top:10px;">
+      Generating bundle... <span id="progressPercent">0%</span>
+    </div>
     
     <div class="chord-list">
       <h3>Chords to be generated:</h3>

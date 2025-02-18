@@ -350,6 +350,9 @@ async function processChordSample(buffer, intervals) {
 }
 
 document.getElementById('generatePreset').addEventListener('click', async () => {
+  document.getElementById('loadingIndicator').style.display = 'block';
+  document.getElementById('progressPercent').textContent = '0%';
+  
   const fileInput = document.getElementById('wavFileInput');
   const presetNameInput = document.getElementById('presetName');
   if (!fileInput.files || fileInput.files.length === 0) {
@@ -388,7 +391,10 @@ document.getElementById('generatePreset').addEventListener('click', async () => 
     const blob = processedSamples[chordName];
     samplesFolder.file(filename, blob);
   }
-  zip.generateAsync({ type: "blob" }).then(function(content) {
+  zip.generateAsync({ type: "blob" }, function(metadata) {
+    document.getElementById('progressPercent').textContent = Math.round(metadata.percent) + "%";
+  }).then(function(content) {
+    document.getElementById('loadingIndicator').style.display = 'none';
     const a = document.createElement("a");
     a.href = URL.createObjectURL(content);
     a.download = presetName + ".ablpresetbundle";
