@@ -1,0 +1,40 @@
+name: Mirror offline-tools to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main  # Change if you use a different default branch
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source repo
+        uses: actions/checkout@v3
+
+      - name: Set up Git config
+        run: |
+          git config --global user.name "Your Name"
+          git config --global user.email "your-email@example.com"
+
+      - name: Clone target repo
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          git clone https://$GH_TOKEN@github.com/charlesvestal/charles.pizza.git target
+
+      - name: Copy offline-tools to target/move
+        run: |
+          mkdir -p target/move
+          rsync -av --delete offline-tools/ target/move/
+
+      - name: Commit and push changes
+        working-directory: target
+        run: |
+          git add -A
+          if ! git diff-index --quiet HEAD; then
+            git commit -m "Mirror offline-tools updates from extending-move repo"
+            git push origin main
+          else
+            echo "No changes to commit."
+          fi
