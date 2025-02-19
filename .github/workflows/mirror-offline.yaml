@@ -30,10 +30,13 @@ jobs:
 
       - name: Commit and push changes
         working-directory: target
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           git add -A
           if ! git diff-index --quiet HEAD; then
             git commit -m "Mirror offline-tools updates from extending-move repo"
+            git remote set-url origin https://$GH_TOKEN@github.com/charlesvestal/charles.pizza.git
             git push origin main
           else
             echo "No changes to commit."
