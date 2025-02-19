@@ -1,155 +1,76 @@
 # Extending Move
 
-This guide explains how to extend the Move webserver with new features. The webserver follows a modular architecture where each feature consists of:
+This guide explains how to extend the Move webserver with new features. The webserver follows a modular architecture where each feature consists of three main components:
 
-1. Core functionality in the core/ directory
-2. A web handler in the handlers/ directory
-3. An HTML template in the templates/ directory
+1. Core functionality in the `core/` directory
+2. A web handler in the `handlers/` directory
+3. An HTML template in the `templates/` directory
 
 ## Project Structure
 
 ```
 extending-move/
-├── move-webserver.py      # Main webserver that handles routing and requests
-├── core/                  # Core functionality for each feature
+├── move-webserver.py      # Main webserver with routing and request handling
+├── core/                  # Core functionality implementations
+│   ├── chord_handler.py         # Chord generation and pitch-shifting
 │   ├── slice_handler.py         # Sample slicing and kit creation
-│   ├── refresh_handler.py       # Library refresh functionality
+│   ├── refresh_handler.py       # Library refresh via D-Bus
 │   ├── reverse_handler.py       # WAV file reversal
 │   ├── restore_handler.py       # Move Set restoration
 │   └── drum_rack_inspector.py   # Preset inspection and modification
-├── handlers/              # Web handlers for each feature
-│   ├── base_handler.py           # Base class for all handlers
+├── handlers/              # Web request handlers
+│   ├── base_handler.py           # Base handler with shared functionality
+│   ├── chord_handler_class.py    # Chord generation interface
 │   ├── slice_handler_class.py    # Slice kit creation interface
 │   ├── refresh_handler_class.py  # Library refresh interface
 │   ├── reverse_handler_class.py  # WAV reversal interface
 │   ├── restore_handler_class.py  # Move Set restoration interface
 │   └── drum_rack_inspector_handler_class.py  # Preset inspection interface
-├── templates/             # HTML templates for each feature
-│   ├── index.html              # Main navigation page with tab system
-│   ├── style.css              # Shared styles
-│   ├── slice.html            # Complex interactive template with waveform
-│   ├── reverse.html          # File selection with AJAX handling
-│   ├── refresh.html          # Simple action template
-│   ├── restore.html          # File upload with dynamic options
-│   └── drum_rack_inspector.html  # Grid layout with multiple actions
-└── utility-scripts/       # Utility scripts for installation and management
-    ├── install-on-move.sh    # Initial setup and installation
-    ├── update-on-move.sh     # Update Move with latest changes
-    └── restart-webserver.sh   # Restart the Move webserver
+├── templates/             # HTML templates and UI components
+│   ├── index.html              # Main navigation with tab system
+│   ├── chord.html             # Chord generation interface
+│   ├── slice.html             # Waveform slicing interface
+│   ├── reverse.html           # File selection with AJAX
+│   ├── refresh.html           # Simple action template
+│   ├── restore.html           # File upload with options
+│   └── drum_rack_inspector.html  # Grid layout with actions
+└── utility-scripts/       # Installation and management scripts
+    ├── install-on-move.sh     # Initial setup script
+    ├── update-on-move.sh      # Update deployment script
+    └── restart-webserver.sh   # Server management script
 ```
 
-Each feature typically consists of three components:
-1. **Core Handler** (core/): Contains the core logic and functionality
-   - File operations (e.g., slicing, reversing)
-   - Preset manipulation (e.g., reading, modifying)
-   - Library management
-   
-2. **Web Handler** (handlers/): Manages web interface and requests
-   - Form handling and validation
-   - File uploads
-   - Response formatting
-   
-3. **Template** (templates/): Defines the user interface
-   - Simple forms (e.g., refresh.html)
-   - File selection (e.g., reverse.html)
-   - Complex interactive UIs (e.g., slice.html)
-   - Grid layouts (e.g., drum_rack_inspector.html)
+## Core Components
 
-## Move-Specific Details
+### 1. Core Handlers
+Core handlers implement the main functionality of each feature. They should:
+- Focus on core logic without web-specific code
+- Handle file operations and data processing
+- Return structured results with success/failure status
+- Include comprehensive error handling
 
-### File Locations
-
-Move uses specific directories for different types of files:
-
-```
-/data/UserData/UserLibrary/
-├── Samples/              # WAV files and other audio samples
-│   └── Preset Samples/   # Samples used by presets
-└── Track Presets/        # Move preset files (.ablpreset)
-```
-
-### Preset Format
-
-Move presets (.ablpreset files) follow the schema at http://tech.ableton.com/schema/song/1.4.4/devicePreset.json. Key components include:
-
-1. Instrument Racks:
-   ```json
-   {
-     "$schema": "http://tech.ableton.com/schema/song/1.4.4/devicePreset.json",
-     "kind": "instrumentRack",
-     "name": "preset_name",
-     "chains": [...]
-   }
-   ```
-
-2. Device References:
-   ```json
-   {
-     "presetUri": null,
-     "kind": "deviceType",  // e.g., "drumCell", "reverb"
-     "parameters": {...},
-     "deviceData": {...}
-   }
-   ```
-
-3. Sample References:
-   ```json
-   "sampleUri": "ableton:/user-library/Samples/Preset%20Samples/sample.wav"
-   ```
-
-### Bundle Format
-
-When creating downloadable presets, use the .ablpresetbundle format:
-- ZIP file containing:
-  - Preset.ablpreset at root
-  - Samples/ directory with referenced WAV files
-- Use URI-encoded filenames in sample references
-
-### Library Management
-
-After modifying files in Move's library:
-1. Place files in correct directories
-2. Use D-Bus to refresh the library cache:
-   ```python
-   dbus-send --system --type=method_call \
-             --dest=com.ableton.move \
-             --print-reply \
-             /com/ableton/move/browser \
-             com.ableton.move.Browser.refreshCache
-   ```
-
-## Adding a New Feature
-
-Here's how to add a new feature to the Move webserver:
-
-### 1. Create Core Functionality
-
-Create a new Python file in the `core` directory named `your_feature_handler.py`. This file should contain the core logic for your feature.
-
-Example structure for a core handler:
-
+Example core handler structure:
 ```python
-#!/usr/bin/env python3
-
-def process_your_feature(param1, param2, ...):
+def process_feature(param1, param2):
     """
-    Main function that implements your feature's logic.
+    Main function implementing feature logic.
     
-    Parameters:
-    - param1: Description of param1
-    - param2: Description of param2
+    Args:
+        param1: Description
+        param2: Description
     
     Returns:
-    A dictionary with keys:
-    - 'success': bool
-    - 'message': str
-    - Additional keys as needed
+        dict with keys:
+        - success: bool indicating success/failure
+        - message: Status or error message
+        - Additional result data as needed
     """
     try:
-        # Your implementation here
+        # Implementation
         return {
             'success': True,
-            'message': 'Operation completed successfully'
+            'message': 'Operation completed',
+            'data': result_data
         }
     except Exception as e:
         return {
@@ -158,422 +79,268 @@ def process_your_feature(param1, param2, ...):
         }
 ```
 
-Key points for core handlers:
-- Focus on core functionality without web-specific logic
-- Use descriptive function names that indicate the action
-- Include comprehensive docstrings
-- Return dictionaries with at least 'success' and 'message' keys
-- Implement proper error handling
-- Add any necessary helper functions
-
-### 2. Create a Web Handler
-
-Create a new Python file in the `handlers` directory named `your_feature_handler_class.py`. This class will handle web-specific logic and inherit from BaseHandler.
-
-Example structure for a web handler:
-
-```python
-#!/usr/bin/env python3
-import cgi
-from handlers.base_handler import BaseHandler
-from core.your_feature_handler import process_your_feature
-
-class YourFeatureHandler(BaseHandler):
-    def handle_post(self, form: cgi.FieldStorage):
-        """Handle POST request for your feature."""
-        # Validate action
-        valid, error_response = self.validate_action(form, "your_action")
-        if not valid:
-            return error_response
-
-        try:
-            # Extract parameters from form
-            param1 = form.getvalue('param1')
-            
-            # Handle file upload if needed
-            if 'file' in form:
-                success, filepath, error_response = self.handle_file_upload(form)
-                if not success:
-                    return error_response
-                
-                # Process the file...
-                self.cleanup_upload(filepath)
-            
-            # Call core functionality
-            result = process_your_feature(param1)
-            
-            if result['success']:
-                return self.format_success_response(result['message'])
-            else:
-                return self.format_error_response(result['message'])
-                
-        except Exception as e:
-            return self.format_error_response(f"Error processing request: {str(e)}")
-```
-
-Key points for web handlers:
+### 2. Web Handlers
+Web handlers manage HTTP requests and interface with core functionality. They should:
 - Inherit from BaseHandler
 - Handle form validation and file uploads
-- Use core functionality for processing
+- Call core functions for processing
 - Format responses consistently
 - Clean up temporary files
 
-### 3. Create Feature Template
+Example web handler structure:
+```python
+from handlers.base_handler import BaseHandler
+from core.your_feature import process_feature
 
-Add a new template file in the `templates` directory named `your_feature.html`. The template system uses dynamic loading within tabs, so your template should ONLY include the feature's content without any HTML structure (no html, head, or body tags).
+class YourFeatureHandler(BaseHandler):
+    def handle_post(self, form):
+        """Handle POST request for feature."""
+        try:
+            # Validate form data
+            if 'required_field' not in form:
+                return self.format_error_response(
+                    "Missing required field"
+                )
+                
+            # Handle file upload if needed
+            if 'file' in form:
+                success, filepath = self.handle_file_upload(form)
+                if not success:
+                    return self.format_error_response(
+                        "File upload failed"
+                    )
+            
+            # Process using core functionality
+            result = process_feature(
+                form.getvalue('param1'),
+                filepath
+            )
+            
+            # Clean up and return result
+            self.cleanup_upload(filepath)
+            return self.format_success_response(
+                result['message'],
+                additional_data=result.get('data')
+            )
+            
+        except Exception as e:
+            return self.format_error_response(str(e))
+```
 
-Here are examples of both simple and complex templates:
+### 3. Templates
+Templates define the user interface for each feature. They should:
+- Include only feature content (no HTML structure)
+- Use consistent styling from style.css
+- Handle both success and error states
+- Support dynamic content updates
 
-1. Simple Template (like refresh.html):
+Example template structures:
+
+1. Simple Action Template:
 ```html
-<h2>Your Feature Title</h2>
+<h2>Your Feature</h2>
 {message_html}
 <form method="post">
     <input type="hidden" name="action" value="your_action"/>
-    <input type="submit" value="Perform Action"/>
+    <button type="submit">Perform Action</button>
 </form>
 ```
 
-2. Template with File Upload and Dynamic Options (like restore.html):
+2. File Upload Template:
 ```html
-<h2>Restore Move Set</h2>
+<h2>Your Feature</h2>
 {message_html}
-<form action="/restore" method="post" enctype="multipart/form-data">
-    <input type="hidden" name="action" value="restore_ablbundle"/>
-    
-    <label for="ablbundle">Select .ablbundle file:</label>
-    <input type="file" name="ablbundle" accept=".ablbundle" required>
-    
-    <label for="mset_index">Restore to pad:</label>
-    <select name="mset_index">
-        {{ options }}  <!-- Dynamically populated with available pads -->
-    </select>
-    
-    <label for="mset_color">Pad Color (1-26):</label>
-    <input type="number" name="mset_color" min="1" max="26" value="1" required>
-    
-    <button type="submit">Upload & Restore</button>
-</form>
-
-<script>
-    // Ensure first option is selected after form submission
-    function initializeRestoreForm() {
-        const select = document.querySelector('select[name="mset_index"]');
-        if (select && select.options.length > 0 && !select.value) {
-            select.selectedIndex = 0;
-        }
-    }
-    
-    // Initialize form when loaded
-    document.addEventListener('DOMContentLoaded', initializeRestoreForm);
-</script>
-```
-
-3. Template with File Selection and AJAX (like reverse.html):
-```html
-<h2>Your Feature Title</h2>
-{message_html}
-<form method="post">
+<form method="post" enctype="multipart/form-data">
     <input type="hidden" name="action" value="your_action"/>
     
-    <label for="file_select">Select file:</label>
-    <select id="file_select" name="file_select" required>
-        <option value="" disabled selected>--Select a file--</option>
+    <label for="file">Select file:</label>
+    <input type="file" name="file" accept=".wav" required/>
+    
+    <label for="option">Processing option:</label>
+    <select name="option" required>
         {{ options }}
     </select>
     
     <button type="submit">Process File</button>
 </form>
+```
+
+3. Interactive Template:
+```html
+<h2>Your Feature</h2>
+{message_html}
+<form method="post" id="featureForm">
+    <input type="hidden" name="action" value="your_action"/>
+    
+    <div id="interactive-container"></div>
+    
+    <div class="controls">
+        <button type="button" onclick="updatePreview()">
+            Update Preview
+        </button>
+        <button type="submit">Process</button>
+    </div>
+</form>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const form = document.querySelector('form');
-        const submitButton = form.querySelector('button[type="submit"]');
-        
-        submitButton.addEventListener('click', function(event) {
-            event.preventDefault();
-            const fileSelect = document.getElementById('file_select');
-            const selectedFile = fileSelect.value;
-            if (!selectedFile) {
-                alert('Please select a file.');
-                return;
-            }
-            const confirmAction = confirm(`Are you sure you want to process "${selectedFile}"?`);
-            if (confirmAction) {
-                // Let the main.js AJAX handler take over
-                form.dispatchEvent(new Event('submit'));
-            }
-        });
-    });
+    document.addEventListener('DOMContentLoaded', initializeFeature);
+    
+    function initializeFeature() {
+        // Setup interactive elements
+    }
+    
+    function updatePreview() {
+        // Update UI based on user input
+    }
 </script>
 ```
 
-3. Template with Grid Layout and Actions (like drum_rack_inspector.html):
-```html
-<h2>Your Feature Title</h2>
-{message_html}
+## Move-Specific Details
 
-<form method="POST">
-    <input type="hidden" name="action" value="select_item">
-    <label for="item_select">Select Item:</label>
-    <select name="item_select" id="item_select">
-        {{ options }}
-    </select>
-</form>
-
-<div class="grid-container">
-    {{ grid_html }}
-</div>
-
-<!-- Example of dynamically generated grid cell -->
-<div class="grid-cell">
-    <div class="cell-info">
-        <span class="cell-number">Cell 1</span>
-    </div>
-    <div class="preview-container" data-preview-path="{{ preview_path }}"></div>
-    <div class="cell-actions">
-        <a href="{{ download_path }}" class="action-button">Download</a>
-        <form method="POST" action="/your-feature">
-            <input type="hidden" name="action" value="process_item">
-            <input type="hidden" name="item_path" value="{{ item_path }}">
-            <button type="submit" class="action-button">Process</button>
-        </form>
-    </div>
-</div>
+### File Locations
+Move uses specific directories for different file types:
+```
+/data/UserData/UserLibrary/
+├── Samples/              # WAV files
+│   └── Preset Samples/   # Preset-specific samples
+└── Track Presets/        # Move presets (.ablpreset)
 ```
 
-4. Complex Interactive Template (like slice.html):
-```html
-<h2>Your Feature Title</h2>
-{message_html}
-<form enctype="multipart/form-data" method="post">
-    <input type="hidden" name="action" value="your_action"/>
-    
-    <!-- File input with preview -->
-    <label for="file">Select file:</label>
-    <input id="file" name="file" type="file" accept=".wav" required/>
-    
-    <!-- Interactive controls -->
-    <label for="num_items">Number of items:</label>
-    <input id="num_items" name="num_items" type="number" 
-           min="1" max="16" value="16" required/>
-    
-    <!-- Multiple submit options -->
-    <button type="submit" onclick="setMode('download')">
-        Download Result
-    </button>
-    <button type="submit" onclick="setMode('process')">
-        Process Directly
-    </button>
-</form>
+### Preset Format
+Move presets follow the schema at http://tech.ableton.com/schema/song/1.4.4/devicePreset.json:
 
-<!-- Interactive UI container -->
-<div id="preview-container" style="width: 100%; height: 128px;"></div>
-```
-
-Key points for templates:
-- Omit all HTML structure tags (html, head, body) - content is loaded into tabs
-- Include the `{message_html}` placeholder for displaying messages
-- Use proper form encoding if handling file uploads
-- Add a hidden action field to identify the operation
-- Include any feature-specific JavaScript in the template
-- Use consistent styling (styles are loaded from shared style.css)
-
-For templates with dynamic content:
-- Use `{{ variable }}` syntax for server-injected content
-- Keep JavaScript scoped to the feature's functionality
-- Initialize UI components after content is loaded
-- Clean up resources when switching tabs
-
-### 4. Update index.html
-
-Add your feature to the tab system in `index.html`:
-
-1. Add a tab button:
-```html
-<div class="tab">
-    <!-- Existing tabs -->
-    <button class="tablinks" onclick="openTab(event, 'YourFeature')">
-        Your Feature
-    </button>
-</div>
-```
-
-2. Add a tab content container:
-```html
-<div id="YourFeature" class="tabcontent">
-    <!-- Content will be loaded here dynamically -->
-</div>
-```
-
-3. If your feature needs special initialization:
-```javascript
-function openTab(evt, tabName) {
-    // Existing tab opening code...
-    
-    // Add your feature's initialization
-    if (tabName === 'YourFeature') {
-        initializeYourFeature();
-    }
+1. Basic Structure:
+```json
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.4.4/devicePreset.json",
+  "kind": "instrumentRack",
+  "name": "preset_name",
+  "chains": [...]
 }
 ```
 
-### 5. Update move-webserver.py
+2. Sample References:
+```json
+"sampleUri": "ableton:/user-library/Samples/Preset%20Samples/sample.wav"
+```
 
-Add your feature to the webserver using the decorator-based routing system:
+### Library Management
+After modifying files:
+1. Place files in correct directories
+2. Use D-Bus to refresh library:
+```python
+subprocess.run([
+    "dbus-send",
+    "--system",
+    "--type=method_call",
+    "--dest=com.ableton.move",
+    "--print-reply",
+    "/com/ableton/move/browser",
+    "com.ableton.move.Browser.refreshCache"
+])
+```
 
+## Adding a New Feature
+
+1. Create core functionality in `core/your_feature.py`
+2. Create web handler in `handlers/your_feature_handler_class.py`
+3. Create template in `templates/your_feature.html`
+4. Add routing in `move-webserver.py`:
 ```python
 from handlers.your_feature_handler_class import YourFeatureHandler
 
-# In MyServer class:
-your_feature_handler = YourFeatureHandler()
-
-@route_handler.get("/your-feature", "your_feature.html")
-def handle_your_feature_get(self):
-    return {}
-
-@route_handler.post("/your-feature")
-def handle_your_feature_post(self, form):
-    return self.your_feature_handler.handle_post(form)
-```
-
-The routing system will automatically:
-- Load and cache templates
-- Handle HTTP responses
-- Format messages
-- Handle errors consistently
-
-## JavaScript Integration
-
-The webserver uses a dynamic content loading system with these key components:
-
-1. Tab System:
-```javascript
-function openTab(evt, tabName) {
-    // Hide all tab content
-    var tabcontent = document.getElementsByClassName("tabcontent");
-    for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
-    }
+class MyServer(BaseHTTPRequestHandler):
+    your_feature_handler = YourFeatureHandler()
     
-    // Show selected tab
-    document.getElementById(tabName).style.display = "block";
-    
-    // Load content dynamically
-    fetchContent(tabName);
-}
+    @route_handler.get("/your-feature", "your_feature.html")
+    def handle_your_feature_get(self):
+        return {}
+        
+    @route_handler.post("/your-feature")
+    def handle_your_feature_post(self, form):
+        return self.your_feature_handler.handle_post(form)
 ```
 
-2. Dynamic Content Loading:
-```javascript
-async function fetchContent(tabName) {
-    const response = await fetch(`/${tabName.toLowerCase()}`);
-    const data = await response.text();
-    document.getElementById(tabName).innerHTML = data;
-}
-```
-
-3. Form Handling:
-```javascript
-function attachFormHandler(tabName) {
-    const form = document.querySelector(`#${tabName} form`);
-    if (form) {
-        form.addEventListener('submit', async function(event) {
-            event.preventDefault();
-            const formData = new FormData(form);
-            // Handle form submission...
-        });
-    }
-}
-```
-
-### Example: Interactive Features
-
-For features requiring interactive elements (like the Slice Kit's waveform):
-
-1. Initialize in the tab system:
-```javascript
-if (tabName === 'YourFeature') {
-    initializeFeature();
-}
-```
-
-2. Clean up when switching tabs:
-```javascript
-function cleanupFeature() {
-    // Remove event listeners
-    // Clean up UI components
-}
-```
-
-3. Handle dynamic updates:
-```javascript
-function updateFeatureUI() {
-    // Update UI based on user interactions
-}
+5. Add tab in `templates/index.html`:
+```html
+<button class="tablinks" onclick="openTab(event, 'YourFeature')">
+    Your Feature
+</button>
+<div id="YourFeature" class="tabcontent">
+    <!-- Content loaded dynamically -->
+</div>
 ```
 
 ## Best Practices
 
 1. **Code Organization**
-   - Keep core functionality separate from web handling
-   - Use clear, descriptive names for files and functions
-   - Follow the established directory structure
-   - Add comments for complex logic
+   - Separate core logic from web handling
+   - Use clear, descriptive names
+   - Follow established patterns
+   - Add comprehensive comments
 
 2. **Error Handling**
-   - Use try/except blocks in both core and web handlers
-   - Return clear error messages
-   - Clean up temporary files in error cases
-   - Handle both expected and unexpected errors
+   - Use try/except blocks consistently
+   - Provide clear error messages
+   - Clean up temporary files
+   - Handle edge cases
 
 3. **User Interface**
-   - Provide clear feedback for all actions
-   - Use consistent styling with style.css
-   - Include proper form validation
-   - Show loading states for long operations
+   - Provide clear feedback
+   - Use consistent styling
+   - Include form validation
+   - Show loading states
 
-4. **Testing**
-   - Test core functionality independently
-   - Test web handling with various inputs
-   - Verify error handling works correctly
-   - Test file upload limits if applicable
+4. **File Management**
+   - Clean up temporary files
+   - Use absolute paths
+   - Handle name collisions
+   - Follow Move's structure
 
-5. **File Management**
-   - Clean up temporary files after use
-   - Use absolute paths for file operations
-   - Handle file name collisions gracefully
-   - Follow Move's directory structure
+5. **Move Integration**
+   - Follow preset format
+   - Use correct URI formats
+   - Refresh library after changes
+   - Test thoroughly
 
-6. **Move Integration**
-   - Follow Move's preset format
-   - Use correct sample URI formats
-   - Refresh library after modifications
-   - Test with Move's file structure
+6. **JavaScript**
+   - Initialize after loading
+   - Clean up on tab switch
+   - Handle async operations
+   - Provide loading indicators
 
-7. **JavaScript Integration**
-   - Initialize features after dynamic loading
-   - Clean up resources when switching tabs
-   - Use event delegation for dynamic content
-   - Handle form submissions asynchronously
-   - Provide loading indicators for async operations
+## Testing
 
-8. **Template Structure**
-   - Keep templates focused on feature content
-   - Include necessary JavaScript in templates
-   - Use consistent form structures
-   - Handle both success and error states
-   - Support dynamic UI updates
+1. **Core Functionality**
+   - Test with various inputs
+   - Verify error handling
+   - Check edge cases
+   - Test file operations
+
+2. **Web Interface**
+   - Test form submissions
+   - Verify file uploads
+   - Check error displays
+   - Test async operations
+
+3. **Move Integration**
+   - Test preset generation
+   - Verify library updates
+   - Check file permissions
+   - Test on actual device
 
 ## Conclusion
 
-Following these guidelines will help maintain consistency and reliability when extending the Move webserver. The separation between core functionality and web handling makes the code more maintainable and easier to test. Remember to:
+Following these guidelines ensures:
+- Consistent code organization
+- Reliable error handling
+- Clean user interface
+- Proper Move integration
+- Maintainable features
 
-- Keep core logic in core/ directory
-- Put web handling in handlers/ directory
-- Create clear and user-friendly templates
+Remember to:
+- Keep core logic separate
 - Handle errors gracefully
-- Test thoroughly before deployment
-- Follow Move's file and preset formats
-- Support dynamic content loading
-- Clean up resources properly
+- Test thoroughly
+- Clean up resources
+- Follow Move's conventions
