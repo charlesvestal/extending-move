@@ -3,21 +3,21 @@ name: Mirror offline-tools to GitHub Pages
 on:
   push:
     branches:
-      - main  # Change if you use a different default branch
+      - main  # Adjust if your default branch is named differently
 
 jobs:
   mirror:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout source repo
+      - name: Checkout source repository
         uses: actions/checkout@v3
 
-      - name: Set up Git config
+      - name: Configure Git
         run: |
           git config --global user.name "Your Name"
           git config --global user.email "your-email@example.com"
 
-      - name: Clone target repo
+      - name: Clone target repository
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
