@@ -1,29 +1,43 @@
-name: Upload Repository Artifacts
+name: Mirror offline-tools to GitHub Pages
 
 on:
-  # You can customize these triggers based on your needs
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-  # Allow manual triggering
-  workflow_dispatch:
+    branches:
+      - main  # Adjust if your default branch is named differently
 
 jobs:
-  upload-artifacts:
+  mirror:
     runs-on: ubuntu-latest
-    
     steps:
-      - uses: actions/checkout@v4
-      
-      # Upload the artifacts
-      - name: Upload repository artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: extending-move
-          path: |
-            **
-            !.*/
-            !.*
-          compression-level: 6
-          retention-days: 90
+      - name: Checkout source repository
+        uses: actions/checkout@v3
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "Charles Vestal"
+          git config --global user.email "charlesv@gmail.com"
+
+      - name: Clone target repository
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          git clone https://$GH_TOKEN@github.com/charlesvestal/charles.pizza.git target
+
+      - name: Copy offline-tools to target/move
+        run: |
+          mkdir -p target/move
+          rsync -av --delete offline-tools/ target/move/
+
+      - name: Commit and push changes
+        working-directory: target
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          git add -A
+          if ! git diff-index --quiet HEAD; then
+            git commit -m "Mirror offline-tools updates from extending-move repo"
+            git remote set-url origin https://$GH_TOKEN@github.com/charlesvestal/charles.pizza.git
+            git push origin main
+          else
+            echo "No changes to commit."
+          fi
