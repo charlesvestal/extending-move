@@ -1,5 +1,80 @@
 /* Slice tool specific functions */
 
+// Converts an AudioBuffer to a WAV ArrayBuffer (44.1kHz, 16-bit PCM)
+function toWav(audioBuffer) {
+  const numChannels = audioBuffer.numberOfChannels;
+  const sampleRate = audioBuffer.sampleRate;
+  const bufferLength = audioBuffer.length * numChannels * 2 + 44;
+  const buffer = new ArrayBuffer(bufferLength);
+  const view = new DataView(buffer);
+
+  function writeString(view, offset, string) {
+    for (let i = 0; i < string.length; i++) {
+      view.setUint8(offset + i, string.charCodeAt(i));
+    }
+  }
+
+  writeString(view, 0, 'RIFF');
+  view.setUint32(4, 36 + audioBuffer.length * numChannels * 2, true);
+  writeString(view, 8, 'WAVE');
+  writeString(view, 12, 'fmt ');
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true);
+  view.setUint16(22, numChannels, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * numChannels * 2, true);
+  view.setUint16(32, numChannels * 2, true);
+  view.setUint16(34, 16, true);
+  writeString(view, 36, 'data');
+  view.setUint32(40, audioBuffer.length * numChannels * 2, true);
+
+  let offset = 44;
+  for (let i = 0; i < audioBuffer.length; i++) {
+    for (let channel = 0; channel < numChannels; channel++) {
+      let sample = audioBuffer.getChannelData(channel)[i];
+      sample = Math.max(-1, Math.min(1, sample));
+      view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
+      offset += 2;
+    }
+  }
+  return buffer;
+}
+
+// Converts an MP3 file to a 44.1kHz 16-bit WAV Blob.
+function convertMp3ToWav(file) {
+  return new Promise((resolve, reject) => {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      const arrayBuffer = evt.target.result;
+      audioContext.decodeAudioData(arrayBuffer, (audioBuffer) => {
+        const targetSampleRate = 44100;
+        if (audioBuffer.sampleRate !== targetSampleRate) {
+          // Resample using an OfflineAudioContext
+          const offlineCtx = new OfflineAudioContext(
+            audioBuffer.numberOfChannels,
+            Math.ceil(audioBuffer.duration * targetSampleRate),
+            targetSampleRate
+          );
+          const source = offlineCtx.createBufferSource();
+          source.buffer = audioBuffer;
+          source.connect(offlineCtx.destination);
+          source.start(0);
+          offlineCtx.startRendering().then((resampledBuffer) => {
+            const wavBuffer = toWav(resampledBuffer);
+            resolve(new Blob([wavBuffer], { type: 'audio/wav' }));
+          }).catch(reject);
+        } else {
+          const wavBuffer = toWav(audioBuffer);
+          resolve(new Blob([wavBuffer], { type: 'audio/wav' }));
+        }
+      }, reject);
+    };
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(file);
+  });
+}
+
 function initWaveSurfer() {
   if (window.wavesurfer) {
     window.wavesurfer.destroy();
@@ -123,13 +198,22 @@ document.getElementById('num_slices').addEventListener('change', function() {
 document.getElementById('wavFileInput').addEventListener('change', (e) => {
   const file = e.target.files[0];
   if (file) {
-    window.fileBlob = file;
-    initWaveSurfer();
-    const reader = new FileReader();
-    reader.onload = function(evt) {
+    // Check if the uploaded file is an MP3.
+    if (file.type === 'audio/mpeg' || file.name.toLowerCase().endsWith('.mp3')) {
+      convertMp3ToWav(file).then((wavBlob) => {
+        // Update the file name to have a .wav extension for preset references.
+        wavBlob.name = file.name.replace(/\.mp3$/i, '.wav');
+        window.fileBlob = wavBlob;
+        initWaveSurfer();
+        window.wavesurfer.loadBlob(wavBlob);
+      }).catch((err) => {
+        alert("Error converting MP3 to WAV: " + err);
+      });
+    } else {
+      window.fileBlob = file;
+      initWaveSurfer();
       window.wavesurfer.loadBlob(file);
-    };
-    reader.readAsArrayBuffer(file);
+    }
   }
 });
 
