@@ -37,6 +37,22 @@ async function fetchContent(tabName) {
         }
         const data = await response.text();
         document.getElementById(tabName).innerHTML = data;
+        
+        // Find and re-run any scripts in the loaded content
+        const scripts = document.getElementById(tabName).querySelectorAll("script");
+        scripts.forEach(oldScript => {
+            const newScript = document.createElement("script");
+            if (oldScript.src) {
+                newScript.src = oldScript.src;
+            } else {
+                newScript.textContent = oldScript.textContent;
+            }
+            document.body.appendChild(newScript);
+        });
+        
+        if (tabName === 'Chord' && typeof initChordTab === 'function') {
+            initChordTab();
+        }
     } catch (error) {
         document.getElementById(tabName).innerHTML = `<p style="color: red;">Error loading content: ${error}</p>`;
     }

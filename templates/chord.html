@@ -1,97 +1,21 @@
-<h2>Create a Chord Kit from a WAV file</h2>
 {message_html}
+<div class="container">
+  <h2>Ableton Move Chord Ksit Generator</h2>
+  <p>Select a .WAV, .AIF, .AIFF or .MP3 file to generate chords for a Choke Kit ablpreset.</p>
+  <input type="file" id="wavFileInput" accept=".wav, .aiff, .aif, .mp3"><br>
+  <label for="presetName">Preset Name (optional): </label>
+  <input type="text" id="presetName" placeholder="Preset name"><br>
+  <button id="generatePreset">Download Preset</button>
+  <div id="loadingIndicator" style="display:none; margin-top:10px;">
+    Generating bundle... <span id="progressPercent">0%</span>
+  </div>
+  
+  <div class="chord-list">
+    <h3>Chords to be generated:</h3>
+    <ul id="chordList"></ul>
+  </div>
+</div>
 
-<form enctype="multipart/form-data" method="post">
-    <input type="hidden" name="action" value="chord"/>
-    <input type="hidden" name="mode" id="mode" value="download"/>
-    
-    <label for="file">Select WAV file:</label>
-    <input id="file" name="file" type="file" accept=".wav" required/>
-    <br/><br/>
-    
-    <!-- <div class="chord-info">
-        <h3>Chords that will be generated:</h3>
-        <div class="chord-grid">
-            {% for chord in chords %}
-            <div class="chord-cell">
-                <strong>{{ chord.name }}</strong>
-                <span class="notes">{{ chord.notes }}</span>
-            </div>
-            {% endfor %}
-        </div>
-    </div> -->
-    <br/>
-    
-    <button type="submit" onclick="document.getElementById('mode').value = 'download'">
-        Download .ablpresetbundle
-    </button>
-    <button type="submit" onclick="document.getElementById('mode').value = 'auto_place'">
-        Save Preset directly on Move
-    </button>
-</form>
+<small>v180220250205 by <a href="mailto:charles@charles.pizza">charlesv</a> with some help from some friends</small>
 
-<!-- Preview section
-<div class="preview-section">
-    <h3>Preview</h3>
-    <img src="/static/img/move_pads.png" alt="Move Pads" class="pads-preview"/>
-    <div class="pad-labels">
-        {% for chord in chords %}
-        <div class="pad-label">{{ chord.name }}</div>
-        {% endfor %}
-    </div>
-</div> -->
-
-<style type="text/css">
-    .chord-info {
-        margin: 20px 0;
-        padding: 15px;
-        background: #f5f5f5;
-        border-radius: 5px;
-    }
-
-    .chord-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 10px;
-        margin-top: 10px;
-    }
-
-    .chord-cell {
-        padding: 10px;
-        background: white;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        text-align: center;
-    }
-
-    .chord-cell .notes {
-        display: block;
-        font-size: 0.8em;
-        color: #666;
-    }
-
-    .preview-section {
-        margin-top: 30px;
-        position: relative;
-    }
-
-    .pads-preview {
-        width: 100%;
-        max-width: 900px;
-        height: auto;
-    }
-
-    .pad-labels {
-        display: grid;
-        grid-template-columns: repeat(16, 1fr);
-        gap: 10px;
-        margin-top: 10px;
-        padding: 0 10px;
-    }
-
-    .pad-label {
-        font-size: 12px;
-        color: #333;
-        text-align: center;
-    }
-</style>
+</script>

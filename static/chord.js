@@ -347,7 +347,10 @@ async function processChordSample(buffer, intervals) {
 }
 
 function initChordTab() {
-  document.getElementById('generatePreset').addEventListener('click', async () => {
+  // Attach event listener for generatePreset
+  const presetBtn = document.getElementById('generatePreset');
+  if (presetBtn) {
+    presetBtn.addEventListener('click', async () => {
     document.getElementById('loadingIndicator').style.display = 'block';
     document.getElementById('progressPercent').textContent = '0%';
     
@@ -408,78 +411,83 @@ function initChordTab() {
       a.click();
       document.body.removeChild(a);
     });
-  });
+    });
+  }
+
+  // Attach event listener for file input
+  const fileInput = document.getElementById('wavFileInput');
+  if (fileInput) {
+    fileInput.addEventListener('change', async function(e) {
+      // Clear any previously generated waveform previews
+      if (window.chordWaveforms && window.chordWaveforms.length) {
+          window.chordWaveforms.forEach(ws => ws.destroy());
+      }
+      window.chordWaveforms = [];
+
+      // Clear the inner HTML of all preview containers (assuming IDs "chord-preview-1" to "chord-preview-16")
+      for (let i = 1; i <= 16; i++) {
+          const container = document.getElementById(`chord-preview-${i}`);
+          if (container) {
+              container.innerHTML = "";
+          }
+      }
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      console.log("File selected:", file);
+      
+      const arrayBuffer = await file.arrayBuffer();
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const decodedBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+      window.decodedBuffer = decodedBuffer;
+      const chordNames = window.selectedChords;
+          
+      // Clear any previous chord waveform instances
+      window.chordWaveforms = [];
+      
+      // Process each chord sample and create its waveform preview sequentially
+      for (let i = 0; i < chordNames.length; i++) {
+          const chordName = chordNames[i];
+          console.log("Processing chord:", chordName);
+          const blob = await processChordSample(decodedBuffer, CHORDS[chordName]);
+          const url = URL.createObjectURL(blob);
+          const padNumber = i + 1;  // Adjust this if your grid order differs
+          const previewContainer = document.getElementById(`chord-preview-${padNumber}`);
+          if (previewContainer) {
+              const ws = WaveSurfer.create({
+                  container: previewContainer,
+                  waveColor: '#888',
+                  progressColor: '#555',
+                  height: 50,
+                  responsive: true,
+                  interact: true,
+                  normalize: true,
+                  cursorWidth: 0
+              });
+              ws.load(url);
+              // Toggle play/pause on click
+              previewContainer.addEventListener('click', function(e) {
+                e.stopPropagation();
+                // Stop all other chord waveform instances
+                if (window.chordWaveforms && window.chordWaveforms.length) {
+                    window.chordWaveforms.forEach(instance => {
+                        if (instance && instance !== ws) {
+                            instance.stop();
+                        }
+                    });
+                }
+                if (ws && ws.backend) {
+                    ws.stop();
+                    ws.seekTo(0);
+                    requestAnimationFrame(() => ws.play(0));
+                }
+              });
+              window.chordWaveforms.push(ws);
+          }
+      }
+    });
+  }
   
   populateChordList();
 }
 
-// Process chord samples for preview when a file is uploaded
-document.getElementById('wavFileInput').addEventListener('change', async function(e) {
-    // Clear any previously generated waveform previews
-    if (window.chordWaveforms && window.chordWaveforms.length) {
-        window.chordWaveforms.forEach(ws => ws.destroy());
-    }
-    window.chordWaveforms = [];
-
-    // Clear the inner HTML of all preview containers (assuming IDs "chord-preview-1" to "chord-preview-16")
-    for (let i = 1; i <= 16; i++) {
-        const container = document.getElementById(`chord-preview-${i}`);
-        if (container) {
-            container.innerHTML = "";
-        }
-    }
-    const file = e.target.files[0];
-    if (!file) return;
-    
-    console.log("File selected:", file);
-    
-    const arrayBuffer = await file.arrayBuffer();
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const decodedBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-    window.decodedBuffer = decodedBuffer;
-    const chordNames = window.selectedChords;
-        
-    // Clear any previous chord waveform instances
-    window.chordWaveforms = [];
-    
-    // Process each chord sample and create its waveform preview sequentially
-    for (let i = 0; i < chordNames.length; i++) {
-        const chordName = chordNames[i];
-        console.log("Processing chord:", chordName);
-        const blob = await processChordSample(decodedBuffer, CHORDS[chordName]);
-        const url = URL.createObjectURL(blob);
-        const padNumber = i + 1;  // Adjust this if your grid order differs
-        const previewContainer = document.getElementById(`chord-preview-${padNumber}`);
-        if (previewContainer) {
-            const ws = WaveSurfer.create({
-                container: previewContainer,
-                waveColor: '#888',
-                progressColor: '#555',
-                height: 50,
-                responsive: true,
-                interact: true,
-                normalize: true,
-                cursorWidth: 0
-            });
-            ws.load(url);
-            // Toggle play/pause on click
-            previewContainer.addEventListener('click', function(e) {
-              e.stopPropagation();
-              // Stop all other chord waveform instances
-              if (window.chordWaveforms && window.chordWaveforms.length) {
-                  window.chordWaveforms.forEach(instance => {
-                      if (instance && instance !== ws) {
-                          instance.stop();
-                      }
-                  });
-              }
-              if (ws && ws.backend) {
-                  ws.stop();
-                  ws.seekTo(0);
-                  requestAnimationFrame(() => ws.play(0));
-              }
-            });
-            window.chordWaveforms.push(ws);
-        }
-    }
-});
