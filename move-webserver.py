@@ -12,6 +12,7 @@ from handlers.reverse_handler_class import ReverseHandler
 from handlers.drum_rack_inspector_handler_class import DrumRackInspectorHandler
 from handlers.restore_handler_class import RestoreHandler
 from handlers.chord_handler_class import ChordHandler
+from handlers.file_placer_handler_class import FilePlacerHandler
 
 # Define the PID file location
 PID_FILE = os.path.expanduser('~/extending-move/move-webserver.pid')
@@ -183,6 +184,7 @@ class MyServer(BaseHTTPRequestHandler):
     drum_rack_inspector_handler = DrumRackInspectorHandler()
     restore_handler = RestoreHandler()
     chord_handler = ChordHandler()
+    file_placer_handler = FilePlacerHandler()
 
     @route_handler.get("/chord", "chord.html")
     def handle_chord_get(self):
@@ -367,6 +369,10 @@ class MyServer(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(content)
 
+    @route_handler.post("/place-files")
+    def handle_place_files(self, form):
+        return self.file_placer_handler.handle_post(form)
+
     @route_handler.post("/chord")
     def handle_chord_post(self, form):
         """Handle POST request for chord feature."""
@@ -407,7 +413,7 @@ class MyServer(BaseHTTPRequestHandler):
         Handle all POST requests.
         Processes form data and delegates to appropriate handler.
         """
-        if self.path not in ["/slice", "/refresh", "/reverse", "/drum-rack-inspector", "/restore", "/chord"]:
+        if self.path not in ["/slice", "/refresh", "/reverse", "/drum-rack-inspector", "/restore", "/chord", "/place-files"]:
             self.send_error(404)
             return
 
@@ -432,6 +438,13 @@ class MyServer(BaseHTTPRequestHandler):
         try:
             result = handler(self, form)
             if result is not None:  # None means the handler has already sent the response
+                if self.path == "/place-files":
+                    import json
+                    self.send_response(200)
+                    self.send_header("Content-Type", "application/json")
+                    self.end_headers()
+                    self.wfile.write(bytes(json.dumps(result), "utf-8"))
+                    return
                 # Convert hyphenated path to underscore for template name
                 template_name = os.path.basename(self.path).replace("-", "_") + ".html"
                 content = self.route_handler.template_manager.render(
