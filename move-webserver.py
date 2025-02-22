@@ -198,6 +198,19 @@ class MyServer(BaseHTTPRequestHandler):
         print(f"DEBUG: Rendering restore.html with options -> {context['options']}")  # ✅ Debug print
         return context
 
+    @route_handler.get("/refresh_library", "refresh.html")
+    def handle_refresh_library_get(self):
+        """Handle GET request for refreshing the library without additional inputs."""
+        from core.refresh_handler import refresh_library  # Import locally
+        try:
+            success, message = refresh_library()
+            if success:
+                return {"message": f"<p style='color: green;'>{message}</p>"}
+            else:
+                return {"message": f"<p style='color: red;'>{message}</p>"}
+        except Exception as e:
+            return {"message": f"<p style='color: red;'>Error refreshing library: {str(e)}</p>"}
+
     @route_handler.get("/", "index.html")
     def handle_index(self):
         """Handle GET request for index page."""
