@@ -197,7 +197,7 @@ function generatePlacementChordPreset(presetName, sampleFilenames) {
       36 + i,
       chordName,
       {"Voice_Envelope_Hold": 60.0},
-      encodeURI("ableton:/user-library/Samples/Preset Samples/" + sampleFilenames[i])
+      "ableton:/user-library/Samples/Preset Samples/" + encodeURIComponent(sampleFilenames[i]).replace(/%23/g, '#')
     );
     preset.chains[0].devices[0].chains.push(chain);
   }
