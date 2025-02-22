@@ -197,7 +197,7 @@ function generatePlacementChordPreset(presetName, sampleFilenames) {
       36 + i,
       chordName,
       {"Voice_Envelope_Hold": 60.0},
-      "/data/UserData/UserLibrary/Samples/Preset%20Samples/" + encodeURIComponent(sampleFilenames[i])
+      "/data/UserData/UserLibrary/Samples/Preset Samples/" + encodeURIComponent(sampleFilenames[i])
     );
     preset.chains[0].devices[0].chains.push(chain);
   }
@@ -478,14 +478,14 @@ function initChordTab() {
     const samplesForm = new FormData();
     samplesForm.append("mode", "zip");
     samplesForm.append("file", samplesZipBlob);
-    samplesForm.append("destination", "/data/UserData/UserLibrary/Samples/Preset%20Samples");
+    samplesForm.append("destination", "/data/UserData/UserLibrary/Samples/Preset Samples");
     await fetch("/place-files", { method: "POST", body: samplesForm });
     
     // Place the preset file via the File Placer API (place mode)
     const presetForm = new FormData();
     presetForm.append("mode", "place");
     presetForm.append("file", new Blob([presetJson], { type: "application/json" }), presetName + ".ablpreset");
-    presetForm.append("destination", "/data/UserData/UserLibrary/Track%20Presets");
+    presetForm.append("destination", "/data/UserData/UserLibrary/Track Presets");
     await fetch("/place-files", { method: "POST", body: presetForm });
     
     document.getElementById('loadingIndicator').style.display = 'none';
