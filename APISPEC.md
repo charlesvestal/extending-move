@@ -2,8 +2,8 @@
 
 ## Overview
 The File Placer API provides an endpoint for placing files onto the host filesystem. Clients can either:
-- Upload a single ZIP file to be extracted into a specified destination directory, or
-- Upload multiple files with a JSON mapping that specifies the destination directory for each file.
+- Upload a single ZIP file with `mode=zip` to be extracted into a specified destination directory, or
+- Upload a non-ZIP file with `mode=place` (or with no mode specified) to simply place the file in the specified destination directory.
 
 ## Endpoint
 
@@ -59,6 +59,14 @@ curl -X POST http://<server-address>:<port>/place-files \
   -F "mode=zip" \
   -F "file=@/path/to/file.zip" \
   -F "destination=/path/to/extract"
+```
+
+#### Example Usage for placing a file (non-ZIP mode):
+```bash
+curl -X POST http://<server-address>:<port>/place-files \
+  -F "mode=place" \
+  -F "file=@/path/to/file.txt" \
+  -F "destination=/path/to/destination"
 ```
 
 ## Security and Considerations
