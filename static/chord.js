@@ -488,6 +488,13 @@ function initChordTab() {
     presetForm.append("destination", "/data/UserData/UserLibrary/Track Presets");
     await fetch("/place-files", { method: "POST", body: presetForm });
     
+    // Refresh the library after placement.
+    await fetch("/refresh", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: "action=refresh_library"
+    });
+    
     document.getElementById('loadingIndicator').style.display = 'none';
     alert("Preset and samples placed successfully.");
   });
