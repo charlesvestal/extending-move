@@ -189,6 +189,21 @@ async function regenerateChordPreview(padNumber) {
  * @param {Array} sampleFilenames - Array of sample filenames for each chord.
  * @returns {Object} - The generated preset object.
  */
+function generatePlacementChordPreset(presetName, sampleFilenames) {
+  const preset = generateBasePreset(presetName);
+  for (let i = 0; i < window.selectedChords.length; i++) {
+    const chordName = window.selectedChords[i];
+    const chain = createDrumCellChain(
+      36 + i,
+      chordName,
+      {"Voice_Envelope_Hold": 60.0},
+      "/data/UserData/UserLibrary/Samples/Preset%20Samples/" + encodeURIComponent(sampleFilenames[i])
+    );
+    preset.chains[0].devices[0].chains.push(chain);
+  }
+  return preset;
+}
+
 function generateChordPreset(presetName, sampleFilenames) {
   const preset = generateBasePreset(presetName);
   for (let i = 0; i < window.selectedChords.length; i++) {
@@ -413,6 +428,69 @@ function initChordTab() {
     });
     });
   }
+
+  // Attach event listener for place preset button
+  document.getElementById('placePreset').addEventListener('click', async () => {
+    document.getElementById('loadingIndicator').style.display = 'block';
+    document.getElementById('progressPercent').textContent = '0%';
+    
+    const fileInput = document.getElementById('wavFileInput');
+    const presetNameInput = document.getElementById('presetName');
+    if (!fileInput.files || fileInput.files.length === 0) {
+      alert("Please select a WAV file.");
+      return;
+    }
+    const file = fileInput.files[0];
+    let baseName = file.name.replace(/\.[^/.]+$/, "");
+    let presetName = presetNameInput.value.trim() || baseName;
+    
+    const arrayBuffer = await file.arrayBuffer();
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const decodedBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+    
+    const chordNames = window.selectedChords;
+    let sampleFilenames = [];
+    let processedSamples = {};
+    for (let chordName of chordNames) {
+      const intervals = CHORDS[chordName];
+      const blob = await processChordSample(decodedBuffer, intervals);
+      let safeChordName = chordName.replace(/\s+/g, '');
+      let filename = `${baseName}_chord_${safeChordName}.wav`;
+      sampleFilenames.push(filename);
+      processedSamples[chordName] = blob;
+    }
+    
+    // Generate preset using the new helper (with updated sample URIs)
+    const preset = generatePlacementChordPreset(presetName, sampleFilenames);
+    const presetJson = JSON.stringify(preset, null, 2);
+    
+    // Bundle chord sample WAV files into a zip
+    const zip = new JSZip();
+    for (let chordName of chordNames) {
+      let safeChordName = chordName.replace(/\s+/g, '');
+      let filename = `${baseName}_chord_${safeChordName}.wav`;
+      const blob = processedSamples[chordName];
+      zip.file(filename, blob);
+    }
+    const samplesZipBlob = await zip.generateAsync({ type: "blob" });
+    
+    // Place samples via the File Placer API (ZIP mode)
+    const samplesForm = new FormData();
+    samplesForm.append("mode", "zip");
+    samplesForm.append("file", samplesZipBlob);
+    samplesForm.append("destination", "/data/UserData/UserLibrary/Samples/Preset%20Samples");
+    await fetch("/place-files", { method: "POST", body: samplesForm });
+    
+    // Place the preset file via the File Placer API (place mode)
+    const presetForm = new FormData();
+    presetForm.append("mode", "place");
+    presetForm.append("file", new Blob([presetJson], { type: "application/json" }), presetName + ".ablpreset");
+    presetForm.append("destination", "/data/UserData/UserLibrary/Track%20Presets");
+    await fetch("/place-files", { method: "POST", body: presetForm });
+    
+    document.getElementById('loadingIndicator').style.display = 'none';
+    alert("Preset and samples placed successfully.");
+  });
 
   // Attach event listener for file input
   const fileInput = document.getElementById('wavFileInput');
