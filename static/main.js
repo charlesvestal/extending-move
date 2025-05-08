@@ -75,10 +75,14 @@ async function handleRestoreSubmit(form) {
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
-        const result = await response.text();
-        const resultMessage = document.getElementById("result-message");
-        if (resultMessage) {
-            resultMessage.innerHTML = result;
+        const html = await response.text();
+        // Replace the entire Restore tab content
+        const container = document.getElementById("Restore");
+        if (container) {
+            container.innerHTML = html;
+            // Reinitialize the form and handler
+            initializeRestoreForm();
+            attachFormHandler('Restore');
         }
     } catch (error) {
         const resultMessage = document.getElementById("result-message");
