@@ -37,35 +37,54 @@ class RestoreHandler(BaseHandler):
     def handle_post(self, form: cgi.FieldStorage):
         """
         Handles POST requests to restore an uploaded .ablbundle file.
-        
-        Args:
-            form (cgi.FieldStorage): Form data from the request.
-        
-        Returns:
-            dict: Response message indicating success or failure.
         """
         valid, error_response = self.validate_action(form, "restore_ablbundle")
         if not valid:
+            # Always include options in error responses
+            _, ids = list_msets(return_free_ids=True)
+            free_pads = sorted([pad_id + 1 for pad_id in ids.get("free", [])])
+            options = self.generate_pad_options(free_pads)
+            error_response["options"] = options
             return error_response
 
         pad_selected = form.getvalue("mset_index")
         pad_color = form.getvalue("mset_color")
 
+        # Early validation: pad index
         if not pad_selected or not pad_selected.isdigit():
-            return self.format_error_response("Invalid pad selection provided.")
+            _, ids = list_msets(return_free_ids=True)
+            free_pads = sorted([pad_id + 1 for pad_id in ids.get("free", [])])
+            options = self.generate_pad_options(free_pads)
+            return self.format_error_response("Invalid pad selection provided.", options=options)
+        # Early validation: color
         if not pad_color or not pad_color.isdigit():
-            return self.format_error_response("Invalid pad color provided.")
+            _, ids = list_msets(return_free_ids=True)
+            free_pads = sorted([pad_id + 1 for pad_id in ids.get("free", [])])
+            options = self.generate_pad_options(free_pads)
+            return self.format_error_response("Invalid pad color provided.", options=options)
 
         pad_selected = int(pad_selected) - 1  # Convert back to internal ID
         pad_color = int(pad_color)
 
         if not (0 <= pad_selected <= 31):
-            return self.format_error_response("Invalid pad selection. Must be between 1 and 32.")
+            _, ids = list_msets(return_free_ids=True)
+            free_pads = sorted([pad_id + 1 for pad_id in ids.get("free", [])])
+            options = self.generate_pad_options(free_pads)
+            return self.format_error_response("Invalid pad selection. Must be between 1 and 32.", options=options)
         if not (1 <= pad_color <= 26):
-            return self.format_error_response("Invalid pad color. Must be between 1 and 26.")
+            _, ids = list_msets(return_free_ids=True)
+            free_pads = sorted([pad_id + 1 for pad_id in ids.get("free", [])])
+            options = self.generate_pad_options(free_pads)
+            return self.format_error_response("Invalid pad color. Must be between 1 and 26.", options=options)
 
         success, filepath, error_response = self.handle_file_upload(form, "ablbundle")
         if not success:
+            _, ids = list_msets(return_free_ids=True)
+            free_pads = sorted([pad_id + 1 for pad_id in ids.get("free", [])])
+            options = self.generate_pad_options(free_pads)
+            if error_response is None:
+                error_response = {}
+            error_response["options"] = options
             return error_response
 
         try:
@@ -79,9 +98,16 @@ class RestoreHandler(BaseHandler):
                 options = self.generate_pad_options(free_pads)
                 return self.format_success_response(result["message"], options)
             else:
-                return self.format_error_response(result["message"])
+                # Regenerate available pad options on error
+                _, ids = list_msets(return_free_ids=True)
+                free_pads = sorted([pad_id + 1 for pad_id in ids.get("free", [])])
+                options = self.generate_pad_options(free_pads)
+                return self.format_error_response(result["message"], options=options)
         except Exception as e:
-            return self.format_error_response(f"Error restoring bundle: {str(e)}")
+            _, ids = list_msets(return_free_ids=True)
+            free_pads = sorted([pad_id + 1 for pad_id in ids.get("free", [])])
+            options = self.generate_pad_options(free_pads)
+            return self.format_error_response(f"Error restoring bundle: {str(e)}", options=options)
 
     def generate_pad_options(self, free_pads):
         """

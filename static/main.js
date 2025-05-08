@@ -75,14 +75,31 @@ async function handleRestoreSubmit(form) {
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
-        const html = await response.text();
-        // Replace the entire Restore tab content
-        const container = document.getElementById("Restore");
-        if (container) {
-            container.innerHTML = html;
-            // Reinitialize the form and handler
-            initializeRestoreForm();
-            attachFormHandler('Restore');
+        const contentType = response.headers.get('Content-Type') || '';
+        if (contentType.includes('application/json')) {
+            // Handle JSON response for both success and error
+            const data = await response.json();
+            const resultMessage = document.getElementById("result-message");
+            if (resultMessage) {
+                resultMessage.innerHTML = data.message;
+            }
+            // Update pad dropdown options if provided
+            if (data.options) {
+                const select = document.querySelector('#Restore select[name="mset_index"]');
+                if (select) {
+                    select.innerHTML = data.options;
+                    select.selectedIndex = 0;
+                }
+            }
+        } else {
+            // Replace the entire Restore tab content on HTML response
+            const html = await response.text();
+            const container = document.getElementById("Restore");
+            if (container) {
+                container.innerHTML = html;
+                initializeRestoreForm();
+                attachFormHandler('Restore');
+            }
         }
     } catch (error) {
         const resultMessage = document.getElementById("result-message");
