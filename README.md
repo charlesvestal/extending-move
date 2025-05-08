@@ -87,6 +87,60 @@ Located in `utility-scripts/`:
 
 Note: Execute these scripts from your computer, not the Move.
 
+## Auto-start
+logged in as root, create an init.d script with
+```bash
+cat > /etc/init.d/ableton-startup << 'EOF'
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          ableton-startup
+# Required-Start:    $local_fs $network
+# Required-Stop:     $local_fs
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start Ableton Python script at boot
+### END INIT INFO
+
+case "$1" in
+  start)
+    # adjust this to whatever directory your code lives in:
+    cd /path/to/your/app
+    echo 'Starting Ableton script…' >> startup.log
+    # run as the 'ableton' user (drops privileges)
+    su - ableton -s /bin/sh -c "/usr/bin/python3 move-webserver.py >> startup.log 2>&1 &"
+    ;;
+  stop)
+    pkill -u ableton -f move-webserver.py
+    ;;
+  restart)
+    $0 stop
+    sleep 1
+    $0 start
+    ;;
+  status)
+    if pgrep -u ableton -f move-webserver.py >/dev/null; then
+      echo "Running"
+    else
+      echo "Not running"
+      exit 1
+    fi
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart|status}"
+    exit 2
+    ;;
+esac
+
+exit 0
+EOF
+chmod +x /etc/init.d/ableton-startup
+```
+
+Enable at boot with 
+```bash
+update-rc.d ableton-startup defaults
+```
+
 ## Documentation
 
 Check the [Wiki](https://github.com/charlesvestal/extending-move/wiki) for:
