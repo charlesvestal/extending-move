@@ -49,6 +49,12 @@ Tools for extending the Ableton Move. This project provides a companion webserve
 1. SSH access to your Move (see [Wiki: Accessing Move](https://github.com/charlesvestal/extending-move/wiki/00--Accessing-Move))
 2. Python environment on your Move
 
+Note:
+These tools are third-party and require SSH access. That means:
+ •    There’s a real risk (though unlikely) of breaking things, including potentially bricking a device. You are accessing the Move in ways it was not designed to do.
+ •    Ableton can’t offer individual support if something goes wrong.
+ •    If issues do arise, the documented restore procedure is the fallback – you use this at their own risk. Information on this procedure can be found in Center Code under [Documentation](https://ableton.centercode.com/project/article/item.html?cap=ecd3942a1fe3405eb27a806608401a0b&arttypeid={e70be312-f44a-418b-bb74-ed1030e3a49a}&artid={C0A2D9E2-D52F-4DEB-8BEE-356B65C8942E}).
+
 ### Quick Install (macOS)
 Simply double-click `utility-scripts/install-on-move.command`
 
@@ -152,7 +158,9 @@ Check the [Wiki](https://github.com/charlesvestal/extending-move/wiki) for:
 ## Contributors
 
 Many thanks to the contributors who have helped discover and document Move's capabilities:
-bobbyd, charlesv, deets, fedpep, manuz, poga, and void.
+bobbyd, charlesv, deets, fedpep, manuz, poga, void, and probably more.
+
+Interested in chatting more? Come talk to us on [Discord](https://discord.gg/yP7SjqDrZG).
 
 ## Disclaimer
 
