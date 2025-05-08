@@ -27,6 +27,19 @@ fi
 REMOTE_USER="ableton"
 REMOTE_HOST="move.local"
 
+# Version check: ensure Move version is within tested range
+HIGHEST_TESTED_VERSION="1.5.0b3"
+INSTALLED_VERSION=$(ssh "${REMOTE_USER}@${REMOTE_HOST}" "/opt/move/Move -v" | awk '{print $3}')
+# Determine if installed version exceeds highest tested
+LATEST_VERSION=$(printf "%s\n%s\n" "$HIGHEST_TESTED_VERSION" "$INSTALLED_VERSION" | sort -V | tail -n1)
+if [ "$LATEST_VERSION" != "$HIGHEST_TESTED_VERSION" ]; then
+    read -p "Warning: Installed Move version ($INSTALLED_VERSION) is newer than highest tested ($HIGHEST_TESTED_VERSION). Continue? [y/N] " confirm
+    if [[ ! $confirm =~ ^[Yy]$ ]]; then
+        echo "Aborting installation."
+        exit 1
+    fi
+fi
+
 echo "Running remote setup commands on ${REMOTE_HOST} as ${REMOTE_USER}..."
 
 ssh "${REMOTE_USER}@${REMOTE_HOST}" bash <<'EOF'

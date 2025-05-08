@@ -12,6 +12,18 @@ REMOTE_USER="ableton"
 REMOTE_HOST="move.local"
 REMOTE_DIR="/data/UserData/extending-move"
 
+# Version check: ensure Move version is within tested range
+HIGHEST_TESTED_VERSION="1.5.0b3"
+INSTALLED_VERSION=$(ssh "${REMOTE_USER}@${REMOTE_HOST}" "/opt/move/Move -v" | awk '{print $3}')
+LATEST_VERSION=$(printf "%s\n%s\n" "$HIGHEST_TESTED_VERSION" "$INSTALLED_VERSION" | sort -V | tail -n1)
+if [ "$LATEST_VERSION" != "$HIGHEST_TESTED_VERSION" ]; then
+    read -p "Warning: Installed Move version ($INSTALLED_VERSION) is newer than highest tested ($HIGHEST_TESTED_VERSION). Continue? [y/N] " confirm
+    if [[ ! $confirm =~ ^[Yy]$ ]]; then
+        echo "Aborting update."
+        exit 1
+    fi
+fi
+
 echo "Ensuring remote directory '${REMOTE_DIR}' exists on ${REMOTE_HOST}..."
 ssh "${REMOTE_USER}@${REMOTE_HOST}" "mkdir -p '${REMOTE_DIR}'" || {
     echo "Error: Failed to create or access remote directory '${REMOTE_DIR}'."
