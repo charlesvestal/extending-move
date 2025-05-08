@@ -290,7 +290,7 @@ def get_unique_filename(path):
             return new_path
         counter += 1
 
-def update_drumcell_sample_uris(data, slices_info, sliced_filename, current_index=0, base_uri="Samples/"):
+def update_drumcell_sample_uris(data, slices_info, sliced_filename, current_index=0, base_uri="Samples/", total_duration=None):
     """
     Update drum cell sample URIs and playback parameters in a Move preset.
     
@@ -308,6 +308,13 @@ def update_drumcell_sample_uris(data, slices_info, sliced_filename, current_inde
     and updating their sampleUri and playback parameters. All cells reference
     the same WAV file but with different playback start points and durations.
     """
+    # Compute total_duration once
+    if total_duration is None:
+        try:
+            samplerate, samples = wavfile.read(sliced_filename)
+            total_duration = len(samples) / samplerate
+        except Exception:
+            total_duration = 1.0  # fallback to prevent division by zero
     from urllib.parse import quote
     if isinstance(data, dict):
         if data.get("kind") == "drumCell" and "deviceData" in data and "sampleUri" in data["deviceData"]:
@@ -322,16 +329,19 @@ def update_drumcell_sample_uris(data, slices_info, sliced_filename, current_inde
                 data["parameters"]["Voice_PlaybackStart"] = offset
                 data["parameters"]["Voice_Envelope_Hold"] = hold
                 data["parameters"]["Voice_Envelope_Decay"] = 0.0
+                # Add playback length as fraction of full file
+                playback_length = hold / total_duration if total_duration > 0 else 0
+                data["parameters"]["Voice_PlaybackLength"] = playback_length
                 print(f"Updated drumCell sampleUri to {new_uri} with Voice_PlaybackStart {offset} and Voice_Envelope_Hold {hold}")
                 current_index += 1
             else:
                 data["deviceData"]["sampleUri"] = None
                 print("No slice info available. Set drumCell sampleUri to null.")
         for key, value in data.items():
-            current_index = update_drumcell_sample_uris(value, slices_info, sliced_filename, current_index, base_uri)
+            current_index = update_drumcell_sample_uris(value, slices_info, sliced_filename, current_index, base_uri, total_duration)
     elif isinstance(data, list):
         for item in data:
-            current_index = update_drumcell_sample_uris(item, slices_info, sliced_filename, current_index, base_uri)
+            current_index = update_drumcell_sample_uris(item, slices_info, sliced_filename, current_index, base_uri, total_duration)
     return current_index
 
 def create_bundle(preset_filename, slice_paths, bundle_name):
