@@ -6,12 +6,23 @@ Tools for extending the Ableton Move. This project provides a companion webserve
 
 ## Features
 
-### Sample Management
-- **Choke Kit Creation**
-  - Create drum kits from WAV files with up to 16 slices
-  - Choose custom slice points for each drum pad
-  - Download as `.ablpresetbundle` or generate directly on device
-  - Automatic choke group configuration for one-shot behavior
+- **Move Set Management**
+  - Upload and restore Move Sets (.ablbundle)
+  - Choose target pad and color
+  - Automatic library integration
+  - Maintains Move's file structure
+
+- **Sample Reversal**
+  - Create reversed versions of any WAV file
+  - Toggle between original and reversed versions
+  - Automatic library updates
+  - Supports most common WAV formats
+    
+- **Drum Rack Inspector**
+  - View all samples in a drum rack preset
+  - Download individual samples
+  - Create reversed versions directly in the preset
+  - Update sample assignments
 
 - **Chord Kit Generation**
   - Create chord variations from any WAV file
@@ -19,30 +30,18 @@ Tools for extending the Ableton Move. This project provides a companion webserve
   - Automatic pitch-shifting and normalization
   - Download as preset bundle or place directly on device
 
-- **Sample Reversal**
-  - Create reversed versions of any WAV file
-  - Toggle between original and reversed versions
-  - Automatic library updates
-  - Supports most common WAV formats
+- **Sliced Choke Kit Creation**
+  - Create drum kits from WAV files with up to 16 slices
+  - Choose custom slice points for each drum pad
+  - Download as `.ablpresetbundle` or generate directly on device
+  - Automatic choke group configuration for one-shot behavior
 
-### Preset Management
-- **Drum Rack Inspector**
-  - View all samples in a drum rack preset
-  - Download individual samples
-  - Create reversed versions directly in the preset
-  - Update sample assignments
-
-- **Move Set Management**
-  - Upload and restore Move Sets (.ablbundle)
-  - Choose target pad and color
-  - Automatic library integration
-  - Maintains Move's file structure
-
-### Library Management
 - **Manual Library Refresh**
   - Force refresh of Move's library cache
   - Useful after manual file changes
   - Uses Move's D-Bus interface
+    
+
 
 ## Installation
 
