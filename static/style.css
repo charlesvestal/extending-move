@@ -1,187 +1,318 @@
+/* Add Ableton Sans font faces with correct filenames */
+@font-face {
+    font-family: 'Ableton Sans';
+    src: url('/static/fonts/ableton-sans-regular.2667c981.woff2') format('woff2'),
+         url('/static/fonts/ableton-sans-regular.96781b02.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Ableton Sans';
+    src: url('/static/fonts/ableton-sans-regular-italic.57c63ecd.woff2') format('woff2'),
+         url('/static/fonts/ableton-sans-regular-italic.3396038c.woff') format('woff');
+    font-weight: 400;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Ableton Sans';
+    src: url('/static/fonts/ableton-sans-medium.0cbbf7a5.woff2') format('woff2'),
+         url('/static/fonts/ableton-sans-medium.1dc02bda.woff') format('woff');
+    font-weight: 500;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Ableton Sans';
+    src: url('/static/fonts/ableton-sans-medium-italic.0b876bb7.woff2') format('woff2'),
+         url('/static/fonts/ableton-sans-medium-italic.2f6b17c5.woff') format('woff');
+    font-weight: 500;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Ableton Sans';
+    src: url('/static/fonts/ableton-sans-bold.3852fc5e.woff2') format('woff2'),
+         url('/static/fonts/ableton-sans-bold.72207915.woff') format('woff');
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Ableton Sans';
+    src: url('/static/fonts/ableton-sans-bold-italic.472dc9f8.woff2') format('woff2'),
+         url('/static/fonts/ableton-sans-bold-italic.e6c549c2.woff') format('woff');
+    font-weight: 700;
+    font-style: italic;
+}
+
+/* Base styles */
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Ableton Sans', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f8f8;
+    color: #262626;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-.success {
-    color: green;
+.text-lg {
+    font-size: 1.125rem;
 }
 
-.error {
-    color: red;
+@media (min-width: 768px) {
+  .md\:text-xl {
+    font-size: 2.375rem;
+    line-height: 3.125rem;
+    letter-spacing: normal;
+  }
 }
 
-.tab {
-    overflow: hidden;
-    border-bottom: 1px solid #ccc;
+.font-medium {
+    font-weight: 500;
 }
 
-.tab button {
-    background-color: inherit;
-    border: none;
-    outline: none;
-    cursor: pointer;
-    padding: 14px 16px;
-    transition: 0.3s;
-    font-size: 17px;
+.mb-3 {
+    margin-bottom: 0.75rem;
 }
 
-.tab button:hover {
-    background-color: #ddd;
+.first\:mt-0:first-child {
+    margin-top: 0;
 }
 
-.tab button.active {
-    color:rgba(255 118 77);
+.mt-0 {
+    margin-top: 0;
 }
 
-.tabcontent {
-    display: none;
-    padding: 20px;
+h1, h2, h3, h4 {
+    font-family: 'Ableton Sans', Arial, sans-serif;
+    font-weight: 500;
+    color: #262626;
+    margin-top: 0;
+}
+
+h1 {
+    font-size: 2.375rem;
+    font-weight: 500;
+    color: #262626;
+    line-height: 3.125rem;
+    margin: 1.5rem 0;
+    padding-bottom: 0.5rem;
+    padding-left: 0.4rem;
+    border-bottom: none;
 }
 
 h2 {
-    margin-bottom: 20px;
-    color: #333;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
 }
 
-form:not(.sample-actions form) {
-    margin-bottom: 30px;
+h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Header/Navigation */
+.tab {
+    display: flex;
+    background-color: transparent;
+    overflow: visible;
+}
+
+.tab button {
+    background: transparent;
+    border: none;
+    padding: 0.75rem 1.25rem;
+    color: #262626;
+    font-size: 1rem;
+    font-weight: 400;
+    margin-right: 0.25rem;
+    transition: color 0.2s;
+}
+
+.tab button:hover {
+    color: #262626;
+    background-color: transparent;
+}
+
+.tab button.active {
+    color: #ff764d;
+    background-color: transparent;
+    border-bottom: none;
+    border-radius: 0;
+}
+
+/* Main content area */
+.tabcontent {
+    background-color: white;
+    border-radius: 4px;
+    border: none;
+    margin: 0;
+    padding: 2rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+/* Form elements */
+input[type="text"],
+input[type="number"],
+input[type="file"],
+select {
+    display: block;
+    width: 100%;
+    max-width: 400px;
+    padding: 0.625rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    background-color: white;
+    font-family: 'Ableton Sans', Arial, sans-serif;
 }
 
 label {
-    font-weight: bold;
-    color: #666;
-    margin-right: 10px;
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: #444;
 }
 
-select, input[type="number"], input[type="file"] {
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
-    margin-bottom: 10px;
-}
-
-select {
-    min-width: 200px;
-}
-
-button, input[type="submit"] {
-    padding: 8px 16px;
-    background-color: #007bff;
+button, 
+input[type="submit"] {
+    background-color: #0000ff;
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 0px;
+    padding: 0.625rem 1.25rem;
+    font-size: 1rem;
+    line-height: 1.5rem;
+    font-weight: 500;
     cursor: pointer;
-    font-size: 14px;
-    margin-right: 10px;
+    transition: background-color 0.2s;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-family: 'Ableton Sans', Arial, sans-serif;
 }
 
-.tablinks {
-    color:black;
+button:hover, 
+input[type="submit"]:hover {
+    background-color: #0000cc;
 }
 
-button:hover, input[type="submit"]:hover {
-    background-color: #0056b3;
-}
-
+/* Card styling for grid layouts */
 .drum-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    width: 100%;
-    max-width: 700px;
-    margin: 20px auto;
-}
-
-.drum-grid-row {
-    display: flex;
-    gap: 10px;
-    width: 100%;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
 }
 
 .drum-cell {
-    width: 160px;
-    height: 160px;
-    background: #f5f5f5;
-    border: 1px solid #ddd;
+    background-color: #f5f5f5;
     border-radius: 4px;
-    padding: 10px;
+    border: 1px solid #ddd;
+    padding: 1rem;
     display: flex;
     flex-direction: column;
+    transition: box-shadow 0.2s;
 }
 
-.pad-info {
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
+.drum-cell:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 .pad-number {
-    font-weight: bold;
-    color: #666;
+    font-weight: 600;
+    color: #555;
 }
 
-.sample-info {
-    margin-top: 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.sample-name {
-    font-size: 0.3em;
-    font-family: 'Courier New', Courier, monospace;    color: #333;
-    word-break: break-all;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-}
-
-.sample-actions {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    margin-top: 4px;
-}
-
-.download-link, .reverse-button {
-    font-size: 0.8em;
-    padding: 4px 8px;
-    background-color: #6c757d;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    height: 24px;
-    box-sizing: border-box;
-}
-
-.sample-actions form {
-    margin: 0;
-    padding: 0;
-    display: flex;
-}
-
-.download-link:hover, .reverse-button:hover {
-    background-color: #5a6268;
-}
-
+/* Waveform styling */
 .waveform-container {
-    flex: 1;
-    background: #fff;
+    background-color: white;
     border: 1px solid #ddd;
     border-radius: 4px;
+    margin: 0.5rem 0;
+    padding: 0.5rem;
+    min-height: 64px;
     cursor: pointer;
-    transition: background-color 0.2s;
-    min-height: 80px;
 }
 
-.waveform-container:hover {
-    background-color: #f0f0f0;
+#waveform {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #f5f5f5;
+    margin-bottom: 1rem;
+}
+
+/* Success/Error messages */
+.success {
+    color: #00a550;
+    padding: 0.75rem;
+    background-color: #e6f7ef;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}
+
+.error {
+    color: #d73a49;
+    padding: 0.75rem;
+    background-color: #ffeef0;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}
+
+/* Chord grid styling */
+.chord-list {
+    margin-top: 2rem;
+}
+
+.chord-preview {
+    background-color: #f5f5f5;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+/* Dropdown styling */
+select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23262626' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 16px;
+    padding-right: 2.5rem;
+    border: 1px solid #ddd;
+}
+
+/* Section titles */
+.tabcontent h2 {
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+    border-bottom: none;
+}
+
+/* List in dropdown */
+select option {
+    font-family: 'Ableton Sans', Arial, sans-serif;
+    padding: 0.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .tab {
+        flex-wrap: wrap;
+    }
+    
+    .tab button {
+        flex: 1 0 auto;
+    }
+    
+    .tabcontent {
+        margin: 1rem 0.5rem;
+        padding: 1rem;
+    }
 }
