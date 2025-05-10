@@ -79,6 +79,7 @@ pip install --no-cache-dir scipy
 4. Copy files and start server:
 ```bash
 cd /data/UserData/extending-move
+cp -r /opt/move/HttpRoot/fonts /data/UserData/extending-move/static/
 python3 move-webserver.py
 ```
 
