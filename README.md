@@ -111,7 +111,6 @@ case "$1" in
   start)
     # adjust this to whatever directory your code lives in:
     cd /data/UserData/extending-move
-    echo 'Starting Ableton script…' >> startup.log
     # run as the 'ableton' user (drops privileges)
     su - ableton -s /bin/sh -c "cd /data/UserData/extending-move ; python3 move-webserver.py >> startup.log 2>&1 &"
     ;;
