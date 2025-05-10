@@ -327,12 +327,12 @@ def update_drumcell_sample_uris(data, slices_info, sliced_filename, current_inde
                     data["parameters"] = {}
                 offset, hold = slices_info[current_index]
                 data["parameters"]["Voice_PlaybackStart"] = offset
-                data["parameters"]["Voice_Envelope_Hold"] = hold
+                data["parameters"]["Voice_Envelope_Hold"] = 60.0
                 data["parameters"]["Voice_Envelope_Decay"] = 0.0
                 # Add playback length as fraction of full file
                 playback_length = hold / total_duration if total_duration > 0 else 0
                 data["parameters"]["Voice_PlaybackLength"] = playback_length
-                print(f"Updated drumCell sampleUri to {new_uri} with Voice_PlaybackStart {offset} and Voice_Envelope_Hold {hold}")
+                print(f"Updated drumCell sampleUri to {new_uri} with Voice_PlaybackStart {offset} and Voice_Envelope_Hold set to 60.0")
                 current_index += 1
             else:
                 data["deviceData"]["sampleUri"] = None

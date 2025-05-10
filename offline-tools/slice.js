@@ -166,12 +166,14 @@ function generateSlicePreset(presetName) {
  */
 function updateDrumCellParameters(template, slices_info, sampleFileName) {
   let drumChains = template.chains[0].devices[0].chains;
+  const totalDuration = window.wavesurfer.getDuration();
   for (let i = 0; i < drumChains.length; i++) {
     let drumCell = drumChains[i].devices[0];
     if (i < slices_info.length) {
       drumCell.parameters["Voice_PlaybackStart"] = slices_info[i].offset;
-      drumCell.parameters["Voice_Envelope_Hold"] = slices_info[i].hold;
+      drumCell.parameters["Voice_Envelope_Hold"] = 60.0;
       drumCell.parameters["Voice_Envelope_Decay"] = 0.0;
+      drumCell.parameters["Voice_PlaybackLength"] = slices_info[i].hold / totalDuration;
       drumCell.deviceData["sampleUri"] = "Samples/" + encodeURIComponent(sampleFileName);
     } else {
       drumCell.deviceData["sampleUri"] = null;
