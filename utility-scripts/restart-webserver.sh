@@ -45,8 +45,8 @@ if ! ps -p $NEW_PID > /dev/null; then
 fi
 
 # Verify the server is listening
-if ! netstat -tln | grep -q ':666'; then
-    echo "Error: Server not listening on port 666. Check logs:"
+if ! netstat -tln | grep -q ':909'; then
+    echo "Error: Server not listening on port 909. Check logs:"
     cat "$LOG_FILE"
     exit 1
 fi

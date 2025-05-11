@@ -468,7 +468,7 @@ if __name__ == "__main__":
     signal.signal(signal.SIGINT, handle_exit)
     
     hostName = "0.0.0.0"
-    serverPort = 666
+    serverPort = 909
     
     print("Starting webserver")
     webServer = HTTPServer((hostName, serverPort), MyServer)

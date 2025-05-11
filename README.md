@@ -1,6 +1,6 @@
 # extending-move
 
-Tools for extending the Ableton Move. This project provides a companion webserver that runs alongside the official Move server, accessible at move.local:666.
+Tools for extending the Ableton Move. This project provides a companion webserver that runs alongside the official Move server, accessible at move.local:909.
 
 ![CleanShot 2025-02-09 at 21 17 48](https://github.com/user-attachments/assets/7b010cbb-8b26-4c53-80ed-ada875514aff)
 
@@ -83,7 +83,7 @@ cp -r /opt/move/HttpRoot/fonts /data/UserData/extending-move/static/
 python3 move-webserver.py
 ```
 
-The server will be accessible at http://move.local:666
+The server will be accessible at http://move.local:909
 
 ## Utility Scripts
 

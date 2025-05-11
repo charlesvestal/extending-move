@@ -99,12 +99,12 @@ echo "*                                                            *"
 echo "*   Deployment and remote setup complete.                    *"
 echo "*                                                            *"
 echo "*   Your new Move tools are now available at:                *"
-echo "*   http://move.local:666                                    *"
+echo "*   http://move.local:909                                    *"
 echo "*                                                            *"
 echo "**************************************************************"
 echo
 printf "Would you like to open the tools in your browser? (y/n): "
 read -r response
 if [ "$response" = "y" ] || [ "$response" = "Y" ]; then
-    open "http://move.local:666"
+    open "http://move.local:909"
 fi
