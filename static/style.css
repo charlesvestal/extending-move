@@ -94,6 +94,11 @@ h1, h2, h3, h4 {
     margin-top: 0;
 }
 
+#header 
+{
+    margin-left:20px;
+}
+
 h1 {
     font-size: 2.375rem;
     font-weight: 500;
@@ -160,7 +165,7 @@ input[type="text"],
 input[type="number"],
 input[type="file"],
 select {
-    display: block;
+    /* display: block; */
     width: 100%;
     max-width: 400px;
     padding: 0.625rem;
@@ -196,6 +201,10 @@ input[type="submit"] {
     font-family: 'Ableton Sans', Arial, sans-serif;
 }
 
+.drum-grid button {
+    margin-left: 0.5rem;
+}
+
 button:hover, 
 input[type="submit"]:hover {
     background-color: #0000cc;
@@ -204,7 +213,7 @@ input[type="submit"]:hover {
 /* Card styling for grid layouts */
 .drum-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 1rem;
     margin: 1.5rem 0;
 }
