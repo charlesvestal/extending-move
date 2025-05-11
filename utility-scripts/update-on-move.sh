@@ -53,7 +53,7 @@ tar -czf - \
     --exclude='.git' \
     --exclude='utility-scripts' \
     core handlers templates static move-webserver.py | \
-    ssh "${REMOTE_USER}@${REMOTE_HOST}" "cd '${REMOTE_DIR}' && tar -xzf -"
+    ssh "${REMOTE_USER}@${REMOTE_HOST}" "cd '${REMOTE_DIR}' && tar -xzf - ; cp -r /opt/move/HttpRoot/fonts '${REMOTE_DIR}/static/'"
 
 echo "Files copied successfully."
 

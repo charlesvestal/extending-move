@@ -1,49 +1,157 @@
-/* Shared styles for both tools */
+/* Shared styles matching Ableton Move aesthetic */
 body {
-  font-family: Arial, sans-serif;
+  font-family: 'Ableton Sans', Arial, sans-serif;
   margin: 0;
   padding: 20px;
-  background-color: #fdfdfd;
-  color: #333;
-}
-
-.chord-label {
-  font-weight: bold;
-  margin-bottom: 5px;
-}
-
-.chord-preview {
-  cursor: pointer;
-  /* You can add additional styling as needed */
+  background-color: #f8f8f8;
+  color: #262626;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .container {
   max-width: 800px;
   margin: 0 auto;
+  padding: 1.5rem;
 }
 
 h2 {
-  margin-bottom: 20px;
-  color: #444;
+  font-family: 'Ableton Sans', Arial, sans-serif;
+  font-weight: 500;
+  font-size: 1.5rem;
+  color: #262626;
+  margin-bottom: 1rem;
+  margin-top: 0;
+  letter-spacing: normal;
 }
 
 input, button, select {
-  margin: 5px 0;
-  padding: 8px;
-  font-size: 1em;
-  border: 1px solid #ccc;
+  display: block;
+  width: 100%;
+  max-width: 400px;
+  padding: 0.625rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ddd;
   border-radius: 4px;
+  font-size: 0.875rem;
+  font-family: 'Ableton Sans', Arial, sans-serif;
 }
 
 button {
-  cursor: pointer;
-  background-color: #007BFF;
-  color: #fff;
+  background-color: #0000ff;
+  color: white;
   border: none;
-  border-radius: 4px;
-  padding: 10px 15px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
 }
 
 button:hover {
-  background-color: #0056b3;
+  background-color: #0000cc;
+}
+
+.chord-label {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #444;
+}
+
+.chord-preview {
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  min-height: 50px;
+  cursor: pointer;
+  border: 1px solid #ddd;
+  overflow: hidden;
+}
+
+/* Chord grid styling */
+.chord-list ul {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1rem;
+}
+
+.chord-list li {
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #f5f5f5;
+}
+
+#waveform {
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+small {
+  display: block;
+  margin-top: 2rem;
+  color: #777;
+  text-align: center;
+}
+
+small a {
+  color: #0000ff;
+  text-decoration: none;
+}
+
+small a:hover {
+  text-decoration: underline;
+}
+
+/* Header styling */
+h1 {
+  font-family: 'Ableton Sans', Arial, sans-serif;
+  font-weight: 500;
+  font-size: 2rem;
+  color: #262626;
+  margin: 1.5rem 0;
+  letter-spacing: normal;
+}
+
+@media (min-width: 768px) {
+  h1 {
+    font-size: 2.375rem;
+    line-height: 3.125rem;
+    letter-spacing: normal;
+  }
+}
+
+/* Make sure form controls use the Ableton styling */
+select, input {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 0.75rem;
+  font-family: 'Ableton Sans', Arial, sans-serif;
+  color: #262626;
+}
+
+select {
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23262626' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 16px;
+  padding-right: 2.5rem;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+@media (min-width: 768px) {
+  .md\:text-xl {
+    font-size: 2.375rem;
+    line-height: 3.125rem;
+    letter-spacing: normal;
+  }
 }

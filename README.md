@@ -79,6 +79,7 @@ pip install --no-cache-dir scipy
 4. Copy files and start server:
 ```bash
 cd /data/UserData/extending-move
+cp -r /opt/move/HttpRoot/fonts /data/UserData/extending-move/static/
 python3 move-webserver.py
 ```
 
@@ -110,10 +111,9 @@ cat > /etc/init.d/ableton-startup << 'EOF'
 case "$1" in
   start)
     # adjust this to whatever directory your code lives in:
-    cd /path/to/your/app
-    echo 'Starting Ableton script…' >> startup.log
+    cd /data/UserData/extending-move
     # run as the 'ableton' user (drops privileges)
-    su - ableton -s /bin/sh -c "/usr/bin/python3 move-webserver.py >> startup.log 2>&1 &"
+    su - ableton -s /bin/sh -c "cd /data/UserData/extending-move ; python3 move-webserver.py >> startup.log 2>&1 &"
     ;;
   stop)
     pkill -u ableton -f move-webserver.py
