@@ -162,9 +162,9 @@ Check the [Wiki](https://github.com/charlesvestal/extending-move/wiki) for:
 ## Contributors
 
 Many thanks to the contributors who have helped discover and document Move's capabilities:
-bobbyd, charlesv, deets, fedpep, manuz, poga, void, and probably more.
+bobbyd, void, deets, djhardrich, fedpep, manuz, poga, void, and many more.
 
-Interested in chatting more? Come talk to us on [Discord](https://discord.gg/yP7SjqDrZG).
+Interested in chatting about more Move hacking? Come talk to us on [Discord](https://discord.gg/yP7SjqDrZG).
 
 ## Disclaimer
 
