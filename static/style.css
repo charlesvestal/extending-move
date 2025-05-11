@@ -94,7 +94,7 @@ h1, h2, h3, h4 {
     margin-top: 0;
 }
 
-#header 
+#header, #footer
 {
     margin-left:10px;
 }
