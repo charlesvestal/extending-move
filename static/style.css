@@ -174,7 +174,7 @@ select {
     border-radius: 4px;
     font-size: 0.875rem;
     background-color: white;
-    font-family: 'Ableton Sans', Arial, sans-serif;
+    /* font-family: 'Ableton Sans', Arial, sans-serif; */
 }
 
 label {
@@ -305,10 +305,10 @@ select {
 }
 
 /* List in dropdown */
-select option {
+/* select option {
     font-family: 'Ableton Sans', Arial, sans-serif;
     padding: 0.5rem;
-}
+} */
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
