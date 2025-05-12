@@ -41,6 +41,7 @@ Tools for extending the Ableton Move. This project provides a companion webserve
   - Automatic choke group configuration for one-shot behavior
 
 - **Manual Library Refresh**
+  - Accessible via move.local:909/refresh
   - Force refresh of Move's library cache
   - Useful after manual file changes
   - Uses Move's D-Bus interface
