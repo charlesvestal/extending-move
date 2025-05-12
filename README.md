@@ -13,31 +13,26 @@ Tools for extending the Ableton Move. This project provides a companion webserve
 - **Move Set Management**
   - Upload and restore Move Sets (.ablbundle)
   - Choose target pad and color
-  - Automatic library integration
-  - Maintains Move's file structure
 
 - **Sample Reversal**
   - Create reversed versions of any WAV file
-  - Toggle between original and reversed versions
-  - Automatic library updates
-  - Supports most common WAV formats
+  - Use reversed file in drum kit or sample presets
     
 - **Drum Rack Inspector**
   - View all samples in a drum rack preset
   - Download individual samples
   - Create reversed versions directly in the preset
-  - Update sample assignments
 
 - **Chord Kit Generation**
   - Create chord variations from any WAV file
   - Includes common chord voicings (Cm9, Fm7, AbMaj7, etc.)
   - Automatic pitch-shifting and normalization
-  - Download as preset bundle or place directly on device
+  - Download as `.ablpresetbundle` or place directly on device
 
 - **Sliced Choke Kit Creation**
-  - Create drum kits from WAV files with up to 16 slices
+  - Use a visual slicer to create drum kits from WAV files with up to 16 slices
   - Choose custom slice points for each drum pad
-  - Download as `.ablpresetbundle` or generate directly on device
+  - Download as `.ablpresetbundle` or place directly on device
   - Automatic choke group configuration for one-shot behavior
 
 - **Manual Library Refresh**
@@ -46,8 +41,6 @@ Tools for extending the Ableton Move. This project provides a companion webserve
   - Useful after manual file changes
   - Uses Move's D-Bus interface
     
-
-
 ## Installation
 
 ### Prerequisites
@@ -92,15 +85,17 @@ The server will be accessible at http://move.local:909
 
 ## Utility Scripts
 
+Note: Execute these scripts from your computer, not the Move.
+
 Located in `utility-scripts/`:
 - `install-on-move.sh` / `.command`: Initial setup and installation
 - `update-on-move.sh` / `.command`: Update with latest files
 - `restart-webserver.sh`: Restart the webserver
 
-Note: Execute these scripts from your computer, not the Move.
 
-## Auto-start
-logged in as root, create an init.d script with
+## How to Auto-start on Boot
+When logged in as root, create an init.d script with the following command
+
 ```bash
 cat > /etc/init.d/ableton-startup << 'EOF'
 #!/bin/sh
