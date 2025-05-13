@@ -94,6 +94,9 @@ Located in `utility-scripts/`:
 
 
 ## How to Auto-start on Boot
+
+Note: This does not persist through firmware upgrades. Re-run the command and re-enable the script after upgrading.
+
 When logged in as root, create an init.d script with the following command
 
 ```bash
