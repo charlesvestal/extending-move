@@ -56,6 +56,9 @@ These tools are third-party and require SSH access. That means:
 
 ### Quick Install (macOS)
 Simply double-click `utility-scripts/install-on-move.command`
+Everything that it does can be found in `utility-scritps/install-on-move.sh`
+
+To update, you can use the similar `utility-scripts/update-on-move.command` or `utility-scripts/update-on-move.sh` to copy over the files and restart the webserver.
 
 ### Manual Installation
 
