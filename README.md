@@ -60,7 +60,21 @@ Simply double-click `utility-scripts/install-on-move.command`
 
 1. Login as the ableton user and install pip:
 ```bash
-wget https://bootstrap.pypa.io/get-pip.py
+cd /data/UserData
+wget -q -O get-pip.py https://bootstrap.pypa.io/get-pip.py
+
+# Ensure that ~/.bash_profile sources ~/.bashrc so that Bash settings persist on login.
+if ! grep -q "\.bashrc" ~/.bash_profile; then
+    echo 'if [ -f ~/.bashrc ]; then . ~/.bashrc; fi' >> ~/.bash_profile
+fi
+
+# Add /data/UserData/.local/bin to PATH for this session.
+export PATH="/data/UserData/.local/bin:$PATH"
+
+# Persist the PATH update in ~/.bashrc if it's not already present.
+if ! grep -q "/data/UserData/.local/bin" ~/.bashrc; then
+    echo 'export PATH="/data/UserData/.local/bin:$PATH"' >> ~/.bashrc
+fi
 ```
 
 2. Configure temporary directory:
@@ -74,7 +88,9 @@ export TMPDIR=~/tmp
 pip install --no-cache-dir scipy
 ```
 
-4. Copy files and start server:
+4. Copy files from your computer to your Move at /data/UserData/extending-move via whatever method you want (i.e. SFTP)
+
+5. SSH to the Move and start the server
 ```bash
 cd /data/UserData/extending-move
 cp -r /opt/move/HttpRoot/fonts /data/UserData/extending-move/static/
