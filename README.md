@@ -45,7 +45,7 @@ Tools for extending the Ableton Move. This project provides a companion webserve
 
 ### Prerequisites
 1. SSH access to your Move (see [Wiki: Accessing Move](https://github.com/charlesvestal/extending-move/wiki/00--Accessing-Move))
-2. Python environment on your Move
+2. Python environment on your Move (should already be present as `python3`)
 
 Note:
 These tools are third-party and require SSH access. That means:
