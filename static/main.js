@@ -139,6 +139,39 @@ function attachFormHandler(tabName) {
                 }
             });
         }
+    } 
+    // For SynthPresetInspector
+    else if (tabName === 'SynthPresetInspector') {
+        // Handle preset selection change
+        const select = form.querySelector('select');
+        if (select) {
+            select.addEventListener('change', async function(event) {
+                event.preventDefault();
+                // Set the action to select_preset
+                const actionInput = form.querySelector('#action-input');
+                if (actionInput) {
+                    actionInput.value = 'select_preset';
+                }
+                await submitForm(form, tabName);
+            });
+        }
+        
+        // Handle form submission (for Select and Save Preset buttons)
+        form.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            await submitForm(form, tabName);
+        });
+        
+        // Handle all forms in the drum grid (for reverse buttons)
+        const drumGrid = document.querySelector('.drum-grid');
+        if (drumGrid) {
+            drumGrid.addEventListener('submit', async function(event) {
+                if (event.target.matches('form')) {
+                    event.preventDefault();
+                    await submitForm(event.target, tabName);
+                }
+            });
+        }
     } else if (tabName === 'Restore') {
         // Special handling for restore form
         form.addEventListener('submit', async function(event) {

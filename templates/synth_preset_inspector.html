@@ -1,0 +1,68 @@
+<h2>Synth Preset Inspector</h2>
+{message_html}
+
+<form method="POST" action="/synth-preset-inspector" id="preset-form">
+    <input type="hidden" name="action" id="action-input" value="select_preset">
+    <div class="preset-selection">
+        <select name="preset_select" id="preset_select">
+            {{ options }}
+        </select>
+        <button type="submit" onclick="document.getElementById('action-input').value='edit_preset'">Save Preset</button>
+    </div>
+    
+    <div class="macro-display">
+        {{ macros_html }}
+    </div>
+</form>
+
+<!-- The dropdown change event is handled by main.js using AJAX -->
+
+<style>
+    .preset-selection {
+        margin-bottom: 20px;
+        padding: 15px;
+        background-color: #f5f5f5;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .preset-selection select {
+        flex-grow: 1;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+    
+    .macros-container {
+        margin-top: 20px;
+    }
+    
+    .macro-item {
+        margin-bottom: 20px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+    
+    .macro-header {
+        margin-top: 0;
+        color: #333;
+        font-size: 1.17em;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    
+    .macro-name-input {
+        padding: 5px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        font-size: 1em;
+        width: 60%;
+    }
+    
+    .parameters-list {
+        margin-top: 10px;
+    }
+</style>

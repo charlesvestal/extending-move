@@ -12,6 +12,7 @@ from handlers.reverse_handler_class import ReverseHandler
 from handlers.drum_rack_inspector_handler_class import DrumRackInspectorHandler
 from handlers.restore_handler_class import RestoreHandler
 from handlers.file_placer_handler_class import FilePlacerHandler
+from handlers.synth_preset_inspector_handler_class import SynthPresetInspectorHandler
 
 # Define the PID file location
 PID_FILE = os.path.expanduser('~/extending-move/move-webserver.pid')
@@ -67,6 +68,10 @@ class TemplateManager:
         # Ensure `{{ samples_html }}` is replaced if used
         if "samples_html" in kwargs:
             template = template.replace("{{ samples_html }}", kwargs["samples_html"])
+            
+        # Ensure `{{ macros_html }}` is replaced if used
+        if "macros_html" in kwargs:
+            template = template.replace("{{ macros_html }}", kwargs["macros_html"])
 
         # Ensure message replacement works properly in ALL templates
         message = kwargs.get("message", "")
@@ -183,6 +188,7 @@ class MyServer(BaseHTTPRequestHandler):
     drum_rack_inspector_handler = DrumRackInspectorHandler()
     restore_handler = RestoreHandler()
     file_placer_handler = FilePlacerHandler()
+    synth_preset_inspector_handler = SynthPresetInspectorHandler()
 
     @route_handler.get("/chord", "chord.html")
     def handle_chord_get(self):
@@ -238,6 +244,16 @@ class MyServer(BaseHTTPRequestHandler):
     def handle_drum_rack_inspector_get(self):
         """Handle GET request for drum rack inspector page."""
         return self.drum_rack_inspector_handler.handle_get()
+
+    @route_handler.get("/synth-preset-inspector", "synth_preset_inspector.html")
+    def handle_synth_preset_inspector_get(self):
+        """Handle GET request for synth preset inspector page."""
+        return self.synth_preset_inspector_handler.handle_get()
+
+    @route_handler.post("/synth-preset-inspector")
+    def handle_synth_preset_inspector_post(self, form):
+        """Handle POST request for synth preset inspector page."""
+        return self.synth_preset_inspector_handler.handle_post(form)
 
     def handle_static_file(self, path):
         """Handle requests for static files."""
@@ -416,7 +432,7 @@ class MyServer(BaseHTTPRequestHandler):
         Handle all POST requests.
         Processes form data and delegates to appropriate handler.
         """
-        if self.path not in ["/slice", "/refresh", "/reverse", "/drum-rack-inspector", "/restore", "/chord", "/place-files"]:
+        if self.path not in ["/slice", "/refresh", "/reverse", "/drum-rack-inspector", "/restore", "/chord", "/place-files", "/synth-preset-inspector"]:
             self.send_error(404)
             return
 
