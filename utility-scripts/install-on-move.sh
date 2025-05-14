@@ -28,7 +28,7 @@ REMOTE_USER="ableton"
 REMOTE_HOST="move.local"
 
 # Version check: ensure Move version is within tested range
-HIGHEST_TESTED_VERSION="1.5.0b3"
+HIGHEST_TESTED_VERSION="1.5.0b4"
 INSTALLED_VERSION=$(ssh "${REMOTE_USER}@${REMOTE_HOST}" "/opt/move/Move -v" | awk '{print $3}')
 # Determine if installed version exceeds highest tested
 LATEST_VERSION=$(printf "%s\n%s\n" "$HIGHEST_TESTED_VERSION" "$INSTALLED_VERSION" | sort -V | tail -n1)
