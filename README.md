@@ -64,6 +64,7 @@ To update, you can use the similar `utility-scripts/update-on-move.command` or `
 
 1. Login as the ableton user and install pip:
 ```bash
+ssh ableton@move.local
 cd /data/UserData
 wget -q -O get-pip.py https://bootstrap.pypa.io/get-pip.py
 
@@ -96,6 +97,7 @@ pip install --no-cache-dir scipy
 
 5. SSH to the Move and start the server
 ```bash
+ssh ableton@move.local
 cd /data/UserData/extending-move
 cp -r /opt/move/HttpRoot/fonts /data/UserData/extending-move/static/
 python3 move-webserver.py
