@@ -271,6 +271,141 @@ class MyServer(BaseHTTPRequestHandler):
 </div>
 ```
 
+## Form Submission Approach
+
+The Move Extended application uses a tab-based interface where each feature is loaded in a tab without requiring full page reloads. This approach keeps users on the current page when submitting forms, providing a smoother user experience. Understanding this approach is essential when creating new features.
+
+### Tab-Based Interface
+
+The application uses a tab system defined in `index.html` where:
+
+1. Each feature has a tab button and a content container
+2. When a tab is clicked, the `openTab` function is called
+3. Tab content is dynamically loaded via AJAX
+4. Form handlers are attached to enable AJAX form submission
+
+```html
+<!-- Tab buttons -->
+<button class="tablinks" onclick="openTab(event, 'YourFeature')">Your Feature</button>
+
+<!-- Tab content container -->
+<div id="YourFeature" class="tabcontent">
+    <!-- Content loaded dynamically -->
+</div>
+```
+
+### AJAX Form Submission
+
+Forms are submitted asynchronously to prevent page navigation:
+
+1. The `attachFormHandler` function intercepts form submissions
+2. The default form submission behavior is prevented with `event.preventDefault()`
+3. Form data is submitted via the fetch API
+4. The response updates the tab content without page navigation
+5. Event handlers are re-attached to maintain interactivity
+
+```javascript
+// Simplified version of the form submission process
+form.addEventListener('submit', async function(event) {
+    event.preventDefault();
+    const formData = new FormData(form);
+    
+    const response = await fetch(url, {
+        method: form.method,
+        body: formData
+    });
+    
+    const result = await response.text();
+    document.getElementById(tabName).innerHTML = result;
+    
+    // Re-attach event handlers
+    attachFormHandler(tabName);
+});
+```
+
+### Form Structure Requirements
+
+To ensure forms work with this system:
+
+1. **Form Structure**
+   - Use standard HTML forms with `method="POST"` and appropriate `action` attributes
+   - Include all form fields within the form element
+   - Use hidden inputs for action identifiers
+
+2. **Handler Responses**
+   - Return complete HTML for the tab content
+   - Include success/error messages
+   - Preserve form state where appropriate
+
+3. **Form Example**
+   ```html
+   <form method="POST" action="/your-feature">
+       <input type="hidden" name="action" value="your_action">
+       
+       <!-- Form fields -->
+       <input type="text" name="field_name">
+       <select name="option">
+           {{ options }}
+       </select>
+       
+       <!-- Submit button -->
+       <button type="submit">Process</button>
+   </form>
+   ```
+
+### Multiple Actions in One Form
+
+For forms that need multiple submit buttons with different actions:
+
+1. Use a hidden input for the action value
+2. Update this value via JavaScript when different buttons are clicked
+
+```html
+<form method="POST" action="/your-feature" id="feature-form">
+    <input type="hidden" name="action" id="action-input" value="default_action">
+    
+    <!-- Form fields -->
+    <input type="text" name="field_name">
+    
+    <!-- Buttons that set different actions -->
+    <button type="submit" onclick="document.getElementById('action-input').value='action1'">
+        Action 1
+    </button>
+    <button type="submit" onclick="document.getElementById('action-input').value='action2'">
+        Action 2
+    </button>
+</form>
+```
+
+### Handler Implementation
+
+Your handler should:
+
+1. Process the form data
+2. Return complete HTML for the tab content
+3. Include appropriate messages and updated form elements
+
+```python
+def handle_post(self, form):
+    action = form.getvalue('action')
+    
+    if action == 'action1':
+        # Process action1
+        result = process_action1(form)
+    elif action == 'action2':
+        # Process action2
+        result = process_action2(form)
+    else:
+        return self.format_error_response("Unknown action")
+    
+    # Return complete HTML with message and updated form elements
+    return {
+        "message": result['message'],
+        "message_type": "success",
+        "form_html": self.generate_form_html(result)
+    }
+```
+
 ## Best Practices
 
 1. **Code Organization**
