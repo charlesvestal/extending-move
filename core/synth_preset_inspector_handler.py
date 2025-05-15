@@ -232,7 +232,7 @@ def update_preset_macro_names(preset_path, macro_updates):
             preset_data = json.load(f)
         
         # Find the device parameters where macros are defined
-        def find_and_update_macros(data):
+        def find_and_update_macros(data, path=""):
             updated_count = 0
             
             # Check if this is a device with parameters
@@ -248,6 +248,13 @@ def update_preset_macro_names(preset_path, macro_updates):
                             
                             # If we have an update for this macro
                             if macro_index in macro_updates:
+                                # Skip top-level parameters (they should remain as simple values)
+                                if path == "":
+                                    # For top-level parameters, we don't modify the structure
+                                    # They should remain as simple values
+                                    continue
+                                
+                                # For device parameters (not top-level), we can add customName
                                 # If it's already an object with customName
                                 if isinstance(params[key], dict) and "value" in params[key]:
                                     params[key]["customName"] = macro_updates[macro_index]
@@ -263,12 +270,13 @@ def update_preset_macro_names(preset_path, macro_updates):
                 
                 # Recursively search in nested structures
                 for key, value in data.items():
+                    new_path = f"{path}.{key}" if path else key
                     if isinstance(value, dict):
-                        updated_count += find_and_update_macros(value)
+                        updated_count += find_and_update_macros(value, new_path)
                     elif isinstance(value, list):
-                        for item in value:
+                        for i, item in enumerate(value):
                             if isinstance(item, dict):
-                                updated_count += find_and_update_macros(item)
+                                updated_count += find_and_update_macros(item, f"{new_path}[{i}]")
             
             return updated_count
         
