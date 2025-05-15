@@ -173,7 +173,37 @@ class MyServer(BaseHTTPRequestHandler):
     - Template rendering
     - Response formatting
     - Error handling
+    - TLS handshake attempt filtering
     """
+    
+    def parse_request(self):
+        """
+        Override parse_request to catch and ignore TLS handshake attempts.
+        This prevents errors when clients try to connect using HTTPS.
+        """
+        try:
+            # Check if this is a TLS handshake attempt before parsing
+            if hasattr(self, 'rfile'):
+                # Peek at the first few bytes without consuming them
+                peek_data = self.rfile.peek(5)
+                if peek_data and len(peek_data) >= 3 and peek_data.startswith(b'\x16\x03'):
+                    # This is a TLS handshake attempt, silently ignore it
+                    print("Ignored TLS handshake attempt (detected in parse_request)")
+                    # Consume the data to prevent further errors
+                    self.rfile.read()
+                    return False
+            
+            # Call the original method
+            return super().parse_request()
+        except Exception as e:
+            # Check if this looks like a TLS handshake attempt
+            err_str = repr(str(e))
+            if "\\x16\\x03" in err_str:
+                # This is likely a TLS handshake attempt, silently ignore it
+                print(f"Ignored TLS handshake attempt (exception in parse_request): {err_str[:50]}...")
+                return False
+            # Re-raise other exceptions
+            raise
     route_handler = RouteHandler()
     
     # Initialize feature handlers
@@ -461,6 +491,36 @@ class MyServer(BaseHTTPRequestHandler):
         except Exception as e:
             self.send_error(500, str(e))
 
+class TLSIgnoringHTTPServer(HTTPServer):
+    """
+    Custom HTTP server that ignores TLS handshake attempts.
+    This prevents errors when clients try to connect using HTTPS.
+    """
+    
+    def handle_error(self, request, client_address):
+        """
+        Override handle_error to ignore TLS handshake attempts.
+        """
+        import traceback
+        import sys
+        
+        # Get the exception info
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        
+        # Check if this is a TLS handshake attempt
+        is_tls_handshake = False
+        
+        # Check exception message for TLS handshake signature
+        if exc_value and "\\x16\\x03" in repr(str(exc_value)):
+            is_tls_handshake = True
+        
+        # If it's not a TLS handshake attempt, log the error as usual
+        if not is_tls_handshake:
+            print('-'*40)
+            print('Exception occurred during processing of request from', client_address)
+            traceback.print_exc()
+            print('-'*40)
+
 if __name__ == "__main__":
     write_pid()
     atexit.register(remove_pid)
@@ -471,7 +531,7 @@ if __name__ == "__main__":
     serverPort = 909
     
     print("Starting webserver")
-    webServer = HTTPServer((hostName, serverPort), MyServer)
+    webServer = TLSIgnoringHTTPServer((hostName, serverPort), MyServer)
     print(f"Server started http://{hostName}:{serverPort}")
     try:
         webServer.serve_forever()
