@@ -7,7 +7,8 @@
         <select name="preset_select" id="preset_select">
             {{ options }}
         </select>
-        <button type="submit" onclick="document.getElementById('action-input').value='edit_preset'">Save Preset</button>
+        <button type="submit" onclick="document.getElementById('action-input').value='select_preset'">Select</button>
+        <button type="submit" onclick="document.getElementById('action-input').value='edit_preset'">Edit</button>
     </div>
     
     <div class="macro-display">
@@ -41,9 +42,10 @@
     
     .macro-item {
         margin-bottom: 20px;
-        padding: 10px;
+        padding: 15px;
         border: 1px solid #ddd;
         border-radius: 5px;
+        background-color: #f9f9f9;
     }
     
     .macro-header {
@@ -51,7 +53,9 @@
         color: #333;
         font-size: 1.17em;
         font-weight: bold;
-        margin-bottom: 10px;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
     }
     
     .macro-name-input {
@@ -60,9 +64,64 @@
         border-radius: 3px;
         font-size: 1em;
         width: 60%;
+        margin-left: 10px;
+    }
+    
+    .parameter-mapping {
+        margin: 15px 0;
+        padding: 10px;
+        background-color: #f0f0f0;
+        border-radius: 4px;
+    }
+    
+    .parameter-mapping select {
+        display: block;
+        width: 100%;
+        padding: 8px;
+        margin: 8px 0 15px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+    
+    .range-inputs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-top: 10px;
+    }
+    
+    .range-inputs label {
+        display: flex;
+        flex-direction: column;
+        font-size: 0.9em;
+        color: #555;
+    }
+    
+    .range-inputs input {
+        padding: 6px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        width: 120px;
+    }
+    
+    .current-mappings {
+        margin-top: 15px;
+        padding-top: 10px;
+        border-top: 1px dashed #ccc;
+    }
+    
+    .current-mappings h4 {
+        margin-top: 0;
+        font-size: 1em;
+        color: #555;
     }
     
     .parameters-list {
         margin-top: 10px;
+        padding-left: 20px;
+    }
+    
+    .parameters-list li {
+        margin-bottom: 5px;
     }
 </style>
