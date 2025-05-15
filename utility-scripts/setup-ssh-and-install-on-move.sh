@@ -187,8 +187,10 @@ fi
 echo "Connecting to ${REMOTE_HOST} as root to set up auto-start..."
 echo "Attempting to use key: ${MOVE_KEY_PATH}"
 
-# Exact script content from README.md
-AUTOSTART_SCRIPT_CONTENT='#!/bin/sh
+# Save init script content to a temporary file instead of using a variable
+TEMP_INIT_SCRIPT=$(mktemp)
+cat > "$TEMP_INIT_SCRIPT" << 'EOINITSCRIPT'
+#!/bin/sh
 ### BEGIN INIT INFO
 # Provides:          ableton-startup
 # Required-Start:    $local_fs $network
@@ -202,7 +204,7 @@ case "$1" in
   start)
     # adjust this to whatever directory your code lives in:
     cd /data/UserData/extending-move
-    # run as the \'ableton\' user (drops privileges)
+    # run as the 'ableton' user (drops privileges)
     su - ableton -s /bin/sh -c "cd /data/UserData/extending-move ; python3 move-webserver.py >> startup.log 2>&1 &"
     ;;
   stop)
@@ -228,56 +230,48 @@ case "$1" in
 esac
 
 exit 0
-'
+EOINITSCRIPT
 
 # Name of the init script as per README.md
 INIT_SCRIPT_NAME="ableton-startup"
 
-# Use -i to specify the key for root SSH connection
-ssh -i "${MOVE_KEY_PATH}" "${REMOTE_USER_ROOT}@${REMOTE_HOST}" bash <<EOSSH_ROOT
-set -e # Exit on error within the SSH heredoc
-echo "Creating /etc/init.d/${INIT_SCRIPT_NAME} on ${REMOTE_HOST}..."
-# Ensure the target directory exists (it should, but good practice)
-mkdir -p /etc/init.d
-# Use printf for better control over writing the script content
-# Note: AUTOSTART_SCRIPT_CONTENT already has escaped single quotes for the su command part.
-printf '%s\n' "${AUTOSTART_SCRIPT_CONTENT}" > "/etc/init.d/${INIT_SCRIPT_NAME}"
+# Upload the init script from the temp file to the remote host
+echo "Uploading init script to ${REMOTE_HOST}..."
+scp -i "${MOVE_KEY_PATH}" "$TEMP_INIT_SCRIPT" "${REMOTE_USER_ROOT}@${REMOTE_HOST}:/tmp/${INIT_SCRIPT_NAME}"
 
-echo "Making /etc/init.d/${INIT_SCRIPT_NAME} executable..."
+# Remove temporary file after upload
+rm "$TEMP_INIT_SCRIPT"
+
+# Execute setup commands on the remote host
+ssh -i "${MOVE_KEY_PATH}" "${REMOTE_USER_ROOT}@${REMOTE_HOST}" << EOF
+set -e
+echo "Moving init script to /etc/init.d/${INIT_SCRIPT_NAME}..."
+mv "/tmp/${INIT_SCRIPT_NAME}" "/etc/init.d/${INIT_SCRIPT_NAME}"
 chmod +x "/etc/init.d/${INIT_SCRIPT_NAME}"
 
 echo "Enabling ${INIT_SCRIPT_NAME} service..."
-# Check for update-rc.d, which is common on Debian-based systems (like Move likely is)
 if command -v update-rc.d > /dev/null; then
-    # Remove old versions if they exist by other names, then add new one
-    update-rc.d -f ableton-startup-extending-move remove >/dev/null 2>&1 || true # Old name used in previous version
-    update-rc.d -f extending-move-startup remove >/dev/null 2>&1 || true # Another old name
-    update-rc.d -f "${INIT_SCRIPT_NAME}" remove >/dev/null 2>&1 || true # Remove if exists by current name
+    update-rc.d -f ableton-startup-extending-move remove >/dev/null 2>&1 || true
+    update-rc.d -f extending-move-startup remove >/dev/null 2>&1 || true
+    update-rc.d -f "${INIT_SCRIPT_NAME}" remove >/dev/null 2>&1 || true
     update-rc.d "${INIT_SCRIPT_NAME}" defaults
     echo "Service ${INIT_SCRIPT_NAME} enabled using update-rc.d."
 else
-    echo "WARNING: 'update-rc.d' command not found on ${REMOTE_HOST}."
-    echo "Auto-start might not be enabled. You may need to manually create symlinks"
-    echo "in /etc/rcX.d/ (e.g., for runlevels 2, 3, 4, 5) pointing to"
-    echo "/etc/init.d/${INIT_SCRIPT_NAME}, like:"
-    echo "  ln -s /etc/init.d/${INIT_SCRIPT_NAME} /etc/rc2.d/S20${INIT_SCRIPT_NAME}"
-    echo "  (The S20 number might need adjustment based on dependencies)."
+    echo "WARNING: 'update-rc.d' command not found."
+    echo "Auto-start might not be enabled."
 fi
 
-echo "Auto-start setup commands executed on ${REMOTE_HOST}."
-echo "Attempting to start the service now..."
+echo "Starting the service..."
 if "/etc/init.d/${INIT_SCRIPT_NAME}" start; then
     echo "Service ${INIT_SCRIPT_NAME} started successfully."
-    echo "You can check its status with: ssh -i \"${MOVE_KEY_PATH}\" ${REMOTE_USER_ROOT}@${REMOTE_HOST} \"/etc/init.d/${INIT_SCRIPT_NAME} status\""
-    echo "Or as ableton user: ssh ${REMOTE_USER_ABLETON}@${REMOTE_HOST} \"pgrep -u ableton -f move-webserver.py && echo Running || echo Not running\""
 else
-    echo "Failed to start the service ${INIT_SCRIPT_NAME}. Check logs on the Move: /data/UserData/extending-move/startup.log"
+    echo "Failed to start the service. Check logs: /data/UserData/extending-move/startup.log"
 fi
-EOSSH_ROOT
+EOF
 
 echo ""
 echo "--------------------------------------------------------------------------"
-echo "Auto-start Setup Attempt Complete."
+echo "Auto-start Setup Complete"
 echo "--------------------------------------------------------------------------"
 echo "If all went well, the 'extending-move' webserver should now be running and"
 echo "configured to start automatically when your Ableton Move boots up."
