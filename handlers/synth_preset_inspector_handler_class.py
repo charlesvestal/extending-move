@@ -6,7 +6,8 @@ from core.synth_preset_inspector_handler import (
     extract_macro_information, 
     update_preset_macro_names,
     extract_available_parameters,
-    update_preset_parameter_mappings
+    update_preset_parameter_mappings,
+    delete_parameter_mapping
 )
 
 class SynthPresetInspectorHandler(BaseHandler):
@@ -25,7 +26,7 @@ class SynthPresetInspectorHandler(BaseHandler):
         self.form = form
         
         action = form.getvalue('action')
-        if action == 'select_preset' or action == 'edit_preset':
+        if action == 'select_preset' or action == 'edit_preset' or action == 'delete_mapping':
             preset_path = form.getvalue('preset_select')
             if not preset_path:
                 return self.format_error_response("No preset selected")
@@ -84,6 +85,21 @@ class SynthPresetInspectorHandler(BaseHandler):
                     if not update_result['success']:
                         return self.format_error_response(update_result['message'])
             
+            # If this is a delete mapping action, delete the mapping
+            if action == 'delete_mapping':
+                param_path = form.getvalue('param_path')
+                param_name = form.getvalue('param_name')
+                
+                if not param_path:
+                    return self.format_error_response("No parameter path provided")
+                
+                # Delete the mapping
+                delete_result = delete_parameter_mapping(preset_path, param_path)
+                if not delete_result['success']:
+                    return self.format_error_response(delete_result['message'])
+                
+                message = f"Deleted mapping for parameter {param_name}"
+            
             # Extract macro information from the selected preset (potentially updated)
             macro_result = extract_macro_information(preset_path)
             if not macro_result['success']:
@@ -95,9 +111,9 @@ class SynthPresetInspectorHandler(BaseHandler):
             # Different message based on action
             if action == 'select_preset':
                 message = f"Selected preset: {preset_path.split('/')[-1]}"
-            else:  # edit_preset
+            elif action == 'edit_preset':
                 message = f"Saved preset: {preset_path.split('/')[-1]}"
-
+            # For delete_mapping, we already set the message above
             
             return {
                 "message": message,
@@ -206,7 +222,16 @@ class SynthPresetInspectorHandler(BaseHandler):
                     param_info = f'{param["name"]}'
                     if "rangeMin" in param and "rangeMax" in param:
                         param_info += f' (Range: {param["rangeMin"]} - {param["rangeMax"]})'
-                    html += f'<li>{param_info}</li>'
+                    
+                    # Add delete button with onclick handler to set action and parameter info
+                    html += f'<li class="parameter-item">'
+                    html += f'<span class="parameter-info">{param_info}</span>'
+                    html += f'<button type="submit" class="delete-mapping-btn" '
+                    html += f'onclick="document.getElementById(\'action-input\').value=\'delete_mapping\'; '
+                    html += f'document.getElementById(\'param-path-input\').value=\'{param["path"]}\'; '
+                    html += f'document.getElementById(\'param-name-input\').value=\'{param["name"]}\';">'
+                    html += f'Delete</button>'
+                    html += f'</li>'
                 html += '</ul>'
             else:
                 html += '<p>No parameters mapped to this macro.</p>'

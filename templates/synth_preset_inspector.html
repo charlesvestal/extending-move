@@ -3,12 +3,14 @@
 
 <form method="POST" action="/synth-preset-inspector" id="preset-form">
     <input type="hidden" name="action" id="action-input" value="select_preset">
+    <input type="hidden" name="param_path" id="param-path-input" value="">
+    <input type="hidden" name="param_name" id="param-name-input" value="">
     <div class="preset-selection">
         <select name="preset_select" id="preset_select">
             {{ options }}
         </select>
-        <button type="submit" onclick="document.getElementById('action-input').value='select_preset'">Select</button>
-        <button type="submit" onclick="document.getElementById('action-input').value='edit_preset'">Edit</button>
+        <!-- <button type="submit" onclick="document.getElementById('action-input').value='select_preset'">Select</button> -->
+        <button type="submit" onclick="document.getElementById('action-input').value='edit_preset'">Save</button>
     </div>
     
     <div class="macro-display">
@@ -123,5 +125,27 @@
     
     .parameters-list li {
         margin-bottom: 5px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .parameter-info {
+        flex-grow: 1;
+    }
+    
+    .delete-mapping-btn {
+        background-color: #f44336;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        padding: 3px 8px;
+        font-size: 0.8em;
+        cursor: pointer;
+        margin-left: 10px;
+    }
+    
+    .delete-mapping-btn:hover {
+        background-color: #d32f2f;
     }
 </style>
