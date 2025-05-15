@@ -529,6 +529,95 @@ def update_preset_parameter_mappings(preset_path, parameter_updates):
             'message': f"Error updating parameter mappings: {e}"
         }
 
+def delete_parameter_mapping(preset_path, param_path):
+    """
+    Delete a parameter mapping from a preset file.
+    
+    Args:
+        preset_path: Path to the .ablpreset file
+        param_path: Full path to the parameter to delete mapping from
+        
+    Returns:
+        dict: Result with keys:
+            - success: bool indicating success/failure
+            - message: Status or error message
+    """
+    try:
+        # Load the preset file
+        with open(preset_path, 'r') as f:
+            preset_data = json.load(f)
+        
+        # Helper function to get the object at a specific path
+        def get_object_at_path(data, path):
+            """Get the object at the specified path."""
+            if not path:
+                return data
+            
+            parts = path.split(".")
+            current = data
+            
+            for part in parts:
+                # Handle array indices
+                if "[" in part and part.endswith("]"):
+                    name, index_str = part.split("[", 1)
+                    index = int(index_str[:-1])  # Remove the closing bracket
+                    
+                    if name:
+                        if name not in current:
+                            return None
+                        current = current[name]
+                    
+                    if not isinstance(current, list) or index >= len(current):
+                        return None
+                    current = current[index]
+                else:
+                    if part not in current:
+                        return None
+                    current = current[part]
+            
+            return current
+        
+        # Get the parent path and key
+        parent_path = param_path.rsplit(".", 1)[0]
+        key = param_path.split(".")[-1]
+        
+        # Get the parent object
+        parent = get_object_at_path(preset_data, parent_path)
+        
+        if parent and key in parent:
+            # Check if the parameter has a macroMapping
+            if isinstance(parent[key], dict) and "macroMapping" in parent[key]:
+                # Store the original value
+                original_value = parent[key].get("value")
+                
+                # Replace the object with just the value
+                parent[key] = original_value
+                
+                # Write the updated preset back to the file
+                with open(preset_path, 'w') as f:
+                    json.dump(preset_data, f, indent=2)
+                
+                return {
+                    'success': True,
+                    'message': f"Deleted mapping for parameter {key}"
+                }
+            else:
+                return {
+                    'success': False,
+                    'message': f"Parameter {key} does not have a macro mapping"
+                }
+        else:
+            return {
+                'success': False,
+                'message': f"Parameter not found at path: {param_path}"
+            }
+        
+    except Exception as e:
+        return {
+            'success': False,
+            'message': f"Error deleting parameter mapping: {e}"
+        }
+
 def scan_for_drift_presets():
     """
     Scan the Move Track Presets directory for .ablpreset files containing drift devices.
