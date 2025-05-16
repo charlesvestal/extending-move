@@ -31,8 +31,8 @@ def extract_available_parameters(preset_path):
         # First, find all drift and wavetable devices
         def find_synth_devices(data, path=""):
             if isinstance(data, dict):
-                # Check if this is a drift or wavetable device
-                if data.get('kind') in ['drift', 'wavetable']:
+                # Check if this is a drift device
+                if data.get('kind') == 'drift':  # Only look for drift devices
                     synth_device_paths.add(path)
                     print(f"Found {data.get('kind')} device at path: {path}")
                 
@@ -669,8 +669,8 @@ def scan_for_synth_presets():
                         with open(filepath, 'r') as f:
                             preset_data = json.load(f)
                         
-                        # Check if preset contains a drift or wavetable device
-                        device_type = has_device_type(preset_data, ['drift', 'wavetable'])
+                        # Check if preset contains a drift device
+                        device_type = has_device_type(preset_data, ['drift'])  # Only look for drift devices
                         if device_type:
                             preset_name = os.path.splitext(filename)[0]
                             synth_presets.append({

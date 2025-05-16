@@ -24,7 +24,7 @@ Tools for extending the Ableton Move. This project provides a companion webserve
   - Create reversed versions directly in the preset
 
 - **Synth Macros**
-  - View and edit macro mappings for Drift and Wavetable presets
+  - View and edit macro mappings for Drift presets
   - Customize macro names for better organization
   - Add and delete parameter mappings
   - Assign multiple parameters to a single macro control

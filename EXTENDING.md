@@ -333,7 +333,7 @@ class MyServer(BaseHTTPRequestHandler):
    - Provide loading indicators
 
 7. **Working with Presets**
-   - Understand the structure of different preset types (Drift, Wavetable, drumRack, etc.)
+   - Understand the structure of different preset types (Drift, drumRack, etc.)
    - Handle macro mappings carefully
    - Preserve original parameter values when removing mappings
    - Test with various preset types
