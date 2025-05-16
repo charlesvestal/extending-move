@@ -14,7 +14,7 @@ class SynthPresetInspectorHandler(BaseHandler):
     def handle_get(self):
         """Initialize the synth macros with synth presets dropdown"""
         return {
-            "message": "Select a Drift or Wavetable preset from the dropdown",
+            "message": "Select a Drift preset from the dropdown",
             "message_type": "info",
             "options": self.get_preset_options(),
             "macros_html": ""  # Initialize with empty string to avoid showing placeholder
