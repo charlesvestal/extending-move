@@ -204,19 +204,16 @@ class SynthPresetInspectorHandler(BaseHandler):
             html += f'Save Name</button>'
             html += '</div>'
             
-            # Get the first mapped parameter (if any) to set as default
+            # Default values are always blank for new mappings
             default_param = None
             default_range_min = ""
             default_range_max = ""
-            if macro["parameters"]:
-                default_param = macro["parameters"][0]["name"]
-                if "rangeMin" in macro["parameters"][0]:
-                    default_range_min = macro["parameters"][0]["rangeMin"]
-                if "rangeMax" in macro["parameters"][0]:
-                    default_range_max = macro["parameters"][0]["rangeMax"]
             
             # Add parameter selection dropdown and range inputs
             html += '<div class="parameter-mapping">'
+            html += '<div class="parameter-controls">'
+            
+            # Parameter dropdown
             html += f'<label for="macro_{macro["index"]}_parameter">Map Parameter:</label>'
             html += f'<select name="macro_{macro["index"]}_parameter" id="macro_{macro["index"]}_parameter">'
             html += '<option value="">--Select Parameter--</option>'
@@ -228,11 +225,13 @@ class SynthPresetInspectorHandler(BaseHandler):
             
             html += '</select>'
             
-            # Add range inputs
-            html += '<div class="range-inputs">'
-            html += f'<label>Range Min: <input type="number" name="macro_{macro["index"]}_range_min" value="{default_range_min}" step="any"></label>'
-            html += f'<label>Range Max: <input type="number" name="macro_{macro["index"]}_range_max" value="{default_range_max}" step="any"></label>'
+            # Range inputs inline
+            html += '<div class="range-inputs-inline">'
+            html += f'<label>Min: <input type="number" name="macro_{macro["index"]}_range_min" value="{default_range_min}" step="any"></label>'
+            html += f'<label>Max: <input type="number" name="macro_{macro["index"]}_range_max" value="{default_range_max}" step="any"></label>'
             html += '</div>'
+            
+            html += '</div>'  # Close parameter-controls
             
             # Add the "Add" button
             html += f'<button type="submit" class="add-mapping-btn" '

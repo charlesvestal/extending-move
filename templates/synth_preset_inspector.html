@@ -84,25 +84,31 @@
         border-radius: 4px;
     }
     
-    .range-inputs {
+    .parameter-controls {
         display: flex;
-        flex-wrap: wrap;
+        align-items: center;
         gap: 15px;
-        margin-top: 10px;
+        margin-bottom: 10px;
     }
     
-    .range-inputs label {
+    .range-inputs-inline {
         display: flex;
-        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .range-inputs-inline label {
+        display: flex;
+        align-items: center;
         font-size: 0.9em;
         color: #555;
     }
     
-    .range-inputs input {
+    .range-inputs-inline input {
         padding: 6px;
         border: 1px solid #ccc;
         border-radius: 3px;
-        width: 120px;
+        width: 80px;
+        margin-left: 5px;
     }
     
     .current-mappings {
@@ -164,13 +170,6 @@
     }
     
     .save-name-btn {
-        background-color: #2196F3;
-        color: white;
-        border: none;
-        border-radius: 3px;
-        padding: 5px 10px;
-        font-size: 0.9em;
-        cursor: pointer;
         margin-left: 10px;
     }
     
