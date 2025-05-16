@@ -44,7 +44,7 @@ Tools for extending the Ableton Move. This project provides a companion webserve
 ## Installation
 
 ### Prerequisites
-1. SSH access to your Move (see [Wiki: Accessing Move](https://github.com/charlesvestal/extending-move/wiki/00--Accessing-Move))
+1. SSH access to your Move (see [Wiki: Accessing Move](https://github.com/charlesvestal/extending-move/wiki/00--Accessing-Move)). This will be handled by `setup-ssh-and-install-on-move.command` under "Install Everything"
 2. Python environment on your Move (should already be present as `python3`)
 
 Note:
@@ -55,8 +55,22 @@ These tools are third-party and require SSH access. That means:
  * If issues do arise, the documented restore procedure is the fallback – you use this at their own risk. Information on this procedure can be found in Center Code under [Documentation](https://ableton.centercode.com/project/article/item.html?cap=ecd3942a1fe3405eb27a806608401a0b&arttypeid={e70be312-f44a-418b-bb74-ed1030e3a49a}&artid={C0A2D9E2-D52F-4DEB-8BEE-356B65C8942E}).
 
 ### Quick Install (macOS)
+
+### Install everything
+
+There is a convenience script to set up an SSH key, install the tools, and set the tools' webserver to autostart.
+
+Simply double-click `utility-scripts/setup-ssh-and-install-on-move.command`
+Everything that it does can be found in `utility-scritps/setup-ssh-and-install-on-move.sh`
+
+Alternatively, you can install just the tools, or see the "Manual Installation" section below to do it all yourself.
+
+#### Install the tools ONLY
+
 Simply double-click `utility-scripts/install-on-move.command`
 Everything that it does can be found in `utility-scritps/install-on-move.sh`
+
+#### Updating
 
 To update, you can use the similar `utility-scripts/update-on-move.command` or `utility-scripts/update-on-move.sh` to copy over the files and restart the webserver.
 
