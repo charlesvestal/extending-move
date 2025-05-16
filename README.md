@@ -23,6 +23,13 @@ Tools for extending the Ableton Move. This project provides a companion webserve
   - Download individual samples
   - Create reversed versions directly in the preset
 
+- **Synth Macros**
+  - View and edit macro mappings for Drift and Wavetable presets
+  - Customize macro names for better organization
+  - Add and delete parameter mappings
+  - Assign multiple parameters to a single macro control
+  - Set custom range values for more precise control
+
 - **Chord Kit Generation**
   - Create chord variations from any WAV file
   - Includes common chord voicings (Cm9, Fm7, AbMaj7, etc.)
