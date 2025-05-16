@@ -8,6 +8,7 @@ REMOTE_USER_ROOT="root" # For autostart
 REMOTE_HOST="move.local"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
 
+clear
 echo "Starting SSH key setup and installation for Ableton Move (macOS)..."
 echo "This script will guide you through:"
 echo "1. Generating an SSH key for your Move."
@@ -15,6 +16,17 @@ echo "2. Configuring your local SSH to use this key for move.local."
 echo "3. Adding the public key to your Move."
 echo "4. Running the main 'extending-move' installation."
 echo "5. Setting up auto-start for the 'extending-move' server on your Move."
+echo ""
+echo "YOU ARE PROCEEDING AT YOUR OWN RISK. NEITHER THE AUTHORS OF THIS SCRIPT"
+echo "NOR ABLETON ARE RESPONSIBLE FOR ANY DAMAGE TO YOUR MOVE OR DATA."
+echo ""
+echo "Recovery information can be found on Center Code, linked from the README."
+echo ""
+read -p "Ready to proceed? (y/N): " user_ready
+if [[ ! "$user_ready" =~ ^[Yy]$ ]]; then
+    echo "Installation aborted by user."
+    exit 1
+fi
 echo ""
 
 # --- 1. Generate SSH Key ---
@@ -172,6 +184,9 @@ echo "This step will configure the 'extending-move' webserver to start automatic
 echo "when your Ableton Move boots up."
 echo ""
 echo "The auto-start configuration may not persist through Move firmware upgrades."
+echo ""
+echo "NOTE: This script will perform commands as the ROOT user on your Move."
+echo ""
 echo "--------------------------------------------------------------------------"
 echo ""
 
