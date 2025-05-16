@@ -26,13 +26,31 @@ class SynthPresetInspectorHandler(BaseHandler):
         self.form = form
         
         action = form.getvalue('action')
-        if action == 'select_preset' or action == 'edit_preset' or action == 'delete_mapping':
+        if action in ['select_preset', 'save_names', 'save_name', 'delete_mapping', 'add_mapping']:
             preset_path = form.getvalue('preset_select')
             if not preset_path:
                 return self.format_error_response("No preset selected")
             
-            # If this is an edit action, update the preset with the new macro names and parameter mappings
-            if action == 'edit_preset':
+            # If this is a save name action for a single macro, update just that macro name
+            if action == 'save_name':
+                macro_index = int(form.getvalue('macro_index'))
+                new_name = form.getvalue(f'macro_{macro_index}_name')
+                
+                if new_name:  # Only update if a name was provided
+                    # Create a single macro update
+                    macro_updates = {macro_index: new_name}
+                    
+                    # Update the preset file with the new macro name
+                    update_result = update_preset_macro_names(preset_path, macro_updates)
+                    if not update_result['success']:
+                        return self.format_error_response(update_result['message'])
+                    
+                    message = f"Saved name for Macro {macro_index}: {new_name}"
+                else:
+                    return self.format_error_response("No name provided for the macro")
+            
+            # If this is a save names action for all macros, update all macro names
+            elif action == 'save_names':
                 # Extract macro name updates from the form
                 macro_updates = {}
                 for field_name in form.keys():
@@ -50,43 +68,46 @@ class SynthPresetInspectorHandler(BaseHandler):
                     if not update_result['success']:
                         return self.format_error_response(update_result['message'])
                 
-                # Extract parameter mapping updates from the form
-                parameter_updates = {}
-                for field_name in form.keys():
-                    # Match fields like "macro_1_parameter", "macro_2_parameter", etc.
-                    match = re.match(r'macro_(\d+)_parameter', field_name)
-                    if match:
-                        macro_index = int(match.group(1))
-                        parameter_name = form.getvalue(field_name)
-                        
-                        # Only process if a parameter was selected
-                        if parameter_name:
-                            # Get range values if provided
-                            range_min = form.getvalue(f'macro_{macro_index}_range_min')
-                            range_max = form.getvalue(f'macro_{macro_index}_range_max')
-                            
-                            # Get parameter path if available
-                            parameter_path = None
-                            if hasattr(self, 'parameter_paths') and parameter_name in self.parameter_paths:
-                                parameter_path = self.parameter_paths[parameter_name]
-                                print(f"Found path for parameter {parameter_name}: {parameter_path}")
-                            
-                            # Add to parameter updates
-                            parameter_updates[macro_index] = {
-                                'parameter': parameter_name,
-                                'parameter_path': parameter_path,
-                                'rangeMin': range_min,
-                                'rangeMax': range_max
-                            }
+                message = f"Saved macro names for preset: {preset_path.split('/')[-1]}"
+            
+            # If this is an add mapping action, add a single parameter mapping
+            elif action == 'add_mapping':
+                macro_index = int(form.getvalue('macro_index'))
+                parameter_name = form.getvalue(f'macro_{macro_index}_parameter')
                 
-                # Update the preset file with the new parameter mappings
-                if parameter_updates:
+                # Only process if a parameter was selected
+                if parameter_name:
+                    # Get range values if provided
+                    range_min = form.getvalue(f'macro_{macro_index}_range_min')
+                    range_max = form.getvalue(f'macro_{macro_index}_range_max')
+                    
+                    # Get parameter path if available
+                    parameter_path = None
+                    if hasattr(self, 'parameter_paths') and parameter_name in self.parameter_paths:
+                        parameter_path = self.parameter_paths[parameter_name]
+                        print(f"Found path for parameter {parameter_name}: {parameter_path}")
+                    
+                    # Create parameter update for just this one mapping
+                    parameter_updates = {
+                        macro_index: {
+                            'parameter': parameter_name,
+                            'parameter_path': parameter_path,
+                            'rangeMin': range_min,
+                            'rangeMax': range_max
+                        }
+                    }
+                    
+                    # Update the preset file with just this one mapping
                     update_result = update_preset_parameter_mappings(preset_path, parameter_updates)
                     if not update_result['success']:
                         return self.format_error_response(update_result['message'])
+                    
+                    message = f"Added mapping for parameter {parameter_name} to Macro {macro_index}"
+                else:
+                    return self.format_error_response("No parameter selected for mapping")
             
             # If this is a delete mapping action, delete the mapping
-            if action == 'delete_mapping':
+            elif action == 'delete_mapping':
                 param_path = form.getvalue('param_path')
                 param_name = form.getvalue('param_name')
                 
@@ -100,6 +121,10 @@ class SynthPresetInspectorHandler(BaseHandler):
                 
                 message = f"Deleted mapping for parameter {param_name}"
             
+            # Set message for select_preset action
+            elif action == 'select_preset':
+                message = f"Selected preset: {preset_path.split('/')[-1]}"
+            
             # Extract macro information from the selected preset (potentially updated)
             macro_result = extract_macro_information(preset_path)
             if not macro_result['success']:
@@ -107,13 +132,6 @@ class SynthPresetInspectorHandler(BaseHandler):
             
             # Generate HTML for displaying macros
             macros_html = self.generate_macros_html(macro_result['macros'])
-            
-            # Different message based on action
-            if action == 'select_preset':
-                message = f"Selected preset: {preset_path.split('/')[-1]}"
-            elif action == 'edit_preset':
-                message = f"Saved preset: {preset_path.split('/')[-1]}"
-            # For delete_mapping, we already set the message above
             
             return {
                 "message": message,
@@ -179,6 +197,11 @@ class SynthPresetInspectorHandler(BaseHandler):
             html += f'<div class="macro-header">'
             html += f'<span>Macro {macro["index"]}:</span> '
             html += f'<input type="text" name="macro_{macro["index"]}_name" value="{macro["name"]}" class="macro-name-input">'
+            # Add the "Save Name" button
+            html += f'<button type="submit" class="save-name-btn" '
+            html += f'onclick="document.getElementById(\'action-input\').value=\'save_name\'; '
+            html += f'document.getElementById(\'macro-index-input\').value=\'{macro["index"]}\';">'
+            html += f'Save Name</button>'
             html += '</div>'
             
             # Get the first mapped parameter (if any) to set as default
@@ -210,6 +233,13 @@ class SynthPresetInspectorHandler(BaseHandler):
             html += f'<label>Range Min: <input type="number" name="macro_{macro["index"]}_range_min" value="{default_range_min}" step="any"></label>'
             html += f'<label>Range Max: <input type="number" name="macro_{macro["index"]}_range_max" value="{default_range_max}" step="any"></label>'
             html += '</div>'
+            
+            # Add the "Add" button
+            html += f'<button type="submit" class="add-mapping-btn" '
+            html += f'onclick="document.getElementById(\'action-input\').value=\'add_mapping\'; '
+            html += f'document.getElementById(\'macro-index-input\').value=\'{macro["index"]}\';">'
+            html += f'Add</button>'
+            
             html += '</div>'
             
             # Display current mappings
