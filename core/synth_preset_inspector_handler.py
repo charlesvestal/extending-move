@@ -693,21 +693,3 @@ def scan_for_synth_presets():
             'message': f"Error scanning presets: {e}",
             'presets': []
         }
-
-# Keep the old function for backward compatibility
-def scan_for_drift_presets():
-    """
-    Legacy function that calls scan_for_synth_presets and filters for drift presets only.
-    """
-    result = scan_for_synth_presets()
-    if not result['success']:
-        return result
-    
-    # Filter for drift presets only
-    drift_presets = [preset for preset in result['presets'] if preset.get('type') == 'drift']
-    
-    return {
-        'success': True,
-        'message': f"Found {len(drift_presets)} drift presets",
-        'presets': drift_presets
-    }
