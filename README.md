@@ -56,7 +56,7 @@ These tools are third-party and require SSH access. That means:
 
 ### Quick Install (macOS)
 
-### Install everything
+#### Install everything
 
 There is a convenience script to set up an SSH key, install the tools, and set the tools' webserver to autostart.
 
