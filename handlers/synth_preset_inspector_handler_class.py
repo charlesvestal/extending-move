@@ -12,7 +12,7 @@ from core.synth_preset_inspector_handler import (
 
 class SynthPresetInspectorHandler(BaseHandler):
     def handle_get(self):
-        """Initialize the synth preset inspector with synth presets dropdown"""
+        """Initialize the synth macros with synth presets dropdown"""
         return {
             "message": "Select a Drift or Wavetable preset from the dropdown",
             "message_type": "info",
@@ -278,7 +278,7 @@ class SynthPresetInspectorHandler(BaseHandler):
             if not result['success']:
                 return ''
             
-            options_html = ['<option value="">--Select a Synth Preset--</option>']
+            options_html = ['<option value="">--Select a Preset--</option>']
             for preset in result['presets']:
                 # Include the device type in the display name
                 device_type = preset.get('type', '').capitalize()
