@@ -17,23 +17,34 @@ extending-move/
 │   ├── refresh_handler.py       # Library refresh via D-Bus
 │   ├── reverse_handler.py       # WAV file reversal
 │   ├── restore_handler.py       # Move Set restoration
-│   └── drum_rack_inspector.py   # Preset inspection and modification
+│   ├── drum_rack_inspector.py   # Preset inspection and modification
+│   └── synth_preset_inspector_handler.py  # Synth preset macro management
 ├── handlers/              # Web request handlers
-│   ├── base_handler.py           # Base handler with shared functionality
-│   ├── chord_handler_class.py    # Chord generation interface
-│   ├── slice_handler_class.py    # Slice kit creation interface
-│   ├── refresh_handler_class.py  # Library refresh interface
-│   ├── reverse_handler_class.py  # WAV reversal interface
-│   ├── restore_handler_class.py  # Move Set restoration interface
-│   └── drum_rack_inspector_handler_class.py  # Preset inspection interface
+│   ├── base_handler.py                    # Base handler with shared functionality
+│   ├── chord_handler_class.py             # Chord generation interface
+│   ├── slice_handler_class.py             # Slice kit creation interface
+│   ├── refresh_handler_class.py           # Library refresh interface
+│   ├── reverse_handler_class.py           # WAV reversal interface
+│   ├── restore_handler_class.py           # Move Set restoration interface
+│   ├── drum_rack_inspector_handler_class.py  # Preset inspection interface
+│   ├── synth_preset_inspector_handler_class.py  # Synth macro management interface
+│   └── file_placer_handler_class.py       # File upload and placement
 ├── templates/             # HTML templates and UI components
-│   ├── index.html              # Main navigation with tab system
-│   ├── chord.html             # Chord generation interface
-│   ├── slice.html             # Waveform slicing interface
-│   ├── reverse.html           # File selection with AJAX
-│   ├── refresh.html           # Simple action template
-│   ├── restore.html           # File upload with options
-│   └── drum_rack_inspector.html  # Grid layout with actions
+│   ├── index.html                # Main navigation with tab system
+│   ├── chord.html               # Chord generation interface
+│   ├── slice.html               # Waveform slicing interface
+│   ├── reverse.html             # File selection with AJAX
+│   ├── refresh.html             # Simple action template
+│   ├── restore.html             # File upload with options
+│   ├── drum_rack_inspector.html # Grid layout with actions
+│   └── synth_preset_inspector.html # Synth macro management interface
+├── examples/              # Example files for testing and development
+│   ├── Track Presets/          # Sample presets organized by instrument type
+│   │   ├── Drift/              # Drift instrument presets
+│   │   ├── Wavetable/          # Wavetable instrument presets
+│   │   ├── drumRack/           # Drum rack presets
+│   │   └── melodicSampler/     # Melodic sampler presets
+│   └── test scripts            # Various test scripts
 └── utility-scripts/       # Installation and management scripts
     ├── install-on-move.sh     # Initial setup script
     ├── update-on-move.sh      # Update deployment script
@@ -207,12 +218,12 @@ Move uses specific directories for different file types:
 ```
 
 ### Preset Format
-Move presets follow the schema at http://tech.ableton.com/schema/song/1.4.4/devicePreset.json:
+Move presets follow the schema at http://tech.ableton.com/schema/song/1.5.1/devicePreset.json:
 
 1. Basic Structure:
 ```json
 {
-  "$schema": "http://tech.ableton.com/schema/song/1.4.4/devicePreset.json",
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
   "kind": "instrumentRack",
   "name": "preset_name",
   "chains": [...]
@@ -222,6 +233,18 @@ Move presets follow the schema at http://tech.ableton.com/schema/song/1.4.4/devi
 2. Sample References:
 ```json
 "sampleUri": "ableton:/user-library/Samples/Preset%20Samples/sample.wav"
+```
+
+3. Macro Mappings:
+```json
+"Parameter_Name": {
+  "value": 0.5,
+  "macroMapping": {
+    "macroIndex": 0,
+    "rangeMin": 0.0,
+    "rangeMax": 1.0
+  }
+}
 ```
 
 ### Library Management
@@ -444,6 +467,18 @@ def handle_post(self, form):
    - Handle async operations
    - Provide loading indicators
 
+7. **Working with Presets**
+   - Understand the structure of different preset types (Drift, drumRack, etc.)
+   - Handle macro mappings carefully
+   - Preserve original parameter values when removing mappings
+   - Test with various preset types
+
+8. **Using the Examples Directory**
+   - Use example presets for testing
+   - Organize new examples by instrument type
+   - Include representative samples of different parameter configurations
+   - Document any special cases or edge conditions
+
 ## Testing
 
 1. **Core Functionality**
@@ -463,6 +498,12 @@ def handle_post(self, form):
    - Verify library updates
    - Check file permissions
    - Test on actual device
+
+4. **Preset Compatibility**
+   - Test with different preset types
+   - Verify parameter mappings work correctly
+   - Check for compatibility issues between versions
+   - Test with both simple and complex presets
 
 ## Conclusion
 
