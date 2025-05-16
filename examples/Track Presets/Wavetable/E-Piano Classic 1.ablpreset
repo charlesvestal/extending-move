@@ -30,7 +30,7 @@
             "Enabled": true,
             "Macro0": {
               "value": 59.0,
-              "customName": "Filter Cutoff"
+              "customName": "Filter Cutoff2"
             },
             "Macro1": {
               "value": 41.0,
@@ -78,14 +78,7 @@
                     "Voice_Filter1_CircuitBpNoMo": "Clean",
                     "Voice_Filter1_CircuitLpHp": "Clean",
                     "Voice_Filter1_Drive": 0.0,
-                    "Voice_Filter1_Frequency": {
-                      "value": 19999.99609375,
-                      "macroMapping": {
-                        "macroIndex": 0,
-                        "rangeMin": 20.0,
-                        "rangeMax": 20479.998046875
-                      }
-                    },
+                    "Voice_Filter1_Frequency": 19999.99609375,
                     "Voice_Filter1_Morph": 0.0,
                     "Voice_Filter1_On": true,
                     "Voice_Filter1_Resonance": {
@@ -101,7 +94,14 @@
                     "Voice_Filter2_CircuitBpNoMo": "Clean",
                     "Voice_Filter2_CircuitLpHp": "Clean",
                     "Voice_Filter2_Drive": 0.0,
-                    "Voice_Filter2_Frequency": 5778.705078125,
+                    "Voice_Filter2_Frequency": {
+                      "value": 5778.705078125,
+                      "macroMapping": {
+                        "macroIndex": 0,
+                        "rangeMin": 20.0,
+                        "rangeMax": 20479.0
+                      }
+                    },
                     "Voice_Filter2_Morph": 0.0,
                     "Voice_Filter2_On": true,
                     "Voice_Filter2_Resonance": 0.5357142686843872,

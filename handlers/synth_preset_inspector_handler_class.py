@@ -2,7 +2,7 @@ import cgi
 import re
 from handlers.base_handler import BaseHandler
 from core.synth_preset_inspector_handler import (
-    scan_for_drift_presets, 
+    scan_for_synth_presets, 
     extract_macro_information, 
     update_preset_macro_names,
     extract_available_parameters,
@@ -12,9 +12,9 @@ from core.synth_preset_inspector_handler import (
 
 class SynthPresetInspectorHandler(BaseHandler):
     def handle_get(self):
-        """Initialize the synth preset inspector with Drift presets dropdown"""
+        """Initialize the synth preset inspector with synth presets dropdown"""
         return {
-            "message": "Select a Drift preset from the dropdown",
+            "message": "Select a Drift or Wavetable preset from the dropdown",
             "message_type": "info",
             "options": self.get_preset_options(),
             "macros_html": ""  # Initialize with empty string to avoid showing placeholder
@@ -272,15 +272,17 @@ class SynthPresetInspectorHandler(BaseHandler):
         return html
     
     def get_preset_options(self):
-        """Get Drift preset options for the template dropdown"""
+        """Get synth preset options for the template dropdown"""
         try:
-            result = scan_for_drift_presets()
+            result = scan_for_synth_presets()
             if not result['success']:
                 return ''
             
-            options_html = ['<option value="">--Select a Drift Preset--</option>']
+            options_html = ['<option value="">--Select a Synth Preset--</option>']
             for preset in result['presets']:
-                options_html.append(f'<option value="{preset["path"]}">{preset["name"]}</option>')
+                # Include the device type in the display name
+                device_type = preset.get('type', '').capitalize()
+                options_html.append(f'<option value="{preset["path"]}">{preset["name"]} ({device_type})</option>')
             return '\n'.join(options_html)
         except Exception as e:
             print(f"Error getting preset options: {e}")

@@ -4,7 +4,7 @@ import json
 
 def extract_available_parameters(preset_path):
     """
-    Extract available parameters from drift devices in a preset file.
+    Extract available parameters from drift or wavetable devices in a preset file.
     
     Args:
         preset_path: Path to the .ablpreset file
@@ -25,47 +25,47 @@ def extract_available_parameters(preset_path):
         # Dictionary to store parameter paths
         parameter_paths = {}
         
-        # Dictionary to store drift device paths
-        drift_device_paths = set()
+        # Dictionary to store synth device paths
+        synth_device_paths = set()
         
-        # First, find all drift devices
-        def find_drift_devices(data, path=""):
+        # First, find all drift and wavetable devices
+        def find_synth_devices(data, path=""):
             if isinstance(data, dict):
-                # Check if this is a drift device
-                if data.get('kind') == 'drift':
-                    drift_device_paths.add(path)
-                    print(f"Found drift device at path: {path}")
+                # Check if this is a drift or wavetable device
+                if data.get('kind') in ['drift', 'wavetable']:
+                    synth_device_paths.add(path)
+                    print(f"Found {data.get('kind')} device at path: {path}")
                 
                 # Recursively search in nested dictionaries
                 for key, value in data.items():
                     new_path = f"{path}.{key}" if path else key
-                    find_drift_devices(value, new_path)
+                    find_synth_devices(value, new_path)
             elif isinstance(data, list):
                 for i, item in enumerate(data):
-                    find_drift_devices(item, f"{path}[{i}]")
+                    find_synth_devices(item, f"{path}[{i}]")
         
-        # Find all drift devices
-        find_drift_devices(preset_data)
+        # Find all synth devices
+        find_synth_devices(preset_data)
         
-        # Function to recursively find parameters in drift devices
+        # Function to recursively find parameters in synth devices
         def find_parameters(data, path=""):
             if isinstance(data, dict):
                 # If this is a parameters object
                 if path.endswith("parameters"):
-                    # Check if this parameters object belongs to a drift device
-                    is_drift_parameter = False
-                    for drift_path in drift_device_paths:
-                        if path.startswith(drift_path) or drift_path.startswith(path.rsplit('.parameters', 1)[0]):
-                            is_drift_parameter = True
+                    # Check if this parameters object belongs to a synth device
+                    is_synth_parameter = False
+                    for device_path in synth_device_paths:
+                        if path.startswith(device_path) or device_path.startswith(path.rsplit('.parameters', 1)[0]):
+                            is_synth_parameter = True
                             break
                     
-                    if is_drift_parameter:
+                    if is_synth_parameter:
                         # Add all keys that aren't "Enabled" or start with "Macro"
                         for key in data.keys():
                             if key != "Enabled" and not key.startswith("Macro"):
                                 parameters.add(key)
                                 parameter_paths[key] = f"{path}.{key}"
-                                print(f"Adding drift parameter: {key} at path: {path}.{key}")
+                                print(f"Adding synth parameter: {key} at path: {path}.{key}")
                 
                 # Recursively search in nested dictionaries
                 for key, value in data.items():
@@ -626,67 +626,88 @@ def delete_parameter_mapping(preset_path, param_path):
             'message': f"Error deleting parameter mapping: {e}"
         }
 
-def scan_for_drift_presets():
+def scan_for_synth_presets():
     """
-    Scan the Move Track Presets directory for .ablpreset files containing drift devices.
+    Scan the Move Track Presets directory for .ablpreset files containing drift or wavetable devices.
     
     Returns:
         dict: Result with keys:
             - success: bool indicating success/failure
             - message: Status or error message
-            - presets: List of dicts with preset info (name and path)
+            - presets: List of dicts with preset info (name, path, and type)
     """
     try:
         presets_dir = "/data/UserData/UserLibrary/Track Presets"
-        drift_presets = []
+        # For local development, check if examples directory exists
+        if not os.path.exists(presets_dir) and os.path.exists("examples/Track Presets"):
+            presets_dir = "examples/Track Presets"
+            
+        synth_presets = []
 
-        # Check if directory exists
-        if not os.path.exists(presets_dir):
-            return {
-                'success': False,
-                'message': f"Track Presets directory not found: {presets_dir}",
-                'presets': []
-            }
+        # Function to recursively search for specific device types
+        def has_device_type(data, device_types):
+            if isinstance(data, dict):
+                if data.get('kind') in device_types:
+                    return data.get('kind')
+                for v in data.values():
+                    result = has_device_type(v, device_types)
+                    if result:
+                        return result
+            elif isinstance(data, list):
+                for item in data:
+                    result = has_device_type(item, device_types)
+                    if result:
+                        return result
+            return None
 
-        # Scan all .ablpreset files
-        for filename in os.listdir(presets_dir):
-            if filename.endswith('.ablpreset'):
-                filepath = os.path.join(presets_dir, filename)
-                try:
-                    with open(filepath, 'r') as f:
-                        preset_data = json.load(f)
+        # Scan all .ablpreset files in all subdirectories
+        for root, dirs, files in os.walk(presets_dir):
+            for filename in files:
+                if filename.endswith('.ablpreset'):
+                    filepath = os.path.join(root, filename)
+                    try:
+                        with open(filepath, 'r') as f:
+                            preset_data = json.load(f)
                         
-                    # Function to recursively search for drift devices
-                    def has_drift_device(data):
-                        if isinstance(data, dict):
-                            if data.get('kind') == 'drift':
-                                return True
-                            return any(has_drift_device(v) for v in data.values())
-                        elif isinstance(data, list):
-                            return any(has_drift_device(item) for item in data)
-                        return False
-
-                    # If preset contains a drift device, add it to our list
-                    if has_drift_device(preset_data):
-                        preset_name = os.path.splitext(filename)[0]
-                        drift_presets.append({
-                            'name': preset_name,
-                            'path': filepath
-                        })
-
-                except Exception as e:
-                    print(f"Warning: Could not parse preset {filename}: {e}")
-                    continue
+                        # Check if preset contains a drift or wavetable device
+                        device_type = has_device_type(preset_data, ['drift', 'wavetable'])
+                        if device_type:
+                            preset_name = os.path.splitext(filename)[0]
+                            synth_presets.append({
+                                'name': preset_name,
+                                'path': filepath,
+                                'type': device_type
+                            })
+                    except Exception as e:
+                        print(f"Warning: Could not parse preset {filename}: {e}")
+                        continue
 
         return {
             'success': True,
-            'message': f"Found {len(drift_presets)} drift presets",
-            'presets': drift_presets
+            'message': f"Found {len(synth_presets)} synth presets",
+            'presets': synth_presets
         }
-
     except Exception as e:
         return {
             'success': False,
             'message': f"Error scanning presets: {e}",
             'presets': []
         }
+
+# Keep the old function for backward compatibility
+def scan_for_drift_presets():
+    """
+    Legacy function that calls scan_for_synth_presets and filters for drift presets only.
+    """
+    result = scan_for_synth_presets()
+    if not result['success']:
+        return result
+    
+    # Filter for drift presets only
+    drift_presets = [preset for preset in result['presets'] if preset.get('type') == 'drift']
+    
+    return {
+        'success': True,
+        'message': f"Found {len(drift_presets)} drift presets",
+        'presets': drift_presets
+    }
