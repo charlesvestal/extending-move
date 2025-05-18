@@ -2,12 +2,14 @@
 import os
 import json
 import shutil
-from urllib.parse import quote
-from scipy.io import wavfile
-import numpy as np
 import zipfile
-import subprocess
+import soundfile as sf
 from core.refresh_handler import refresh_library
+
+# using SoundFile for robust WAV/AIFF slicing
+
+# Remove self-import if present
+# from core.slice_handler import slice_wav  # <-- REMOVE THIS LINE IF PRESENT
 
 def cleanup_temp_files(files_to_cleanup):
     """
@@ -169,102 +171,20 @@ def generate_choke_kit_template(preset_name):
     }
     return template
 
-def slice_wav(input_wav, out_dir, regions=None, num_slices=16, target_directory="./Samples"):
+def slice_wav(input_file, regions=None, num_slices=16, target_directory="./Samples"):
     """
-    Slice a WAV file into multiple parts based on regions or equal divisions.
-    
-    Args:
-        input_wav: Path to input WAV file
-        out_dir: Base output directory (unused, kept for compatibility)
-        regions: Optional list of dicts with 'start' and 'end' times in seconds
-        num_slices: Number of equal slices if regions not provided (default: 16)
-        target_directory: Directory to save slice files (default: ./Samples)
-    
+    Copy the original audio file (WAV or AIFF) to the target directory,
+    preserving its extension. Playback regions will be handled via the preset.
     Returns:
-        list: Paths to created slice files
-    
-    The function can operate in two modes:
-    1. Region-based slicing: Uses provided regions with start/end times
-    2. Equal slicing: Divides file into num_slices equal parts
-    
-    Each slice is saved as a WAV file with format:
-    {original_name}_slice_XX.wav where XX is the slice number (01-16)
+        list of one path: the copied file.
     """
-    samplerate, data = wavfile.read(input_wav)
-    total_samples = data.shape[0]
-    duration = total_samples / samplerate
-    print(f"Sampling rate: {samplerate} Hz")
-    print(f"Total samples: {total_samples}")
-    print(f"Duration: {duration} seconds")
-    
     os.makedirs(target_directory, exist_ok=True)
-    base = os.path.splitext(os.path.basename(input_wav))[0]
-    slice_paths = []
-
-    if regions is not None:
-        # Region-based slicing
-        if not isinstance(regions, list):
-            print("Error: 'regions' should be a list of dictionaries with 'start' and 'end' keys.")
-            return slice_paths
-        regions = sorted(regions, key=lambda r: r.get('start', 0))
-        print(f"Number of regions received: {len(regions)}")
-        for idx, region in enumerate(regions):
-            start_time = region.get('start')
-            end_time = region.get('end', start_time + 1)
-
-            # Validate region times
-            if not isinstance(start_time, (int, float)) or not isinstance(end_time, (int, float)):
-                print(f"Warning: Region {idx+1} has invalid 'start' or 'end' times. Skipping.")
-                continue
-
-            if start_time >= end_time:
-                print(f"Warning: Region {idx+1} start_time >= end_time. Skipping.")
-                continue
-
-            # Clamp times to file duration
-            start_time = max(0, start_time)
-            end_time = min(duration, end_time)
-            start_sample = int(start_time * samplerate)
-            end_sample = int(end_time * samplerate)
-
-            if end_sample <= start_sample:
-                print(f"Warning: Slice {idx+1} has zero length. Skipping.")
-                continue
-
-            # Extract and save slice
-            slice_data = data[start_sample:end_sample]
-            filename = f"{base}_slice_{idx+1:02d}.wav"
-            path = os.path.join(target_directory, filename)
-            unique_path = get_unique_filename(path)
-            wavfile.write(unique_path, samplerate, slice_data)
-            print(f"Exported slice {idx+1}: {unique_path}")
-            slice_paths.append(unique_path)
-    else:
-        # Equal slicing
-        print("No regions provided. Falling back to equal slicing.")
-        slice_duration = duration / num_slices
-        for i in range(num_slices):
-            start_time = i * slice_duration
-            end_time = (i + 1) * slice_duration
-            start_sample = int(start_time * samplerate)
-            end_sample = int(end_time * samplerate)
-
-            start_time = max(0, start_time)
-            end_time = min(duration, end_time)
-
-            if end_sample <= start_sample:
-                print(f"Warning: Slice {i+1} has zero length. Skipping.")
-                continue
-
-            # Extract and save slice
-            slice_data = data[start_sample:end_sample]
-            filename = f"{base}_slice_{i+1:02d}.wav"
-            path = os.path.join(target_directory, filename)
-            unique_path = get_unique_filename(path)
-            wavfile.write(unique_path, samplerate, slice_data)
-            print(f"Exported slice {i+1}: {unique_path}")
-            slice_paths.append(unique_path)
-    return slice_paths
+    base, ext = os.path.splitext(os.path.basename(input_file))
+    # Copy file with suffix '-sliced' and preserve extension
+    dest = os.path.join(target_directory, f"{base}-sliced{ext}")
+    unique_dest = get_unique_filename(dest)
+    shutil.copy2(input_file, unique_dest)
+    return [unique_dest]
 
 def get_unique_filename(path):
     """
@@ -311,7 +231,8 @@ def update_drumcell_sample_uris(data, slices_info, sliced_filename, current_inde
     # Compute total_duration once
     if total_duration is None:
         try:
-            samplerate, samples = wavfile.read(sliced_filename)
+            import soundfile as sf
+            samples, samplerate = sf.read(sliced_filename, dtype='int32')
             total_duration = len(samples) / samplerate
         except Exception:
             total_duration = 1.0  # fallback to prevent division by zero
@@ -424,17 +345,12 @@ def process_kit(input_wav, preset_name=None, regions=None, num_slices=None, keep
             # Track temporary files for cleanup
             temp_files.extend([samples_folder, preset_output_file])
 
-            os.makedirs(samples_folder, exist_ok=True)
-            
-            # Copy the entire WAV file with -sliced suffix
-            os.makedirs(samples_folder, exist_ok=True)
-            base = os.path.splitext(os.path.basename(input_wav))[0]
-            sliced_wav = os.path.join(samples_folder, base + "-sliced.wav")
-            shutil.copy2(input_wav, sliced_wav)
+            # Create sliced file via slice_wav (preserves extension)
+            sliced_list = slice_wav(input_wav, regions=regions, num_slices=num_slices, target_directory=samples_folder)
+            sliced_wav = sliced_list[0]
 
-            # Compute total duration of the WAV file
-            from scipy.io import wavfile
-            samplerate, data = wavfile.read(sliced_wav)
+            # Compute total duration of the audio file using SoundFile
+            data, samplerate = sf.read(sliced_wav, dtype='int32')
             total_duration = len(data) / samplerate
 
             if regions:
@@ -481,13 +397,12 @@ def process_kit(input_wav, preset_name=None, regions=None, num_slices=None, keep
             presets_target_dir = "/data/UserData/UserLibrary/Track Presets"
             preset_output_file = os.path.join(presets_target_dir, f"{preset}.ablpreset")
 
-            os.makedirs(samples_target_dir, exist_ok=True)
-            base = os.path.splitext(os.path.basename(input_wav))[0]
-            sliced_wav = os.path.join(samples_target_dir, base + "-sliced.wav")
-            shutil.copy2(input_wav, sliced_wav)
+            # Create sliced file via slice_wav (preserves extension)
+            sliced_list = slice_wav(input_wav, regions=regions, num_slices=num_slices, target_directory=samples_target_dir)
+            sliced_wav = sliced_list[0]
 
-            from scipy.io import wavfile
-            samplerate, data = wavfile.read(sliced_wav)
+            # Compute total duration of the audio file using SoundFile
+            data, samplerate = sf.read(sliced_wav, dtype='int32')
             total_duration = len(data) / samplerate
 
             if regions:
