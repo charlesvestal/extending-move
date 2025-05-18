@@ -1,11 +1,11 @@
-<h2>Choose a WAV file to slice into a Choke Kit</h2>
+<h2>Choose an audio file (WAV or AIFF) to slice into a Choke Kit</h2>
 {message_html}
 <form enctype="multipart/form-data" method="post">
     <input type="hidden" name="action" value="slice"/>
     <input type="hidden" name="mode" id="mode" value="download"/>
     
-    <label for="file">Select WAV file:</label>
-    <input id="file" name="file" type="file" accept=".wav" required/>
+    <label for="file">Select Audio file:</label>
+    <input id="file" name="file" type="file" accept=".wav, .aif, .aiff" required/>
     <br/><br/>
     
     <label for="num_slices">Number of slices (1-16):</label>
