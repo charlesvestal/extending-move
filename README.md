@@ -140,7 +140,7 @@ Located in `utility-scripts/`:
 
 Note: This does not persist through firmware upgrades. Re-run the command and re-enable the script after upgrading.
 
-When logged in as root, create an init.d script with the following command
+When logged in as root (`ssh root@move.local`), create an init.d script with the following command
 
 ```bash
 cat > /etc/init.d/ableton-startup << 'EOF'
