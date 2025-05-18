@@ -77,7 +77,7 @@ python3 /data/UserData/get-pip.py
 
 # Install scipy using pip (without using the cache).
 echo "Installing scipy with pip..."
-pip install --no-cache-dir scipy
+pip install --no-cache-dir scipy soundfile
 
 echo "Remote setup complete."
 EOF

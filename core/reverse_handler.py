@@ -1,107 +1,79 @@
 import os
-import wave
-import numpy as np
+import soundfile as sf
 
 from core.refresh_handler import refresh_library
 
+
 def get_wav_files(directory):
     """
-    Retrieves a list of WAV files from the specified directory.
+    Retrieves a list of audio files (WAV and AIFF) from the specified directory.
     """
-    wav_files = []
+    audio_files = []
     for root, _, files in os.walk(directory):
         for file in files:
-            if file.lower().endswith('.wav'):
+            if file.lower().endswith(('.wav', '.aif', '.aiff')):
                 relative_path = os.path.relpath(os.path.join(root, file), directory)
-                wav_files.append(relative_path)
-    return wav_files
+                audio_files.append(relative_path)
+    return audio_files
+
 
 def reverse_wav_file(filename, directory):
     """
-    Handles reversing and un-reversing WAV files.
-    If the file ends with _reverse.wav or _reversed.wav, attempts to switch back.
-    Otherwise, creates a reversed version, including manual 24-bit support.
+    Handles reversing and un-reversing of PCM audio files (WAV, AIFF), including 24-bit.
+    If the file ends with _reversed or _reverse, attempts to switch back to the original.
+    Otherwise, creates a reversed version.
     Returns (success: bool, message: str, new_path: str).
     """
     filepath = os.path.join(directory, filename)
     if not os.path.isfile(filepath):
         return False, f"File does not exist: {filepath}", None
-        
+
     base, ext = os.path.splitext(filename)
+    ext_lower = ext.lower()
+
+    # Toggle back to original
+    if base.endswith('_reversed') or base.endswith('_reverse'):
+        suffix_len = 9 if base.endswith('_reversed') else 8
+        original_base = base[:-suffix_len]
+        original_filename = f"{original_base}{ext_lower}"
+        original_filepath = os.path.join(directory, original_filename)
+        if os.path.exists(original_filepath):
+            return True, f"Switched to original file: {original_filename}", original_filepath
+        else:
+            return False, f"Original file not found: {original_filename}", None
+
+    # Build new reversed filename
+    new_filename = f"{base}_reversed{ext_lower}"
+    new_filepath = os.path.join(directory, new_filename)
+    if os.path.exists(new_filepath):
+        return True, f"Using existing reversed file: {new_filename}", new_filepath
+
+    # Determine format for writing
+    format_map = {
+        '.wav': 'WAV',
+        '.aif': 'AIFF',
+        '.aiff': 'AIFF'
+    }
+    write_format = format_map.get(ext_lower)
+    if write_format is None:
+        return False, f"Unsupported file extension: {ext_lower}", None
 
     try:
-        # --- handle toggling back to original ---
-        if base.endswith('_reverse') or base.endswith('_reversed'):
-            suffix_len = 8 if base.endswith('_reverse') else 9
-            original_base = base[:-suffix_len]
-            original_filename = f"{original_base}{ext}"
-            original_filepath = os.path.join(directory, original_filename)
-            if os.path.exists(original_filepath):
-                return True, f"Switched to original file: {original_filename}", original_filepath
-            else:
-                return False, f"Original file not found: {original_filename}", None
+        # Read audio using SoundFile as 32-bit integer data
+        info = sf.info(filepath)
+        data, samplerate = sf.read(filepath, dtype='int32')
 
-        # --- create reversed version ---
-        new_filename = f"{base}_reversed{ext}"
-        new_filepath = os.path.join(directory, new_filename)
-        if os.path.exists(new_filepath):
-            return True, f"Using existing reversed file: {new_filename}", new_filepath
+        # Reverse in time
+        reversed_data = data[::-1]
 
-        with wave.open(filepath, 'rb') as wf:
-            params = wf.getparams()
-            n_channels, sampwidth, framerate, n_frames, comptype, compname = params
-            frames = wf.readframes(n_frames)
-
-        # --- unpack samples ---
-        if sampwidth == 3:
-            # 24-bit little-endian PCM → manual unpack to int32
-            raw = np.frombuffer(frames, dtype=np.uint8)
-            raw = raw.reshape(-1, n_channels, 3)
-            # combine bytes: little-endian
-            samples = (
-                raw[:,:,0].astype(np.int32)
-                | (raw[:,:,1].astype(np.int32) << 8)
-                | (raw[:,:,2].astype(np.int32) << 16)
-            )
-            # sign-extend 24→32 bits
-            sign_bit = 1 << 23
-            samples = (samples ^ sign_bit) - sign_bit
-
-            audio_data = samples  # shape: (n_frames, n_channels)
-
-        else:
-            # use numpy built-in for 8, 16, or 32 bits
-            dtype = {1: np.int8, 2: np.int16, 4: np.int32}.get(sampwidth)
-            if dtype is None:
-                return False, f"Unsupported sample width: {sampwidth} bytes.", None
-            audio_data = np.frombuffer(frames, dtype=dtype)
-            if n_channels > 1:
-                audio_data = audio_data.reshape(-1, n_channels)
-
-        # --- reverse in time ---
-        reversed_data = audio_data[::-1]
-
-        # --- repack samples ---
-        if sampwidth == 3:
-            # pack int32 back into 3 bytes, little-endian
-            # ensure values fit in signed 24-bit
-            vals = reversed_data.astype(np.int32)
-            # mask to unsigned 24-bit
-            vals = np.bitwise_and(vals, 0xFFFFFF)
-            b0 = (vals & 0xFF).astype(np.uint8)
-            b1 = ((vals >> 8) & 0xFF).astype(np.uint8)
-            b2 = ((vals >> 16) & 0xFF).astype(np.uint8)
-            packed = np.stack([b0, b1, b2], axis=-1)  # shape (n_frames, n_channels, 3)
-            raw_out = packed.reshape(-1, 3).flatten().tobytes()
-
-        else:
-            flat = reversed_data.reshape(-1)
-            raw_out = flat.tobytes()
-
-        # --- write reversed WAV ---
-        with wave.open(new_filepath, 'wb') as wf:
-            wf.setparams(params)
-            wf.writeframes(raw_out)
+        # Write out with correct format and subtype
+        sf.write(
+            new_filepath,
+            reversed_data,
+            samplerate,
+            format=write_format,
+            subtype=info.subtype
+        )
 
         # Refresh library
         refresh_success, refresh_message = refresh_library()
