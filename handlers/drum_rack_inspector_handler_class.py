@@ -43,24 +43,24 @@ class DrumRackInspectorHandler(BaseHandler):
             print("\nProcessing samples for display:")  # Debug log
             # Create a grid container
             samples_html = '<div class="drum-grid">'
-            
+
             # Sort samples by pad number and create a 16-element list (some pads might be empty)
             grid_samples = [None] * 16
             for sample in result['samples']:
                 pad_num = int(sample['pad'])
                 if 1 <= pad_num <= 16:
                     grid_samples[pad_num - 1] = sample
-            
+
             # Generate grid cells in reverse row order (bottom to top)
             for row in range(3, -1, -1):  # 3,2,1,0 for the four rows
                 samples_html += '<div class="drum-grid-row">'
                 for col in range(4):  # 0,1,2,3 for the four columns
                     pad_index = row * 4 + col  # Calculate index in grid_samples
                     pad_num = pad_index + 1  # Actual pad number (1-16)
-                    
+
                     sample = grid_samples[pad_index]
                     cell_html = '<div class="drum-cell">'
-                    
+
                     if sample:
                         print(f"\nSample: {sample}")  # Debug log
                         if sample.get('path') and sample['path'].startswith('/data/UserData/UserLibrary/Samples/'):
@@ -83,13 +83,19 @@ class DrumRackInspectorHandler(BaseHandler):
                                             <input type="hidden" name="pad_number" value="{pad_num}">
                                             <button type="submit" class="reverse-button">Reverse</button>
                                         </form>
-                                        <form method="POST" action="/drum-rack-inspector" style="display: inline;">
-                                            <input type="hidden" name="action" value="time_stretch_sample">
-                                            <input type="hidden" name="sample_path" value="{sample['path']}">
-                                            <input type="hidden" name="preset_path" value="{preset_path}">
-                                            <input type="hidden" name="pad_number" value="{pad_num}">
-                                            <button type="submit" class="time-stretch-button">Time Stretch</button>
-                                        </form>
+                                        <button type="button" class="time-stretch-button"
+                                            data-sample-path="{sample['path']}"
+                                            data-preset-path="{preset_path}"
+                                            data-pad-number="{pad_num}"
+                                            onclick="
+                                              var modal = document.getElementById('timeStretchModal');
+                                              document.getElementById('ts_sample_path').value = this.getAttribute('data-sample-path');
+                                              document.getElementById('ts_preset_path').value = this.getAttribute('data-preset-path');
+                                              document.getElementById('ts_pad_number').value = this.getAttribute('data-pad-number');
+                                              modal.classList.remove('hidden');
+                                            ">
+                                            Time Stretch
+                                        </button>
                                     </div>
                                 </div>
                             '''
@@ -97,12 +103,12 @@ class DrumRackInspectorHandler(BaseHandler):
                             cell_html += f'<div class="pad-info"><span class="pad-number">Pad {pad_num}</span><span>No sample</span></div>'
                     else:
                         cell_html += f'<div class="pad-info"><span class="pad-number">Pad {pad_num}</span><span>Empty</span></div>'
-                    
+
                     cell_html += '</div>'
                     samples_html += cell_html
-                
+
                 samples_html += '</div>'
-            
+
             samples_html += '</div>'
 
             return {
@@ -129,23 +135,53 @@ class DrumRackInspectorHandler(BaseHandler):
             return ''
     
     def handle_time_stretch_sample(self, form: cgi.FieldStorage):
-        """Handle time-stretch action (stub)."""
+        """Handle time-stretch action."""
         sample_path = form.getvalue('sample_path')
         preset_path = form.getvalue('preset_path')
-        pad_number  = form.getvalue('pad_number')
+        pad_number = form.getvalue('pad_number')
+        bpm = form.getvalue('bpm')
+        measures = form.getvalue('measures')
 
-        if not sample_path or not preset_path:
-            return self.format_error_response("Missing sample or preset path")
+        # Step 1: Ask for BPM and measures if not provided
+        if bpm is None or measures is None:
+            samples_html = f'''
+                <div class="time-stretch-form">
+                    <form method="POST" action="/drum-rack-inspector">
+                        <input type="hidden" name="action" value="time_stretch_sample">
+                        <input type="hidden" name="sample_path" value="{sample_path}">
+                        <input type="hidden" name="preset_path" value="{preset_path}">
+                        <input type="hidden" name="pad_number" value="{pad_number}">
+                        <label for="bpm">BPM:</label>
+                        <input type="number" name="bpm" id="bpm" step="0.1" required>
+                        <label for="measures">Measures:</label>
+                        <input type="number" name="measures" id="measures" step="0.1" required>
+                        <button type="submit" class="apply-time-stretch-button">Apply Time Stretch</button>
+                    </form>
+                </div>
+            '''
+            return {
+                'options': self.get_preset_options(),
+                'message': '',
+                'samples_html': samples_html
+            }
 
-        # TODO: actually call your core.time_stretch(...) here
-        message = "Time stretch feature not implemented yet"
+        # Step 2: Compute target duration
+        try:
+            bpm_val = float(bpm)
+            measures_val = float(measures)
+            # 4 beats per measure, each beat is 60/bpm seconds
+            target_duration = (60.0 / bpm_val) * 4 * measures_val
+        except ValueError:
+            return self.format_error_response("Invalid BPM or measures values")
 
-        # Redisplay the grid
+        # TODO: integrate actual time-stretch core function here
+        message = f"Time-stretch target: {target_duration:.2f}s for {measures_val} measures at {bpm_val} BPM"
+
+        # Redisplay the grid (same logic as reverse handler)
         result = get_drum_cell_samples(preset_path)
         if not result['success']:
             return self.format_error_response(result['message'])
 
-        # Build 4×4 grid HTML
         samples_html = '<div class="drum-grid">'
         grid_samples = [None] * 16
         for sample in result['samples']:
@@ -161,12 +197,11 @@ class DrumRackInspectorHandler(BaseHandler):
                 sample = grid_samples[idx]
                 cell_html = '<div class="drum-cell">'
 
-                if sample and sample.get('path','').startswith('/data/UserData/UserLibrary/Samples/'):
-                    web_path = '/samples/' + sample['path']\
+                if sample and sample.get('path', '').startswith('/data/UserData/UserLibrary/Samples/'):
+                    web_path = '/samples/' + sample['path'] \
                                 .replace('/data/UserData/UserLibrary/Samples/Preset Samples/', '', 1)
                     web_path = urllib.parse.quote(web_path)
                     wf_id = f'waveform-{num}'
-
                     cell_html += f'''
                         <div class="pad-info">
                             <span class="pad-number">Pad {num}</span>
@@ -183,13 +218,19 @@ class DrumRackInspectorHandler(BaseHandler):
                                     <input type="hidden" name="pad_number" value="{num}">
                                     <button type="submit" class="reverse-button">Reverse</button>
                                 </form>
-                                <form method="POST" action="/drum-rack-inspector" style="display: inline;">
-                                    <input type="hidden" name="action" value="time_stretch_sample">
-                                    <input type="hidden" name="sample_path" value="{sample['path']}">
-                                    <input type="hidden" name="preset_path" value="{preset_path}">
-                                    <input type="hidden" name="pad_number" value="{num}">
-                                    <button type="submit" class="time-stretch-button">Time Stretch</button>
-                                </form>
+                                <button type="button" class="time-stretch-button"
+                                    data-sample-path="{sample['path']}"
+                                    data-preset-path="{preset_path}"
+                                    data-pad-number="{num}"
+                                    onclick="
+                                      var modal = document.getElementById('timeStretchModal');
+                                      document.getElementById('ts_sample_path').value = this.getAttribute('data-sample-path');
+                                      document.getElementById('ts_preset_path').value = this.getAttribute('data-preset-path');
+                                      document.getElementById('ts_pad_number').value = this.getAttribute('data-pad-number');
+                                      modal.classList.remove('hidden');
+                                    ">
+                                    Time Stretch
+                                </button>
                             </div>
                         </div>
                     '''
@@ -251,16 +292,16 @@ class DrumRackInspectorHandler(BaseHandler):
                 pad_num = int(sample['pad'])
                 if 1 <= pad_num <= 16:
                     grid_samples[pad_num - 1] = sample
-            
+
             for row in range(3, -1, -1):
                 samples_html += '<div class="drum-grid-row">'
                 for col in range(4):
                     pad_index = row * 4 + col
                     pad_num = pad_index + 1
-                    
+
                     sample = grid_samples[pad_index]
                     cell_html = '<div class="drum-cell">'
-                    
+
                     if sample:
                         if sample.get('path') and sample['path'].startswith('/data/UserData/UserLibrary/Samples/'):
                             web_path = '/samples/' + sample['path'].replace('/data/UserData/UserLibrary/Samples/Preset Samples/', '', 1)
@@ -282,13 +323,19 @@ class DrumRackInspectorHandler(BaseHandler):
                                             <input type="hidden" name="pad_number" value="{pad_num}">
                                             <button type="submit" class="reverse-button">Reverse</button>
                                         </form>
-                                        <form method="POST" action="/drum-rack-inspector" style="display: inline;">
-                                            <input type="hidden" name="action" value="time_stretch_sample">
-                                            <input type="hidden" name="sample_path" value="{sample['path']}">
-                                            <input type="hidden" name="preset_path" value="{preset_path}">
-                                            <input type="hidden" name="pad_number" value="{pad_num}">
-                                            <button type="submit" class="time-stretch-button">Time Stretch</button>
-                                        </form>
+                                        <button type="button" class="time-stretch-button"
+                                            data-sample-path="{sample['path']}"
+                                            data-preset-path="{preset_path}"
+                                            data-pad-number="{pad_num}"
+                                            onclick="
+                                              var modal = document.getElementById('timeStretchModal');
+                                              document.getElementById('ts_sample_path').value = this.getAttribute('data-sample-path');
+                                              document.getElementById('ts_preset_path').value = this.getAttribute('data-preset-path');
+                                              document.getElementById('ts_pad_number').value = this.getAttribute('data-pad-number');
+                                              modal.classList.remove('hidden');
+                                            ">
+                                            Time Stretch
+                                        </button>
                                     </div>
                                 </div>
                             '''
@@ -296,14 +343,14 @@ class DrumRackInspectorHandler(BaseHandler):
                             cell_html += f'<div class="pad-info"><span class="pad-number">Pad {pad_num}</span><span>No sample</span></div>'
                     else:
                         cell_html += f'<div class="pad-info"><span class="pad-number">Pad {pad_num}</span><span>Empty</span></div>'
-                    
+
                     cell_html += '</div>'
                     samples_html += cell_html
-                
+
                 samples_html += '</div>'
-            
+
             samples_html += '</div>'
-            
+
             return {
                 'options': self.get_preset_options(),
                 'message': message,
