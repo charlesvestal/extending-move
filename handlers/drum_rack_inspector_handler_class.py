@@ -22,7 +22,8 @@ class DrumRackInspectorHandler(BaseHandler):
         action = form.getvalue('action')
         if action == 'reverse_sample':
             return self.handle_reverse_sample(form)
-        
+        if action == 'time_stretch_sample':
+            return self.handle_time_stretch_sample(form)    
         # Validate preset selection action
         valid, error_response = self.validate_action(form, "select_preset")
         if not valid:
@@ -82,6 +83,13 @@ class DrumRackInspectorHandler(BaseHandler):
                                             <input type="hidden" name="pad_number" value="{pad_num}">
                                             <button type="submit" class="reverse-button">Reverse</button>
                                         </form>
+                                        <form method="POST" action="/drum-rack-inspector" style="display: inline;">
+                                            <input type="hidden" name="action" value="time_stretch_sample">
+                                            <input type="hidden" name="sample_path" value="{sample['path']}">
+                                            <input type="hidden" name="preset_path" value="{preset_path}">
+                                            <input type="hidden" name="pad_number" value="{pad_num}">
+                                            <button type="submit" class="time-stretch-button">Time Stretch</button>
+                                        </form>
                                     </div>
                                 </div>
                             '''
@@ -119,7 +127,15 @@ class DrumRackInspectorHandler(BaseHandler):
         except Exception as e:
             print(f"Error getting preset options: {e}")
             return ''
-            
+    
+    def handle_time_stretch_sample(self, form: cgi.FieldStorage):
+        """Handle time-stretch action (stub)."""
+        sample_path = form.getvalue('sample_path')
+        preset_path = form.getvalue('preset_path')
+        pad_number  = form.getvalue('pad_number')
+        # TODO: call your core.time_stretch function when ready
+        return self.format_error_response("Time stretch feature not implemented yet")
+
     def handle_reverse_sample(self, form):
         """Handle reversing a sample."""
         sample_path = form.getvalue('sample_path')
@@ -191,6 +207,13 @@ class DrumRackInspectorHandler(BaseHandler):
                                             <input type="hidden" name="preset_path" value="{preset_path}">
                                             <input type="hidden" name="pad_number" value="{pad_num}">
                                             <button type="submit" class="reverse-button">Reverse</button>
+                                        </form>
+                                        <form method="POST" action="/drum-rack-inspector" style="display: inline;">
+                                            <input type="hidden" name="action" value="time_stretch_sample">
+                                            <input type="hidden" name="sample_path" value="{sample['path']}">
+                                            <input type="hidden" name="preset_path" value="{preset_path}">
+                                            <input type="hidden" name="pad_number" value="{pad_num}">
+                                            <button type="submit" class="time-stretch-button">Time Stretch</button>
                                         </form>
                                     </div>
                                 </div>
