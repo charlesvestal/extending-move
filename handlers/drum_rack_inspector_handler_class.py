@@ -133,9 +133,83 @@ class DrumRackInspectorHandler(BaseHandler):
         sample_path = form.getvalue('sample_path')
         preset_path = form.getvalue('preset_path')
         pad_number  = form.getvalue('pad_number')
-        # TODO: call your core.time_stretch function when ready
-        return self.format_error_response("Time stretch feature not implemented yet")
 
+        if not sample_path or not preset_path:
+            return self.format_error_response("Missing sample or preset path")
+
+        # TODO: actually call your core.time_stretch(...) here
+        message = "Time stretch feature not implemented yet"
+
+        # Redisplay the grid
+        result = get_drum_cell_samples(preset_path)
+        if not result['success']:
+            return self.format_error_response(result['message'])
+
+        # Build 4×4 grid HTML
+        samples_html = '<div class="drum-grid">'
+        grid_samples = [None] * 16
+        for sample in result['samples']:
+            num = int(sample['pad'])
+            if 1 <= num <= 16:
+                grid_samples[num - 1] = sample
+
+        for row in range(3, -1, -1):
+            samples_html += '<div class="drum-grid-row">'
+            for col in range(4):
+                idx = row * 4 + col
+                num = idx + 1
+                sample = grid_samples[idx]
+                cell_html = '<div class="drum-cell">'
+
+                if sample and sample.get('path','').startswith('/data/UserData/UserLibrary/Samples/'):
+                    web_path = '/samples/' + sample['path']\
+                                .replace('/data/UserData/UserLibrary/Samples/Preset Samples/', '', 1)
+                    web_path = urllib.parse.quote(web_path)
+                    wf_id = f'waveform-{num}'
+
+                    cell_html += f'''
+                        <div class="pad-info">
+                            <span class="pad-number">Pad {num}</span>
+                        </div>
+                        <div id="{wf_id}" class="waveform-container" data-audio-path="{web_path}"></div>
+                        <div class="sample-info">
+                            <span class="sample-name">{sample["sample"]}</span>
+                            <div class="sample-actions">
+                                <a href="{web_path}" target="_blank" class="download-link">Download</a>
+                                <form method="POST" action="/drum-rack-inspector" style="display: inline;">
+                                    <input type="hidden" name="action" value="reverse_sample">
+                                    <input type="hidden" name="sample_path" value="{sample['path']}">
+                                    <input type="hidden" name="preset_path" value="{preset_path}">
+                                    <input type="hidden" name="pad_number" value="{num}">
+                                    <button type="submit" class="reverse-button">Reverse</button>
+                                </form>
+                                <form method="POST" action="/drum-rack-inspector" style="display: inline;">
+                                    <input type="hidden" name="action" value="time_stretch_sample">
+                                    <input type="hidden" name="sample_path" value="{sample['path']}">
+                                    <input type="hidden" name="preset_path" value="{preset_path}">
+                                    <input type="hidden" name="pad_number" value="{num}">
+                                    <button type="submit" class="time-stretch-button">Time Stretch</button>
+                                </form>
+                            </div>
+                        </div>
+                    '''
+                elif sample:
+                    cell_html += f'<div class="pad-info"><span class="pad-number">Pad {num}</span><span>No sample</span></div>'
+                else:
+                    cell_html += f'<div class="pad-info"><span class="pad-number">Pad {num}</span><span>Empty</span></div>'
+
+                cell_html += '</div>'
+                samples_html += cell_html
+
+            samples_html += '</div>'
+
+        samples_html += '</div>'
+
+        return {
+            'options': self.get_preset_options(),
+            'message': message,
+            'samples_html': samples_html
+        }
     def handle_reverse_sample(self, form):
         """Handle reversing a sample."""
         sample_path = form.getvalue('sample_path')
