@@ -28,7 +28,7 @@ REMOTE_USER="ableton"
 REMOTE_HOST="move.local"
 
 # Version check: ensure Move version is within tested range
-HIGHEST_TESTED_VERSION="1.5.0b4"
+HIGHEST_TESTED_VERSION="1.5.0b5"
 INSTALLED_VERSION=$(ssh "${REMOTE_USER}@${REMOTE_HOST}" "/opt/move/Move -v" | awk '{print $3}')
 # Determine if installed version exceeds highest tested
 LATEST_VERSION=$(printf "%s\n%s\n" "$HIGHEST_TESTED_VERSION" "$INSTALLED_VERSION" | sort -V | tail -n1)
@@ -75,9 +75,11 @@ fi
 echo "Executing get-pip.py..."
 python3 /data/UserData/get-pip.py
 
-# Install scipy using pip (without using the cache).
-echo "Installing scipy with pip..."
-pip install --no-cache-dir scipy soundfile librosa audiotsm
+
+# Install requirements using pip (without using the cache).
+echo "Installing requirements with pip..."
+pip install --no-cache-dir -r requirements.txt
+
 
 echo "Remote setup complete."
 EOF
