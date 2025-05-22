@@ -71,6 +71,9 @@
         // Replace tab content (including modal) with new HTML
         const container = form.closest('.tabcontent');
         container.innerHTML = html;
+        // Reinitialize functionality
+        attachFormHandler('DrumRackInspector');
+        initializeDrumRackWaveforms();
       })
       .catch(err => console.error(err));
     }
