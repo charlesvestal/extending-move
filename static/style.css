@@ -340,3 +340,18 @@ select {
         padding: 1rem;
     }
 }
+
+
+/* Sample-info layout tweaks */
+.sample-info .sample-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sample-info .sample-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
