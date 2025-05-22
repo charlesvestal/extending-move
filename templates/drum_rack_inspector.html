@@ -26,10 +26,26 @@
       z-index: 10;
     }
     .modal .loading-overlay.hidden { display: none; }
-    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-             background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; }
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
     .modal.hidden { display: none; }
-    .modal-content { background: #fff; padding: 20px; border-radius: 4px; position: relative; }
+    .modal-content {
+      background: #fff;
+      padding: 20px;
+      border-radius: 4px;
+      position: relative;
+      z-index: 1001;
+    }
     .modal-close { position: absolute; top: 10px; right: 10px; cursor: pointer; }
   </style>
   <div id="timeStretchModal" class="modal hidden">
