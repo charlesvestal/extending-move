@@ -2,6 +2,8 @@ import os
 import librosa
 import soundfile as sf
 
+from core.refresh_handler import refresh_library
+
 def time_stretch_wav(input_path, target_duration, output_path):
     """
     Time-stretch a WAV file to a target duration, keeping pitch constant.
@@ -32,6 +34,13 @@ def time_stretch_wav(input_path, target_duration, output_path):
         # Write to output path (overwrite if exists)
         sf.write(output_path, y_stretched, sr)
 
-        return True, f"Stretched to {target_duration:.2f}s", output_path
+        # Refresh library
+        refresh_success, refresh_message = refresh_library()
+        if refresh_success:
+            msg = f"Stretched to {target_duration:.2f}s. Library refreshed."
+        else:
+            msg = f"Stretched to {target_duration:.2f}s. Library refresh failed: {refresh_message}"
+
+        return True, msg, output_path
     except Exception as e:
         return False, f"Error stretching WAV: {e}", None
