@@ -20,7 +20,11 @@ function openTab(evt, tabName) {
         if (tabName === 'Slice') {
             initializeWaveform();
         } else if (tabName === 'DrumRackInspector') {
-            initializeDrumRackWaveforms();
+             initializeDrumRackWaveforms();
+            // Ensure the modal’s open/close handlers get bound on first load
+            if (typeof initializeTimeStretchModal === 'function') {
+                initializeTimeStretchModal();
+            }
         }
     });
 }
