@@ -1,8 +1,6 @@
 import os
 import soundfile as sf
-
 from core.refresh_handler import refresh_library
-
 
 def get_wav_files(directory):
     """
