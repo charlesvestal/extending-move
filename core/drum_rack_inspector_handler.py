@@ -3,7 +3,7 @@ import os
 import json
 import urllib.parse
 
-def update_drum_cell_sample(preset_path, pad_number, new_sample_path):
+def update_drum_cell_sample(preset_path, pad_number, new_sample_path, new_playback_start=None, new_playback_length=None):
     """
     Update the sample URI for a specific drum cell in a preset.
     
@@ -39,6 +39,14 @@ def update_drum_cell_sample(preset_path, pad_number, new_sample_path):
                         if 'deviceData' not in data:
                             data['deviceData'] = {}
                         data['deviceData']['sampleUri'] = uri
+                        # Update slice playback parameters if given
+                        if new_playback_start is not None or new_playback_length is not None:
+                            if 'parameters' not in data:
+                                data['parameters'] = {}
+                            if new_playback_start is not None:
+                                data['parameters']['Voice_PlaybackStart'] = float(new_playback_start)
+                            if new_playback_length is not None:
+                                data['parameters']['Voice_PlaybackLength'] = float(new_playback_length)
                         found[0] = True
                     current_pad[0] += 1
                     
@@ -111,12 +119,19 @@ def get_drum_cell_samples(preset_path):
                     else:
                         sample_path = ""
                         sample_name = "No sample loaded"
+
+                    # New: Extract playback_start and playback_length from parameters
+                    params = data.get('parameters', {})
+                    playback_start = params.get('Voice_PlaybackStart', 0.0)
+                    playback_length = params.get('Voice_PlaybackLength', 1.0)
                     
                     # Simply use incrementing counter for pad numbers
                     samples.append({
                         'pad': pad_counter[0],
                         'sample': sample_name,
-                        'path': sample_path
+                        'path': sample_path,
+                        'playback_start': playback_start,
+                        'playback_length': playback_length
                     })
                     pad_counter[0] += 1
                     

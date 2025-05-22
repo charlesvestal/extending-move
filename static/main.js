@@ -20,7 +20,11 @@ function openTab(evt, tabName) {
         if (tabName === 'Slice') {
             initializeWaveform();
         } else if (tabName === 'DrumRackInspector') {
-            initializeDrumRackWaveforms();
+             initializeDrumRackWaveforms();
+            // Ensure the modal’s open/close handlers get bound on first load
+            if (typeof initializeTimeStretchModal === 'function') {
+                initializeTimeStretchModal();
+            }
         }
     });
 }
@@ -244,6 +248,9 @@ async function submitForm(form, tabName) {
                 initializeWaveform();
             } else if (tabName === 'DrumRackInspector') {
                 initializeDrumRackWaveforms();
+                if (typeof initializeTimeStretchModal === 'function') {
+                    initializeTimeStretchModal();
+                }
             } else if (tabName === 'Restore') {
                 initializeRestoreForm();
             }
@@ -272,7 +279,10 @@ function initializeDrumRackWaveforms() {
 
     const containers = document.querySelectorAll('.waveform-container');
     containers.forEach(container => {
-        const audioPath = container.getAttribute('data-audio-path');
+        // New: get slice info from data attributes
+        const startPct  = parseFloat(container.dataset.playbackStart)  || 0;
+        const lengthPct = parseFloat(container.dataset.playbackLength) || 1;
+        const audioPath = container.dataset.audioPath;
         if (!audioPath) return;
         
         const wavesurfer = WaveSurfer.create({
@@ -292,8 +302,29 @@ function initializeDrumRackWaveforms() {
         container.wavesurfer = wavesurfer;
         drumRackWaveforms.push(wavesurfer);
         
-        // Load the audio file
-        wavesurfer.load(audioPath);
+        // Load only the slice of the audio file
+        const audioContext = wavesurfer.backend.getAudioContext();
+        fetch(audioPath)
+          .then(res => res.arrayBuffer())
+          .then(data => audioContext.decodeAudioData(data))
+          .then(buffer => {
+            const duration = buffer.duration;
+            const sampleRate = buffer.sampleRate;
+            const startSample = Math.floor(startPct * duration * sampleRate);
+            const frameCount = Math.floor(lengthPct * duration * sampleRate);
+            const slicedBuffer = audioContext.createBuffer(
+              buffer.numberOfChannels, frameCount, sampleRate
+            );
+            for (let ch = 0; ch < buffer.numberOfChannels; ch++) {
+              slicedBuffer.copyToChannel(
+                buffer.getChannelData(ch).subarray(startSample, startSample + frameCount),
+                ch,
+                0
+              );
+            }
+            // Load only the slice
+            wavesurfer.loadDecodedBuffer(slicedBuffer);
+          });
         
         // Handle finish event to reset state
         wavesurfer.on('finish', () => {
