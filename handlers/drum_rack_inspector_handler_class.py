@@ -179,7 +179,11 @@ class DrumRackInspectorHandler(BaseHandler):
         import os
         sample_dir = os.path.dirname(sample_path)
         sample_basename = os.path.splitext(os.path.basename(sample_path))[0]
-        output_filename = f"{sample_basename}-stretched-{int(bpm_val)}-{int(measures_val)}.wav"
+        # Format BPM and measures as strings preserving decimals
+        bpm_str = f"{bpm_val:g}"
+        measures_str = f"{measures_val:g}"
+        output_filename = f"{sample_basename}-stretched-{bpm_str}-{measures_str}.wav"
+        # output_filename = f"{sample_basename}-stretched-{int(bpm_val)}-{int(measures_val)}.wav"
         output_path = os.path.join(sample_dir, output_filename)
 
         success, ts_message, new_path = time_stretch_wav(sample_path, target_duration, output_path)
