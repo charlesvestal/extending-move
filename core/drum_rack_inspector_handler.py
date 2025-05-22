@@ -181,35 +181,36 @@ def scan_for_drum_rack_presets():
                 'presets': []
             }
 
-        # Scan all .ablpreset files
-        for filename in os.listdir(presets_dir):
-            if filename.endswith('.ablpreset'):
-                filepath = os.path.join(presets_dir, filename)
-                try:
-                    with open(filepath, 'r') as f:
-                        preset_data = json.load(f)
-                        
-                    # Function to recursively search for drumRack devices
-                    def has_drum_rack(data):
-                        if isinstance(data, dict):
-                            if data.get('kind') == 'drumRack':
-                                return True
-                            return any(has_drum_rack(v) for v in data.values())
-                        elif isinstance(data, list):
-                            return any(has_drum_rack(item) for item in data)
-                        return False
+        # Recursively scan all .ablpreset files
+        for root, _, files in os.walk(presets_dir):
+            for filename in files:
+                if filename.endswith('.ablpreset'):
+                    filepath = os.path.join(root, filename)
+                    try:
+                        with open(filepath, 'r') as f:
+                            preset_data = json.load(f)
+                            
+                        # Function to recursively search for drumRack devices
+                        def has_drum_rack(data):
+                            if isinstance(data, dict):
+                                if data.get('kind') == 'drumRack':
+                                    return True
+                                return any(has_drum_rack(v) for v in data.values())
+                            elif isinstance(data, list):
+                                return any(has_drum_rack(item) for item in data)
+                            return False
 
-                    # If preset contains a drumRack, add it to our list
-                    if has_drum_rack(preset_data):
-                        preset_name = os.path.splitext(filename)[0]
-                        drum_rack_presets.append({
-                            'name': preset_name,
-                            'path': filepath
-                        })
+                        # If preset contains a drumRack, add it to our list
+                        if has_drum_rack(preset_data):
+                            preset_name = os.path.splitext(filename)[0]
+                            drum_rack_presets.append({
+                                'name': preset_name,
+                                'path': filepath
+                            })
 
-                except Exception as e:
-                    print(f"Warning: Could not parse preset {filename}: {e}")
-                    continue
+                    except Exception as e:
+                        print(f"Warning: Could not parse preset {filename}: {e}")
+                        continue
 
         return {
             'success': True,
