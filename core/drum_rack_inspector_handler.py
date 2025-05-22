@@ -3,7 +3,7 @@ import os
 import json
 import urllib.parse
 
-def update_drum_cell_sample(preset_path, pad_number, new_sample_path):
+def update_drum_cell_sample(preset_path, pad_number, new_sample_path, new_playback_start=None, new_playback_length=None):
     """
     Update the sample URI for a specific drum cell in a preset.
     
@@ -39,6 +39,14 @@ def update_drum_cell_sample(preset_path, pad_number, new_sample_path):
                         if 'deviceData' not in data:
                             data['deviceData'] = {}
                         data['deviceData']['sampleUri'] = uri
+                        # Update slice playback parameters if given
+                        if new_playback_start is not None or new_playback_length is not None:
+                            if 'parameters' not in data:
+                                data['parameters'] = {}
+                            if new_playback_start is not None:
+                                data['parameters']['Voice_PlaybackStart'] = float(new_playback_start)
+                            if new_playback_length is not None:
+                                data['parameters']['Voice_PlaybackLength'] = float(new_playback_length)
                         found[0] = True
                     current_pad[0] += 1
                     
