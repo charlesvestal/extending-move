@@ -22,7 +22,7 @@ Tools for extending the Ableton Move. This project provides a companion webserve
   - View all samples in a drum rack preset
   - Download individual samples
   - Create reversed versions directly in the preset
-  - Time stretch samples to a target BPM and length with two different algoritms, for melodic or rhythmic content.
+  - Time stretch samples to a target BPM and length with two different algorithms, for melodic or rhythmic content.
 
 - **Synth Macros**
   - View and edit macro mappings for Drift presets
