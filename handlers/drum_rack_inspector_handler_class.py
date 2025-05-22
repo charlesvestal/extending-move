@@ -292,36 +292,53 @@ class DrumRackInspectorHandler(BaseHandler):
         """Handle reversing a sample."""
         sample_path = form.getvalue('sample_path')
         preset_path = form.getvalue('preset_path')
-        
+
         if not sample_path or not preset_path:
             return self.format_error_response("Missing sample or preset path")
-            
+
         try:
             # Get the directory and filename
             sample_dir = os.path.dirname(sample_path)
             sample_filename = os.path.basename(sample_path)
-            
+
+            # Retrieve original slice parameters
+            pad_number = form.getvalue('pad_number')
+            if not pad_number:
+                return self.format_error_response("Missing pad number")
+            samples_info = get_drum_cell_samples(preset_path)
+            if not samples_info['success']:
+                return self.format_error_response(samples_info['message'])
+            orig = next((s for s in samples_info['samples'] if int(s['pad']) == int(pad_number)), None)
+            if orig:
+                orig_start = float(orig.get('playback_start', 0.0))
+                orig_length = float(orig.get('playback_length', 1.0))
+            else:
+                orig_start, orig_length = 0.0, 1.0
+
             # Reverse the sample
             success, message, new_path = reverse_wav_file(sample_filename, sample_dir)
             if not success:
                 return self.format_error_response(f"Failed to reverse sample: {message}")
-                
-            # Update the preset to use the new sample path
-            pad_number = form.getvalue('pad_number')
-            if not pad_number:
-                return self.format_error_response("Missing pad number")
-                
-            success, update_message = update_drum_cell_sample(preset_path, pad_number, new_path)
+
+            # Compute new slice start for reversed audio
+            new_start = max(0.0, 1.0 - (orig_start + orig_length))
+            new_length = orig_length
+
+            # Update the preset to use the new sample path and new slice parameters
+            success, update_message = update_drum_cell_sample(
+                preset_path, pad_number, new_path,
+                new_playback_start=new_start, new_playback_length=new_length
+            )
             if not success:
                 return self.format_error_response(f"Failed to update preset: {update_message}")
-                
+
             message = f"{message}\n{update_message}"
-                
+
             # Now get the samples to redisplay the grid
             result = get_drum_cell_samples(preset_path)
             if not result['success']:
                 return self.format_error_response(result['message'])
-                
+
             # Generate grid HTML
             samples_html = '<div class="drum-grid">'
             grid_samples = [None] * 16
@@ -402,6 +419,6 @@ class DrumRackInspectorHandler(BaseHandler):
                 'message': message,
                 'samples_html': samples_html
             }
-            
+
         except Exception as e:
             return self.format_error_response(f"Error reversing sample: {str(e)}")
