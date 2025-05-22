@@ -32,31 +32,49 @@ def cleanup_temp_files(files_to_cleanup):
         except Exception as e:
             print(f"Warning: Failed to clean up {path}: {e}")
 
-def generate_choke_kit_template(preset_name):
+def generate_kit_template(preset_name, kit_type='choke'):
     """
-    Generates a Move Choke Kit template with 16 drum cell chains.
-    
-    This creates a Move preset file structure that includes:
-    - An instrument rack containing a drum rack
-    - 16 drum cells with MIDI notes 36-51
-    - Each cell in a choke group for one-shot behavior
-    - Default envelope settings for clean sample playback
-    - A reverb return track
-    - A saturator for additional processing
-    
+    Generates a Move Kit template with 16 drum cell chains, supporting choke, gate, or drum kit types.
+
     Args:
         preset_name: Name to use for the preset
-    
+        kit_type: One of 'choke', 'gate', or 'drum'
+
     Returns:
         dict: Complete Move preset structure following the schema:
               http://tech.ableton.com/schema/song/1.4.4/devicePreset.json
-    
-    Note:
-        Each drum cell initially has a placeholder sampleUri that will
-        be updated later with actual slice file paths.
+
+    Kit behaviors:
+        - "choke": Voice_Envelope_Hold=60.0, chokeGroup=1, Voice_Envelope_Mode="A-H-D"
+        - "gate": Voice_Envelope_Hold=0.6, chokeGroup=None, Voice_Envelope_Mode="A-S-R"
+        - "drum": Voice_Envelope_Hold=0.6, chokeGroup=None, Voice_Envelope_Mode="A-H-D"
     """
+    # Set kit type parameters
+    if kit_type == "choke":
+        envelope_hold = 60.0
+        choke_group = 1
+        envelope_mode = "A-H-D"
+    elif kit_type == "gate":
+        envelope_hold = 0.6
+        choke_group = None
+        envelope_mode = "A-S-R"
+    elif kit_type == "drum":
+        envelope_hold = 0.6
+        choke_group = None
+        envelope_mode = "A-H-D"
+    else:
+        # fallback to choke kit if unrecognized
+        envelope_hold = 60.0
+        choke_group = 1
+        envelope_mode = "A-S-R"
+
     drum_cells = []
     for i in range(16):
+        drum_zone_settings = {
+            "receivingNote": 36 + i,
+            "sendingNote": 60,
+            "chokeGroup": choke_group
+        }
         cell = {
             "name": "",
             "color": 0,
@@ -65,9 +83,11 @@ def generate_choke_kit_template(preset_name):
                     "presetUri": None,
                     "kind": "drumCell",
                     "name": "",
-                    "parameters": {"Voice_Envelope_Hold": 60.0},  # Prevents sample truncation
+                    "parameters": {
+                        "Voice_Envelope_Hold": envelope_hold,
+                        "Voice_Envelope_Mode": envelope_mode,
+                    },
                     "deviceData": {
-                        # Placeholder URI; will be replaced later
                         "sampleUri": f"ableton:/user-library/Samples/Preset%20Samples/Placeholder_slice_{i+1:02d}.wav"
                     }
                 }
@@ -79,14 +99,10 @@ def generate_choke_kit_template(preset_name):
                 "volume": 0.0,
                 "sends": [{"isEnabled": True, "amount": -70.0}]
             },
-            "drumZoneSettings": {
-                "receivingNote": 36 + i,  # MIDI notes 36-51
-                "sendingNote": 60,
-                "chokeGroup": 1  # All cells in same choke group
-            }
+            "drumZoneSettings": drum_zone_settings
         }
         drum_cells.append(cell)
-    
+
     # Create the full preset structure
     template = {
         "$schema": "http://tech.ableton.com/schema/song/1.4.4/devicePreset.json",
@@ -213,20 +229,9 @@ def get_unique_filename(path):
 def update_drumcell_sample_uris(data, slices_info, sliced_filename, current_index=0, base_uri="Samples/", total_duration=None):
     """
     Update drum cell sample URIs and playback parameters in a Move preset.
-    
-    Args:
-        data: Move preset data structure to update
-        slices_info: List of (offset, hold) tuples for each slice
-        sliced_filename: Path to the single sliced WAV file
-        current_index: Current slice index (for recursive calls)
-        base_uri: Base URI for sample references
-    
-    Returns:
-        int: Updated current_index
-    
-    This function recursively walks the preset structure, finding drum cells
-    and updating their sampleUri and playback parameters. All cells reference
-    the same WAV file but with different playback start points and durations.
+
+    Only updates Voice_Envelope_Hold if it is currently 60.0 (the default for choke kit),
+    so user-set values from the template (e.g., 0.6 for gate/drum) are respected.
     """
     # Compute total_duration once
     if total_duration is None:
@@ -248,12 +253,14 @@ def update_drumcell_sample_uris(data, slices_info, sliced_filename, current_inde
                     data["parameters"] = {}
                 offset, hold = slices_info[current_index]
                 data["parameters"]["Voice_PlaybackStart"] = offset
-                data["parameters"]["Voice_Envelope_Hold"] = 60.0
+                # Only update Voice_Envelope_Hold if it is currently 60.0
+                if data["parameters"].get("Voice_Envelope_Hold", None) == 60.0:
+                    data["parameters"]["Voice_Envelope_Hold"] = 60.0
+                # Always update Decay and PlaybackLength as before
                 data["parameters"]["Voice_Envelope_Decay"] = 0.0
-                # Add playback length as fraction of full file
                 playback_length = hold / total_duration if total_duration > 0 else 0
                 data["parameters"]["Voice_PlaybackLength"] = playback_length
-                print(f"Updated drumCell sampleUri to {new_uri} with Voice_PlaybackStart {offset} and Voice_Envelope_Hold set to 60.0")
+                print(f"Updated drumCell sampleUri to {new_uri} with Voice_PlaybackStart {offset} and Voice_Envelope_Hold {data['parameters'].get('Voice_Envelope_Hold')}")
                 current_index += 1
             else:
                 data["deviceData"]["sampleUri"] = None
@@ -289,8 +296,8 @@ def create_bundle(preset_filename, slice_paths, bundle_name):
             zf.write(slice_path, arcname=arcname)
             print(f"Added {slice_path} as {arcname}")
 
-def process_kit(input_wav, preset_name=None, regions=None, num_slices=None, keep_files=False, 
-               mode="download"):
+def process_kit(input_wav, preset_name=None, regions=None, num_slices=None, keep_files=False,
+               mode="download", kit_type="choke"):
     """
     Process a WAV file into a Move drum kit preset.
     
@@ -334,7 +341,7 @@ def process_kit(input_wav, preset_name=None, regions=None, num_slices=None, keep
             print(f"No preset name provided; defaulting to '{preset}'.")
 
         # Generate the kit template
-        kit_template = generate_choke_kit_template(preset)
+        kit_template = generate_kit_template(preset, kit_type=kit_type)
 
         if mode == "download":
             # Set up paths for bundle creation

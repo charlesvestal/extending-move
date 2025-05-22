@@ -51,6 +51,9 @@ class SliceHandler(BaseHandler):
         if not mode or mode not in ["download", "auto_place"]:
             return self.format_error_response("Bad Request: Invalid mode")
 
+        # Get kit type from form
+        kit_type = form.getvalue('kit_type', 'choke')
+
         # Handle file upload
         success, filepath, error_response = self.handle_file_upload(form)
         if not success:
@@ -81,7 +84,8 @@ class SliceHandler(BaseHandler):
                 regions=regions,
                 num_slices=num_slices,
                 keep_files=False,
-                mode=mode
+                mode=mode,
+                kit_type=kit_type
             )
 
             if not result.get('success'):
