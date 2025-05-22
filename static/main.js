@@ -248,6 +248,9 @@ async function submitForm(form, tabName) {
                 initializeWaveform();
             } else if (tabName === 'DrumRackInspector') {
                 initializeDrumRackWaveforms();
+                if (typeof initializeTimeStretchModal === 'function') {
+                    initializeTimeStretchModal();
+                }
             } else if (tabName === 'Restore') {
                 initializeRestoreForm();
             }
