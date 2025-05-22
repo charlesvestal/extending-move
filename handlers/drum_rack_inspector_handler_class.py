@@ -182,6 +182,17 @@ class DrumRackInspectorHandler(BaseHandler):
             measures_val = float(measures)
             # 4 beats per measure, each beat is 60/bpm seconds
             target_duration = (60.0 / bpm_val) * 4 * measures_val
+
+            # Retrieve original slice parameters for this pad
+            samples_info = get_drum_cell_samples(preset_path)
+            if not samples_info['success']:
+                return self.format_error_response(samples_info['message'])
+            orig = next((s for s in samples_info['samples']
+                         if int(s['pad']) == int(pad_number)), None)
+            playback_length = float(orig.get('playback_length', 1.0)) if orig else 1.0
+
+            # Compute full-stretch duration so slice maps to target duration
+            full_stretch_duration = target_duration / playback_length
         except ValueError:
             return self.format_error_response("Invalid BPM or measures values")
 
@@ -192,11 +203,10 @@ class DrumRackInspectorHandler(BaseHandler):
         # Format BPM and measures as strings preserving decimals
         bpm_str = f"{bpm_val:g}"
         measures_str = f"{measures_val:g}"
-        output_filename = f"{sample_basename}-stretched-{bpm_str}-{measures_str}.wav"
-        # output_filename = f"{sample_basename}-stretched-{int(bpm_val)}-{int(measures_val)}.wav"
+        output_filename = f"{sample_basename}-slice{pad_number}-stretched-{bpm_str}-{measures_str}.wav"
         output_path = os.path.join(sample_dir, output_filename)
 
-        success, ts_message, new_path = time_stretch_wav(sample_path, target_duration, output_path)
+        success, ts_message, new_path = time_stretch_wav(sample_path, full_stretch_duration, output_path)
         if not success:
             return self.format_error_response(f"Failed to time-stretch sample: {ts_message}")
 
