@@ -354,4 +354,10 @@ select {
     align-items: center;
     gap: 0.5rem;
     margin-top: 0.5rem;
+    flex-wrap: wrap;
+}
+
+/* Push sample-info to bottom of the cell */
+.drum-cell .sample-info {
+    margin-top: auto;
 }
