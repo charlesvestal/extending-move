@@ -2,9 +2,12 @@ import os
 import librosa
 import soundfile as sf
 
+from audiotsm import wsola
+from audiotsm.io.wav import WavReader, WavWriter
+
 from core.refresh_handler import refresh_library
 
-def time_stretch_wav(input_path, target_duration, output_path, preserve_pitch=True):
+def time_stretch_wav(input_path, target_duration, output_path, preserve_pitch=True, algorithm='wsola'):
     """
     Time-stretch a WAV file to a target duration, keeping pitch constant.
 
@@ -29,9 +32,18 @@ def time_stretch_wav(input_path, target_duration, output_path, preserve_pitch=Tr
             return False, "Invalid target duration.", None
 
         if preserve_pitch:
-            # Stretch with constant pitch
-            y_stretched = librosa.effects.time_stretch(y, rate=rate)
-            sf.write(output_path, y_stretched, sr)
+            if algorithm == 'wsola':
+                # WSOLA for transient preservation
+                with WavReader(input_path) as reader, WavWriter(output_path, reader.channels, reader.samplerate) as writer:
+                    tsm = wsola(reader.channels)
+                    tsm.set_speed(rate)
+                    tsm.run(reader, writer)
+            elif algorithm == 'phase':
+                # Phase-vocoder via librosa for smooth harmonic material
+                y_stretched = librosa.effects.time_stretch(y, rate=rate)
+                sf.write(output_path, y_stretched, sr)
+            else:
+                return False, f"Unknown algorithm: {algorithm}", None
         else:
             # Repitch by adjusting sample rate
             new_sr = int(sr * rate)
