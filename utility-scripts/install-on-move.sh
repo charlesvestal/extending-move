@@ -75,9 +75,11 @@ fi
 echo "Executing get-pip.py..."
 python3 /data/UserData/get-pip.py
 
+
 # Install requirements using pip (without using the cache).
 echo "Installing requirements with pip..."
 pip install --no-cache-dir -r requirements.txt
+
 
 echo "Remote setup complete."
 EOF
