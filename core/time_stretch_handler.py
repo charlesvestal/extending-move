@@ -22,7 +22,7 @@ def time_stretch_wav(input_path, target_duration, output_path):
             return False, "Source file duration is zero", None
 
         # Compute stretch ratio
-        rate = target_duration / original_duration
+        rate = original_duration / target_duration
         if rate <= 0:
             return False, "Invalid target duration.", None
 
