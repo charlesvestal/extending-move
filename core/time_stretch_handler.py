@@ -1,9 +1,10 @@
 import os
 import librosa
 import soundfile as sf
-
+import tempfile
+import numpy as np
+from audiotsm.io.array import ArrayReader, ArrayWriter
 from audiotsm import wsola
-from audiotsm.io.wav import WavReader, WavWriter
 
 from core.refresh_handler import refresh_library
 
@@ -20,6 +21,18 @@ def time_stretch_wav(input_path, target_duration, output_path, preserve_pitch=Tr
         tuple: (success: bool, message: str, output_path: str)
     """
     try:
+        # Preserve original file format and subtype for writing (e.g., 24-bit WAV)
+        info = sf.info(input_path)
+        subtype = info.subtype
+        # Determine format based on extension
+        ext_lower = os.path.splitext(input_path)[1].lower()
+        format_map = {
+            '.wav': 'WAV',
+            '.aif': 'AIFF',
+            '.aiff': 'AIFF'
+        }
+        write_format = format_map.get(ext_lower)
+
         # Load audio
         y, sr = librosa.load(input_path, sr=None, mono=True)
         original_duration = librosa.get_duration(y=y, sr=sr)
@@ -33,21 +46,56 @@ def time_stretch_wav(input_path, target_duration, output_path, preserve_pitch=Tr
 
         if preserve_pitch:
             if algorithm == 'wsola':
-                # WSOLA for transient preservation
-                with WavReader(input_path) as reader, WavWriter(output_path, reader.channels, reader.samplerate) as writer:
-                    tsm = wsola(reader.channels)
-                    tsm.set_speed(rate)
-                    tsm.run(reader, writer)
+                # Load audio data for WSOLA
+                data, sr = sf.read(input_path, dtype='float32')
+                # Ensure shape is (channels, frames)
+                if data.ndim == 1:
+                    data = data[np.newaxis, :]
+                else:
+                    data = data.T
+                # Time-stretch using array-based WSOLA
+                reader = ArrayReader(data)
+                writer = ArrayWriter(data.shape[0])
+                tsm = wsola(data.shape[0])
+                tsm.set_speed(rate)
+                tsm.run(reader, writer)
+                # Retrieve stretched data
+                y_stretched = writer.data
+                # Convert back to (frames, channels) or 1D
+                if y_stretched.shape[0] == 1:
+                    y_stretched = y_stretched.flatten()
+                else:
+                    y_stretched = y_stretched.T
+                # Write output preserving original format and subtype
+                sf.write(
+                    output_path,
+                    y_stretched,
+                    sr,
+                    format=write_format,
+                    subtype=subtype
+                )
             elif algorithm == 'phase':
                 # Phase-vocoder via librosa for smooth harmonic material
                 y_stretched = librosa.effects.time_stretch(y, rate=rate)
-                sf.write(output_path, y_stretched, sr)
+                sf.write(
+                    output_path,
+                    y_stretched,
+                    sr,
+                    format=write_format,
+                    subtype=subtype
+                )
             else:
                 return False, f"Unknown algorithm: {algorithm}", None
         else:
             # Repitch by adjusting sample rate
             new_sr = int(sr * rate)
-            sf.write(output_path, y, new_sr)
+            sf.write(
+                output_path,
+                y,
+                new_sr,
+                format=write_format,
+                subtype=subtype
+            )
 
         # Refresh library
         refresh_success, refresh_message = refresh_library()

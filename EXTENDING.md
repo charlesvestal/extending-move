@@ -1,10 +1,10 @@
 # Extending Move
 
-This guide explains how to extend the Move webserver with new features. The webserver follows a modular architecture where each feature consists of three main components:
+This guide explains how to add new features to the Move webserver. Move follows a modular structure, with each feature comprising three components:
 
-1. Core functionality in the `core/` directory
-2. A web handler in the `handlers/` directory
-3. An HTML template in the `templates/` directory
+- **Core Logic**: Business logic (e.g., audio processing) in `core/`
+- **Web Handler**: HTTP request handling in `handlers/`
+- **HTML Template**: User interface in `templates/`
 
 ## Project Structure
 
@@ -16,6 +16,7 @@ extending-move/
 │   ├── slice_handler.py         # Sample slicing and kit creation
 │   ├── refresh_handler.py       # Library refresh via D-Bus
 │   ├── reverse_handler.py       # WAV file reversal
+│   ├── time_stretch_handler.py      # Time-stretching (with WSOLA/Phase-vocoder & repitch options)
 │   ├── restore_handler.py       # Move Set restoration
 │   ├── drum_rack_inspector.py   # Preset inspection and modification
 │   └── synth_preset_inspector_handler.py  # Synth preset macro management
@@ -50,6 +51,11 @@ extending-move/
     ├── update-on-move.sh      # Update deployment script
     └── restart-webserver.sh   # Server management script
 ```
+
+Each feature should follow this structure precisely:
+- Core logic: `core/feature_name_handler.py`
+- Handler class: `handlers/feature_name_handler_class.py`
+- UI template: `templates/feature_name.html`
 
 ## Core Components
 
@@ -265,34 +271,101 @@ subprocess.run([
 
 ## Adding a New Feature
 
-1. Create core functionality in `core/your_feature.py`
-2. Create web handler in `handlers/your_feature_handler_class.py`
-3. Create template in `templates/your_feature.html`
-4. Add routing in `move-webserver.py`:
+Follow these steps to add a new feature called `your_feature`:
+
+### Step 1: Core Logic
+Create `core/your_feature_handler.py` with a function for your main logic:
+
+```python
+def your_feature_logic(input_param1, input_param2):
+    try:
+        # Implement core logic here
+        result = ...  # your result data
+        return {'success': True, 'data': result, 'message': 'Operation succeeded'}
+    except Exception as e:
+        return {'success': False, 'message': str(e)}
+```
+
+### Step 2: Web Handler
+Create `handlers/your_feature_handler_class.py` inheriting from `BaseHandler`:
+
+```python
+from handlers.base_handler import BaseHandler
+from core.your_feature_handler import your_feature_logic
+
+class YourFeatureHandler(BaseHandler):
+    def handle_post(self, form):
+        # Validate form input
+        if 'param1' not in form:
+            return self.format_error_response('Missing required parameter: param1')
+
+        # Process logic
+        result = your_feature_logic(form.getvalue('param1'), form.getvalue('param2'))
+
+        # Handle response
+        if result['success']:
+            return self.format_success_response(result['message'], additional_data=result.get('data'))
+        else:
+            return self.format_error_response(result['message'])
+```
+
+### Step 3: UI Template
+Create `templates/your_feature.html` to render your UI:
+
+```html
+<h2>Your Feature</h2>
+{message_html}
+<form method="post">
+    <input type="text" name="param1" required />
+    <input type="text" name="param2" />
+    <button type="submit">Submit</button>
+</form>
+```
+
+### Step 4: Routing
+In `move-webserver.py`, register your routes:
+
 ```python
 from handlers.your_feature_handler_class import YourFeatureHandler
 
 class MyServer(BaseHTTPRequestHandler):
     your_feature_handler = YourFeatureHandler()
-    
+
     @route_handler.get("/your-feature", "your_feature.html")
     def handle_your_feature_get(self):
         return {}
-        
+
     @route_handler.post("/your-feature")
     def handle_your_feature_post(self, form):
         return self.your_feature_handler.handle_post(form)
 ```
 
-5. Add tab in `templates/index.html`:
+### Step 5: Tab Integration
+In `templates/index.html`, add a tab entry:
+
 ```html
-<button class="tablinks" onclick="openTab(event, 'YourFeature')">
-    Your Feature
-</button>
-<div id="YourFeature" class="tabcontent">
-    <!-- Content loaded dynamically -->
-</div>
+<button class="tablinks" onclick="openTab(event, 'YourFeature')">Your Feature</button>
+<div id="YourFeature" class="tabcontent"></div>
 ```
+
+### Example: Time Stretch Feature
+
+Demonstrates adding audio time-stretching functionality:
+
+- Core (`core/time_stretch_handler.py`):
+  - Implements `time_stretch_wav` for WSOLA, phase-vocoder, and repitch.
+
+- Web Handler (`handlers/drum_rack_inspector_handler_class.py`):
+  - Processes form inputs (BPM, measures, preserve pitch, algorithm).
+  - Calls the core function and updates presets.
+
+- Template (`templates/drum_rack_inspector.html`):
+  - Provides a modal with form inputs and dynamic updates.
+
+- JavaScript (`static/main.js`):
+  - AJAX form submission and waveform updates.
+
+Dependencies added: `audiotsm`, `librosa`, `soundfile`.
 
 ## Form Submission Approach
 
