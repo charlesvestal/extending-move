@@ -153,6 +153,7 @@ class DrumRackInspectorHandler(BaseHandler):
         bpm = form.getvalue('bpm')
         measures = form.getvalue('measures')
         preserve_pitch = form.getvalue('preserve_pitch') is not None
+        algorithm = form.getvalue('algorithm') or 'wsola'
 
         # Step 1: Ask for BPM and measures if not provided
         if bpm is None or measures is None:
@@ -208,7 +209,13 @@ class DrumRackInspectorHandler(BaseHandler):
         output_filename = f"{sample_basename}-slice{pad_number}-{suffix}-{bpm_str}-{measures_str}.wav"
         output_path = os.path.join(sample_dir, output_filename)
 
-        success, ts_message, new_path = time_stretch_wav(sample_path, full_stretch_duration, output_path, preserve_pitch=preserve_pitch)
+        success, ts_message, new_path = time_stretch_wav(
+            sample_path,
+            full_stretch_duration,
+            output_path,
+            preserve_pitch=preserve_pitch,
+            algorithm=algorithm
+        )
         if not success:
             return self.format_error_response(f"Failed to time-stretch sample: {ts_message}")
 
