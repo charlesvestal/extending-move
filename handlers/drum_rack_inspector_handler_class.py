@@ -74,9 +74,15 @@ class DrumRackInspectorHandler(BaseHandler):
                                 </div>
                                 <div id="{waveform_id}" class="waveform-container" data-audio-path="{web_path}"></div>
                                 <div class="sample-info">
-                                    <span class="sample-name">{sample["sample"]}</span>
+                                    <div class="sample-header">
+                                        <span class="sample-name">{sample["sample"]}</span>
+                                        <a href="{web_path}" target="_blank" class="download-link" aria-label="Download">
+                                            <svg fill="none" viewBox="0 0 20 18" height="18" width="20" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M10 12.2892V0M10 12.2892L14.6667 8.19277M10 12.2892L5.33333 8.19277M17 17H3" stroke="currentColor" stroke-width="1.5"/>
+                                            </svg>
+                                        </a>
+                                    </div>
                                     <div class="sample-actions">
-                                        <a href="{web_path}" target="_blank" class="download-link">Download</a>
                                         <form method="POST" action="/drum-rack-inspector" style="display: inline;">
                                             <input type="hidden" name="action" value="reverse_sample">
                                             <input type="hidden" name="sample_path" value="{sample['path']}">
@@ -226,9 +232,15 @@ class DrumRackInspectorHandler(BaseHandler):
                         </div>
                         <div id="{wf_id}" class="waveform-container" data-audio-path="{web_path}"></div>
                         <div class="sample-info">
-                            <span class="sample-name">{sample["sample"]}</span>
+                            <div class="sample-header">
+                                <span class="sample-name">{sample["sample"]}</span>
+                                <a href="{web_path}" target="_blank" class="download-link" aria-label="Download">
+                                    <svg fill="none" viewBox="0 0 20 18" height="18" width="20" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M10 12.2892V0M10 12.2892L14.6667 8.19277M10 12.2892L5.33333 8.19277M17 17H3" stroke="currentColor" stroke-width="1.5"/>
+                                    </svg>
+                                </a>
+                            </div>
                             <div class="sample-actions">
-                                <a href="{web_path}" target="_blank" class="download-link">Download</a>
                                 <form method="POST" action="/drum-rack-inspector" style="display: inline;">
                                     <input type="hidden" name="action" value="reverse_sample">
                                     <input type="hidden" name="sample_path" value="{sample['path']}">
@@ -331,9 +343,15 @@ class DrumRackInspectorHandler(BaseHandler):
                                 </div>
                                 <div id="{waveform_id}" class="waveform-container" data-audio-path="{web_path}"></div>
                                 <div class="sample-info">
-                                    <span class="sample-name">{sample["sample"]}</span>
+                                    <div class="sample-header">
+                                        <span class="sample-name">{sample["sample"]}</span>
+                                        <a href="{web_path}" target="_blank" class="download-link" aria-label="Download">
+                                            <svg fill="none" viewBox="0 0 20 18" height="18" width="20" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M10 12.2892V0M10 12.2892L14.6667 8.19277M10 12.2892L5.33333 8.19277M17 17H3" stroke="currentColor" stroke-width="1.5"/>
+                                            </svg>
+                                        </a>
+                                    </div>
                                     <div class="sample-actions">
-                                        <a href="{web_path}" target="_blank" class="download-link">Download</a>
                                         <form method="POST" action="/drum-rack-inspector" style="display: inline;">
                                             <input type="hidden" name="action" value="reverse_sample">
                                             <input type="hidden" name="sample_path" value="{sample['path']}">
