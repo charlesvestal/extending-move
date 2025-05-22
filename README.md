@@ -22,6 +22,7 @@ Tools for extending the Ableton Move. This project provides a companion webserve
   - View all samples in a drum rack preset
   - Download individual samples
   - Create reversed versions directly in the preset
+  - Time stretch samples to a target BPM and length with two different algoritms, for melodic or rhythmic content.
 
 - **Synth Macros**
   - View and edit macro mappings for Drift presets
@@ -36,11 +37,11 @@ Tools for extending the Ableton Move. This project provides a companion webserve
   - Automatic pitch-shifting and normalization
   - Download as `.ablpresetbundle` or place directly on device
 
-- **Sliced Choke Kit Creation**
+- **Sliced Kit Creation**
   - Use a visual slicer to create drum kits from WAV files with up to 16 slices
   - Choose custom slice points for each drum pad
   - Download as `.ablpresetbundle` or place directly on device
-  - Automatic choke group configuration for one-shot behavior
+  - Create a choke group configuration for one-shot behavior, or use Gate and Drum kit style presets
 
 - **Manual Library Refresh**
   - Accessible via move.local:909/refresh
@@ -131,7 +132,8 @@ The server will be accessible at http://move.local:909
 Note: Execute these scripts from your computer, not the Move.
 
 Located in `utility-scripts/`:
-- `install-on-move.sh` / `.command`: Initial setup and installation
+- `setup-ssh-and-install-on-move.command`: Walks through setting up an ssh key, installing files, and setting auto-start
+- `install-on-move.sh` / `.command`: Content installation
 - `update-on-move.sh` / `.command`: Update with latest files
 - `restart-webserver.sh`: Restart the webserver
 
