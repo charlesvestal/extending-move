@@ -1,7 +1,7 @@
 {
-  "$schema": "http://tech.ableton.com/schema/song/1.4.5/devicePreset.json",
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
   "kind": "instrumentRack",
-  "name": "Choke Kit",
+  "name": "Gate Kit",
   "lockId": 1001,
   "lockSeal": -973461132,
   "parameters": {
@@ -50,22 +50,22 @@
                     "Effect_EightBitFilterDecay": 5.0,
                     "Effect_EightBitResamplingRate": 14080.0,
                     "Effect_FmAmount": 0.0,
-                    "Effect_FmFrequency": 1000.0,
+                    "Effect_FmFrequency": 999.9998779296875,
                     "Effect_LoopLength": 0.30000001192092896,
-                    "Effect_LoopOffset": 0.019999999552965164,
+                    "Effect_LoopOffset": 0.0,
                     "Effect_NoiseAmount": 0.0,
-                    "Effect_NoiseFrequency": 10000.0,
+                    "Effect_NoiseFrequency": 10000.0009765625,
                     "Effect_On": true,
                     "Effect_PitchEnvelopeAmount": 0.0,
-                    "Effect_PitchEnvelopeDecay": 0.30000001192092896,
+                    "Effect_PitchEnvelopeDecay": 0.29999998211860657,
                     "Effect_PunchAmount": 0.0,
                     "Effect_PunchTime": 0.12015999853610992,
                     "Effect_RingModAmount": 0.0,
-                    "Effect_RingModFrequency": 1000.0,
+                    "Effect_RingModFrequency": 999.9998168945313,
                     "Effect_StretchFactor": 1.0,
-                    "Effect_StretchGrainSize": 0.10000000149011612,
+                    "Effect_StretchGrainSize": 0.09999999403953552,
                     "Effect_SubOscAmount": 0.0,
-                    "Effect_SubOscFrequency": 60.0,
+                    "Effect_SubOscFrequency": 59.99999237060547,
                     "Effect_Type": "Stretch",
                     "Enabled": true,
                     "NotePitchBend": true,
@@ -73,9 +73,9 @@
                     "Voice_Detune": 0.0,
                     "Voice_Envelope_Attack": 0.0010000000474974513,
                     "Voice_Envelope_Decay": 0.0010000000474974513,
-                    "Voice_Envelope_Hold": 0.819405895596617,
-                    "Voice_Envelope_Mode": "A-H-D",
-                    "Voice_Filter_Frequency": 22000.0,
+                    "Voice_Envelope_Hold": 0.6000000238418579,
+                    "Voice_Envelope_Mode": "A-S-R",
+                    "Voice_Filter_Frequency": 21999.990234375,
                     "Voice_Filter_On": true,
                     "Voice_Filter_PeakGain": 1.0,
                     "Voice_Filter_Resonance": 0.0,
@@ -84,14 +84,15 @@
                     "Voice_ModulationAmount": 0.0,
                     "Voice_ModulationSource": "Velocity",
                     "Voice_ModulationTarget": "Filter",
+                    "Voice_PitchToEnvelopeModulation": true,
                     "Voice_PlaybackLength": 1.0,
                     "Voice_PlaybackStart": 0.0,
                     "Voice_Transpose": 0,
-                    "Voice_VelocityToVolume": 0.5,
-                    "Volume": -12.0
+                    "Voice_VelocityToVolume": 0.3499999940395355,
+                    "Volume": -11.999999046325684
                   },
                   "deviceData": {
-                    "sampleUri": "ableton:/user-library/Recordings/Set%204%20Rec%207.wav"
+                    "sampleUri": null
                   }
                 }
               ],
@@ -110,7 +111,7 @@
               "drumZoneSettings": {
                 "receivingNote": 36,
                 "sendingNote": 60,
-                "chokeGroup": 1
+                "chokeGroup": null
               }
             },
             {
@@ -125,22 +126,22 @@
                     "Effect_EightBitFilterDecay": 5.0,
                     "Effect_EightBitResamplingRate": 14080.0,
                     "Effect_FmAmount": 0.0,
-                    "Effect_FmFrequency": 1000.0,
+                    "Effect_FmFrequency": 999.9998779296875,
                     "Effect_LoopLength": 0.30000001192092896,
-                    "Effect_LoopOffset": 0.019999999552965164,
+                    "Effect_LoopOffset": 0.0,
                     "Effect_NoiseAmount": 0.0,
-                    "Effect_NoiseFrequency": 10000.0,
+                    "Effect_NoiseFrequency": 10000.0009765625,
                     "Effect_On": true,
                     "Effect_PitchEnvelopeAmount": 0.0,
-                    "Effect_PitchEnvelopeDecay": 0.30000001192092896,
+                    "Effect_PitchEnvelopeDecay": 0.29999998211860657,
                     "Effect_PunchAmount": 0.0,
                     "Effect_PunchTime": 0.12015999853610992,
                     "Effect_RingModAmount": 0.0,
-                    "Effect_RingModFrequency": 1000.0,
+                    "Effect_RingModFrequency": 999.9998168945313,
                     "Effect_StretchFactor": 1.0,
-                    "Effect_StretchGrainSize": 0.10000000149011612,
+                    "Effect_StretchGrainSize": 0.09999999403953552,
                     "Effect_SubOscAmount": 0.0,
-                    "Effect_SubOscFrequency": 60.0,
+                    "Effect_SubOscFrequency": 59.99999237060547,
                     "Effect_Type": "Stretch",
                     "Enabled": true,
                     "NotePitchBend": true,
@@ -148,9 +149,9 @@
                     "Voice_Detune": 0.0,
                     "Voice_Envelope_Attack": 0.0010000000474974513,
                     "Voice_Envelope_Decay": 0.0010000000474974513,
-                    "Voice_Envelope_Hold": 0.6829886620365286,
-                    "Voice_Envelope_Mode": "A-H-D",
-                    "Voice_Filter_Frequency": 22000.0,
+                    "Voice_Envelope_Hold": 0.6000000238418579,
+                    "Voice_Envelope_Mode": "A-S-R",
+                    "Voice_Filter_Frequency": 21999.990234375,
                     "Voice_Filter_On": true,
                     "Voice_Filter_PeakGain": 1.0,
                     "Voice_Filter_Resonance": 0.0,
@@ -159,14 +160,15 @@
                     "Voice_ModulationAmount": 0.0,
                     "Voice_ModulationSource": "Velocity",
                     "Voice_ModulationTarget": "Filter",
+                    "Voice_PitchToEnvelopeModulation": true,
                     "Voice_PlaybackLength": 1.0,
-                    "Voice_PlaybackStart": 0.08105144923320659,
+                    "Voice_PlaybackStart": 0.0,
                     "Voice_Transpose": 0,
-                    "Voice_VelocityToVolume": 0.5,
-                    "Volume": -12.0
+                    "Voice_VelocityToVolume": 0.3499999940395355,
+                    "Volume": -11.999999046325684
                   },
                   "deviceData": {
-                    "sampleUri": "ableton:/user-library/Recordings/Set%204%20Rec%207.wav"
+                    "sampleUri": null
                   }
                 }
               ],
@@ -185,7 +187,7 @@
               "drumZoneSettings": {
                 "receivingNote": 37,
                 "sendingNote": 60,
-                "chokeGroup": 1
+                "chokeGroup": null
               }
             },
             {
@@ -200,22 +202,22 @@
                     "Effect_EightBitFilterDecay": 5.0,
                     "Effect_EightBitResamplingRate": 14080.0,
                     "Effect_FmAmount": 0.0,
-                    "Effect_FmFrequency": 1000.0,
+                    "Effect_FmFrequency": 999.9998779296875,
                     "Effect_LoopLength": 0.30000001192092896,
-                    "Effect_LoopOffset": 0.019999999552965164,
+                    "Effect_LoopOffset": 0.0,
                     "Effect_NoiseAmount": 0.0,
-                    "Effect_NoiseFrequency": 10000.0,
+                    "Effect_NoiseFrequency": 10000.0009765625,
                     "Effect_On": true,
                     "Effect_PitchEnvelopeAmount": 0.0,
-                    "Effect_PitchEnvelopeDecay": 0.30000001192092896,
+                    "Effect_PitchEnvelopeDecay": 0.29999998211860657,
                     "Effect_PunchAmount": 0.0,
                     "Effect_PunchTime": 0.12015999853610992,
                     "Effect_RingModAmount": 0.0,
-                    "Effect_RingModFrequency": 1000.0,
+                    "Effect_RingModFrequency": 999.9998168945313,
                     "Effect_StretchFactor": 1.0,
-                    "Effect_StretchGrainSize": 0.10000000149011612,
+                    "Effect_StretchGrainSize": 0.09999999403953552,
                     "Effect_SubOscAmount": 0.0,
-                    "Effect_SubOscFrequency": 60.0,
+                    "Effect_SubOscFrequency": 59.99999237060547,
                     "Effect_Type": "Stretch",
                     "Enabled": true,
                     "NotePitchBend": true,
@@ -223,9 +225,9 @@
                     "Voice_Detune": 0.0,
                     "Voice_Envelope_Attack": 0.0010000000474974513,
                     "Voice_Envelope_Decay": 0.0010000000474974513,
-                    "Voice_Envelope_Hold": 0.6394512470705253,
-                    "Voice_Envelope_Mode": "A-H-D",
-                    "Voice_Filter_Frequency": 22000.0,
+                    "Voice_Envelope_Hold": 0.6000000238418579,
+                    "Voice_Envelope_Mode": "A-S-R",
+                    "Voice_Filter_Frequency": 21999.990234375,
                     "Voice_Filter_On": true,
                     "Voice_Filter_PeakGain": 1.0,
                     "Voice_Filter_Resonance": 0.0,
@@ -234,14 +236,15 @@
                     "Voice_ModulationAmount": 0.0,
                     "Voice_ModulationSource": "Velocity",
                     "Voice_ModulationTarget": "Filter",
+                    "Voice_PitchToEnvelopeModulation": true,
                     "Voice_PlaybackLength": 1.0,
-                    "Voice_PlaybackStart": 0.14864205707432612,
+                    "Voice_PlaybackStart": 0.0,
                     "Voice_Transpose": 0,
-                    "Voice_VelocityToVolume": 0.5,
-                    "Volume": -12.0
+                    "Voice_VelocityToVolume": 0.3499999940395355,
+                    "Volume": -11.999999046325684
                   },
                   "deviceData": {
-                    "sampleUri": "ableton:/user-library/Recordings/Set%204%20Rec%207.wav"
+                    "sampleUri": null
                   }
                 }
               ],
@@ -260,7 +263,7 @@
               "drumZoneSettings": {
                 "receivingNote": 38,
                 "sendingNote": 60,
-                "chokeGroup": 1
+                "chokeGroup": null
               }
             },
             {
@@ -275,22 +278,22 @@
                     "Effect_EightBitFilterDecay": 5.0,
                     "Effect_EightBitResamplingRate": 14080.0,
                     "Effect_FmAmount": 0.0,
-                    "Effect_FmFrequency": 1000.0,
+                    "Effect_FmFrequency": 999.9998779296875,
                     "Effect_LoopLength": 0.30000001192092896,
-                    "Effect_LoopOffset": 0.019999999552965164,
+                    "Effect_LoopOffset": 0.0,
                     "Effect_NoiseAmount": 0.0,
-                    "Effect_NoiseFrequency": 10000.0,
+                    "Effect_NoiseFrequency": 10000.0009765625,
                     "Effect_On": true,
                     "Effect_PitchEnvelopeAmount": 0.0,
-                    "Effect_PitchEnvelopeDecay": 0.30000001192092896,
+                    "Effect_PitchEnvelopeDecay": 0.29999998211860657,
                     "Effect_PunchAmount": 0.0,
                     "Effect_PunchTime": 0.12015999853610992,
                     "Effect_RingModAmount": 0.0,
-                    "Effect_RingModFrequency": 1000.0,
+                    "Effect_RingModFrequency": 999.9998168945313,
                     "Effect_StretchFactor": 1.0,
-                    "Effect_StretchGrainSize": 0.10000000149011612,
+                    "Effect_StretchGrainSize": 0.09999999403953552,
                     "Effect_SubOscAmount": 0.0,
-                    "Effect_SubOscFrequency": 60.0,
+                    "Effect_SubOscFrequency": 59.99999237060547,
                     "Effect_Type": "Stretch",
                     "Enabled": true,
                     "NotePitchBend": true,
@@ -298,9 +301,9 @@
                     "Voice_Detune": 0.0,
                     "Voice_Envelope_Attack": 0.0010000000474974513,
                     "Voice_Envelope_Decay": 0.0010000000474974513,
-                    "Voice_Envelope_Hold": 0.7294285713335853,
-                    "Voice_Envelope_Mode": "A-H-D",
-                    "Voice_Filter_Frequency": 22000.0,
+                    "Voice_Envelope_Hold": 0.6000000238418579,
+                    "Voice_Envelope_Mode": "A-S-R",
+                    "Voice_Filter_Frequency": 21999.990234375,
                     "Voice_Filter_On": true,
                     "Voice_Filter_PeakGain": 1.0,
                     "Voice_Filter_Resonance": 0.0,
@@ -309,14 +312,15 @@
                     "Voice_ModulationAmount": 0.0,
                     "Voice_ModulationSource": "Velocity",
                     "Voice_ModulationTarget": "Filter",
+                    "Voice_PitchToEnvelopeModulation": true,
                     "Voice_PlaybackLength": 1.0,
-                    "Voice_PlaybackStart": 0.21193665170520334,
+                    "Voice_PlaybackStart": 0.0,
                     "Voice_Transpose": 0,
-                    "Voice_VelocityToVolume": 0.5,
-                    "Volume": -12.0
+                    "Voice_VelocityToVolume": 0.3499999940395355,
+                    "Volume": -11.999999046325684
                   },
                   "deviceData": {
-                    "sampleUri": "ableton:/user-library/Recordings/Set%204%20Rec%207.wav"
+                    "sampleUri": null
                   }
                 }
               ],
@@ -335,7 +339,7 @@
               "drumZoneSettings": {
                 "receivingNote": 39,
                 "sendingNote": 60,
-                "chokeGroup": 1
+                "chokeGroup": null
               }
             },
             {
@@ -350,22 +354,22 @@
                     "Effect_EightBitFilterDecay": 5.0,
                     "Effect_EightBitResamplingRate": 14080.0,
                     "Effect_FmAmount": 0.0,
-                    "Effect_FmFrequency": 1000.0,
+                    "Effect_FmFrequency": 999.9998779296875,
                     "Effect_LoopLength": 0.30000001192092896,
-                    "Effect_LoopOffset": 0.019999999552965164,
+                    "Effect_LoopOffset": 0.0,
                     "Effect_NoiseAmount": 0.0,
-                    "Effect_NoiseFrequency": 10000.0,
+                    "Effect_NoiseFrequency": 10000.0009765625,
                     "Effect_On": true,
                     "Effect_PitchEnvelopeAmount": 0.0,
-                    "Effect_PitchEnvelopeDecay": 0.30000001192092896,
+                    "Effect_PitchEnvelopeDecay": 0.29999998211860657,
                     "Effect_PunchAmount": 0.0,
                     "Effect_PunchTime": 0.12015999853610992,
                     "Effect_RingModAmount": 0.0,
-                    "Effect_RingModFrequency": 1000.0,
+                    "Effect_RingModFrequency": 999.9998168945313,
                     "Effect_StretchFactor": 1.0,
-                    "Effect_StretchGrainSize": 0.10000000149011612,
+                    "Effect_StretchGrainSize": 0.09999999403953552,
                     "Effect_SubOscAmount": 0.0,
-                    "Effect_SubOscFrequency": 60.0,
+                    "Effect_SubOscFrequency": 59.99999237060547,
                     "Effect_Type": "Stretch",
                     "Enabled": true,
                     "NotePitchBend": true,
@@ -373,9 +377,9 @@
                     "Voice_Detune": 0.0,
                     "Voice_Envelope_Attack": 0.0010000000474974513,
                     "Voice_Envelope_Decay": 0.0010000000474974513,
-                    "Voice_Envelope_Hold": 0.5088390021725786,
-                    "Voice_Envelope_Mode": "A-H-D",
-                    "Voice_Filter_Frequency": 22000.0,
+                    "Voice_Envelope_Hold": 0.6000000238418579,
+                    "Voice_Envelope_Mode": "A-S-R",
+                    "Voice_Filter_Frequency": 21999.990234375,
                     "Voice_Filter_On": true,
                     "Voice_Filter_PeakGain": 1.0,
                     "Voice_Filter_Resonance": 0.0,
@@ -384,14 +388,15 @@
                     "Voice_ModulationAmount": 0.0,
                     "Voice_ModulationSource": "Velocity",
                     "Voice_ModulationTarget": "Filter",
+                    "Voice_PitchToEnvelopeModulation": true,
                     "Voice_PlaybackLength": 1.0,
-                    "Voice_PlaybackStart": 0.28410967363724665,
+                    "Voice_PlaybackStart": 0.0,
                     "Voice_Transpose": 0,
-                    "Voice_VelocityToVolume": 0.5,
-                    "Volume": -12.0
+                    "Voice_VelocityToVolume": 0.3499999940395355,
+                    "Volume": -11.999999046325684
                   },
                   "deviceData": {
-                    "sampleUri": "ableton:/user-library/Recordings/Set%204%20Rec%207.wav"
+                    "sampleUri": null
                   }
                 }
               ],
@@ -410,7 +415,7 @@
               "drumZoneSettings": {
                 "receivingNote": 40,
                 "sendingNote": 60,
-                "chokeGroup": 1
+                "chokeGroup": null
               }
             },
             {
@@ -425,22 +430,22 @@
                     "Effect_EightBitFilterDecay": 5.0,
                     "Effect_EightBitResamplingRate": 14080.0,
                     "Effect_FmAmount": 0.0,
-                    "Effect_FmFrequency": 1000.0,
+                    "Effect_FmFrequency": 999.9998779296875,
                     "Effect_LoopLength": 0.30000001192092896,
-                    "Effect_LoopOffset": 0.019999999552965164,
+                    "Effect_LoopOffset": 0.0,
                     "Effect_NoiseAmount": 0.0,
-                    "Effect_NoiseFrequency": 10000.0,
+                    "Effect_NoiseFrequency": 10000.0009765625,
                     "Effect_On": true,
                     "Effect_PitchEnvelopeAmount": 0.0,
-                    "Effect_PitchEnvelopeDecay": 0.30000001192092896,
+                    "Effect_PitchEnvelopeDecay": 0.29999998211860657,
                     "Effect_PunchAmount": 0.0,
                     "Effect_PunchTime": 0.12015999853610992,
                     "Effect_RingModAmount": 0.0,
-                    "Effect_RingModFrequency": 1000.0,
+                    "Effect_RingModFrequency": 999.9998168945313,
                     "Effect_StretchFactor": 1.0,
-                    "Effect_StretchGrainSize": 0.10000000149011612,
+                    "Effect_StretchGrainSize": 0.09999999403953552,
                     "Effect_SubOscAmount": 0.0,
-                    "Effect_SubOscFrequency": 60.0,
+                    "Effect_SubOscFrequency": 59.99999237060547,
                     "Effect_Type": "Stretch",
                     "Enabled": true,
                     "NotePitchBend": true,
@@ -448,9 +453,9 @@
                     "Voice_Detune": 0.0,
                     "Voice_Envelope_Attack": 0.0010000000474974513,
                     "Voice_Envelope_Decay": 0.0010000000474974513,
-                    "Voice_Envelope_Hold": 0.5988163264356103,
-                    "Voice_Envelope_Mode": "A-H-D",
-                    "Voice_Filter_Frequency": 22000.0,
+                    "Voice_Envelope_Hold": 0.6000000238418579,
+                    "Voice_Envelope_Mode": "A-S-R",
+                    "Voice_Filter_Frequency": 21999.990234375,
                     "Voice_Filter_On": true,
                     "Voice_Filter_PeakGain": 1.0,
                     "Voice_Filter_Resonance": 0.0,
@@ -459,14 +464,15 @@
                     "Voice_ModulationAmount": 0.0,
                     "Voice_ModulationSource": "Velocity",
                     "Voice_ModulationTarget": "Filter",
+                    "Voice_PitchToEnvelopeModulation": true,
                     "Voice_PlaybackLength": 1.0,
-                    "Voice_PlaybackStart": 0.33451622863740327,
+                    "Voice_PlaybackStart": 0.0,
                     "Voice_Transpose": 0,
-                    "Voice_VelocityToVolume": 0.5,
-                    "Volume": -12.0
+                    "Voice_VelocityToVolume": 0.3499999940395355,
+                    "Volume": -11.999999046325684
                   },
                   "deviceData": {
-                    "sampleUri": "ableton:/user-library/Recordings/Set%204%20Rec%207.wav"
+                    "sampleUri": null
                   }
                 }
               ],
@@ -485,7 +491,7 @@
               "drumZoneSettings": {
                 "receivingNote": 41,
                 "sendingNote": 60,
-                "chokeGroup": 1
+                "chokeGroup": null
               }
             },
             {
@@ -500,22 +506,22 @@
                     "Effect_EightBitFilterDecay": 5.0,
                     "Effect_EightBitResamplingRate": 14080.0,
                     "Effect_FmAmount": 0.0,
-                    "Effect_FmFrequency": 1000.0,
+                    "Effect_FmFrequency": 999.9998779296875,
                     "Effect_LoopLength": 0.30000001192092896,
-                    "Effect_LoopOffset": 0.019999999552965164,
+                    "Effect_LoopOffset": 0.0,
                     "Effect_NoiseAmount": 0.0,
-                    "Effect_NoiseFrequency": 10000.0,
+                    "Effect_NoiseFrequency": 10000.0009765625,
                     "Effect_On": true,
                     "Effect_PitchEnvelopeAmount": 0.0,
-                    "Effect_PitchEnvelopeDecay": 0.30000001192092896,
+                    "Effect_PitchEnvelopeDecay": 0.29999998211860657,
                     "Effect_PunchAmount": 0.0,
                     "Effect_PunchTime": 0.12015999853610992,
                     "Effect_RingModAmount": 0.0,
-                    "Effect_RingModFrequency": 1000.0,
+                    "Effect_RingModFrequency": 999.9998168945313,
                     "Effect_StretchFactor": 1.0,
-                    "Effect_StretchGrainSize": 0.10000000149011612,
+                    "Effect_StretchGrainSize": 0.09999999403953552,
                     "Effect_SubOscAmount": 0.0,
-                    "Effect_SubOscFrequency": 60.0,
+                    "Effect_SubOscFrequency": 59.99999237060547,
                     "Effect_Type": "Stretch",
                     "Enabled": true,
                     "NotePitchBend": true,
@@ -523,9 +529,9 @@
                     "Voice_Detune": 0.0,
                     "Voice_Envelope_Attack": 0.0010000000474974513,
                     "Voice_Envelope_Decay": 0.0010000000474974513,
-                    "Voice_Envelope_Hold": 0.552376417138575,
-                    "Voice_Envelope_Mode": "A-H-D",
-                    "Voice_Filter_Frequency": 22000.0,
+                    "Voice_Envelope_Hold": 0.6000000238418579,
+                    "Voice_Envelope_Mode": "A-S-R",
+                    "Voice_Filter_Frequency": 21999.990234375,
                     "Voice_Filter_On": true,
                     "Voice_Filter_PeakGain": 1.0,
                     "Voice_Filter_Resonance": 0.0,
@@ -534,14 +540,15 @@
                     "Voice_ModulationAmount": 0.0,
                     "Voice_ModulationSource": "Velocity",
                     "Voice_ModulationTarget": "Filter",
+                    "Voice_PitchToEnvelopeModulation": true,
                     "Voice_PlaybackLength": 1.0,
-                    "Voice_PlaybackStart": 0.39380121093872317,
+                    "Voice_PlaybackStart": 0.0,
                     "Voice_Transpose": 0,
-                    "Voice_VelocityToVolume": 0.5,
-                    "Volume": -12.0
+                    "Voice_VelocityToVolume": 0.3499999940395355,
+                    "Volume": -11.999999046325684
                   },
                   "deviceData": {
-                    "sampleUri": "ableton:/user-library/Recordings/Set%204%20Rec%207.wav"
+                    "sampleUri": null
                   }
                 }
               ],
@@ -560,7 +567,7 @@
               "drumZoneSettings": {
                 "receivingNote": 42,
                 "sendingNote": 60,
-                "chokeGroup": 1
+                "chokeGroup": null
               }
             },
             {
@@ -575,22 +582,22 @@
                     "Effect_EightBitFilterDecay": 5.0,
                     "Effect_EightBitResamplingRate": 14080.0,
                     "Effect_FmAmount": 0.0,
-                    "Effect_FmFrequency": 1000.0,
+                    "Effect_FmFrequency": 999.9998779296875,
                     "Effect_LoopLength": 0.30000001192092896,
-                    "Effect_LoopOffset": 0.019999999552965164,
+                    "Effect_LoopOffset": 0.0,
                     "Effect_NoiseAmount": 0.0,
-                    "Effect_NoiseFrequency": 10000.0,
+                    "Effect_NoiseFrequency": 10000.0009765625,
                     "Effect_On": true,
                     "Effect_PitchEnvelopeAmount": 0.0,
-                    "Effect_PitchEnvelopeDecay": 0.30000001192092896,
+                    "Effect_PitchEnvelopeDecay": 0.29999998211860657,
                     "Effect_PunchAmount": 0.0,
                     "Effect_PunchTime": 0.12015999853610992,
                     "Effect_RingModAmount": 0.0,
-                    "Effect_RingModFrequency": 1000.0,
+                    "Effect_RingModFrequency": 999.9998168945313,
                     "Effect_StretchFactor": 1.0,
-                    "Effect_StretchGrainSize": 0.10000000149011612,
+                    "Effect_StretchGrainSize": 0.09999999403953552,
                     "Effect_SubOscAmount": 0.0,
-                    "Effect_SubOscFrequency": 60.0,
+                    "Effect_SubOscFrequency": 59.99999237060547,
                     "Effect_Type": "Stretch",
                     "Enabled": true,
                     "NotePitchBend": true,
@@ -598,9 +605,9 @@
                     "Voice_Detune": 0.0,
                     "Voice_Envelope_Attack": 0.0010000000474974513,
                     "Voice_Envelope_Decay": 0.0010000000474974513,
-                    "Voice_Envelope_Hold": 0.6191337867530677,
-                    "Voice_Envelope_Mode": "A-H-D",
-                    "Voice_Filter_Frequency": 22000.0,
+                    "Voice_Envelope_Hold": 0.6000000238418579,
+                    "Voice_Envelope_Mode": "A-S-R",
+                    "Voice_Filter_Frequency": 21999.990234375,
                     "Voice_Filter_On": true,
                     "Voice_Filter_PeakGain": 1.0,
                     "Voice_Filter_Resonance": 0.0,
@@ -609,14 +616,15 @@
                     "Voice_ModulationAmount": 0.0,
                     "Voice_ModulationSource": "Velocity",
                     "Voice_ModulationTarget": "Filter",
+                    "Voice_PitchToEnvelopeModulation": true,
                     "Voice_PlaybackLength": 1.0,
-                    "Voice_PlaybackStart": 0.4485037791491214,
+                    "Voice_PlaybackStart": 0.0,
                     "Voice_Transpose": 0,
-                    "Voice_VelocityToVolume": 0.5,
-                    "Volume": -12.0
+                    "Voice_VelocityToVolume": 0.3499999940395355,
+                    "Volume": -11.999999046325684
                   },
                   "deviceData": {
-                    "sampleUri": "ableton:/user-library/Recordings/Set%204%20Rec%207.wav"
+                    "sampleUri": null
                   }
                 }
               ],
@@ -635,7 +643,7 @@
               "drumZoneSettings": {
                 "receivingNote": 43,
                 "sendingNote": 60,
-                "chokeGroup": 1
+                "chokeGroup": null
               }
             },
             {
@@ -650,22 +658,22 @@
                     "Effect_EightBitFilterDecay": 5.0,
                     "Effect_EightBitResamplingRate": 14080.0,
                     "Effect_FmAmount": 0.0,
-                    "Effect_FmFrequency": 1000.0,
+                    "Effect_FmFrequency": 999.9998779296875,
                     "Effect_LoopLength": 0.30000001192092896,
-                    "Effect_LoopOffset": 0.019999999552965164,
+                    "Effect_LoopOffset": 0.0,
                     "Effect_NoiseAmount": 0.0,
-                    "Effect_NoiseFrequency": 10000.0,
+                    "Effect_NoiseFrequency": 10000.0009765625,
                     "Effect_On": true,
                     "Effect_PitchEnvelopeAmount": 0.0,
-                    "Effect_PitchEnvelopeDecay": 0.30000001192092896,
+                    "Effect_PitchEnvelopeDecay": 0.29999998211860657,
                     "Effect_PunchAmount": 0.0,
                     "Effect_PunchTime": 0.12015999853610992,
                     "Effect_RingModAmount": 0.0,
-                    "Effect_RingModFrequency": 1000.0,
+                    "Effect_RingModFrequency": 999.9998168945313,
                     "Effect_StretchFactor": 1.0,
-                    "Effect_StretchGrainSize": 0.10000000149011612,
+                    "Effect_StretchGrainSize": 0.09999999403953552,
                     "Effect_SubOscAmount": 0.0,
-                    "Effect_SubOscFrequency": 60.0,
+                    "Effect_SubOscFrequency": 59.99999237060547,
                     "Effect_Type": "Stretch",
                     "Enabled": true,
                     "NotePitchBend": true,
@@ -673,9 +681,9 @@
                     "Voice_Detune": 0.0,
                     "Voice_Envelope_Attack": 0.0010000000474974513,
                     "Voice_Envelope_Decay": 0.0010000000474974513,
-                    "Voice_Envelope_Hold": 0.5959138321045572,
-                    "Voice_Envelope_Mode": "A-H-D",
-                    "Voice_Filter_Frequency": 22000.0,
+                    "Voice_Envelope_Hold": 0.6000000238418579,
+                    "Voice_Envelope_Mode": "A-S-R",
+                    "Voice_Filter_Frequency": 21999.990234375,
                     "Voice_Filter_On": true,
                     "Voice_Filter_PeakGain": 1.0,
                     "Voice_Filter_Resonance": 0.0,
@@ -684,14 +692,15 @@
                     "Voice_ModulationAmount": 0.0,
                     "Voice_ModulationSource": "Velocity",
                     "Voice_ModulationTarget": "Filter",
+                    "Voice_PitchToEnvelopeModulation": true,
                     "Voice_PlaybackLength": 1.0,
-                    "Voice_PlaybackStart": 0.50979356761522,
+                    "Voice_PlaybackStart": 0.0,
                     "Voice_Transpose": 0,
-                    "Voice_VelocityToVolume": 0.5,
-                    "Volume": -12.0
+                    "Voice_VelocityToVolume": 0.3499999940395355,
+                    "Volume": -11.999999046325684
                   },
                   "deviceData": {
-                    "sampleUri": "ableton:/user-library/Recordings/Set%204%20Rec%207.wav"
+                    "sampleUri": null
                   }
                 }
               ],
@@ -710,7 +719,7 @@
               "drumZoneSettings": {
                 "receivingNote": 44,
                 "sendingNote": 60,
-                "chokeGroup": 1
+                "chokeGroup": null
               }
             },
             {
@@ -725,22 +734,22 @@
                     "Effect_EightBitFilterDecay": 5.0,
                     "Effect_EightBitResamplingRate": 14080.0,
                     "Effect_FmAmount": 0.0,
-                    "Effect_FmFrequency": 1000.0,
+                    "Effect_FmFrequency": 999.9998779296875,
                     "Effect_LoopLength": 0.30000001192092896,
-                    "Effect_LoopOffset": 0.019999999552965164,
+                    "Effect_LoopOffset": 0.0,
                     "Effect_NoiseAmount": 0.0,
-                    "Effect_NoiseFrequency": 10000.0,
+                    "Effect_NoiseFrequency": 10000.0009765625,
                     "Effect_On": true,
                     "Effect_PitchEnvelopeAmount": 0.0,
-                    "Effect_PitchEnvelopeDecay": 0.30000001192092896,
+                    "Effect_PitchEnvelopeDecay": 0.29999998211860657,
                     "Effect_PunchAmount": 0.0,
                     "Effect_PunchTime": 0.12015999853610992,
                     "Effect_RingModAmount": 0.0,
-                    "Effect_RingModFrequency": 1000.0,
+                    "Effect_RingModFrequency": 999.9998168945313,
                     "Effect_StretchFactor": 1.0,
-                    "Effect_StretchGrainSize": 0.10000000149011612,
+                    "Effect_StretchGrainSize": 0.09999999403953552,
                     "Effect_SubOscAmount": 0.0,
-                    "Effect_SubOscFrequency": 60.0,
+                    "Effect_SubOscFrequency": 59.99999237060547,
                     "Effect_Type": "Stretch",
                     "Enabled": true,
                     "NotePitchBend": true,
@@ -748,9 +757,9 @@
                     "Voice_Detune": 0.0,
                     "Voice_Envelope_Attack": 0.0010000000474974513,
                     "Voice_Envelope_Decay": 0.0010000000474974513,
-                    "Voice_Envelope_Hold": 0.5523764171385608,
-                    "Voice_Envelope_Mode": "A-H-D",
-                    "Voice_Filter_Frequency": 22000.0,
+                    "Voice_Envelope_Hold": 0.6000000238418579,
+                    "Voice_Envelope_Mode": "A-S-R",
+                    "Voice_Filter_Frequency": 21999.990234375,
                     "Voice_Filter_On": true,
                     "Voice_Filter_PeakGain": 1.0,
                     "Voice_Filter_Resonance": 0.0,
@@ -759,14 +768,15 @@
                     "Voice_ModulationAmount": 0.0,
                     "Voice_ModulationSource": "Velocity",
                     "Voice_ModulationTarget": "Filter",
+                    "Voice_PitchToEnvelopeModulation": true,
                     "Voice_PlaybackLength": 1.0,
-                    "Voice_PlaybackStart": 0.5687921490358584,
+                    "Voice_PlaybackStart": 0.0,
                     "Voice_Transpose": 0,
-                    "Voice_VelocityToVolume": 0.5,
-                    "Volume": -12.0
+                    "Voice_VelocityToVolume": 0.3499999940395355,
+                    "Volume": -11.999999046325684
                   },
                   "deviceData": {
-                    "sampleUri": "ableton:/user-library/Recordings/Set%204%20Rec%207.wav"
+                    "sampleUri": null
                   }
                 }
               ],
@@ -785,7 +795,7 @@
               "drumZoneSettings": {
                 "receivingNote": 45,
                 "sendingNote": 60,
-                "chokeGroup": 1
+                "chokeGroup": null
               }
             },
             {
@@ -800,22 +810,22 @@
                     "Effect_EightBitFilterDecay": 5.0,
                     "Effect_EightBitResamplingRate": 14080.0,
                     "Effect_FmAmount": 0.0,
-                    "Effect_FmFrequency": 1000.0,
+                    "Effect_FmFrequency": 999.9998779296875,
                     "Effect_LoopLength": 0.30000001192092896,
-                    "Effect_LoopOffset": 0.019999999552965164,
+                    "Effect_LoopOffset": 0.0,
                     "Effect_NoiseAmount": 0.0,
-                    "Effect_NoiseFrequency": 10000.0,
+                    "Effect_NoiseFrequency": 10000.0009765625,
                     "Effect_On": true,
                     "Effect_PitchEnvelopeAmount": 0.0,
-                    "Effect_PitchEnvelopeDecay": 0.30000001192092896,
+                    "Effect_PitchEnvelopeDecay": 0.29999998211860657,
                     "Effect_PunchAmount": 0.0,
                     "Effect_PunchTime": 0.12015999853610992,
                     "Effect_RingModAmount": 0.0,
-                    "Effect_RingModFrequency": 1000.0,
+                    "Effect_RingModFrequency": 999.9998168945313,
                     "Effect_StretchFactor": 1.0,
-                    "Effect_StretchGrainSize": 0.10000000149011612,
+                    "Effect_StretchGrainSize": 0.09999999403953552,
                     "Effect_SubOscAmount": 0.0,
-                    "Effect_SubOscFrequency": 60.0,
+                    "Effect_SubOscFrequency": 59.99999237060547,
                     "Effect_Type": "Stretch",
                     "Enabled": true,
                     "NotePitchBend": true,
@@ -823,9 +833,9 @@
                     "Voice_Detune": 0.0,
                     "Voice_Envelope_Attack": 0.0010000000474974513,
                     "Voice_Envelope_Decay": 0.0010000000474974513,
-                    "Voice_Envelope_Hold": 0.5291564624900502,
-                    "Voice_Envelope_Mode": "A-H-D",
-                    "Voice_Filter_Frequency": 22000.0,
+                    "Voice_Envelope_Hold": 0.6000000238418579,
+                    "Voice_Envelope_Mode": "A-S-R",
+                    "Voice_Filter_Frequency": 21999.990234375,
                     "Voice_Filter_On": true,
                     "Voice_Filter_PeakGain": 1.0,
                     "Voice_Filter_Resonance": 0.0,
@@ -834,14 +844,15 @@
                     "Voice_ModulationAmount": 0.0,
                     "Voice_ModulationSource": "Velocity",
                     "Voice_ModulationTarget": "Filter",
+                    "Voice_PitchToEnvelopeModulation": true,
                     "Voice_PlaybackLength": 1.0,
-                    "Voice_PlaybackStart": 0.6234947172462552,
+                    "Voice_PlaybackStart": 0.0,
                     "Voice_Transpose": 0,
-                    "Voice_VelocityToVolume": 0.5,
-                    "Volume": -12.0
+                    "Voice_VelocityToVolume": 0.3499999940395355,
+                    "Volume": -11.999999046325684
                   },
                   "deviceData": {
-                    "sampleUri": "ableton:/user-library/Recordings/Set%204%20Rec%207.wav"
+                    "sampleUri": null
                   }
                 }
               ],
@@ -860,7 +871,7 @@
               "drumZoneSettings": {
                 "receivingNote": 46,
                 "sendingNote": 60,
-                "chokeGroup": 1
+                "chokeGroup": null
               }
             },
             {
@@ -875,22 +886,22 @@
                     "Effect_EightBitFilterDecay": 5.0,
                     "Effect_EightBitResamplingRate": 14080.0,
                     "Effect_FmAmount": 0.0,
-                    "Effect_FmFrequency": 1000.0,
+                    "Effect_FmFrequency": 999.9998779296875,
                     "Effect_LoopLength": 0.30000001192092896,
-                    "Effect_LoopOffset": 0.019999999552965164,
+                    "Effect_LoopOffset": 0.0,
                     "Effect_NoiseAmount": 0.0,
-                    "Effect_NoiseFrequency": 10000.0,
+                    "Effect_NoiseFrequency": 10000.0009765625,
                     "Effect_On": true,
                     "Effect_PitchEnvelopeAmount": 0.0,
-                    "Effect_PitchEnvelopeDecay": 0.30000001192092896,
+                    "Effect_PitchEnvelopeDecay": 0.29999998211860657,
                     "Effect_PunchAmount": 0.0,
                     "Effect_PunchTime": 0.12015999853610992,
                     "Effect_RingModAmount": 0.0,
-                    "Effect_RingModFrequency": 1000.0,
+                    "Effect_RingModFrequency": 999.9998168945313,
                     "Effect_StretchFactor": 1.0,
-                    "Effect_StretchGrainSize": 0.10000000149011612,
+                    "Effect_StretchGrainSize": 0.09999999403953552,
                     "Effect_SubOscAmount": 0.0,
-                    "Effect_SubOscFrequency": 60.0,
+                    "Effect_SubOscFrequency": 59.99999237060547,
                     "Effect_Type": "Stretch",
                     "Enabled": true,
                     "NotePitchBend": true,
@@ -898,9 +909,9 @@
                     "Voice_Detune": 0.0,
                     "Voice_Envelope_Attack": 0.0010000000474974513,
                     "Voice_Envelope_Decay": 0.0010000000474974513,
-                    "Voice_Envelope_Hold": 0.5523764171385608,
-                    "Voice_Envelope_Mode": "A-H-D",
-                    "Voice_Filter_Frequency": 22000.0,
+                    "Voice_Envelope_Hold": 0.6000000238418579,
+                    "Voice_Envelope_Mode": "A-S-R",
+                    "Voice_Filter_Frequency": 21999.990234375,
                     "Voice_Filter_On": true,
                     "Voice_Filter_PeakGain": 1.0,
                     "Voice_Filter_Resonance": 0.0,
@@ -909,14 +920,15 @@
                     "Voice_ModulationAmount": 0.0,
                     "Voice_ModulationSource": "Velocity",
                     "Voice_ModulationTarget": "Filter",
+                    "Voice_PitchToEnvelopeModulation": true,
                     "Voice_PlaybackLength": 1.0,
-                    "Voice_PlaybackStart": 0.6759060784111919,
+                    "Voice_PlaybackStart": 0.0,
                     "Voice_Transpose": 0,
-                    "Voice_VelocityToVolume": 0.5,
-                    "Volume": -12.0
+                    "Voice_VelocityToVolume": 0.3499999940395355,
+                    "Volume": -11.999999046325684
                   },
                   "deviceData": {
-                    "sampleUri": "ableton:/user-library/Recordings/Set%204%20Rec%207.wav"
+                    "sampleUri": null
                   }
                 }
               ],
@@ -935,7 +947,7 @@
               "drumZoneSettings": {
                 "receivingNote": 47,
                 "sendingNote": 60,
-                "chokeGroup": 1
+                "chokeGroup": null
               }
             },
             {
@@ -950,22 +962,22 @@
                     "Effect_EightBitFilterDecay": 5.0,
                     "Effect_EightBitResamplingRate": 14080.0,
                     "Effect_FmAmount": 0.0,
-                    "Effect_FmFrequency": 1000.0,
+                    "Effect_FmFrequency": 999.9998779296875,
                     "Effect_LoopLength": 0.30000001192092896,
-                    "Effect_LoopOffset": 0.019999999552965164,
+                    "Effect_LoopOffset": 0.0,
                     "Effect_NoiseAmount": 0.0,
-                    "Effect_NoiseFrequency": 10000.0,
+                    "Effect_NoiseFrequency": 10000.0009765625,
                     "Effect_On": true,
                     "Effect_PitchEnvelopeAmount": 0.0,
-                    "Effect_PitchEnvelopeDecay": 0.30000001192092896,
+                    "Effect_PitchEnvelopeDecay": 0.29999998211860657,
                     "Effect_PunchAmount": 0.0,
                     "Effect_PunchTime": 0.12015999853610992,
                     "Effect_RingModAmount": 0.0,
-                    "Effect_RingModFrequency": 1000.0,
+                    "Effect_RingModFrequency": 999.9998168945313,
                     "Effect_StretchFactor": 1.0,
-                    "Effect_StretchGrainSize": 0.10000000149011612,
+                    "Effect_StretchGrainSize": 0.09999999403953552,
                     "Effect_SubOscAmount": 0.0,
-                    "Effect_SubOscFrequency": 60.0,
+                    "Effect_SubOscFrequency": 59.99999237060547,
                     "Effect_Type": "Stretch",
                     "Enabled": true,
                     "NotePitchBend": true,
@@ -973,9 +985,9 @@
                     "Voice_Detune": 0.0,
                     "Voice_Envelope_Attack": 0.0010000000474974513,
                     "Voice_Envelope_Decay": 0.0010000000474974513,
-                    "Voice_Envelope_Hold": 0.5988163264356103,
-                    "Voice_Envelope_Mode": "A-H-D",
-                    "Voice_Filter_Frequency": 22000.0,
+                    "Voice_Envelope_Hold": 0.6000000238418579,
+                    "Voice_Envelope_Mode": "A-S-R",
+                    "Voice_Filter_Frequency": 21999.990234375,
                     "Voice_Filter_On": true,
                     "Voice_Filter_PeakGain": 1.0,
                     "Voice_Filter_Resonance": 0.0,
@@ -984,14 +996,15 @@
                     "Voice_ModulationAmount": 0.0,
                     "Voice_ModulationSource": "Velocity",
                     "Voice_ModulationTarget": "Filter",
+                    "Voice_PitchToEnvelopeModulation": true,
                     "Voice_PlaybackLength": 1.0,
-                    "Voice_PlaybackStart": 0.7306086466215886,
+                    "Voice_PlaybackStart": 0.0,
                     "Voice_Transpose": 0,
-                    "Voice_VelocityToVolume": 0.5,
-                    "Volume": -12.0
+                    "Voice_VelocityToVolume": 0.3499999940395355,
+                    "Volume": -11.999999046325684
                   },
                   "deviceData": {
-                    "sampleUri": "ableton:/user-library/Recordings/Set%204%20Rec%207.wav"
+                    "sampleUri": null
                   }
                 }
               ],
@@ -1010,7 +1023,7 @@
               "drumZoneSettings": {
                 "receivingNote": 48,
                 "sendingNote": 60,
-                "chokeGroup": 1
+                "chokeGroup": null
               }
             },
             {
@@ -1025,22 +1038,22 @@
                     "Effect_EightBitFilterDecay": 5.0,
                     "Effect_EightBitResamplingRate": 14080.0,
                     "Effect_FmAmount": 0.0,
-                    "Effect_FmFrequency": 1000.0,
+                    "Effect_FmFrequency": 999.9998779296875,
                     "Effect_LoopLength": 0.30000001192092896,
-                    "Effect_LoopOffset": 0.019999999552965164,
+                    "Effect_LoopOffset": 0.0,
                     "Effect_NoiseAmount": 0.0,
-                    "Effect_NoiseFrequency": 10000.0,
+                    "Effect_NoiseFrequency": 10000.0009765625,
                     "Effect_On": true,
                     "Effect_PitchEnvelopeAmount": 0.0,
-                    "Effect_PitchEnvelopeDecay": 0.30000001192092896,
+                    "Effect_PitchEnvelopeDecay": 0.29999998211860657,
                     "Effect_PunchAmount": 0.0,
                     "Effect_PunchTime": 0.12015999853610992,
                     "Effect_RingModAmount": 0.0,
-                    "Effect_RingModFrequency": 1000.0,
+                    "Effect_RingModFrequency": 999.9998168945313,
                     "Effect_StretchFactor": 1.0,
-                    "Effect_StretchGrainSize": 0.10000000149011612,
+                    "Effect_StretchGrainSize": 0.09999999403953552,
                     "Effect_SubOscAmount": 0.0,
-                    "Effect_SubOscFrequency": 60.0,
+                    "Effect_SubOscFrequency": 59.99999237060547,
                     "Effect_Type": "Stretch",
                     "Enabled": true,
                     "NotePitchBend": true,
@@ -1048,9 +1061,9 @@
                     "Voice_Detune": 0.0,
                     "Voice_Envelope_Attack": 0.0010000000474974513,
                     "Voice_Envelope_Decay": 0.0010000000474974513,
-                    "Voice_Envelope_Hold": 0.552376417138575,
-                    "Voice_Envelope_Mode": "A-H-D",
-                    "Voice_Filter_Frequency": 22000.0,
+                    "Voice_Envelope_Hold": 0.6000000238418579,
+                    "Voice_Envelope_Mode": "A-S-R",
+                    "Voice_Filter_Frequency": 21999.990234375,
                     "Voice_Filter_On": true,
                     "Voice_Filter_PeakGain": 1.0,
                     "Voice_Filter_Resonance": 0.0,
@@ -1059,14 +1072,15 @@
                     "Voice_ModulationAmount": 0.0,
                     "Voice_ModulationSource": "Velocity",
                     "Voice_ModulationTarget": "Filter",
+                    "Voice_PitchToEnvelopeModulation": true,
                     "Voice_PlaybackLength": 1.0,
-                    "Voice_PlaybackStart": 0.7898936289229086,
+                    "Voice_PlaybackStart": 0.0,
                     "Voice_Transpose": 0,
-                    "Voice_VelocityToVolume": 0.5,
-                    "Volume": -12.0
+                    "Voice_VelocityToVolume": 0.3499999940395355,
+                    "Volume": -11.999999046325684
                   },
                   "deviceData": {
-                    "sampleUri": "ableton:/user-library/Recordings/Set%204%20Rec%207.wav"
+                    "sampleUri": null
                   }
                 }
               ],
@@ -1085,7 +1099,7 @@
               "drumZoneSettings": {
                 "receivingNote": 49,
                 "sendingNote": 60,
-                "chokeGroup": 1
+                "chokeGroup": null
               }
             },
             {
@@ -1100,22 +1114,22 @@
                     "Effect_EightBitFilterDecay": 5.0,
                     "Effect_EightBitResamplingRate": 14080.0,
                     "Effect_FmAmount": 0.0,
-                    "Effect_FmFrequency": 1000.0,
+                    "Effect_FmFrequency": 999.9998779296875,
                     "Effect_LoopLength": 0.30000001192092896,
-                    "Effect_LoopOffset": 0.019999999552965164,
+                    "Effect_LoopOffset": 0.0,
                     "Effect_NoiseAmount": 0.0,
-                    "Effect_NoiseFrequency": 10000.0,
+                    "Effect_NoiseFrequency": 10000.0009765625,
                     "Effect_On": true,
                     "Effect_PitchEnvelopeAmount": 0.0,
-                    "Effect_PitchEnvelopeDecay": 0.30000001192092896,
+                    "Effect_PitchEnvelopeDecay": 0.29999998211860657,
                     "Effect_PunchAmount": 0.0,
                     "Effect_PunchTime": 0.12015999853610992,
                     "Effect_RingModAmount": 0.0,
-                    "Effect_RingModFrequency": 1000.0,
+                    "Effect_RingModFrequency": 999.9998168945313,
                     "Effect_StretchFactor": 1.0,
-                    "Effect_StretchGrainSize": 0.10000000149011612,
+                    "Effect_StretchGrainSize": 0.09999999403953552,
                     "Effect_SubOscAmount": 0.0,
-                    "Effect_SubOscFrequency": 60.0,
+                    "Effect_SubOscFrequency": 59.99999237060547,
                     "Effect_Type": "Stretch",
                     "Enabled": true,
                     "NotePitchBend": true,
@@ -1123,9 +1137,9 @@
                     "Voice_Detune": 0.0,
                     "Voice_Envelope_Attack": 0.0010000000474974513,
                     "Voice_Envelope_Decay": 0.0010000000474974513,
-                    "Voice_Envelope_Hold": 0.5262539681589686,
-                    "Voice_Envelope_Mode": "A-H-D",
-                    "Voice_Filter_Frequency": 22000.0,
+                    "Voice_Envelope_Hold": 0.6000000238418579,
+                    "Voice_Envelope_Mode": "A-S-R",
+                    "Voice_Filter_Frequency": 21999.990234375,
                     "Voice_Filter_On": true,
                     "Voice_Filter_PeakGain": 1.0,
                     "Voice_Filter_Resonance": 0.0,
@@ -1134,14 +1148,15 @@
                     "Voice_ModulationAmount": 0.0,
                     "Voice_ModulationSource": "Velocity",
                     "Voice_ModulationTarget": "Filter",
+                    "Voice_PitchToEnvelopeModulation": true,
                     "Voice_PlaybackLength": 1.0,
-                    "Voice_PlaybackStart": 0.8445961971333068,
+                    "Voice_PlaybackStart": 0.0,
                     "Voice_Transpose": 0,
-                    "Voice_VelocityToVolume": 0.5,
-                    "Volume": -12.0
+                    "Voice_VelocityToVolume": 0.3499999940395355,
+                    "Volume": -11.999999046325684
                   },
                   "deviceData": {
-                    "sampleUri": "ableton:/user-library/Recordings/Set%204%20Rec%207.wav"
+                    "sampleUri": null
                   }
                 }
               ],
@@ -1160,7 +1175,7 @@
               "drumZoneSettings": {
                 "receivingNote": 50,
                 "sendingNote": 60,
-                "chokeGroup": 1
+                "chokeGroup": null
               }
             },
             {
@@ -1175,22 +1190,22 @@
                     "Effect_EightBitFilterDecay": 5.0,
                     "Effect_EightBitResamplingRate": 14080.0,
                     "Effect_FmAmount": 0.0,
-                    "Effect_FmFrequency": 1000.0,
+                    "Effect_FmFrequency": 999.9998779296875,
                     "Effect_LoopLength": 0.30000001192092896,
-                    "Effect_LoopOffset": 0.019999999552965164,
+                    "Effect_LoopOffset": 0.0,
                     "Effect_NoiseAmount": 0.0,
-                    "Effect_NoiseFrequency": 10000.0,
+                    "Effect_NoiseFrequency": 10000.0009765625,
                     "Effect_On": true,
                     "Effect_PitchEnvelopeAmount": 0.0,
-                    "Effect_PitchEnvelopeDecay": 0.30000001192092896,
+                    "Effect_PitchEnvelopeDecay": 0.29999998211860657,
                     "Effect_PunchAmount": 0.0,
                     "Effect_PunchTime": 0.12015999853610992,
                     "Effect_RingModAmount": 0.0,
-                    "Effect_RingModFrequency": 1000.0,
+                    "Effect_RingModFrequency": 999.9998168945313,
                     "Effect_StretchFactor": 1.0,
-                    "Effect_StretchGrainSize": 0.10000000149011612,
+                    "Effect_StretchGrainSize": 0.09999999403953552,
                     "Effect_SubOscAmount": 0.0,
-                    "Effect_SubOscFrequency": 60.0,
+                    "Effect_SubOscFrequency": 59.99999237060547,
                     "Effect_Type": "Stretch",
                     "Enabled": true,
                     "NotePitchBend": true,
@@ -1198,9 +1213,9 @@
                     "Voice_Detune": 0.0,
                     "Voice_Envelope_Attack": 0.0010000000474974513,
                     "Voice_Envelope_Decay": 0.0010000000474974513,
-                    "Voice_Envelope_Hold": 1.0446666665716702,
-                    "Voice_Envelope_Mode": "A-H-D",
-                    "Voice_Filter_Frequency": 22000.0,
+                    "Voice_Envelope_Hold": 0.6000000238418579,
+                    "Voice_Envelope_Mode": "A-S-R",
+                    "Voice_Filter_Frequency": 21999.990234375,
                     "Voice_Filter_On": true,
                     "Voice_Filter_PeakGain": 1.0,
                     "Voice_Filter_Resonance": 0.0,
@@ -1209,14 +1224,15 @@
                     "Voice_ModulationAmount": 0.0,
                     "Voice_ModulationSource": "Velocity",
                     "Voice_ModulationTarget": "Filter",
+                    "Voice_PitchToEnvelopeModulation": true,
                     "Voice_PlaybackLength": 1.0,
-                    "Voice_PlaybackStart": 0.8967211574175592,
+                    "Voice_PlaybackStart": 0.0,
                     "Voice_Transpose": 0,
-                    "Voice_VelocityToVolume": 0.5,
-                    "Volume": -12.0
+                    "Voice_VelocityToVolume": 0.3499999940395355,
+                    "Volume": -11.999999046325684
                   },
                   "deviceData": {
-                    "sampleUri": "ableton:/user-library/Recordings/Set%204%20Rec%207.wav"
+                    "sampleUri": null
                   }
                 }
               ],
@@ -1235,7 +1251,7 @@
               "drumZoneSettings": {
                 "receivingNote": 51,
                 "sendingNote": 60,
-                "chokeGroup": 1
+                "chokeGroup": null
               }
             }
           ],
