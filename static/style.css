@@ -223,6 +223,11 @@ input[type="submit"]:hover {
     gap: 1rem;
 }
 
+.drum-grid-row .drum-cell {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
 .drum-cell {
     background-color: #f5f5f5;
     border-radius: 4px;
@@ -231,6 +236,11 @@ input[type="submit"]:hover {
     display: flex;
     flex-direction: column;
     transition: box-shadow 0.2s;
+}
+
+.sample-name {
+    overflow-wrap: break-word;
+    word-break: break-all;
 }
 
 .drum-cell:hover {
