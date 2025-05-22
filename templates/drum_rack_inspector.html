@@ -1,5 +1,5 @@
 <h2>Drum Rack Inspector</h2>
-<p><em>Note: this inspects the samples from a drum rack, but does not take into account any start / hold / length times, including slice information. Reversing a sample will create a new copy of the raw sound file itself!</em></p>
+<p><em>Note: this inspects the samples from a drum rack, and shows an individual slice based on start and length information. Reversing or time stretching a sample will create a new copy of the raw sound file itself, and keep your sliced region.</em></p>
 {message_html}
 
 <form method="POST" action="/drum-rack-inspector">
@@ -13,3 +13,140 @@
 <div class="samples-container">
     {{ samples_html }}
 </div>
+
+  <!-- Time Stretch Modal -->
+  <style>
+    .modal .loading-overlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(255,255,255,0.8);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.25rem;
+      z-index: 10;
+    }
+    .modal .loading-overlay.hidden { display: none; }
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal.hidden { display: none; }
+    .modal-content {
+      background: #fff;
+      padding: 20px;
+      border-radius: 4px;
+      position: relative;
+      z-index: 1001;
+    }
+    .modal-close { position: absolute; top: 10px; right: 10px; cursor: pointer; }
+    /* Modal inputs default width */
+    #timeStretchModal input[type="number"] {
+        width: auto;
+        max-width: none;
+    }
+  </style>
+  <div id="timeStretchModal" class="modal hidden">
+    <div class="modal-content">
+      <span class="modal-close" onclick="document.getElementById('timeStretchModal').classList.add('hidden')">&times;</span>
+      <div id="ts_loading" class="loading-overlay hidden">
+        Time stretching…
+      </div>
+      <form method="POST" action="/drum-rack-inspector" id="timeStretchForm" onsubmit="event.preventDefault(); submitTimeStretchForm();">
+        <input type="hidden" name="action" value="time_stretch_sample">
+        <input type="hidden" name="sample_path" id="ts_sample_path">
+        <input type="hidden" name="preset_path" id="ts_preset_path">
+        <input type="hidden" name="pad_number" id="ts_pad_number">
+        <label for="ts_bpm">BPM:</label>
+        <input type="number" name="bpm" id="ts_bpm" step="any" required value="120">
+        <label for="ts_measures">Measures:</label>
+        <input type="number" name="measures" id="ts_measures" step="any" required value="1.0">
+        <label for="ts_preserve_pitch">
+          <input type="checkbox" name="preserve_pitch" id="ts_preserve_pitch" checked>
+          Preserve pitch
+        </label>
+        <div id="ts_algorithm_container">
+          <label for="ts_algorithm">Algorithm:</label>
+          <select name="algorithm" id="ts_algorithm">
+            <option value="wsola" selected>WSOLA (best for drums)</option>
+            <option value="phase">Phase-Vocoder (best for melodic)</option>
+          </select>
+        </div>
+        <button type="submit" class="apply-time-stretch-button">Apply</button>
+      </form>
+    </div>
+  </div>
+  <script>
+    function initializeTimeStretchModal() {
+      const modal = document.getElementById('timeStretchModal');
+      const closeBtn = modal.querySelector('.modal-close');
+      // Open buttons
+      document.querySelectorAll('.time-stretch-button').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.preventDefault();
+          document.getElementById('ts_sample_path').value = btn.getAttribute('data-sample-path');
+          document.getElementById('ts_preset_path').value = btn.getAttribute('data-preset-path');
+          document.getElementById('ts_pad_number').value = btn.getAttribute('data-pad-number');
+          modal.classList.remove('hidden');
+        });
+      });
+      // Close actions
+      closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
+      window.addEventListener('click', e => {
+        if (e.target === modal) modal.classList.add('hidden');
+      });
+      // Disable algorithm dropdown when Preserve pitch is unchecked
+      const preserveCheckbox = document.getElementById('ts_preserve_pitch');
+      const algoSelect = document.getElementById('ts_algorithm');
+      function updateAlgoState() {
+        algoSelect.disabled = !preserveCheckbox.checked;
+      }
+      preserveCheckbox.addEventListener('change', updateAlgoState);
+      // Initialize algorithm state
+      updateAlgoState();
+    }
+    document.addEventListener('DOMContentLoaded', initializeTimeStretchModal);
+  </script>
+
+  <script>
+    function submitTimeStretchForm() {
+      const form = document.getElementById('timeStretchForm');
+      const loading = document.getElementById('ts_loading');
+      const applyBtn = form.querySelector('button[type="submit"]');
+      applyBtn.disabled = true;
+      loading.classList.remove('hidden');
+
+      const url = form.getAttribute('action');
+      const formData = new FormData(form);
+
+      fetch(url, {
+        method: form.method,
+        body: formData
+      })
+      .then(response => response.text())
+      .then(html => {
+        loading.classList.add('hidden');
+        applyBtn.disabled = false;
+        let container = form.closest('.tabcontent');
+        if (!container) {
+          container = document.querySelector('.tabcontent');
+        }
+        container.innerHTML = html;
+        attachFormHandler('DrumRackInspector');
+        initializeDrumRackWaveforms();
+        initializeTimeStretchModal();
+      })
+      .catch(err => {
+        console.error(err);
+        loading.classList.add('hidden');
+        applyBtn.disabled = false;
+      });
+    }
+  </script>
