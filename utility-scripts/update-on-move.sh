@@ -16,7 +16,7 @@ REMOTE_HOST="move.local"
 REMOTE_DIR="/data/UserData/extending-move"
 
 # --- Version check: ensure Move version is within tested range ---
-HIGHEST_TESTED_VERSION="1.5.0b4"
+HIGHEST_TESTED_VERSION="1.5.0b5"
 INSTALLED_VERSION=$(ssh "${REMOTE_USER}@${REMOTE_HOST}" "/opt/move/Move -v" | awk '{print $3}')
 if ! printf "%s\n%s\n" "$HIGHEST_TESTED_VERSION" "$INSTALLED_VERSION" | sort -V | head -n1 | grep -qx "$HIGHEST_TESTED_VERSION"; then
   read -p "Warning: Installed Move ($INSTALLED_VERSION) > tested ($HIGHEST_TESTED_VERSION). Continue? [y/N] " confirm
