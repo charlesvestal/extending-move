@@ -111,7 +111,7 @@ export TMPDIR=~/tmp
 
 3. Install dependencies:
 ```bash
-pip install --no-cache-dir scipy soundfile
+pip install --no-cache-dir scipy soundfile librosa audiotsm
 ```
 
 4. Copy files from your computer to your Move at /data/UserData/extending-move via whatever method you want (i.e. SFTP)
