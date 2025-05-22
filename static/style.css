@@ -212,10 +212,15 @@ input[type="submit"]:hover {
 
 /* Card styling for grid layouts */
 .drum-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    display: flex;
+    flex-direction: column;
     gap: 1rem;
     margin: 1.5rem 0;
+}
+
+.drum-grid-row {
+    display: flex;
+    gap: 1rem;
 }
 
 .drum-cell {
