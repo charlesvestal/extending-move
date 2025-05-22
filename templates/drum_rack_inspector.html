@@ -16,6 +16,16 @@
 
   <!-- Time Stretch Modal -->
   <style>
+    .modal .loading-overlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(255,255,255,0.8);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.25rem;
+      z-index: 10;
+    }
+    .modal .loading-overlay.hidden { display: none; }
     .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
              background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; }
     .modal.hidden { display: none; }
@@ -25,6 +35,9 @@
   <div id="timeStretchModal" class="modal hidden">
     <div class="modal-content">
       <span class="modal-close">&times;</span>
+      <div id="ts_loading" class="loading-overlay hidden">
+        Time stretching…
+      </div>
       <form method="POST" action="/drum-rack-inspector" id="timeStretchForm" onsubmit="event.preventDefault(); submitTimeStretchForm();">
         <input type="hidden" name="action" value="time_stretch_sample">
         <input type="hidden" name="sample_path" id="ts_sample_path">
@@ -60,21 +73,34 @@
   <script>
     function submitTimeStretchForm() {
       const form = document.getElementById('timeStretchForm');
+      const loading = document.getElementById('ts_loading');
+      const applyBtn = form.querySelector('button[type="submit"]');
+      applyBtn.disabled = true;
+      loading.classList.remove('hidden');
+
       const url = form.getAttribute('action');
       const formData = new FormData(form);
+
       fetch(url, {
         method: form.method,
         body: formData
       })
       .then(response => response.text())
       .then(html => {
-        // Replace tab content (including modal) with new HTML
-        const container = form.closest('.tabcontent');
+        loading.classList.add('hidden');
+        applyBtn.disabled = false;
+        let container = form.closest('.tabcontent');
+        if (!container) {
+          container = document.querySelector('.tabcontent');
+        }
         container.innerHTML = html;
-        // Reinitialize functionality
         attachFormHandler('DrumRackInspector');
         initializeDrumRackWaveforms();
       })
-      .catch(err => console.error(err));
+      .catch(err => {
+        console.error(err);
+        loading.classList.add('hidden');
+        applyBtn.disabled = false;
+      });
     }
   </script>
