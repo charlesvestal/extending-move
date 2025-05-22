@@ -6,6 +6,7 @@ from handlers.base_handler import BaseHandler
 from core.drum_rack_inspector_handler import scan_for_drum_rack_presets, get_drum_cell_samples, update_drum_cell_sample
 from core.reverse_handler import reverse_wav_file
 from core.refresh_handler import refresh_library
+from core.time_stretch_handler import time_stretch_wav
 
 class DrumRackInspectorHandler(BaseHandler):
     def handle_get(self):
@@ -174,10 +175,23 @@ class DrumRackInspectorHandler(BaseHandler):
         except ValueError:
             return self.format_error_response("Invalid BPM or measures values")
 
-        # TODO: integrate actual time-stretch core function here
-        message = f"Time-stretch target: {target_duration:.2f}s for {measures_val} measures at {bpm_val} BPM"
+        # Step 3: Time-stretch the file and update the preset
+        import os
+        sample_dir = os.path.dirname(sample_path)
+        sample_basename = os.path.splitext(os.path.basename(sample_path))[0]
+        output_filename = f"{sample_basename}-stretched-{int(bpm_val)}-{int(measures_val)}.wav"
+        output_path = os.path.join(sample_dir, output_filename)
 
-        # Redisplay the grid (same logic as reverse handler)
+        success, ts_message, new_path = time_stretch_wav(sample_path, target_duration, output_path)
+        if not success:
+            return self.format_error_response(f"Failed to time-stretch sample: {ts_message}")
+
+        # Update the preset to use the new time-stretched sample
+        update_success, update_message = update_drum_cell_sample(preset_path, pad_number, new_path)
+        if not update_success:
+            return self.format_error_response(f"Failed to update preset: {update_message}")
+
+        # Show success message and redisplay updated grid
         result = get_drum_cell_samples(preset_path)
         if not result['success']:
             return self.format_error_response(result['message'])
@@ -248,7 +262,7 @@ class DrumRackInspectorHandler(BaseHandler):
 
         return {
             'options': self.get_preset_options(),
-            'message': message,
+            'message': f"Time-stretched sample created and loaded for pad {pad_number}! {ts_message} {update_message}",
             'samples_html': samples_html
         }
     def handle_reverse_sample(self, form):
