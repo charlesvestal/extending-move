@@ -152,6 +152,7 @@ class DrumRackInspectorHandler(BaseHandler):
         pad_number = form.getvalue('pad_number')
         bpm = form.getvalue('bpm')
         measures = form.getvalue('measures')
+        preserve_pitch = form.getvalue('preserve_pitch') is not None
 
         # Step 1: Ask for BPM and measures if not provided
         if bpm is None or measures is None:
@@ -203,10 +204,11 @@ class DrumRackInspectorHandler(BaseHandler):
         # Format BPM and measures as strings preserving decimals
         bpm_str = f"{bpm_val:g}"
         measures_str = f"{measures_val:g}"
-        output_filename = f"{sample_basename}-slice{pad_number}-stretched-{bpm_str}-{measures_str}.wav"
+        suffix = 'stretched' if preserve_pitch else 'repitched'
+        output_filename = f"{sample_basename}-slice{pad_number}-{suffix}-{bpm_str}-{measures_str}.wav"
         output_path = os.path.join(sample_dir, output_filename)
 
-        success, ts_message, new_path = time_stretch_wav(sample_path, full_stretch_duration, output_path)
+        success, ts_message, new_path = time_stretch_wav(sample_path, full_stretch_duration, output_path, preserve_pitch=preserve_pitch)
         if not success:
             return self.format_error_response(f"Failed to time-stretch sample: {ts_message}")
 
