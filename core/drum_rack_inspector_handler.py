@@ -111,12 +111,19 @@ def get_drum_cell_samples(preset_path):
                     else:
                         sample_path = ""
                         sample_name = "No sample loaded"
+
+                    # New: Extract playback_start and playback_length from parameters
+                    params = data.get('parameters', {})
+                    playback_start = params.get('Voice_PlaybackStart', 0.0)
+                    playback_length = params.get('Voice_PlaybackLength', 1.0)
                     
                     # Simply use incrementing counter for pad numbers
                     samples.append({
                         'pad': pad_counter[0],
                         'sample': sample_name,
-                        'path': sample_path
+                        'path': sample_path,
+                        'playback_start': playback_start,
+                        'playback_length': playback_length
                     })
                     pad_counter[0] += 1
                     

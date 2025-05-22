@@ -68,11 +68,15 @@ class DrumRackInspectorHandler(BaseHandler):
                             web_path = '/samples/' + sample['path'].replace('/data/UserData/UserLibrary/Samples/Preset Samples/', '', 1)
                             web_path = urllib.parse.quote(web_path)
                             waveform_id = f'waveform-{pad_num}'
+                            # Add new data-playback-start and data-playback-length attributes
                             cell_html += f'''
                                 <div class="pad-info">
                                     <span class="pad-number">Pad {pad_num}</span>
                                 </div>
-                                <div id="{waveform_id}" class="waveform-container" data-audio-path="{web_path}"></div>
+                                <div id="{waveform_id}" class="waveform-container"
+                                     data-audio-path="{web_path}"
+                                     data-playback-start="{sample.get('playback_start', 0.0)}"
+                                     data-playback-length="{sample.get('playback_length', 1.0)}"></div>
                                 <div class="sample-info">
                                     <div class="sample-header">
                                         <span class="sample-name">{sample["sample"]}</span>
@@ -230,7 +234,10 @@ class DrumRackInspectorHandler(BaseHandler):
                         <div class="pad-info">
                             <span class="pad-number">Pad {num}</span>
                         </div>
-                        <div id="{wf_id}" class="waveform-container" data-audio-path="{web_path}"></div>
+                        <div id="{wf_id}" class="waveform-container"
+                             data-audio-path="{web_path}"
+                             data-playback-start="{sample.get('playback_start', 0.0)}"
+                             data-playback-length="{sample.get('playback_length', 1.0)}"></div>
                         <div class="sample-info">
                             <div class="sample-header">
                                 <span class="sample-name">{sample["sample"]}</span>
@@ -341,7 +348,10 @@ class DrumRackInspectorHandler(BaseHandler):
                                 <div class="pad-info">
                                     <span class="pad-number">Pad {pad_num}</span>
                                 </div>
-                                <div id="{waveform_id}" class="waveform-container" data-audio-path="{web_path}"></div>
+                                <div id="{waveform_id}" class="waveform-container"
+                                     data-audio-path="{web_path}"
+                                     data-playback-start="{sample.get('playback_start', 0.0)}"
+                                     data-playback-length="{sample.get('playback_length', 1.0)}"></div>
                                 <div class="sample-info">
                                     <div class="sample-header">
                                         <span class="sample-name">{sample["sample"]}</span>
