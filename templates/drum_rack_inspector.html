@@ -102,6 +102,15 @@
       window.addEventListener('click', e => {
         if (e.target === modal) modal.classList.add('hidden');
       });
+      // Disable algorithm dropdown when Preserve pitch is unchecked
+      const preserveCheckbox = document.getElementById('ts_preserve_pitch');
+      const algoSelect = document.getElementById('ts_algorithm');
+      function updateAlgoState() {
+        algoSelect.disabled = !preserveCheckbox.checked;
+      }
+      preserveCheckbox.addEventListener('change', updateAlgoState);
+      // Initialize algorithm state
+      updateAlgoState();
     }
     document.addEventListener('DOMContentLoaded', initializeTimeStretchModal);
   </script>
