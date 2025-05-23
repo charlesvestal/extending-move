@@ -147,7 +147,7 @@ class SliceHandler(BaseHandler):
             # --- BEGIN: Inject detected regions into HTML if transient_detect and regions ---
             # This block is only relevant for rendering HTML responses (not downloads)
             # so we insert a <script> tag at the end of the HTML output if needed.
-            if mode != "download":
+            if mode != "download" and transient_detect:
                 # Prepare detected regions for script injection
                 detected_regions = None
                 # If the result contains detected regions, use them
