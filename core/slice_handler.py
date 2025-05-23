@@ -64,6 +64,10 @@ def cleanup_temp_files(files_to_cleanup):
             print(f"Warning: Failed to clean up {path}: {e}")
 
 def generate_kit_template(preset_name, kit_type='choke'):
+    print(f"[DEBUG] generate_kit_template called with preset_name={preset_name} (type={type(preset_name)})")
+    if not isinstance(preset_name, str):
+        print(f"[ERROR] generate_kit_template: preset_name is not a string! Value: {preset_name}, type: {type(preset_name)}")
+        preset_name = str(preset_name) if hasattr(preset_name, "__str__") else "Preset"
     """
     Generates a Move Kit template with 16 drum cell chains, supporting choke, gate, or drum kit types.
 
@@ -357,6 +361,14 @@ def process_kit(input_wav, preset_name=None, regions=None, num_slices=None, keep
        - Preset goes to UserLibrary/Track Presets
        - Refreshes library cache automatically
     """
+    """
+    See docstring above for details.
+    """
+    print(f"[DEBUG] process_kit called with preset_name={preset_name} (type={type(preset_name)})")
+    # Prevent preset_name from being a dict (or any non-str)
+    if preset_name is not None and not isinstance(preset_name, str):
+        print(f"[ERROR] preset_name is not a string! Value: {preset_name}, type: {type(preset_name)}")
+        preset_name = str(preset_name) if hasattr(preset_name, "__str__") else "Preset"
     temp_files = []  # Track files to clean up
     try:
         # If transient detection is requested, generate regions
@@ -374,7 +386,7 @@ def process_kit(input_wav, preset_name=None, regions=None, num_slices=None, keep
         else:
             preset = os.path.splitext(os.path.basename(input_wav))[0]
             print(f"No preset name provided; defaulting to '{preset}'.")
-
+        print(f"[DEBUG] Using preset for filename: {preset} (type={type(preset)})")
         # Generate the kit template
         kit_template = generate_kit_template(preset, kit_type=kit_type)
 
@@ -383,6 +395,8 @@ def process_kit(input_wav, preset_name=None, regions=None, num_slices=None, keep
             samples_folder = "Samples"
             preset_output_file = "Preset.ablpreset"
             bundle_filename = f"{preset}.ablpresetbundle"
+            print(f"[DEBUG] bundle_filename will be: {bundle_filename} (type={type(bundle_filename)})")
+            print(f"[DEBUG] preset_output_file will be: {preset_output_file} (type={type(preset_output_file)})")
 
             # Track temporary files for cleanup
             temp_files.extend([samples_folder, preset_output_file])
@@ -396,13 +410,22 @@ def process_kit(input_wav, preset_name=None, regions=None, num_slices=None, keep
             total_duration = len(data) / samplerate
 
             if regions:
+                print(f"[DEBUG] Regions provided: {regions} (type={type(regions)})")
+                for i, region in enumerate(regions):
+                    print(f"[DEBUG] Region {i}: {region} (type={type(region)})")
                 slices_info = []
-                for region in regions:
-                    start = float(region.get("start", 0))
-                    end = float(region.get("end", start))
-                    hold = end - start
-                    offset = start / total_duration if total_duration > 0 else 0
-                    slices_info.append((offset, hold))
+                try:
+                    for region in regions:
+                        print(f"[DEBUG] Processing region: {region} (type={type(region)})")
+                        start = float(region.get("start", 0))
+                        end = float(region.get("end", start))
+                        hold = end - start
+                        offset = start / total_duration if total_duration > 0 else 0
+                        slices_info.append((offset, hold))
+                except Exception as e:
+                    print(f"[ERROR] While processing region: {region} (type={type(region)})")
+                    import traceback; traceback.print_exc()
+                    raise
             else:
                 num_slices = num_slices if num_slices is not None else 16
                 slice_duration = total_duration / num_slices
@@ -437,7 +460,10 @@ def process_kit(input_wav, preset_name=None, regions=None, num_slices=None, keep
             # Set up paths for direct placement
             samples_target_dir = "/data/UserData/UserLibrary/Samples/Preset Samples"
             presets_target_dir = "/data/UserData/UserLibrary/Track Presets"
+            print(f"[DEBUG] Using preset for filename: {preset} (type={type(preset)})")
             preset_output_file = os.path.join(presets_target_dir, f"{preset}.ablpreset")
+            print(f"[DEBUG] bundle_filename will be: None (auto_place mode)")
+            print(f"[DEBUG] preset_output_file will be: {preset_output_file} (type={type(preset_output_file)})")
 
             # Create sliced file via slice_wav (preserves extension)
             sliced_list = slice_wav(input_wav, regions=regions, num_slices=num_slices, target_directory=samples_target_dir)
@@ -448,13 +474,22 @@ def process_kit(input_wav, preset_name=None, regions=None, num_slices=None, keep
             total_duration = len(data) / samplerate
 
             if regions:
+                print(f"[DEBUG] Regions provided: {regions} (type={type(regions)})")
+                for i, region in enumerate(regions):
+                    print(f"[DEBUG] Region {i}: {region} (type={type(region)})")
                 slices_info = []
-                for region in regions:
-                    start = float(region.get("start", 0))
-                    end = float(region.get("end", start))
-                    hold = end - start
-                    offset = start / total_duration if total_duration > 0 else 0
-                    slices_info.append((offset, hold))
+                try:
+                    for region in regions:
+                        print(f"[DEBUG] Processing region: {region} (type={type(region)})")
+                        start = float(region.get("start", 0))
+                        end = float(region.get("end", start))
+                        hold = end - start
+                        offset = start / total_duration if total_duration > 0 else 0
+                        slices_info.append((offset, hold))
+                except Exception as e:
+                    print(f"[ERROR] While processing region: {region} (type={type(region)})")
+                    import traceback; traceback.print_exc()
+                    raise
             else:
                 num_slices = num_slices if num_slices is not None else 16
                 slice_duration = total_duration / num_slices
@@ -486,4 +521,4 @@ def process_kit(input_wav, preset_name=None, regions=None, num_slices=None, keep
 
     except Exception as e:
         cleanup_temp_files(temp_files)
-        return {'success': False, 'message': f"Error processing kit: {e}"}
+        return {'success': False, 'message': f"Error processing kit in: {e}"}
