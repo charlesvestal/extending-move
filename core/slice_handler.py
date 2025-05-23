@@ -7,6 +7,7 @@ import soundfile as sf
 from core.refresh_handler import refresh_library
 
 import librosa
+import numpy as np
 
 def detect_transients(filepath, max_slices=16, delta=0.07):
     """
@@ -17,8 +18,39 @@ def detect_transients(filepath, max_slices=16, delta=0.07):
         delta: sensitivity threshold for onset detection
     Returns: regions list [{start, end}, ...] (in seconds, up to max_slices)
     """
+    # 1) Load audio and isolate percussive component for tighter drum transients
     y, sr = librosa.load(filepath, sr=None, mono=True)
-    onsets = librosa.onset.onset_detect(y=y, sr=sr, units='time', delta=delta)
+    _, y_perc = librosa.effects.hpss(y)
+
+    # 2) Compute Mel-based onset strength envelope
+    # higher time resolution for drum hits
+    hop_s = 128
+    o_env = librosa.onset.onset_strength(
+        y=y_perc,
+        sr=sr,
+        hop_length=hop_s,
+        n_mels=64,
+        fmax=sr // 2,
+        aggregate=np.median
+    )
+
+    # 3) Normalize envelope for consistent delta threshold
+    if o_env.max() > 0:
+        o_env = o_env / o_env.max()
+
+    # 4) Detect onsets with tuned parameters and backtracking
+    onsets = librosa.onset.onset_detect(
+        y=y_perc,
+        sr=sr,
+        hop_length=hop_s,
+        units='time',
+        backtrack=True,
+        pre_max=2,
+        post_max=2,
+        pre_avg=2,
+        post_avg=2,
+        delta=delta
+    ).tolist()
     if len(onsets) == 0:
         duration = librosa.get_duration(y=y, sr=sr)
         return [{"start": 0.0, "end": duration}]

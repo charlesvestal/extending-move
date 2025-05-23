@@ -599,6 +599,38 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"Error during audiotsm WSOLA warm-up: {e}")
     
+    # Warm-up the full Librosa onset pipeline (basic + advanced)
+    try:
+        # 1) Basic onset_detect warm-up
+        y = np.zeros(512, dtype=float)
+        librosa.onset.onset_detect(y=y, sr=22050, units='time', delta=0.07)
+
+        # 2) HPSS + onset_strength + peak_pick warm-up
+        y_long = np.zeros(22050, dtype=float)  # 1 second of silence
+        y_harm, y_perc = librosa.effects.hpss(y_long)
+        o_env = librosa.onset.onset_strength(
+            y=y_perc,
+            sr=22050,
+            hop_length=128,
+            n_mels=64,
+            fmax=22050//2,
+            aggregate=np.median
+        )
+        if o_env.max() > 0:
+            o_env = o_env / o_env.max()
+        # Use the same peak-picker parameters you ship to the user
+        librosa.util.peak_pick(
+            o_env,
+            pre_max=2, post_max=2,
+            pre_avg=2, post_avg=2,
+            delta=0.07, wait=128//2
+        )
+
+        print("Librosa onset pipeline warm-up complete.")
+    except Exception as e:
+        print(f"Error during Librosa warm-up: {e}")
+
+
     try:
         webServer.serve_forever()
     except KeyboardInterrupt:
