@@ -25,14 +25,26 @@ class SliceHandler(BaseHandler):
         if not success:
             return self.format_json_response({'success': False, 'message': 'File upload failed.'}, status=400)
         try:
-            print(f"DEBUG: Calling detect_transients with {filepath}")  # <--- Add here
-            regions = detect_transients(filepath, max_slices=16)
+            # --- Sensitivity support ---
+            delta = 0.07  # default
+            if "sensitivity" in form:
+                try:
+                    delta = float(form.getvalue("sensitivity"))
+                except Exception:
+                    pass
+            print(f"DEBUG: Calling detect_transients with {filepath}, delta={delta}")  # <--- Add here
+            regions = detect_transients(filepath, max_slices=16, delta=delta)
             print(f"DEBUG: Regions detected: {regions}")  # <--- Add here
-            if regions and len(regions) > 0:
-                message = f'Detected {len(regions)} transients.'
-                resp = {'success': True, 'regions': regions, 'message': message}
+            num_detected = len(regions) if regions else 0
+            if num_detected > 16:
+                message = f"Detected {num_detected} transients. Mapping the first 16."
+            elif num_detected > 0:
+                message = f"Detected {num_detected} transients."
             else:
-                message = 'No transients detected. Using full file.'
+                message = "No transients detected. Using full file."
+            if regions and len(regions) > 0:
+                resp = {'success': True, 'regions': regions[:16], 'message': message}
+            else:
                 resp = {'success': False, 'regions': [{'start': 0.0, 'end': 1.0}], 'message': message}
             return self.format_json_response(resp)
         except Exception as e:
