@@ -18,6 +18,15 @@
 
     <label for="num_slices">Number of slices (1-16):</label>
     <input id="num_slices" name="num_slices" type="number" min="1" max="16" value="16" required/>
+    <br/>
+    <!--
+    <input type="checkbox" id="transient_detect" name="transient_detect" value="1" onclick="toggleNumSlices()"/>
+    <label for="transient_detect">Detect slices by transients (max 16)</label>
+    <input type="hidden" id="transient_detect_hidden" name="transient_detect" value="0"/>
+    -->
+    <br/>
+    <button type="button" id="detect-transients-btn">Detect Slices by Transients</button>
+    <span id="transient-detect-message" style="margin-left: 1em; color: #337ab7;"></span>
     <br/><br/>
     
     <button type="submit" onclick="document.getElementById('mode').value = 'download'">
@@ -26,6 +35,14 @@
     <button type="submit" onclick="document.getElementById('mode').value = 'auto_place'">
         Save Preset directly on Move
     </button>
+    <script>
+    function toggleNumSlices() {
+        const cb = document.getElementById('transient_detect');
+        const numSlicesInput = document.getElementById('num_slices');
+        numSlicesInput.disabled = cb.checked;
+        document.getElementById('transient_detect_hidden').value = cb.checked ? "1" : "0";
+    }
+    </script>
 </form>
 <br/><br/>
     

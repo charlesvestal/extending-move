@@ -462,7 +462,7 @@ class MyServer(BaseHTTPRequestHandler):
         Handle all POST requests.
         Processes form data and delegates to appropriate handler.
         """
-        if self.path not in ["/slice", "/refresh", "/reverse", "/drum-rack-inspector", "/restore", "/chord", "/place-files", "/synth-preset-inspector"]:
+        if self.path not in ["/slice", "/refresh", "/reverse", "/drum-rack-inspector", "/restore", "/chord", "/place-files", "/synth-preset-inspector", "/detect-transients"]:
             self.send_error(404)
             return
 
@@ -555,3 +555,7 @@ if __name__ == "__main__":
         pass
     webServer.server_close()
     print("Server stopped.")
+
+    @route_handler.post("/detect-transients")
+    def handle_detect_transients(self, form):
+        return self.slice_handler.handle_detect_transients(form)
