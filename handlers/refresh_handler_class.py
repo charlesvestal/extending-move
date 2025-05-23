@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-import cgi
 from handlers.base_handler import BaseHandler
 from core.refresh_handler import refresh_library
 
 class RefreshHandler(BaseHandler):
-    def handle_post(self, form: cgi.FieldStorage):
+    def handle_post(self, form):
         """Handle POST request for library refresh."""
         # Validate action
         valid, error_response = self.validate_action(form, "refresh_library")

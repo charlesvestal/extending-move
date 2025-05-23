@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Move - Extended</title>
+    <link rel="stylesheet" href="/static/style.css">
+    
+    <!-- HTMX for modern interactions -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    
+    <!-- WaveSurfer for audio waveforms -->
+    <script src="https://unpkg.com/wavesurfer.js@6/dist/wavesurfer.js"></script>
+    <script src="https://unpkg.com/wavesurfer.js@6/dist/plugin/wavesurfer.regions.js"></script>
+    
+    <!-- JSZip for chord generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+    
+    <!-- Existing JavaScript -->
+    <script src="/static/shared.js"></script>
+    <script src="/static/chord.js"></script>
+    
+    <style>
+        /* HTMX loading indicators */
+        .htmx-indicator {
+            display: none;
+        }
+        .htmx-request .htmx-indicator {
+            display: inline;
+        }
+        .htmx-request.htmx-indicator {
+            display: inline;
+        }
+        
+        /* Tab styling improvements */
+        .tab-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .tab-btn {
+            padding: 10px 15px;
+            border: 1px solid #ccc;
+            background: #f9f9f9;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        
+        .tab-btn:hover {
+            background: #e9e9e9;
+        }
+        
+        .tab-btn.active {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        
+        /* Message styling */
+        .message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <h1 id="header">Move - Extended</h1>
+    
+    {% block content %}{% endblock %}
+    
+    <small id="footer">
+        More information on <a href="http://github.com/charlesvestal/extending-move">GitHub</a>. 
+        <a href="mailto:charles@charles.pizza">Feedback welcome!</a>
+    </small>
+</body>
+</html>

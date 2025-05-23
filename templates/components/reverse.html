@@ -1,0 +1,30 @@
+<h2>Reverse WAV File</h2>
+
+{% if message %}
+<div class="message {{ message_type }}">
+    {{ message }}
+</div>
+{% endif %}
+
+<p>Select a WAV file from your samples directory to reverse it.</p>
+
+<form hx-post="/api/reverse" 
+      hx-target="#content" 
+      hx-indicator="#loading">
+    <input type="hidden" name="action" value="reverse">
+    
+    <label for="filename">Select WAV file:</label>
+    <select name="filename" id="filename" required>
+        {% if options %}
+            {{ options|safe }}
+        {% else %}
+            <option value="">No WAV files found</option>
+        {% endif %}
+    </select>
+    <br><br>
+    
+    <button type="submit" {% if not options %}disabled{% endif %}>
+        Reverse Selected File
+    </button>
+    <span class="htmx-indicator">Processing...</span>
+</form>

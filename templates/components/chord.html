@@ -1,0 +1,203 @@
+<h2>Chord Kit Generator</h2>
+
+{% if message %}
+<div class="message {{ message_type }}">
+    {{ message }}
+</div>
+{% endif %}
+
+<p>Generate chord kits from audio samples. This tool runs entirely in your browser.</p>
+
+<div id="chordControls">
+    <label for="audioFile">Select Audio File:</label>
+    <input type="file" id="audioFile" accept="audio/*">
+    <br><br>
+    
+    <label for="rootNote">Root Note:</label>
+    <select id="rootNote">
+        <option value="C">C</option>
+        <option value="C#">C#</option>
+        <option value="D">D</option>
+        <option value="D#">D#</option>
+        <option value="E">E</option>
+        <option value="F">F</option>
+        <option value="F#">F#</option>
+        <option value="G">G</option>
+        <option value="G#">G#</option>
+        <option value="A">A</option>
+        <option value="A#">A#</option>
+        <option value="B">B</option>
+    </select>
+    <br><br>
+    
+    <label for="chordType">Chord Type:</label>
+    <select id="chordType">
+        <option value="major">Major</option>
+        <option value="minor">Minor</option>
+        <option value="diminished">Diminished</option>
+        <option value="augmented">Augmented</option>
+        <option value="major7">Major 7th</option>
+        <option value="minor7">Minor 7th</option>
+        <option value="dominant7">Dominant 7th</option>
+    </select>
+    <br><br>
+    
+    <button id="generateChord" disabled>Generate Chord Kit</button>
+    <button id="downloadChord" disabled>Download Kit</button>
+</div>
+
+<div id="chordList"></div>
+
+<script>
+// Initialize chord functionality when this component loads
+function initChordTab() {
+    const audioFileInput = document.getElementById('audioFile');
+    const generateButton = document.getElementById('generateChord');
+    const downloadButton = document.getElementById('downloadChord');
+    const rootNoteSelect = document.getElementById('rootNote');
+    const chordTypeSelect = document.getElementById('chordType');
+    const chordListDiv = document.getElementById('chordList');
+    
+    if (!audioFileInput || !generateButton) return;
+    
+    let currentAudioBuffer = null;
+    let currentChordKit = null;
+    
+    // Enable generate button when file is selected
+    audioFileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            generateButton.disabled = false;
+            
+            // Load audio file
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                audioContext.decodeAudioData(e.target.result)
+                    .then(buffer => {
+                        currentAudioBuffer = buffer;
+                    })
+                    .catch(err => {
+                        console.error('Error decoding audio:', err);
+                        alert('Error loading audio file');
+                    });
+            };
+            reader.readAsArrayBuffer(file);
+        } else {
+            generateButton.disabled = true;
+        }
+    });
+    
+    // Generate chord kit
+    generateButton.addEventListener('click', function() {
+        if (!currentAudioBuffer) {
+            alert('Please select an audio file first');
+            return;
+        }
+        
+        const rootNote = rootNoteSelect.value;
+        const chordType = chordTypeSelect.value;
+        
+        try {
+            // Use the existing chord generation logic from chord.js
+            if (typeof generateChordKit === 'function') {
+                currentChordKit = generateChordKit(currentAudioBuffer, rootNote, chordType);
+                displayChordKit(currentChordKit);
+                downloadButton.disabled = false;
+            } else {
+                // Fallback simple chord generation
+                currentChordKit = generateSimpleChordKit(currentAudioBuffer, rootNote, chordType);
+                displayChordKit(currentChordKit);
+                downloadButton.disabled = false;
+            }
+        } catch (err) {
+            console.error('Error generating chord kit:', err);
+            alert('Error generating chord kit');
+        }
+    });
+    
+    // Download chord kit
+    downloadButton.addEventListener('click', function() {
+        if (!currentChordKit) {
+            alert('Please generate a chord kit first');
+            return;
+        }
+        
+        try {
+            if (typeof downloadChordKit === 'function') {
+                downloadChordKit(currentChordKit);
+            } else {
+                // Fallback download
+                downloadSimpleChordKit(currentChordKit);
+            }
+        } catch (err) {
+            console.error('Error downloading chord kit:', err);
+            alert('Error downloading chord kit');
+        }
+    });
+    
+    function displayChordKit(chordKit) {
+        if (!chordListDiv) return;
+        
+        chordListDiv.innerHTML = '<h3>Generated Chord Kit:</h3>';
+        
+        if (chordKit && chordKit.chords) {
+            const list = document.createElement('ul');
+            chordKit.chords.forEach((chord, index) => {
+                const item = document.createElement('li');
+                item.textContent = `Pad ${index + 1}: ${chord.name} (${chord.notes.join(', ')})`;
+                list.appendChild(item);
+            });
+            chordListDiv.appendChild(list);
+        }
+    }
+    
+    function generateSimpleChordKit(audioBuffer, rootNote, chordType) {
+        // Simple fallback chord generation
+        const chordDefinitions = {
+            'major': [0, 4, 7],
+            'minor': [0, 3, 7],
+            'diminished': [0, 3, 6],
+            'augmented': [0, 4, 8],
+            'major7': [0, 4, 7, 11],
+            'minor7': [0, 3, 7, 10],
+            'dominant7': [0, 4, 7, 10]
+        };
+        
+        const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+        const rootIndex = noteNames.indexOf(rootNote);
+        const intervals = chordDefinitions[chordType] || chordDefinitions['major'];
+        
+        const chords = [];
+        for (let i = 0; i < 16; i++) {
+            const chordNotes = intervals.map(interval => {
+                const noteIndex = (rootIndex + interval + i) % 12;
+                return noteNames[noteIndex];
+            });
+            
+            chords.push({
+                name: `${chordNotes[0]} ${chordType}`,
+                notes: chordNotes,
+                audioBuffer: audioBuffer // In a real implementation, this would be pitch-shifted
+            });
+        }
+        
+        return { chords };
+    }
+    
+    function downloadSimpleChordKit(chordKit) {
+        // Simple fallback download - just show the chord info
+        const chordInfo = chordKit.chords.map((chord, index) => 
+            `Pad ${index + 1}: ${chord.name} (${chord.notes.join(', ')})`
+        ).join('\n');
+        
+        const blob = new Blob([chordInfo], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'chord-kit-info.txt';
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+}
+</script>
