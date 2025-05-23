@@ -22,7 +22,8 @@ def detect_transients(filepath, max_slices=16, delta=0.07):
     if len(onsets) == 0:
         duration = librosa.get_duration(y=y, sr=sr)
         return [{"start": 0.0, "end": duration}]
-    slice_points = [0.0] + list(onsets)
+    # Start slices at the first detected transient rather than the file start
+    slice_points = list(onsets)
     duration = librosa.get_duration(y=y, sr=sr)
     if slice_points[-1] < duration:
         slice_points.append(duration)
