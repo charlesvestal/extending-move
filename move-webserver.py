@@ -6,6 +6,8 @@ import cgi
 import atexit
 import signal
 import sys
+import numpy as np
+import librosa
 from handlers.slice_handler_class import SliceHandler
 from handlers.refresh_handler_class import RefreshHandler
 from handlers.reverse_handler_class import ReverseHandler
@@ -565,6 +567,38 @@ if __name__ == "__main__":
     print("Starting webserver")
     webServer = TLSIgnoringHTTPServer((hostName, serverPort), MyServer)
     print(f"Server started http://{hostName}:{serverPort}")
+    
+    # Warm-up librosa onset detection to avoid first-call latency
+    try:
+        y = np.zeros(512, dtype=float)
+        librosa.onset.onset_detect(y=y, sr=22050, units='time', delta=0.07)
+        print("Librosa onset_detect warm-up complete.")
+    except Exception as e:
+        print(f"Error during librosa warm-up: {e}")
+
+    # Warm-up librosa time_stretch for phase vocoder
+    try:
+        from librosa.effects import time_stretch
+        time_stretch(y, rate=1.0)
+        print("Librosa time_stretch warm-up complete.")
+    except Exception as e:
+        print(f"Error during librosa time_stretch warm-up: {e}")
+
+    # Warm-up audiotsm WSOLA to compile JIT and FFT routines
+    try:
+        from audiotsm.io.array import ArrayReader, ArrayWriter
+        from audiotsm import wsola
+        # Dummy mono audio data: shape (channels, frames)
+        dummy = np.zeros((1, 512), dtype=float)
+        reader = ArrayReader(dummy)
+        writer = ArrayWriter(dummy.shape[0])
+        tsm = wsola(writer.channels)
+        tsm.set_speed(1.0)
+        tsm.run(reader, writer)
+        print("Audiotsm WSOLA warm-up complete.")
+    except Exception as e:
+        print(f"Error during audiotsm WSOLA warm-up: {e}")
+    
     try:
         webServer.serve_forever()
     except KeyboardInterrupt:
