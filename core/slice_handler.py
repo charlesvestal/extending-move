@@ -6,6 +6,31 @@ import zipfile
 import soundfile as sf
 from core.refresh_handler import refresh_library
 
+import librosa
+
+def detect_transients(filepath, max_slices=16):
+    """
+    Detect transient points (onsets) in the audio file.
+    Returns: regions list [{start, end}, ...] (in seconds, up to max_slices)
+    """
+    y, sr = librosa.load(filepath, sr=None, mono=True)
+    onsets = librosa.onset.onset_detect(y=y, sr=sr, units='time')
+    if len(onsets) == 0:
+        # fallback: one region covering the whole file
+        duration = librosa.get_duration(y=y, sr=sr)
+        return [{"start": 0.0, "end": duration}]
+    slice_points = [0.0] + list(onsets[:max_slices-1])
+    duration = librosa.get_duration(y=y, sr=sr)
+    if slice_points[-1] < duration:
+        slice_points.append(duration)
+    # Ensure no overlapping/empty regions
+    regions = []
+    for i in range(len(slice_points)-1):
+        start, end = slice_points[i], slice_points[i+1]
+        if end - start > 0.01:
+            regions.append({"start": start, "end": end})
+    return regions
+
 # using SoundFile for robust WAV/AIFF slicing
 
 # Remove self-import if present
@@ -297,7 +322,7 @@ def create_bundle(preset_filename, slice_paths, bundle_name):
             print(f"Added {slice_path} as {arcname}")
 
 def process_kit(input_wav, preset_name=None, regions=None, num_slices=None, keep_files=False,
-               mode="download", kit_type="choke"):
+               mode="download", kit_type="choke", transient_detect=False):
     """
     Process a WAV file into a Move drum kit preset.
     
@@ -328,6 +353,10 @@ def process_kit(input_wav, preset_name=None, regions=None, num_slices=None, keep
     """
     temp_files = []  # Track files to clean up
     try:
+        # If transient detection is requested, generate regions
+        if transient_detect:
+            regions = detect_transients(input_wav, max_slices=16)
+            num_slices = None
         # Parse regions if provided as JSON string
         if isinstance(regions, str):
             regions = json.loads(regions)

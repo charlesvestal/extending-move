@@ -11,6 +11,7 @@ class SliceHandler(BaseHandler):
         # Create uploads directory if it doesn't exist
         os.makedirs(self.upload_dir, exist_ok=True)
 
+
     def cleanup_directory(self, directory):
         """Clean up a directory and its contents."""
         try:
@@ -67,6 +68,9 @@ class SliceHandler(BaseHandler):
                 self.cleanup_upload(filepath)
                 return self.format_error_response("Number of slices must be between 1 and 16")
 
+            # Detect transient mode
+            transient_detect = form.getvalue('transient_detect') in ['1', 'true', 'True', 'on']
+
             # Handle regions if provided
             regions = None
             if 'regions' in form:
@@ -85,13 +89,51 @@ class SliceHandler(BaseHandler):
                 num_slices=num_slices,
                 keep_files=False,
                 mode=mode,
-                kit_type=kit_type
+                kit_type=kit_type,
+                transient_detect=transient_detect
             )
 
             if not result.get('success'):
                 # Clean up only if processing failed
                 self.cleanup_upload(filepath)
                 return self.format_error_response(result.get('message', 'Kit processing failed'))
+
+            # --- BEGIN: Inject detected regions into HTML if transient_detect and regions ---
+            # This block is only relevant for rendering HTML responses (not downloads)
+            # so we insert a <script> tag at the end of the HTML output if needed.
+            if mode != "download":
+                # Prepare detected regions for script injection
+                detected_regions = None
+                # If the result contains detected regions, use them
+                if transient_detect and result.get('regions'):
+                    detected_regions = result['regions']
+                # If not, fallback to regions variable if available
+                elif transient_detect and regions:
+                    detected_regions = regions
+
+                html = self.format_success_response(result.get('message', 'Kit processed successfully'))
+                # If it's a dict, extract the HTML
+                if isinstance(html, dict) and 'html' in html:
+                    html = html['html']
+
+                # Compose the transient message to prepend to html
+                if detected_regions and len(detected_regions) > 1:
+                    transient_msg = f"<div style='color: green;'>Detected {len(detected_regions)} transients; regions set automatically.</div>"
+                else:
+                    transient_msg = "<div style='color: orange;'>No transients detected; using the whole file as one region.</div>"
+                html = transient_msg + html
+
+                # If there are detected regions, append the <script> tag as before
+                if detected_regions:
+                    html += f"""
+        <script>
+        window.DETECTED_REGIONS = {json.dumps(detected_regions)};
+        </script>
+        """
+                # Always append a console log about transient detection
+                html += f"<script>console.log('Transient detection attempted: {len(detected_regions) if detected_regions else 0} regions detected.');</script>"
+                return html
+            # --- END: Inject detected regions into HTML if transient_detect and regions ---
 
             if mode == "download":
                 bundle_path = result.get('bundle_path')
