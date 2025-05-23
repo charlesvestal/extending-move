@@ -144,6 +144,11 @@ function attachFormHandler(tabName) {
                 msg.style.color = "#337ab7";
                 const formData = new FormData();
                 formData.append('file', fileInput.files[0]);
+                // --- Add sensitivity slider support ---
+                const sensInput = form.querySelector('#sensitivity');
+                const sensitivity = sensInput ? sensInput.value : 0.07;
+                formData.append('sensitivity', sensitivity);
+                // --- End sensitivity slider support ---
                 try {
                     const response = await fetch('/detect-transients', {
                         method: 'POST',
@@ -174,6 +179,15 @@ function attachFormHandler(tabName) {
                     msg.style.color = "red";
                     console.error(err);
                 }
+            });
+        }
+
+        // --- Sensitivity slider live update ---
+        const sensSlider = form.querySelector('#sensitivity');
+        const sensValue = document.getElementById('sensitivity-value');
+        if (sensSlider && sensValue) {
+            sensSlider.addEventListener('input', function() {
+                sensValue.textContent = sensSlider.value;
             });
         }
     }
