@@ -184,6 +184,13 @@ label {
     color: #444;
 }
 
+.slice-even-group label, .slice-transient-group label {   
+    display: inline;
+    margin-bottom: 0;
+    font-weight: 500;
+    color: #444;
+}
+
 button, 
 input[type="submit"] {
     background-color: #0000ff;

@@ -29,16 +29,19 @@ class SliceHandler(BaseHandler):
                     delta = float(form.getvalue("sensitivity"))
                 except Exception:
                     pass
-            regions = detect_transients(filepath, max_slices=16, delta=delta)
-            num_detected = len(regions) if regions else 0
-            if num_detected > 16:
-                message = f"Detected {num_detected} transients. Mapping the first 16."
-            elif num_detected > 0:
-                message = f"Detected {num_detected} transients."
+            # Detect all transients to determine total count
+            all_regions = detect_transients(filepath, max_slices=None, delta=delta)
+            total_detected = len(all_regions) if all_regions else 0
+            # Use only the first 16 regions for mapping
+            regions = all_regions[:16] if all_regions else []
+            if total_detected > 16:
+                message = f"Detected {total_detected} transients. Mapping the first 16."
+            elif total_detected > 0:
+                message = f"Detected {total_detected} transients."
             else:
                 message = "No transients detected. Using full file."
             if regions and len(regions) > 0:
-                resp = {'success': True, 'regions': regions[:16], 'message': message}
+                resp = {'success': True, 'regions': regions, 'message': message}
             else:
                 resp = {'success': False, 'regions': [{'start': 0.0, 'end': 1.0}], 'message': message}
             return self.format_json_response(resp)
