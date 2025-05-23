@@ -285,6 +285,10 @@ class MyServer(BaseHTTPRequestHandler):
         """Handle POST request for synth preset inspector page."""
         return self.synth_preset_inspector_handler.handle_post(form)
 
+    @route_handler.post("/detect-transients")
+    def handle_detect_transients_post(self, form):
+        return self.slice_handler.handle_detect_transients(form)
+
     def handle_static_file(self, path):
         """Handle requests for static files."""
         try:

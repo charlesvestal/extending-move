@@ -11,6 +11,37 @@ class SliceHandler(BaseHandler):
         # Create uploads directory if it doesn't exist
         os.makedirs(self.upload_dir, exist_ok=True)
 
+    def handle_detect_transients(self, form):
+        import json
+        from core.slice_handler import detect_transients
+        print("DEBUG: Entered handle_detect_transients")  # <--- Add here
+
+        # Accept file upload from form as 'file'
+        if 'file' not in form:
+            print("DEBUG: No file in form")  # <--- Add here
+            return self.format_json_response({'success': False, 'message': 'No file provided.'}, status=400)
+        success, filepath, error_response = self.handle_file_upload(form)
+        print(f"DEBUG: File upload success={success}, filepath={filepath}, error={error_response}")  # <--- Add here
+        if not success:
+            return self.format_json_response({'success': False, 'message': 'File upload failed.'}, status=400)
+        try:
+            print(f"DEBUG: Calling detect_transients with {filepath}")  # <--- Add here
+            regions = detect_transients(filepath, max_slices=16)
+            print(f"DEBUG: Regions detected: {regions}")  # <--- Add here
+            if regions and len(regions) > 0:
+                message = f'Detected {len(regions)} transients.'
+                resp = {'success': True, 'regions': regions, 'message': message}
+            else:
+                message = 'No transients detected. Using full file.'
+                resp = {'success': False, 'regions': [{'start': 0.0, 'end': 1.0}], 'message': message}
+            return self.format_json_response(resp)
+        except Exception as e:
+            print(f"ERROR in handle_detect_transients: {e}")  # <--- Add here
+            import traceback; traceback.print_exc()           # <--- Add here
+            return self.format_json_response({'success': False, 'message': str(e)}, status=500)
+        finally:
+            self.cleanup_upload(filepath)
+
 
     def cleanup_directory(self, directory):
         """Clean up a directory and its contents."""
