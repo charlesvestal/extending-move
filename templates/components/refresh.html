@@ -1,0 +1,16 @@
+<h2>Refresh Library</h2>
+
+{% if message %}
+<div class="message {{ message_type }}">
+    {{ message }}
+</div>
+{% endif %}
+
+<p>Click the button below to refresh the Move library cache. This will make any new files you've added visible in Move.</p>
+
+<form method="post" action="/refresh">
+    <input type="hidden" name="action" value="refresh_library">
+    <button type="submit">
+        Refresh Library
+    </button>
+</form>

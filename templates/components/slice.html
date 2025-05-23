@@ -1,0 +1,211 @@
+<h2>Choose an audio file (WAV or AIFF) to slice into a Kit</h2>
+
+{% if message %}
+<div class="message {{ message_type }}">
+    {{ message }}
+</div>
+{% endif %}
+
+<form hx-post="/api/slice" 
+      hx-target="#content" 
+      hx-indicator="#loading"
+      hx-encoding="multipart/form-data">
+    <input type="hidden" name="action" value="slice">
+    <input type="hidden" name="mode" id="mode" value="download">
+    
+    <label for="file">Select Audio file:</label>
+    <input id="file" name="file" type="file" accept=".wav, .aif, .aiff" required>
+    <br><br>
+
+    <label for="kit_type">Kit Type:</label>
+    <select id="kit_type" name="kit_type">
+        <option value="choke" selected>Choke Kit – Pads play through, one at a time</option>
+        <option value="gate">Gate Kit – Pads play while held, multiples at once</option>
+        <option value="drum">Drum Kit – Pads play through, multiples at once</option>
+    </select>
+    <br><br>
+
+    <label for="num_slices">Number of slices (1-16):</label>
+    <input id="num_slices" name="num_slices" type="number" min="1" max="16" value="16" required>
+    <br><br>
+    
+    <button type="submit" onclick="document.getElementById('mode').value = 'download'">
+        Download .ablpresetbundle
+    </button>
+    <button type="submit" onclick="document.getElementById('mode').value = 'auto_place'">
+        Save Preset directly on Move
+    </button>
+    <span class="htmx-indicator">Processing...</span>
+</form>
+<br><br>
+    
+<!-- Waveform container -->
+<div id="waveform" style="width: 100%; height: 128px;"></div>
+<br>
+
+<script>
+// Initialize waveform functionality when this component loads
+function initializeWaveform() {
+    const waveform = document.getElementById('waveform');
+    
+    // If there's a placeholder and no existing WaveSurfer instance, create it
+    if (waveform && !waveform.waveSurferInstance) {
+        wavesurfer = WaveSurfer.create({
+            container: '#waveform',
+            waveColor: 'violet',
+            progressColor: 'purple',
+            height: 128,
+            responsive: true,
+            plugins: [WaveSurfer.regions.create({})]
+        });
+
+        // Set flag and create initial contiguous slices when audio is loaded
+        wavesurfer.on('ready', () => {
+            if (wavesurfer.getDuration() > 0) {
+                audioReady = true;
+                createContiguousRegions();
+                addResetSlicesButton();
+            } else {
+                audioReady = false;
+            }
+        });
+
+        // Listen for region clicks to play just that slice
+        wavesurfer.on('region-click', (region, e) => {
+            e.stopPropagation(); 
+            region.play();
+        });
+
+        // Whenever the user finishes resizing a region,
+        // force them to remain contiguous (no overlap/gap).
+        wavesurfer.on('region-update-end', keepRegionsContiguous);
+        
+        // Mark that this waveform has been initialized
+        waveform.waveSurferInstance = wavesurfer;
+    }
+
+    // Listen for changes in num_slices input to recalc slices
+    const numSlicesInput = document.getElementById('num_slices');
+    if (numSlicesInput) {
+        numSlicesInput.addEventListener('change', function() {
+            if (audioReady) {
+                wavesurfer.stop();       // Stop playback if audio is playing
+                wavesurfer.clearRegions(); 
+                createContiguousRegions(); 
+            }
+        });
+    }
+
+    // Listen for a new file selection
+    const fileInput = document.getElementById('file');
+    if (fileInput) {
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                // Clear old regions, reset flag, and load new file
+                wavesurfer.clearRegions();
+                audioReady = false;
+                wavesurfer.loadBlob(file);
+            }
+        });
+    }
+}
+
+// Initialize when this component loads
+if (typeof wavesurfer === 'undefined') {
+    let wavesurfer;
+    let audioReady = false;
+}
+
+// These functions are from the original main.js - keeping them for slice functionality
+function createContiguousRegions() {
+    const numSlicesInput = document.getElementById('num_slices');
+    if (!numSlicesInput) return;
+
+    const numSlices = parseInt(numSlicesInput.value, 10) || 0;
+    if (!audioReady || !wavesurfer || numSlices <= 0) return;
+
+    let slicingStart = 0;
+    let slicingEnd = wavesurfer.getDuration();
+
+    const regions = Object.values(wavesurfer.regions.list)
+        .sort((a, b) => a.start - b.start);
+
+    if (regions.length > 0) {
+        slicingStart = regions[0].start;
+        slicingEnd = regions[regions.length - 1].end;
+    }
+
+    const slicingDuration = slicingEnd - slicingStart;
+    const sliceDuration = slicingDuration / numSlices;
+
+    for (let i = 0; i < numSlices; i++) {
+        let regionOptions = {
+            start: slicingStart + i * sliceDuration,
+            end: slicingStart + (i + 1) * sliceDuration,
+            color: 'rgba(0, 255, 0, 0.2)',
+            drag: false
+        };
+
+        if (i === 0) {
+            regionOptions.resize = 'left';
+        }
+
+        if (i === numSlices - 1) {
+            regionOptions.resize = 'right';
+        }
+
+        wavesurfer.addRegion(regionOptions);
+    }
+}
+
+function keepRegionsContiguous(updatedRegion) {
+    const regions = Object.values(wavesurfer.regions.list)
+        .sort((a, b) => a.start - b.start);
+
+    const idx = regions.findIndex(r => r.id === updatedRegion.id);
+    if (idx === -1) return;
+
+    const duration = wavesurfer.getDuration();
+
+    if (updatedRegion.start < 0) {
+        updatedRegion.update({ start: 0 });
+    }
+    if (updatedRegion.end > duration) {
+        updatedRegion.update({ end: duration });
+    }
+
+    if (idx > 0) {
+        const prev = regions[idx - 1];
+        prev.update({ end: updatedRegion.start });
+    }
+
+    if (idx < regions.length - 1) {
+        const next = regions[idx + 1];
+        next.update({ start: updatedRegion.end });
+    }
+}
+
+function addResetSlicesButton() {
+    const waveform = document.getElementById('waveform');
+    if (!waveform) return;
+
+    if (document.getElementById('reset-slices')) return;
+
+    if (wavesurfer.getDuration() <= 0) return;
+
+    const resetButton = document.createElement('button');
+    resetButton.id = 'reset-slices';
+    resetButton.innerText = 'Reset Slices';
+    resetButton.type = 'button';
+
+    resetButton.addEventListener('click', () => {
+        if (!audioReady || !wavesurfer) return;
+        wavesurfer.stop();
+        wavesurfer.clearRegions();
+        createContiguousRegions();
+    });
+
+    waveform.parentNode.appendChild(resetButton);
+}
+</script>

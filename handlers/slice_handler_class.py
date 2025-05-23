@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import os
 import json
-import cgi
 from handlers.base_handler import BaseHandler
 from core.slice_handler import process_kit
 
@@ -33,12 +32,12 @@ class SliceHandler(BaseHandler):
         except Exception as e:
             print(f"Warning: Error cleaning directory {directory}: {e}")
 
-    def handle_post(self, form: cgi.FieldStorage, response_handler=None):
+    def handle_post(self, form, response_handler=None):
         """
         Handle POST request for slice processing.
         
         Args:
-            form: The form data
+            form: The form data (dict-like object with getvalue method)
             response_handler: A callable that takes (status, headers, content) for sending responses
         """
         # Validate action
@@ -47,12 +46,12 @@ class SliceHandler(BaseHandler):
             return error_response
 
         # Validate mode
-        mode = form.getvalue('mode')
+        mode = form.getvalue('mode') if hasattr(form, 'getvalue') else form.get('mode')
         if not mode or mode not in ["download", "auto_place"]:
             return self.format_error_response("Bad Request: Invalid mode")
 
         # Get kit type from form
-        kit_type = form.getvalue('kit_type', 'choke')
+        kit_type = form.getvalue('kit_type', 'choke') if hasattr(form, 'getvalue') else form.get('kit_type', 'choke')
 
         # Handle file upload
         success, filepath, error_response = self.handle_file_upload(form)
@@ -62,16 +61,18 @@ class SliceHandler(BaseHandler):
         try:
             # Process form data
             preset_name = os.path.splitext(os.path.basename(filepath))[0]
-            num_slices = int(form.getvalue('num_slices', 16))
+            num_slices_val = form.getvalue('num_slices', 16) if hasattr(form, 'getvalue') else form.get('num_slices', 16)
+            num_slices = int(num_slices_val)
             if not (1 <= num_slices <= 16):
                 self.cleanup_upload(filepath)
                 return self.format_error_response("Number of slices must be between 1 and 16")
 
             # Handle regions if provided
             regions = None
-            if 'regions' in form:
+            regions_val = form.getvalue('regions') if hasattr(form, 'getvalue') else form.get('regions')
+            if regions_val:
                 try:
-                    regions = json.loads(form.getvalue('regions'))
+                    regions = json.loads(regions_val)
                     num_slices = None
                 except json.JSONDecodeError:
                     self.cleanup_upload(filepath)

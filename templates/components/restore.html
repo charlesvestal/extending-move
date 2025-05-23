@@ -1,0 +1,48 @@
+<h2>Restore Move Set</h2>
+
+{% if message %}
+<div class="message {{ message_type }}">
+    {{ message }}
+</div>
+{% endif %}
+
+<p>Upload an .ablbundle file to restore it to a Move Set slot.</p>
+
+<form hx-post="/api/restore" 
+      hx-target="#content" 
+      hx-indicator="#loading"
+      hx-encoding="multipart/form-data">
+    <input type="hidden" name="action" value="restore">
+    
+    <label for="file">Select .ablbundle file:</label>
+    <input type="file" name="file" id="file" accept=".ablbundle" required>
+    <br><br>
+    
+    <label for="mset_index">Move Set slot:</label>
+    <select name="mset_index" id="mset_index" required>
+        {% if options %}
+            {{ options|safe }}
+        {% else %}
+            <option value="">No Move Sets available</option>
+        {% endif %}
+    </select>
+    <br><br>
+    
+    <label for="mset_restorecolor">Color:</label>
+    <select name="mset_restorecolor" id="mset_restorecolor" required>
+        <option value="0">Orange</option>
+        <option value="1">Red</option>
+        <option value="2">Yellow</option>
+        <option value="3">Green</option>
+        <option value="4">Blue</option>
+        <option value="5">Purple</option>
+        <option value="6">Pink</option>
+        <option value="7">White</option>
+    </select>
+    <br><br>
+    
+    <button type="submit" {% if not options %}disabled{% endif %}>
+        Restore Bundle
+    </button>
+    <span class="htmx-indicator">Restoring...</span>
+</form>
