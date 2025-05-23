@@ -14,14 +14,11 @@ class SliceHandler(BaseHandler):
     def handle_detect_transients(self, form):
         import json
         from core.slice_handler import detect_transients
-        print("DEBUG: Entered handle_detect_transients")  # <--- Add here
 
         # Accept file upload from form as 'file'
         if 'file' not in form:
-            print("DEBUG: No file in form")  # <--- Add here
             return self.format_json_response({'success': False, 'message': 'No file provided.'}, status=400)
         success, filepath, error_response = self.handle_file_upload(form)
-        print(f"DEBUG: File upload success={success}, filepath={filepath}, error={error_response}")  # <--- Add here
         if not success:
             return self.format_json_response({'success': False, 'message': 'File upload failed.'}, status=400)
         try:
@@ -32,9 +29,7 @@ class SliceHandler(BaseHandler):
                     delta = float(form.getvalue("sensitivity"))
                 except Exception:
                     pass
-            print(f"DEBUG: Calling detect_transients with {filepath}, delta={delta}")  # <--- Add here
             regions = detect_transients(filepath, max_slices=16, delta=delta)
-            print(f"DEBUG: Regions detected: {regions}")  # <--- Add here
             num_detected = len(regions) if regions else 0
             if num_detected > 16:
                 message = f"Detected {num_detected} transients. Mapping the first 16."
@@ -48,8 +43,6 @@ class SliceHandler(BaseHandler):
                 resp = {'success': False, 'regions': [{'start': 0.0, 'end': 1.0}], 'message': message}
             return self.format_json_response(resp)
         except Exception as e:
-            print(f"ERROR in handle_detect_transients: {e}")  # <--- Add here
-            import traceback; traceback.print_exc()           # <--- Add here
             return self.format_json_response({'success': False, 'message': str(e)}, status=500)
         finally:
             self.cleanup_upload(filepath)
