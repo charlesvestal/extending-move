@@ -31,8 +31,8 @@ def detect_transients(filepath, max_slices=16, delta=0.07):
         start, end = slice_points[i], slice_points[i+1]
         if end - start > 0.01:
             regions.append({"start": start, "end": end})
-    # Limit to first max_slices
-    if len(regions) > max_slices:
+    # Limit to first max_slices if a limit is specified
+    if max_slices is not None and len(regions) > max_slices:
         return regions[:max_slices]
     else:
         return regions

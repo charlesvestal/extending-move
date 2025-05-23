@@ -477,19 +477,19 @@ function initializeWaveform() {
         // force them to remain contiguous (no overlap/gap).
         wavesurfer.on('region-update-end', keepRegionsContiguous);
     }
-
-    // Listen for changes in num_slices input to recalc slices
-    const numSlicesInput = document.getElementById('num_slices');
-    if (numSlicesInput) {
-        numSlicesInput.addEventListener('change', function() {
-            if (audioReady) {
-                wavesurfer.stop();       // Stop playback if audio is playing
-                wavesurfer.clearRegions(); 
-                createContiguousRegions(); 
+    // Handler for "Slice into even slices" button
+    const evenSlicesBtn = document.getElementById('even-slices-btn');
+    if (evenSlicesBtn) {
+        evenSlicesBtn.addEventListener('click', function() {
+            if (!audioReady || !wavesurfer) {
+                alert("Audio file must be loaded first.");
+                return;
             }
+            wavesurfer.stop();
+            wavesurfer.clearRegions();
+            createContiguousRegions();
         });
     }
-
     // Listen for a new file selection
     const fileInput = document.getElementById('file');
     if (fileInput) {
