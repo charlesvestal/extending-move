@@ -287,7 +287,8 @@ class MyServer(BaseHTTPRequestHandler):
 
     @route_handler.post("/detect-transients")
     def handle_detect_transients_post(self, form):
-        return self.slice_handler.handle_detect_transients(form)
+        resp = self.slice_handler.handle_detect_transients(form)
+        return resp["status"], resp["headers"], resp["content"]
 
     def handle_static_file(self, path):
         """Handle requests for static files."""
@@ -491,6 +492,17 @@ class MyServer(BaseHTTPRequestHandler):
         try:
             result = handler(self, form)
             if result is not None:  # None means the handler has already sent the response
+                # Special handling for handlers that return (status, headers, content) tuple
+                if isinstance(result, tuple) and len(result) == 3:
+                    status, headers, content = result
+                    self.send_response(status)
+                    for header, value in headers:
+                        self.send_header(header, value)
+                    self.end_headers()
+                    if isinstance(content, str):
+                        content = content.encode("utf-8")
+                    self.wfile.write(content)
+                    return
                 if self.path == "/place-files":
                     import json
                     self.send_response(200)

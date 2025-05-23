@@ -143,3 +143,20 @@ class BaseHandler:
                 os.remove(filepath)
         except Exception as e:
             print(f"Warning: Failed to clean up uploaded file {filepath}: {e}")
+
+
+    def format_json_response(self, data, status=200):
+        """
+        Format a JSON response for AJAX handlers.
+        Args:
+            data: dict to encode as JSON
+            status: HTTP status code
+        Returns:
+            dict with status, headers, and content (JSON-encoded string)
+        """
+        import json
+        return {
+            "status": status,
+            "headers": [("Content-Type", "application/json")],
+            "content": json.dumps(data)
+        }
