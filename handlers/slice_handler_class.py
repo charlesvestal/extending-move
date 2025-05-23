@@ -139,7 +139,10 @@ class SliceHandler(BaseHandler):
             if not result.get('success'):
                 # Clean up only if processing failed
                 self.cleanup_upload(filepath)
-                return self.format_error_response(result.get('message', 'Kit processing failed'))
+                message = result.get('message', 'Kit processing failed')
+                if not isinstance(message, str):
+                    message = str(message)
+                return self.format_error_response(message)
 
             # --- BEGIN: Inject detected regions into HTML if transient_detect and regions ---
             # This block is only relevant for rendering HTML responses (not downloads)
@@ -154,10 +157,11 @@ class SliceHandler(BaseHandler):
                 elif transient_detect and regions:
                     detected_regions = regions
 
-                html = self.format_success_response(result.get('message', 'Kit processed successfully'))
-                # If it's a dict, extract the HTML
-                if isinstance(html, dict) and 'html' in html:
-                    html = html['html']
+                html_output = self.format_success_response(result.get('message', 'Kit processed successfully'))
+                if isinstance(html_output, dict) and 'html' in html_output:
+                    html = html_output['html']
+                else:
+                    html = str(html_output)
 
                 # Compose the transient message to prepend to html
                 if detected_regions and len(detected_regions) > 1:
@@ -175,7 +179,7 @@ class SliceHandler(BaseHandler):
         """
                 # Always append a console log about transient detection
                 html += f"<script>console.log('Transient detection attempted: {len(detected_regions) if detected_regions else 0} regions detected.');</script>"
-                return html
+                return {'message_html': html}
             # --- END: Inject detected regions into HTML if transient_detect and regions ---
 
             if mode == "download":
@@ -213,15 +217,21 @@ class SliceHandler(BaseHandler):
                             os.remove(bundle_path)
                         return self.format_error_response(f"Error reading bundle: {str(e)}")
                 else:
-                    return self.format_error_response("Bundle file not found")
+                    message = "Bundle file not found"
+                    if not isinstance(message, str):
+                        message = str(message)
+                    return self.format_error_response(message)
             else:
                 # For auto_place mode, clean up after successful processing
                 self.cleanup_upload(filepath)
                 self.cleanup_directory(self.upload_dir)
-                return self.format_success_response(result.get('message', 'Kit processed successfully'))
+                message = result.get('message', 'Kit processed successfully')
+                if not isinstance(message, str):
+                    message = str(message)
+                return self.format_success_response(message)
 
         except Exception as e:
             # Clean up in case of any error
             self.cleanup_upload(filepath)
             self.cleanup_directory(self.upload_dir)
-            return self.format_error_response(f"Error processing kit: {str(e)}")
+            return self.format_error_response(f"Error processing kit in class: {str(e)}")
