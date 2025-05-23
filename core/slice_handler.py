@@ -8,28 +8,34 @@ from core.refresh_handler import refresh_library
 
 import librosa
 
-def detect_transients(filepath, max_slices=16):
+def detect_transients(filepath, max_slices=16, delta=0.07):
     """
     Detect transient points (onsets) in the audio file.
+    Args:
+        filepath: path to audio
+        max_slices: maximum number of regions to return
+        delta: sensitivity threshold for onset detection
     Returns: regions list [{start, end}, ...] (in seconds, up to max_slices)
     """
     y, sr = librosa.load(filepath, sr=None, mono=True)
-    onsets = librosa.onset.onset_detect(y=y, sr=sr, units='time')
+    onsets = librosa.onset.onset_detect(y=y, sr=sr, units='time', delta=delta)
     if len(onsets) == 0:
-        # fallback: one region covering the whole file
         duration = librosa.get_duration(y=y, sr=sr)
         return [{"start": 0.0, "end": duration}]
-    slice_points = [0.0] + list(onsets[:max_slices-1])
+    slice_points = [0.0] + list(onsets)
     duration = librosa.get_duration(y=y, sr=sr)
     if slice_points[-1] < duration:
         slice_points.append(duration)
-    # Ensure no overlapping/empty regions
     regions = []
     for i in range(len(slice_points)-1):
         start, end = slice_points[i], slice_points[i+1]
         if end - start > 0.01:
             regions.append({"start": start, "end": end})
-    return regions
+    # Limit to first max_slices
+    if len(regions) > max_slices:
+        return regions[:max_slices]
+    else:
+        return regions
 
 # using SoundFile for robust WAV/AIFF slicing
 

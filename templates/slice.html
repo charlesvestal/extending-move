@@ -19,6 +19,10 @@
     <label for="num_slices">Number of slices (1-16):</label>
     <input id="num_slices" name="num_slices" type="number" min="1" max="16" value="16" required/>
     <br/>
+    <label for="sensitivity" style="margin-right: 0.5em;">Transient Sensitivity:</label>
+    <input type="range" id="sensitivity" name="sensitivity" min="0.01" max="0.20" step="0.01" value="0.07" style="vertical-align: middle; width:120px;">
+    <span id="sensitivity-value" style="margin-left: 0.5em;">0.07</span>
+    <br/>
     <!--
     <input type="checkbox" id="transient_detect" name="transient_detect" value="1" onclick="toggleNumSlices()"/>
     <label for="transient_detect">Detect slices by transients (max 16)</label>
