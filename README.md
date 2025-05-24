@@ -39,7 +39,8 @@ Tools for extending the Ableton Move. This project provides a companion webserve
 
 - **Sliced Kit Creation**
   - Use a visual slicer to create drum kits from WAV files with up to 16 slices
-  - Choose custom slice points for each drum pad
+  - Create equal slices or use transient detection to autoslice to hits
+  - Drag custom slice points for each drum pad
   - Download as `.ablpresetbundle` or place directly on device
   - Create a choke group configuration for one-shot behavior, or use Gate and Drum kit style presets
 
