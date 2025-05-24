@@ -117,6 +117,81 @@ function attachFormHandler(tabName) {
     const form = document.querySelector(`#${tabName} form`);
     if (!form) return;
 
+    // Handle transient_detect checkbox/hidden sync for Slice tab
+    if (tabName === 'Slice') {
+        const transientCheckbox = form.querySelector('#transient_detect');
+        const transientHidden = form.querySelector('#transient_detect_hidden');
+        if (transientCheckbox && transientHidden) {
+            transientCheckbox.addEventListener('change', function() {
+                transientHidden.value = this.checked ? "1" : "0";
+            });
+            // Set initial state
+            transientHidden.value = transientCheckbox.checked ? "1" : "0";
+        }
+
+        // Attach Detect Transients button handler
+        const detectBtn = form.querySelector('#detect-transients-btn');
+        if (detectBtn) {
+            detectBtn.addEventListener('click', async function() {
+                const fileInput = form.querySelector('#file');
+                const msg = document.getElementById('transient-detect-message');
+                if (!fileInput || !fileInput.files[0]) {
+                    msg.textContent = "Please select a file first.";
+                    msg.style.color = "orange";
+                    return;
+                }
+                msg.textContent = "Detecting transients...";
+                msg.style.color = "#337ab7";
+                const formData = new FormData();
+                formData.append('file', fileInput.files[0]);
+                // --- Add sensitivity slider support ---
+                const sensInput = form.querySelector('#sensitivity');
+                const sensitivity = sensInput ? sensInput.value : 0.07;
+                formData.append('sensitivity', sensitivity);
+                // --- End sensitivity slider support ---
+                try {
+                    const response = await fetch('/detect-transients', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await response.json();
+                    if (data.success && data.regions) {
+                        msg.textContent = data.message;
+                        msg.style.color = "green";
+                        // Update regions on waveform
+                        if (typeof wavesurfer !== "undefined" && wavesurfer) {
+                            wavesurfer.clearRegions();
+                            data.regions.forEach(r => {
+                                wavesurfer.addRegion({
+                                    start: r.start,
+                                    end: r.end,
+                                    color: 'rgba(0, 255, 0, 0.2)',
+                                    drag: false
+                                });
+                            });
+                        }
+                    } else {
+                        msg.textContent = data.message || "No transients detected.";
+                        msg.style.color = "orange";
+                    }
+                } catch (err) {
+                    msg.textContent = "Error detecting transients.";
+                    msg.style.color = "red";
+                    console.error(err);
+                }
+            });
+        }
+
+        // --- Sensitivity slider live update ---
+        const sensSlider = form.querySelector('#sensitivity');
+        const sensValue = document.getElementById('sensitivity-value');
+        if (sensSlider && sensValue) {
+            sensSlider.addEventListener('input', function() {
+                sensValue.textContent = sensSlider.value;
+            });
+        }
+    }
+
     // Initialize restore form if applicable
     if (tabName === 'Restore') {
         initializeRestoreForm();
@@ -370,6 +445,21 @@ function initializeWaveform() {
         wavesurfer.on('ready', () => {
             if (wavesurfer.getDuration() > 0) {
                 audioReady = true;
+                // --- BEGIN: Detected regions injection ---
+                if (window.DETECTED_REGIONS && wavesurfer) {
+                    wavesurfer.clearRegions();
+                    window.DETECTED_REGIONS.forEach(r => {
+                        wavesurfer.addRegion({
+                            start: r.start,
+                            end: r.end,
+                            color: 'rgba(0, 255, 0, 0.2)',
+                            drag: false
+                        });
+                    });
+                    delete window.DETECTED_REGIONS;
+                    return; // Don't create default contiguous slices
+                }
+                // --- END: Detected regions injection ---
                 createContiguousRegions();
                 addResetSlicesButton();
             } else {
@@ -387,19 +477,19 @@ function initializeWaveform() {
         // force them to remain contiguous (no overlap/gap).
         wavesurfer.on('region-update-end', keepRegionsContiguous);
     }
-
-    // Listen for changes in num_slices input to recalc slices
-    const numSlicesInput = document.getElementById('num_slices');
-    if (numSlicesInput) {
-        numSlicesInput.addEventListener('change', function() {
-            if (audioReady) {
-                wavesurfer.stop();       // Stop playback if audio is playing
-                wavesurfer.clearRegions(); 
-                createContiguousRegions(); 
+    // Handler for "Slice into even slices" button
+    const evenSlicesBtn = document.getElementById('even-slices-btn');
+    if (evenSlicesBtn) {
+        evenSlicesBtn.addEventListener('click', function() {
+            if (!audioReady || !wavesurfer) {
+                alert("Audio file must be loaded first.");
+                return;
             }
+            wavesurfer.stop();
+            wavesurfer.clearRegions();
+            createContiguousRegions();
         });
     }
-
     // Listen for a new file selection
     const fileInput = document.getElementById('file');
     if (fileInput) {
@@ -537,3 +627,53 @@ function recalcSlices() {
 window.onload = function() {
     document.getElementById("defaultOpen").click();
 }
+
+// --- Detect Transients Button Handler ---
+document.addEventListener('DOMContentLoaded', function() {
+    const detectBtn = document.getElementById('detect-transients-btn');
+    if (detectBtn) {
+        detectBtn.addEventListener('click', async function() {
+            const fileInput = document.getElementById('file');
+            const msg = document.getElementById('transient-detect-message');
+            if (!fileInput || !fileInput.files[0]) {
+                msg.textContent = "Please select a file first.";
+                msg.style.color = "orange";
+                return;
+            }
+            msg.textContent = "Detecting transients...";
+            msg.style.color = "#337ab7";
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            try {
+                const response = await fetch('/detect-transients', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                if (data.success && data.regions) {
+                    msg.textContent = data.message;
+                    msg.style.color = "green";
+                    // Update regions on waveform
+                    if (typeof wavesurfer !== "undefined" && wavesurfer) {
+                        wavesurfer.clearRegions();
+                        data.regions.forEach(r => {
+                            wavesurfer.addRegion({
+                                start: r.start,
+                                end: r.end,
+                                color: 'rgba(0, 255, 0, 0.2)',
+                                drag: false
+                            });
+                        });
+                    }
+                } else {
+                    msg.textContent = data.message || "No transients detected.";
+                    msg.style.color = "orange";
+                }
+            } catch (err) {
+                msg.textContent = "Error detecting transients.";
+                msg.style.color = "red";
+                console.error(err);
+            }
+        });
+    }
+});

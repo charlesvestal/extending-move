@@ -6,6 +6,8 @@ import cgi
 import atexit
 import signal
 import sys
+import numpy as np
+import librosa
 from handlers.slice_handler_class import SliceHandler
 from handlers.refresh_handler_class import RefreshHandler
 from handlers.reverse_handler_class import ReverseHandler
@@ -285,6 +287,11 @@ class MyServer(BaseHTTPRequestHandler):
         """Handle POST request for synth preset inspector page."""
         return self.synth_preset_inspector_handler.handle_post(form)
 
+    @route_handler.post("/detect-transients")
+    def handle_detect_transients_post(self, form):
+        resp = self.slice_handler.handle_detect_transients(form)
+        return resp["status"], resp["headers"], resp["content"]
+
     def handle_static_file(self, path):
         """Handle requests for static files."""
         try:
@@ -462,7 +469,7 @@ class MyServer(BaseHTTPRequestHandler):
         Handle all POST requests.
         Processes form data and delegates to appropriate handler.
         """
-        if self.path not in ["/slice", "/refresh", "/reverse", "/drum-rack-inspector", "/restore", "/chord", "/place-files", "/synth-preset-inspector"]:
+        if self.path not in ["/slice", "/refresh", "/reverse", "/drum-rack-inspector", "/restore", "/chord", "/place-files", "/synth-preset-inspector", "/detect-transients"]:
             self.send_error(404)
             return
 
@@ -487,6 +494,17 @@ class MyServer(BaseHTTPRequestHandler):
         try:
             result = handler(self, form)
             if result is not None:  # None means the handler has already sent the response
+                # Special handling for handlers that return (status, headers, content) tuple
+                if isinstance(result, tuple) and len(result) == 3:
+                    status, headers, content = result
+                    self.send_response(status)
+                    for header, value in headers:
+                        self.send_header(header, value)
+                    self.end_headers()
+                    if isinstance(content, str):
+                        content = content.encode("utf-8")
+                    self.wfile.write(content)
+                    return
                 if self.path == "/place-files":
                     import json
                     self.send_response(200)
@@ -549,9 +567,77 @@ if __name__ == "__main__":
     print("Starting webserver")
     webServer = TLSIgnoringHTTPServer((hostName, serverPort), MyServer)
     print(f"Server started http://{hostName}:{serverPort}")
+    
+    # Warm-up librosa onset detection to avoid first-call latency
+    try:
+        y = np.zeros(512, dtype=float)
+        librosa.onset.onset_detect(y=y, sr=22050, units='time', delta=0.07)
+        print("Librosa onset_detect warm-up complete.")
+    except Exception as e:
+        print(f"Error during librosa warm-up: {e}")
+
+    # Warm-up librosa time_stretch for phase vocoder
+    try:
+        from librosa.effects import time_stretch
+        time_stretch(y, rate=1.0)
+        print("Librosa time_stretch warm-up complete.")
+    except Exception as e:
+        print(f"Error during librosa time_stretch warm-up: {e}")
+
+    # Warm-up audiotsm WSOLA to compile JIT and FFT routines
+    try:
+        from audiotsm.io.array import ArrayReader, ArrayWriter
+        from audiotsm import wsola
+        # Dummy mono audio data: shape (channels, frames)
+        dummy = np.zeros((1, 512), dtype=float)
+        reader = ArrayReader(dummy)
+        writer = ArrayWriter(dummy.shape[0])
+        tsm = wsola(writer.channels)
+        tsm.set_speed(1.0)
+        tsm.run(reader, writer)
+        print("Audiotsm WSOLA warm-up complete.")
+    except Exception as e:
+        print(f"Error during audiotsm WSOLA warm-up: {e}")
+    
+    # Warm-up the full Librosa onset pipeline (basic + advanced)
+    try:
+        # 1) Basic onset_detect warm-up
+        y = np.zeros(512, dtype=float)
+        librosa.onset.onset_detect(y=y, sr=22050, units='time', delta=0.07)
+
+        # 2) HPSS + onset_strength + peak_pick warm-up
+        y_long = np.zeros(22050, dtype=float)  # 1 second of silence
+        y_harm, y_perc = librosa.effects.hpss(y_long)
+        o_env = librosa.onset.onset_strength(
+            y=y_perc,
+            sr=22050,
+            hop_length=128,
+            n_mels=64,
+            fmax=22050//2,
+            aggregate=np.median
+        )
+        if o_env.max() > 0:
+            o_env = o_env / o_env.max()
+        # Use the same peak-picker parameters you ship to the user
+        librosa.util.peak_pick(
+            o_env,
+            pre_max=2, post_max=2,
+            pre_avg=2, post_avg=2,
+            delta=0.07, wait=128//2
+        )
+
+        print("Librosa onset pipeline warm-up complete.")
+    except Exception as e:
+        print(f"Error during Librosa warm-up: {e}")
+
+
     try:
         webServer.serve_forever()
     except KeyboardInterrupt:
         pass
     webServer.server_close()
     print("Server stopped.")
+
+    @route_handler.post("/detect-transients")
+    def handle_detect_transients(self, form):
+        return self.slice_handler.handle_detect_transients(form)
