@@ -16,8 +16,19 @@
     </select>
     <br/><br/>
 
-    <label for="num_slices">Number of slices (1-16):</label>
-    <input id="num_slices" name="num_slices" type="number" min="1" max="16" value="16" required/>
+    <div class="slice-even-group">
+    <button type="button" id="even-slices-btn">Slice into even slices</button>
+    <label for="num_slices" style="margin-left: 1em;">Slices (1–16):</label>
+    <input id="num_slices" name="num_slices" type="number" min="1" max="16" value="16" required style="width: 4em; margin-left: 0.5em;"/>
+    </div>
+    <br/>
+    <div class="slice-transient-group" style="margin-top: 1em;">
+    <button type="button" id="detect-transients-btn">Slice on transients</button>
+    <label for="sensitivity" style="margin-left: 1em; vertical-align: middle;">Threhold:</label>
+    <input type="range" id="sensitivity" name="sensitivity" min="0.01" max="0.20" step="0.001" value="0.07" style="margin-left: 1em; vertical-align: middle; width:120px;"/>
+    <span id="sensitivity-value" style="margin-left: 0.5em;">0.07</span>
+    <span id="transient-detect-message" style="margin-left: 1em; color: #337ab7;"></span>
+    </div>
     <br/><br/>
     
     <button type="submit" onclick="document.getElementById('mode').value = 'download'">
@@ -26,6 +37,14 @@
     <button type="submit" onclick="document.getElementById('mode').value = 'auto_place'">
         Save Preset directly on Move
     </button>
+    <script>
+    function toggleNumSlices() {
+        const cb = document.getElementById('transient_detect');
+        const numSlicesInput = document.getElementById('num_slices');
+        numSlicesInput.disabled = cb.checked;
+        document.getElementById('transient_detect_hidden').value = cb.checked ? "1" : "0";
+    }
+    </script>
 </form>
 <br/><br/>
     

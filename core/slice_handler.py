@@ -6,6 +6,70 @@ import zipfile
 import soundfile as sf
 from core.refresh_handler import refresh_library
 
+import librosa
+import numpy as np
+
+def detect_transients(filepath, max_slices=16, delta=0.07):
+    """
+    Detect transient points (onsets) in the audio file.
+    Args:
+        filepath: path to audio
+        max_slices: maximum number of regions to return
+        delta: sensitivity threshold for onset detection
+    Returns: regions list [{start, end}, ...] (in seconds, up to max_slices)
+    """
+    # 1) Load audio and isolate percussive component for tighter drum transients
+    y, sr = librosa.load(filepath, sr=None, mono=True)
+    _, y_perc = librosa.effects.hpss(y)
+
+    # 2) Compute Mel-based onset strength envelope
+    # higher time resolution for drum hits
+    hop_s = 128
+    o_env = librosa.onset.onset_strength(
+        y=y_perc,
+        sr=sr,
+        hop_length=hop_s,
+        n_mels=64,
+        fmax=sr // 2,
+        aggregate=np.median
+    )
+
+    # 3) Normalize envelope for consistent delta threshold
+    if o_env.max() > 0:
+        o_env = o_env / o_env.max()
+
+    # 4) Detect onsets with tuned parameters and backtracking
+    onsets = librosa.onset.onset_detect(
+        y=y_perc,
+        sr=sr,
+        hop_length=hop_s,
+        units='time',
+        backtrack=True,
+        pre_max=2,
+        post_max=2,
+        pre_avg=2,
+        post_avg=2,
+        delta=delta
+    ).tolist()
+    if len(onsets) == 0:
+        duration = librosa.get_duration(y=y, sr=sr)
+        return [{"start": 0.0, "end": duration}]
+    # Start slices at the first detected transient rather than the file start
+    slice_points = list(onsets)
+    duration = librosa.get_duration(y=y, sr=sr)
+    if slice_points[-1] < duration:
+        slice_points.append(duration)
+    regions = []
+    for i in range(len(slice_points)-1):
+        start, end = slice_points[i], slice_points[i+1]
+        if end - start > 0.01:
+            regions.append({"start": start, "end": end})
+    # Limit to first max_slices if a limit is specified
+    if max_slices is not None and len(regions) > max_slices:
+        return regions[:max_slices]
+    else:
+        return regions
+
 # using SoundFile for robust WAV/AIFF slicing
 
 # Remove self-import if present
@@ -33,6 +97,8 @@ def cleanup_temp_files(files_to_cleanup):
             print(f"Warning: Failed to clean up {path}: {e}")
 
 def generate_kit_template(preset_name, kit_type='choke'):
+    if not isinstance(preset_name, str):
+        preset_name = str(preset_name) if hasattr(preset_name, "__str__") else "Preset"
     """
     Generates a Move Kit template with 16 drum cell chains, supporting choke, gate, or drum kit types.
 
@@ -297,7 +363,7 @@ def create_bundle(preset_filename, slice_paths, bundle_name):
             print(f"Added {slice_path} as {arcname}")
 
 def process_kit(input_wav, preset_name=None, regions=None, num_slices=None, keep_files=False,
-               mode="download", kit_type="choke"):
+               mode="download", kit_type="choke", transient_detect=False):
     """
     Process a WAV file into a Move drum kit preset.
     
@@ -326,20 +392,27 @@ def process_kit(input_wav, preset_name=None, regions=None, num_slices=None, keep
        - Preset goes to UserLibrary/Track Presets
        - Refreshes library cache automatically
     """
+    """
+    See docstring above for details.
+    """
+    # Prevent preset_name from being a dict (or any non-str)
+    if preset_name is not None and not isinstance(preset_name, str):
+        preset_name = str(preset_name) if hasattr(preset_name, "__str__") else "Preset"
     temp_files = []  # Track files to clean up
     try:
+        # If transient detection is requested, generate regions
+        if transient_detect:
+            regions = detect_transients(input_wav, max_slices=16)
+            num_slices = None
         # Parse regions if provided as JSON string
         if isinstance(regions, str):
             regions = json.loads(regions)
-            print(f"Parsed regions from JSON string: {regions}")
         
         # Determine preset name
         if preset_name:
             preset = preset_name
         else:
             preset = os.path.splitext(os.path.basename(input_wav))[0]
-            print(f"No preset name provided; defaulting to '{preset}'.")
-
         # Generate the kit template
         kit_template = generate_kit_template(preset, kit_type=kit_type)
 
@@ -451,4 +524,4 @@ def process_kit(input_wav, preset_name=None, regions=None, num_slices=None, keep
 
     except Exception as e:
         cleanup_temp_files(temp_files)
-        return {'success': False, 'message': f"Error processing kit: {e}"}
+        return {'success': False, 'message': f"Error processing kit in: {e}"}
