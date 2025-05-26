@@ -2,7 +2,6 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import os
 import json
-import cgi
 import atexit
 import signal
 import sys
@@ -226,7 +225,7 @@ class MyServer(BaseHTTPRequestHandler):
     @route_handler.get("/set-management", "set_management.html")
     def handle_set_management_get(self):
         """Handle GET request for Set Management page."""
-        return {}
+        return self.set_management_handler.handle_get()
 
     @route_handler.post("/set-management")
     def handle_set_management_post(self, form):

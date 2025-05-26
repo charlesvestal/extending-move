@@ -1,9 +1,449 @@
-
-
 <h2>Set Management</h2>
 {message_html}
-<form method="post" action="/set-management">
-    <label for="set_name">Set Name:</label>
-    <input type="text" name="set_name" id="set_name" required />
-    <button type="submit">Create Set</button>
-</form>
+
+<div class="set-management-container">
+    <!-- Tab navigation -->
+    <div class="tab-nav">
+        <button class="tab-button active" onclick="switchSetTab('create')">Create Empty Set</button>
+        <button class="tab-button" onclick="switchSetTab('generate')">Generate Set with Patterns</button>
+    </div>
+
+    <!-- Create Empty Set Tab -->
+    <div id="create-tab" class="set-tab active">
+        <form method="post" action="/set-management">
+            <input type="hidden" name="action" value="create" />
+            <label for="set_name">Set Name:</label>
+            <input type="text" name="set_name" id="set_name" required />
+            <button type="submit">Create Set</button>
+        </form>
+    </div>
+
+    <!-- Generate Set with Patterns Tab -->
+    <div id="generate-tab" class="set-tab" style="display: none;">
+        <form method="post" action="/set-management">
+            <input type="hidden" name="action" value="generate" />
+            
+            <div class="form-group">
+                <label for="gen_set_name">Set Name:</label>
+                <input type="text" name="set_name" id="gen_set_name" required />
+            </div>
+
+            <h3>Track Configuration</h3>
+            <p>Configure up to 4 tracks with different note patterns and modifications.</p>
+
+            <!-- Track 1 -->
+            <div class="track-config">
+                <h4>Track 1 - Drums</h4>
+                <label>
+                    <input type="checkbox" name="track0_enabled" checked />
+                    Enable Track
+                </label>
+                
+                <div class="track-params">
+                    <div class="param-row">
+                        <label for="track0_pattern">Pattern:</label>
+                        <select name="track0_pattern" id="track0_pattern">
+                            <option value="kick">Kick (Four on the floor)</option>
+                            <option value="snare">Snare (2 and 4)</option>
+                            <option value="hihat">Hi-hat (16th notes)</option>
+                            <option value="offbeat">Offbeat</option>
+                            <option value="syncopated">Syncopated</option>
+                        </select>
+                    </div>
+                    
+                    <div class="param-row">
+                        <label for="track0_note">MIDI Note:</label>
+                        <select name="track0_note" id="track0_note">
+                            <option value="36">36 - Kick</option>
+                            <option value="38">38 - Snare</option>
+                            <option value="42">42 - Closed Hi-hat</option>
+                            <option value="46">46 - Open Hi-hat</option>
+                            <option value="48" selected>48 - Tom High</option>
+                            <option value="49">49 - Crash</option>
+                            <option value="51">51 - Ride</option>
+                        </select>
+                    </div>
+                    
+                    <div class="param-row">
+                        <label for="track0_velocity">Velocity:</label>
+                        <input type="range" name="track0_velocity" id="track0_velocity" 
+                               min="1" max="127" value="127" />
+                        <span id="track0_velocity_val">127</span>
+                    </div>
+                    
+                    <h5>Modifications</h5>
+                    <div class="param-row">
+                        <label for="track0_pitch_shift">Pitch Shift:</label>
+                        <input type="range" name="track0_pitch_shift" id="track0_pitch_shift" 
+                               min="-12" max="12" value="0" />
+                        <span id="track0_pitch_shift_val">0</span>
+                    </div>
+                    
+                    <div class="param-row">
+                        <label for="track0_velocity_scale">Velocity Scale:</label>
+                        <input type="range" name="track0_velocity_scale" id="track0_velocity_scale" 
+                               min="0.1" max="2.0" step="0.1" value="1.0" />
+                        <span id="track0_velocity_scale_val">1.0</span>
+                    </div>
+                    
+                    <div class="param-row">
+                        <label for="track0_time_scale">Time Scale:</label>
+                        <input type="range" name="track0_time_scale" id="track0_time_scale" 
+                               min="0.5" max="2.0" step="0.1" value="1.0" />
+                        <span id="track0_time_scale_val">1.0</span>
+                    </div>
+                    
+                    <div class="param-row">
+                        <label for="track0_swing">Swing:</label>
+                        <input type="range" name="track0_swing" id="track0_swing" 
+                               min="0" max="1.0" step="0.05" value="0" />
+                        <span id="track0_swing_val">0%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Track 2 -->
+            <div class="track-config">
+                <h4>Track 2 - Bass</h4>
+                <label>
+                    <input type="checkbox" name="track1_enabled" />
+                    Enable Track
+                </label>
+                
+                <div class="track-params" style="display: none;">
+                    <div class="param-row">
+                        <label for="track1_pattern">Pattern:</label>
+                        <select name="track1_pattern" id="track1_pattern">
+                            <option value="kick">Kick (Four on the floor)</option>
+                            <option value="snare">Snare (2 and 4)</option>
+                            <option value="hihat">Hi-hat (16th notes)</option>
+                            <option value="offbeat">Offbeat</option>
+                            <option value="syncopated">Syncopated</option>
+                        </select>
+                    </div>
+                    
+                    <div class="param-row">
+                        <label for="track1_note">MIDI Note:</label>
+                        <input type="number" name="track1_note" id="track1_note" 
+                               min="0" max="127" value="36" />
+                    </div>
+                    
+                    <div class="param-row">
+                        <label for="track1_velocity">Velocity:</label>
+                        <input type="range" name="track1_velocity" id="track1_velocity" 
+                               min="1" max="127" value="100" />
+                        <span id="track1_velocity_val">100</span>
+                    </div>
+                    
+                    <h5>Modifications</h5>
+                    <div class="param-row">
+                        <label for="track1_pitch_shift">Pitch Shift:</label>
+                        <input type="range" name="track1_pitch_shift" id="track1_pitch_shift" 
+                               min="-12" max="12" value="0" />
+                        <span id="track1_pitch_shift_val">0</span>
+                    </div>
+                    
+                    <div class="param-row">
+                        <label for="track1_velocity_scale">Velocity Scale:</label>
+                        <input type="range" name="track1_velocity_scale" id="track1_velocity_scale" 
+                               min="0.1" max="2.0" step="0.1" value="1.0" />
+                        <span id="track1_velocity_scale_val">1.0</span>
+                    </div>
+                    
+                    <div class="param-row">
+                        <label for="track1_time_scale">Time Scale:</label>
+                        <input type="range" name="track1_time_scale" id="track1_time_scale" 
+                               min="0.5" max="2.0" step="0.1" value="1.0" />
+                        <span id="track1_time_scale_val">1.0</span>
+                    </div>
+                    
+                    <div class="param-row">
+                        <label for="track1_swing">Swing:</label>
+                        <input type="range" name="track1_swing" id="track1_swing" 
+                               min="0" max="1.0" step="0.05" value="0" />
+                        <span id="track1_swing_val">0%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Track 3 -->
+            <div class="track-config">
+                <h4>Track 3 - Keys</h4>
+                <label>
+                    <input type="checkbox" name="track2_enabled" />
+                    Enable Track
+                </label>
+                
+                <div class="track-params" style="display: none;">
+                    <div class="param-row">
+                        <label for="track2_pattern">Pattern:</label>
+                        <select name="track2_pattern" id="track2_pattern">
+                            <option value="kick">Kick (Four on the floor)</option>
+                            <option value="snare">Snare (2 and 4)</option>
+                            <option value="hihat">Hi-hat (16th notes)</option>
+                            <option value="offbeat">Offbeat</option>
+                            <option value="syncopated">Syncopated</option>
+                        </select>
+                    </div>
+                    
+                    <div class="param-row">
+                        <label for="track2_note">MIDI Note:</label>
+                        <input type="number" name="track2_note" id="track2_note" 
+                               min="0" max="127" value="60" />
+                    </div>
+                    
+                    <div class="param-row">
+                        <label for="track2_velocity">Velocity:</label>
+                        <input type="range" name="track2_velocity" id="track2_velocity" 
+                               min="1" max="127" value="80" />
+                        <span id="track2_velocity_val">80</span>
+                    </div>
+                    
+                    <h5>Modifications</h5>
+                    <div class="param-row">
+                        <label for="track2_pitch_shift">Pitch Shift:</label>
+                        <input type="range" name="track2_pitch_shift" id="track2_pitch_shift" 
+                               min="-12" max="12" value="0" />
+                        <span id="track2_pitch_shift_val">0</span>
+                    </div>
+                    
+                    <div class="param-row">
+                        <label for="track2_velocity_scale">Velocity Scale:</label>
+                        <input type="range" name="track2_velocity_scale" id="track2_velocity_scale" 
+                               min="0.1" max="2.0" step="0.1" value="1.0" />
+                        <span id="track2_velocity_scale_val">1.0</span>
+                    </div>
+                    
+                    <div class="param-row">
+                        <label for="track2_time_scale">Time Scale:</label>
+                        <input type="range" name="track2_time_scale" id="track2_time_scale" 
+                               min="0.5" max="2.0" step="0.1" value="1.0" />
+                        <span id="track2_time_scale_val">1.0</span>
+                    </div>
+                    
+                    <div class="param-row">
+                        <label for="track2_swing">Swing:</label>
+                        <input type="range" name="track2_swing" id="track2_swing" 
+                               min="0" max="1.0" step="0.05" value="0" />
+                        <span id="track2_swing_val">0%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Track 4 -->
+            <div class="track-config">
+                <h4>Track 4 - Lead</h4>
+                <label>
+                    <input type="checkbox" name="track3_enabled" />
+                    Enable Track
+                </label>
+                
+                <div class="track-params" style="display: none;">
+                    <div class="param-row">
+                        <label for="track3_pattern">Pattern:</label>
+                        <select name="track3_pattern" id="track3_pattern">
+                            <option value="kick">Kick (Four on the floor)</option>
+                            <option value="snare">Snare (2 and 4)</option>
+                            <option value="hihat">Hi-hat (16th notes)</option>
+                            <option value="offbeat">Offbeat</option>
+                            <option value="syncopated">Syncopated</option>
+                        </select>
+                    </div>
+                    
+                    <div class="param-row">
+                        <label for="track3_note">MIDI Note:</label>
+                        <input type="number" name="track3_note" id="track3_note" 
+                               min="0" max="127" value="72" />
+                    </div>
+                    
+                    <div class="param-row">
+                        <label for="track3_velocity">Velocity:</label>
+                        <input type="range" name="track3_velocity" id="track3_velocity" 
+                               min="1" max="127" value="90" />
+                        <span id="track3_velocity_val">90</span>
+                    </div>
+                    
+                    <h5>Modifications</h5>
+                    <div class="param-row">
+                        <label for="track3_pitch_shift">Pitch Shift:</label>
+                        <input type="range" name="track3_pitch_shift" id="track3_pitch_shift" 
+                               min="-12" max="12" value="0" />
+                        <span id="track3_pitch_shift_val">0</span>
+                    </div>
+                    
+                    <div class="param-row">
+                        <label for="track3_velocity_scale">Velocity Scale:</label>
+                        <input type="range" name="track3_velocity_scale" id="track3_velocity_scale" 
+                               min="0.1" max="2.0" step="0.1" value="1.0" />
+                        <span id="track3_velocity_scale_val">1.0</span>
+                    </div>
+                    
+                    <div class="param-row">
+                        <label for="track3_time_scale">Time Scale:</label>
+                        <input type="range" name="track3_time_scale" id="track3_time_scale" 
+                               min="0.5" max="2.0" step="0.1" value="1.0" />
+                        <span id="track3_time_scale_val">1.0</span>
+                    </div>
+                    
+                    <div class="param-row">
+                        <label for="track3_swing">Swing:</label>
+                        <input type="range" name="track3_swing" id="track3_swing" 
+                               min="0" max="1.0" step="0.05" value="0" />
+                        <span id="track3_swing_val">0%</span>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="generate-button">Generate Set</button>
+        </form>
+    </div>
+</div>
+
+<style>
+.set-management-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.tab-nav {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.tab-button {
+    padding: 10px 20px;
+    background: #f0f0f0;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.tab-button.active {
+    background: #007bff;
+    color: white;
+}
+
+.set-tab {
+    padding: 20px;
+    border: 1px solid #ccc;
+    background: #f9f9f9;
+}
+
+.track-config {
+    margin-bottom: 30px;
+    padding: 15px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.track-config h4 {
+    margin-top: 0;
+    color: #333;
+}
+
+.track-config h5 {
+    margin-top: 15px;
+    margin-bottom: 10px;
+    color: #666;
+}
+
+.track-params {
+    margin-top: 15px;
+}
+
+.param-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    gap: 10px;
+}
+
+.param-row label {
+    min-width: 150px;
+    font-weight: normal;
+}
+
+.param-row input[type="range"] {
+    flex: 1;
+    max-width: 200px;
+}
+
+.param-row span {
+    min-width: 50px;
+    text-align: right;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.generate-button {
+    margin-top: 20px;
+    padding: 12px 30px;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.generate-button:hover {
+    background: #218838;
+}
+</style>
+
+<script>
+// Tab switching
+function switchSetTab(tabName) {
+    // Hide all tabs
+    document.querySelectorAll('.set-tab').forEach(tab => {
+        tab.style.display = 'none';
+    });
+    
+    // Remove active class from all buttons
+    document.querySelectorAll('.tab-button').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Show selected tab
+    document.getElementById(tabName + '-tab').style.display = 'block';
+    
+    // Add active class to clicked button
+    event.target.classList.add('active');
+}
+
+// Track enable/disable
+document.addEventListener('DOMContentLoaded', function() {
+    // Add event listeners for track checkboxes
+    for (let i = 0; i < 4; i++) {
+        const checkbox = document.querySelector(`input[name="track${i}_enabled"]`);
+        const params = checkbox.parentElement.nextElementSibling;
+        
+        checkbox.addEventListener('change', function() {
+            params.style.display = this.checked ? 'block' : 'none';
+        });
+        
+        // Initialize display state
+        if (checkbox.checked) {
+            params.style.display = 'block';
+        }
+    }
+    
+    // Add event listeners for range inputs to update display values
+    document.querySelectorAll('input[type="range"]').forEach(input => {
+        input.addEventListener('input', function() {
+            const valueSpan = document.getElementById(this.id + '_val');
+            if (valueSpan) {
+                let value = this.value;
+                if (this.name.includes('swing')) {
+                    value = Math.round(parseFloat(value) * 100) + '%';
+                }
+                valueSpan.textContent = value;
+            }
+        });
+    });
+});
+</script>
