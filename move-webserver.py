@@ -15,6 +15,7 @@ from handlers.drum_rack_inspector_handler_class import DrumRackInspectorHandler
 from handlers.restore_handler_class import RestoreHandler
 from handlers.file_placer_handler_class import FilePlacerHandler
 from handlers.synth_preset_inspector_handler_class import SynthPresetInspectorHandler
+from handlers.set_management_handler_class import SetManagementHandler
 
 # Define the PID file location
 PID_FILE = os.path.expanduser('~/extending-move/move-webserver.pid')
@@ -221,6 +222,16 @@ class MyServer(BaseHTTPRequestHandler):
     restore_handler = RestoreHandler()
     file_placer_handler = FilePlacerHandler()
     synth_preset_inspector_handler = SynthPresetInspectorHandler()
+    set_management_handler = SetManagementHandler()
+    @route_handler.get("/set-management", "set_management.html")
+    def handle_set_management_get(self):
+        """Handle GET request for Set Management page."""
+        return {}
+
+    @route_handler.post("/set-management")
+    def handle_set_management_post(self, form):
+        """Handle POST request to create a new set."""
+        return self.set_management_handler.handle_post(form)
 
     @route_handler.get("/chord", "chord.html")
     def handle_chord_get(self):
@@ -469,7 +480,7 @@ class MyServer(BaseHTTPRequestHandler):
         Handle all POST requests.
         Processes form data and delegates to appropriate handler.
         """
-        if self.path not in ["/slice", "/refresh", "/reverse", "/drum-rack-inspector", "/restore", "/chord", "/place-files", "/synth-preset-inspector", "/detect-transients"]:
+        if self.path not in ["/slice", "/refresh", "/reverse", "/drum-rack-inspector", "/restore", "/chord", "/place-files", "/synth-preset-inspector", "/detect-transients", "/set-management"]:
             self.send_error(404)
             return
 
