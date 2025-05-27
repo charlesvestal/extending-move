@@ -4,8 +4,7 @@ import zipfile
 import tempfile
 import shutil
 from core.set_management_handler import (
-    create_set, generate_set_from_template,
-    get_available_patterns, get_drum_note_mappings
+    create_set, get_available_patterns, get_drum_note_mappings, generate_chromatic_scale_set
 )
 from core.list_msets_handler import list_msets
 from core.restore_handler import restore_ablbundle
@@ -58,41 +57,11 @@ class SetManagementHandler(BaseHandler):
             result = create_set(set_name)
 
         elif action == 'generate':
-            # Generate set with modified note lanes
+            # Generate a chromatic scale set programmatically
             set_name = form.getvalue('set_name')
             if not set_name:
                 return self.format_error_response("Missing required parameter: set_name", pad_options=pad_options, pad_color_options=pad_color_options)
-
-            # Parse track configurations
-            tracks_config = []
-
-            # Get configurations for up to 4 tracks
-            for i in range(4):
-                track_enabled = form.getvalue(f'track{i}_enabled')
-                if track_enabled == 'on':
-                    pattern = form.getvalue(f'track{i}_pattern', 'kick')
-                    note = int(form.getvalue(f'track{i}_note', '48'))
-                    velocity = int(form.getvalue(f'track{i}_velocity', '127'))
-                    # Get modifications
-                    pitch_shift = int(form.getvalue(f'track{i}_pitch_shift', '0'))
-                    velocity_scale = float(form.getvalue(f'track{i}_velocity_scale', '1.0'))
-                    time_scale = float(form.getvalue(f'track{i}_time_scale', '1.0'))
-                    swing = float(form.getvalue(f'track{i}_swing', '0.0'))
-                    track_config = {
-                        'pattern': pattern,
-                        'note': note,
-                        'velocity': velocity,
-                        'modifications': {
-                            'pitch_shift': pitch_shift,
-                            'velocity_scale': velocity_scale,
-                            'time_scale': time_scale,
-                            'swing': swing
-                        }
-                    }
-                    tracks_config.append(track_config)
-
-            # Generate the set
-            result = generate_set_from_template(set_name, tracks_config=tracks_config)
+            result = generate_chromatic_scale_set(set_name, root_note=int(form.getvalue('root_note', 5)))
 
         else:
             return self.format_error_response(f"Unknown action: {action}", pad_options=pad_options, pad_color_options=pad_color_options)
@@ -114,7 +83,9 @@ class SetManagementHandler(BaseHandler):
         with tempfile.TemporaryDirectory() as tmpdir:
             song_abl_path = os.path.join(tmpdir, 'Song.abl')
             shutil.copy(set_path, song_abl_path)
-            bundle_path = set_path + '.ablbundle'
+            # Name bundle based on set name without .abl extension
+            base_path, _ = os.path.splitext(set_path)
+            bundle_path = base_path + '.ablbundle'
             with zipfile.ZipFile(bundle_path, 'w') as zf:
                 zf.write(song_abl_path, 'Song.abl')
             # Restore to device
