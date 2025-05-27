@@ -262,3 +262,40 @@ def get_drum_note_mappings() -> Dict[str, int]:
         'tom_mid': 47,
         'tom_high': 48
     }
+
+
+# --- New function for generating chromatic scale set ---
+def generate_chromatic_scale_set(set_name, root_note=5, tempo=152.0):
+    """
+    Generate a one-bar chromatic scale MIDI set programmatically.
+    """
+    # Load the template and offset notes to the desired root
+    template_path = os.path.join(os.path.dirname(__file__), '..', 'examples', 'Sets', 'midi_template.abl')
+    song = load_set_template(template_path)
+    template_root = song.get('rootNote', 0)
+    offset = root_note - template_root
+
+    # Offset each noteNumber in the first track's first clip
+    notes = song['tracks'][0]['clipSlots'][0]['clip']['notes']
+    for note in notes:
+        new_number = note.get('noteNumber', 0) + offset
+        note['noteNumber'] = max(0, min(127, new_number))
+
+    # Update set metadata
+    song['rootNote'] = root_note
+    song['tempo'] = tempo
+
+    # Write out the modified set
+    output_dir = "/data/UserData/UserLibrary/Sets"
+    os.makedirs(output_dir, exist_ok=True)
+    output_path = os.path.join(output_dir, set_name)
+    if not output_path.endswith('.abl'):
+        output_path += '.abl'
+    with open(output_path, 'w') as f:
+        json.dump(song, f, indent=2)
+
+    return {
+        'success': True,
+        'message': f"Chromatic scale set '{set_name}' generated",
+        'path': output_path
+    }
