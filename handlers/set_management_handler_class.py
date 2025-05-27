@@ -107,7 +107,20 @@ class SetManagementHandler(BaseHandler):
             # Restore to device
             restore_result = restore_ablbundle(bundle_path, pad_selected_int, pad_color_int)
             os.remove(bundle_path)
+        
         if restore_result.get('success'):
-            return self.format_success_response(restore_result['message'], pad_options=pad_options, pad_color_options=pad_color_options)
+            # Clean up the original .abl file after successful placement
+            try:
+                os.remove(set_path)
+            except Exception as e:
+                print(f"Warning: Failed to clean up set file {set_path}: {e}")
+            
+            # Refresh pad list after successful placement
+            _, updated_ids = list_msets(return_free_ids=True)
+            updated_free_pads = sorted([pad_id + 1 for pad_id in updated_ids.get("free", [])])
+            updated_pad_options = ''.join(f'<option value="{pad}">{pad}</option>' for pad in updated_free_pads)
+            updated_pad_options = '<option value="" disabled selected>-- Select Pad --</option>' + updated_pad_options
+            
+            return self.format_success_response(restore_result['message'], pad_options=updated_pad_options, pad_color_options=pad_color_options)
         else:
             return self.format_error_response(restore_result.get('message'), pad_options=pad_options, pad_color_options=pad_color_options)
