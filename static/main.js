@@ -114,6 +114,21 @@ async function handleRestoreSubmit(form) {
 }
 
 function attachFormHandler(tabName) {
+    // Special case: intercept both Create and Generate forms in Set Management tab
+    if (tabName === 'SetManagement') {
+      const container = document.getElementById(tabName);
+      if (container) {
+        // Attach to all forms in the SetManagement container
+        container.querySelectorAll('form').forEach(form => {
+          form.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            await submitForm(form, tabName);
+          });
+        });
+      }
+      return;
+    }
+
     const form = document.querySelector(`#${tabName} form`);
     if (!form) return;
 

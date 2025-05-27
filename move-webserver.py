@@ -5,6 +5,7 @@ import json
 import atexit
 import signal
 import sys
+import cgi
 import numpy as np
 import librosa
 from handlers.slice_handler_class import SliceHandler
