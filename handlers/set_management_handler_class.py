@@ -4,7 +4,7 @@ import zipfile
 import tempfile
 import shutil
 from core.set_management_handler import (
-    create_set, get_available_patterns, get_drum_note_mappings, generate_chromatic_scale_set
+    create_set, generate_chromatic_scale_set, generate_chord_set, get_chord_definitions, get_chord_root_notes
 )
 from core.list_msets_handler import list_msets
 from core.restore_handler import restore_ablbundle
@@ -15,8 +15,8 @@ class SetManagementHandler(BaseHandler):
         """
         Return context for rendering the Set Management page.
         """
-        patterns = get_available_patterns()
-        drum_notes = get_drum_note_mappings()
+        chord_definitions = get_chord_definitions()
+        chord_roots = get_chord_root_notes()
         # Get available pads
         _, ids = list_msets(return_free_ids=True)
         free_pads = sorted([pad_id + 1 for pad_id in ids.get("free", [])])
@@ -28,11 +28,11 @@ class SetManagementHandler(BaseHandler):
         pad_color_options = ''.join(f'<option value="{i}">{i}</option>' for i in range(1,27))
         print(f"DEBUG: SetManagementHandler GET - pad_options: {pad_options}")
         import sys; sys.stdout.flush()
-        print("DEBUG: SetManagementHandler GET context:", {'patterns': patterns, 'drum_notes': drum_notes, 'pad_options': pad_options, 'pad_color_options': pad_color_options})
+        print("DEBUG: SetManagementHandler GET context:", {'chord_definitions': chord_definitions, 'chord_roots': chord_roots, 'pad_options': pad_options, 'pad_color_options': pad_color_options})
         import sys; sys.stdout.flush()
         return {
-            'patterns': patterns,
-            'drum_notes': drum_notes,
+            'chord_definitions': chord_definitions,
+            'chord_roots': chord_roots,
             'pad_options': pad_options,
             'pad_color_options': pad_color_options
         }
@@ -62,6 +62,21 @@ class SetManagementHandler(BaseHandler):
             if not set_name:
                 return self.format_error_response("Missing required parameter: set_name", pad_options=pad_options, pad_color_options=pad_color_options)
             result = generate_chromatic_scale_set(set_name, root_note=int(form.getvalue('root_note', 5)))
+
+        elif action == 'generate_chord':
+            # Generate a chord set programmatically
+            set_name = form.getvalue('set_name')
+            if not set_name:
+                return self.format_error_response("Missing required parameter: set_name", pad_options=pad_options, pad_color_options=pad_color_options)
+            
+            chord_type = form.getvalue('chord_type', 'C_major')
+            root_note = form.getvalue('root_note')
+            tempo = float(form.getvalue('tempo', 152.0))
+            
+            # Convert root_note to int if provided, otherwise use default for chord
+            root_note_int = int(root_note) if root_note and root_note.isdigit() else None
+            
+            result = generate_chord_set(set_name, chord_type=chord_type, root_note=root_note_int, tempo=tempo)
 
         else:
             return self.format_error_response(f"Unknown action: {action}", pad_options=pad_options, pad_color_options=pad_color_options)
