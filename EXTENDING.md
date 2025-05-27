@@ -26,7 +26,9 @@ extending-move/
 │   ├── time_stretch_handler.py      # Time-stretching (with WSOLA/Phase-vocoder & repitch options)
 │   ├── restore_handler.py       # Move Set restoration
 │   ├── drum_rack_inspector.py   # Preset inspection and modification
-│   └── synth_preset_inspector_handler.py  # Synth preset macro management
+│   ├── synth_preset_inspector_handler.py  # Synth preset macro management
+│   ├── set_management_handler.py    # MIDI set generation and management
+│   └── midi_pattern_generator.py    # Custom MIDI pattern creation utilities
 ├── handlers/              # Web request handlers
 │   ├── base_handler.py                    # Base handler with shared functionality
 │   ├── chord_handler_class.py             # Chord generation interface
@@ -36,6 +38,7 @@ extending-move/
 │   ├── restore_handler_class.py           # Move Set restoration interface
 │   ├── drum_rack_inspector_handler_class.py  # Preset inspection interface
 │   ├── synth_preset_inspector_handler_class.py  # Synth macro management interface
+│   ├── set_management_handler_class.py     # MIDI set generation and upload interface
 │   └── file_placer_handler_class.py       # File upload and placement
 ├── templates/             # HTML templates and UI components
 │   ├── index.html                # Main navigation with tab system
@@ -45,13 +48,17 @@ extending-move/
 │   ├── refresh.html             # Simple action template
 │   ├── restore.html             # File upload with options
 │   ├── drum_rack_inspector.html # Grid layout with actions
-│   └── synth_preset_inspector.html # Synth macro management interface
+│   ├── synth_preset_inspector.html # Synth macro management interface
+│   └── set_management.html      # MIDI file upload and set generation interface
 ├── examples/              # Example files for testing and development
 │   ├── Track Presets/          # Sample presets organized by instrument type
 │   │   ├── Drift/              # Drift instrument presets
 │   │   ├── Wavetable/          # Wavetable instrument presets
 │   │   ├── drumRack/           # Drum rack presets
 │   │   └── melodicSampler/     # Melodic sampler presets
+│   ├── Midi/                   # Example MIDI files for testing
+│   ├── Sets/                   # Example Ableton Live sets and templates
+│   ├── pattern_examples.py     # MIDI pattern generation examples
 │   └── test scripts            # Various test scripts
 └── utility-scripts/       # Installation and management scripts
     ├── install-on-move.sh     # Initial setup script
@@ -392,7 +399,7 @@ See the implementation in `static/main.js` for details.
 
 ### Special Case: Multiple Forms in One Tab
 
-Some features (e.g., Set Management) use more than one form in a single tab. By default, only the first form will be handled by AJAX, and others may cause a full-page reload.
+Some features (e.g., MIDI Upload) use more than one form in a single tab. By default, only the first form will be handled by AJAX, and others may cause a full-page reload.
 
 To handle multiple forms in a single tab, update the `attachFormHandler` function in `static/main.js` to detect your tab name and bind every form inside its container. For example:
 
