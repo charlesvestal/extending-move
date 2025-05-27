@@ -4,7 +4,7 @@ import zipfile
 import tempfile
 import shutil
 from core.set_management_handler import (
-    create_set, generate_chromatic_scale_set, generate_chord_set, get_chord_definitions, get_chord_root_notes
+    create_set, generate_midi_set_from_file, generate_c_major_chord_example
 )
 from core.list_msets_handler import list_msets
 from core.restore_handler import restore_ablbundle
@@ -15,24 +15,14 @@ class SetManagementHandler(BaseHandler):
         """
         Return context for rendering the Set Management page.
         """
-        chord_definitions = get_chord_definitions()
-        chord_roots = get_chord_root_notes()
         # Get available pads
         _, ids = list_msets(return_free_ids=True)
         free_pads = sorted([pad_id + 1 for pad_id in ids.get("free", [])])
-        print("DEBUG: Free pads found for Set Management:", free_pads)
-        import sys; sys.stdout.flush()
         pad_options = ''.join(f'<option value="{pad}">{pad}</option>' for pad in free_pads)
         pad_options = '<option value="" disabled selected>-- Select Pad --</option>' + pad_options
         # Pad color options (1-26)
         pad_color_options = ''.join(f'<option value="{i}">{i}</option>' for i in range(1,27))
-        print(f"DEBUG: SetManagementHandler GET - pad_options: {pad_options}")
-        import sys; sys.stdout.flush()
-        print("DEBUG: SetManagementHandler GET context:", {'chord_definitions': chord_definitions, 'chord_roots': chord_roots, 'pad_options': pad_options, 'pad_color_options': pad_color_options})
-        import sys; sys.stdout.flush()
         return {
-            'chord_definitions': chord_definitions,
-            'chord_roots': chord_roots,
             'pad_options': pad_options,
             'pad_color_options': pad_color_options
         }
@@ -49,37 +39,48 @@ class SetManagementHandler(BaseHandler):
         pad_options = ''.join(f'<option value="{pad}">{pad}</option>' for pad in free_pads)
         pad_color_options = ''.join(f'<option value="{i}">{i}</option>' for i in range(1,27))
 
-        if action == 'create':
-            # Original create set functionality
-            set_name = form.getvalue('set_name')
-            if not set_name:
-                return self.format_error_response("Missing required parameter: set_name", pad_options=pad_options, pad_color_options=pad_color_options)
-            result = create_set(set_name)
-
-        elif action == 'generate':
-            # Generate a chromatic scale set programmatically
-            set_name = form.getvalue('set_name')
-            if not set_name:
-                return self.format_error_response("Missing required parameter: set_name", pad_options=pad_options, pad_color_options=pad_color_options)
-            result = generate_chromatic_scale_set(set_name, root_note=int(form.getvalue('root_note', 5)))
-
-        elif action == 'generate_chord':
-            # Generate a chord set programmatically
+        if action == 'upload_midi':
+            # Generate set from uploaded MIDI file
             set_name = form.getvalue('set_name')
             if not set_name:
                 return self.format_error_response("Missing required parameter: set_name", pad_options=pad_options, pad_color_options=pad_color_options)
             
-            chord_type = form.getvalue('chord_type', 'C_major')
-            root_note = form.getvalue('root_note')
-            tempo = float(form.getvalue('tempo', 152.0))
+            # Handle file upload
+            if 'midi_file' not in form:
+                return self.format_error_response("No MIDI file uploaded", pad_options=pad_options, pad_color_options=pad_color_options)
             
-            # Convert root_note to int if provided, otherwise use default for chord
-            root_note_int = int(root_note) if root_note and root_note.isdigit() else None
+            fileitem = form['midi_file']
+            if not fileitem.filename:
+                return self.format_error_response("No MIDI file selected", pad_options=pad_options, pad_color_options=pad_color_options)
             
-            result = generate_chord_set(set_name, chord_type=chord_type, root_note=root_note_int, tempo=tempo)
+            # Check file extension
+            filename = fileitem.filename.lower()
+            if not (filename.endswith('.mid') or filename.endswith('.midi')):
+                return self.format_error_response("Invalid file type. Please upload a .mid or .midi file", pad_options=pad_options, pad_color_options=pad_color_options)
+            
+            # Save uploaded file temporarily
+            success, filepath, error_response = self.handle_file_upload(form, 'midi_file')
+            if not success:
+                return self.format_error_response(error_response.get('message', "Failed to upload MIDI file"), pad_options=pad_options, pad_color_options=pad_color_options)
+            
+            try:
+                # Get tempo if provided
+                tempo_str = form.getvalue('tempo')
+                tempo = float(tempo_str) if tempo_str and tempo_str.strip() else None
+                
+                # Process MIDI file
+                result = generate_midi_set_from_file(set_name, filepath, tempo)
+                
+            finally:
+                # Clean up uploaded file
+                self.cleanup_upload(filepath)
 
         else:
             return self.format_error_response(f"Unknown action: {action}", pad_options=pad_options, pad_color_options=pad_color_options)
+
+        # Check if the operation was successful
+        if not result.get('success'):
+            return self.format_error_response(result.get('message', 'Operation failed'), pad_options=pad_options, pad_color_options=pad_color_options)
 
         # Parse pad assignment
         pad_selected = form.getvalue('pad_index')

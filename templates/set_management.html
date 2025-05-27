@@ -1,176 +1,109 @@
-<h2>Set Management</h2>
+<h2>MIDI to Set Generator</h2>
 <div id="result-message">{message_html}</div>
 
 <div class="set-management-container">
-    <!-- Tab Navigation -->
-    <div class="tab-nav">
-        <button type="button" class="tab-button active" onclick="switchSetTab('generate')">Generate Scale</button>
-        <button type="button" class="tab-button" onclick="switchSetTab('chord')">Generate Chords</button>
-    </div>
-
-    <!-- Generate Scale Tab -->
-    <div id="generate-tab" class="set-tab active">
-        <form method="post" action="/set-management">
-            <input type="hidden" name="action" value="generate" />
+    <div class="midi-upload-section">
+        <h3>Upload MIDI File</h3>
+        <p>Upload a MIDI file to generate an Ableton Live set with the notes from the file.</p>
+        
+        <form method="post" action="/set-management" enctype="multipart/form-data">
+            <input type="hidden" name="action" value="upload_midi" />
             
             <div class="form-group">
-                <label for="gen_set_name">Set Name:</label>
-                <input type="text" name="set_name" id="gen_set_name" required />
+                <label for="midi_file">MIDI File:</label>
+                <input type="file" name="midi_file" id="midi_file" accept=".mid,.midi" required />
+                <small>Supported formats: .mid, .midi</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="set_name">Set Name:</label>
+                <input type="text" name="set_name" id="set_name" placeholder="My MIDI Set" required />
             </div>
 
-            <div class="form-group">
-                <label for="root_note">Root Note (MIDI number):</label>
-                <input type="number" name="root_note" id="root_note" min="0" max="127" value="5" required />
-            </div>
             <div class="form-group">
                 <label for="tempo">Tempo (BPM):</label>
-                <input type="number" name="tempo" id="tempo" min="20" max="300" value="152" required />
-            </div>
-
-            <label for="generate_pad_index">Device Pad:</label>
-            <select name="pad_index" id="generate_pad_index" required>
-                {{ pad_options }}
-            </select>
-            <br>
-            <label for="generate_pad_color">Pad Color:</label>
-            <select name="pad_color" id="generate_pad_color" required>
-                {{ pad_color_options }}
-            </select>
-            <br>
-            <button type="submit" class="generate-button">Generate Scale Set</button>
-        </form>
-    </div>
-
-    <!-- Generate Chords Tab -->
-    <div id="chord-tab" class="set-tab" style="display: none;">
-        <form method="post" action="/set-management">
-            <input type="hidden" name="action" value="generate_chord" />
-            
-            <div class="form-group">
-                <label for="chord_set_name">Set Name:</label>
-                <input type="text" name="set_name" id="chord_set_name" required />
+                <input type="number" name="tempo" id="tempo" min="20" max="300" placeholder="Auto-detect from MIDI" />
+                <small>Leave blank to use tempo from MIDI file (or default 120 BPM)</small>
             </div>
 
             <div class="form-group">
-                <label for="chord_type">Chord Type:</label>
-                <select name="chord_type" id="chord_type" required>
-                    <option value="C_major">C Major</option>
-                    <option value="C_minor">C Minor</option>
-                    <option value="F_major">F Major</option>
-                    <option value="G_major">G Major</option>
-                    <option value="A_minor">A Minor</option>
-                    <option value="D_minor">D Minor</option>
+                <label for="pad_index">Device Pad:</label>
+                <select name="pad_index" id="pad_index" required>
+                    {{ pad_options }}
                 </select>
             </div>
-
+            
             <div class="form-group">
-                <label for="chord_root_note">Root Note Override (optional):</label>
-                <input type="number" name="root_note" id="chord_root_note" min="0" max="127" placeholder="Leave blank for default" />
-                <small>Leave blank to use default root note for selected chord</small>
+                <label for="pad_color">Pad Color:</label>
+                <select name="pad_color" id="pad_color" required>
+                    {{ pad_color_options }}
+                </select>
             </div>
-
-            <div class="form-group">
-                <label for="chord_tempo">Tempo (BPM):</label>
-                <input type="number" name="tempo" id="chord_tempo" min="20" max="300" value="152" required />
-            </div>
-
-            <label for="chord_pad_index">Device Pad:</label>
-            <select name="pad_index" id="chord_pad_index" required>
-                {{ pad_options }}
-            </select>
-            <br>
-            <label for="chord_pad_color">Pad Color:</label>
-            <select name="pad_color" id="chord_pad_color" required>
-                {{ pad_color_options }}
-            </select>
-            <br>
-            <button type="submit" class="generate-button">Generate Chord Set</button>
+            
+            <button type="submit" class="generate-button">Generate Set from MIDI</button>
         </form>
     </div>
 </div>
 
 <style>
 .set-management-container {
-    max-width: 800px;
+    max-width: 600px;
     margin: 0 auto;
 }
 
-.tab-nav {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
-.tab-button {
-    padding: 10px 20px;
-    background: #f0f0f0;
-    border: 1px solid #ccc;
-    cursor: pointer;
-    transition: background 0.3s;
-}
-
-.tab-button.active {
-    background: #007bff;
-    color: white;
-}
-
-.set-tab {
-    padding: 20px;
-    border: 1px solid #ccc;
+.midi-upload-section {
+    padding: 30px;
     background: #f9f9f9;
-}
-
-.track-config {
-    margin-bottom: 30px;
-    padding: 15px;
-    background: white;
     border: 1px solid #ddd;
-    border-radius: 5px;
+    border-radius: 8px;
 }
 
-.track-config h4 {
+.midi-upload-section h3 {
     margin-top: 0;
     color: #333;
 }
 
-.track-config h5 {
-    margin-top: 15px;
-    margin-bottom: 10px;
+.midi-upload-section p {
     color: #666;
-}
-
-.track-params {
-    margin-top: 15px;
-}
-
-.param-row {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-    gap: 10px;
-}
-
-.param-row label {
-    min-width: 150px;
-    font-weight: normal;
-}
-
-.param-row input[type="range"] {
-    flex: 1;
-    max-width: 200px;
-}
-
-.param-row span {
-    min-width: 50px;
-    text-align: right;
+    margin-bottom: 25px;
 }
 
 .form-group {
     margin-bottom: 20px;
 }
 
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #333;
+}
+
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group input[type="file"],
+.form-group select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.form-group input[type="file"] {
+    padding: 6px;
+    background: white;
+}
+
+.form-group small {
+    display: block;
+    margin-top: 5px;
+    color: #666;
+    font-size: 12px;
+}
+
 .generate-button {
-    margin-top: 20px;
+    width: 100%;
     padding: 12px 30px;
     background: #28a745;
     color: white;
@@ -178,62 +111,30 @@
     border-radius: 5px;
     font-size: 16px;
     cursor: pointer;
+    transition: background 0.3s;
 }
 
 .generate-button:hover {
     background: #218838;
 }
-</style>
 
-<script>
-// Tab switching
-function switchSetTab(tabName) {
-    // Hide all tabs
-    document.querySelectorAll('.set-tab').forEach(tab => {
-        tab.style.display = 'none';
-    });
-    
-    // Remove active class from all buttons
-    document.querySelectorAll('.tab-button').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    
-    // Show selected tab
-    document.getElementById(tabName + '-tab').style.display = 'block';
-    
-    // Add active class to clicked button
-    event.target.classList.add('active');
+#result-message {
+    margin-bottom: 20px;
 }
 
-// Track enable/disable
-document.addEventListener('DOMContentLoaded', function() {
-    // Add event listeners for track checkboxes
-    for (let i = 0; i < 4; i++) {
-        const checkbox = document.querySelector(`input[name="track${i}_enabled"]`);
-        const params = checkbox.parentElement.nextElementSibling;
-        
-        checkbox.addEventListener('change', function() {
-            params.style.display = this.checked ? 'block' : 'none';
-        });
-        
-        // Initialize display state
-        if (checkbox.checked) {
-            params.style.display = 'block';
-        }
-    }
-    
-    // Add event listeners for range inputs to update display values
-    document.querySelectorAll('input[type="range"]').forEach(input => {
-        input.addEventListener('input', function() {
-            const valueSpan = document.getElementById(this.id + '_val');
-            if (valueSpan) {
-                let value = this.value;
-                if (this.name.includes('swing')) {
-                    value = Math.round(parseFloat(value) * 100) + '%';
-                }
-                valueSpan.textContent = value;
-            }
-        });
-    });
-});
-</script>
+.success {
+    padding: 15px;
+    background: #d4edda;
+    border: 1px solid #c3e6cb;
+    border-radius: 4px;
+    color: #155724;
+}
+
+.error {
+    padding: 15px;
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 4px;
+    color: #721c24;
+}
+</style>
