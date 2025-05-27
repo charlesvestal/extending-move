@@ -2,7 +2,13 @@
 <div id="result-message">{message_html}</div>
 
 <div class="set-management-container">
-    <!-- Only one tab: Generate Set with Patterns -->
+    <!-- Tab Navigation -->
+    <div class="tab-nav">
+        <button type="button" class="tab-button active" onclick="switchSetTab('generate')">Generate Scale</button>
+        <button type="button" class="tab-button" onclick="switchSetTab('chord')">Generate Chords</button>
+    </div>
+
+    <!-- Generate Scale Tab -->
     <div id="generate-tab" class="set-tab active">
         <form method="post" action="/set-management">
             <input type="hidden" name="action" value="generate" />
@@ -31,7 +37,54 @@
                 {{ pad_color_options }}
             </select>
             <br>
-            <button type="submit" class="generate-button">Generate Set</button>
+            <button type="submit" class="generate-button">Generate Scale Set</button>
+        </form>
+    </div>
+
+    <!-- Generate Chords Tab -->
+    <div id="chord-tab" class="set-tab" style="display: none;">
+        <form method="post" action="/set-management">
+            <input type="hidden" name="action" value="generate_chord" />
+            
+            <div class="form-group">
+                <label for="chord_set_name">Set Name:</label>
+                <input type="text" name="set_name" id="chord_set_name" required />
+            </div>
+
+            <div class="form-group">
+                <label for="chord_type">Chord Type:</label>
+                <select name="chord_type" id="chord_type" required>
+                    <option value="C_major">C Major</option>
+                    <option value="C_minor">C Minor</option>
+                    <option value="F_major">F Major</option>
+                    <option value="G_major">G Major</option>
+                    <option value="A_minor">A Minor</option>
+                    <option value="D_minor">D Minor</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="chord_root_note">Root Note Override (optional):</label>
+                <input type="number" name="root_note" id="chord_root_note" min="0" max="127" placeholder="Leave blank for default" />
+                <small>Leave blank to use default root note for selected chord</small>
+            </div>
+
+            <div class="form-group">
+                <label for="chord_tempo">Tempo (BPM):</label>
+                <input type="number" name="tempo" id="chord_tempo" min="20" max="300" value="152" required />
+            </div>
+
+            <label for="chord_pad_index">Device Pad:</label>
+            <select name="pad_index" id="chord_pad_index" required>
+                {{ pad_options }}
+            </select>
+            <br>
+            <label for="chord_pad_color">Pad Color:</label>
+            <select name="pad_color" id="chord_pad_color" required>
+                {{ pad_color_options }}
+            </select>
+            <br>
+            <button type="submit" class="generate-button">Generate Chord Set</button>
         </form>
     </div>
 </div>
