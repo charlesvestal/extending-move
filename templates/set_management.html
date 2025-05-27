@@ -1,35 +1,9 @@
 <h2>Set Management</h2>
-{message_html}
+<div id="result-message">{message_html}</div>
 
 <div class="set-management-container">
-    <!-- Tab navigation -->
-    <div class="tab-nav">
-        <button class="tab-button active" onclick="switchSetTab('create')">Create Empty Set</button>
-        <button class="tab-button" onclick="switchSetTab('generate')">Generate Set with Patterns</button>
-    </div>
-
-    <!-- Create Empty Set Tab -->
-    <div id="create-tab" class="set-tab active">
-        <form method="post" action="/set-management">
-            <input type="hidden" name="action" value="create" />
-            <label for="set_name">Set Name:</label>
-            <input type="text" name="set_name" id="set_name" required />
-            <label for="pad_index">Device Pad:</label>
-            <select name="pad_index" id="pad_index" required>
-                {{ pad_options }}
-            </select>
-            <br>
-            <label for="pad_color">Pad Color:</label>
-            <select name="pad_color" id="pad_color" required>
-                {{ pad_color_options }}
-            </select>
-            <br>
-            <button type="submit">Create Set</button>
-        </form>
-    </div>
-
-    <!-- Generate Set with Patterns Tab -->
-    <div id="generate-tab" class="set-tab" style="display: none;">
+    <!-- Only one tab: Generate Set with Patterns -->
+    <div id="generate-tab" class="set-tab active">
         <form method="post" action="/set-management">
             <input type="hidden" name="action" value="generate" />
             
@@ -304,13 +278,13 @@
                 </div>
             </div>
 
-            <label for="pad_index">Device Pad:</label>
-            <select name="pad_index" id="pad_index" required>
+            <label for="generate_pad_index">Device Pad:</label>
+            <select name="pad_index" id="generate_pad_index" required>
                 {{ pad_options }}
             </select>
             <br>
-            <label for="pad_color">Pad Color:</label>
-            <select name="pad_color" id="pad_color" required>
+            <label for="generate_pad_color">Pad Color:</label>
+            <select name="pad_color" id="generate_pad_color" required>
                 {{ pad_color_options }}
             </select>
             <br>

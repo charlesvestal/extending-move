@@ -71,10 +71,16 @@ class TemplateManager:
         # Ensure `{{ samples_html }}` is replaced if used
         if "samples_html" in kwargs:
             template = template.replace("{{ samples_html }}", kwargs["samples_html"])
-            
+
         # Ensure `{{ macros_html }}` is replaced if used
         if "macros_html" in kwargs:
             template = template.replace("{{ macros_html }}", kwargs["macros_html"])
+
+        # Add pad_options and pad_color_options replacements
+        if "pad_options" in kwargs:
+            template = template.replace("{{ pad_options }}", kwargs["pad_options"])
+        if "pad_color_options" in kwargs:
+            template = template.replace("{{ pad_color_options }}", kwargs["pad_color_options"])
 
         # Ensure message replacement works properly in ALL templates
         message = kwargs.get("message", "")
@@ -226,6 +232,8 @@ class MyServer(BaseHTTPRequestHandler):
     @route_handler.get("/set-management", "set_management.html")
     def handle_set_management_get(self):
         """Handle GET request for Set Management page."""
+        print("DEBUG: /set-management GET called")
+        import sys; sys.stdout.flush()
         return self.set_management_handler.handle_get()
 
     @route_handler.post("/set-management")

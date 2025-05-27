@@ -114,6 +114,7 @@ async function handleRestoreSubmit(form) {
 }
 
 function attachFormHandler(tabName) {
+    console.log("Attaching form handlers for tab:", tabName);
     // Special case: intercept both Create and Generate forms in Set Management tab
     if (tabName === 'SetManagement') {
       const container = document.getElementById(tabName);
@@ -317,6 +318,28 @@ async function submitForm(form, tabName) {
             a.remove();
             window.URL.revokeObjectURL(urlBlob);
         } else {
+            // Handle JSON responses for SetManagement
+            const contentType = response.headers.get('Content-Type') || '';
+            if (tabName === 'SetManagement' && contentType.includes('application/json')) {
+                const data = await response.json();
+                const container = document.getElementById(tabName);
+                const msgDiv = container.querySelector('#result-message');
+                if (msgDiv) msgDiv.innerHTML = data.message;
+                // Update pad selects
+                const padSelect = container.querySelector('select[name="pad_index"]');
+                if (padSelect && data.pad_options) {
+                    padSelect.innerHTML = data.pad_options;
+                    padSelect.selectedIndex = 0;
+                }
+                const colorSelect = container.querySelector('select[name="pad_color"]');
+                if (colorSelect && data.pad_color_options) {
+                    colorSelect.innerHTML = data.pad_color_options;
+                    colorSelect.selectedIndex = 0;
+                }
+                // Re-attach handlers
+                attachFormHandler(tabName);
+                return;
+            }
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
