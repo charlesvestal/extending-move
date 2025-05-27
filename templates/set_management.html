@@ -14,6 +14,16 @@
             <input type="hidden" name="action" value="create" />
             <label for="set_name">Set Name:</label>
             <input type="text" name="set_name" id="set_name" required />
+            <label for="pad_index">Device Pad:</label>
+            <select name="pad_index" id="pad_index" required>
+                {{ pad_options }}
+            </select>
+            <br>
+            <label for="pad_color">Pad Color:</label>
+            <select name="pad_color" id="pad_color" required>
+                {{ pad_color_options }}
+            </select>
+            <br>
             <button type="submit">Create Set</button>
         </form>
     </div>
@@ -294,6 +304,16 @@
                 </div>
             </div>
 
+            <label for="pad_index">Device Pad:</label>
+            <select name="pad_index" id="pad_index" required>
+                {{ pad_options }}
+            </select>
+            <br>
+            <label for="pad_color">Pad Color:</label>
+            <select name="pad_color" id="pad_color" required>
+                {{ pad_color_options }}
+            </select>
+            <br>
             <button type="submit" class="generate-button">Generate Set</button>
         </form>
     </div>

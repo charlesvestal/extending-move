@@ -12,7 +12,7 @@ def create_set(set_name):
     path = os.path.join(directory, set_name)
     try:
         open(path, 'w').close()
-        return {'success': True, 'message': f"Set '{set_name}' created successfully"}
+        return {'success': True, 'message': f"Set '{set_name}' created successfully", 'path': path}
     except Exception as e:
         return {'success': False, 'message': str(e)}
 
