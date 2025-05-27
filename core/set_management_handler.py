@@ -272,14 +272,20 @@ def generate_chromatic_scale_set(set_name, root_note=5, tempo=152.0):
     # Load the template and offset notes to the desired root
     template_path = os.path.join(os.path.dirname(__file__), '..', 'examples', 'Sets', 'midi_template.abl')
     song = load_set_template(template_path)
-    template_root = song.get('rootNote', 0)
-    offset = root_note - template_root
 
-    # Offset each noteNumber in the first track's first clip
-    notes = song['tracks'][0]['clipSlots'][0]['clip']['notes']
-    for note in notes:
-        new_number = note.get('noteNumber', 0) + offset
-        note['noteNumber'] = max(0, min(127, new_number))
+    # Create a repeated single note at every other sixteenth step
+    original_notes = song['tracks'][0]['clipSlots'][0]['clip']['notes']
+    new_notes = []
+    for i, note in enumerate(original_notes):
+        if i % 2 == 0:
+            new_notes.append({
+                'noteNumber': root_note,
+                'startTime': note['startTime'],
+                'duration': note['duration'],
+                'velocity': note['velocity'],
+                'offVelocity': note['offVelocity']
+            })
+    song['tracks'][0]['clipSlots'][0]['clip']['notes'] = new_notes
 
     # Update set metadata
     song['rootNote'] = root_note
