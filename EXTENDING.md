@@ -1,3 +1,10 @@
+# Before You Start
+
+**Integration Reminders:**
+- If you use `cgi.FieldStorage` in your handler, ensure you `import cgi` at the top of your file.
+- When adding multiple forms in a single tab, you must customize the form handler logic in `static/main.js` to attach event listeners to all forms in that tab.
+- Tab names/IDs must match exactly between your HTML (`index.html`), JavaScript (`static/main.js`), and route definitions (in your handler classes and webserver routing).
+
 # Extending Move
 
 This guide explains how to add new features to the Move webserver. Move follows a modular structure, with each feature comprising three components:
@@ -348,37 +355,15 @@ In `templates/index.html`, add a tab entry:
 <div id="YourFeature" class="tabcontent"></div>
 ```
 
-### Example: Time Stretch Feature
 
-Demonstrates adding audio time-stretching functionality:
+## Tab-Based Interface
 
-- Core (`core/time_stretch_handler.py`):
-  - Implements `time_stretch_wav` for WSOLA, phase-vocoder, and repitch.
+The Move Extended application uses a tab-based interface, defined in `templates/index.html`, where each feature is loaded in a tab without requiring full page reloads. This ensures users remain on the current page when submitting forms, providing a smoother experience.
 
-- Web Handler (`handlers/drum_rack_inspector_handler_class.py`):
-  - Processes form inputs (BPM, measures, preserve pitch, algorithm).
-  - Calls the core function and updates presets.
-
-- Template (`templates/drum_rack_inspector.html`):
-  - Provides a modal with form inputs and dynamic updates.
-
-- JavaScript (`static/main.js`):
-  - AJAX form submission and waveform updates.
-
-Dependencies added: `audiotsm`, `librosa`, `soundfile`.
-
-## Form Submission Approach
-
-The Move Extended application uses a tab-based interface where each feature is loaded in a tab without requiring full page reloads. This approach keeps users on the current page when submitting forms, providing a smoother user experience. Understanding this approach is essential when creating new features.
-
-### Tab-Based Interface
-
-The application uses a tab system defined in `index.html` where:
-
-1. Each feature has a tab button and a content container
-2. When a tab is clicked, the `openTab` function is called
-3. Tab content is dynamically loaded via AJAX
-4. Form handlers are attached to enable AJAX form submission
+1. Each feature has a tab button and a content container.
+2. When a tab is clicked, the `openTab` function (see `static/main.js`) is called.
+3. Tab content is dynamically loaded via AJAX.
+4. Form handlers are attached to enable AJAX form submission.
 
 ```html
 <!-- Tab buttons -->
@@ -390,79 +375,78 @@ The application uses a tab system defined in `index.html` where:
 </div>
 ```
 
-### AJAX Form Submission
+## AJAX Forms and Dynamic Tabs
 
-Forms are submitted asynchronously to prevent page navigation:
+AJAX form submission is used to keep users on the current page and to update tab content dynamically without a full reload.
 
-1. The `attachFormHandler` function intercepts form submissions
-2. The default form submission behavior is prevented with `event.preventDefault()`
-3. Form data is submitted via the fetch API
-4. The response updates the tab content without page navigation
-5. Event handlers are re-attached to maintain interactivity
+### How AJAX Submission Works
 
-```javascript
-// Simplified version of the form submission process
-form.addEventListener('submit', async function(event) {
-    event.preventDefault();
-    const formData = new FormData(form);
-    
-    const response = await fetch(url, {
-        method: form.method,
-        body: formData
+When a form is submitted from a tab:
+1. The `attachFormHandler` function (see `static/main.js`) intercepts the form submission.
+2. The default behavior is prevented (`event.preventDefault()`).
+3. The form data is submitted via the Fetch API.
+4. The server response (HTML) is used to update the tab content.
+5. Event handlers are re-attached to maintain interactivity.
+
+See the implementation in `static/main.js` for details.
+
+### Special Case: Multiple Forms in One Tab
+
+Some features (e.g., Set Management) use more than one form in a single tab. By default, only the first form will be handled by AJAX, and others may cause a full-page reload.
+
+To handle multiple forms in a single tab, update the `attachFormHandler` function in `static/main.js` to detect your tab name and bind every form inside its container. For example:
+
+```js
+// See static/main.js for the full implementation
+function attachFormHandler(tabName) {
+  if (tabName === 'SetManagement') {
+    const container = document.getElementById(tabName);
+    container.querySelectorAll('form').forEach(form => {
+      form.addEventListener('submit', async event => {
+        event.preventDefault();
+        await submitForm(form, tabName);
+      });
     });
-    
-    const result = await response.text();
-    document.getElementById(tabName).innerHTML = result;
-    
-    // Re-attach event handlers
-    attachFormHandler(tabName);
-});
+    return;
+  }
+  // ...existing single-form logic...
+}
 ```
+
+This ensures all forms in the tab are handled via AJAX and the page stays on `index.html`.
 
 ### Form Structure Requirements
 
-To ensure forms work with this system:
+To ensure your forms work with this system:
+1. Use standard HTML forms with `method="POST"` and appropriate `action` attributes.
+2. Include all form fields within the form element.
+3. Use hidden inputs for action identifiers if you have multiple submit buttons.
 
-1. **Form Structure**
-   - Use standard HTML forms with `method="POST"` and appropriate `action` attributes
-   - Include all form fields within the form element
-   - Use hidden inputs for action identifiers
+Example:
+```html
+<form method="POST" action="/your-feature">
+    <input type="hidden" name="action" value="your_action">
+    <!-- Form fields -->
+    <input type="text" name="field_name">
+    <select name="option">
+        {{ options }}
+    </select>
+    <button type="submit">Process</button>
+</form>
+```
 
-2. **Handler Responses**
-   - Return complete HTML for the tab content
-   - Include success/error messages
-   - Preserve form state where appropriate
-
-3. **Form Example**
-   ```html
-   <form method="POST" action="/your-feature">
-       <input type="hidden" name="action" value="your_action">
-       
-       <!-- Form fields -->
-       <input type="text" name="field_name">
-       <select name="option">
-           {{ options }}
-       </select>
-       
-       <!-- Submit button -->
-       <button type="submit">Process</button>
-   </form>
-   ```
-
-### Multiple Actions in One Form
+#### Multiple Actions in One Form
 
 For forms that need multiple submit buttons with different actions:
+1. Use a hidden input for the action value.
+2. Update this value via JavaScript when different buttons are clicked.
 
-1. Use a hidden input for the action value
-2. Update this value via JavaScript when different buttons are clicked
-
+Example:
 ```html
 <form method="POST" action="/your-feature" id="feature-form">
     <input type="hidden" name="action" id="action-input" value="default_action">
-    
     <!-- Form fields -->
     <input type="text" name="field_name">
-    
     <!-- Buttons that set different actions -->
     <button type="submit" onclick="document.getElementById('action-input').value='action1'">
         Action 1
@@ -473,27 +457,23 @@ For forms that need multiple submit buttons with different actions:
 </form>
 ```
 
-### Handler Implementation
+#### Handler Implementation
 
 Your handler should:
+1. Process the form data.
+2. Return complete HTML for the tab content.
+3. Include appropriate messages and updated form elements.
 
-1. Process the form data
-2. Return complete HTML for the tab content
-3. Include appropriate messages and updated form elements
-
+Example:
 ```python
 def handle_post(self, form):
     action = form.getvalue('action')
-    
     if action == 'action1':
-        # Process action1
         result = process_action1(form)
     elif action == 'action2':
-        # Process action2
         result = process_action2(form)
     else:
         return self.format_error_response("Unknown action")
-    
     # Return complete HTML with message and updated form elements
     return {
         "message": result['message'],
@@ -501,6 +481,18 @@ def handle_post(self, form):
         "form_html": self.generate_form_html(result)
     }
 ```
+
+For more, see `static/main.js` for the core AJAX logic and how to extend it for your tab.
+
+### Example: Time Stretch Feature
+
+This feature demonstrates audio time-stretching with dynamic tab updates:
+- Core: `core/time_stretch_handler.py` implements `time_stretch_wav`.
+- Web Handler: `handlers/drum_rack_inspector_handler_class.py` processes form inputs and calls the core function.
+- Template: `templates/drum_rack_inspector.html` provides a form and modal UI.
+- JavaScript: `static/main.js` handles AJAX form submission and waveform updates.
+
+Dependencies: `audiotsm`, `librosa`, `soundfile`.
 
 ## Best Practices
 
@@ -593,3 +585,11 @@ Remember to:
 - Test thoroughly
 - Clean up resources
 - Follow Move's conventions
+
+---
+
+## Troubleshooting & Common Pitfalls
+
+- **Importing cgi**: If you use `cgi.FieldStorage` in your handler, be sure to `import cgi` at the top of your file.
+- **Multiple forms per tab**: If your tab contains more than one form, you must update `static/main.js` to attach event listeners to all forms in that tab (see "AJAX Forms and Dynamic Tabs").
+- **Tab name/ID consistency**: The tab name/ID must match exactly between your JS (`static/main.js`), HTML (`index.html`), and route handler code. Mismatches will break AJAX loading or form submission.
