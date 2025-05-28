@@ -30,6 +30,11 @@ Tools for extending the Ableton Move. This project provides a companion webserve
   - Add and delete parameter mappings
   - Assign multiple parameters to a single macro control
   - Set custom range values for more precise control
+ 
+- **MIDI Import**
+  - Upload MIDI files to create new sets
+  - Choose between Melodic or Drum presets
+  - New Sets will be created with either a default Drift or 808 kit for further customization
 
 - **Chord Kit Generation**
   - Create chord variations from any WAV file
