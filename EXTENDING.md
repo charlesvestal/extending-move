@@ -226,6 +226,49 @@ Example template structures:
 </script>
 ```
 
+## Template Variables
+
+When working with templates, ensure all required variables are provided in your handler responses:
+
+1. **Always Include All Template Variables**: If your template uses variables like `{message_html}`, `{pad_options}`, etc., you must provide ALL of them in every response (success or error).
+
+2. **Empty Defaults**: For conditional content, provide empty strings as defaults:
+```python
+return {
+    'message': 'Success',
+    'message_type': 'success',
+    'channel_selection_html': '',  # Empty if not needed
+    'midi_filepath': ''  # Empty if not needed
+}
+```
+
+3. **Template Manager Support**: The template manager in `move-webserver.py` handles various replacement patterns:
+   - Double curly braces: `{{ options }}`, `{{ pad_options }}`
+   - Single curly braces: `{message_html}`, `{channel_selection_html}`
+   - Ensure your template variables are registered in the template manager's render method
+
+## Multi-Step Workflows
+
+For features that require multiple steps (like MIDI channel selection):
+
+1. **File Retention**: Keep uploaded files between steps by passing the filepath as a hidden form field:
+```html
+<input type="hidden" name="midi_filepath" value="{midi_filepath}" />
+```
+
+2. **State Management**: Use JavaScript to show/hide sections based on current state:
+```javascript
+document.addEventListener('DOMContentLoaded', function() {
+    const hasContent = channelInfo && channelInfo.innerHTML.trim() !== '';
+    if (hasContent) {
+        uploadSection.style.display = 'none';
+        selectionSection.style.display = 'block';
+    }
+});
+```
+
+3. **Clean Up**: Only clean up temporary files after the final step is complete.
+
 ## Move-Specific Details
 
 ### File Locations

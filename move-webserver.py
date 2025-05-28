@@ -81,6 +81,14 @@ class TemplateManager:
             template = template.replace("{{ pad_options }}", kwargs["pad_options"])
         if "pad_color_options" in kwargs:
             template = template.replace("{{ pad_color_options }}", kwargs["pad_color_options"])
+        
+        # Add channel_selection_html replacement
+        if "channel_selection_html" in kwargs:
+            template = template.replace("{channel_selection_html}", kwargs["channel_selection_html"])
+        
+        # Add midi_filepath replacement
+        if "midi_filepath" in kwargs:
+            template = template.replace("{midi_filepath}", kwargs.get("midi_filepath", ""))
 
         # Ensure message replacement works properly in ALL templates
         message = kwargs.get("message", "")

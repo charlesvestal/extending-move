@@ -2,7 +2,115 @@ import os
 import json
 import copy
 import mido
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, Tuple, Set
+
+def analyze_midi_channels(midi_file_path: str) -> Dict[str, Any]:
+    """
+    Analyze a MIDI file to extract channel information.
+    
+    Args:
+        midi_file_path: Path to the MIDI file
+        
+    Returns:
+        Dictionary containing channel analysis data
+    """
+    try:
+        mid = mido.MidiFile(midi_file_path)
+        
+        # Dictionary to store channel info
+        channels = {}
+        
+        # GM instrument names (General MIDI standard)
+        gm_instruments = [
+            "Acoustic Grand Piano", "Bright Acoustic Piano", "Electric Grand Piano", "Honky-tonk Piano",
+            "Electric Piano 1", "Electric Piano 2", "Harpsichord", "Clavi", "Celesta", "Glockenspiel",
+            "Music Box", "Vibraphone", "Marimba", "Xylophone", "Tubular Bells", "Dulcimer",
+            "Drawbar Organ", "Percussive Organ", "Rock Organ", "Church Organ", "Reed Organ",
+            "Accordion", "Harmonica", "Tango Accordion", "Acoustic Guitar (nylon)", "Acoustic Guitar (steel)",
+            "Electric Guitar (jazz)", "Electric Guitar (clean)", "Electric Guitar (muted)", "Overdriven Guitar",
+            "Distortion Guitar", "Guitar harmonics", "Acoustic Bass", "Electric Bass (finger)",
+            "Electric Bass (pick)", "Fretless Bass", "Slap Bass 1", "Slap Bass 2", "Synth Bass 1",
+            "Synth Bass 2", "Violin", "Viola", "Cello", "Contrabass", "Tremolo Strings",
+            "Pizzicato Strings", "Orchestral Harp", "Timpani", "String Ensemble 1", "String Ensemble 2",
+            "SynthStrings 1", "SynthStrings 2", "Choir Aahs", "Voice Oohs", "Synth Voice",
+            "Orchestra Hit", "Trumpet", "Trombone", "Tuba", "Muted Trumpet", "French Horn",
+            "Brass Section", "SynthBrass 1", "SynthBrass 2", "Soprano Sax", "Alto Sax",
+            "Tenor Sax", "Baritone Sax", "Oboe", "English Horn", "Bassoon", "Clarinet",
+            "Piccolo", "Flute", "Recorder", "Pan Flute", "Blown Bottle", "Shakuhachi",
+            "Whistle", "Ocarina", "Lead 1 (square)", "Lead 2 (sawtooth)", "Lead 3 (calliope)",
+            "Lead 4 (chiff)", "Lead 5 (charang)", "Lead 6 (voice)", "Lead 7 (fifths)",
+            "Lead 8 (bass + lead)", "Pad 1 (new age)", "Pad 2 (warm)", "Pad 3 (polysynth)",
+            "Pad 4 (choir)", "Pad 5 (bowed)", "Pad 6 (metallic)", "Pad 7 (halo)", "Pad 8 (sweep)",
+            "FX 1 (rain)", "FX 2 (soundtrack)", "FX 3 (crystal)", "FX 4 (atmosphere)",
+            "FX 5 (brightness)", "FX 6 (goblins)", "FX 7 (echoes)", "FX 8 (sci-fi)",
+            "Sitar", "Banjo", "Shamisen", "Koto", "Kalimba", "Bag pipe", "Fiddle", "Shanai",
+            "Tinkle Bell", "Agogo", "Steel Drums", "Woodblock", "Taiko Drum", "Melodic Tom",
+            "Synth Drum", "Reverse Cymbal", "Guitar Fret Noise", "Breath Noise", "Seashore",
+            "Bird Tweet", "Telephone Ring", "Helicopter", "Applause", "Gunshot"
+        ]
+        
+        # Track program changes per channel
+        program_per_channel = {}
+        
+        # Process all tracks
+        for track_idx, track in enumerate(mid.tracks):
+            current_time = 0
+            current_channel = None
+            
+            for msg in track:
+                current_time += msg.time
+                
+                # Track program changes
+                if msg.type == 'program_change':
+                    program_per_channel[msg.channel] = msg.program
+                
+                # Track note events
+                if msg.type in ['note_on', 'note_off']:
+                    channel = msg.channel
+                    
+                    if channel not in channels:
+                        channels[channel] = {
+                            'channel': channel,
+                            'note_count': 0,
+                            'min_note': 127,
+                            'max_note': 0,
+                            'tracks': set(),
+                            'program': None,
+                            'instrument_name': None
+                        }
+                    
+                    if msg.type == 'note_on' and msg.velocity > 0:
+                        channels[channel]['note_count'] += 1
+                        channels[channel]['min_note'] = min(channels[channel]['min_note'], msg.note)
+                        channels[channel]['max_note'] = max(channels[channel]['max_note'], msg.note)
+                        channels[channel]['tracks'].add(track_idx)
+        
+        # Add program/instrument info
+        for channel, info in channels.items():
+            if channel in program_per_channel:
+                program = program_per_channel[channel]
+                info['program'] = program
+                if 0 <= program < len(gm_instruments):
+                    info['instrument_name'] = gm_instruments[program]
+            
+            # Convert tracks set to list for JSON serialization
+            info['tracks'] = list(info['tracks'])
+        
+        # Convert to list and sort by channel number
+        channel_list = sorted(channels.values(), key=lambda x: x['channel'])
+        
+        return {
+            'success': True,
+            'channels': channel_list,
+            'total_channels': len(channel_list)
+        }
+        
+    except Exception as e:
+        return {
+            'success': False,
+            'message': f"Failed to analyze MIDI file: {str(e)}"
+        }
+
 
 def create_set(set_name):
     """
@@ -100,7 +208,9 @@ def generate_c_major_chord_example(set_name: str, tempo: float = 120.0) -> Dict[
         }
 
 
-def generate_midi_set_from_file(set_name: str, midi_file_path: str, tempo: float = None) -> Dict[str, Any]:
+def generate_midi_set_from_file(set_name: str, midi_file_path: str, tempo: float = None, 
+                               selected_channels: Optional[List[int]] = None, 
+                               flatten_channels: bool = False) -> Dict[str, Any]:
     """
     Generate an Ableton Live set from an uploaded MIDI file.
     
@@ -108,6 +218,8 @@ def generate_midi_set_from_file(set_name: str, midi_file_path: str, tempo: float
         set_name: Name for the new set
         midi_file_path: Path to the uploaded MIDI file
         tempo: Tempo in BPM (if None, will try to detect from MIDI or use 120)
+        selected_channels: List of MIDI channels to include (0-15), None means all channels
+        flatten_channels: If True, combine all selected channels into one track
         
     Returns:
         Result dictionary with success status and message
@@ -131,67 +243,60 @@ def generate_midi_set_from_file(set_name: str, midi_file_path: str, tempo: float
         if tempo is None:
             tempo = detected_tempo
         
-        # Extract notes from MIDI
+        # Extract notes from MIDI with channel filtering
         notes = []
-        current_time = 0
-        active_notes = {}  # Track active notes by note number
-        
-        # Find the first track with note data
-        note_track = None
-        for track in mid.tracks:
-            has_notes = any(msg.type in ['note_on', 'note_off'] for msg in track)
-            if has_notes:
-                note_track = track
-                break
-        
-        if note_track is None:
-            return {
-                'success': False,
-                'message': "No note data found in MIDI file"
-            }
-        
-        # Process the track to extract notes
         ticks_per_beat = mid.ticks_per_beat
         
-        for msg in note_track:
-            current_time += msg.time
+        # Process all tracks to extract notes
+        for track in mid.tracks:
+            current_time = 0
+            active_notes = {}  # Track active notes by (channel, note_number)
             
-            if msg.type == 'note_on' and msg.velocity > 0:
-                # Note on event
-                active_notes[msg.note] = {
-                    'start_time': current_time / ticks_per_beat,
-                    'velocity': msg.velocity
-                }
-            elif msg.type == 'note_off' or (msg.type == 'note_on' and msg.velocity == 0):
-                # Note off event
-                if msg.note in active_notes:
-                    start_beat = active_notes[msg.note]['start_time']
-                    duration = (current_time / ticks_per_beat) - start_beat
-                    
-                    # Only add notes with positive duration
-                    if duration > 0:
-                        notes.append({
-                            'noteNumber': msg.note,
-                            'startTime': start_beat,
-                            'duration': duration,
-                            'velocity': float(active_notes[msg.note]['velocity']),
-                            'offVelocity': 0.0
-                        })
-                    
-                    del active_notes[msg.note]
-        
-        # Handle any remaining active notes (in case file ends without note_off)
-        final_time = current_time / ticks_per_beat
-        for note_num, note_data in active_notes.items():
-            duration = final_time - note_data['start_time']
-            if duration > 0:
-                notes.append({
-                    'noteNumber': note_num,
-                    'startTime': note_data['start_time'],
-                    'duration': duration,
-                    'velocity': float(note_data['velocity']),
-                    'offVelocity': 0.0
-                })
+            for msg in track:
+                current_time += msg.time
+                
+                if msg.type == 'note_on' and msg.velocity > 0:
+                    # Check if we should include this channel
+                    if selected_channels is None or msg.channel in selected_channels:
+                        key = (msg.channel, msg.note)
+                        active_notes[key] = {
+                            'start_time': current_time / ticks_per_beat,
+                            'velocity': msg.velocity,
+                            'channel': msg.channel
+                        }
+                        
+                elif msg.type == 'note_off' or (msg.type == 'note_on' and msg.velocity == 0):
+                    key = (msg.channel, msg.note)
+                    if key in active_notes:
+                        start_beat = active_notes[key]['start_time']
+                        duration = (current_time / ticks_per_beat) - start_beat
+                        
+                        # Only add notes with positive duration
+                        if duration > 0:
+                            notes.append({
+                                'noteNumber': msg.note,
+                                'startTime': start_beat,
+                                'duration': duration,
+                                'velocity': float(active_notes[key]['velocity']),
+                                'offVelocity': 0.0,
+                                'channel': active_notes[key]['channel']
+                            })
+                        
+                        del active_notes[key]
+            
+            # Handle any remaining active notes in this track
+            final_time = current_time / ticks_per_beat
+            for key, note_data in active_notes.items():
+                duration = final_time - note_data['start_time']
+                if duration > 0:
+                    notes.append({
+                        'noteNumber': key[1],  # note number from key
+                        'startTime': note_data['start_time'],
+                        'duration': duration,
+                        'velocity': float(note_data['velocity']),
+                        'offVelocity': 0.0,
+                        'channel': note_data['channel']
+                    })
         
         if not notes:
             return {
@@ -202,8 +307,20 @@ def generate_midi_set_from_file(set_name: str, midi_file_path: str, tempo: float
         # Sort notes by start time
         notes.sort(key=lambda x: x['startTime'])
         
+        # Remove channel information from notes (not needed in final output)
+        clean_notes = []
+        for note in notes:
+            clean_note = {
+                'noteNumber': note['noteNumber'],
+                'startTime': note['startTime'],
+                'duration': note['duration'],
+                'velocity': note['velocity'],
+                'offVelocity': note['offVelocity']
+            }
+            clean_notes.append(clean_note)
+        
         # Calculate clip length (round up to nearest bar)
-        max_end_time = max(note['startTime'] + note['duration'] for note in notes)
+        max_end_time = max(note['startTime'] + note['duration'] for note in clean_notes)
         clip_length = max(4.0, ((int(max_end_time) // 4) + 1) * 4.0)
         
         # Load the template
@@ -212,7 +329,7 @@ def generate_midi_set_from_file(set_name: str, midi_file_path: str, tempo: float
         
         # Update the clip with MIDI notes
         clip = song['tracks'][0]['clipSlots'][0]['clip']
-        clip['notes'] = notes
+        clip['notes'] = clean_notes
         clip['region']['end'] = clip_length
         clip['region']['loop']['end'] = clip_length
         
@@ -229,9 +346,16 @@ def generate_midi_set_from_file(set_name: str, midi_file_path: str, tempo: float
         with open(output_path, 'w') as f:
             json.dump(song, f, indent=2)
         
+        # Create informative message about channel selection
+        channel_info = ""
+        if selected_channels is not None:
+            channel_info = f" from channel(s) {', '.join(str(c) for c in selected_channels)}"
+        elif flatten_channels:
+            channel_info = " (all channels flattened)"
+        
         return {
             'success': True,
-            'message': f"MIDI set '{set_name}' generated successfully ({len(notes)} notes imported)",
+            'message': f"MIDI set '{set_name}' generated successfully ({len(clean_notes)} notes imported{channel_info})",
             'path': output_path
         }
         
@@ -243,10 +367,17 @@ def generate_midi_set_from_file(set_name: str, midi_file_path: str, tempo: float
 
 
 # --- Drum set generation from MIDI file ---
-def generate_drum_set_from_file(set_name: str, midi_file_path: str, tempo: float = None) -> Dict[str, Any]:
+def generate_drum_set_from_file(set_name: str, midi_file_path: str, tempo: float = None,
+                               selected_channels: Optional[List[int]] = None) -> Dict[str, Any]:
     """
     Generate an Ableton Live set from an uploaded drum MIDI file,
     mapping incoming notes to 16 pads starting at MIDI note 36.
+    
+    Args:
+        set_name: Name for the new set
+        midi_file_path: Path to the uploaded MIDI file
+        tempo: Tempo in BPM (if None, will try to detect from MIDI or use 120)
+        selected_channels: List of MIDI channels to include (0-15), None means all channels
     """
     try:
         # Load the MIDI file
@@ -265,45 +396,57 @@ def generate_drum_set_from_file(set_name: str, midi_file_path: str, tempo: float
         if tempo is None:
             tempo = detected_tempo
 
-        # Extract notes from first track with note events
+        # Extract notes from all tracks with channel filtering
         notes = []
-        current_time = 0
-        active_notes: Dict[int, Dict[str, Any]] = {}
-        note_track = next((t for t in mid.tracks if any(m.type in ['note_on', 'note_off'] for m in t)), None)
-        if note_track is None:
-            return {'success': False, 'message': "No note data found in MIDI file"}
         ticks_per_beat = mid.ticks_per_beat
-
-        for msg in note_track:
-            current_time += msg.time
-            if msg.type == 'note_on' and msg.velocity > 0:
-                active_notes[msg.note] = {'start_time': current_time / ticks_per_beat, 'velocity': msg.velocity}
-            elif msg.type == 'note_off' or (msg.type == 'note_on' and msg.velocity == 0):
-                if msg.note in active_notes:
-                    start = active_notes[msg.note]['start_time']
-                    duration = (current_time / ticks_per_beat) - start
-                    if duration > 0:
-                        notes.append({
-                            'noteNumber': msg.note,
-                            'startTime': start,
-                            'duration': duration,
-                            'velocity': float(active_notes[msg.note]['velocity']),
-                            'offVelocity': 0.0
-                        })
-                    del active_notes[msg.note]
-
-        # Close out any lingering notes
-        final_time = current_time / ticks_per_beat
-        for note_num, data in active_notes.items():
-            duration = final_time - data['start_time']
-            if duration > 0:
-                notes.append({
-                    'noteNumber': note_num,
-                    'startTime': data['start_time'],
-                    'duration': duration,
-                    'velocity': float(data['velocity']),
-                    'offVelocity': 0.0
-                })
+        
+        # Process all tracks to extract notes
+        for track in mid.tracks:
+            current_time = 0
+            active_notes = {}  # Track active notes by (channel, note_number)
+            
+            for msg in track:
+                current_time += msg.time
+                
+                if msg.type == 'note_on' and msg.velocity > 0:
+                    # Check if we should include this channel
+                    if selected_channels is None or msg.channel in selected_channels:
+                        key = (msg.channel, msg.note)
+                        active_notes[key] = {
+                            'start_time': current_time / ticks_per_beat,
+                            'velocity': msg.velocity
+                        }
+                        
+                elif msg.type == 'note_off' or (msg.type == 'note_on' and msg.velocity == 0):
+                    key = (msg.channel, msg.note)
+                    if key in active_notes:
+                        start_beat = active_notes[key]['start_time']
+                        duration = (current_time / ticks_per_beat) - start_beat
+                        
+                        # Only add notes with positive duration
+                        if duration > 0:
+                            notes.append({
+                                'noteNumber': msg.note,
+                                'startTime': start_beat,
+                                'duration': duration,
+                                'velocity': float(active_notes[key]['velocity']),
+                                'offVelocity': 0.0
+                            })
+                        
+                        del active_notes[key]
+            
+            # Handle any remaining active notes in this track
+            final_time = current_time / ticks_per_beat
+            for key, note_data in active_notes.items():
+                duration = final_time - note_data['start_time']
+                if duration > 0:
+                    notes.append({
+                        'noteNumber': key[1],  # note number from key
+                        'startTime': note_data['start_time'],
+                        'duration': duration,
+                        'velocity': float(note_data['velocity']),
+                        'offVelocity': 0.0
+                    })
 
         if not notes:
             return {'success': False, 'message': "No valid notes found in MIDI file"}

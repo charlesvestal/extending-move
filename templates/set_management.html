@@ -2,12 +2,35 @@
 <div id="result-message">{message_html}</div>
 
 <div class="set-management-container">
-    <div class="midi-upload-section">
-        <h3>Upload MIDI File</h3>
-        <p>Upload a MIDI file to generate an Ableton Live set with the notes from the file.</p>
+    <!-- Step 1: Upload and Analyze MIDI -->
+    <div id="midi-upload-section" class="midi-upload-section">
+        <h3>Step 1: Upload MIDI File</h3>
+        <p>Upload a MIDI file to analyze its channels and generate an Ableton Live set.</p>
         
-        <form method="post" action="/set-management" enctype="multipart/form-data">
+        <form method="post" action="/set-management" enctype="multipart/form-data" id="analyze-form">
+            <input type="hidden" name="action" value="analyze_midi" />
+            
+            <div class="form-group">
+                <label for="midi_file">MIDI File:</label>
+                <input type="file" name="midi_file" id="midi_file" accept=".mid,.midi" required />
+                <small>Supported formats: .mid, .midi</small>
+            </div>
+            
+            <button type="submit" class="analyze-button">Analyze MIDI File</button>
+        </form>
+    </div>
+
+    <!-- Step 2: Channel Selection and Generation -->
+    <div id="channel-selection-section" class="channel-selection-section">
+        <h3>Step 2: Select Channels and Generate Set</h3>
+        
+        <div id="channel-info">
+            {channel_selection_html}
+        </div>
+        
+        <form method="post" action="/set-management" enctype="multipart/form-data" id="generate-form">
             <input type="hidden" name="action" value="upload_midi" />
+            <input type="hidden" name="midi_filepath" value="{midi_filepath}" />
             
             <div class="form-group">
                 <label for="midi_type">MIDI Type:</label>
@@ -15,12 +38,6 @@
                     <option value="melodic" selected>Melodic MIDI</option>
                     <option value="drum">Drum MIDI (808)</option>
                 </select>
-            </div>
-            
-            <div class="form-group">
-                <label for="midi_file">MIDI File:</label>
-                <input type="file" name="midi_file" id="midi_file" accept=".mid,.midi" required />
-                <small>Supported formats: .mid, .midi</small>
             </div>
             
             <div class="form-group">
@@ -49,29 +66,34 @@
             </div>
             
             <button type="submit" class="generate-button">Generate Set from MIDI</button>
+            <button type="button" class="back-button" onclick="resetToUpload()">Upload Different File</button>
         </form>
     </div>
 </div>
 
 <style>
 .set-management-container {
-    max-width: 600px;
+    max-width: 700px;
     margin: 0 auto;
 }
 
-.midi-upload-section {
+.midi-upload-section,
+.channel-selection-section {
     padding: 30px;
     background: #f9f9f9;
     border: 1px solid #ddd;
     border-radius: 8px;
+    margin-bottom: 20px;
 }
 
-.midi-upload-section h3 {
+.midi-upload-section h3,
+.channel-selection-section h3 {
     margin-top: 0;
     color: #333;
 }
 
-.midi-upload-section p {
+.midi-upload-section p,
+.channel-selection-section p {
     color: #666;
     margin-bottom: 25px;
 }
@@ -110,8 +132,8 @@
     font-size: 12px;
 }
 
+.analyze-button,
 .generate-button {
-    width: 100%;
     padding: 12px 30px;
     background: #28a745;
     color: white;
@@ -120,10 +142,79 @@
     font-size: 16px;
     cursor: pointer;
     transition: background 0.3s;
+    margin-right: 10px;
 }
 
+.analyze-button:hover,
 .generate-button:hover {
     background: #218838;
+}
+
+.back-button {
+    padding: 12px 30px;
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.back-button:hover {
+    background: #5a6268;
+}
+
+/* Channel selection table styles */
+.channel-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    background: white;
+    border: 1px solid #ddd;
+}
+
+.channel-table thead {
+    background: #f8f9fa;
+}
+
+.channel-table th,
+.channel-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.channel-table th {
+    font-weight: bold;
+    color: #333;
+}
+
+.channel-table tr:hover {
+    background: #f8f9fa;
+}
+
+.channel-table input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+}
+
+.channel-options {
+    margin: 20px 0;
+    padding: 15px;
+    background: #e9ecef;
+    border-radius: 4px;
+}
+
+.channel-options label {
+    display: flex;
+    align-items: center;
+    font-weight: normal;
+    margin: 0;
+}
+
+.channel-options input[type="checkbox"] {
+    margin-right: 10px;
 }
 
 #result-message {
@@ -146,3 +237,75 @@
     color: #721c24;
 }
 </style>
+
+<script>
+// Check if we have channel selection HTML on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const channelInfo = document.getElementById('channel-info');
+    const uploadSection = document.getElementById('midi-upload-section');
+    const channelSection = document.getElementById('channel-selection-section');
+    
+    // Check if we have actual channel content (not just the placeholder)
+    const hasChannelContent = channelInfo && 
+                            channelInfo.innerHTML.trim() !== '' && 
+                            channelInfo.innerHTML.trim() !== '{channel_selection_html}';
+    
+    if (hasChannelContent) {
+        // We have channel selection HTML, show the second step
+        uploadSection.style.display = 'none';
+        channelSection.style.display = 'block';
+    } else {
+        // No channel content, show upload form
+        uploadSection.style.display = 'block';
+        channelSection.style.display = 'none';
+    }
+});
+
+function resetToUpload() {
+    // Show upload section, hide channel selection
+    document.getElementById('midi-upload-section').style.display = 'block';
+    document.getElementById('channel-selection-section').style.display = 'none';
+    
+    // Clear the file input
+    document.getElementById('midi_file').value = '';
+    uploadedMidiFile = null;
+    
+    // Clear any messages
+    const messageDiv = document.getElementById('result-message');
+    if (messageDiv) {
+        messageDiv.innerHTML = '';
+    }
+}
+
+// Handle drum type selection - disable channel selection for drums
+document.addEventListener('DOMContentLoaded', function() {
+    const midiTypeSelect = document.getElementById('midi_type');
+    if (midiTypeSelect) {
+        midiTypeSelect.addEventListener('change', function() {
+            const channelInfo = document.getElementById('channel-info');
+            if (this.value === 'drum' && channelInfo) {
+                // Disable channel selection for drum mode
+                channelInfo.style.opacity = '0.5';
+                channelInfo.style.pointerEvents = 'none';
+                
+                // Add a note
+                const note = document.createElement('p');
+                note.style.color = '#666';
+                note.style.fontStyle = 'italic';
+                note.textContent = 'Channel selection is not available for drum MIDI files.';
+                channelInfo.insertBefore(note, channelInfo.firstChild);
+            } else if (channelInfo) {
+                // Re-enable for melodic
+                channelInfo.style.opacity = '1';
+                channelInfo.style.pointerEvents = 'auto';
+                
+                // Remove the note if it exists
+                const note = channelInfo.querySelector('p');
+                if (note && note.textContent.includes('Channel selection is not available')) {
+                    note.remove();
+                }
+            }
+        });
+    }
+});
+</script>
