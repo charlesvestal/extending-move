@@ -4,7 +4,8 @@ import zipfile
 import tempfile
 import shutil
 from core.set_management_handler import (
-    create_set, generate_midi_set_from_file, generate_c_major_chord_example
+    create_set, generate_midi_set_from_file, generate_drum_set_from_file,
+    generate_c_major_chord_example, load_set_template
 )
 from core.list_msets_handler import list_msets
 from core.restore_handler import restore_ablbundle
@@ -71,15 +72,9 @@ class SetManagementHandler(BaseHandler):
                 # Dispatch based on MIDI type
                 midi_type = form.getvalue('midi_type', 'melodic')
                 if midi_type == 'drum':
-                    # TODO: Replace with drum-specific import logic
-                    return self.format_error_response(
-                        "Drum import not yet implemented",
-                        pad_options=pad_options,
-                        pad_color_options=pad_color_options
-                    )
-
-                # Process melodic MIDI file
-                result = generate_midi_set_from_file(set_name, filepath, tempo)
+                    result = generate_drum_set_from_file(set_name, filepath, tempo)
+                else:
+                    result = generate_midi_set_from_file(set_name, filepath, tempo)
 
             finally:
                 # Clean up uploaded file

@@ -240,3 +240,112 @@ def generate_midi_set_from_file(set_name: str, midi_file_path: str, tempo: float
             'success': False,
             'message': f"Failed to process MIDI file: {str(e)}"
         }
+
+
+# --- Drum set generation from MIDI file ---
+def generate_drum_set_from_file(set_name: str, midi_file_path: str, tempo: float = None) -> Dict[str, Any]:
+    """
+    Generate an Ableton Live set from an uploaded drum MIDI file,
+    mapping incoming notes to 16 pads starting at MIDI note 36.
+    """
+    try:
+        # Load the MIDI file
+        mid = mido.MidiFile(midi_file_path)
+
+        # Tempo detection (reuse melodic logic)
+        detected_tempo = 120.0
+        for track in mid.tracks:
+            for msg in track:
+                if msg.type == 'set_tempo':
+                    detected_tempo = 60000000 / msg.tempo
+                    break
+            if detected_tempo != 120.0:
+                break
+
+        if tempo is None:
+            tempo = detected_tempo
+
+        # Extract notes from first track with note events
+        notes = []
+        current_time = 0
+        active_notes: Dict[int, Dict[str, Any]] = {}
+        note_track = next((t for t in mid.tracks if any(m.type in ['note_on', 'note_off'] for m in t)), None)
+        if note_track is None:
+            return {'success': False, 'message': "No note data found in MIDI file"}
+        ticks_per_beat = mid.ticks_per_beat
+
+        for msg in note_track:
+            current_time += msg.time
+            if msg.type == 'note_on' and msg.velocity > 0:
+                active_notes[msg.note] = {'start_time': current_time / ticks_per_beat, 'velocity': msg.velocity}
+            elif msg.type == 'note_off' or (msg.type == 'note_on' and msg.velocity == 0):
+                if msg.note in active_notes:
+                    start = active_notes[msg.note]['start_time']
+                    duration = (current_time / ticks_per_beat) - start
+                    if duration > 0:
+                        notes.append({
+                            'noteNumber': msg.note,
+                            'startTime': start,
+                            'duration': duration,
+                            'velocity': float(active_notes[msg.note]['velocity']),
+                            'offVelocity': 0.0
+                        })
+                    del active_notes[msg.note]
+
+        # Close out any lingering notes
+        final_time = current_time / ticks_per_beat
+        for note_num, data in active_notes.items():
+            duration = final_time - data['start_time']
+            if duration > 0:
+                notes.append({
+                    'noteNumber': note_num,
+                    'startTime': data['start_time'],
+                    'duration': duration,
+                    'velocity': float(data['velocity']),
+                    'offVelocity': 0.0
+                })
+
+        if not notes:
+            return {'success': False, 'message': "No valid notes found in MIDI file"}
+
+        # Map original notes to 16 pads: base note 36 + (original - min_note) % 16
+        min_note = min(n['noteNumber'] for n in notes)
+        mapped_notes = []
+        for n in notes:
+            pad_index = (n['noteNumber'] - min_note) % 16
+            mapped_notes.append({
+                'noteNumber': 36 + pad_index,
+                'startTime': n['startTime'],
+                'duration': n['duration'],
+                'velocity': n['velocity'],
+                'offVelocity': n['offVelocity']
+            })
+
+        # Determine clip length as nearest bar (4 beats)
+        max_end = max(n['startTime'] + n['duration'] for n in mapped_notes)
+        clip_length = max(4.0, ((int(max_end) // 4) + 1) * 4.0)
+
+        # Load the 808 template
+        template_path = os.path.join(os.path.dirname(__file__), '..', 'examples', 'Sets', '808.abl')
+        song = load_set_template(template_path)
+
+        # Update the clip
+        clip = song['tracks'][0]['clipSlots'][0]['clip']
+        clip['notes'] = mapped_notes
+        clip['region']['end'] = clip_length
+        clip['region']['loop']['end'] = clip_length
+
+        # Update tempo and save
+        song['tempo'] = tempo
+        output_dir = "/data/UserData/UserLibrary/Sets"
+        os.makedirs(output_dir, exist_ok=True)
+        output_path = os.path.join(output_dir, set_name)
+        if not output_path.endswith('.abl'):
+            output_path += '.abl'
+        with open(output_path, 'w') as f:
+            json.dump(song, f, indent=2)
+
+        return {'success': True, 'message': f"Drum set '{set_name}' generated successfully ({len(mapped_notes)} pads)", 'path': output_path}
+
+    except Exception as e:
+        return {'success': False, 'message': f"Failed to process drum MIDI file: {str(e)}"}
