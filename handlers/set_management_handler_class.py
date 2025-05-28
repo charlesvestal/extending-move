@@ -67,10 +67,20 @@ class SetManagementHandler(BaseHandler):
                 # Get tempo if provided
                 tempo_str = form.getvalue('tempo')
                 tempo = float(tempo_str) if tempo_str and tempo_str.strip() else None
-                
-                # Process MIDI file
+
+                # Dispatch based on MIDI type
+                midi_type = form.getvalue('midi_type', 'melodic')
+                if midi_type == 'drum':
+                    # TODO: Replace with drum-specific import logic
+                    return self.format_error_response(
+                        "Drum import not yet implemented",
+                        pad_options=pad_options,
+                        pad_color_options=pad_color_options
+                    )
+
+                # Process melodic MIDI file
                 result = generate_midi_set_from_file(set_name, filepath, tempo)
-                
+
             finally:
                 # Clean up uploaded file
                 self.cleanup_upload(filepath)
