@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SF2 → ABLPresetBundle Converter</title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: #222;
+      color: #eee;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    h1 {
+      margin-bottom: 0.5em;
+    }
+    #drop-zone {
+      border: 2px dashed #666;
+      padding: 2em;
+      text-align: center;
+      width: 90%;
+      max-width: 400px;
+      transition: background 0.3s;
+    }
+    #drop-zone.dragover {
+      background: rgba(255,255,255,0.05);
+    }
+    input[type="file"] {
+      display: none;
+    }
+    button {
+      margin-top: 1em;
+      padding: 0.5em 1em;
+      background: #4CAF50;
+      border: none;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+    #log {
+      margin-top: 1em;
+      font-size: 0.9rem;
+      max-width: 600px;
+      word-break: break-word;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <h1>SF2 → ABLPresetBundle Converter</h1>
+  <div id="drop-zone">
+    Drop a <code>.sf2</code> or <code>.sfz</code> file here<br>
+    or<br>
+    <label>
+      <button id="file-button">Select File…</button>
+      <input type="file" id="file-input" accept=".sf2,.sfz" />
+    </label>
+  </div>
+  <div id="log"></div>
+  <div class="section">
+    <input type="checkbox" id="export-wavs-checkbox" />
+    <label for="export-wavs-checkbox">Also download ZIP of WAVs</label>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/fflate@0.8.0/umd/index.js"></script>
+  -->
+  <script>
+    // ——— BEGIN SF2 Parser (Parser, Riff, RiffChunk, etc.) ———
+    (function (global, factory) {
+      typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+      typeof define === 'function' && define.amd ? define(factory) :
+      (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.SoundFont = factory());
+    })(this, (function () { 'use strict';
+
+    class Riff {
+      constructor(input, optParams = {}) {
+        this.input = input;
+        this.ip = optParams.index || 0;
+        this.length = optParams.length || input.byteLength - this.ip;
+        this.chunkList = [];
+        this.offset = this.ip;
+        this.padding = optParams.padding !== void 0 ? optParams.padding : true;
+        this.bigEndian = optParams.bigEndian !== void 0 ? optParams.bigEndian : false;
+      }
+      parse() {
+        const length = this.length + this.offset;
+        this.chunkList = [];
+        while (this.ip < length) this.parseChunk();
+      }
+      parseChunk() {
+        const input = this.input;
+        let ip = this.ip;
+        let size;
+        this.chunkList.push(
+          new RiffChunk(
+            String.fromCharCode(input[ip++], input[ip++], input[ip++], input[ip++]),
+            (size = this.bigEndian
+              ? ((input[ip++] << 24) |
+                  (input[ip++] << 16) |
+                  (input[ip++] << 8) |
+                  input[ip++]) >>>
+                0
+              : (input[ip++] |
+                  (input[ip++] << 8) |
+                  (input[ip++] << 16) |
+                  (input[ip++] << 24)) >>>
+                0),
+            ip
+          )
+        );
+        ip += size;
+        if (this.padding && ((ip - this.offset) & 1) === 1) ip++;
+        this.ip = ip;
+      }
+      getChunk(index) {
+        const chunk = this.chunkList[index];
+        return chunk !== undefined ? chunk : null;
+      }
+      getNumberOfChunks() {
+        return this.chunkList.length;
+      }
+    }
+
+    class RiffChunk {
+      constructor(type, size, offset) {
+        this.type = type;
+        this.size = size;
+        this.offset = offset;
+      }
+    }
+
+    class Parser {
+      constructor(input, optParams = {}) {
+        this.input = input;
+        this.parserOption = optParams.parserOption || {};
+        this.sampleRate = optParams.sampleRate || 22050;
+        this.presetHeader = [];
+        this.presetZone = [];
+        this.presetZoneModulator = [];
+        this.presetZoneGenerator = [];
+        this.instrument = [];
+        this.instrumentZone = [];
+        this.instrumentZoneModulator = [];
+        this.instrumentZoneGenerator = [];
+        this.sampleHeader = [];
+        this.GeneratorEnumeratorTable = Object.keys(this.getGeneratorTable());
+      }
+      getGeneratorTable() {
+        return Object.freeze({
+          startAddrsOffset: 0, endAddrsOffset: 0, startloopAddrsOffset: 0,
+          endloopAddrsOffset: 0, startAddrsCoarseOffset: 0,
+          modLfoToPitch: 0, vibLfoToPitch: 0, modEnvToPitch: 0,
+          initialFilterFc: 13500, initialFilterQ: 0, modLfoToFilterFc: 0,
+          modEnvToFilterFc: 0, endAddrsCoarseOffset: 0, modLfoToVolume: 0,
+          unused1: undefined, chorusEffectsSend: 0, reverbEffectsSend: 0,
+          pan: 0, unused2: undefined, unused3: undefined, unused4: undefined,
+          delayModLFO: -12000, freqModLFO: 0, delayVibLFO: -12000,
+          freqVibLFO: 0, delayModEnv: -12000, attackModEnv: -12000,
+          holdModEnv: -12000, decayModEnv: -12000, sustainModEnv: 0,
+          releaseModEnv: -12000, keynumToModEnvHold: 0, keynumToModEnvDecay: 0,
+          delayVolEnv: -12000, attackVolEnv: -12000, holdVolEnv: -12000,
+          decayVolEnv: -12000, sustainVolEnv: 0, releaseVolEnv: -12000,
+          keynumToVolEnvHold: 0, keynumToVolEnvDecay: 0, instrument: null,
+          reserved1: undefined, keyRange: null, velRange: null,
+          startloopAddrsCoarseOffset: 0, keynum: null, velocity: null,
+          initialAttenuation: 0, reserved2: undefined,
+          endloopAddrsCoarseOffset: 0, coarseTune: 0, fineTune: 0,
+          sampleID: null, sampleModes: 0, reserved3: undefined,
+          scaleTuning: 100, exclusiveClass: null, overridingRootKey: null,
+          unuded5: undefined, endOper: undefined
+        });
+      }
+      parse() {
+        const parser = new Riff(this.input, this.parserOption);
+        parser.parse();
+        if (parser.chunkList.length !== 1) throw new Error('wrong chunk length');
+        const chunk = parser.getChunk(0);
+        if (chunk === null) throw new Error('chunk not found');
+        this.parseRiffChunk(chunk);
+        this.input = null;
+      }
+      parseRiffChunk(chunk) {
+        const data = this.input;
+        let ip = chunk.offset;
+        if (chunk.type !== 'RIFF') throw new Error('invalid chunk type:' + chunk.type);
+        const signature = String.fromCharCode(data[ip++], data[ip++], data[ip++], data[ip++]);
+        if (signature !== 'sfbk') throw new Error('invalid signature:' + signature);
+        const parser = new Riff(data, { index: ip, length: chunk.size - 4 });
+        parser.parse();
+        if (parser.getNumberOfChunks() !== 3) throw new Error('invalid sfbk structure');
+        this.parseInfoList(parser.getChunk(0));
+        this.parseSdtaList(parser.getChunk(1));
+        this.parsePdtaList(parser.getChunk(2));
+      }
+      parseInfoList(chunk) {
+        const data = this.input;
+        let ip = chunk.offset;
+        if (chunk.type !== 'LIST') throw new Error('invalid chunk type:' + chunk.type);
+        const signature = String.fromCharCode(data[ip++], data[ip++], data[ip++], data[ip++]);
+        if (signature !== 'INFO') throw new Error('invalid signature:' + signature);
+        const parser = new Riff(data, { index: ip, length: chunk.size - 4 });
+        parser.parse();
+      }
+      parseSdtaList(chunk) {
+        const data = this.input;
+        let ip = chunk.offset;
+        if (chunk.type !== 'LIST') throw new Error('invalid chunk type:' + chunk.type);
+        const signature = String.fromCharCode(data[ip++], data[ip++], data[ip++], data[ip++]);
+        if (signature !== 'sdta') throw new Error('invalid signature:' + signature);
+        const parser = new Riff(data, { index: ip, length: chunk.size - 4 });
+        parser.parse();
+        if (parser.chunkList.length > 1) console.warn("Ignoring extra sample data chunks:", parser.chunkList);
+        else if (parser.chunkList.length < 1) throw new Error("No sample data chunk");
+        this.samplingData = parser.getChunk(0);
+      }
+      parsePdtaList(chunk) {
+        const data = this.input;
+        let ip = chunk.offset;
+        if (chunk.type !== 'LIST') throw new Error('invalid chunk type:' + chunk.type);
+        const signature = String.fromCharCode(data[ip++], data[ip++], data[ip++], data[ip++]);
+        if (signature !== 'pdta') throw new Error('invalid signature:' + signature);
+        const parser = new Riff(data, { index: ip, length: chunk.size - 4 });
+        parser.parse();
+        if (parser.getNumberOfChunks() !== 9) throw new Error('invalid pdta chunk');
+        this.parsePhdr(parser.getChunk(0));
+        this.parsePbag(parser.getChunk(1));
+        this.parsePmod(parser.getChunk(2));
+        this.parsePgen(parser.getChunk(3));
+        this.parseInst(parser.getChunk(4));
+        this.parseIbag(parser.getChunk(5));
+        this.parseImod(parser.getChunk(6));
+        this.parseIgen(parser.getChunk(7));
+        this.parseShdr(parser.getChunk(8));
+      }
+      parsePhdr(chunk) {
+        const data = this.input;
+        let ip = chunk.offset;
+        const presetHeader = (this.presetHeader = []);
+        const size = chunk.offset + chunk.size;
+        if (chunk.type !== 'phdr') throw new Error('invalid chunk type:' + chunk.type);
+        while (ip < size) {
+          presetHeader.push({
+            presetName: String.fromCharCode.apply(null, data.subarray(ip, (ip += 20))),
+            preset: data[ip++] | (data[ip++] << 8),
+            bank: data[ip++] | (data[ip++] << 8),
+            presetBagIndex: data[ip++] | (data[ip++] << 8),
+            library: (data[ip++] | (data[ip++] << 8) | (data[ip++] << 16) | (data[ip++] << 24)) >>> 0,
+            genre: (data[ip++] | (data[ip++] << 8) | (data[ip++] << 16) | (data[ip++] << 24)) >>> 0,
+            morphology: (data[ip++] | (data[ip++] << 8) | (data[ip++] << 16) | (data[ip++] << 24)) >>> 0,
+          });
+        }
+      }
+      parsePbag(chunk) {
+        const data = this.input;
+        let ip = chunk.offset;
+        const presetZone = (this.presetZone = []);
+        const size = chunk.offset + chunk.size;
+        if (chunk.type !== 'pbag') throw new Error('invalid chunk type:' + chunk.type);
+        while (ip < size) {
+          presetZone.push({
+            presetGeneratorIndex: data[ip++] | (data[ip++] << 8),
+            presetModulatorIndex: data[ip++] | (data[ip++] << 8),
+          });
+        }
+      }
+      parsePmod(chunk) {
+        if (chunk.type !== 'pmod') throw new Error('invalid chunk type:' + chunk.type);
+        this.presetZoneModulator = this.parseModulator(chunk);
+      }
+      parsePgen(chunk) {
+        if (chunk.type !== 'pgen') throw new Error('invalid chunk type:' + chunk.type);
+        this.presetZoneGenerator = this.parseGenerator(chunk);
+      }
+      parseInst(chunk) {
+        const data = this.input;
+        let ip = chunk.offset;
+        const instrument = (this.instrument = []);
+        const size = chunk.offset + chunk.size;
+        if (chunk.type !== 'inst') throw new Error('invalid chunk type:' + chunk.type);
+        while (ip < size) {
+          instrument.push({
+            instrumentName: String.fromCharCode.apply(null, data.subarray(ip, (ip += 20))),
+            instrumentBagIndex: data[ip++] | (data[ip++] << 8),
+          });
+        }
+      }
+      parseIbag(chunk) {
+        const data = this.input;
+        let ip = chunk.offset;
+        const instrumentZone = (this.instrumentZone = []);
+        const size = chunk.offset + chunk.size;
+        if (chunk.type !== 'ibag') throw new Error('invalid chunk type:' + chunk.type);
+        while (ip < size) {
+          instrumentZone.push({
+            instrumentGeneratorIndex: data[ip++] | (data[ip++] << 8),
+            instrumentModulatorIndex: data[ip++] | (data[ip++] << 8),
+          });
+        }
+      }
+      parseImod(chunk) {
+        if (chunk.type !== 'imod') throw new Error('invalid chunk type:' + chunk.type);
+        this.instrumentZoneModulator = this.parseModulator(chunk);
+      }
+      parseIgen(chunk) {
+        if (chunk.type !== 'igen') throw new Error('invalid chunk type:' + chunk.type);
+        this.instrumentZoneGenerator = this.parseGenerator(chunk);
+      }
+      parseShdr(chunk) {
+        const data = this.input;
+        let ip = chunk.offset;
+        const samples = (this.sample = []);
+        const sampleHeader = (this.sampleHeader = []);
+        const size = chunk.offset + chunk.size;
+        let sampleName, start, end, startLoop, endLoop, sampleRate, originalPitch, pitchCorrection, sampleLink, sampleType;
+        if (chunk.type !== 'shdr') throw new Error('invalid chunk type:' + chunk.type);
+        while (ip < size) {
+          sampleName = String.fromCharCode.apply(null, data.subarray(ip, (ip += 20)));
+          start = ((data[ip++] << 0) | (data[ip++] << 8) | (data[ip++] << 16) | (data[ip++] << 24)) >>> 0;
+          end = ((data[ip++] << 0) | (data[ip++] << 8) | (data[ip++] << 16) | (data[ip++] << 24)) >>> 0;
+          startLoop = ((data[ip++] << 0) | (data[ip++] << 8) | (data[ip++] << 16) | (data[ip++] << 24)) >>> 0;
+          endLoop = ((data[ip++] << 0) | (data[ip++] << 8) | (data[ip++] << 16) | (data[ip++] << 24)) >>> 0;
+          sampleRate = ((data[ip++] << 0) | (data[ip++] << 8) | (data[ip++] << 16) | (data[ip++] << 24)) >>> 0;
+          originalPitch = data[ip++];
+          pitchCorrection = (data[ip++] << 24) >> 24;
+          sampleLink = data[ip++] | (data[ip++] << 8);
+          sampleType = data[ip++] | (data[ip++] << 8);
+
+          let sample = new Int16Array(
+            new Uint8Array(
+              data.subarray(
+                this.samplingData.offset + start * 2,
+                this.samplingData.offset + end * 2
+              )
+            ).buffer
+          );
+
+          startLoop -= start;
+          endLoop -= start;
+
+          if (sampleRate > 0) {
+            const adjust = this.adjustSampleData(sample, sampleRate);
+            sample = adjust.sample;
+            sampleRate *= adjust.multiply;
+            startLoop *= adjust.multiply;
+            endLoop *= adjust.multiply;
+          }
+
+          samples.push(sample);
+
+          sampleHeader.push({
+            sampleName: sampleName.trim().replace(/\0/g, ""),
+            start: start,
+            end: end,
+            startLoop: startLoop,
+            endLoop: endLoop,
+            sampleRate: sampleRate,
+            originalPitch: originalPitch,
+            pitchCorrection: pitchCorrection,
+            sampleLink: sampleLink,
+            sampleType: sampleType
+          });
+        }
+      }
+      adjustSampleData(sample, sampleRate) {
+        let newSample, i, il, j, multiply = 1;
+        while (sampleRate < this.sampleRate) {
+          newSample = new Int16Array(sample.length * 2);
+          for (i = j = 0, il = sample.length; i < il; ++i) {
+            newSample[j++] = sample[i];
+            newSample[j++] = sample[i];
+          }
+          sample = newSample;
+          multiply *= 2;
+          sampleRate *= 2;
+        }
+        return { sample: sample, multiply: multiply };
+      }
+      parseModulator(chunk) {
+        const data = this.input;
+        let ip = chunk.offset;
+        const size = chunk.offset + chunk.size;
+        let code, key;
+        const output = [];
+        while (ip < size) {
+          ip += 2;
+          code = data[ip++] | (data[ip++] << 8);
+          key = this.GeneratorEnumeratorTable[code];
+          if (key === void 0) {
+            output.push({
+              type: key,
+              value: {
+                code: code,
+                amount: data[ip] | (((data[ip + 1] << 8) << 16) >> 16),
+                lo: data[ip++],
+                hi: data[ip++]
+              }
+            });
+          } else {
+            switch (key) {
+              case 'keyRange':
+              case 'velRange':
+              case 'keynum':
+              case 'velocity':
+                output.push({
+                  type: key,
+                  value: { amount: null, lo: data[ip++], hi: data[ip++] }
+                });
+                break;
+              default:
+                output.push({
+                  type: key,
+                  value: { amount: data[ip++] | (((data[ip++] << 8) << 16) >> 16) }
+                });
+                break;
+            }
+          }
+          ip += 2;
+          ip += 2;
+        }
+        return output;
+      }
+      parseGenerator(chunk) {
+        const data = this.input;
+        let ip = chunk.offset;
+        const size = chunk.offset + chunk.size;
+        let code, key;
+        const output = [];
+        while (ip < size) {
+          code = data[ip++] | (data[ip++] << 8);
+          key = this.GeneratorEnumeratorTable[code];
+          if (key === void 0) {
+            output.push({
+              type: key,
+              value: {
+                code: code,
+                amount: data[ip] | (((data[ip + 1] << 8) << 16) >> 16),
+                lo: data[ip++],
+                hi: data[ip++]
+              }
+            });
+            continue;
+          }
+          switch (key) {
+            case 'keynum':
+            case 'keyRange':
+            case 'velRange':
+            case 'velocity':
+              output.push({
+                type: key,
+                value: { amount: null, lo: data[ip++], hi: data[ip++] }
+              });
+              break;
+            default:
+              output.push({
+                type: key,
+                value: { amount: data[ip++] | (((data[ip++] << 8) << 16) >> 16) }
+              });
+              break;
+          }
+        }
+        return output;
+      }
+      createInstrument() {
+        const instrument = this.instrument;
+        const zone = this.instrumentZone;
+        const output = [];
+        let bagIndex, bagIndexEnd, zoneInfo, instrumentGenerator, instrumentModulator;
+        for (let i = 0, il = instrument.length; i < il; ++i) {
+          bagIndex = instrument[i].instrumentBagIndex;
+          bagIndexEnd = instrument[i + 1] ? instrument[i + 1].instrumentBagIndex : zone.length;
+          zoneInfo = [];
+          for (let j = bagIndex, jl = bagIndexEnd; j < jl; ++j) {
+            instrumentGenerator = this.createInstrumentGenerator_(zone, j);
+            instrumentModulator = this.createInstrumentModulator_(zone, j);
+            zoneInfo.push({
+              generator: instrumentGenerator.generator,
+              generatorSequence: instrumentGenerator.generatorInfo,
+              modulator: instrumentModulator.modulator,
+              modulatorSequence: instrumentModulator.modulatorInfo
+            });
+          }
+          output.push({ name: instrument[i].instrumentName, info: zoneInfo });
+        }
+        return output;
+      }
+      createPreset() {
+        const preset = this.presetHeader;
+        const zone = this.presetZone;
+        const output = [];
+        let bagIndex, bagIndexEnd, zoneInfo, instrument;
+        let presetGenerator, presetModulator;
+        for (let i = 0, il = preset.length; i < il; ++i) {
+          bagIndex = preset[i].presetBagIndex;
+          bagIndexEnd = preset[i + 1] ? preset[i + 1].presetBagIndex : zone.length;
+          zoneInfo = [];
+          for (let j = bagIndex, jl = bagIndexEnd; j < jl; ++j) {
+            presetGenerator = this.createPresetGenerator_(zone, j);
+            presetModulator = this.createPresetModulator_(zone, j);
+            zoneInfo.push({
+              generator: presetGenerator.generator,
+              generatorSequence: presetGenerator.generatorInfo,
+              modulator: presetModulator.modulator,
+              modulatorSequence: presetModulator.modulatorInfo
+            });
+            instrument =
+              presetGenerator.generator['instrument'] !== void 0
+                ? presetGenerator.generator['instrument'].amount
+                : presetModulator.modulator['instrument'] !== void 0
+                ? presetModulator.modulator['instrument'].amount
+                : null;
+          }
+          output.push({
+            name: preset[i].presetName.trim().replace(/\0/g, ""),
+            info: zoneInfo,
+            header: preset[i],
+            instrument: instrument
+          });
+        }
+        return output;
+      }
+      createInstrumentGenerator_(zone, index) {
+        const modgen = this.createBagModGen_(
+          zone,
+          zone[index].instrumentGeneratorIndex,
+          zone[index + 1] ? zone[index + 1].instrumentGeneratorIndex : this.instrumentZoneGenerator.length,
+          this.instrumentZoneGenerator
+        );
+        return { generator: modgen.modgen, generatorInfo: modgen.modgenInfo };
+      }
+      createInstrumentModulator_(zone, index) {
+        const modgen = this.createBagModGen_(
+          zone,
+          zone[index].presetModulatorIndex,
+          zone[index + 1] ? zone[index + 1].instrumentModulatorIndex : this.instrumentZoneModulator.length,
+          this.instrumentZoneModulator
+        );
+        return { modulator: modgen.modgen, modulatorInfo: modgen.modgenInfo };
+      }
+      createPresetGenerator_(zone, index) {
+        const modgen = this.createBagModGen_(
+          zone,
+          zone[index].presetGeneratorIndex,
+          zone[index + 1] ? zone[index + 1].presetGeneratorIndex : this.presetZoneGenerator.length,
+          this.presetZoneGenerator
+        );
+        return { generator: modgen.modgen, generatorInfo: modgen.modgenInfo };
+      }
+      createPresetModulator_(zone, index) {
+        const modgen = this.createBagModGen_(
+          zone,
+          zone[index].presetModulatorIndex,
+          zone[index + 1] ? zone[index + 1].presetModulatorIndex : this.presetZoneModulator.length,
+          this.presetZoneModulator
+        );
+        return { modulator: modgen.modgen, modulatorInfo: modgen.modgenInfo };
+      }
+      createBagModGen_(_zone, indexStart, indexEnd, zoneModGen) {
+        const modgenInfo = [];
+        const modgen = { unknown: [], keyRange: { amount: null, hi: 127, lo: 0 } };
+        let info;
+        for (let i = indexStart, il = indexEnd; i < il; ++i) {
+          info = zoneModGen[i];
+          modgenInfo.push(info);
+          if (info.type === 'unknown') modgen.unknown.push(info.value);
+          else modgen[info.type] = info.value;
+        }
+        return { modgen: modgen, modgenInfo: modgenInfo };
+      }
+    }
+
+    return Parser;
+    }));
+    // ——— END SF2 Parser ———
+  </script>
+
+  <!-- ====================
+       Inline WAV Encoder
+       ====================
+       A minimal function to convert a PCM Int16Array + sampleRate into a WAV Blob.
+       No external libraries.  
+  -->
+  <script>
+    function encodeWAV(samples, sampleRate) {
+      // samples: Int16Array (16-bit PCM, mono)
+      const buffer = new ArrayBuffer(44 + samples.length * 2);
+      const view = new DataView(buffer);
+
+      /* RIFF identifier */
+      writeString(view, 0, 'RIFF');
+      /* file length minus RIFF identifier length and length field itself (4 + 4) */
+      view.setUint32(4, 36 + samples.length * 2, true);
+      /* RIFF type */
+      writeString(view, 8, 'WAVE');
+      /* format chunk identifier */
+      writeString(view, 12, 'fmt ');
+      /* format chunk length */
+      view.setUint32(16, 16, true);
+      /* sample format (1 = PCM) */
+      view.setUint16(20, 1, true);
+      /* channel count (1 = mono) */
+      view.setUint16(22, 1, true);
+      /* sample rate */
+      view.setUint32(24, sampleRate, true);
+      /* byte rate (sampleRate * blockAlign) */
+      view.setUint32(28, sampleRate * 2, true);
+      /* block align (channels * bytesPerSample) */
+      view.setUint16(32, 2, true);
+      /* bits per sample */
+      view.setUint16(34, 16, true);
+      /* data chunk identifier */
+      writeString(view, 36, 'data');
+      /* data chunk length */
+      view.setUint32(40, samples.length * 2, true);
+      // write actual PCM samples
+      let offset = 44;
+      for (let i = 0; i < samples.length; i++, offset += 2) {
+        view.setInt16(offset, samples[i], true);
+      }
+      return new Blob([view], { type: 'audio/wav' });
+
+      function writeString(dataview, offset, str) {
+        for (let i = 0; i < str.length; i++) {
+          dataview.setUint8(offset + i, str.charCodeAt(i));
+        }
+      }
+    }
+  </script>
+
+  <!-- ====================
+       Main Logic
+       ====================
+  -->
+  <script>
+    (function() {
+      const dropZone = document.getElementById('drop-zone');
+      const fileInput = document.getElementById('file-input');
+      const fileButton = document.getElementById('file-button');
+      const logEl = document.getElementById('log');
+
+      // Utility: log messages
+      function log(msg) {
+        logEl.innerHTML += msg + '<br/>';
+        logEl.scrollTop = logEl.scrollHeight;
+      }
+
+      // Prevent default drag behaviors
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(evtName => {
+        dropZone.addEventListener(evtName, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }, false);
+      });
+
+      // Highlight on dragover
+      ['dragenter', 'dragover'].forEach(evtName => {
+        dropZone.addEventListener(evtName, () => dropZone.classList.add('dragover'), false);
+      });
+      ['dragleave', 'drop'].forEach(evtName => {
+        dropZone.addEventListener(evtName, () => dropZone.classList.remove('dragover'), false);
+      });
+
+      dropZone.addEventListener('drop', handleDrop, false);
+      fileButton.addEventListener('click', () => fileInput.click());
+      fileInput.addEventListener('change', () => {
+        if (fileInput.files.length) handleFile(fileInput.files[0]);
+      });
+
+      function handleDrop(e) {
+        const dt = e.dataTransfer;
+        if (dt.files && dt.files.length) {
+          handleFile(dt.files[0]);
+        }
+      }
+
+      async function handleFile(file) {
+        log(`Loading “${file.name}”…`);
+        if (!/\.(sf2|SF2)$/i.test(file.name)) {
+          log('❌ Only .sf2 files are supported in this build.');
+          return;
+        }
+        try {
+          const arrayBuffer = await file.arrayBuffer();
+          const uint8 = new Uint8Array(arrayBuffer);
+          const parser = new SoundFont(uint8, { sampleRate: 44100 });
+          parser.parse();
+          const presets = parser.createPreset(); // Array of { name, info, header, instrument }
+          if (!presets.length) {
+            log('❌ No presets found in SF2.');
+            return;
+          }
+          // For simplicity, take the first preset only
+          const sf2BaseName = sanitizeFilename(file.name.replace(/\.[^/.]+$/, ''));
+          log(`Using SF2 base name: ${sf2BaseName}`);
+
+          // Gather all sampleHeaders & sampleData
+          const sampleHeaders = parser.sampleHeader; // Array of { sampleName, start, end, startLoop, endLoop, sampleRate, ... }
+          const rawSamples = parser.sample; // Array of Int16Array
+          const outSamples = []; // { name, wavBlob }
+
+          for (let i = 0; i < sampleHeaders.length; i++) {
+            const hdr = sampleHeaders[i];
+            const pcm = rawSamples[i];       // Int16Array
+            const sr = hdr.sampleRate;       // sample rate (e.g. 44100)
+            const smpName = sanitizeFilename(hdr.sampleName || (`sample${i}`));
+            log(`→ Encoding sample “${smpName}” (len=${pcm.length}, rate=${sr})`);
+            const wavBlob = encodeWAV(pcm, sr);
+            outSamples.push({ name: smpName, blob: wavBlob });
+          }
+
+          // If checkbox is checked, bundle all raw WAVs for verification
+          const exportWavsCheckbox = document.getElementById('export-wavs-checkbox');
+          if (exportWavsCheckbox && exportWavsCheckbox.checked) {
+            const wavFiles = {};
+            const wavFolder = 'WAVs/';
+            for (const s of outSamples) {
+              const wavName = s.name + '.wav';
+              const arr = new Uint8Array(await s.blob.arrayBuffer());
+              wavFiles[wavFolder + wavName] = arr;
+            }
+            const wavsZip = fflate.zipSync(wavFiles);
+            const wavsBlob = new Blob([wavsZip], { type: 'application/zip' });
+            const wavsDownloadName = `${sf2BaseName}_WAVs.zip`;
+            triggerDownload(wavsBlob, wavsDownloadName);
+            log(`✅ Raw WAVs ZIP: ${wavsDownloadName}`);
+            return;
+          }
+
+          // Generate the JSON “Preset.ablpreset”
+          const presetJSON = generatePresetJSON(sf2BaseName, outSamples.map(s => s.name));
+          const presetJSONString = JSON.stringify(presetJSON, null, 2);
+          const presetBlob = new Blob([presetJSONString], { type: 'application/json' });
+
+          // Build a map of files for all presets and samples, to zip as a single archive
+          const files = {};
+          for (const s of outSamples) {
+            // Prepare sample file
+            const sampleFilename = s.name + '.wav';
+            const sampleUint8Array = new Uint8Array(await s.blob.arrayBuffer());
+            files[`${sf2BaseName}/Samples/${sf2BaseName}/${sampleFilename}`] = sampleUint8Array;
+
+            // Prepare preset JSON file
+            const presetFilename = `${sf2BaseName}_${s.name}.ablpreset`;
+            // For sampleUri, use URI-escaped path:
+            const sampleUri = `ableton:/user-library/Samples/${encodeURIComponent(sf2BaseName)}/${encodeURIComponent(s.name)}.wav`;
+            const presetJSON = generatePresetJSON(`${sf2BaseName}_${s.name}`, sampleUri);
+            files[`${sf2BaseName}/Presets/${sf2BaseName}/${presetFilename}`] =
+              new TextEncoder().encode(JSON.stringify(presetJSON, null, 2));
+          }
+
+          // Create the single ZIP containing everything
+          const masterZipped = fflate.zipSync(files);
+          const masterBlob = new Blob([masterZipped], { type: 'application/zip' });
+          const masterName = `${sf2BaseName}_all.zip`;
+          triggerDownload(masterBlob, masterName);
+          log(`✅ Done! Download: ${masterName}`);
+        } catch (err) {
+          console.error(err);
+          log('❌ Error: ' + err.message);
+        }
+      }
+
+      function sanitizeFilename(name) {
+        return name.replace(/[\/\\?%*:|"<>]/g, '_').trim() || 'Untitled';
+      }
+
+      function generatePresetJSON(presetName, sampleUri) {
+        // Use default template with provided sampleUri
+        return {
+          "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+          "kind": "instrumentRack",
+          "name": presetName,
+          "lockId": 1001,
+          "lockSeal": 1472017714,
+          "parameters": {
+            "Enabled": true,
+            "Macro0": 0.0,
+            "Macro1": 0.0,
+            "Macro2": 0.0,
+            "Macro3": 0.0,
+            "Macro4": 0.0,
+            "Macro5": 0.0,
+            "Macro6": 0.0,
+            "Macro7": 0.0
+          },
+          "chains": [
+            {
+              "name": "",
+              "color": 0,
+              "devices": [
+                {
+                  "presetUri": null,
+                  "kind": "melodicSampler",
+                  "name": "",
+                  "parameters": {
+                    "Enabled": true,
+                    "Voice_AmplitudeEnvelope_Attack": 0.00010000000149011613,
+                    "Voice_AmplitudeEnvelope_Decay": 60.0,
+                    "Voice_AmplitudeEnvelope_Release": 0.05,
+                    "Voice_AmplitudeEnvelope_Sustain": 0.25118863582611084,
+                    "Voice_AmplitudeEnvelope_SustainMode": "Gate",
+                    "Voice_Detune": 0.0,
+                    "Voice_FilterEnvelope_Attack": 0.00010000000149011613,
+                    "Voice_FilterEnvelope_Decay": 0.6,
+                    "Voice_FilterEnvelope_On": true,
+                    "Voice_FilterEnvelope_Release": 0.05,
+                    "Voice_FilterEnvelope_Sustain": 0.0,
+                    "Voice_Filter_Frequency": 22000.0,
+                    "Voice_Filter_FrequencyModulationAmounts_EnvelopeAmount": 0,
+                    "Voice_Filter_FrequencyModulationAmounts_LfoAmount": 0.0,
+                    "Voice_Filter_On": true,
+                    "Voice_Filter_Resonance": 0.0,
+                    "Voice_Filter_Slope": "12",
+                    "Voice_Filter_Type": "Lowpass",
+                    "Voice_Gain": 1.0,
+                    "Voice_Lfo_On": true,
+                    "Voice_Lfo_Rate": 1.0,
+                    "Voice_Lfo_Type": "Sine",
+                    "Voice_PlaybackLength": 1.0,
+                    "Voice_PlaybackStart": 0.0,
+                    "Voice_Transpose": 0,
+                    "Voice_VelocityToVolume": 0.3499999940395355,
+                    "Volume": -13.800000190734863
+                  },
+                  "deviceData": {
+                    "sampleUri": sampleUri
+                  }
+                },
+                {
+                  "presetUri": null,
+                  "kind": "delay",
+                  "name": "Delay",
+                  "parameters": {
+                    "DelayLine_CompatibilityMode": "D",
+                    "DelayLine_Link": true,
+                    "DelayLine_OffsetL": 0.002081066370010376,
+                    "DelayLine_OffsetR": 0.002081066370010376,
+                    "DelayLine_PingPong": false,
+                    "DelayLine_PingPongDelayTimeL": 1.0,
+                    "DelayLine_PingPongDelayTimeR": 1.0,
+                    "DelayLine_SimpleDelayTimeL": 100.0,
+                    "DelayLine_SimpleDelayTimeR": 100.0,
+                    "DelayLine_SmoothingMode": "Repitch",
+                    "DelayLine_SyncL": true,
+                    "DelayLine_SyncR": true,
+                    "DelayLine_SyncedSixteenthL": "3",
+                    "DelayLine_SyncedSixteenthR": "3",
+                    "DelayLine_TimeL": 0.005981674883514643,
+                    "DelayLine_TimeR": 0.005440727341920137,
+                    "DryWet": 0.0,
+                    "DryWetMode": "Linear",
+                    "EcoProcessing": true,
+                    "Enabled": true,
+                    "Feedback": 0.5759842395782471,
+                    "Filter_Bandwidth": 9.0,
+                    "Filter_Frequency": 1002.1611328125,
+                    "Filter_On": true,
+                    "Freeze": false,
+                    "Modulation_AmountFilter": 0.0,
+                    "Modulation_AmountTime": 0.0,
+                    "Modulation_Frequency": 2.0
+                  },
+                  "deviceData": {}
+                },
+                {
+                  "presetUri": null,
+                  "kind": "reverb",
+                  "name": "",
+                  "parameters": {
+                    "AllPassGain": 0.7849444150924683,
+                    "AllPassSize": 1.0,
+                    "BandFreq": 844.8901977539063,
+                    "BandHighOn": true,
+                    "BandLowOn": true,
+                    "BandWidth": 7.229166507720947,
+                    "ChorusOn": false,
+                    "CutOn": false,
+                    "DecayTime": 12458.9150390625,
+                    "DiffuseDelay": 0.5,
+                    "EarlyReflectModDepth": 2.0,
+                    "EarlyReflectModFreq": 0.16887205839157104,
+                    "Enabled": true,
+                    "FlatOn": false,
+                    "FreezeOn": false,
+                    "HighFilterType": "Shelf",
+                    "MixDiffuse": 1.2989338636398315,
+                    "MixDirect": 0.0,
+                    "MixReflect": 1.1751354932785034,
+                    "PreDelay": 23.870241165161133,
+                    "RoomSize": 442.7644958496094,
+                    "RoomType": "SuperEco",
+                    "ShelfHiFreq": 4500.00146484375,
+                    "ShelfHiGain": 1.0,
+                    "ShelfHighOn": true,
+                    "ShelfLoFreq": 90.00000762939453,
+                    "ShelfLoGain": 1.0,
+                    "ShelfLowOn": true,
+                    "SizeModDepth": 0.019999999552965164,
+                    "SizeModFreq": 0.019999999552965164,
+                    "SizeSmoothing": "Fast",
+                    "SpinOn": false,
+                    "StereoSeparation": 120.0
+                  },
+                  "deviceData": {}
+                }
+              ],
+              "mixer": {
+                "pan": 0.0,
+                "solo-cue": false,
+                "speakerOn": true,
+                "volume": 0.0,
+                "sends": []
+              }
+            }
+          ]
+        };
+      }
+
+      function triggerDownload(blob, filename) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }, 100);
+      }
+    })();
+  </script>
+</body>
+</html>
