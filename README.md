@@ -129,9 +129,11 @@ ssh ableton@move.local
 cd /data/UserData/extending-move
 cp -r /opt/move/HttpRoot/fonts /data/UserData/extending-move/static/
 python3 move-webserver.py
+
+python3 flask_app.py  # new Flask/Jinja/Dash server on port 9090
 ```
 
-The server will be accessible at http://move.local:909
+The server will be accessible at http://move.local:909 (or 9090 for the Flask version)
 
 ## Utility Scripts
 
