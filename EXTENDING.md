@@ -19,19 +19,17 @@ This guide explains how to add new features to the Move webserver. Move follows 
 extending-move/
 ├── move-webserver.py      # Main webserver with routing and request handling
 ├── core/                  # Core functionality implementations
-│   ├── chord_handler.py         # Chord generation and pitch-shifting
 │   ├── slice_handler.py         # Sample slicing and kit creation
 │   ├── refresh_handler.py       # Library refresh via D-Bus
 │   ├── reverse_handler.py       # WAV file reversal
 │   ├── time_stretch_handler.py      # Time-stretching (with WSOLA/Phase-vocoder & repitch options)
 │   ├── restore_handler.py       # Move Set restoration
-│   ├── drum_rack_inspector.py   # Preset inspection and modification
+│   ├── drum_rack_inspector_handler.py   # Preset inspection and modification
 │   ├── synth_preset_inspector_handler.py  # Synth preset macro management
 │   ├── set_management_handler.py    # MIDI set generation and management
 │   └── midi_pattern_generator.py    # Custom MIDI pattern creation utilities
 ├── handlers/              # Web request handlers
 │   ├── base_handler.py                    # Base handler with shared functionality
-│   ├── chord_handler_class.py             # Chord generation interface
 │   ├── slice_handler_class.py             # Slice kit creation interface
 │   ├── refresh_handler_class.py           # Library refresh interface
 │   ├── reverse_handler_class.py           # WAV reversal interface
