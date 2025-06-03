@@ -637,10 +637,8 @@ def scan_for_synth_presets():
             - presets: List of dicts with preset info (name, path, and type)
     """
     try:
-        presets_dir = "/data/UserData/UserLibrary/Track Presets"
-        # For local development, check if examples directory exists
-        if not os.path.exists(presets_dir) and os.path.exists("examples/Track Presets"):
-            presets_dir = "examples/Track Presets"
+        from core.config import TRACK_PRESET_DIR
+        presets_dir = TRACK_PRESET_DIR
             
         synth_presets = []
 

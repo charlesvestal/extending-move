@@ -478,14 +478,17 @@ function initChordTab() {
     const samplesForm = new FormData();
     samplesForm.append("mode", "zip");
     samplesForm.append("file", samplesZipBlob);
-    samplesForm.append("destination", "/data/UserData/UserLibrary/Samples/Preset Samples");
+    const localDev = ["localhost", "127.0.0.1"].includes(location.hostname);
+    const samplesDest = localDev ? "examples/Samples/Preset Samples" : "/data/UserData/UserLibrary/Samples/Preset Samples";
+    samplesForm.append("destination", samplesDest);
     await fetch("/place-files", { method: "POST", body: samplesForm });
     
     // Place the preset file via the File Placer API (place mode)
     const presetForm = new FormData();
     presetForm.append("mode", "place");
     presetForm.append("file", new Blob([presetJson], { type: "application/json" }), presetName + ".ablpreset");
-    presetForm.append("destination", "/data/UserData/UserLibrary/Track Presets");
+    const presetDest = localDev ? "examples/Track Presets" : "/data/UserData/UserLibrary/Track Presets";
+    presetForm.append("destination", presetDest);
     await fetch("/place-files", { method: "POST", body: presetForm });
     
     // Refresh the library after placement.

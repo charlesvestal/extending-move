@@ -473,8 +473,9 @@ def process_kit(input_wav, preset_name=None, regions=None, num_slices=None, keep
 
         elif mode == "auto_place":
             # Set up paths for direct placement
-            samples_target_dir = "/data/UserData/UserLibrary/Samples/Preset Samples"
-            presets_target_dir = "/data/UserData/UserLibrary/Track Presets"
+            from core.config import SAMPLES_PRESET_DIR, TRACK_PRESET_DIR
+            samples_target_dir = SAMPLES_PRESET_DIR
+            presets_target_dir = TRACK_PRESET_DIR
             preset_output_file = os.path.join(presets_target_dir, f"{preset}.ablpreset")
 
             # Create sliced file via slice_wav (preserves extension)

@@ -83,7 +83,8 @@ def generate_pattern_set(
         song['tempo'] = tempo
         
         # Save the modified set
-        output_dir = "/data/UserData/UserLibrary/Sets"
+        from core.config import MSETS_DIRECTORY
+        output_dir = MSETS_DIRECTORY
         os.makedirs(output_dir, exist_ok=True)
         output_path = os.path.join(output_dir, set_name)
         if not output_path.endswith('.abl'):

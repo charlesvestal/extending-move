@@ -4,11 +4,13 @@ import copy
 import mido
 from typing import Dict, List, Any, Optional
 
+from core.config import MSETS_DIRECTORY
+
 def create_set(set_name):
     """
     Create a blank set file in the UserLibrary/Sets directory.
     """
-    directory = "/data/UserData/UserLibrary/Sets"
+    directory = MSETS_DIRECTORY
     os.makedirs(directory, exist_ok=True)
     path = os.path.join(directory, set_name)
     try:
@@ -78,7 +80,7 @@ def generate_c_major_chord_example(set_name: str, tempo: float = 120.0) -> Dict[
         song['tempo'] = tempo
         
         # Save the modified set
-        output_dir = "/data/UserData/UserLibrary/Sets"
+        output_dir = MSETS_DIRECTORY
         os.makedirs(output_dir, exist_ok=True)
         output_path = os.path.join(output_dir, set_name)
         if not output_path.endswith('.abl'):
@@ -220,7 +222,7 @@ def generate_midi_set_from_file(set_name: str, midi_file_path: str, tempo: float
         song['tempo'] = tempo
         
         # Save the modified set
-        output_dir = "/data/UserData/UserLibrary/Sets"
+        output_dir = MSETS_DIRECTORY
         os.makedirs(output_dir, exist_ok=True)
         output_path = os.path.join(output_dir, set_name)
         if not output_path.endswith('.abl'):
@@ -337,7 +339,7 @@ def generate_drum_set_from_file(set_name: str, midi_file_path: str, tempo: float
 
         # Update tempo and save
         song['tempo'] = tempo
-        output_dir = "/data/UserData/UserLibrary/Sets"
+        output_dir = MSETS_DIRECTORY
         os.makedirs(output_dir, exist_ok=True)
         output_path = os.path.join(output_dir, set_name)
         if not output_path.endswith('.abl'):

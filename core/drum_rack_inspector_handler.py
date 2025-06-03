@@ -3,6 +3,8 @@ import os
 import json
 import urllib.parse
 
+from core.config import MSET_SAMPLE_PATH, TRACK_PRESET_DIR
+
 def update_drum_cell_sample(preset_path, pad_number, new_sample_path, new_playback_start=None, new_playback_length=None):
     """
     Update the sample URI for a specific drum cell in a preset.
@@ -29,9 +31,9 @@ def update_drum_cell_sample(preset_path, pad_number, new_sample_path, new_playba
                         # Convert system path to Ableton URI format
                         # Encode the new sample path
                         encoded_path = urllib.parse.quote(new_sample_path)
-                        
-                        if encoded_path.startswith('/data/UserData/UserLibrary/Samples/'):
-                            uri = encoded_path.replace('/data/UserData/UserLibrary/Samples/', 'ableton:/user-library/Samples/')
+
+                        if encoded_path.startswith(MSET_SAMPLE_PATH + '/'):
+                            uri = encoded_path.replace(MSET_SAMPLE_PATH + '/', 'ableton:/user-library/Samples/')
                         else:
                             uri = 'file://' + encoded_path
                             
@@ -103,8 +105,8 @@ def get_drum_cell_samples(preset_path):
                     if sample_uri:
                         # Handle Ableton URI format
                         if sample_uri.startswith('ableton:/user-library/Samples/'):
-                            # Convert ableton:/user-library/Samples/ to /data/UserData/UserLibrary/Samples/
-                            sample_path = sample_uri.replace('ableton:/user-library/Samples/', '/data/UserData/UserLibrary/Samples/')
+                            # Convert ableton:/user-library/Samples/ to local sample path
+                            sample_path = sample_uri.replace('ableton:/user-library/Samples/', MSET_SAMPLE_PATH + '/')
                         else:
                             # Fallback to original file:// handling
                             sample_path = sample_uri.split('file://')[-1]
@@ -170,7 +172,7 @@ def scan_for_drum_rack_presets():
             - presets: List of dicts with preset info (name and path)
     """
     try:
-        presets_dir = "/data/UserData/UserLibrary/Track Presets"
+        presets_dir = TRACK_PRESET_DIR
         drum_rack_presets = []
 
         # Check if directory exists

@@ -16,6 +16,7 @@ from handlers.restore_handler_class import RestoreHandler
 from handlers.file_placer_handler_class import FilePlacerHandler
 from handlers.synth_preset_inspector_handler_class import SynthPresetInspectorHandler
 from handlers.set_management_handler_class import SetManagementHandler
+from core.config import SAMPLES_PRESET_DIR
 
 # Define the PID file location
 PID_FILE = os.path.expanduser('~/extending-move/move-webserver.pid')
@@ -361,7 +362,7 @@ class MyServer(BaseHTTPRequestHandler):
             relative_path = unquote(relative_path)
             
             # Construct the full path to the samples directory
-            base_samples_dir = '/data/UserData/UserLibrary/Samples/Preset Samples'
+            base_samples_dir = SAMPLES_PRESET_DIR
             full_path = os.path.join(base_samples_dir, relative_path)
             
             # Security check: ensure the requested path is within the samples directory
