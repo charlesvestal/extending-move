@@ -75,14 +75,14 @@ These tools are third-party and require SSH access. That means:
 There is a convenience script to set up an SSH key, install the tools, and set the tools' webserver to autostart.
 
 Simply double-click `utility-scripts/setup-ssh-and-install-on-move.command`
-Everything that it does can be found in `utility-scritps/setup-ssh-and-install-on-move.sh`
+Everything that it does can be found in `utility-scripts/setup-ssh-and-install-on-move.sh`
 
 Alternatively, you can install just the tools, or see the "Manual Installation" section below to do it all yourself.
 
 #### Install the tools ONLY
 
 Simply double-click `utility-scripts/install-on-move.command`
-Everything that it does can be found in `utility-scritps/install-on-move.sh`
+Everything that it does can be found in `utility-scripts/install-on-move.sh`
 
 #### Updating
 
