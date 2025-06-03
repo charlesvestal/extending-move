@@ -243,7 +243,7 @@ class MyServer(BaseHTTPRequestHandler):
 
     @route_handler.get("/chord", "chord.html")
     def handle_chord_get(self):
-        """Simple GET handler for chord page; all processing is client-side."""
+        """Serve chord.html with no server-side chord processing."""
         return {}
 
     @route_handler.get("/restore", "restore.html")
@@ -269,11 +269,6 @@ class MyServer(BaseHTTPRequestHandler):
     @route_handler.get("/", "index.html")
     def handle_index(self):
         """Handle GET request for index page."""
-        return {}
-
-    @route_handler.get("/chord", "chord.html")
-    def handle_chord_get(self):
-        """Serve chord.html with no server-side chord processing."""
         return {}
 
     @route_handler.get("/slice", "slice.html")
@@ -657,6 +652,3 @@ if __name__ == "__main__":
     webServer.server_close()
     print("Server stopped.")
 
-    @route_handler.post("/detect-transients")
-    def handle_detect_transients(self, form):
-        return self.slice_handler.handle_detect_transients(form)
