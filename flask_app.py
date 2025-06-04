@@ -5,7 +5,7 @@ This example shows how parts of ``move-webserver.py`` can be served
 via Flask.  Only the reverse, restore, and slice tools are
 implemented to demonstrate the approach.
 """
-from flask import Flask, render_template, request, send_file
+from flask import Flask, render_template, request, send_file, jsonify
 import os
 from handlers.reverse_handler_class import ReverseHandler
 from handlers.restore_handler_class import RestoreHandler
@@ -108,6 +108,18 @@ def slice_tool():
         message=message,
         success=success,
         active_tab="slice",
+    )
+
+
+@app.route("/detect-transients", methods=["POST"])
+def detect_transients_route():
+    form_data = request.form.to_dict()
+    if 'file' in request.files:
+        form_data['file'] = FileField(request.files['file'])
+    form = SimpleForm(form_data)
+    resp = slice_handler.handle_detect_transients(form)
+    return resp["content"], resp.get("status", 200), resp.get(
+        "headers", [("Content-Type", "application/json")]
     )
 
 if __name__ == "__main__":
