@@ -2,12 +2,17 @@
 
 **Integration Reminders:**
 - If you use `cgi.FieldStorage` in your handler, ensure you `import cgi` at the top of your file.
-- When adding multiple forms in a single tab, you must customize the form handler logic in `static/main.js` to attach event listeners to all forms in that tab.
+- The legacy server relies on JavaScript form handlers in `static/main.js`. If you add multiple forms per tab you must update that script accordingly.  The new Flask server uses standard HTML forms so no extra JavaScript is required.
 - Tab names/IDs must match exactly between your HTML (`index.html`), JavaScript (`static/main.js`), and route definitions (in your handler classes and webserver routing).
 
 # Extending Move
 
-This guide explains how to add new features to the Move webserver. Move follows a modular structure, with each feature comprising three components:
+This guide explains how to add new features to the Move webserver.  Two server implementations exist:
+
+- **move-webserver.py** – the original HTTP server using custom handler classes and AJAX.
+- **flask_app.py** – a simplified Flask/Jinja example that relies on standard HTML forms.
+
+Move follows a modular structure, with each feature comprising three components:
 
 - **Core Logic**: Business logic (e.g., audio processing) in `core/`
 - **Web Handler**: HTTP request handling in `handlers/`
@@ -17,7 +22,8 @@ This guide explains how to add new features to the Move webserver. Move follows 
 
 ```
 extending-move/
-├── move-webserver.py      # Main webserver with routing and request handling
+├── move-webserver.py      # Legacy HTTP server with handler classes
+├── flask_app.py           # New Flask/Jinja/Dash server example
 ├── core/                  # Core functionality implementations
 │   ├── slice_handler.py         # Sample slicing and kit creation
 │   ├── refresh_handler.py       # Library refresh via D-Bus
@@ -38,7 +44,7 @@ extending-move/
 │   ├── synth_preset_inspector_handler_class.py  # Synth macro management interface
 │   ├── set_management_handler_class.py     # MIDI set generation and upload interface
 │   └── file_placer_handler_class.py       # File upload and placement
-├── templates/             # HTML templates and UI components
+├── templates/             # HTML templates for the legacy server
 │   ├── index.html                # Main navigation with tab system
 │   ├── chord.html               # Chord generation interface
 │   ├── slice.html               # Waveform slicing interface
@@ -48,6 +54,7 @@ extending-move/
 │   ├── drum_rack_inspector.html # Grid layout with actions
 │   ├── synth_preset_inspector.html # Synth macro management interface
 │   └── set_management.html      # MIDI file upload and set generation interface
+├── templates_jinja/       # Jinja templates used by the Flask app
 ├── examples/              # Example files for testing and development
 │   ├── Track Presets/          # Sample presets organized by instrument type
 │   │   ├── Drift/              # Drift instrument presets
@@ -62,12 +69,13 @@ extending-move/
     ├── install-on-move.sh     # Initial setup script
     ├── update-on-move.sh      # Update deployment script
     └── restart-webserver.sh   # Server management script
+├── tests/                 # pytest unit tests for the Flask app
 ```
 
 Each feature should follow this structure precisely:
 - Core logic: `core/feature_name_handler.py`
 - Handler class: `handlers/feature_name_handler_class.py`
-- UI template: `templates/feature_name.html`
+- UI template: `templates/feature_name.html` (or `templates_jinja/feature_name.html` for Flask)
 
 ## Core Components
 
