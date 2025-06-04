@@ -4,6 +4,15 @@ from handlers.base_handler import BaseHandler
 from core.reverse_handler import get_wav_files, reverse_wav_file
 
 class ReverseHandler(BaseHandler):
+    def handle_get(self):
+        """Provide options and an informational message for the reverse page."""
+        wav_files = get_wav_files("/data/UserData/UserLibrary/Samples")
+        return {
+            "wav_files": wav_files,
+            "message": "Select a WAV file to reverse",
+            "message_type": "info",
+        }
+
     def handle_post(self, form: cgi.FieldStorage):
         """Handle POST request for WAV file reversal."""
         # Validate action

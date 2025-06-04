@@ -25,7 +25,9 @@ class SetManagementHandler(BaseHandler):
         pad_color_options = ''.join(f'<option value="{i}">{i}</option>' for i in range(1,27))
         return {
             'pad_options': pad_options,
-            'pad_color_options': pad_color_options
+            'pad_color_options': pad_color_options,
+            'message': 'Upload a MIDI file to generate a set',
+            'message_type': 'info'
         }
 
     def handle_post(self, form):

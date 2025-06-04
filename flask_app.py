@@ -60,6 +60,9 @@ def reverse():
         message = result.get("message")
         message_type = result.get("message_type")
         success = message_type != "error"
+    else:
+        message = "Select a WAV file to reverse"
+        message_type = "info"
     wav_list = get_wav_files("/data/UserData/UserLibrary/Samples")
     return render_template(
         "reverse.html",
@@ -146,6 +149,10 @@ def set_management():
         message_type = result.get("message_type")
         success = message_type != "error"
         pad_options = result.get("pad_options", pad_options)
+    else:
+        message = context.get("message")
+        message_type = context.get("message_type")
+        success = message_type != "error" if message_type else False
     return render_template(
         "set_management.html",
         message=message,

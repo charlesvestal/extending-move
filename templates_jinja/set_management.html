@@ -2,7 +2,7 @@
 {% block content %}
 <h2>MIDI Upload</h2>
 {% if message %}
-<div class="{{ message_type if message_type else ('success' if success else 'error') }}">{{ message }}</div>
+  <p class="{{ message_type if message_type else ('success' if success else 'error') }}">{{ message }}</p>
 {% endif %}
 <div class="set-management-container">
     <div class="midi-upload-section">
@@ -108,20 +108,6 @@
 }
 .generate-button:hover {
     background: #218838;
-}
-.success {
-    padding: 15px;
-    background: #d4edda;
-    border: 1px solid #c3e6cb;
-    border-radius: 4px;
-    color: #155724;
-}
-.error {
-    padding: 15px;
-    background: #f8d7da;
-    border: 1px solid #f5c6cb;
-    border-radius: 4px;
-    color: #721c24;
 }
 </style>
 {% endblock %}
