@@ -57,6 +57,43 @@ def test_slice_post(client, monkeypatch):
     assert resp.status_code == 200
     assert b'sliced' in resp.data
 
+def test_synth_macros_get(client, monkeypatch):
+    def fake_get():
+        return {
+            'message': 'choose',
+            'message_type': 'info',
+            'options': '<option value="p">p</option>',
+            'macros_html': '',
+            'selected_preset': None,
+        }
+    monkeypatch.setattr(flask_app.synth_handler, 'handle_get', fake_get)
+    resp = client.get('/synth-macros')
+    assert resp.status_code == 200
+    assert b'choose' in resp.data
+
+def test_synth_macros_post(client, monkeypatch):
+    def fake_post(form):
+        return {
+            'message': 'saved',
+            'message_type': 'success',
+            'options': '<option value="x" selected>Sub/preset (Drift)</option>',
+            'macros_html': '<p>done</p>',
+            'selected_preset': 'x',
+        }
+    monkeypatch.setattr(flask_app.synth_handler, 'handle_post', fake_post)
+    resp = client.post('/synth-macros', data={'action': 'select_preset'})
+    assert resp.status_code == 200
+    assert b'saved' in resp.data
+    assert b'name="preset_select" value="x"' in resp.data
+    assert b'id="preset_select"' in resp.data and b'disabled' in resp.data
+    assert b'Choose Another Preset' in resp.data
+
+def test_chord_get(client):
+    resp = client.get('/chord')
+    assert resp.status_code == 200
+    assert b'Chord Kit Generator' in resp.data
+    assert b'id="chordList"' in resp.data
+
 def test_detect_transients(client, monkeypatch):
     def fake_detect(form):
         return {'content': '{"success": true}', 'status': 200, 'headers': [('Content-Type', 'application/json')]}
@@ -100,3 +137,22 @@ def test_set_management_post(client, monkeypatch):
     resp = client.post('/set-management', data=data, content_type='multipart/form-data')
     assert resp.status_code == 200
     assert b'ok' in resp.data
+
+def test_place_files_post(client, monkeypatch):
+    def fake_place(form):
+        return {'message': 'placed', 'message_type': 'success'}
+    monkeypatch.setattr(flask_app.file_placer_handler, 'handle_post', fake_place)
+    f = (io.BytesIO(b'data'), 'sample.zip')
+    data = {'mode': 'zip', 'file': f, 'destination': '/tmp'}
+    resp = client.post('/place-files', data=data, content_type='multipart/form-data')
+    assert resp.status_code == 200
+    assert resp.json['message'] == 'placed'
+
+
+def test_refresh_post(client, monkeypatch):
+    def fake_refresh(form):
+        return {'message': 'refreshed', 'message_type': 'success'}
+    monkeypatch.setattr(flask_app.refresh_handler, 'handle_post', fake_refresh)
+    resp = client.post('/refresh', data={'action': 'refresh_library'})
+    assert resp.status_code == 200
+    assert resp.json['message'] == 'refreshed'
