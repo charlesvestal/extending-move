@@ -115,11 +115,11 @@ async function handleRestoreSubmit(form) {
 
 function attachFormHandler(tabName) {
     console.log("Attaching form handlers for tab:", tabName);
-    // Special case: intercept both Create and Generate forms in Set Management tab
-    if (tabName === 'SetManagement') {
+    // Special case: intercept both Create and Generate forms in MIDI Upload tab
+    if (tabName === 'MidiUpload') {
       const container = document.getElementById(tabName);
       if (container) {
-        // Attach to all forms in the SetManagement container
+        // Attach to all forms in the MidiUpload container
         container.querySelectorAll('form').forEach(form => {
           form.addEventListener('submit', async function(event) {
             event.preventDefault();
@@ -318,9 +318,9 @@ async function submitForm(form, tabName) {
             a.remove();
             window.URL.revokeObjectURL(urlBlob);
         } else {
-            // Handle JSON responses for SetManagement
+            // Handle JSON responses for MidiUpload
             const contentType = response.headers.get('Content-Type') || '';
-            if (tabName === 'SetManagement' && contentType.includes('application/json')) {
+            if (tabName === 'MidiUpload' && contentType.includes('application/json')) {
                 const data = await response.json();
                 const container = document.getElementById(tabName);
                 const msgDiv = container.querySelector('#result-message');

@@ -1,12 +1,12 @@
 <h2>MIDI Upload</h2>
 <div id="result-message">{message_html}</div>
 
-<div class="set-management-container">
-    <div class="midi-upload-section">
+<div  >
+    <div  >
         <h3>Upload MIDI File</h3>
         <p>Upload a MIDI file to generate an Ableton Live set with the notes from the file.</p>
         
-        <form method="post" action="/set-management" enctype="multipart/form-data">
+        <form method="post" action="/midi-upload" enctype="multipart/form-data">
             <input type="hidden" name="action" value="upload_midi" />
             
             <div class="form-group">
@@ -48,101 +48,8 @@
                 </select>
             </div>
             
-            <button type="submit" class="generate-button">Generate Set from MIDI</button>
+            <button type="submit" >Generate Set from MIDI</button>
         </form>
     </div>
 </div>
 
-<style>
-.set-management-container {
-    max-width: 600px;
-    margin: 0 auto;
-}
-
-.midi-upload-section {
-    padding: 30px;
-    background: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-}
-
-.midi-upload-section h3 {
-    margin-top: 0;
-    color: #333;
-}
-
-.midi-upload-section p {
-    color: #666;
-    margin-bottom: 25px;
-}
-
-.form-group {
-    margin-bottom: 20px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-    color: #333;
-}
-
-.form-group input[type="text"],
-.form-group input[type="number"],
-.form-group input[type="file"],
-.form-group select {
-    width: 100%;
-    padding: 8px 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 14px;
-}
-
-.form-group input[type="file"] {
-    padding: 6px;
-    background: white;
-}
-
-.form-group small {
-    display: block;
-    margin-top: 5px;
-    color: #666;
-    font-size: 12px;
-}
-
-.generate-button {
-    width: 100%;
-    padding: 12px 30px;
-    background: #28a745;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background 0.3s;
-}
-
-.generate-button:hover {
-    background: #218838;
-}
-
-#result-message {
-    margin-bottom: 20px;
-}
-
-.success {
-    padding: 15px;
-    background: #d4edda;
-    border: 1px solid #c3e6cb;
-    border-radius: 4px;
-    color: #155724;
-}
-
-.error {
-    padding: 15px;
-    background: #f8d7da;
-    border: 1px solid #f5c6cb;
-    border-radius: 4px;
-    color: #721c24;
-}
-</style>
