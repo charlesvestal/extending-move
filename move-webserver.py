@@ -171,6 +171,15 @@ def record_start_time():
     g._start_time = time.perf_counter()
 
 
+@app.before_request
+def enforce_http():
+    """Redirect HTTPS requests to HTTP."""
+    proto = request.headers.get("X-Forwarded-Proto", "http").lower()
+    if proto == "https" or request.is_secure:
+        target = request.url.replace("https://", "http://", 1)
+        return redirect(target, code=301)
+
+
 @app.after_request
 def log_request_time(response):
     """Log how long the request took."""
