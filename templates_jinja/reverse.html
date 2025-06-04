@@ -3,7 +3,7 @@
 <h2>Reverse a WAV File</h2>
 <p><em>This will create a reversed version of any individual sample, keeping the original.</em></p>
 {% if message %}
-  <p style="color: {{ 'green' if success else 'red' }};">{{ message }}</p>
+  <p class="{{ message_type if message_type else ('success' if success else 'error') }}">{{ message }}</p>
 {% endif %}
 <form method="post">
     <input type="hidden" name="action" value="reverse_file">
