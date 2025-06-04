@@ -63,7 +63,8 @@ def test_synth_macros_get(client, monkeypatch):
             'message': 'choose',
             'message_type': 'info',
             'options': '<option value="p">p</option>',
-            'macros_html': ''
+            'macros_html': '',
+            'selected_preset': None,
         }
     monkeypatch.setattr(flask_app.synth_handler, 'handle_get', fake_get)
     resp = client.get('/synth-macros')
@@ -75,8 +76,9 @@ def test_synth_macros_post(client, monkeypatch):
         return {
             'message': 'saved',
             'message_type': 'success',
-            'options': '',
-            'macros_html': '<p>done</p>'
+            'options': '<option value="x" selected>p</option>',
+            'macros_html': '<p>done</p>',
+            'selected_preset': 'x',
         }
     monkeypatch.setattr(flask_app.synth_handler, 'handle_post', fake_post)
     resp = client.post('/synth-macros', data={'action': 'select_preset'})
