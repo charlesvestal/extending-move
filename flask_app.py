@@ -53,16 +53,22 @@ def index():
 def reverse():
     message = None
     success = False
+    message_type = None
     if request.method == "POST":
         form = SimpleForm(request.form.to_dict())
         result = reverse_handler.handle_post(form)
         message = result.get("message")
-        success = result.get("message_type") != "error"
+        message_type = result.get("message_type")
+        success = message_type != "error"
+    else:
+        message = "Select a WAV file to reverse"
+        message_type = "info"
     wav_list = get_wav_files("/data/UserData/UserLibrary/Samples")
     return render_template(
         "reverse.html",
         message=message,
         success=success,
+        message_type=message_type,
         wav_files=wav_list,
         active_tab="reverse",
     )
@@ -71,6 +77,7 @@ def reverse():
 def restore():
     message = None
     success = False
+    message_type = None
     options_html = ""
     if request.method == "POST":
         form_data = request.form.to_dict()
@@ -79,13 +86,15 @@ def restore():
         form = SimpleForm(form_data)
         result = restore_handler.handle_post(form)
         message = result.get("message")
-        success = result.get("message_type") != "error"
+        message_type = result.get("message_type")
+        success = message_type != "error"
     context = restore_handler.handle_get()
     options_html = context.get("options", "")
     return render_template(
         "restore.html",
         message=message,
         success=success,
+        message_type=message_type,
         options_html=options_html,
         active_tab="restore",
     )
@@ -94,6 +103,7 @@ def restore():
 def slice_tool():
     message = None
     success = False
+    message_type = None
     if request.method == "POST":
         form_data = request.form.to_dict()
         if 'file' in request.files:
@@ -110,11 +120,13 @@ def slice_tool():
                     pass
                 return resp
             message = result.get("message")
-            success = result.get("message_type") != "error"
+            message_type = result.get("message_type")
+            success = message_type != "error"
     return render_template(
         "slice.html",
         message=message,
         success=success,
+        message_type=message_type,
         active_tab="slice",
     )
 
@@ -123,6 +135,7 @@ def slice_tool():
 def set_management():
     message = None
     success = False
+    message_type = None
     context = set_management_handler.handle_get()
     pad_options = context.get("pad_options", "")
     pad_color_options = context.get("pad_color_options", "")
@@ -133,12 +146,18 @@ def set_management():
         form = SimpleForm(form_data)
         result = set_management_handler.handle_post(form)
         message = result.get("message")
-        success = result.get("message_type") != "error"
+        message_type = result.get("message_type")
+        success = message_type != "error"
         pad_options = result.get("pad_options", pad_options)
+    else:
+        message = context.get("message")
+        message_type = context.get("message_type")
+        success = message_type != "error" if message_type else False
     return render_template(
         "set_management.html",
         message=message,
         success=success,
+        message_type=message_type,
         pad_options=pad_options,
         pad_color_options=pad_color_options,
         active_tab="set-management",
@@ -149,6 +168,7 @@ def set_management():
 def synth_macros():
     message = None
     success = False
+    message_type = None
     options_html = ""
     macros_html = ""
     selected_preset = None
@@ -158,7 +178,8 @@ def synth_macros():
     else:
         result = synth_handler.handle_get()
     message = result.get("message")
-    success = result.get("message_type") != "error"
+    message_type = result.get("message_type")
+    success = message_type != "error"
     options_html = result.get("options", "")
     macros_html = result.get("macros_html", "")
     selected_preset = result.get("selected_preset")
@@ -167,6 +188,7 @@ def synth_macros():
         "synth_macros.html",
         message=message,
         success=success,
+        message_type=message_type,
         options_html=options_html,
         macros_html=macros_html,
         preset_selected=preset_selected,

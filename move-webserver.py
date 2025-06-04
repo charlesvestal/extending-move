@@ -86,10 +86,8 @@ class TemplateManager:
         message = kwargs.get("message", "")
         message_type = kwargs.get("message_type", "")
         if message:
-            if message_type == "success":
-                message_html = f'<p style="color: green;">{message}</p>'
-            elif message_type == "error":
-                message_html = f'<p style="color: red;">{message}</p>'
+            if message_type in ("success", "error", "info"):
+                message_html = f'<p class="{message_type}">{message}</p>'
             else:
                 message_html = f'<p>{message}</p>'
         else:

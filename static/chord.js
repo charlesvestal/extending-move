@@ -361,6 +361,14 @@ async function processChordSample(buffer, intervals) {
   return new Blob([new DataView(wavData)], { type: 'audio/wav' });
 }
 
+function showChordMessage(text, type = 'info') {
+  const msgEl = document.getElementById('chord-message');
+  if (msgEl) {
+    msgEl.textContent = text;
+    msgEl.className = type;
+  }
+}
+
 function initChordTab() {
   // Attach event listener for generatePreset
   const presetBtn = document.getElementById('generatePreset');
@@ -375,7 +383,7 @@ function initChordTab() {
     const fileInput = document.getElementById('wavFileInput');
     const presetNameInput = document.getElementById('presetName');
     if (!fileInput.files || fileInput.files.length === 0) {
-      alert("Please select a WAV file.");
+      showChordMessage('Please select a WAV file.', 'error');
       return;
     }
     const file = fileInput.files[0];
@@ -429,7 +437,7 @@ function initChordTab() {
     }).catch(function(err) {
       console.error('Error generating bundle', err);
       document.getElementById('loadingIndicator').style.display = 'none';
-      alert('Failed to generate bundle');
+      showChordMessage('Failed to generate bundle', 'error');
     });
     });
   }
@@ -442,7 +450,7 @@ function initChordTab() {
     const fileInput = document.getElementById('wavFileInput');
     const presetNameInput = document.getElementById('presetName');
     if (!fileInput.files || fileInput.files.length === 0) {
-      alert("Please select a WAV file.");
+      showChordMessage('Please select a WAV file.', 'error');
       return;
     }
     const file = fileInput.files[0];
@@ -486,7 +494,7 @@ function initChordTab() {
     } catch (err) {
       console.error('Error zipping samples', err);
       document.getElementById('loadingIndicator').style.display = 'none';
-      alert('Failed to package samples');
+      showChordMessage('Failed to package samples', 'error');
       return;
     }
 
@@ -514,13 +522,13 @@ function initChordTab() {
     } catch (err) {
       console.error('Error placing preset', err);
       document.getElementById('loadingIndicator').style.display = 'none';
-      alert('Failed to place preset');
+      showChordMessage('Failed to place preset', 'error');
       return;
     }
 
     document.getElementById('progressPercent').textContent = '100%';
     document.getElementById('loadingIndicator').style.display = 'none';
-    alert("Preset and samples placed successfully.");
+    showChordMessage('Preset and samples placed successfully.', 'success');
   });
 
   // Attach event listener for file input

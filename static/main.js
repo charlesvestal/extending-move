@@ -520,7 +520,11 @@ function initializeWaveform() {
     if (evenSlicesBtn) {
         evenSlicesBtn.addEventListener('click', function() {
             if (!audioReady || !wavesurfer) {
-                alert("Audio file must be loaded first.");
+                const msg = document.getElementById('slice-message');
+                if (msg) {
+                    msg.textContent = 'Audio file must be loaded first.';
+                    msg.className = 'error';
+                }
                 return;
             }
             wavesurfer.stop();
