@@ -128,10 +128,10 @@ pip install --no-cache-dir -r requirements.txt
 ssh ableton@move.local
 cd /data/UserData/extending-move
 cp -r /opt/move/HttpRoot/fonts /data/UserData/extending-move/static/
-python3 move-webserver.py  # Flask/Jinja web server on port 9090
+python3 move-webserver.py  # Flask/Jinja web server on port 909
 ```
 
-The server will be accessible at http://move.local:9090
+The server will be accessible at http://move.local:909
 
 ## Utility Scripts
 
