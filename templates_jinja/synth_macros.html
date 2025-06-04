@@ -17,6 +17,9 @@
             {{ options_html | safe }}
         </select>
         <button type="submit" {% if preset_selected %}disabled{% endif %}>Load Preset</button>
+        {% if preset_selected %}
+        <input type="hidden" name="preset_select" value="{{ selected_preset }}">
+        {% endif %}
     </div>
     
     <div class="macro-display">
