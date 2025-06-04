@@ -13,10 +13,10 @@
     <input type="hidden" name="param_name" id="param-name-input" value="">
     <input type="hidden" name="macro_index" id="macro-index-input" value="">
     <div class="preset-selection">
-        <select name="preset_select" id="preset_select" required>
+        <select name="preset_select" id="preset_select" required {% if preset_selected %}disabled{% endif %}>
             {{ options_html | safe }}
         </select>
-        <button type="submit">Load Preset</button>
+        <button type="submit" {% if preset_selected %}disabled{% endif %}>Load Preset</button>
     </div>
     
     <div class="macro-display">

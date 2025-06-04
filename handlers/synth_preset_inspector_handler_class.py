@@ -17,7 +17,8 @@ class SynthPresetInspectorHandler(BaseHandler):
             "message": "Select a Drift preset from the dropdown",
             "message_type": "info",
             "options": self.get_preset_options(),
-            "macros_html": ""  # Initialize with empty string to avoid showing placeholder
+            "macros_html": "",
+            "selected_preset": None,
         }
 
     def handle_post(self, form):
@@ -136,8 +137,9 @@ class SynthPresetInspectorHandler(BaseHandler):
             return {
                 "message": message,
                 "message_type": "success",
-                "options": self.get_preset_options(),
-                "macros_html": macros_html
+                "options": self.get_preset_options(selected_preset=preset_path),
+                "macros_html": macros_html,
+                "selected_preset": preset_path,
             }
         
         return self.format_info_response("Unknown action")
@@ -271,18 +273,23 @@ class SynthPresetInspectorHandler(BaseHandler):
         html += '</div>'
         return html
     
-    def get_preset_options(self):
+    def get_preset_options(self, selected_preset=None):
         """Get synth preset options for the template dropdown"""
         try:
             result = scan_for_synth_presets()
             if not result['success']:
                 return ''
-            
+
             options_html = ['<option value="">--Select a Preset--</option>']
             for preset in result['presets']:
                 # Include the device type in the display name
                 device_type = preset.get('type', '').capitalize()
-                options_html.append(f'<option value="{preset["path"]}">{preset["name"]} ({device_type})</option>')
+                selected = ''
+                if selected_preset and preset['path'] == selected_preset:
+                    selected = ' selected="selected"'
+                options_html.append(
+                    f'<option value="{preset["path"]}"{selected}>{preset["name"]} ({device_type})</option>'
+                )
             return '\n'.join(options_html)
         except Exception as e:
             print(f"Error getting preset options: {e}")

@@ -119,6 +119,7 @@ def synth_macros():
     success = False
     options_html = ""
     macros_html = ""
+    selected_preset = None
     if request.method == "POST":
         form = SimpleForm(request.form.to_dict())
         result = synth_handler.handle_post(form)
@@ -128,12 +129,16 @@ def synth_macros():
     success = result.get("message_type") != "error"
     options_html = result.get("options", "")
     macros_html = result.get("macros_html", "")
+    selected_preset = result.get("selected_preset")
+    preset_selected = bool(selected_preset)
     return render_template(
         "synth_macros.html",
         message=message,
         success=success,
         options_html=options_html,
         macros_html=macros_html,
+        preset_selected=preset_selected,
+        selected_preset=selected_preset,
         active_tab="synth-macros",
     )
 
