@@ -1,18 +1,34 @@
 import os
 import logging
+import time
 import soundfile as sf
 from core.refresh_handler import refresh_library
 
+# Simple in-memory cache for WAV file listings with a TTL
+_wav_cache = {}
+_CACHE_TTL = 300  # seconds
+
+def clear_wav_cache():
+    """Clear the cached WAV file list."""
+    _wav_cache.clear()
+
 def get_wav_files(directory):
-    """
-    Retrieves a list of audio files (WAV and AIFF) from the specified directory.
-    """
+    """Return a cached list of WAV/AIFF files within ``directory``."""
+    now = time.time()
+    cache_entry = _wav_cache.get(directory)
+    if cache_entry:
+        timestamp, files = cache_entry
+        if now - timestamp < _CACHE_TTL:
+            return files
+
     audio_files = []
     for root, _, files in os.walk(directory):
         for file in files:
-            if file.lower().endswith(('.wav', '.aif', '.aiff')):
-                relative_path = os.path.relpath(os.path.join(root, file), directory)
-                audio_files.append(relative_path)
+            if file.lower().endswith((".wav", ".aif", ".aiff")):
+                rel_path = os.path.relpath(os.path.join(root, file), directory)
+                audio_files.append(rel_path)
+
+    _wav_cache[directory] = (now, audio_files)
     return audio_files
 
 
@@ -37,6 +53,7 @@ def reverse_wav_file(filename, directory):
         original_filename = f"{original_base}{ext_lower}"
         original_filepath = os.path.join(directory, original_filename)
         if os.path.exists(original_filepath):
+            clear_wav_cache()
             return True, f"Switched to original file: {original_filename}", original_filepath
         else:
             return False, f"Original file not found: {original_filename}", None
@@ -46,6 +63,7 @@ def reverse_wav_file(filename, directory):
     new_filepath = os.path.join(directory, new_filename)
     logging.info("Reversing %s -> %s", filepath, new_filepath)
     if os.path.exists(new_filepath):
+        clear_wav_cache()
         return True, f"Using existing reversed file: {new_filename}", new_filepath
 
     # Determine format for writing
@@ -84,6 +102,8 @@ def reverse_wav_file(filename, directory):
             msg = f"Successfully created reversed file: {new_filename}. Library refreshed."
         else:
             msg = f"Created reversed file: {new_filename}. Library refresh failed: {refresh_message}"
+
+        clear_wav_cache()
 
         return True, msg, new_filepath
 

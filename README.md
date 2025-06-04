@@ -17,6 +17,7 @@ Tools for extending the Ableton Move. This project provides a companion webserve
 - **Sample Reversal**
   - Create reversed versions of any WAV file
   - Use reversed file in drum kit or sample presets
+  - WAV file lists are cached for faster loading
     
 - **Drum Rack Inspector**
   - View all samples in a drum rack preset
