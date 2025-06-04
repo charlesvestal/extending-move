@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Slice a WAV File into a Kit</h2>
+{% if message %}
+  <p style="color: {{ 'green' if success else 'red' }};">{{ message }}</p>
+{% endif %}
+<form action="/slice" method="post" enctype="multipart/form-data">
+  <input type="hidden" name="action" value="slice">
+  <label for="file">Audio file (.wav/.aif):</label>
+  <input type="file" name="file" accept=".wav,.aif,.aiff" required>
+  <br>
+  <label for="kit_type">Kit type:</label>
+  <select name="kit_type" id="kit_type">
+    <option value="choke" selected>Choke Kit – Pads play through, one at a time</option>
+    <option value="gate">Gate Kit – Pads play while held, multiples at once</option>
+    <option value="drum">Drum Kit – Pads play through, multiples at once</option>
+  </select>
+  <br>
+  <div class="slice-even-group">
+    <label for="num_slices">Slices (1–16):</label>
+    <input id="num_slices" name="num_slices" type="number" min="1" max="16" value="16">
+  </div>
+  <br>
+  <div class="slice-transient-group">
+    <label for="transient_detect">Slice on transients</label>
+    <input id="transient_detect" name="transient_detect" type="checkbox">
+    <label for="sensitivity" style="margin-left: 1em;">Threshold:</label>
+    <input id="sensitivity" name="sensitivity" type="range" min="0.01" max="0.20" step="0.001" value="0.07">
+    <span id="sensitivity-value">0.07</span>
+  </div>
+  <br>
+  <button type="submit" name="mode" value="download">Download .ablpresetbundle</button>
+  <button type="submit" name="mode" value="auto_place">Save Preset directly on Move</button>
+</form>
+{% endblock %}
