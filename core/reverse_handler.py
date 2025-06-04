@@ -70,32 +70,13 @@ def reverse_wav_file(filename, directory):
         os.makedirs(os.path.dirname(new_filepath), exist_ok=True)
 
         # Write out with correct format and subtype
-        try:
-            sf.write(
-                new_filepath,
-                reversed_data,
-                samplerate,
-                format=write_format,
-                subtype=info.subtype,
-            )
-        except Exception as e:
-            logging.warning(
-                "Write failed for %s: %s. Trying Reversed folder", new_filepath, e
-            )
-            # If writing directly fails (e.g. read-only directory), write under
-            # a Reversed/ subdirectory and return that path instead.
-            alt_base_dir = os.path.join(directory, "Reversed", os.path.dirname(filename))
-            os.makedirs(alt_base_dir, exist_ok=True)
-            alt_filepath = os.path.join(alt_base_dir, os.path.basename(new_filename))
-            logging.info("Writing reversed file to alternate path %s", alt_filepath)
-            sf.write(
-                alt_filepath,
-                reversed_data,
-                samplerate,
-                format=write_format,
-                subtype=info.subtype,
-            )
-            new_filepath = alt_filepath
+        sf.write(
+            new_filepath,
+            reversed_data,
+            samplerate,
+            format=write_format,
+            subtype=info.subtype,
+        )
 
         # Refresh library
         refresh_success, refresh_message = refresh_library()
