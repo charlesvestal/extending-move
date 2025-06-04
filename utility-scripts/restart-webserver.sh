@@ -13,7 +13,7 @@ LOG_FILE="/data/UserData/extending-move/move-webserver.log"
 
 echo "Restarting the webserver on ${REMOTE_HOST}..."
 
-ssh "${REMOTE_USER}@${REMOTE_HOST}" bash <<'EOF'
+ssh -T "${REMOTE_USER}@${REMOTE_HOST}" bash <<'EOF'
 set -euo pipefail
 
 # Use the absolute paths
