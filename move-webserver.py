@@ -445,7 +445,7 @@ if __name__ == "__main__":
 
     host = "0.0.0.0"
     port = 909
-    print("Starting webserver")
+    print("Starting webserver", flush=True)
     with make_server(
         host,
         port,
@@ -453,7 +453,7 @@ if __name__ == "__main__":
         server_class=TLSIgnoringWSGIServer,
         handler_class=TLSIgnoringWSGIRequestHandler,
     ) as httpd:
-        print(f"Server started http://{host}:{port}")
+        print(f"Server started http://{host}:{port}", flush=True)
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:
