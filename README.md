@@ -201,6 +201,23 @@ Enable at boot with
 update-rc.d ableton-startup defaults
 ```
 
+## Local Development
+
+Running the webserver on a normal computer is handy for hacking on the tools
+without having a Move connected.  When the Move specific paths under
+``/data/UserData`` are unavailable, the server will automatically fall back to
+the `examples` directory in this repository.  You can also override any of the
+locations with environment variables:
+
+```
+MSETS_DIRECTORY   Path to store generated sets
+MSET_SAMPLE_PATH  Path containing audio samples
+TRACK_PRESET_DIR  Path for preset files
+```
+
+This makes it possible to run the sample generation scripts and web UI locally
+while still mimicking the expected directory layout.
+
 ## Documentation
 
 Check the [Wiki](https://github.com/charlesvestal/extending-move/wiki) for:

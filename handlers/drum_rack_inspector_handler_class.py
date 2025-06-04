@@ -3,10 +3,15 @@ import cgi
 import os
 import urllib.parse
 from handlers.base_handler import BaseHandler
-from core.drum_rack_inspector_handler import scan_for_drum_rack_presets, get_drum_cell_samples, update_drum_cell_sample
+from core.drum_rack_inspector_handler import (
+    scan_for_drum_rack_presets,
+    get_drum_cell_samples,
+    update_drum_cell_sample,
+)
 from core.reverse_handler import reverse_wav_file
 from core.refresh_handler import refresh_library
 from core.time_stretch_handler import time_stretch_wav
+from core.config import MSET_SAMPLE_PATH
 
 class DrumRackInspectorHandler(BaseHandler):
     def handle_get(self):
@@ -64,8 +69,13 @@ class DrumRackInspectorHandler(BaseHandler):
 
                     if sample:
                         print(f"\nSample: {sample}")  # Debug log
-                        if sample.get('path') and sample['path'].startswith('/data/UserData/UserLibrary/Samples/'):
-                            web_path = '/samples/' + sample['path'].replace('/data/UserData/UserLibrary/Samples/Preset Samples/', '', 1)
+                        sample_path = sample.get('path', '')
+                        if sample_path.startswith(MSET_SAMPLE_PATH + os.sep):
+                            web_path = '/samples/' + sample_path.replace(
+                                os.path.join(MSET_SAMPLE_PATH, 'Preset Samples') + os.sep,
+                                '',
+                                1,
+                            )
                             web_path = urllib.parse.quote(web_path)
                             waveform_id = f'waveform-{pad_num}'
                             # Add new data-playback-start and data-playback-length attributes
@@ -244,10 +254,15 @@ class DrumRackInspectorHandler(BaseHandler):
                 sample = grid_samples[idx]
                 cell_html = '<div class="drum-cell">'
 
-                if sample and sample.get('path', '').startswith('/data/UserData/UserLibrary/Samples/'):
-                    web_path = '/samples/' + sample['path'] \
-                                .replace('/data/UserData/UserLibrary/Samples/Preset Samples/', '', 1)
-                    web_path = urllib.parse.quote(web_path)
+                if sample:
+                    sample_path = sample.get('path', '')
+                    if sample_path.startswith(MSET_SAMPLE_PATH + os.sep):
+                        web_path = '/samples/' + sample_path.replace(
+                            os.path.join(MSET_SAMPLE_PATH, 'Preset Samples') + os.sep,
+                            '',
+                            1,
+                        )
+                        web_path = urllib.parse.quote(web_path)
                     wf_id = f'waveform-{num}'
                     cell_html += f'''
                         <div class="pad-info">
@@ -376,8 +391,13 @@ class DrumRackInspectorHandler(BaseHandler):
                     cell_html = '<div class="drum-cell">'
 
                     if sample:
-                        if sample.get('path') and sample['path'].startswith('/data/UserData/UserLibrary/Samples/'):
-                            web_path = '/samples/' + sample['path'].replace('/data/UserData/UserLibrary/Samples/Preset Samples/', '', 1)
+                        sample_path = sample.get('path', '')
+                        if sample_path.startswith(MSET_SAMPLE_PATH + os.sep):
+                            web_path = '/samples/' + sample_path.replace(
+                                os.path.join(MSET_SAMPLE_PATH, 'Preset Samples') + os.sep,
+                                '',
+                                1,
+                            )
                             web_path = urllib.parse.quote(web_path)
                             waveform_id = f'waveform-{pad_num}'
                             cell_html += f'''
