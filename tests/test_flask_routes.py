@@ -61,6 +61,7 @@ def test_chord_get(client):
     resp = client.get('/chord')
     assert resp.status_code == 200
     assert b'Chord Kit Generator' in resp.data
+    assert b'id="chordList"' in resp.data
 
 def test_detect_transients(client, monkeypatch):
     def fake_detect(form):
