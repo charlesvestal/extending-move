@@ -57,6 +57,37 @@ def test_slice_post(client, monkeypatch):
     assert resp.status_code == 200
     assert b'sliced' in resp.data
 
+def test_synth_macros_get(client, monkeypatch):
+    def fake_get():
+        return {
+            'message': 'choose',
+            'message_type': 'info',
+            'options': '<option value="p">p</option>',
+            'macros_html': '',
+            'selected_preset': None,
+        }
+    monkeypatch.setattr(flask_app.synth_handler, 'handle_get', fake_get)
+    resp = client.get('/synth-macros')
+    assert resp.status_code == 200
+    assert b'choose' in resp.data
+
+def test_synth_macros_post(client, monkeypatch):
+    def fake_post(form):
+        return {
+            'message': 'saved',
+            'message_type': 'success',
+            'options': '<option value="x" selected>Sub/preset (Drift)</option>',
+            'macros_html': '<p>done</p>',
+            'selected_preset': 'x',
+        }
+    monkeypatch.setattr(flask_app.synth_handler, 'handle_post', fake_post)
+    resp = client.post('/synth-macros', data={'action': 'select_preset'})
+    assert resp.status_code == 200
+    assert b'saved' in resp.data
+    assert b'name="preset_select" value="x"' in resp.data
+    assert b'id="preset_select"' in resp.data and b'disabled' in resp.data
+    assert b'Choose Another Preset' in resp.data
+
 def test_chord_get(client):
     resp = client.get('/chord')
     assert resp.status_code == 200

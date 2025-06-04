@@ -634,7 +634,8 @@ def scan_for_synth_presets():
         dict: Result with keys:
             - success: bool indicating success/failure
             - message: Status or error message
-            - presets: List of dicts with preset info (name, path, and type)
+            - presets: List of dicts with preset info
+              (name, path, display_path, and type)
     """
     try:
         presets_dir = "/data/UserData/UserLibrary/Track Presets"
@@ -668,14 +669,17 @@ def scan_for_synth_presets():
                     try:
                         with open(filepath, 'r') as f:
                             preset_data = json.load(f)
-                        
+
                         # Check if preset contains a drift device
                         device_type = has_device_type(preset_data, ['drift'])  # Only look for drift devices
                         if device_type:
                             preset_name = os.path.splitext(filename)[0]
+                            rel = os.path.relpath(filepath, presets_dir)
+                            rel_no_ext = os.path.splitext(rel)[0]
                             synth_presets.append({
                                 'name': preset_name,
                                 'path': filepath,
+                                'display_path': rel_no_ext,
                                 'type': device_type
                             })
                     except Exception as e:
