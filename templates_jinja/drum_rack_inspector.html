@@ -58,7 +58,7 @@
   <div class="modal-content">
     <span class="modal-close">&times;</span>
     <div id="ts_loading" class="loading-overlay hidden">Time stretching…</div>
-    <form method="POST" action="/drum-rack-inspector" id="timeStretchForm" onsubmit="event.preventDefault(); submitTimeStretchForm();">
+    <form method="POST" action="/drum-rack-inspector" id="timeStretchForm">
       <input type="hidden" name="action" value="time_stretch_sample">
       <input type="hidden" name="sample_path" id="ts_sample_path">
       <input type="hidden" name="preset_path" id="ts_preset_path">
