@@ -84,9 +84,10 @@ def reverse_wav_file(filename, directory):
             )
             # If writing directly fails (e.g. read-only directory), write under
             # a Reversed/ subdirectory and return that path instead.
-            alt_dir = os.path.join(directory, "Reversed", os.path.dirname(filename))
-            os.makedirs(alt_dir, exist_ok=True)
-            alt_filepath = os.path.join(alt_dir, new_filename)
+            alt_base_dir = os.path.join(directory, "Reversed", os.path.dirname(filename))
+            os.makedirs(alt_base_dir, exist_ok=True)
+            alt_filepath = os.path.join(alt_base_dir, os.path.basename(new_filename))
+            logging.info("Writing reversed file to alternate path %s", alt_filepath)
             sf.write(
                 alt_filepath,
                 reversed_data,
