@@ -71,3 +71,23 @@ def test_detect_transients(client, monkeypatch):
     resp = client.post('/detect-transients', data={'file': f}, content_type='multipart/form-data')
     assert resp.status_code == 200
     assert resp.json['success'] is True
+
+
+def test_place_files_post(client, monkeypatch):
+    def fake_place(form):
+        return {'message': 'placed', 'message_type': 'success'}
+    monkeypatch.setattr(flask_app.file_placer_handler, 'handle_post', fake_place)
+    f = (io.BytesIO(b'data'), 'sample.zip')
+    data = {'mode': 'zip', 'file': f, 'destination': '/tmp'}
+    resp = client.post('/place-files', data=data, content_type='multipart/form-data')
+    assert resp.status_code == 200
+    assert resp.json['message'] == 'placed'
+
+
+def test_refresh_post(client, monkeypatch):
+    def fake_refresh(form):
+        return {'message': 'refreshed', 'message_type': 'success'}
+    monkeypatch.setattr(flask_app.refresh_handler, 'handle_post', fake_refresh)
+    resp = client.post('/refresh', data={'action': 'refresh_library'})
+    assert resp.status_code == 200
+    assert resp.json['message'] == 'refreshed'
