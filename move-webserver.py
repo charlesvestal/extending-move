@@ -178,11 +178,13 @@ def record_start_time():
 
 @app.before_request
 def enforce_http():
-    """Redirect HTTPS requests to HTTP."""
+    """Redirect HTTPS requests to HTTP without persistent caching."""
     proto = request.headers.get("X-Forwarded-Proto", "http").lower()
     if proto == "https" or request.is_secure:
         target = request.url.replace("https://", "http://", 1)
-        return redirect(target, code=301)
+        resp = redirect(target, code=307)
+        resp.headers["Cache-Control"] = "no-store"
+        return resp
 
 
 @app.after_request
