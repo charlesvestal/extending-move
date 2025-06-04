@@ -1,4 +1,5 @@
 import os
+import logging
 import soundfile as sf
 from core.refresh_handler import refresh_library
 
@@ -43,6 +44,7 @@ def reverse_wav_file(filename, directory):
     # Build new reversed filename
     new_filename = f"{base}_reversed{ext_lower}"
     new_filepath = os.path.join(directory, new_filename)
+    logging.info("Reversing %s -> %s", filepath, new_filepath)
     if os.path.exists(new_filepath):
         return True, f"Using existing reversed file: {new_filename}", new_filepath
 
@@ -59,10 +61,13 @@ def reverse_wav_file(filename, directory):
     try:
         # Read audio using SoundFile as 32-bit integer data
         info = sf.info(filepath)
-        data, samplerate = sf.read(filepath, dtype='int32')
+        data, samplerate = sf.read(filepath, dtype="int32")
 
         # Reverse in time
         reversed_data = data[::-1]
+
+        # Ensure the output directory exists
+        os.makedirs(os.path.dirname(new_filepath), exist_ok=True)
 
         # Write out with correct format and subtype
         sf.write(
@@ -70,7 +75,7 @@ def reverse_wav_file(filename, directory):
             reversed_data,
             samplerate,
             format=write_format,
-            subtype=info.subtype
+            subtype=info.subtype,
         )
 
         # Refresh library
@@ -83,4 +88,5 @@ def reverse_wav_file(filename, directory):
         return True, msg, new_filepath
 
     except Exception as e:
+        logging.error("Reverse failed for %s: %s", filepath, e)
         return False, f"Error reversing file {filename}: {e}", None
