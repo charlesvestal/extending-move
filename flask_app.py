@@ -11,6 +11,9 @@ from handlers.reverse_handler_class import ReverseHandler
 from handlers.restore_handler_class import RestoreHandler
 from handlers.slice_handler_class import SliceHandler
 from handlers.set_management_handler_class import SetManagementHandler
+from handlers.synth_preset_inspector_handler_class import SynthPresetInspectorHandler
+from handlers.file_placer_handler_class import FilePlacerHandler
+from handlers.refresh_handler_class import RefreshHandler
 from dash import Dash, html
 from core.reverse_handler import get_wav_files
 import cgi
@@ -35,6 +38,9 @@ reverse_handler = ReverseHandler()
 restore_handler = RestoreHandler()
 slice_handler = SliceHandler()
 set_management_handler = SetManagementHandler()
+synth_handler = SynthPresetInspectorHandler()
+file_placer_handler = FilePlacerHandler()
+refresh_handler = RefreshHandler()
 dash_app = Dash(__name__, server=app, routes_pathname_prefix="/dash/")
 dash_app.layout = html.Div([html.H1("Move Dash"), html.P("Placeholder")])
 
@@ -137,6 +143,57 @@ def set_management():
         pad_color_options=pad_color_options,
         active_tab="set-management",
     )
+
+
+@app.route("/synth-macros", methods=["GET", "POST"])
+def synth_macros():
+    message = None
+    success = False
+    options_html = ""
+    macros_html = ""
+    selected_preset = None
+    if request.method == "POST":
+        form = SimpleForm(request.form.to_dict())
+        result = synth_handler.handle_post(form)
+    else:
+        result = synth_handler.handle_get()
+    message = result.get("message")
+    success = result.get("message_type") != "error"
+    options_html = result.get("options", "")
+    macros_html = result.get("macros_html", "")
+    selected_preset = result.get("selected_preset")
+    preset_selected = bool(selected_preset)
+    return render_template(
+        "synth_macros.html",
+        message=message,
+        success=success,
+        options_html=options_html,
+        macros_html=macros_html,
+        preset_selected=preset_selected,
+        selected_preset=selected_preset,
+        active_tab="synth-macros",
+    )
+
+@app.route("/chord", methods=["GET"])
+def chord():
+    return render_template("chord.html", active_tab="chord")
+
+
+@app.route("/place-files", methods=["POST"])
+def place_files_route():
+    form_data = request.form.to_dict()
+    if 'file' in request.files:
+        form_data['file'] = FileField(request.files['file'])
+    form = SimpleForm(form_data)
+    result = file_placer_handler.handle_post(form)
+    return jsonify(result)
+
+
+@app.route("/refresh", methods=["POST"])
+def refresh_route():
+    form = SimpleForm(request.form.to_dict())
+    result = refresh_handler.handle_post(form)
+    return jsonify(result)
 
 
 @app.route("/detect-transients", methods=["POST"])

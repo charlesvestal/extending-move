@@ -418,6 +418,7 @@ function initChordTab() {
       let zipProgress = 50 + Math.round(metadata.percent / 2);
       document.getElementById('progressPercent').textContent = zipProgress + "%";
     }).then(function(content) {
+      document.getElementById('progressPercent').textContent = '100%';
       document.getElementById('loadingIndicator').style.display = 'none';
       const a = document.createElement("a");
       a.href = URL.createObjectURL(content);
@@ -425,6 +426,10 @@ function initChordTab() {
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
+    }).catch(function(err) {
+      console.error('Error generating bundle', err);
+      document.getElementById('loadingIndicator').style.display = 'none';
+      alert('Failed to generate bundle');
     });
     });
   }
@@ -472,29 +477,48 @@ function initChordTab() {
       const blob = processedSamples[chordName];
       zip.file(filename, blob);
     }
-    const samplesZipBlob = await zip.generateAsync({ type: "blob" });
-    
-    // Place samples via the File Placer API (ZIP mode)
-    const samplesForm = new FormData();
-    samplesForm.append("mode", "zip");
-    samplesForm.append("file", samplesZipBlob);
-    samplesForm.append("destination", "/data/UserData/UserLibrary/Samples/Preset Samples");
-    await fetch("/place-files", { method: "POST", body: samplesForm });
-    
-    // Place the preset file via the File Placer API (place mode)
-    const presetForm = new FormData();
-    presetForm.append("mode", "place");
-    presetForm.append("file", new Blob([presetJson], { type: "application/json" }), presetName + ".ablpreset");
-    presetForm.append("destination", "/data/UserData/UserLibrary/Track Presets");
-    await fetch("/place-files", { method: "POST", body: presetForm });
-    
-    // Refresh the library after placement.
-    await fetch("/refresh", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: "action=refresh_library"
-    });
-    
+    let samplesZipBlob;
+    try {
+      samplesZipBlob = await zip.generateAsync({ type: "blob" }, meta => {
+        let zipProg = Math.round(meta.percent / 2) + 50;
+        document.getElementById('progressPercent').textContent = zipProg + "%";
+      });
+    } catch (err) {
+      console.error('Error zipping samples', err);
+      document.getElementById('loadingIndicator').style.display = 'none';
+      alert('Failed to package samples');
+      return;
+    }
+
+    try {
+      const samplesForm = new FormData();
+      samplesForm.append("mode", "zip");
+      samplesForm.append("file", samplesZipBlob);
+      samplesForm.append("destination", "/data/UserData/UserLibrary/Samples/Preset Samples");
+      const resp1 = await fetch("/place-files", { method: "POST", body: samplesForm });
+      if (!resp1.ok) throw new Error('sample placement failed');
+
+      const presetForm = new FormData();
+      presetForm.append("mode", "place");
+      presetForm.append("file", new Blob([presetJson], { type: "application/json" }), presetName + ".ablpreset");
+      presetForm.append("destination", "/data/UserData/UserLibrary/Track Presets");
+      const resp2 = await fetch("/place-files", { method: "POST", body: presetForm });
+      if (!resp2.ok) throw new Error('preset placement failed');
+
+      const resp3 = await fetch("/refresh", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: "action=refresh_library"
+      });
+      if (!resp3.ok) throw new Error('refresh failed');
+    } catch (err) {
+      console.error('Error placing preset', err);
+      document.getElementById('loadingIndicator').style.display = 'none';
+      alert('Failed to place preset');
+      return;
+    }
+
+    document.getElementById('progressPercent').textContent = '100%';
     document.getElementById('loadingIndicator').style.display = 'none';
     alert("Preset and samples placed successfully.");
   });
