@@ -209,6 +209,7 @@ input[type="submit"] {
     transition: background-color 0.2s;
     margin-right: 0.5rem;
     margin-bottom: 0.5rem;
+    margin-top: 0.5rem;
     font-family: 'Ableton Sans', Arial, sans-serif;
 }
 
