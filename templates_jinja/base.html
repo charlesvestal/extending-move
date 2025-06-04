@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="/static/style.css">
     <script src="https://unpkg.com/htmx.org@1.9.12"></script>
 </head>
-<body hx-boost="true" hx-target="body" hx-select="body">
+<body hx-boost="true" hx-target="#content" hx-select="#content">
     <h1 id="header">Move - Extended</h1>
     <nav class="tab">
         <a href="/restore" class="{% if active_tab == 'restore' %}active{% endif %}">Restore Set</a>
@@ -19,6 +19,20 @@
     <div id="content" class="tabcontent">
         {% block content %}{% endblock %}
     </div>
+    <script>
+        function updateActiveTab() {
+            const path = window.location.pathname;
+            document.querySelectorAll('nav.tab a').forEach(a => {
+                if (a.getAttribute('href') === path) {
+                    a.classList.add('active');
+                } else {
+                    a.classList.remove('active');
+                }
+            });
+        }
+        document.addEventListener('DOMContentLoaded', updateActiveTab);
+        document.body.addEventListener('htmx:afterSwap', updateActiveTab);
+    </script>
     {% block scripts %}{% endblock %}
 </body>
 </html>
