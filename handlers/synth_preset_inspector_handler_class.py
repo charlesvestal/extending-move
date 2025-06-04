@@ -27,6 +27,9 @@ class SynthPresetInspectorHandler(BaseHandler):
         self.form = form
         
         action = form.getvalue('action')
+        if action == 'reset_preset':
+            return self.handle_get()
+
         if action in ['select_preset', 'save_names', 'save_name', 'delete_mapping', 'add_mapping']:
             preset_path = form.getvalue('preset_select')
             if not preset_path:
@@ -282,13 +285,14 @@ class SynthPresetInspectorHandler(BaseHandler):
 
             options_html = ['<option value="">--Select a Preset--</option>']
             for preset in result['presets']:
-                # Include the device type in the display name
+                # Include the device type and relative path in the display name
                 device_type = preset.get('type', '').capitalize()
                 selected = ''
                 if selected_preset and preset['path'] == selected_preset:
                     selected = ' selected="selected"'
+                display_name = f"{preset.get('display_path', preset['name'])} ({device_type})"
                 options_html.append(
-                    f'<option value="{preset["path"]}"{selected}>{preset["name"]} ({device_type})</option>'
+                    f'<option value="{preset["path"]}"{selected}>{display_name}</option>'
                 )
             return '\n'.join(options_html)
         except Exception as e:

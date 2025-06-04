@@ -16,15 +16,19 @@
         <select name="preset_select" id="preset_select" required {% if preset_selected %}disabled{% endif %}>
             {{ options_html | safe }}
         </select>
-        <button type="submit" {% if preset_selected %}disabled{% endif %}>Load Preset</button>
         {% if preset_selected %}
+        <button type="submit" onclick="document.getElementById('action-input').value='reset_preset';">Choose Another Preset</button>
         <input type="hidden" name="preset_select" value="{{ selected_preset }}">
+        {% else %}
+        <button type="submit">Load Preset</button>
         {% endif %}
     </div>
-    
+
+    {% if preset_selected %}
     <div class="macro-display">
         {{ macros_html | safe }}
     </div>
+    {% endif %}
 </form>
 
 <!-- The dropdown change event is handled by main.js using AJAX -->
