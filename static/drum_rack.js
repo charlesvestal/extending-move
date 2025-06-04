@@ -80,35 +80,9 @@ function initializeTimeStretchModal() {
     updateAlgoState();
 }
 
-function submitTimeStretchForm() {
-    const form = document.getElementById('timeStretchForm');
-    const loading = document.getElementById('ts_loading');
-    const applyBtn = form.querySelector('button[type="submit"]');
-    applyBtn.disabled = true;
-    loading.classList.remove('hidden');
-
-    const url = form.getAttribute('action');
-    const formData = new FormData(form);
-    fetch(url, { method: form.method, body: formData })
-        .then(response => response.text())
-        .then(html => {
-            loading.classList.add('hidden');
-            applyBtn.disabled = false;
-            let container = form.closest('.tabcontent');
-            if (!container) container = document.querySelector('.tabcontent');
-            container.innerHTML = html;
-            initDrumRackTab();
-        })
-        .catch(err => {
-            console.error(err);
-            loading.classList.add('hidden');
-            applyBtn.disabled = false;
-        });
-}
-
 function initDrumRackTab() {
     initializeDrumRackWaveforms();
     initializeTimeStretchModal();
 }
 
-export { initDrumRackTab, submitTimeStretchForm };
+export { initDrumRackTab };
