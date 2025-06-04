@@ -127,7 +127,8 @@ h3 {
     overflow: visible;
 }
 
-.tab button {
+.tab button,
+.tab a {
     background: transparent;
     border: none;
     padding: 0.75rem 1.25rem;
@@ -136,14 +137,17 @@ h3 {
     font-weight: 400;
     margin-right: 0.25rem;
     transition: color 0.2s;
+    text-decoration: none;
 }
 
-.tab button:hover {
+.tab button:hover,
+.tab a:hover {
     color: #262626;
     background-color: transparent;
 }
 
-.tab button.active {
+.tab button.active,
+.tab a.active {
     color: #ff764d;
     background-color: transparent;
     border-bottom: none;

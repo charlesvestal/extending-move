@@ -6,7 +6,13 @@
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <h1>Move - Extended</h1>
-    {% block content %}{% endblock %}
+    <h1 id="header">Move - Extended</h1>
+    <nav class="tab">
+        <a href="/reverse" class="{% if active_tab == 'reverse' %}active{% endif %}">Reverse WAV</a>
+        <a href="/restore" class="{% if active_tab == 'restore' %}active{% endif %}">Restore Set</a>
+    </nav>
+    <div class="tabcontent">
+        {% block content %}{% endblock %}
+    </div>
 </body>
 </html>
