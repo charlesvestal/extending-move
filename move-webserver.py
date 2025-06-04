@@ -12,6 +12,7 @@ import os
 import atexit
 import signal
 import sys
+import socket
 import numpy as np
 import librosa
 from wsgiref.simple_server import make_server, WSGIRequestHandler, WSGIServer
@@ -75,13 +76,46 @@ def handle_exit(signum, frame):
 class TLSIgnoringWSGIRequestHandler(WSGIRequestHandler):
     """WSGI request handler that ignores TLS handshake attempts."""
 
+    def handle(self):
+        """Check for TLS handshakes before reading the request line."""
+        try:
+            if hasattr(self, "rfile"):
+                peek = self.rfile.peek(3)
+                if peek and len(peek) >= 3 and peek.startswith(b"\x16\x03"):
+                    print("Ignored TLS handshake attempt (detected in handle)")
+                    self.close_connection = True
+                    try:
+                        self.connection.shutdown(socket.SHUT_RDWR)
+                    except Exception:
+                        pass
+                    self.connection.close()
+                    return
+        except Exception as exc:
+            err_str = repr(str(exc))
+            if "\\x16\\x03" in err_str:
+                print(
+                    f"Ignored TLS handshake attempt (exception in handle): {err_str[:50]}..."
+                )
+                self.close_connection = True
+                try:
+                    self.connection.close()
+                except Exception:
+                    pass
+                return
+        super().handle()
+
     def parse_request(self):
         try:
             if hasattr(self, "rfile"):
                 peek = self.rfile.peek(5)
                 if peek and len(peek) >= 3 and peek.startswith(b"\x16\x03"):
                     print("Ignored TLS handshake attempt (detected in parse_request)")
-                    self.rfile.read()
+                    self.close_connection = True
+                    try:
+                        self.connection.shutdown(socket.SHUT_RDWR)
+                    except Exception:
+                        pass
+                    self.connection.close()
                     return False
             return super().parse_request()
         except Exception as exc:
@@ -90,6 +124,11 @@ class TLSIgnoringWSGIRequestHandler(WSGIRequestHandler):
                 print(
                     f"Ignored TLS handshake attempt (exception in parse_request): {err_str[:50]}..."
                 )
+                self.close_connection = True
+                try:
+                    self.connection.close()
+                except Exception:
+                    pass
                 return False
             raise
 
