@@ -5,13 +5,23 @@ This example shows how parts of ``move-webserver.py`` can be served
 via Flask.  Only the reverse, restore, and slice tools are
 implemented to demonstrate the approach.
 """
-from flask import Flask, render_template, request, send_file, jsonify, redirect
+from flask import (
+    Flask,
+    render_template,
+    request,
+    send_file,
+    jsonify,
+    redirect,
+)
 import os
 from handlers.reverse_handler_class import ReverseHandler
 from handlers.restore_handler_class import RestoreHandler
 from handlers.slice_handler_class import SliceHandler
 from handlers.set_management_handler_class import SetManagementHandler
-from handlers.synth_preset_inspector_handler_class import SynthPresetInspectorHandler
+from handlers.synth_preset_inspector_handler_class import (
+    SynthPresetInspectorHandler,
+)
+from handlers.drum_rack_inspector_handler_class import DrumRackInspectorHandler
 from handlers.file_placer_handler_class import FilePlacerHandler
 from handlers.refresh_handler_class import RefreshHandler
 from dash import Dash, html
@@ -33,6 +43,7 @@ class FileField(cgi.FieldStorage):
         self.filename = fs.filename
         self.file = fs.stream
 
+
 app = Flask(__name__, template_folder="templates_jinja")
 reverse_handler = ReverseHandler()
 restore_handler = RestoreHandler()
@@ -41,6 +52,7 @@ set_management_handler = SetManagementHandler()
 synth_handler = SynthPresetInspectorHandler()
 file_placer_handler = FilePlacerHandler()
 refresh_handler = RefreshHandler()
+drum_rack_handler = DrumRackInspectorHandler()
 dash_app = Dash(__name__, server=app, routes_pathname_prefix="/dash/")
 dash_app.layout = html.Div([html.H1("Move Dash"), html.P("Placeholder")])
 
@@ -48,6 +60,7 @@ dash_app.layout = html.Div([html.H1("Move Dash"), html.P("Placeholder")])
 @app.route("/")
 def index():
     return redirect("/restore")
+
 
 @app.route("/reverse", methods=["GET", "POST"])
 def reverse():
@@ -73,6 +86,7 @@ def reverse():
         active_tab="reverse",
     )
 
+
 @app.route("/restore", methods=["GET", "POST"])
 def restore():
     message = None
@@ -81,8 +95,8 @@ def restore():
     options_html = ""
     if request.method == "POST":
         form_data = request.form.to_dict()
-        if 'ablbundle' in request.files:
-            form_data['ablbundle'] = FileField(request.files['ablbundle'])
+        if "ablbundle" in request.files:
+            form_data["ablbundle"] = FileField(request.files["ablbundle"])
         form = SimpleForm(form_data)
         result = restore_handler.handle_post(form)
         message = result.get("message")
@@ -99,6 +113,7 @@ def restore():
         active_tab="restore",
     )
 
+
 @app.route("/slice", methods=["GET", "POST"])
 def slice_tool():
     message = None
@@ -106,8 +121,8 @@ def slice_tool():
     message_type = None
     if request.method == "POST":
         form_data = request.form.to_dict()
-        if 'file' in request.files:
-            form_data['file'] = FileField(request.files['file'])
+        if "file" in request.files:
+            form_data["file"] = FileField(request.files["file"])
         form = SimpleForm(form_data)
         result = slice_handler.handle_post(form)
         if result is not None:
@@ -196,16 +211,74 @@ def synth_macros():
         active_tab="synth-macros",
     )
 
+
 @app.route("/chord", methods=["GET"])
 def chord():
     return render_template("chord.html", active_tab="chord")
 
 
+@app.route("/samples/<path:sample_path>", methods=["GET", "OPTIONS"])
+def serve_sample(sample_path):
+    """Serve sample audio files with CORS headers."""
+    from urllib.parse import unquote
+
+    base_dir = "/data/UserData/UserLibrary/Samples/Preset Samples"
+    decoded_path = unquote(sample_path)
+    full_path = os.path.join(base_dir, decoded_path)
+
+    base_real = os.path.realpath(base_dir)
+    file_real = os.path.realpath(full_path)
+
+    if not file_real.startswith(base_real):
+        return ("Access denied", 403)
+
+    if not os.path.exists(file_real):
+        return ("File not found", 404)
+
+    if request.method == "OPTIONS":
+        resp = app.make_response("")
+    else:
+        resp = send_file(file_real)
+
+    resp.headers["Access-Control-Allow-Origin"] = "*"
+    resp.headers["Access-Control-Allow-Methods"] = "GET, OPTIONS"
+    resp.headers["Access-Control-Allow-Headers"] = "Content-Type"
+    return resp
+
+
+@app.route("/drum-rack-inspector", methods=["GET", "POST"])
+def drum_rack_inspector():
+    message = None
+    success = False
+    message_type = None
+    options_html = ""
+    samples_html = ""
+    if request.method == "POST":
+        form = SimpleForm(request.form.to_dict())
+        result = drum_rack_handler.handle_post(form)
+    else:
+        result = drum_rack_handler.handle_get()
+    message = result.get("message")
+    message_type = result.get("message_type")
+    success = message_type != "error" if message_type else False
+    options_html = result.get("options") or result.get("options_html", "")
+    samples_html = result.get("samples_html", "")
+    return render_template(
+        "drum_rack_inspector.html",
+        message=message,
+        success=success,
+        message_type=message_type,
+        options_html=options_html,
+        samples_html=samples_html,
+        active_tab="drum-rack-inspector",
+    )
+
+
 @app.route("/place-files", methods=["POST"])
 def place_files_route():
     form_data = request.form.to_dict()
-    if 'file' in request.files:
-        form_data['file'] = FileField(request.files['file'])
+    if "file" in request.files:
+        form_data["file"] = FileField(request.files["file"])
     form = SimpleForm(form_data)
     result = file_placer_handler.handle_post(form)
     return jsonify(result)
@@ -221,13 +294,16 @@ def refresh_route():
 @app.route("/detect-transients", methods=["POST"])
 def detect_transients_route():
     form_data = request.form.to_dict()
-    if 'file' in request.files:
-        form_data['file'] = FileField(request.files['file'])
+    if "file" in request.files:
+        form_data["file"] = FileField(request.files["file"])
     form = SimpleForm(form_data)
     resp = slice_handler.handle_detect_transients(form)
-    return resp["content"], resp.get("status", 200), resp.get(
-        "headers", [("Content-Type", "application/json")]
+    return (
+        resp["content"],
+        resp.get("status", 200),
+        resp.get("headers", [("Content-Type", "application/json")]),
     )
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=9090)
