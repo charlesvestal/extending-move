@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Ableton Move Chord Kit Generator</h2>
+<p>Select a .WAV, .AIF, .AIFF or .MP3 file to generate chords for a Choke Kit ablpreset.</p>
+<input type="file" id="wavFileInput" accept=".wav,.aiff,.aif,.mp3"><br>
+<label for="presetName">Preset Name (optional): </label>
+<input type="text" id="presetName" placeholder="Preset name"><br>
+<button id="generatePreset">Download .ablpresetbundle</button>
+<div id="loadingIndicator" style="display:none; margin-top:10px;">
+  Generating bundle... <span id="progressPercent">0%</span>
+</div>
+<div class="chord-list">
+  <h3>Chords to be generated:</h3>
+  <ul id="chordList"></ul>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+<script src="https://unpkg.com/wavesurfer.js@6/dist/wavesurfer.js"></script>
+<script src="/static/chord.js"></script>
+{% endblock %}

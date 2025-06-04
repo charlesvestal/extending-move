@@ -111,6 +111,11 @@ def slice_tool():
     )
 
 
+@app.route("/chord", methods=["GET"])
+def chord():
+    return render_template("chord.html", active_tab="chord")
+
+
 @app.route("/detect-transients", methods=["POST"])
 def detect_transients_route():
     form_data = request.form.to_dict()

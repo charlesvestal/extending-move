@@ -57,6 +57,11 @@ def test_slice_post(client, monkeypatch):
     assert resp.status_code == 200
     assert b'sliced' in resp.data
 
+def test_chord_get(client):
+    resp = client.get('/chord')
+    assert resp.status_code == 200
+    assert b'Chord Kit Generator' in resp.data
+
 def test_detect_transients(client, monkeypatch):
     def fake_detect(form):
         return {'content': '{"success": true}', 'status': 200, 'headers': [('Content-Type', 'application/json')]}
