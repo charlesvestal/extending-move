@@ -11,6 +11,8 @@ from handlers.reverse_handler_class import ReverseHandler
 from handlers.restore_handler_class import RestoreHandler
 from handlers.slice_handler_class import SliceHandler
 from handlers.synth_preset_inspector_handler_class import SynthPresetInspectorHandler
+from handlers.file_placer_handler_class import FilePlacerHandler
+from handlers.refresh_handler_class import RefreshHandler
 from dash import Dash, html
 from core.reverse_handler import get_wav_files
 import cgi
@@ -35,6 +37,8 @@ reverse_handler = ReverseHandler()
 restore_handler = RestoreHandler()
 slice_handler = SliceHandler()
 synth_handler = SynthPresetInspectorHandler()
+file_placer_handler = FilePlacerHandler()
+refresh_handler = RefreshHandler()
 dash_app = Dash(__name__, server=app, routes_pathname_prefix="/dash/")
 dash_app.layout = html.Div([html.H1("Move Dash"), html.P("Placeholder")])
 
@@ -141,6 +145,27 @@ def synth_macros():
         selected_preset=selected_preset,
         active_tab="synth-macros",
     )
+
+@app.route("/chord", methods=["GET"])
+def chord():
+    return render_template("chord.html", active_tab="chord")
+
+
+@app.route("/place-files", methods=["POST"])
+def place_files_route():
+    form_data = request.form.to_dict()
+    if 'file' in request.files:
+        form_data['file'] = FileField(request.files['file'])
+    form = SimpleForm(form_data)
+    result = file_placer_handler.handle_post(form)
+    return jsonify(result)
+
+
+@app.route("/refresh", methods=["POST"])
+def refresh_route():
+    form = SimpleForm(request.form.to_dict())
+    result = refresh_handler.handle_post(form)
+    return jsonify(result)
 
 
 @app.route("/detect-transients", methods=["POST"])
