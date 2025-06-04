@@ -84,6 +84,8 @@ def test_synth_macros_post(client, monkeypatch):
     resp = client.post('/synth-macros', data={'action': 'select_preset'})
     assert resp.status_code == 200
     assert b'saved' in resp.data
+    assert b'name="preset_select" value="x"' in resp.data
+    assert b'id="preset_select"' in resp.data and b'disabled' in resp.data
 
 def test_detect_transients(client, monkeypatch):
     def fake_detect(form):
