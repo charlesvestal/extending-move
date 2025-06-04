@@ -35,7 +35,8 @@ echo "Uploading project files to ${REMOTE_HOST}:${REMOTE_DIR}…"
 tar czf - \
   --exclude='.git' \
   --exclude='utility-scripts' \
-  core handlers templates static examples move-webserver.py requirements.txt | \
+  core handlers templates templates_jinja static examples \
+  move-webserver.py flask_app.py requirements.txt | \
 ssh "${REMOTE_USER}@${REMOTE_HOST}" "cd '${REMOTE_DIR}' && tar xzf - && cp -r /opt/move/HttpRoot/fonts static/"
 
 echo "Files copied."
@@ -44,6 +45,7 @@ echo "Files copied."
 echo "Setting permissions on remote…"
 ssh "${REMOTE_USER}@${REMOTE_HOST}" <<EOF
 chmod +x "${REMOTE_DIR}/move-webserver.py"
+chmod +x "${REMOTE_DIR}/flask_app.py"
 chmod -R 755 "${REMOTE_DIR}/static"
 EOF
 
