@@ -10,6 +10,7 @@ import os
 from handlers.reverse_handler_class import ReverseHandler
 from handlers.restore_handler_class import RestoreHandler
 from handlers.slice_handler_class import SliceHandler
+from handlers.drum_rack_inspector_handler_class import DrumRackInspectorHandler
 from dash import Dash, html
 from core.reverse_handler import get_wav_files
 import cgi
@@ -33,6 +34,7 @@ app = Flask(__name__, template_folder="templates_jinja")
 reverse_handler = ReverseHandler()
 restore_handler = RestoreHandler()
 slice_handler = SliceHandler()
+drum_rack_handler = DrumRackInspectorHandler()
 dash_app = Dash(__name__, server=app, routes_pathname_prefix="/dash/")
 dash_app.layout = html.Div([html.H1("Move Dash"), html.P("Placeholder")])
 
@@ -111,6 +113,33 @@ def slice_tool():
     )
 
 
+@app.route("/drum-rack-inspector", methods=["GET", "POST"])
+def drum_rack_inspector():
+    message = None
+    success = False
+    options_html = ""
+    samples_html = ""
+    if request.method == "POST":
+        form = SimpleForm(request.form.to_dict())
+        result = drum_rack_handler.handle_post(form)
+        message = result.get("message")
+        success = result.get("message_type") != "error"
+        options_html = result.get("options")
+        samples_html = result.get("samples_html")
+    else:
+        ctx = drum_rack_handler.handle_get()
+        options_html = ctx.get("options")
+        samples_html = ctx.get("samples_html")
+    return render_template(
+        "drum_rack_inspector.html",
+        message=message,
+        success=success,
+        options_html=options_html,
+        samples_html=samples_html,
+        active_tab="drum_rack_inspector",
+    )
+
+
 @app.route("/detect-transients", methods=["POST"])
 def detect_transients_route():
     form_data = request.form.to_dict()
@@ -121,6 +150,21 @@ def detect_transients_route():
     return resp["content"], resp.get("status", 200), resp.get(
         "headers", [("Content-Type", "application/json")]
     )
+
+
+@app.route("/samples/<path:sub>")
+def serve_sample(sub):
+    base_dir = "/data/UserData/UserLibrary/Samples/Preset Samples"
+    full_path = os.path.join(base_dir, sub)
+    if not os.path.realpath(full_path).startswith(os.path.realpath(base_dir)):
+        return "Access denied", 403
+    if not os.path.exists(full_path):
+        return "Not found", 404
+    resp = send_file(full_path, mimetype="audio/wav")
+    resp.headers["Access-Control-Allow-Origin"] = "*"
+    resp.headers["Access-Control-Allow-Methods"] = "GET, OPTIONS"
+    resp.headers["Access-Control-Allow-Headers"] = "Content-Type"
+    return resp
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=9090)

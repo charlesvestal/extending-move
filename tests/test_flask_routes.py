@@ -57,6 +57,23 @@ def test_slice_post(client, monkeypatch):
     assert resp.status_code == 200
     assert b'sliced' in resp.data
 
+def test_drum_rack_get(client, monkeypatch):
+    def fake_get():
+        return {'options': '<option>dr</option>', 'message': '', 'samples_html': ''}
+    monkeypatch.setattr(flask_app.drum_rack_handler, 'handle_get', fake_get)
+    resp = client.get('/drum-rack-inspector')
+    assert resp.status_code == 200
+    assert b'<option>dr</option>' in resp.data
+
+def test_drum_rack_post(client, monkeypatch):
+    def fake_post(form):
+        return {'message': 'done', 'message_type': 'success', 'options': '', 'samples_html': ''}
+    monkeypatch.setattr(flask_app.drum_rack_handler, 'handle_post', fake_post)
+    data = {'action': 'select_preset', 'preset_select': 'foo'}
+    resp = client.post('/drum-rack-inspector', data=data)
+    assert resp.status_code == 200
+    assert b'done' in resp.data
+
 def test_detect_transients(client, monkeypatch):
     def fake_detect(form):
         return {'content': '{"success": true}', 'status': 200, 'headers': [('Content-Type', 'application/json')]}
