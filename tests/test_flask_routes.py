@@ -76,7 +76,7 @@ def test_synth_macros_post(client, monkeypatch):
         return {
             'message': 'saved',
             'message_type': 'success',
-            'options': '<option value="x" selected>p</option>',
+            'options': '<option value="x" selected>Sub/preset (Drift)</option>',
             'macros_html': '<p>done</p>',
             'selected_preset': 'x',
         }
@@ -86,6 +86,7 @@ def test_synth_macros_post(client, monkeypatch):
     assert b'saved' in resp.data
     assert b'name="preset_select" value="x"' in resp.data
     assert b'id="preset_select"' in resp.data and b'disabled' in resp.data
+    assert b'Choose Another Preset' in resp.data
 
 def test_detect_transients(client, monkeypatch):
     def fake_detect(form):
