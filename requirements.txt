@@ -6,3 +6,4 @@ soundfile>=0.13.1
 mido>=1.2.10
 Flask>=2.3.3
 dash>=2.16.1
+gunicorn>=23.0.0

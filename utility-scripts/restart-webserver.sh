@@ -7,8 +7,8 @@ REMOTE_HOST="move.local"
 
 # Absolute paths on the remote machine
 PID_FILE="/data/UserData/extending-move/move-webserver.pid"
-# Define the command to change directory and run the webserver unbuffered.
-WEB_SERVER_CMD="cd /data/UserData/extending-move && PYTHONPATH=/data/UserData/extending-move python3 -u move-webserver.py"
+# Define the command to change directory and run the webserver via gunicorn.
+WEB_SERVER_CMD="cd /data/UserData/extending-move && PYTHONPATH=/data/UserData/extending-move gunicorn -c gunicorn_config.py move-webserver:app"
 LOG_FILE="/data/UserData/extending-move/move-webserver.log"
 
 echo "Restarting the webserver on ${REMOTE_HOST}..."
@@ -18,7 +18,7 @@ set -euo pipefail
 
 # Use the absolute paths
 PID_FILE="/data/UserData/extending-move/move-webserver.pid"
-WEB_SERVER_CMD="cd /data/UserData/extending-move && PYTHONPATH=/data/UserData/extending-move python3 -u move-webserver.py"
+WEB_SERVER_CMD="cd /data/UserData/extending-move && PYTHONPATH=/data/UserData/extending-move gunicorn -c gunicorn_config.py move-webserver:app"
 LOG_FILE="/data/UserData/extending-move/move-webserver.log"
 
 # Kill any existing webserver process using the PID file if available
@@ -33,7 +33,7 @@ if [ -f "$PID_FILE" ]; then
   fi
   rm -f "$PID_FILE"
 else
-  pkill -f 'python3 move-webserver.py' || true
+  pkill -f 'gunicorn.*move-webserver:app' || true
 fi
 
 # Clean up any old log file

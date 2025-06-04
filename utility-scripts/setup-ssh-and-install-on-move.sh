@@ -195,7 +195,7 @@ if [[ ! "$setup_autostart" =~ ^[Yy]$ ]]; then
     echo "Auto-start setup skipped by user."
     echo ""
     echo "Script finished. 'extending-move' should be installed."
-    echo "You may need to start the server manually: ssh ${REMOTE_USER_ABLETON}@${REMOTE_HOST} 'cd /data/UserData/extending-move && python3 move-webserver.py'"
+    echo "You may need to start the server manually: ssh ${REMOTE_USER_ABLETON}@${REMOTE_HOST} 'cd /data/UserData/extending-move && gunicorn -c gunicorn_config.py move-webserver:app'"
     exit 0
 fi
 
@@ -220,10 +220,10 @@ case "$1" in
     # adjust this to whatever directory your code lives in:
     cd /data/UserData/extending-move
     # run as the 'ableton' user (drops privileges)
-    su - ableton -s /bin/sh -c "cd /data/UserData/extending-move ; python3 move-webserver.py >> startup.log 2>&1 &"
+    su - ableton -s /bin/sh -c "cd /data/UserData/extending-move ; gunicorn -c gunicorn_config.py move-webserver:app >> startup.log 2>&1 &"
     ;;
   stop)
-    pkill -u ableton -f move-webserver.py
+    pkill -u ableton -f 'gunicorn.*move-webserver:app'
     ;;
   restart)
     $0 stop
@@ -231,7 +231,7 @@ case "$1" in
     $0 start
     ;;
   status)
-    if pgrep -u ableton -f move-webserver.py >/dev/null; then
+    if pgrep -u ableton -f 'gunicorn.*move-webserver:app' >/dev/null; then
       echo "Running"
     else
       echo "Not running"
