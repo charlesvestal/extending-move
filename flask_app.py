@@ -5,7 +5,7 @@ This example shows how parts of ``move-webserver.py`` can be served
 via Flask.  Only the reverse, restore, and slice tools are
 implemented to demonstrate the approach.
 """
-from flask import Flask, render_template, request, send_file, jsonify
+from flask import Flask, render_template, request, send_file, jsonify, redirect
 import os
 from handlers.reverse_handler_class import ReverseHandler
 from handlers.restore_handler_class import RestoreHandler
@@ -47,7 +47,7 @@ dash_app.layout = html.Div([html.H1("Move Dash"), html.P("Placeholder")])
 
 @app.route("/")
 def index():
-    return render_template("index.html", active_tab="home")
+    return redirect("/restore")
 
 @app.route("/reverse", methods=["GET", "POST"])
 def reverse():
