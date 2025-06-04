@@ -14,6 +14,21 @@ from dash import Dash, html
 from core.reverse_handler import get_wav_files
 import cgi
 
+
+class SimpleForm(dict):
+    """Mimic ``cgi.FieldStorage`` for our handler classes."""
+
+    def getvalue(self, name, default=None):
+        return self.get(name, default)
+
+
+class FileField(cgi.FieldStorage):
+    """Wrapper around Flask ``FileStorage`` objects."""
+
+    def __init__(self, fs):
+        self.filename = fs.filename
+        self.file = fs.stream
+
 app = Flask(__name__, template_folder="templates_jinja")
 reverse_handler = ReverseHandler()
 restore_handler = RestoreHandler()
@@ -31,10 +46,6 @@ def reverse():
     message = None
     success = False
     if request.method == "POST":
-        class SimpleForm(dict):
-            def getvalue(self, name):
-                return self.get(name)
-
         form = SimpleForm(request.form.to_dict())
         result = reverse_handler.handle_post(form)
         message = result.get("message")
@@ -54,15 +65,6 @@ def restore():
     success = False
     options_html = ""
     if request.method == "POST":
-        class SimpleForm(dict):
-            def getvalue(self, name):
-                return self.get(name)
-
-        class FileField(cgi.FieldStorage):
-            def __init__(self, fs):
-                self.filename = fs.filename
-                self.file = fs.stream
-
         form_data = request.form.to_dict()
         if 'ablbundle' in request.files:
             form_data['ablbundle'] = FileField(request.files['ablbundle'])
@@ -85,15 +87,6 @@ def slice_tool():
     message = None
     success = False
     if request.method == "POST":
-        class SimpleForm(dict):
-            def getvalue(self, name):
-                return self.get(name)
-
-        class FileField(cgi.FieldStorage):
-            def __init__(self, fs):
-                self.filename = fs.filename
-                self.file = fs.stream
-
         form_data = request.form.to_dict()
         if 'file' in request.files:
             form_data['file'] = FileField(request.files['file'])
