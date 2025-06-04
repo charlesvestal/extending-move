@@ -10,6 +10,7 @@ import os
 from handlers.reverse_handler_class import ReverseHandler
 from handlers.restore_handler_class import RestoreHandler
 from handlers.slice_handler_class import SliceHandler
+from handlers.set_management_handler_class import SetManagementHandler
 from dash import Dash, html
 from core.reverse_handler import get_wav_files
 import cgi
@@ -33,6 +34,7 @@ app = Flask(__name__, template_folder="templates_jinja")
 reverse_handler = ReverseHandler()
 restore_handler = RestoreHandler()
 slice_handler = SliceHandler()
+set_management_handler = SetManagementHandler()
 dash_app = Dash(__name__, server=app, routes_pathname_prefix="/dash/")
 dash_app.layout = html.Div([html.H1("Move Dash"), html.P("Placeholder")])
 
@@ -108,6 +110,32 @@ def slice_tool():
         message=message,
         success=success,
         active_tab="slice",
+    )
+
+
+@app.route("/set-management", methods=["GET", "POST"])
+def set_management():
+    message = None
+    success = False
+    context = set_management_handler.handle_get()
+    pad_options = context.get("pad_options", "")
+    pad_color_options = context.get("pad_color_options", "")
+    if request.method == "POST":
+        form_data = request.form.to_dict()
+        if "midi_file" in request.files:
+            form_data["midi_file"] = FileField(request.files["midi_file"])
+        form = SimpleForm(form_data)
+        result = set_management_handler.handle_post(form)
+        message = result.get("message")
+        success = result.get("message_type") != "error"
+        pad_options = result.get("pad_options", pad_options)
+    return render_template(
+        "set_management.html",
+        message=message,
+        success=success,
+        pad_options=pad_options,
+        pad_color_options=pad_color_options,
+        active_tab="set-management",
     )
 
 
