@@ -78,6 +78,12 @@ function initializeTimeStretchModal() {
     function updateAlgoState() { algoSelect.disabled = !preserveCheckbox.checked; }
     preserveCheckbox.addEventListener('change', updateAlgoState);
     updateAlgoState();
+
+    const tsForm = document.getElementById('timeStretchForm');
+    const loadingOverlay = document.getElementById('ts_loading');
+    tsForm.addEventListener('submit', () => {
+        if (loadingOverlay) loadingOverlay.classList.remove('hidden');
+    });
 }
 
 function initDrumRackTab() {
