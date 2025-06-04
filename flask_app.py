@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """Simple Flask app using Jinja templates.
 
-This is a minimal example showing how the Move server logic can
-be wrapped in a Flask application. Only a subset of the features
-from ``move-webserver.py`` are implemented as a demonstration.
+This example shows how parts of ``move-webserver.py`` can be served
+via Flask.  Only the reverse, restore, and slice tools are
+implemented to demonstrate the approach.
 """
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_file
+import os
 from handlers.reverse_handler_class import ReverseHandler
 from handlers.restore_handler_class import RestoreHandler
+from handlers.slice_handler_class import SliceHandler
 from dash import Dash, html
 from core.reverse_handler import get_wav_files
 import cgi
@@ -15,6 +17,7 @@ import cgi
 app = Flask(__name__, template_folder="templates_jinja")
 reverse_handler = ReverseHandler()
 restore_handler = RestoreHandler()
+slice_handler = SliceHandler()
 dash_app = Dash(__name__, server=app, routes_pathname_prefix="/dash/")
 dash_app.layout = html.Div([html.H1("Move Dash"), html.P("Placeholder")])
 
@@ -75,6 +78,43 @@ def restore():
         success=success,
         options_html=options_html,
         active_tab="restore",
+    )
+
+@app.route("/slice", methods=["GET", "POST"])
+def slice_tool():
+    message = None
+    success = False
+    if request.method == "POST":
+        class SimpleForm(dict):
+            def getvalue(self, name):
+                return self.get(name)
+
+        class FileField(cgi.FieldStorage):
+            def __init__(self, fs):
+                self.filename = fs.filename
+                self.file = fs.stream
+
+        form_data = request.form.to_dict()
+        if 'file' in request.files:
+            form_data['file'] = FileField(request.files['file'])
+        form = SimpleForm(form_data)
+        result = slice_handler.handle_post(form)
+        if result is not None:
+            if result.get("download") and result.get("bundle_path"):
+                path = result["bundle_path"]
+                resp = send_file(path, as_attachment=True)
+                try:
+                    os.remove(path)
+                except Exception:
+                    pass
+                return resp
+            message = result.get("message")
+            success = result.get("message_type") != "error"
+    return render_template(
+        "slice.html",
+        message=message,
+        success=success,
+        active_tab="slice",
     )
 
 if __name__ == "__main__":
