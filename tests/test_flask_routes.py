@@ -104,6 +104,40 @@ def test_detect_transients(client, monkeypatch):
     assert resp.json['success'] is True
 
 
+def test_set_management_get(client, monkeypatch):
+    def fake_get():
+        return {
+            'pad_options': '<option value="1">1</option>',
+            'pad_color_options': '<option value="1">1</option>'
+        }
+    monkeypatch.setattr(flask_app.set_management_handler, 'handle_get', fake_get)
+    resp = client.get('/set-management')
+    assert resp.status_code == 200
+    assert b'<option value="1">1</option>' in resp.data
+
+
+def test_set_management_post(client, monkeypatch):
+    def fake_post(form):
+        return {
+            'message': 'ok',
+            'message_type': 'success',
+            'pad_options': '<option value="2">2</option>',
+            'pad_color_options': '<option value="1">1</option>'
+        }
+    monkeypatch.setattr(flask_app.set_management_handler, 'handle_post', fake_post)
+    f = (io.BytesIO(b'data'), 'test.mid')
+    data = {
+        'action': 'upload_midi',
+        'midi_type': 'melodic',
+        'set_name': 'MySet',
+        'pad_index': '1',
+        'pad_color': '1',
+        'midi_file': f
+    }
+    resp = client.post('/set-management', data=data, content_type='multipart/form-data')
+    assert resp.status_code == 200
+    assert b'ok' in resp.data
+
 def test_place_files_post(client, monkeypatch):
     def fake_place(form):
         return {'message': 'placed', 'message_type': 'success'}
