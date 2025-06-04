@@ -9,6 +9,8 @@ from flask import Flask, render_template, request
 from handlers.reverse_handler_class import ReverseHandler
 from handlers.restore_handler_class import RestoreHandler
 from dash import Dash, html
+from core.reverse_handler import get_wav_files
+import cgi
 
 app = Flask(__name__, template_folder="templates_jinja")
 reverse_handler = ReverseHandler()
@@ -26,46 +28,42 @@ def reverse():
     message = None
     success = False
     if request.method == "POST":
-        form = request.form.to_dict(flat=False)
-        # Flask wraps file fields in request.files
         class SimpleForm(dict):
             def getvalue(self, name):
-                if name in self:
-                    return self[name]
-                if name in request.files:
-                    return request.files[name]
-                return None
-        form.update({k: v[0] if isinstance(v, list) else v for k, v in form.items()})
-        form = SimpleForm(form)
+                return self.get(name)
+
+        form = SimpleForm(request.form.to_dict())
         result = reverse_handler.handle_post(form)
         message = result.get("message")
         success = result.get("message_type") != "error"
-    wav_files = reverse_handler.get_wav_options()
-    wav_list = [line.split('>')[1].split('<')[0] for line in wav_files.splitlines() if line.strip()]
+    wav_list = get_wav_files("/data/UserData/UserLibrary/Samples")
     return render_template("reverse.html", message=message, success=success, wav_files=wav_list)
 
 @app.route("/restore", methods=["GET", "POST"])
 def restore():
     message = None
     success = False
-    pad_options = []
+    options_html = ""
     if request.method == "POST":
         class SimpleForm(dict):
             def getvalue(self, name):
-                if name in self:
-                    return self[name]
-                if name in request.files:
-                    return request.files[name]
-                return None
-        form_data = request.form.to_dict(flat=False)
-        form_data.update({k: v.filename if hasattr(v, 'filename') else v for k, v in request.files.items()})
-        simple = SimpleForm({k: v[0] if isinstance(v, list) else v for k, v in form_data.items()})
-        result = restore_handler.handle_post(simple)
+                return self.get(name)
+
+        class FileField(cgi.FieldStorage):
+            def __init__(self, fs):
+                self.filename = fs.filename
+                self.file = fs.stream
+
+        form_data = request.form.to_dict()
+        if 'ablbundle' in request.files:
+            form_data['ablbundle'] = FileField(request.files['ablbundle'])
+        form = SimpleForm(form_data)
+        result = restore_handler.handle_post(form)
         message = result.get("message")
         success = result.get("message_type") != "error"
     context = restore_handler.handle_get()
-    pad_options = [opt.split('>')[1].split('<')[0] for opt in context.get('options','').splitlines() if opt.strip()]
-    return render_template("restore.html", message=message, success=success, pad_options=pad_options)
+    options_html = context.get("options", "")
+    return render_template("restore.html", message=message, success=success, options_html=options_html)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=9090)

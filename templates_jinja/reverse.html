@@ -6,6 +6,7 @@
   <p style="color: {{ 'green' if success else 'red' }};">{{ message }}</p>
 {% endif %}
 <form method="post">
+    <input type="hidden" name="action" value="reverse_file">
     <label for="wav_file">Select WAV file:</label>
     <select name="wav_file" required>
         <option value="" disabled selected>--Select a file--</option>
