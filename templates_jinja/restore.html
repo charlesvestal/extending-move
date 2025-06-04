@@ -2,7 +2,7 @@
 {% block content %}
 <h2>Restore Move Set (.ablbundle)</h2>
 {% if message %}
-  <p style="color: {{ 'green' if success else 'red' }};">{{ message }}</p>
+  <p class="{{ message_type if message_type else ('success' if success else 'error') }}">{{ message }}</p>
 {% endif %}
 <form action="/restore" method="post" enctype="multipart/form-data">
     <label for="ablbundle">Select .ablbundle file:</label>

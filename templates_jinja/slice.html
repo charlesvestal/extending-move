@@ -2,8 +2,9 @@
 {% block content %}
 <h2>Slice a WAV File into a Kit</h2>
 {% if message %}
-  <p style="color: {{ 'green' if success else 'red' }};">{{ message }}</p>
+  <p class="{{ message_type if message_type else ('success' if success else 'error') }}">{{ message }}</p>
 {% endif %}
+<p id="slice-message"></p>
 <form id="slice-form" action="/slice" method="post" enctype="multipart/form-data">
   <input type="hidden" name="action" value="slice">
   <input type="hidden" name="regions" id="regions-input">
