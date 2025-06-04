@@ -77,6 +77,7 @@ def handle_exit(signum, frame):
 
 class TLSIgnoringWSGIRequestHandler(WSGIRequestHandler):
     """WSGI request handler that ignores TLS handshake attempts."""
+    protocol_version = "HTTP/1.1"
 
     def handle(self):
         """Check for TLS handshakes before reading the request line."""
@@ -160,6 +161,14 @@ class TLSIgnoringWSGIServer(WSGIServer):
             print("Exception occurred during processing of request from", client_address)
             traceback.print_exc()
             print("-" * 40)
+
+
+# Threading-enabled WSGI server that ignores TLS handshake attempts
+from socketserver import ThreadingMixIn
+
+class ThreadingTLSIgnoringWSGIServer(ThreadingMixIn, TLSIgnoringWSGIServer):
+    """Threading-enabled WSGI server that ignores TLS handshake attempts."""
+    daemon_threads = True
 
 
 app = Flask(__name__, template_folder="templates_jinja")
@@ -545,7 +554,7 @@ if __name__ == "__main__":
         host,
         port,
         app,
-        server_class=TLSIgnoringWSGIServer,
+        server_class=ThreadingTLSIgnoringWSGIServer,
         handler_class=TLSIgnoringWSGIRequestHandler,
     ) as httpd:
         print(f"Server started http://{host}:{port}", flush=True)
