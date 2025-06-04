@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <title>Move - Extended</title>
     <link rel="stylesheet" href="/static/style.css">
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
 </head>
-<body>
+<body hx-boost="true" hx-target="body" hx-select="body">
     <h1 id="header">Move - Extended</h1>
     <nav class="tab">
         <a href="/restore" class="{% if active_tab == 'restore' %}active{% endif %}">Restore Set</a>
@@ -15,7 +16,7 @@
         <a href="/reverse" class="{% if active_tab == 'reverse' %}active{% endif %}">Reverse WAV</a>
         <a href="/set-management" class="{% if active_tab == 'set-management' %}active{% endif %}">MIDI Upload</a>
     </nav>
-    <div class="tabcontent">
+    <div id="content" class="tabcontent">
         {% block content %}{% endblock %}
     </div>
     {% block scripts %}{% endblock %}

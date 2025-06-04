@@ -5,7 +5,7 @@
   <p class="{{ message_type if message_type else ('success' if success else 'error') }}">{{ message }}</p>
 {% endif %}
 <p id="slice-message"></p>
-<form id="slice-form" action="/slice" method="post" enctype="multipart/form-data">
+<form id="slice-form" action="/slice" method="post" enctype="multipart/form-data" hx-boost="false">
   <input type="hidden" name="action" value="slice">
   <input type="hidden" name="regions" id="regions-input">
 
