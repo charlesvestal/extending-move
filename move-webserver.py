@@ -81,18 +81,23 @@ class TLSIgnoringWSGIRequestHandler(WSGIRequestHandler):
     def handle(self):
         """Check for TLS handshakes before reading the request line."""
         try:
-            if hasattr(self, "rfile"):
-                peek = self.rfile.peek(3)
-                if peek and len(peek) >= 3 and peek.startswith(b"\x16\x03"):
-                    print("Ignored TLS handshake attempt (detected in handle)")
-                    self.close_connection = True
-                    try:
-                        self.connection.shutdown(socket.SHUT_RDWR)
-                    except Exception:
-                        pass
-                    self.connection.close()
-                    return
+            self.connection.settimeout(0.5)
+            peek = self.connection.recv(3, socket.MSG_PEEK)
+            self.connection.settimeout(None)
+            if peek and len(peek) >= 3 and peek.startswith(b"\x16\x03"):
+                print("Ignored TLS handshake attempt (detected in handle)")
+                self.close_connection = True
+                try:
+                    self.connection.shutdown(socket.SHUT_RDWR)
+                except Exception:
+                    pass
+                self.connection.close()
+                return
+        except socket.timeout:
+            # No data arrived quickly; proceed with normal handling
+            self.connection.settimeout(None)
         except Exception as exc:
+            self.connection.settimeout(None)
             err_str = repr(str(exc))
             if "\\x16\\x03" in err_str:
                 print(
