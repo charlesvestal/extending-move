@@ -28,7 +28,7 @@ from handlers.synth_preset_inspector_handler_class import (
 from handlers.drum_rack_inspector_handler_class import DrumRackInspectorHandler
 from handlers.file_placer_handler_class import FilePlacerHandler
 from handlers.refresh_handler_class import RefreshHandler
-from dash import Dash, html
+from dash import Dash, html, dcc, Input, Output, State
 from core.reverse_handler import get_wav_files
 import cgi
 
@@ -181,7 +181,66 @@ file_placer_handler = FilePlacerHandler()
 refresh_handler = RefreshHandler()
 drum_rack_handler = DrumRackInspectorHandler()
 dash_app = Dash(__name__, server=app, routes_pathname_prefix="/dash/")
-dash_app.layout = html.Div([html.H1("Move Dash"), html.P("Placeholder")])
+
+
+def dash_layout():
+    """Dynamic layout for the Dash interface."""
+    return html.Div(
+        [
+            dcc.Location(id="dash-url"),
+            html.H1("Move Dash"),
+            html.Nav(
+                [
+                    dcc.Link("Reverse", href="/dash/reverse", style={"margin-right": "10px"}),
+                ]
+            ),
+            html.Div(id="dash-page-content"),
+        ]
+    )
+
+
+dash_app.layout = dash_layout
+
+
+def reverse_page_layout():
+    """Layout for reversing WAV files."""
+    options = [
+        {"label": f, "value": f}
+        for f in get_wav_files("/data/UserData/UserLibrary/Samples")
+    ]
+    return html.Div(
+        [
+            html.H2("Reverse a WAV File"),
+            dcc.Dropdown(
+                id="reverse-wav-file",
+                options=options,
+                placeholder="Select a file",
+            ),
+            html.Button("Reverse", id="reverse-submit"),
+            html.Div(id="reverse-message"),
+        ]
+    )
+
+
+@dash_app.callback(Output("dash-page-content", "children"), Input("dash-url", "pathname"))
+def render_page(pathname):
+    if pathname == "/dash/reverse":
+        return reverse_page_layout()
+    return html.Div("Select a tool from the navigation.")
+
+
+@dash_app.callback(
+    Output("reverse-message", "children"),
+    Input("reverse-submit", "n_clicks"),
+    State("reverse-wav-file", "value"),
+    prevent_initial_call=True,
+)
+def perform_reverse(n_clicks, wav_file):
+    if not wav_file:
+        return "No file selected"
+    form = SimpleForm({"action": "reverse_file", "wav_file": wav_file})
+    result = reverse_handler.handle_post(form)
+    return result.get("message", "")
 
 
 @app.before_request
