@@ -7,13 +7,16 @@ from flask import (
     send_file,
     jsonify,
     redirect,
+    g,
 )
 import os
 import atexit
 import signal
 import sys
+import socket
 import numpy as np
 import librosa
+import time
 from wsgiref.simple_server import make_server, WSGIRequestHandler, WSGIServer
 from handlers.reverse_handler_class import ReverseHandler
 from handlers.restore_handler_class import RestoreHandler
@@ -74,22 +77,71 @@ def handle_exit(signum, frame):
 
 class TLSIgnoringWSGIRequestHandler(WSGIRequestHandler):
     """WSGI request handler that ignores TLS handshake attempts."""
+    protocol_version = "HTTP/1.1"
+
+    def handle(self):
+        """Check for TLS handshakes before reading the request line."""
+        try:
+            self.connection.settimeout(0.5)
+            peek = self.connection.recv(3, socket.MSG_PEEK)
+            self.connection.settimeout(None)
+            if peek and len(peek) >= 3 and peek.startswith(b"\x16\x03"):
+                print("Ignored TLS handshake attempt (detected in handle)")
+                self.close_connection = True
+                try:
+                    self.connection.shutdown(socket.SHUT_RDWR)
+                except Exception:
+                    pass
+                self.connection.close()
+                return
+        except socket.timeout:
+            # No data arrived quickly; proceed with normal handling
+            self.connection.settimeout(None)
+        except Exception as exc:
+            self.connection.settimeout(None)
+            err_str = repr(str(exc))
+            if "\\x16\\x03" in err_str:
+                print(
+                    f"Ignored TLS handshake attempt (exception in handle): {err_str[:50]}..."
+                )
+                self.close_connection = True
+                try:
+                    self.connection.close()
+                except Exception:
+                    pass
+                return
+        super().handle()
 
     def parse_request(self):
         try:
-            if hasattr(self, "rfile"):
-                peek = self.rfile.peek(5)
-                if peek and len(peek) >= 3 and peek.startswith(b"\x16\x03"):
-                    print("Ignored TLS handshake attempt (detected in parse_request)")
-                    self.rfile.read()
-                    return False
+            self.connection.settimeout(0.5)
+            peek = self.connection.recv(5, socket.MSG_PEEK)
+            self.connection.settimeout(None)
+            if peek and len(peek) >= 3 and peek.startswith(b"\x16\x03"):
+                print("Ignored TLS handshake attempt (detected in parse_request)")
+                self.close_connection = True
+                try:
+                    self.connection.shutdown(socket.SHUT_RDWR)
+                except Exception:
+                    pass
+                self.connection.close()
+                return False
+            return super().parse_request()
+        except socket.timeout:
+            self.connection.settimeout(None)
             return super().parse_request()
         except Exception as exc:
+            self.connection.settimeout(None)
             err_str = repr(str(exc))
             if "\\x16\\x03" in err_str:
                 print(
                     f"Ignored TLS handshake attempt (exception in parse_request): {err_str[:50]}..."
                 )
+                self.close_connection = True
+                try:
+                    self.connection.close()
+                except Exception:
+                    pass
                 return False
             raise
 
@@ -111,6 +163,14 @@ class TLSIgnoringWSGIServer(WSGIServer):
             print("-" * 40)
 
 
+# Threading-enabled WSGI server that ignores TLS handshake attempts
+from socketserver import ThreadingMixIn
+
+class ThreadingTLSIgnoringWSGIServer(ThreadingMixIn, TLSIgnoringWSGIServer):
+    """Threading-enabled WSGI server that ignores TLS handshake attempts."""
+    daemon_threads = True
+
+
 app = Flask(__name__, template_folder="templates_jinja")
 reverse_handler = ReverseHandler()
 restore_handler = RestoreHandler()
@@ -124,27 +184,62 @@ dash_app = Dash(__name__, server=app, routes_pathname_prefix="/dash/")
 dash_app.layout = html.Div([html.H1("Move Dash"), html.P("Placeholder")])
 
 
+@app.before_request
+def record_start_time():
+    """Record the start time of the request."""
+    g._start_time = time.perf_counter()
+
+
+@app.before_request
+def enforce_http():
+    """Redirect HTTPS requests to HTTP without persistent caching."""
+    proto = request.headers.get("X-Forwarded-Proto", "http").lower()
+    if proto == "https" or request.is_secure:
+        target = request.url.replace("https://", "http://", 1)
+        resp = redirect(target, code=307)
+        resp.headers["Cache-Control"] = "no-store"
+        return resp
+
+
+@app.after_request
+def log_request_time(response):
+    """Log how long the request took."""
+    start = getattr(g, "_start_time", None)
+    if start is not None:
+        elapsed = time.perf_counter() - start
+        print(f"{request.method} {request.path} took {elapsed:.3f}s")
+    return response
+
+
 def warm_up_modules():
     """Warm-up heavy modules to avoid first-call latency."""
+    overall_start = time.perf_counter()
     # Warm-up librosa onset detection
     try:
+        start = time.perf_counter()
         y = np.zeros(512, dtype=float)
         librosa.onset.onset_detect(y=y, sr=22050, units="time", delta=0.07)
-        print("Librosa onset_detect warm-up complete.")
+        print(
+            f"Librosa onset_detect warm-up complete in {time.perf_counter() - start:.3f}s."
+        )
     except Exception as exc:
         print(f"Error during librosa warm-up: {exc}")
 
     # Warm-up librosa time_stretch
     try:
+        start = time.perf_counter()
         from librosa.effects import time_stretch
 
         time_stretch(y, rate=1.0)
-        print("Librosa time_stretch warm-up complete.")
+        print(
+            f"Librosa time_stretch warm-up complete in {time.perf_counter() - start:.3f}s."
+        )
     except Exception as exc:
         print(f"Error during librosa time_stretch warm-up: {exc}")
 
     # Warm-up audiotsm WSOLA
     try:
+        start = time.perf_counter()
         from audiotsm.io.array import ArrayReader, ArrayWriter
         from audiotsm import wsola
 
@@ -154,12 +249,15 @@ def warm_up_modules():
         tsm = wsola(writer.channels)
         tsm.set_speed(1.0)
         tsm.run(reader, writer)
-        print("Audiotsm WSOLA warm-up complete.")
+        print(
+            f"Audiotsm WSOLA warm-up complete in {time.perf_counter() - start:.3f}s."
+        )
     except Exception as exc:
         print(f"Error during audiotsm WSOLA warm-up: {exc}")
 
     # Full Librosa onset pipeline
     try:
+        start = time.perf_counter()
         y_long = np.zeros(22050, dtype=float)
         librosa.onset.onset_detect(y=y, sr=22050, units="time", delta=0.07)
         y_harm, y_perc = librosa.effects.hpss(y_long)
@@ -182,9 +280,15 @@ def warm_up_modules():
             delta=0.07,
             wait=64,
         )
-        print("Librosa onset pipeline warm-up complete.")
+        print(
+            f"Librosa onset pipeline warm-up complete in {time.perf_counter() - start:.3f}s."
+        )
     except Exception as exc:
         print(f"Error during Librosa warm-up: {exc}")
+
+    print(
+        f"Module warm-up finished in {time.perf_counter() - overall_start:.3f}s."
+    )
 
 
 @app.route("/")
@@ -450,7 +554,7 @@ if __name__ == "__main__":
         host,
         port,
         app,
-        server_class=TLSIgnoringWSGIServer,
+        server_class=ThreadingTLSIgnoringWSGIServer,
         handler_class=TLSIgnoringWSGIRequestHandler,
     ) as httpd:
         print(f"Server started http://{host}:{port}", flush=True)
