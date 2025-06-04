@@ -10,6 +10,7 @@ import os
 from handlers.reverse_handler_class import ReverseHandler
 from handlers.restore_handler_class import RestoreHandler
 from handlers.slice_handler_class import SliceHandler
+from handlers.synth_preset_inspector_handler_class import SynthPresetInspectorHandler
 from handlers.file_placer_handler_class import FilePlacerHandler
 from handlers.refresh_handler_class import RefreshHandler
 from dash import Dash, html
@@ -35,6 +36,7 @@ app = Flask(__name__, template_folder="templates_jinja")
 reverse_handler = ReverseHandler()
 restore_handler = RestoreHandler()
 slice_handler = SliceHandler()
+synth_handler = SynthPresetInspectorHandler()
 file_placer_handler = FilePlacerHandler()
 refresh_handler = RefreshHandler()
 dash_app = Dash(__name__, server=app, routes_pathname_prefix="/dash/")
@@ -114,6 +116,35 @@ def slice_tool():
         active_tab="slice",
     )
 
+
+@app.route("/synth-macros", methods=["GET", "POST"])
+def synth_macros():
+    message = None
+    success = False
+    options_html = ""
+    macros_html = ""
+    selected_preset = None
+    if request.method == "POST":
+        form = SimpleForm(request.form.to_dict())
+        result = synth_handler.handle_post(form)
+    else:
+        result = synth_handler.handle_get()
+    message = result.get("message")
+    success = result.get("message_type") != "error"
+    options_html = result.get("options", "")
+    macros_html = result.get("macros_html", "")
+    selected_preset = result.get("selected_preset")
+    preset_selected = bool(selected_preset)
+    return render_template(
+        "synth_macros.html",
+        message=message,
+        success=success,
+        options_html=options_html,
+        macros_html=macros_html,
+        preset_selected=preset_selected,
+        selected_preset=selected_preset,
+        active_tab="synth-macros",
+    )
 
 @app.route("/chord", methods=["GET"])
 def chord():
