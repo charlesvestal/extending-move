@@ -57,6 +57,32 @@ def test_slice_post(client, monkeypatch):
     assert resp.status_code == 200
     assert b'sliced' in resp.data
 
+def test_synth_macros_get(client, monkeypatch):
+    def fake_get():
+        return {
+            'message': 'choose',
+            'message_type': 'info',
+            'options': '<option value="p">p</option>',
+            'macros_html': ''
+        }
+    monkeypatch.setattr(flask_app.synth_handler, 'handle_get', fake_get)
+    resp = client.get('/synth-macros')
+    assert resp.status_code == 200
+    assert b'choose' in resp.data
+
+def test_synth_macros_post(client, monkeypatch):
+    def fake_post(form):
+        return {
+            'message': 'saved',
+            'message_type': 'success',
+            'options': '',
+            'macros_html': '<p>done</p>'
+        }
+    monkeypatch.setattr(flask_app.synth_handler, 'handle_post', fake_post)
+    resp = client.post('/synth-macros', data={'action': 'select_preset'})
+    assert resp.status_code == 200
+    assert b'saved' in resp.data
+
 def test_detect_transients(client, monkeypatch):
     def fake_detect(form):
         return {'content': '{"success": true}', 'status': 200, 'headers': [('Content-Type', 'application/json')]}
