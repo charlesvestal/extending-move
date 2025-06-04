@@ -7,6 +7,7 @@ from flask import (
     send_file,
     jsonify,
     redirect,
+    g,
 )
 import os
 import atexit
@@ -15,6 +16,7 @@ import sys
 import socket
 import numpy as np
 import librosa
+import time
 from wsgiref.simple_server import make_server, WSGIRequestHandler, WSGIServer
 from handlers.reverse_handler_class import ReverseHandler
 from handlers.restore_handler_class import RestoreHandler
@@ -163,27 +165,51 @@ dash_app = Dash(__name__, server=app, routes_pathname_prefix="/dash/")
 dash_app.layout = html.Div([html.H1("Move Dash"), html.P("Placeholder")])
 
 
+@app.before_request
+def record_start_time():
+    """Record the start time of the request."""
+    g._start_time = time.perf_counter()
+
+
+@app.after_request
+def log_request_time(response):
+    """Log how long the request took."""
+    start = getattr(g, "_start_time", None)
+    if start is not None:
+        elapsed = time.perf_counter() - start
+        print(f"{request.method} {request.path} took {elapsed:.3f}s")
+    return response
+
+
 def warm_up_modules():
     """Warm-up heavy modules to avoid first-call latency."""
+    overall_start = time.perf_counter()
     # Warm-up librosa onset detection
     try:
+        start = time.perf_counter()
         y = np.zeros(512, dtype=float)
         librosa.onset.onset_detect(y=y, sr=22050, units="time", delta=0.07)
-        print("Librosa onset_detect warm-up complete.")
+        print(
+            f"Librosa onset_detect warm-up complete in {time.perf_counter() - start:.3f}s."
+        )
     except Exception as exc:
         print(f"Error during librosa warm-up: {exc}")
 
     # Warm-up librosa time_stretch
     try:
+        start = time.perf_counter()
         from librosa.effects import time_stretch
 
         time_stretch(y, rate=1.0)
-        print("Librosa time_stretch warm-up complete.")
+        print(
+            f"Librosa time_stretch warm-up complete in {time.perf_counter() - start:.3f}s."
+        )
     except Exception as exc:
         print(f"Error during librosa time_stretch warm-up: {exc}")
 
     # Warm-up audiotsm WSOLA
     try:
+        start = time.perf_counter()
         from audiotsm.io.array import ArrayReader, ArrayWriter
         from audiotsm import wsola
 
@@ -193,12 +219,15 @@ def warm_up_modules():
         tsm = wsola(writer.channels)
         tsm.set_speed(1.0)
         tsm.run(reader, writer)
-        print("Audiotsm WSOLA warm-up complete.")
+        print(
+            f"Audiotsm WSOLA warm-up complete in {time.perf_counter() - start:.3f}s."
+        )
     except Exception as exc:
         print(f"Error during audiotsm WSOLA warm-up: {exc}")
 
     # Full Librosa onset pipeline
     try:
+        start = time.perf_counter()
         y_long = np.zeros(22050, dtype=float)
         librosa.onset.onset_detect(y=y, sr=22050, units="time", delta=0.07)
         y_harm, y_perc = librosa.effects.hpss(y_long)
@@ -221,9 +250,15 @@ def warm_up_modules():
             delta=0.07,
             wait=64,
         )
-        print("Librosa onset pipeline warm-up complete.")
+        print(
+            f"Librosa onset pipeline warm-up complete in {time.perf_counter() - start:.3f}s."
+        )
     except Exception as exc:
         print(f"Error during Librosa warm-up: {exc}")
+
+    print(
+        f"Module warm-up finished in {time.perf_counter() - overall_start:.3f}s."
+    )
 
 
 @app.route("/")
