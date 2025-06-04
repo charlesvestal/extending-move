@@ -12,6 +12,7 @@ from handlers.restore_handler_class import RestoreHandler
 from handlers.slice_handler_class import SliceHandler
 from handlers.set_management_handler_class import SetManagementHandler
 from handlers.synth_preset_inspector_handler_class import SynthPresetInspectorHandler
+from handlers.drum_rack_inspector_handler_class import DrumRackInspectorHandler
 from handlers.file_placer_handler_class import FilePlacerHandler
 from handlers.refresh_handler_class import RefreshHandler
 from dash import Dash, html
@@ -41,6 +42,7 @@ set_management_handler = SetManagementHandler()
 synth_handler = SynthPresetInspectorHandler()
 file_placer_handler = FilePlacerHandler()
 refresh_handler = RefreshHandler()
+drum_rack_handler = DrumRackInspectorHandler()
 dash_app = Dash(__name__, server=app, routes_pathname_prefix="/dash/")
 dash_app.layout = html.Div([html.H1("Move Dash"), html.P("Placeholder")])
 
@@ -199,6 +201,34 @@ def synth_macros():
 @app.route("/chord", methods=["GET"])
 def chord():
     return render_template("chord.html", active_tab="chord")
+
+
+@app.route("/drum-rack-inspector", methods=["GET", "POST"])
+def drum_rack_inspector():
+    message = None
+    success = False
+    message_type = None
+    options_html = ""
+    samples_html = ""
+    if request.method == "POST":
+        form = SimpleForm(request.form.to_dict())
+        result = drum_rack_handler.handle_post(form)
+    else:
+        result = drum_rack_handler.handle_get()
+    message = result.get("message")
+    message_type = result.get("message_type")
+    success = message_type != "error" if message_type else False
+    options_html = result.get("options") or result.get("options_html", "")
+    samples_html = result.get("samples_html", "")
+    return render_template(
+        "drum_rack_inspector.html",
+        message=message,
+        success=success,
+        message_type=message_type,
+        options_html=options_html,
+        samples_html=samples_html,
+        active_tab="drum-rack-inspector",
+    )
 
 
 @app.route("/place-files", methods=["POST"])
