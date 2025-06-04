@@ -14,7 +14,7 @@ import json
 class SetManagementHandler(BaseHandler):
     def handle_get(self):
         """
-        Return context for rendering the Set Management page.
+        Return context for rendering the MIDI Upload page.
         """
         # Get available pads
         _, ids = list_msets(return_free_ids=True)

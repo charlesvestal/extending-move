@@ -100,7 +100,7 @@ pattern = create_rhythm_pattern(
 
 You can also generate sets from MIDI files through the web interface:
 
-1. Navigate to the Set Management page
+1. Navigate to the MIDI Upload page
 2. Upload a .mid or .midi file
 3. Specify a set name and optional tempo
 4. Select a pad and color for the device
