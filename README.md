@@ -10,7 +10,7 @@ Tools for extending the Ableton Move. This project provides a companion webserve
 
 ## Features
 
-- **Move Set Management**
+- **MIDI Upload**
   - Upload and restore Move Sets (.ablbundle)
   - Choose target pad and color
 

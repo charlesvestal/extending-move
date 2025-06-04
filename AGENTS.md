@@ -53,7 +53,7 @@ extending-move/
 │   ├── restore.html             # File upload with options
 │   ├── drum_rack_inspector.html # Grid layout with actions
 │   ├── synth_preset_inspector.html # Synth macro management interface
-│   └── set_management.html      # MIDI file upload and set generation interface
+│   └── midi_upload.html         # MIDI file upload and set generation interface
 ├── templates_jinja/       # Jinja templates used by the Flask app
 ├── examples/              # Example files for testing and development
 │   ├── Track Presets/          # Sample presets organized by instrument type
@@ -412,7 +412,7 @@ To handle multiple forms in a single tab, update the `attachFormHandler` functio
 ```js
 // See static/main.js for the full implementation
 function attachFormHandler(tabName) {
-  if (tabName === 'SetManagement') {
+  if (tabName === 'MidiUpload') {
     const container = document.getElementById(tabName);
     container.querySelectorAll('form').forEach(form => {
       form.addEventListener('submit', async event => {

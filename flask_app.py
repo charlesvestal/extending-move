@@ -146,8 +146,8 @@ def slice_tool():
     )
 
 
-@app.route("/set-management", methods=["GET", "POST"])
-def set_management():
+@app.route("/midi-upload", methods=["GET", "POST"])
+def midi_upload():
     message = None
     success = False
     message_type = None
@@ -169,13 +169,13 @@ def set_management():
         message_type = context.get("message_type")
         success = message_type != "error" if message_type else False
     return render_template(
-        "set_management.html",
+        "midi_upload.html",
         message=message,
         success=success,
         message_type=message_type,
         pad_options=pad_options,
         pad_color_options=pad_color_options,
-        active_tab="set-management",
+        active_tab="midi-upload",
     )
 
 
