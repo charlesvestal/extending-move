@@ -17,7 +17,7 @@ REMOTE_DIR="/data/UserData/extending-move"
 
 # --- Version check: ensure Move version is within tested range ---
 HIGHEST_TESTED_VERSION="1.5.0b6"
-INSTALLED_VERSION=$(ssh "${REMOTE_USER}@${REMOTE_HOST}" "/opt/move/Move -v" | awk '{print $3}')
+INSTALLED_VERSION=$(ssh -T "${REMOTE_USER}@${REMOTE_HOST}" "/opt/move/Move -v" | awk '{print $3}')
 if ! printf "%s\n%s\n" "$HIGHEST_TESTED_VERSION" "$INSTALLED_VERSION" | sort -V | head -n1 | grep -qx "$HIGHEST_TESTED_VERSION"; then
   read -p "Warning: Installed Move ($INSTALLED_VERSION) > tested ($HIGHEST_TESTED_VERSION). Continue? [y/N] " confirm
   if [[ ! $confirm =~ ^[Yy]$ ]]; then
@@ -28,29 +28,28 @@ fi
 
 # --- Ensure remote directory exists ---
 echo "Creating ${REMOTE_DIR} on ${REMOTE_HOST}…"
-ssh "${REMOTE_USER}@${REMOTE_HOST}" "mkdir -p '${REMOTE_DIR}'"
+ssh -T "${REMOTE_USER}@${REMOTE_HOST}" "mkdir -p '${REMOTE_DIR}'"
 
 # --- Archive & copy your project files (excludes .git & utility-scripts) ---
 echo "Uploading project files to ${REMOTE_HOST}:${REMOTE_DIR}…"
 tar czf - \
   --exclude='.git' \
   --exclude='utility-scripts' \
-  core handlers templates templates_jinja static examples \
-  move-webserver.py flask_app.py requirements.txt | \
-ssh "${REMOTE_USER}@${REMOTE_HOST}" "cd '${REMOTE_DIR}' && tar xzf - && cp -r /opt/move/HttpRoot/fonts static/"
+  core handlers templates_jinja static examples \
+  move-webserver.py requirements.txt | \
+ssh -T "${REMOTE_USER}@${REMOTE_HOST}" "cd '${REMOTE_DIR}' && tar xzf - && cp -r /opt/move/HttpRoot/fonts static/"
 
 echo "Files copied."
 
 # --- Fix permissions remotely (now with proper path expansion) ---
 echo "Setting permissions on remote…"
-ssh "${REMOTE_USER}@${REMOTE_HOST}" <<EOF
+ssh -T "${REMOTE_USER}@${REMOTE_HOST}" <<EOF
 chmod +x "${REMOTE_DIR}/move-webserver.py"
-chmod +x "${REMOTE_DIR}/flask_app.py"
 chmod -R 755 "${REMOTE_DIR}/static"
 EOF
 
 echo "Installing requirements with pip on remote..."
-ssh "${REMOTE_USER}@${REMOTE_HOST}" <<EOF
+ssh -T "${REMOTE_USER}@${REMOTE_HOST}" <<EOF
 export TMPDIR=/data/UserData/tmp
 echo "TMPDIR is set to: \$TMPDIR"
 pip install --no-cache-dir -r "${REMOTE_DIR}/requirements.txt"
