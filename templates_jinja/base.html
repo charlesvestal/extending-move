@@ -8,12 +8,12 @@
 <body>
     <h1 id="header">Move - Extended</h1>
     <nav class="tab">
-        <a href="/restore" class="{% if active_tab == 'restore' %}active{% endif %}">Restore Set</a>
-        <a href="/slice" class="{% if active_tab == 'slice' %}active{% endif %}">Slice Kit</a>
-        <a href="/chord" class="{% if active_tab == 'chord' %}active{% endif %}">Chord Kit</a>
-        <a href="/synth-macros" class="{% if active_tab == 'synth-macros' %}active{% endif %}">Synth Macros</a>
-        <a href="/reverse" class="{% if active_tab == 'reverse' %}active{% endif %}">Reverse WAV</a>
-        <a href="/midi-upload" class="{% if active_tab == 'midi-upload' %}active{% endif %}">MIDI Upload</a>
+        <a href="/restore" class="{% if active_tab == 'restore' %}active{% endif %}">Restore</a>
+        <a href="/slice" class="{% if active_tab == 'slice' %}active{% endif %}">Slice</a>
+        <a href="/chord" class="{% if active_tab == 'chord' %}active{% endif %}">Chords</a>
+        <a href="/synth-macros" class="{% if active_tab == 'synth-macros' %}active{% endif %}">Macros </a>
+        <a href="/reverse" class="{% if active_tab == 'reverse' %}active{% endif %}">Reverse</a>
+        <a href="/midi-upload" class="{% if active_tab == 'midi-upload' %}active{% endif %}">MIDI</a>
     </nav>
     <div class="tabcontent">
         {% block content %}{% endblock %}
