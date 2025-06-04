@@ -10,9 +10,7 @@
     <br>
     <label for="mset_index">Restore to pad:</label>
     <select name="mset_index">
-        {% for opt in pad_options %}
-        <option value="{{ opt }}">{{ opt }}</option>
-        {% endfor %}
+        {{ options_html | safe }}
     </select>
     <br>
     <label for="mset_color">Pad color (1-26):</label>
@@ -20,4 +18,5 @@
     <input type="hidden" name="action" value="restore_ablbundle">
     <button type="submit">Upload & Restore</button>
 </form>
+<img src="/static/img/move_pads.png" alt="Pad map" style="width:30%;" />
 {% endblock %}
