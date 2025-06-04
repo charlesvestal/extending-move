@@ -66,25 +66,31 @@ if ! ps -p "$NEW_PID" > /dev/null; then
     exit 1
 fi
 
-# Verify the server is responding on port 909
-if command -v curl >/dev/null 2>&1; then
-    if ! curl -sf http://localhost:909/ > /dev/null; then
-        echo "Error: Server not responding on port 909. Check logs:"
-        tail -n 20 "$LOG_FILE"
-        exit 1
+# Wait for the server to respond on port 909 (allow time for warm-up)
+for i in {1..30}; do
+    if command -v curl >/dev/null 2>&1; then
+        if curl -sf http://localhost:909/ > /dev/null; then
+            PORT_READY=true
+            break
+        fi
+    elif command -v ss >/dev/null 2>&1; then
+        if ss -tln | grep -q ':909'; then
+            PORT_READY=true
+            break
+        fi
+    else
+        if netstat -tln | grep -q ':909'; then
+            PORT_READY=true
+            break
+        fi
     fi
-elif command -v ss >/dev/null 2>&1; then
-    if ! ss -tln | grep -q ':909'; then
-        echo "Error: Server not listening on port 909. Check logs:"
-        tail -n 20 "$LOG_FILE"
-        exit 1
-    fi
-else
-    if ! netstat -tln | grep -q ':909'; then
-        echo "Error: Server not listening on port 909. Check logs:"
-        tail -n 20 "$LOG_FILE"
-        exit 1
-    fi
+    sleep 1
+done
+
+if [ "${PORT_READY:-}" != "true" ]; then
+    echo "Error: Server not listening on port 909. Check logs:"
+    tail -n 20 "$LOG_FILE"
+    exit 1
 fi
 
 echo "Webserver started successfully with PID: $NEW_PID"
