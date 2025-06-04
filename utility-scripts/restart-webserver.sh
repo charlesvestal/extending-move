@@ -21,9 +21,17 @@ PID_FILE="/data/UserData/extending-move/move-webserver.pid"
 WEB_SERVER_CMD="cd /data/UserData/extending-move && PYTHONPATH=/data/UserData/extending-move python3 move-webserver.py"
 LOG_FILE="/data/UserData/extending-move/move-webserver.log"
 
-# Kill any existing webserver processes
-pkill -f 'python3 move-webserver.py' || true
-rm -f "$PID_FILE"
+# Kill any existing webserver process using the PID file if available
+if [ -f "$PID_FILE" ]; then
+  OLD_PID=$(cat "$PID_FILE")
+  if kill -0 "$OLD_PID" 2>/dev/null; then
+    kill "$OLD_PID"
+    sleep 1
+  fi
+  rm -f "$PID_FILE"
+else
+  pkill -f 'python3 move-webserver.py' || true
+fi
 
 # Clean up any old log file
 rm -f "$LOG_FILE"
@@ -33,6 +41,7 @@ echo "Starting the webserver..."
 cd /data/UserData/extending-move
 nohup setsid bash -c "$WEB_SERVER_CMD" > "$LOG_FILE" 2>&1 &
 NEW_PID=$!
+echo "$NEW_PID" > "$PID_FILE"
 
 # Wait a moment for the server to start
 sleep 2

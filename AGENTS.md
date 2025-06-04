@@ -7,10 +7,9 @@
 
 # Extending Move
 
-This guide explains how to add new features to the Move webserver.  Two server implementations exist:
+This guide explains how to add new features to the Move webserver.
 
-- **move-webserver.py** – the original HTTP server using custom handler classes and AJAX.
-- **flask_app.py** – a simplified Flask/Jinja example that relies on standard HTML forms.
+The project uses a single Flask-based server implemented in `move-webserver.py`.
 
 Move follows a modular structure, with each feature comprising three components:
 
@@ -22,8 +21,7 @@ Move follows a modular structure, with each feature comprising three components:
 
 ```
 extending-move/
-├── move-webserver.py      # Legacy HTTP server with handler classes
-├── flask_app.py           # New Flask/Jinja/Dash server example
+├── move-webserver.py      # Flask web server
 ├── core/                  # Core functionality implementations
 │   ├── slice_handler.py         # Sample slicing and kit creation
 │   ├── refresh_handler.py       # Library refresh via D-Bus

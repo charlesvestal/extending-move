@@ -128,12 +128,10 @@ pip install --no-cache-dir -r requirements.txt
 ssh ableton@move.local
 cd /data/UserData/extending-move
 cp -r /opt/move/HttpRoot/fonts /data/UserData/extending-move/static/
-python3 move-webserver.py
-
-python3 flask_app.py  # new Flask/Jinja/Dash server on port 9090
+python3 move-webserver.py  # Flask/Jinja web server on port 9090
 ```
 
-The server will be accessible at http://move.local:909 (or 9090 for the Flask version)
+The server will be accessible at http://move.local:9090
 
 ## Utility Scripts
 
@@ -172,7 +170,10 @@ case "$1" in
     su - ableton -s /bin/sh -c "cd /data/UserData/extending-move ; python3 move-webserver.py >> startup.log 2>&1 &"
     ;;
   stop)
-    pkill -u ableton -f move-webserver.py
+    if [ -f /data/UserData/extending-move/move-webserver.pid ]; then
+      kill $(cat /data/UserData/extending-move/move-webserver.pid)
+      rm /data/UserData/extending-move/move-webserver.pid
+    fi
     ;;
   restart)
     $0 stop
@@ -180,7 +181,8 @@ case "$1" in
     $0 start
     ;;
   status)
-    if pgrep -u ableton -f move-webserver.py >/dev/null; then
+    if [ -f /data/UserData/extending-move/move-webserver.pid ] && \
+       ps -p $(cat /data/UserData/extending-move/move-webserver.pid) >/dev/null 2>&1; then
       echo "Running"
     else
       echo "Not running"
