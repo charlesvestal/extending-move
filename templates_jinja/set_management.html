@@ -2,7 +2,7 @@
 {% block content %}
 <h2>MIDI Upload</h2>
 {% if message %}
-<div class="{{ 'success' if success else 'error' }}">{{ message }}</div>
+<div class="{{ message_type if message_type else ('success' if success else 'error') }}">{{ message }}</div>
 {% endif %}
 <div class="set-management-container">
     <div class="midi-upload-section">

@@ -126,6 +126,15 @@ class BaseHandler:
         response.update(kwargs)
         return response
 
+    def format_info_response(self, message: str, **kwargs) -> Dict[str, Any]:
+        """Format an informational response."""
+        response = {
+            "message": message,
+            "message_type": "info"
+        }
+        response.update(kwargs)
+        return response
+
     def cleanup_upload(self, filepath: str):
         """
         Clean up an uploaded file.

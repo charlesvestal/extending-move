@@ -4,7 +4,7 @@
 <p><em>Note: Deleting and adding macro assignments will immediately alter your preset files and can result in broken presets. Back them up! Ranges are optional, and not all parameters take them (i.e. Voice1_Filter1_Type). Experiement!</em></p>
 
 {% if message %}
-  <p style="color: {{ 'green' if success else 'red' }};">{{ message }}</p>
+  <p class="{{ message_type if message_type else ('success' if success else 'error') }}">{{ message }}</p>
 {% endif %}
 
 <form method="post" action="/synth-macros" id="preset-form">
