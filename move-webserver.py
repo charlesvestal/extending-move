@@ -227,14 +227,14 @@ class MyServer(BaseHTTPRequestHandler):
     file_placer_handler = FilePlacerHandler()
     synth_preset_inspector_handler = SynthPresetInspectorHandler()
     set_management_handler = SetManagementHandler()
-    @route_handler.get("/set-management", "set_management.html")
+    @route_handler.get("/midi-upload", "midi_upload.html")
     def handle_set_management_get(self):
-        """Handle GET request for Set Management page."""
-        print("DEBUG: /set-management GET called")
+        """Handle GET request for MIDI Upload page."""
+        print("DEBUG: /midi-upload GET called")
         import sys; sys.stdout.flush()
         return self.set_management_handler.handle_get()
 
-    @route_handler.post("/set-management")
+    @route_handler.post("/midi-upload")
     def handle_set_management_post(self, form):
         """Handle POST request to create a new set."""
         return self.set_management_handler.handle_post(form)
@@ -481,7 +481,7 @@ class MyServer(BaseHTTPRequestHandler):
         Handle all POST requests.
         Processes form data and delegates to appropriate handler.
         """
-        if self.path not in ["/slice", "/refresh", "/reverse", "/drum-rack-inspector", "/restore", "/chord", "/place-files", "/synth-preset-inspector", "/detect-transients", "/set-management"]:
+        if self.path not in ["/slice", "/refresh", "/reverse", "/drum-rack-inspector", "/restore", "/chord", "/place-files", "/synth-preset-inspector", "/detect-transients", "/midi-upload"]:
             self.send_error(404)
             return
 
