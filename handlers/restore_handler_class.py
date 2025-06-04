@@ -126,6 +126,6 @@ class RestoreHandler(BaseHandler):
 
     def format_success_response(self, message, options):
         return {
-            "message": f"<p style='color: green;'>{message}</p>",
+            "message": f"{message}",
             "options": options
         }
