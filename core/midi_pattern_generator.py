@@ -6,10 +6,7 @@ import os
 import json
 from typing import Dict, List, Any, Tuple, Optional
 
-def load_set_template(template_path: str) -> Dict[str, Any]:
-    """Load a set template from file."""
-    with open(template_path, 'r') as f:
-        return json.load(f)
+from core.utils import load_set_template
 
 def generate_pattern_set(
     set_name: str,
