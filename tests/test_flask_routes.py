@@ -1,6 +1,10 @@
 import io
 import importlib.util
 from pathlib import Path
+import sys
+
+# Ensure project root is on the path
+sys.path.append(str(Path(__file__).resolve().parents[1]))
 
 spec = importlib.util.spec_from_file_location(
     "move_webserver",
@@ -193,3 +197,77 @@ def test_refresh_post(client, monkeypatch):
     resp = client.post('/refresh', data={'action': 'refresh_library'})
     assert resp.status_code == 200
     assert resp.json['message'] == 'refreshed'
+
+def test_index_redirect(client):
+    resp = client.get('/')
+    assert resp.status_code == 302
+    assert resp.headers['Location'].endswith('/restore')
+
+
+def test_browse_dir(client, tmp_path):
+    (tmp_path / 'sub').mkdir()
+    (tmp_path / 'a.wav').write_text('x')
+    (tmp_path / 'b.txt').write_text('x')
+    query = {
+        'root': str(tmp_path),
+        'path': '',
+        'action_url': '/do',
+        'field_name': 'file',
+        'action_value': 'act',
+        'filter': 'wav',
+    }
+    resp = client.get('/browse-dir', query_string=query)
+    assert resp.status_code == 200
+    data = resp.data.decode()
+    assert 'data-path="sub"' in data
+    assert 'a.wav' in data
+    assert 'b.txt' not in data
+
+
+def test_samples_route(client, tmp_path, monkeypatch):
+    sample = tmp_path / 's.wav'
+    sample.write_bytes(b'data')
+    real_join = move_webserver.os.path.join
+    real_real = move_webserver.os.path.realpath
+
+    base = '/data/UserData/UserLibrary/Samples/Preset Samples'
+
+    def fake_join(a, *rest):
+        if a == base:
+            return real_join(tmp_path, *rest)
+        return real_join(a, *rest)
+
+    def fake_real(path):
+        if path.startswith(base):
+            new = path.replace(base, str(tmp_path), 1)
+            return real_real(new)
+        return real_real(path)
+
+    monkeypatch.setattr(move_webserver.os.path, 'join', fake_join)
+    monkeypatch.setattr(move_webserver.os.path, 'realpath', fake_real)
+    resp = client.get(f'/samples/{sample.name}')
+    assert resp.status_code == 200
+    assert resp.headers['Access-Control-Allow-Origin'] == '*'
+    assert b'data' in resp.data
+
+
+def test_samples_route_not_found(client, tmp_path, monkeypatch):
+    real_join = move_webserver.os.path.join
+    real_real = move_webserver.os.path.realpath
+    base = '/data/UserData/UserLibrary/Samples/Preset Samples'
+
+    def fake_join(a, *rest):
+        if a == base:
+            return real_join(tmp_path, *rest)
+        return real_join(a, *rest)
+
+    def fake_real(path):
+        if path.startswith(base):
+            new = path.replace(base, str(tmp_path), 1)
+            return real_real(new)
+        return real_real(path)
+
+    monkeypatch.setattr(move_webserver.os.path, 'join', fake_join)
+    monkeypatch.setattr(move_webserver.os.path, 'realpath', fake_real)
+    resp = client.get('/samples/missing.wav')
+    assert resp.status_code == 404
