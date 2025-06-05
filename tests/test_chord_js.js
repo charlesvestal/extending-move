@@ -2,7 +2,7 @@ const fs = require('fs');
 const vm = require('vm');
 const assert = require('assert');
 
-async function runProcessChordSample(file, keepLength) {
+async function runProcessChordSample(file, keepLength, trimSilence = true) {
   const code = fs.readFileSync(file, 'utf8');
   const match = code.match(/async function processChordSample[\s\S]*?\n}\n/);
   if (!match) throw new Error('function not found');
@@ -20,7 +20,7 @@ async function runProcessChordSample(file, keepLength) {
   };
   vm.createContext(context);
   vm.runInContext(match[0], context);
-  await context.processChordSample({ length: 10 }, [0], keepLength);
+  await context.processChordSample({ length: 10 }, [0], keepLength, trimSilence);
   return context.mixedLen;
 }
 
@@ -29,5 +29,7 @@ async function runProcessChordSample(file, keepLength) {
   assert.strictEqual(await runProcessChordSample('static/chord.js', true), 10);
   assert.strictEqual(await runProcessChordSample('offline-tools/chord.js', false), 8);
   assert.strictEqual(await runProcessChordSample('static/chord.js', false), 8);
+  assert.strictEqual(await runProcessChordSample('offline-tools/chord.js', false, false), 10);
+  assert.strictEqual(await runProcessChordSample('static/chord.js', false, false), 10);
   console.log('All chord.js tests passed');
 })();
