@@ -2,6 +2,7 @@
 import os
 import json
 import urllib.parse
+from core.cache_manager import get_cache, set_cache
 
 def update_drum_cell_sample(preset_path, pad_number, new_sample_path, new_playback_start=None, new_playback_length=None):
     """
@@ -160,15 +161,16 @@ def get_drum_cell_samples(preset_path):
         }
 
 def scan_for_drum_rack_presets():
-    """
-    Scan the Move Track Presets directory for .ablpreset files containing drumRack devices.
-    
-    Returns:
-        dict: Result with keys:
-            - success: bool indicating success/failure
-            - message: Status or error message
-            - presets: List of dicts with preset info (name and path)
-    """
+    """Scan ``Track Presets`` for drum rack presets with caching."""
+    cache_key = "drum_rack_presets"
+    cached = get_cache(cache_key)
+    if cached is not None:
+        return {
+            "success": True,
+            "message": f"Found {len(cached)} drum rack presets (cached)",
+            "presets": cached,
+        }
+
     try:
         presets_dir = "/data/UserData/UserLibrary/Track Presets"
         drum_rack_presets = []
@@ -212,15 +214,16 @@ def scan_for_drum_rack_presets():
                         print(f"Warning: Could not parse preset {filename}: {e}")
                         continue
 
+        set_cache(cache_key, drum_rack_presets)
         return {
-            'success': True,
-            'message': f"Found {len(drum_rack_presets)} drum rack presets",
-            'presets': drum_rack_presets
+            "success": True,
+            "message": f"Found {len(drum_rack_presets)} drum rack presets",
+            "presets": drum_rack_presets,
         }
 
     except Exception as e:
         return {
-            'success': False,
-            'message': f"Error scanning presets: {e}",
-            'presets': []
+            "success": False,
+            "message": f"Error scanning presets: {e}",
+            "presets": [],
         }

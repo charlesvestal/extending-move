@@ -54,6 +54,7 @@ Tools for extending the Ableton Move. This project provides a companion webserve
   - Force refresh of Move's library cache
   - Useful after manual file changes
   - Uses Move's D-Bus interface
+  - Clears cached preset and sample lists used by the web tools
     
 ## Installation
 

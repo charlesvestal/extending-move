@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import json
+from core.cache_manager import get_cache, set_cache
 
 def extract_available_parameters(preset_path):
     """
@@ -627,22 +628,21 @@ def delete_parameter_mapping(preset_path, param_path):
         }
 
 def scan_for_synth_presets():
-    """
-    Scan the Move Track Presets directory for .ablpreset files containing drift or wavetable devices.
-    
-    Returns:
-        dict: Result with keys:
-            - success: bool indicating success/failure
-            - message: Status or error message
-            - presets: List of dicts with preset info
-              (name, path, display_path, and type)
-    """
+    """Scan ``Track Presets`` for synth presets using a cache."""
+    cache_key = "synth_presets"
+    cached = get_cache(cache_key)
+    if cached is not None:
+        return {
+            "success": True,
+            "message": f"Found {len(cached)} synth presets (cached)",
+            "presets": cached,
+        }
+
     try:
         presets_dir = "/data/UserData/UserLibrary/Track Presets"
-        # For local development, check if examples directory exists
         if not os.path.exists(presets_dir) and os.path.exists("examples/Track Presets"):
             presets_dir = "examples/Track Presets"
-            
+
         synth_presets = []
 
         # Function to recursively search for specific device types
@@ -686,14 +686,15 @@ def scan_for_synth_presets():
                         print(f"Warning: Could not parse preset {filename}: {e}")
                         continue
 
+        set_cache(cache_key, synth_presets)
         return {
-            'success': True,
-            'message': f"Found {len(synth_presets)} synth presets",
-            'presets': synth_presets
+            "success": True,
+            "message": f"Found {len(synth_presets)} synth presets",
+            "presets": synth_presets,
         }
     except Exception as e:
         return {
-            'success': False,
-            'message': f"Error scanning presets: {e}",
-            'presets': []
+            "success": False,
+            "message": f"Error scanning presets: {e}",
+            "presets": [],
         }
