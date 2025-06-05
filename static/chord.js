@@ -229,8 +229,6 @@ async function regenerateChordPreview(padNumber) {
     const intervals = getChordIntervals(selectedChord, inversion, octave);
     const keepLen = document.getElementById('stretchOption')?.checked;
     const trimSilence = document.getElementById('trimOption')?.checked;
-    const trimSilence = document.getElementById('trimOption')?.checked;
-    const trimSilence = document.getElementById('trimOption')?.checked;
     const blob = await processChordSample(window.decodedBuffer, intervals, keepLen, trimSilence);
     const url = URL.createObjectURL(blob);
     const previewContainer = document.getElementById(`chord-preview-${padNumber}`);
