@@ -528,6 +528,18 @@ function initChordTab() {
   });
   
   populateChordList();
+
+  const stretchOption = document.getElementById('stretchOption');
+  if (stretchOption) {
+    stretchOption.addEventListener('change', () => {
+      if (!window.decodedBuffer) return;
+      for (let pad = 1; pad <= 16; pad++) {
+        if (window.selectedChords[pad - 1]) {
+          regenerateChordPreview(pad);
+        }
+      }
+    });
+  }
 }
 
 // Process chord samples for preview when a file is uploaded
