@@ -13,11 +13,15 @@ PRESETS_ROOT = "/data/UserData/UserLibrary/Track Presets"
 
 class DrumRackInspectorHandler(BaseHandler):
     def handle_get(self):
-        """Handle GET request for drum rack inspector page."""
+        "Handle GET request for drum rack inspector page."
         return {
-            'message': '',
-            'samples_html': ''
+            "message": "Select a Drum preset from the browser",
+            "message_type": "info",
+            "macros_html": "",
+            "samples_html": ""
+
         }
+
 
     def handle_post(self, form: cgi.FieldStorage):
         """Handle POST request for preset selection and sample operations."""
