@@ -1,4 +1,5 @@
 import subprocess
+from core.cache_manager import invalidate_cache
 
 def refresh_library():
     """
@@ -29,6 +30,7 @@ def refresh_library():
         ]
         # Execute command and capture output
         subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+        invalidate_cache()
         print("Library refreshed successfully.")
         return True, "Library refreshed successfully."
     except subprocess.CalledProcessError as e:
