@@ -5,15 +5,17 @@
 {% if message %}
   <p class="{{ message_type if message_type else ('success' if success else 'error') }}">{{ message }}</p>
 {% endif %}
-<form method="post" action="{{ host_prefix }}/reverse">
+<form id="reverse-form" method="post" action="{{ host_prefix }}/reverse">
     <input type="hidden" name="action" value="reverse_file">
-    <label for="wav_file">Select WAV file:</label>
-    <select name="wav_file" required>
-        <option value="" disabled selected>--Select a file--</option>
-        {% for f in wav_files %}
-        <option value="{{ f }}">{{ f }}</option>
-        {% endfor %}
-    </select>
+    <input type="hidden" name="wav_file" id="wav_file" required>
+    <div id="file-browser">
+        <div id="breadcrumb"></div>
+        <ul id="file-list"></ul>
+    </div>
     <button type="submit">Reverse</button>
 </form>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ host_prefix }}/static/reverse_browser.js"></script>
 {% endblock %}

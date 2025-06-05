@@ -16,11 +16,10 @@ def client(monkeypatch):
     move_webserver.app.config['TESTING'] = True
     return move_webserver.app.test_client()
 
-def test_reverse_get(client, monkeypatch):
-    monkeypatch.setattr(move_webserver, 'get_wav_files', lambda d: ['sample.wav'])
+def test_reverse_get(client):
     resp = client.get('/reverse')
     assert resp.status_code == 200
-    assert b'sample.wav' in resp.data
+    assert b'id="file-list"' in resp.data
 
 def test_reverse_post(client, monkeypatch):
     def fake_handle_post(form):
@@ -29,6 +28,15 @@ def test_reverse_post(client, monkeypatch):
     resp = client.post('/reverse', data={'action': 'reverse_file', 'wav_file': 'sample.wav'})
     assert resp.status_code == 200
     assert b'ok' in resp.data
+
+def test_reverse_list(client, monkeypatch):
+    def fake_list(path):
+        return {"success": True, "dirs": ["d"], "files": ["f.wav"], "path": path}
+    monkeypatch.setattr(move_webserver.reverse_handler, 'list_directory', fake_list)
+    resp = client.get('/reverse/list?path=')
+    assert resp.status_code == 200
+    assert resp.json['dirs'] == ['d']
+    assert resp.json['files'] == ['f.wav']
 
 def test_restore_get(client, monkeypatch):
     def fake_get():

@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 import cgi
+import os
 from handlers.base_handler import BaseHandler
-from core.reverse_handler import get_wav_files, reverse_wav_file
+from core.reverse_handler import reverse_wav_file
 
 class ReverseHandler(BaseHandler):
     def handle_get(self):
-        """Provide options and an informational message for the reverse page."""
-        wav_files = get_wav_files("/data/UserData/UserLibrary/Samples")
+        """Return informational message for the reverse page."""
         return {
-            "wav_files": wav_files,
             "message": "Select a WAV file to reverse",
             "message_type": "info",
         }
@@ -40,7 +39,26 @@ class ReverseHandler(BaseHandler):
         except Exception as e:
             return self.format_error_response(f"Error processing reverse WAV file: {str(e)}")
 
-    def get_wav_options(self):
-        """Get WAV file options for the template."""
-        wav_files = get_wav_files("/data/UserData/UserLibrary/Samples")
-        return ''.join([f'<option value="{file}">{file}</option>' for file in wav_files])
+
+    def list_directory(self, rel_path: str):
+        """Return directories and WAV files for a given relative path."""
+        base_dir = "/data/UserData/UserLibrary/Samples"
+        abs_dir = os.path.realpath(os.path.join(base_dir, rel_path))
+        base_real = os.path.realpath(base_dir)
+        if not abs_dir.startswith(base_real):
+            return {"success": False, "message": "Invalid path"}
+        if not os.path.isdir(abs_dir):
+            return {"success": False, "message": "Not a directory"}
+
+        dirs = []
+        files = []
+        for entry in sorted(os.listdir(abs_dir)):
+            if entry.startswith('.'):
+                continue
+            full = os.path.join(abs_dir, entry)
+            if os.path.isdir(full):
+                dirs.append(entry)
+            elif entry.lower().endswith((".wav", ".aif", ".aiff")):
+                files.append(entry)
+        return {"success": True, "dirs": dirs, "files": files, "path": rel_path}
+

@@ -382,3 +382,30 @@ select {
 .drum-cell .sample-info {
     margin-top: auto;
 }
+
+/* Reverse file browser */
+#file-browser {
+    border: 1px solid #ccc;
+    padding: 0.5rem;
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 1rem;
+    background-color: #fff;
+}
+#file-list {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+#file-list li {
+    margin: 0.2rem 0;
+    cursor: pointer;
+}
+#file-list li.selected {
+    background-color: #e0e0e0;
+}
+#breadcrumb {
+    font-family: monospace;
+    margin-bottom: 0.5rem;
+}
+

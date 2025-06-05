@@ -28,7 +28,6 @@ from handlers.drum_rack_inspector_handler_class import DrumRackInspectorHandler
 from handlers.file_placer_handler_class import FilePlacerHandler
 from handlers.refresh_handler_class import RefreshHandler
 from dash import Dash, html
-from core.reverse_handler import get_wav_files
 import cgi
 
 PID_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "move-webserver.pid")
@@ -205,21 +204,26 @@ def reverse():
     if request.method == "POST":
         form = SimpleForm(request.form.to_dict())
         result = reverse_handler.handle_post(form)
-        message = result.get("message")
-        message_type = result.get("message_type")
-        success = message_type != "error"
     else:
-        message = "Select a WAV file to reverse"
-        message_type = "info"
-    wav_list = get_wav_files("/data/UserData/UserLibrary/Samples")
+        result = reverse_handler.handle_get()
+    message = result.get("message")
+    message_type = result.get("message_type")
+    success = message_type != "error" if message_type else False
     return render_template(
         "reverse.html",
         message=message,
         success=success,
         message_type=message_type,
-        wav_files=wav_list,
         active_tab="reverse",
     )
+
+
+@app.route("/reverse/list", methods=["GET"])
+def reverse_list():
+    path = request.args.get("path", "")
+    result = reverse_handler.list_directory(path)
+    status = 200 if result.get("success") else 400
+    return jsonify(result), status
 
 
 @app.route("/restore", methods=["GET", "POST"])
