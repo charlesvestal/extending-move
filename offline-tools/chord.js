@@ -359,20 +359,18 @@ function normalizeAudioBuffer(buffer, targetPeak = 0.8) {
 
 async function processChordSample(buffer, intervals) {
   const pitched = [];
-  const peaks = [];
   for (let semitone of intervals) {
     const shifted = await pitchShiftOffline(buffer, semitone);
-    peaks.push(getPeakAmplitude(shifted));
     pitched.push(shifted);
   }
 
   const perBufferGain = 1 / intervals.length;
-  const predictedPeak = peaks.reduce((sum, p) => sum + p * perBufferGain, 0);
-  const masterGain = predictedPeak > 0 ? 0.8 / predictedPeak : 1;
+  const scaled = pitched.map(b => scaleAudioBuffer(b, perBufferGain));
+  const mixed = mixAudioBuffers(scaled);
+  const mixPeak = getPeakAmplitude(mixed);
+  const masterGain = mixPeak > 0 ? 0.8 / mixPeak : 1;
 
-  const scaledBuffers = pitched.map(b => scaleAudioBuffer(b, perBufferGain * masterGain));
-  const mixed = mixAudioBuffers(scaledBuffers);
-  const normalized = normalizeAudioBuffer(mixed, 0.8);
+  const normalized = normalizeAudioBuffer(scaleAudioBuffer(mixed, masterGain), 0.8);
   const wavData = toWav(normalized);
   return new Blob([new DataView(wavData)], { type: 'audio/wav' });
 }
