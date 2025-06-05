@@ -8,7 +8,9 @@ from core.synth_preset_inspector_handler import (
     update_preset_parameter_mappings,
     delete_parameter_mapping
 )
-from core.file_browser import list_directory as list_dir
+from core.file_browser import list_directory as list_dir, resolve_path
+
+PRESETS_ROOT = "/data/UserData/UserLibrary/Track Presets"
 
 class SynthPresetInspectorHandler(BaseHandler):
     def handle_get(self):
@@ -33,6 +35,10 @@ class SynthPresetInspectorHandler(BaseHandler):
             preset_path = form.getvalue('preset_select')
             if not preset_path:
                 return self.format_error_response("No preset selected")
+            try:
+                preset_path = resolve_path(PRESETS_ROOT, preset_path)
+            except Exception:
+                return self.format_error_response("Invalid preset path")
             
             # If this is a save name action for a single macro, update just that macro name
             if action == 'save_name':
@@ -169,6 +175,10 @@ class SynthPresetInspectorHandler(BaseHandler):
             # Extract the preset path from the form value
             preset_select = self.form.getvalue('preset_select') if hasattr(self, 'form') else None
             if preset_select:
+                try:
+                    preset_select = resolve_path(PRESETS_ROOT, preset_select)
+                except Exception:
+                    return "<p>Invalid preset path</p>"
                 # Get all parameters
                 param_result = extract_available_parameters(preset_select)
                 if param_result['success']:
@@ -277,7 +287,7 @@ class SynthPresetInspectorHandler(BaseHandler):
     def list_directory(self, rel_path: str):
         """Return directories and preset files for a given relative path."""
         return list_dir(
-            "/data/UserData/UserLibrary/Track Presets",
+            PRESETS_ROOT,
             rel_path,
             [".ablpreset"],
         )

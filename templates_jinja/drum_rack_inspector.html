@@ -5,14 +5,13 @@
 {% if message %}
   <p class="{{ message_type if message_type else ('success' if success else 'error') }}">{{ message }}</p>
 {% endif %}
-<form method="POST" action="{{ host_prefix }}/drum-rack-inspector">
+<form method="POST" action="{{ host_prefix }}/drum-rack-inspector" id="preset-form">
     <input type="hidden" name="action" value="select_preset">
     <input type="hidden" name="preset_select" id="preset_select" required>
-    <div class="file-browser" data-endpoint="{{ host_prefix }}/browse/drum_presets" data-input="preset_select">
+    <div class="file-browser" data-endpoint="{{ host_prefix }}/browse/drum_presets" data-input="preset_select" data-form="preset-form">
         <div class="breadcrumb"></div>
         <ul class="file-list"></ul>
     </div>
-    <button type="submit">Load</button>
 </form>
 <div class="samples-container">
     {{ samples_html | safe }}

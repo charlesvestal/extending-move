@@ -404,6 +404,13 @@ select {
 .file-list li.selected {
     background-color: #e0e0e0;
 }
+.file-list li.dir a {
+    font-weight: bold;
+    color: #003366;
+}
+.file-list li.file a {
+    color: #333;
+}
 .breadcrumb {
     font-family: monospace;
     margin-bottom: 0.5rem;

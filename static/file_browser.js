@@ -3,6 +3,7 @@ function initFileBrowser(container) {
   const bcEl = container.querySelector('.breadcrumb');
   const endpoint = container.dataset.endpoint;
   const input = container.dataset.input ? document.getElementById(container.dataset.input) : null;
+  const form = container.dataset.form ? document.getElementById(container.dataset.form) : null;
   let currentPath = '';
 
   function load(path) {
@@ -35,6 +36,7 @@ function initFileBrowser(container) {
         const parent = currentPath.split('/').slice(0, -1).join('/');
         load(parent);
       });
+      li.classList.add('dir');
       li.appendChild(a);
       listEl.appendChild(li);
     }
@@ -47,6 +49,7 @@ function initFileBrowser(container) {
         e.preventDefault();
         load(currentPath ? currentPath + '/' + d : d);
       });
+      li.classList.add('dir');
       li.appendChild(a);
       listEl.appendChild(li);
     });
@@ -61,7 +64,9 @@ function initFileBrowser(container) {
         const sel = listEl.querySelector('.selected');
         if (sel) sel.classList.remove('selected');
         li.classList.add('selected');
+        if (form) form.submit();
       });
+      li.classList.add('file');
       li.appendChild(a);
       listEl.appendChild(li);
     });

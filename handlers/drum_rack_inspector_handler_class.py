@@ -7,7 +7,9 @@ from core.drum_rack_inspector_handler import get_drum_cell_samples, update_drum_
 from core.reverse_handler import reverse_wav_file
 from core.refresh_handler import refresh_library
 from core.time_stretch_handler import time_stretch_wav
-from core.file_browser import list_directory
+from core.file_browser import list_directory, resolve_path
+
+PRESETS_ROOT = "/data/UserData/UserLibrary/Track Presets"
 
 class DrumRackInspectorHandler(BaseHandler):
     def handle_get(self):
@@ -34,7 +36,10 @@ class DrumRackInspectorHandler(BaseHandler):
         preset_path = form.getvalue('preset_select')
         if not preset_path:
             return self.format_error_response("No preset selected")
-
+        try:
+            preset_path = resolve_path(PRESETS_ROOT, preset_path)
+        except Exception:
+            return self.format_error_response("Invalid preset path")
         try:
             result = get_drum_cell_samples(preset_path)
             if not result['success']:
@@ -135,6 +140,10 @@ class DrumRackInspectorHandler(BaseHandler):
         """Handle time-stretch action."""
         sample_path = form.getvalue('sample_path')
         preset_path = form.getvalue('preset_path')
+        try:
+            preset_path = resolve_path(PRESETS_ROOT, preset_path)
+        except Exception:
+            return self.format_error_response("Invalid preset path")
         pad_number = form.getvalue('pad_number')
         bpm = form.getvalue('bpm')
         measures = form.getvalue('measures')
@@ -295,6 +304,10 @@ class DrumRackInspectorHandler(BaseHandler):
         """Handle reversing a sample."""
         sample_path = form.getvalue('sample_path')
         preset_path = form.getvalue('preset_path')
+        try:
+            preset_path = resolve_path(PRESETS_ROOT, preset_path)
+        except Exception:
+            return self.format_error_response("Invalid preset path")
 
         if not sample_path or not preset_path:
             return self.format_error_response("Missing sample or preset path")
@@ -428,7 +441,7 @@ class DrumRackInspectorHandler(BaseHandler):
     def list_directory(self, rel_path: str):
         """Return directories and preset files for a given relative path."""
         return list_directory(
-            "/data/UserData/UserLibrary/Track Presets",
+            PRESETS_ROOT,
             rel_path,
             [".ablpreset"],
         )

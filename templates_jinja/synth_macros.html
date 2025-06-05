@@ -15,11 +15,10 @@
     <div class="preset-selection">
         <input type="hidden" name="preset_select" id="preset_select" required {% if preset_selected %}disabled{% endif %}>
         {% if not preset_selected %}
-        <div class="file-browser" data-endpoint="{{ host_prefix }}/browse/synth_presets" data-input="preset_select">
+        <div class="file-browser" data-endpoint="{{ host_prefix }}/browse/synth_presets" data-input="preset_select" data-form="preset-form">
             <div class="breadcrumb"></div>
             <ul class="file-list"></ul>
         </div>
-        <button type="submit">Load Preset</button>
         {% else %}
         <button type="submit" onclick="document.getElementById('action-input').value='reset_preset';">Choose Another Preset</button>
         <input type="hidden" name="preset_select" value="{{ selected_preset }}">

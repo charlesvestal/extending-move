@@ -25,3 +25,12 @@ def list_directory(base_dir: str, rel_path: str, extensions=None):
             else:
                 files.append(entry)
     return {"success": True, "dirs": dirs, "files": files, "path": rel_path}
+
+
+def resolve_path(base_dir: str, rel_path: str) -> str:
+    """Return an absolute path within ``base_dir`` or raise ``ValueError``."""
+    abs_path = os.path.realpath(os.path.join(base_dir, rel_path))
+    base_real = os.path.realpath(base_dir)
+    if not abs_path.startswith(base_real):
+        raise ValueError("Invalid path")
+    return abs_path
