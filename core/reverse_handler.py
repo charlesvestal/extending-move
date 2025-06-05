@@ -2,17 +2,23 @@ import os
 import logging
 import soundfile as sf
 from core.refresh_handler import refresh_library
+from core.cache_manager import get_cache, set_cache
 
 def get_wav_files(directory):
-    """
-    Retrieves a list of audio files (WAV and AIFF) from the specified directory.
-    """
+    """Retrieve WAV/AIFF files from ``directory`` using a cached result."""
+    cache_key = f"wav:{directory}"
+    cached = get_cache(cache_key)
+    if cached is not None:
+        return cached
+
     audio_files = []
     for root, _, files in os.walk(directory):
         for file in files:
-            if file.lower().endswith(('.wav', '.aif', '.aiff')):
+            if file.lower().endswith((".wav", ".aif", ".aiff")):
                 relative_path = os.path.relpath(os.path.join(root, file), directory)
                 audio_files.append(relative_path)
+
+    set_cache(cache_key, audio_files)
     return audio_files
 
 
