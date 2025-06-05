@@ -4,7 +4,7 @@ from flask import (
     Flask,
     render_template,
     request,
-    send_file,
+    send_file as flask_send_file,
     jsonify,
     redirect,
     g,
@@ -29,6 +29,7 @@ from handlers.drum_rack_inspector_handler_class import DrumRackInspectorHandler
 from handlers.file_placer_handler_class import FilePlacerHandler
 from handlers.refresh_handler_class import RefreshHandler
 from dash import Dash, html, dcc, Input, Output, State
+import dash
 from core.reverse_handler import get_wav_files
 from core.list_msets_handler import list_msets
 import base64
@@ -273,6 +274,105 @@ def restore_page_layout():
     )
 
 
+def slice_page_layout():
+    """Layout for slicing WAV files into kits."""
+    return html.Div(
+        [
+            html.H2("Slice a WAV File"),
+            dcc.Upload(
+                id="slice-file",
+                children=html.Button("Select WAV"),
+                multiple=False,
+            ),
+            html.Br(),
+            dcc.Dropdown(
+                id="slice-kit-type",
+                options=[
+                    {"label": "Choke", "value": "choke"},
+                    {"label": "Gate", "value": "gate"},
+                    {"label": "Drum", "value": "drum"},
+                ],
+                value="choke",
+            ),
+            dcc.Input(id="slice-num", type="number", min=1, max=16, value=16),
+            html.Button("Download", id="slice-download"),
+            html.Button("Place on Move", id="slice-place"),
+            html.Div(id="slice-message"),
+        ]
+    )
+
+
+def midi_upload_page_layout():
+    """Layout for MIDI file upload and set creation."""
+    pad_options = [
+        {"label": str(pad), "value": str(pad)} for pad in get_free_pads()
+    ]
+    color_options = [{"label": str(i), "value": str(i)} for i in range(1, 27)]
+    return html.Div(
+        [
+            html.H2("Upload MIDI"),
+            dcc.Upload(id="midi-file", children=html.Button("Select MIDI"), multiple=False),
+            dcc.Dropdown(
+                id="midi-type",
+                options=[{"label": "Melodic", "value": "melodic"}, {"label": "Drum", "value": "drum"}],
+                value="melodic",
+            ),
+            dcc.Input(id="set-name", type="text", placeholder="Set Name"),
+            dcc.Input(id="tempo", type="number", placeholder="Tempo (BPM)"),
+            dcc.Dropdown(id="pad-index", options=pad_options, placeholder="Pad"),
+            dcc.Dropdown(id="pad-color", options=color_options, placeholder="Color"),
+            html.Button("Generate Set", id="midi-submit"),
+            html.Div(id="midi-message"),
+        ]
+    )
+
+
+def synth_macros_page_layout():
+    """Layout for managing synth macros."""
+    result = synth_handler.handle_get()
+    options = result.get("options", "")
+    return html.Div(
+        [
+            html.H2("Synth Macros"),
+            dcc.Dropdown(
+                id="synth-preset",
+                options=[{"label": o.split('>')[1].split('<')[0], "value": o.split('value=')[1].split('"')[1]} for o in options.split('\n') if 'value' in o],
+                placeholder="Select preset",
+            ),
+            html.Button("Load", id="synth-load"),
+            dcc.Store(id="synth-selected"),
+            html.Div(id="synth-message"),
+            html.Div(id="synth-macros"),
+        ]
+    )
+
+
+def drum_rack_page_layout():
+    """Layout for inspecting drum racks."""
+    result = drum_rack_handler.handle_get()
+    options = result.get("options") or result.get("options_html", "")
+    return html.Div(
+        [
+            html.H2("Drum Rack Inspector"),
+            dcc.Dropdown(
+                id="drum-preset",
+                options=[{"label": o.split('>')[1].split('<')[0], "value": o.split('value=')[1].split('"')[1]} for o in options.split('\n') if 'value' in o],
+                placeholder="Select drum rack",
+            ),
+            html.Button("Load", id="drum-load"),
+            html.Div(id="drum-message"),
+            html.Div(id="drum-samples"),
+        ]
+    )
+
+
+def refresh_page_layout():
+    return html.Div([
+        html.H2("Refresh Library"),
+        html.Button("Refresh", id="refresh-button"),
+        html.Div(id="refresh-message"),
+    ])
+
 @dash_app.callback(Output("dash-page-content", "children"), Input("dash-url", "pathname"))
 def render_page(pathname):
     if pathname == "/dash/reverse":
@@ -280,15 +380,15 @@ def render_page(pathname):
     if pathname == "/dash/restore":
         return restore_page_layout()
     if pathname == "/dash/slice":
-        return html.Iframe(src="/slice", style={"width": "100%", "height": "800px", "border": "none"})
+        return slice_page_layout()
     if pathname == "/dash/midi-upload":
-        return html.Iframe(src="/midi-upload", style={"width": "100%", "height": "800px", "border": "none"})
+        return midi_upload_page_layout()
     if pathname == "/dash/synth-macros":
-        return html.Iframe(src="/synth-macros", style={"width": "100%", "height": "800px", "border": "none"})
+        return synth_macros_page_layout()
     if pathname == "/dash/drum-rack-inspector":
-        return html.Iframe(src="/drum-rack-inspector", style={"width": "100%", "height": "800px", "border": "none"})
+        return drum_rack_page_layout()
     if pathname == "/dash/refresh":
-        return html.Iframe(src="/refresh", style={"width": "100%", "height": "200px", "border": "none"})
+        return refresh_page_layout()
     return html.Div("Select a tool from the navigation.")
 
 
@@ -337,6 +437,129 @@ def perform_restore(n_clicks, contents, filename, pad, color):
         return result.get("message", "")
     except Exception as exc:
         return f"Error: {exc}"
+
+
+@dash_app.callback(
+    Output("slice-message", "children"),
+    Input("slice-download", "n_clicks"),
+    Input("slice-place", "n_clicks"),
+    State("slice-file", "contents"),
+    State("slice-file", "filename"),
+    State("slice-kit-type", "value"),
+    State("slice-num", "value"),
+    prevent_initial_call=True,
+)
+def perform_slice(n_download, n_place, contents, filename, kit_type, num_slices):
+    ctx = dash.callback_context
+    if not ctx.triggered:
+        return dash.no_update
+    mode = "download" if ctx.triggered[0]["prop_id"].startswith("slice-download") else "auto_place"
+    if not contents or not filename:
+        return "No file uploaded", dash.no_update
+    try:
+        content_type, content_string = contents.split(",", 1)
+        data = base64.b64decode(content_string)
+        stream = io.BytesIO(data)
+        fs = types.SimpleNamespace(filename=filename, stream=stream)
+        form = SimpleForm(
+            {
+                "action": "slice",
+                "file": FileField(fs),
+                "kit_type": kit_type or "choke",
+                "num_slices": str(num_slices or 16),
+                "mode": mode,
+            }
+        )
+        result = slice_handler.handle_post(form)
+        return result.get("message", "")
+    except Exception as exc:
+        return f"Error: {exc}"
+
+
+@dash_app.callback(
+    Output("midi-message", "children"),
+    Input("midi-submit", "n_clicks"),
+    State("midi-file", "contents"),
+    State("midi-file", "filename"),
+    State("midi-type", "value"),
+    State("set-name", "value"),
+    State("tempo", "value"),
+    State("pad-index", "value"),
+    State("pad-color", "value"),
+    prevent_initial_call=True,
+)
+def perform_midi_upload(n_clicks, contents, filename, midi_type, set_name, tempo, pad_index, pad_color):
+    if not contents or not filename:
+        return "No MIDI file"
+    try:
+        content_type, content_string = contents.split(",", 1)
+        data = base64.b64decode(content_string)
+        stream = io.BytesIO(data)
+        fs = types.SimpleNamespace(filename=filename, stream=stream)
+        form = SimpleForm(
+            {
+                "action": "upload_midi",
+                "midi_file": FileField(fs),
+                "midi_type": midi_type,
+                "set_name": set_name or "Set",
+                "tempo": str(tempo) if tempo else "",
+                "pad_index": pad_index,
+                "pad_color": pad_color,
+            }
+        )
+        result = set_management_handler.handle_post(form)
+        return result.get("message", "")
+    except Exception as exc:
+        return f"Error: {exc}"
+
+
+@dash_app.callback(
+    Output("synth-message", "children"),
+    Output("synth-macros", "children"),
+    Output("synth-selected", "data"),
+    Input("synth-load", "n_clicks"),
+    State("synth-preset", "value"),
+    prevent_initial_call=True,
+)
+def perform_synth_load(n_clicks, preset):
+    if not preset:
+        return "No preset selected", "", dash.no_update
+    form = SimpleForm({"action": "select_preset", "preset_select": preset})
+    result = synth_handler.handle_post(form)
+    return (
+        result.get("message", ""),
+        dash.dcc.Markdown(result.get("macros_html", ""), dangerously_allow_html=True),
+        preset,
+    )
+
+
+@dash_app.callback(
+    Output("drum-message", "children"),
+    Output("drum-samples", "children"),
+    Input("drum-load", "n_clicks"),
+    State("drum-preset", "value"),
+    prevent_initial_call=True,
+)
+def perform_drum_load(n_clicks, preset):
+    if not preset:
+        return "No preset selected", ""
+    form = SimpleForm({"action": "select_preset", "preset_select": preset})
+    result = drum_rack_handler.handle_post(form)
+    return (
+        result.get("message", ""),
+        dash.dcc.Markdown(result.get("samples_html", ""), dangerously_allow_html=True),
+    )
+
+
+@dash_app.callback(
+    Output("refresh-message", "children"),
+    Input("refresh-button", "n_clicks"),
+    prevent_initial_call=True,
+)
+def perform_refresh(n_clicks):
+    form = SimpleForm({"action": "refresh"})
+    result = refresh_handler.handle_post(form)
+    return result.get("message", "")
 
 
 @app.before_request
@@ -517,7 +740,7 @@ def slice_tool():
         if result is not None:
             if result.get("download") and result.get("bundle_path"):
                 path = result["bundle_path"]
-                resp = send_file(path, as_attachment=True)
+                resp = flask_send_file(path, as_attachment=True)
                 try:
                     os.remove(path)
                 except Exception:
@@ -627,7 +850,7 @@ def serve_sample(sample_path):
     if request.method == "OPTIONS":
         resp = app.make_response("")
     else:
-        resp = send_file(file_real)
+        resp = flask_send_file(file_real)
 
     resp.headers["Access-Control-Allow-Origin"] = "*"
     resp.headers["Access-Control-Allow-Methods"] = "GET, OPTIONS"

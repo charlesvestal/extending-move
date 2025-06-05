@@ -3,7 +3,7 @@
 Tools for extending the Ableton Move. This project provides a companion webserver that runs alongside the official Move server, accessible at move.local:909.
 
 All tools are also accessible via a unified Dash interface at `move.local:909/dash`.
-The Reverse and Restore pages now use native Dash forms.
+Every tool now uses native Dash forms instead of embedded iframes.
 
 ![CleanShot 2025-05-11 at 10 56 02](https://github.com/user-attachments/assets/be64a1d8-992a-4a84-bbbf-15095479d11d)
 
