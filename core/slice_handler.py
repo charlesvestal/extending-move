@@ -8,6 +8,9 @@ from core.refresh_handler import refresh_library
 
 import librosa
 import numpy as np
+import logging
+
+logger = logging.getLogger(__name__)
 
 def detect_transients(filepath, max_slices=16, delta=0.07):
     """
@@ -94,7 +97,7 @@ def cleanup_temp_files(files_to_cleanup):
                 else:
                     os.remove(path)
         except Exception as e:
-            print(f"Warning: Failed to clean up {path}: {e}")
+            logger.warning("Failed to clean up %s: %s", path, e)
 
 def generate_kit_template(preset_name, kit_type='choke'):
     if not isinstance(preset_name, str):
@@ -326,11 +329,16 @@ def update_drumcell_sample_uris(data, slices_info, sliced_filename, current_inde
                 data["parameters"]["Voice_Envelope_Decay"] = 0.0
                 playback_length = hold / total_duration if total_duration > 0 else 0
                 data["parameters"]["Voice_PlaybackLength"] = playback_length
-                print(f"Updated drumCell sampleUri to {new_uri} with Voice_PlaybackStart {offset} and Voice_Envelope_Hold {data['parameters'].get('Voice_Envelope_Hold')}")
+                logger.debug(
+                    "Updated drumCell sampleUri to %s with Voice_PlaybackStart %s and Voice_Envelope_Hold %s",
+                    new_uri,
+                    offset,
+                    data["parameters"].get("Voice_Envelope_Hold"),
+                )
                 current_index += 1
             else:
                 data["deviceData"]["sampleUri"] = None
-                print("No slice info available. Set drumCell sampleUri to null.")
+                logger.debug("No slice info available. Set drumCell sampleUri to null.")
         for key, value in data.items():
             current_index = update_drumcell_sample_uris(value, slices_info, sliced_filename, current_index, base_uri, total_duration)
     elif isinstance(data, list):
@@ -354,13 +362,13 @@ def create_bundle(preset_filename, slice_paths, bundle_name):
     with zipfile.ZipFile(bundle_name, 'w', zipfile.ZIP_DEFLATED) as zf:
         # Add the preset file at the root
         zf.write(preset_filename, arcname=os.path.basename(preset_filename))
-        print(f"Added {preset_filename}")
+        logger.debug("Added %s", preset_filename)
         
         # Add only the specified slice files
         for slice_path in slice_paths:
             arcname = os.path.join("Samples", os.path.basename(slice_path))
             zf.write(slice_path, arcname=arcname)
-            print(f"Added {slice_path} as {arcname}")
+            logger.debug("Added %s as %s", slice_path, arcname)
 
 def process_kit(input_wav, preset_name=None, regions=None, num_slices=None, keep_files=False,
                mode="download", kit_type="choke", transient_detect=False):
