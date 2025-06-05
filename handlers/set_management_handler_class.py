@@ -3,6 +3,7 @@ import os
 import zipfile
 import tempfile
 import shutil
+import logging
 from core.set_management_handler import (
     create_set, generate_midi_set_from_file, generate_drum_set_from_file,
     generate_c_major_chord_example, load_set_template
@@ -10,6 +11,8 @@ from core.set_management_handler import (
 from core.list_msets_handler import list_msets
 from core.restore_handler import restore_ablbundle
 import json
+
+logger = logging.getLogger(__name__)
 
 class SetManagementHandler(BaseHandler):
     def handle_get(self):
@@ -120,7 +123,7 @@ class SetManagementHandler(BaseHandler):
             try:
                 os.remove(set_path)
             except Exception as e:
-                print(f"Warning: Failed to clean up set file {set_path}: {e}")
+                logger.warning("Failed to clean up set file %s: %s", set_path, e)
             
             # Refresh pad list after successful placement
             _, updated_ids = list_msets(return_free_ids=True)

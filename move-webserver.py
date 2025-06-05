@@ -13,6 +13,7 @@ import os
 import atexit
 import signal
 import sys
+import logging
 import numpy as np
 import librosa
 import time
@@ -30,6 +31,13 @@ from handlers.refresh_handler_class import RefreshHandler
 from dash import Dash, html
 from core.file_browser import generate_dir_html
 import cgi
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    handlers=[logging.FileHandler("server.log"), logging.StreamHandler(sys.stdout)],
+)
+logger = logging.getLogger(__name__)
 
 PID_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "move-webserver.pid")
 
@@ -55,7 +63,7 @@ def write_pid():
         with open(PID_FILE, "w") as f:
             f.write(str(os.getpid()))
     except Exception as exc:
-        print(f"Error writing PID file: {exc}")
+        logger.error("Error writing PID file: %s", exc)
 
 
 def remove_pid():
@@ -64,12 +72,12 @@ def remove_pid():
         if os.path.exists(PID_FILE):
             os.remove(PID_FILE)
     except Exception as exc:
-        print(f"Error removing PID file: {exc}")
+        logger.error("Error removing PID file: %s", exc)
 
 
 def handle_exit(signum, frame):
     """Handle termination signals gracefully."""
-    print(f"Received signal {signum}, exiting.")
+    logger.info("Received signal %s, exiting.", signum)
     remove_pid()
     sys.exit(0)
 
@@ -108,7 +116,7 @@ def log_request_time(response):
     start = getattr(g, "_start_time", None)
     if start is not None:
         elapsed = time.perf_counter() - start
-        print(f"{request.method} {request.path} took {elapsed:.3f}s")
+        logger.info("%s %s took %.3fs", request.method, request.path, elapsed)
     return response
 
 
@@ -120,11 +128,12 @@ def warm_up_modules():
         start = time.perf_counter()
         y = np.zeros(512, dtype=float)
         librosa.onset.onset_detect(y=y, sr=22050, units="time", delta=0.07)
-        print(
-            f"Librosa onset_detect warm-up complete in {time.perf_counter() - start:.3f}s."
+        logger.info(
+            "Librosa onset_detect warm-up complete in %.3fs",
+            time.perf_counter() - start,
         )
     except Exception as exc:
-        print(f"Error during librosa warm-up: {exc}")
+        logger.error("Error during librosa warm-up: %s", exc)
 
     # Warm-up librosa time_stretch
     try:
@@ -132,11 +141,12 @@ def warm_up_modules():
         from librosa.effects import time_stretch
 
         time_stretch(y, rate=1.0)
-        print(
-            f"Librosa time_stretch warm-up complete in {time.perf_counter() - start:.3f}s."
+        logger.info(
+            "Librosa time_stretch warm-up complete in %.3fs",
+            time.perf_counter() - start,
         )
     except Exception as exc:
-        print(f"Error during librosa time_stretch warm-up: {exc}")
+        logger.error("Error during librosa time_stretch warm-up: %s", exc)
 
     # Warm-up audiotsm WSOLA
     try:
@@ -150,11 +160,12 @@ def warm_up_modules():
         tsm = wsola(writer.channels)
         tsm.set_speed(1.0)
         tsm.run(reader, writer)
-        print(
-            f"Audiotsm WSOLA warm-up complete in {time.perf_counter() - start:.3f}s."
+        logger.info(
+            "Audiotsm WSOLA warm-up complete in %.3fs",
+            time.perf_counter() - start,
         )
     except Exception as exc:
-        print(f"Error during audiotsm WSOLA warm-up: {exc}")
+        logger.error("Error during audiotsm WSOLA warm-up: %s", exc)
 
     # Full Librosa onset pipeline
     try:
@@ -181,14 +192,15 @@ def warm_up_modules():
             delta=0.07,
             wait=64,
         )
-        print(
-            f"Librosa onset pipeline warm-up complete in {time.perf_counter() - start:.3f}s."
+        logger.info(
+            "Librosa onset pipeline warm-up complete in %.3fs",
+            time.perf_counter() - start,
         )
     except Exception as exc:
-        print(f"Error during Librosa warm-up: {exc}")
+        logger.error("Error during Librosa warm-up: %s", exc)
 
-    print(
-        f"Module warm-up finished in {time.perf_counter() - overall_start:.3f}s."
+    logger.info(
+        "Module warm-up finished in %.3fs", time.perf_counter() - overall_start
     )
 
 
@@ -468,14 +480,14 @@ if __name__ == "__main__":
 
     host = "0.0.0.0"
     port = 909
-    print("Starting webserver", flush=True)
+    logger.info("Starting webserver")
     with make_server(
         host,
         port,
         app,
         server_class=ThreadingWSGIServer,
     ) as httpd:
-        print(f"Server started http://{host}:{port}", flush=True)
+        logger.info("Server started http://%s:%s", host, port)
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:
