@@ -341,7 +341,20 @@ function scaleAudioBuffer(buffer, gain) {
   return buffer;
 }
 
-function normalizeAudioBuffer(buffer, targetPeak = 0.9) {
+function getPeakAmplitude(buffer) {
+  let peak = 0;
+  const numChannels = buffer.numberOfChannels;
+  for (let channel = 0; channel < numChannels; channel++) {
+    const data = buffer.getChannelData(channel);
+    for (let i = 0; i < data.length; i++) {
+      const val = Math.abs(data[i]);
+      if (val > peak) peak = val;
+    }
+  }
+  return peak;
+}
+
+function normalizeAudioBuffer(buffer, targetPeak = 0.8) {
   const numChannels = buffer.numberOfChannels;
   let maxVal = 0;
   for (let channel = 0; channel < numChannels; channel++) {
@@ -361,15 +374,21 @@ function normalizeAudioBuffer(buffer, targetPeak = 0.9) {
 }
 
 async function processChordSample(buffer, intervals) {
-  const pitchedBuffers = [];
-  const perBufferGain = 1 / intervals.length;
+  const pitched = [];
+  const peaks = [];
   for (let semitone of intervals) {
-    const pitched = await pitchShiftOffline(buffer, semitone);
-    const scaled = scaleAudioBuffer(pitched, perBufferGain);
-    pitchedBuffers.push(scaled);
+    const shifted = await pitchShiftOffline(buffer, semitone);
+    peaks.push(getPeakAmplitude(shifted));
+    pitched.push(shifted);
   }
-  const mixed = mixAudioBuffers(pitchedBuffers);
-  const normalized = normalizeAudioBuffer(mixed, 0.9);
+
+  const perBufferGain = 1 / intervals.length;
+  const predictedPeak = peaks.reduce((sum, p) => sum + p * perBufferGain, 0);
+  const masterGain = predictedPeak > 0 ? 0.8 / predictedPeak : 1;
+
+  const scaledBuffers = pitched.map(b => scaleAudioBuffer(b, perBufferGain * masterGain));
+  const mixed = mixAudioBuffers(scaledBuffers);
+  const normalized = normalizeAudioBuffer(mixed, 0.8);
   const wavData = toWav(normalized);
   return new Blob([new DataView(wavData)], { type: 'audio/wav' });
 }
