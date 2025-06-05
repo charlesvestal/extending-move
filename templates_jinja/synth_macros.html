@@ -7,7 +7,7 @@
   <p class="{{ message_type if message_type else ('success' if success else 'error') }}">{{ message }}</p>
 {% endif %}
 
-<form method="post" action="/synth-macros" id="preset-form">
+<form method="post" action="{{ host_prefix }}/synth-macros" id="preset-form">
     <input type="hidden" name="action" id="action-input" value="select_preset">
     <input type="hidden" name="param_path" id="param-path-input" value="">
     <input type="hidden" name="param_name" id="param-name-input" value="">

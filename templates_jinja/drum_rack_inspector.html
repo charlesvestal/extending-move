@@ -5,7 +5,7 @@
 {% if message %}
   <p class="{{ message_type if message_type else ('success' if success else 'error') }}">{{ message }}</p>
 {% endif %}
-<form method="POST" action="/drum-rack-inspector">
+<form method="POST" action="{{ host_prefix }}/drum-rack-inspector">
     <input type="hidden" name="action" value="select_preset">
     <label for="preset_select">Select a Drum Rack:</label>
     <select name="preset_select" id="preset_select">
@@ -58,7 +58,7 @@
   <div class="modal-content">
     <span class="modal-close">&times;</span>
     <div id="ts_loading" class="loading-overlay hidden">Time stretching…</div>
-    <form method="POST" action="/drum-rack-inspector" id="timeStretchForm">
+    <form method="POST" action="{{ host_prefix }}/drum-rack-inspector" id="timeStretchForm">
       <input type="hidden" name="action" value="time_stretch_sample">
       <input type="hidden" name="sample_path" id="ts_sample_path">
       <input type="hidden" name="preset_path" id="ts_preset_path">
@@ -82,9 +82,9 @@
 {% endblock %}
 {% block scripts %}
 <script src="https://unpkg.com/wavesurfer.js@6/dist/wavesurfer.js"></script>
-<script type="module" src="/static/drum_rack.js"></script>
+<script type="module" src="{{ host_prefix }}/static/drum_rack.js"></script>
 <script type="module">
-  import { initDrumRackTab } from '/static/drum_rack.js';
+  import { initDrumRackTab } from '{{ host_prefix }}/static/drum_rack.js';
   document.addEventListener('DOMContentLoaded', initDrumRackTab);
 </script>
 {% endblock %}

@@ -69,7 +69,7 @@ function detectTransients() {
   formData.append('file', fileInput.files[0]);
   const sens = document.getElementById('sensitivity');
   formData.append('sensitivity', sens ? sens.value : 0.07);
-  fetch('/detect-transients', { method: 'POST', body: formData })
+  fetch('http://' + location.host + '/detect-transients', { method: 'POST', body: formData })
     .then(r => r.json())
     .then(data => {
       if (data.success && data.regions) {
