@@ -31,16 +31,16 @@ def _list_directory(base_dir: str, rel_path: str) -> Tuple[list[str], list[str]]
     return dirs, files
 
 
-def _check_json_file(file_path: str, predicate: Callable[[dict], bool]) -> bool:
-    """Check JSON file against predicate with caching."""
-    key = f"{_CACHE_PREFIX}{file_path}"
+def _check_json_file(file_path: str, kind: str) -> bool:
+    """Check JSON file for a specific ``kind`` with caching."""
+    key = f"{_CACHE_PREFIX}{kind}:{file_path}"
     cached = get_cache(key)
     if cached is not None and "result" in cached:
         return cached["result"]
     try:
         with open(file_path, "r") as f:
             data = json.load(f)
-        result = predicate(data)
+        result = _has_kind(data, kind)
     except Exception:
         result = False
     set_cache(key, {"result": result})
@@ -59,8 +59,16 @@ def _has_kind(data: dict | list, kind: str) -> bool:
 
 FILTERS: dict[str, Callable[[str], bool]] = {
     "wav": lambda p: p.lower().endswith(".wav"),
-    "drift": lambda p: p.lower().endswith(".ablpreset") and _check_json_file(p, lambda d: _has_kind(d, "drift")),
-    "drumrack": lambda p: p.lower().endswith(".ablpreset") and _check_json_file(p, lambda d: _has_kind(d, "drumRack")),
+    "drift": lambda p: (
+        p.lower().endswith(".ablpreset")
+        or p.lower().endswith(".json")
+    )
+    and _check_json_file(p, "drift"),
+    "drumrack": lambda p: (
+        p.lower().endswith(".ablpreset")
+        or p.lower().endswith(".json")
+    )
+    and _check_json_file(p, "drumRack"),
 }
 
 
