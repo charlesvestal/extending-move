@@ -35,15 +35,15 @@ def test_reverse_post(client, monkeypatch):
 
 def test_restore_get(client, monkeypatch):
     def fake_get():
-        return {'options': '<option value="1">1</option>', 'message': ''}
+        return {'options': '<option value="1">1</option>', 'pad_grid': '<div class="pad-grid"></div>', 'message': ''}
     monkeypatch.setattr(move_webserver.restore_handler, 'handle_get', fake_get)
     resp = client.get('/restore')
     assert resp.status_code == 200
-    assert b'<option value="1">1</option>' in resp.data
+    assert b'class="pad-grid"' in resp.data
 
 def test_restore_post(client, monkeypatch):
     def fake_handle_post(form):
-        return {'message': 'restored', 'message_type': 'success'}
+        return {'message': 'restored', 'message_type': 'success', 'pad_grid': '<div class="pad-grid"></div>', 'options': ''}
     monkeypatch.setattr(move_webserver.restore_handler, 'handle_post', fake_handle_post)
     data = {
         'action': 'restore_ablbundle',

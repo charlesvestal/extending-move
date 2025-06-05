@@ -424,8 +424,13 @@ select {
     font-weight: 600;
 }
 
-.pad-cell input[type="radio"] {
-    margin-right: 0.25rem;
+.pad-grid input[type="radio"] {
+    display: none;
+}
+
+.pad-grid input[type="radio"]:checked + label {
+    border: 2px solid #333;
+    background: #d0e8ff;
 }
 
 .pad-cell.occupied {

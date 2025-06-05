@@ -258,6 +258,7 @@ def restore():
     success = False
     message_type = None
     options_html = ""
+    pad_grid = ""
     if request.method == "POST":
         form_data = request.form.to_dict()
         if "ablbundle" in request.files:
@@ -267,14 +268,18 @@ def restore():
         message = result.get("message")
         message_type = result.get("message_type")
         success = message_type != "error"
+        options_html = result.get("options", options_html)
+        pad_grid = result.get("pad_grid", pad_grid)
     context = restore_handler.handle_get()
-    options_html = context.get("options", "")
+    options_html = context.get("options", options_html)
+    pad_grid = context.get("pad_grid", pad_grid)
     return render_template(
         "restore.html",
         message=message,
         success=success,
         message_type=message_type,
         options_html=options_html,
+        pad_grid=pad_grid,
         active_tab="restore",
     )
 

@@ -191,14 +191,16 @@ class SetManagementHandler(BaseHandler):
     def generate_pad_grid(self, used_ids):
         """Return HTML for a 32-pad grid showing occupied pads."""
         cells = []
-        for idx in range(32):
-            num = idx + 1
-            occupied = idx in used_ids
-            status = 'occupied' if occupied else 'free'
-            disabled = 'disabled' if occupied else ''
-            cells.append(
-                f'<label class="pad-cell {status}">'
-                f'<input type="radio" name="pad_index" value="{num}" {disabled}> {num}'
-                f'</label>'
-            )
+        # Pad numbering starts with 1 on the bottom-left
+        for row in range(3, -1, -1):
+            for col in range(8):
+                idx = row * 8 + col
+                num = idx + 1
+                occupied = idx in used_ids
+                status = 'occupied' if occupied else 'free'
+                disabled = 'disabled' if occupied else ''
+                cells.append(
+                    f'<input type="radio" id="pad_{num}" name="pad_index" value="{num}" {disabled}>'
+                    f'<label for="pad_{num}" class="pad-cell {status}">{num}</label>'
+                )
         return '<div class="pad-grid">' + ''.join(cells) + '</div>'
