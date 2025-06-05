@@ -1,6 +1,6 @@
 import os
 import json
-from typing import Callable, Tuple
+from typing import Callable, Tuple, Union, Optional
 
 from core.cache_manager import get_cache, set_cache
 
@@ -47,7 +47,7 @@ def _check_json_file(file_path: str, kind: str) -> bool:
     return result
 
 
-def _has_kind(data: dict | list, kind: str) -> bool:
+def _has_kind(data: Union[dict, list], kind: str) -> bool:
     if isinstance(data, dict):
         if data.get("kind") == kind:
             return True
@@ -78,7 +78,7 @@ def generate_dir_html(
     action_url: str,
     field_name: str,
     action_value: str,
-    filter_key: str | None = None,
+    filter_key: Optional[str] = None,
 ) -> str:
     """Return HTML listing for the directory."""
     filter_func = FILTERS.get(filter_key, lambda p: True)

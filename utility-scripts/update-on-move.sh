@@ -52,7 +52,7 @@ echo "Installing requirements with pip on remote..."
 ssh -T "${REMOTE_USER}@${REMOTE_HOST}" <<EOF
 export TMPDIR=/data/UserData/tmp
 echo "TMPDIR is set to: \$TMPDIR"
-pip install --no-cache-dir -r "${REMOTE_DIR}/requirements.txt"
+pip install --no-cache-dir -r "${REMOTE_DIR}/requirements.txt" | grep -v 'already satisfied'
 EOF
 
 # --- Restart the webserver ---
