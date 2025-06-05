@@ -191,7 +191,8 @@ async function regenerateChordPreview(padNumber) {
     const octave = window.selectedOctaves[padNumber - 1] || 0;
     const intervals = getChordIntervals(selectedChord, inversion, octave);
     const keepLen = document.getElementById('stretchOption')?.checked;
-    const blob = await processChordSample(window.decodedBuffer, intervals, keepLen);
+    const trimSilence = document.getElementById('trimOption')?.checked;
+    const blob = await processChordSample(window.decodedBuffer, intervals, keepLen, trimSilence);
     const url = URL.createObjectURL(blob);
     const previewContainer = document.getElementById(`chord-preview-${padNumber}`);
     if (previewContainer) {
@@ -413,19 +414,24 @@ function normalizeAudioBuffer(buffer, targetPeak = 0.9) {
   return buffer;
 }
 
-async function processChordSample(buffer, intervals, keepLength = false) {
+async function processChordSample(buffer, intervals, keepLength = false, trimSilence = true) {
   const pitchedBuffers = [];
   for (let semitone of intervals) {
     let pitched = await pitchShiftOffline(buffer, semitone);
-    pitched = trimLeadingSilence(pitched);
+    if (trimSilence) {
+      pitched = trimLeadingSilence(pitched);
+    }
     if (keepLength) {
       pitched = await soundtouchStretch(pitched, buffer.length);
+    } else if (trimSilence) {
       pitched = trimLeadingSilence(pitched);
     }
     pitchedBuffers.push(pitched);
   }
   let mixed = mixAudioBuffers(pitchedBuffers);
-  mixed = trimLeadingSilence(mixed);
+  if (!keepLength && trimSilence) {
+    mixed = trimLeadingSilence(mixed);
+  }
   const normalized = normalizeAudioBuffer(mixed, 0.9);
   const wavData = toWav(normalized);
   return new Blob([new DataView(wavData)], { type: 'audio/wav' });
@@ -457,6 +463,7 @@ function initChordTab() {
     let sampleFilenames = [];
     let processedSamples = {};
     const keepLen = document.getElementById('stretchOption')?.checked;
+    const trimSilence = document.getElementById('trimOption')?.checked;
     for (let i = 0; i < chordNames.length; i++) {
       const chordName = chordNames[i];
       const intervals = getChordIntervals(
@@ -464,7 +471,7 @@ function initChordTab() {
         window.selectedVoicings[i] || 0,
         window.selectedOctaves[i] || 0
       );
-      const blob = await processChordSample(decodedBuffer, intervals, keepLen);
+      const blob = await processChordSample(decodedBuffer, intervals, keepLen, trimSilence);
       let safeChordName = chordName.replace(/\s+/g, '');
       let filename = `${baseName}_chord_${safeChordName}.wav`;
       sampleFilenames.push(filename);
@@ -514,6 +521,17 @@ function initChordTab() {
       }
     });
   }
+  const trimOption = document.getElementById('trimOption');
+  if (trimOption) {
+    trimOption.addEventListener('change', () => {
+      if (!window.decodedBuffer) return;
+      for (let pad = 1; pad <= 16; pad++) {
+        if (window.selectedChords[pad - 1]) {
+          regenerateChordPreview(pad);
+        }
+      }
+    });
+  }
 }
 
 // Process chord samples for preview when a file is uploaded
@@ -547,6 +565,7 @@ document.getElementById('wavFileInput').addEventListener('change', async functio
     
     // Process each chord sample and create its waveform preview sequentially
     const keepLen = document.getElementById('stretchOption')?.checked;
+    const trimSilence = document.getElementById('trimOption')?.checked;
     for (let i = 0; i < chordNames.length; i++) {
         const chordName = chordNames[i];
         console.log("Processing chord:", chordName);
@@ -555,7 +574,7 @@ document.getElementById('wavFileInput').addEventListener('change', async functio
             window.selectedVoicings[i] || 0,
             window.selectedOctaves[i] || 0
         );
-        const blob = await processChordSample(decodedBuffer, intervals, keepLen);
+        const blob = await processChordSample(decodedBuffer, intervals, keepLen, trimSilence);
         const url = URL.createObjectURL(blob);
         const padNumber = i + 1;  // Adjust this if your grid order differs
         const previewContainer = document.getElementById(`chord-preview-${padNumber}`);
