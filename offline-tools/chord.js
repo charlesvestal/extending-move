@@ -334,55 +334,56 @@ function hannWindow(size) {
   return win;
 }
 
-function phaseVocoderStretch(buffer, targetLength) {
+
+function wsolaStretch(buffer, targetLength) {
   var ratio = targetLength / buffer.length;
   var numChannels = buffer.numberOfChannels;
   var sr = buffer.sampleRate;
   var outBuf = new AudioBuffer({ length: targetLength, numberOfChannels: numChannels, sampleRate: sr });
-  var size = 1024;
-  var hopIn = size / 4;
-  var hopOut = hopIn * ratio;
+  var size = 2048;
+  var hopIn = size / 2;
+  var hopOut = Math.round(hopIn * ratio);
+  var search = hopIn;
   var window = hannWindow(size);
-  var twoPi = 2 * Math.PI;
 
   for (var ch = 0; ch < numChannels; ch++) {
     var input = buffer.getChannelData(ch);
     var output = outBuf.getChannelData(ch);
-    var prevPhase = new Float32Array(size);
-    var sumPhase = new Float32Array(size);
+    var inPos = 0;
     var outPos = 0;
+    var prevFrame = input.slice(0, size);
 
-    for (var i = 0; i + size <= input.length; i += hopIn) {
-      var re = new Float32Array(size);
-      var im = new Float32Array(size);
-      for (var j = 0; j < size; j++) {
-        re[j] = input[i + j] * window[j];
-        im[j] = 0;
-      }
+    for (var j = 0; j < size; j++) {
+      if (j < output.length) output[j] += prevFrame[j] * window[j];
+    }
+    inPos += hopIn;
+    outPos += hopOut;
 
-      fft(re, im);
-
-      for (var k = 0; k < size; k++) {
-        var mag = Math.hypot(re[k], im[k]);
-        var phase = Math.atan2(im[k], re[k]);
-        var delta = phase - prevPhase[k];
-        prevPhase[k] = phase;
-        var expected = twoPi * hopIn * k / size;
-        var diff = delta - expected;
-        diff -= Math.round(diff / (2 * Math.PI)) * 2 * Math.PI;
-        sumPhase[k] += expected + diff * ratio;
-        re[k] = mag * Math.cos(sumPhase[k]);
-        im[k] = mag * Math.sin(sumPhase[k]);
-      }
-
-      ifft(re, im);
-
-      for (var j = 0; j < size; j++) {
-        var idx = Math.floor(outPos + j);
-        if (idx < output.length) {
-          output[idx] += re[j] * window[j];
+    while (outPos + size < targetLength && inPos + size < input.length) {
+      var start = Math.max(0, Math.floor(inPos - search));
+      var end = Math.min(input.length - size, Math.floor(inPos + search));
+      var bestOffset = start;
+      var bestCorr = -Infinity;
+      for (var s = start; s <= end; s += 4) {
+        var corr = 0;
+        for (var k = 0; k < size; k += 1) {
+          corr += prevFrame[k] * input[s + k];
+        }
+        if (corr > bestCorr) {
+          bestCorr = corr;
+          bestOffset = s;
         }
       }
+
+      var frame = input.subarray(bestOffset, bestOffset + size);
+      for (var j = 0; j < size; j++) {
+        var idx = outPos + j;
+        if (idx < output.length) {
+          output[idx] += frame[j] * window[j];
+        }
+      }
+      prevFrame = frame.slice();
+      inPos += hopIn;
       outPos += hopOut;
     }
   }
@@ -452,7 +453,7 @@ async function processChordSample(buffer, intervals, keepLength = false) {
   for (let semitone of intervals) {
     let pitched = await pitchShiftOffline(buffer, semitone);
     if (keepLength) {
-      pitched = phaseVocoderStretch(pitched, buffer.length);
+      pitched = wsolaStretch(pitched, buffer.length);
     }
     pitchedBuffers.push(pitched);
   }
