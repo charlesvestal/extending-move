@@ -387,7 +387,8 @@ select {
 .file-browser {
     border: 1px solid #ccc;
     padding: 0.5rem;
-    max-height: 300px;
+    width: 100%;
+    height: 80vh;
     overflow-y: auto;
     margin-bottom: 1rem;
     background-color: #fff;
@@ -403,6 +404,12 @@ select {
 }
 .file-list li.selected {
     background-color: #e0e0e0;
+}
+.file-list li.dir::before {
+    content: "\1F4C1\0020"; /* folder icon */
+}
+.file-list li.file::before {
+    content: "\1F4C4\0020"; /* file icon */
 }
 .file-list li.dir a {
     font-weight: bold;

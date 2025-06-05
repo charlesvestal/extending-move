@@ -8,11 +8,10 @@
 <form id="reverse-form" method="post" action="{{ host_prefix }}/reverse">
     <input type="hidden" name="action" value="reverse_file">
     <input type="hidden" name="wav_file" id="wav_file" required>
-    <div class="file-browser" data-endpoint="{{ host_prefix }}/browse/samples" data-input="wav_file">
+    <div class="file-browser" data-endpoint="{{ host_prefix }}/browse/samples" data-input="wav_file" data-form="reverse-form">
         <div class="breadcrumb"></div>
         <ul class="file-list"></ul>
     </div>
-    <button type="submit">Reverse</button>
 </form>
 {% endblock %}
 

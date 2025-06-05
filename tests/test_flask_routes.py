@@ -20,6 +20,7 @@ def test_reverse_get(client):
     resp = client.get('/reverse')
     assert resp.status_code == 200
     assert b'class="file-list"' in resp.data
+    assert b'data-form="reverse-form"' in resp.data
 
 def test_reverse_post(client, monkeypatch):
     def fake_handle_post(form):
