@@ -19,6 +19,7 @@
     <input type="hidden" name="macro_index" id="macro-index-input" value="">
     <button type="submit">Choose Another Preset</button>
     <input type="hidden" name="preset_select" value="{{ selected_preset }}">
+    <p class="current-preset">Currently loaded preset: {{ selected_preset.split('/')[-1] }}</p>
     <div class="macro-display">
         {{ macros_html | safe }}
     </div>

@@ -77,6 +77,7 @@ def test_synth_macros_get(client, monkeypatch):
     resp = client.get('/synth-macros')
     assert resp.status_code == 200
     assert b'choose' in resp.data
+    assert b'Currently loaded preset' not in resp.data
 
 def test_synth_macros_post(client, monkeypatch):
     def fake_post(form):
@@ -93,6 +94,7 @@ def test_synth_macros_post(client, monkeypatch):
     assert b'saved' in resp.data
     assert b'Choose Another Preset' in resp.data
     assert b'<p>done</p>' in resp.data
+    assert b'Currently loaded preset:' in resp.data
 
 def test_drum_rack_inspector_get(client, monkeypatch):
     def fake_get():
@@ -106,6 +108,7 @@ def test_drum_rack_inspector_get(client, monkeypatch):
     resp = client.get('/drum-rack-inspector')
     assert resp.status_code == 200
     assert b'class="file-browser"' in resp.data
+    assert b'Currently loaded preset' not in resp.data
 
 def test_drum_rack_inspector_post(client, monkeypatch):
     def fake_post(form):
@@ -120,6 +123,7 @@ def test_drum_rack_inspector_post(client, monkeypatch):
     resp = client.post('/drum-rack-inspector', data={'action':'select_preset', 'preset_select':'x'})
     assert resp.status_code == 200
     assert b'<div>grid</div>' in resp.data
+    assert b'Currently loaded preset:' in resp.data
 
 def test_chord_get(client):
     resp = client.get('/chord')

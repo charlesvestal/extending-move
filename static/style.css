@@ -308,6 +308,11 @@ input[type="submit"]:hover {
     margin-bottom: 1rem;
 }
 
+.current-preset {
+    font-weight: 500;
+    margin-bottom: 1rem;
+}
+
 /* Chord grid styling */
 .chord-list {
     margin-top: 2rem;
