@@ -37,6 +37,12 @@ def list_msets(return_free_ids=False):
     msets = []
     used_ids = set()
 
+    if not os.path.isdir(MSETS_DIRECTORY):
+        if return_free_ids:
+            free = list(range(32))
+            return msets, {"used": used_ids, "free": free}
+        return msets
+
     for uuid in os.listdir(MSETS_DIRECTORY):
         uuid_path = os.path.join(MSETS_DIRECTORY, uuid)
         if os.path.isdir(uuid_path):
