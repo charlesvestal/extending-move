@@ -465,21 +465,23 @@ function normalizeAudioBuffer(buffer, targetPeak = 0.9) {
   return buffer;
 }
 
-async function processChordSample(buffer, intervals, keepLength = false) {
+  async function processChordSample(buffer, intervals, keepLength = false) {
   const pitchedBuffers = [];
   for (let semitone of intervals) {
     let pitched = await pitchShiftOffline(buffer, semitone);
     pitched = trimLeadingSilence(pitched);
     if (keepLength) {
       pitched = await soundtouchStretch(pitched, buffer.length);
+      pitched = trimLeadingSilence(pitched);
     }
     pitchedBuffers.push(pitched);
   }
-  const mixed = mixAudioBuffers(pitchedBuffers);
+  let mixed = mixAudioBuffers(pitchedBuffers);
+  mixed = trimLeadingSilence(mixed);
   const normalized = normalizeAudioBuffer(mixed, 0.9);
   const wavData = toWav(normalized);
   return new Blob([new DataView(wavData)], { type: 'audio/wav' });
-}
+  }
 
 function showChordMessage(text, type = 'info') {
   const msgEl = document.getElementById('chord-message');
