@@ -7,23 +7,23 @@
   <p class="{{ message_type if message_type else ('success' if success else 'error') }}">{{ message }}</p>
 {% endif %}
 
+{% if not preset_selected %}
+<div class="file-browser" data-root="{{ browser_root }}" data-action="{{ host_prefix }}/synth-macros" data-field="preset_select" data-value="select_preset" data-filter="drift">
+    {{ file_browser_html | safe }}
+</div>
+{% else %}
 <form method="post" action="{{ host_prefix }}/synth-macros" id="preset-form">
-    <input type="hidden" name="action" id="action-input" value="select_preset">
+    <input type="hidden" name="action" id="action-input" value="reset_preset">
     <input type="hidden" name="param_path" id="param-path-input" value="">
     <input type="hidden" name="param_name" id="param-name-input" value="">
     <input type="hidden" name="macro_index" id="macro-index-input" value="">
-    {% if not preset_selected %}
-    <div class="file-browser" data-root="{{ browser_root }}" data-action="{{ host_prefix }}/synth-macros" data-field="preset_select" data-value="select_preset" data-filter="drift">
-        {{ file_browser_html | safe }}
-    </div>
-    {% else %}
-    <button type="submit" onclick="document.getElementById('action-input').value='reset_preset';">Choose Another Preset</button>
+    <button type="submit">Choose Another Preset</button>
     <input type="hidden" name="preset_select" value="{{ selected_preset }}">
     <div class="macro-display">
         {{ macros_html | safe }}
     </div>
-    {% endif %}
 </form>
+{% endif %}
 
 <!-- The dropdown change event is handled by main.js using AJAX -->
 
