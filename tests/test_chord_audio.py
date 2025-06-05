@@ -15,6 +15,12 @@ def active_duration(y, sr, threshold=1e-4):
         return 0.0
     return (idx[-1] - idx[0]) / sr
 
+def active_bounds(y, sr, threshold=1e-4):
+    idx = np.where(np.abs(y) > threshold)[0]
+    if len(idx) == 0:
+        return 0.0, 0.0
+    return idx[0] / sr, idx[-1] / sr
+
 def generate_chord(y, sr, intervals):
     buffers = []
     for semitone in intervals:
@@ -33,7 +39,11 @@ def test_examples_have_equal_length():
     for p in paths:
         y, sr = load_mono(p)
         orig_dur = active_duration(y, sr)
+        orig_start, orig_end = active_bounds(y, sr)
         chord = generate_chord(y, sr, intervals)
         assert len(chord) == len(y)
         chord_dur = active_duration(chord, sr)
+        chord_start, chord_end = active_bounds(chord, sr)
         assert abs(chord_dur - orig_dur) < 0.01
+        assert abs(chord_start - orig_start) < 0.01
+        assert abs(chord_end - orig_end) < 0.01
