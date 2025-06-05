@@ -294,10 +294,10 @@ function writeString(view, offset, string) {
 
 async function soundtouchStretch(buffer, targetLength) {
   const { PitchShifter } = await import('./soundtouch.js');
-  const ratio = targetLength / buffer.length;
+  const tempo = buffer.length / targetLength;
   const ctx = new OfflineAudioContext(buffer.numberOfChannels, targetLength, buffer.sampleRate);
   const shifter = new PitchShifter(ctx, buffer, 4096);
-  shifter.tempo = ratio;
+  shifter.tempo = tempo;
   shifter.pitch = 1;
   shifter.connect(ctx.destination);
   return ctx.startRendering();
