@@ -35,7 +35,7 @@ import cgi
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-    handlers=[logging.FileHandler("server.log"), logging.StreamHandler(sys.stdout)],
+    handlers=[logging.FileHandler("move-webserver.log"), logging.StreamHandler(sys.stdout)],
 )
 logger = logging.getLogger(__name__)
 
