@@ -351,56 +351,54 @@ function hannWindow(size) {
 }
 
 
-function wsolaStretch(buffer, targetLength) {
+function estimatePitchPeriod(data, sampleRate) {
+  var minFreq = 80;
+  var maxFreq = 1000;
+  var minLag = Math.floor(sampleRate / maxFreq);
+  var maxLag = Math.floor(sampleRate / minFreq);
+  var bestLag = minLag;
+  var bestCorr = -Infinity;
+  var end = Math.min(data.length - maxLag - 1, sampleRate * 0.1);
+  for (var lag = minLag; lag <= maxLag; lag++) {
+    var corr = 0;
+    for (var i = 0; i < end; i++) {
+      corr += data[i] * data[i + lag];
+    }
+    if (corr > bestCorr) {
+      bestCorr = corr;
+      bestLag = lag;
+    }
+  }
+  return bestLag;
+}
+
+function psolaStretch(buffer, targetLength) {
   var ratio = targetLength / buffer.length;
   var numChannels = buffer.numberOfChannels;
   var sr = buffer.sampleRate;
   var outBuf = new AudioBuffer({ length: targetLength, numberOfChannels: numChannels, sampleRate: sr });
-  var size = 2048;
-  var hopIn = size / 2;
-  var hopOut = Math.round(hopIn * ratio);
-  var search = hopIn;
-  var window = hannWindow(size);
+  var windowCache = {};
 
   for (var ch = 0; ch < numChannels; ch++) {
     var input = buffer.getChannelData(ch);
     var output = outBuf.getChannelData(ch);
+    var pitch = estimatePitchPeriod(input, sr) || 1;
+    var frameSize = 2 * pitch;
+    var A = pitch;
+    var S = Math.round(A * ratio);
+    var window = windowCache[frameSize] || (windowCache[frameSize] = hannWindow(frameSize));
     var inPos = 0;
     var outPos = 0;
-    var prevFrame = input.slice(0, size);
-
-    for (var j = 0; j < size; j++) {
-      if (j < output.length) output[j] += prevFrame[j] * window[j];
-    }
-    inPos += hopIn;
-    outPos += hopOut;
-
-    while (outPos + size < targetLength && inPos + size < input.length) {
-      var start = Math.max(0, Math.floor(inPos - search));
-      var end = Math.min(input.length - size, Math.floor(inPos + search));
-      var bestOffset = start;
-      var bestCorr = -Infinity;
-      for (var s = start; s <= end; s += 4) { // step to reduce CPU load
-        var corr = 0;
-        for (var k = 0; k < size; k += 1) {
-          corr += prevFrame[k] * input[s + k];
-        }
-        if (corr > bestCorr) {
-          bestCorr = corr;
-          bestOffset = s;
-        }
-      }
-
-      var frame = input.subarray(bestOffset, bestOffset + size);
-      for (var j = 0; j < size; j++) {
+    while (outPos + frameSize < targetLength && inPos + frameSize < input.length) {
+      var frame = input.subarray(inPos, inPos + frameSize);
+      for (var j = 0; j < frameSize; j++) {
         var idx = outPos + j;
         if (idx < output.length) {
           output[idx] += frame[j] * window[j];
         }
       }
-      prevFrame = frame.slice();
-      inPos += hopIn;
-      outPos += hopOut;
+      inPos += A;
+      outPos += S;
     }
   }
   return outBuf;
@@ -469,7 +467,7 @@ async function processChordSample(buffer, intervals, keepLength = false) {
   for (let semitone of intervals) {
     let pitched = await pitchShiftOffline(buffer, semitone);
     if (keepLength) {
-      pitched = wsolaStretch(pitched, buffer.length);
+      pitched = psolaStretch(pitched, buffer.length);
     }
     pitchedBuffers.push(pitched);
   }
