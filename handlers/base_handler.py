@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import os
-import cgi
 import shutil
 import logging
 from typing import Dict, Any, Optional, Tuple
@@ -30,7 +29,7 @@ class BaseHandler:
         self.upload_dir = os.path.abspath("uploads")
         os.makedirs(self.upload_dir, exist_ok=True)
 
-    def validate_action(self, form: cgi.FieldStorage, expected_action: str) -> Tuple[bool, Optional[Dict[str, str]]]:
+    def validate_action(self, form, expected_action: str) -> Tuple[bool, Optional[Dict[str, str]]]:
         """
         Validate that the form's action field matches the expected action.
         
@@ -48,7 +47,7 @@ class BaseHandler:
             return False, {"message": f"Bad Request: Invalid action '{action}'", "message_type": "error"}
         return True, None
 
-    def handle_file_upload(self, form: cgi.FieldStorage, field_name: str = 'file') -> Tuple[bool, Optional[str], Optional[Dict[str, str]]]:
+    def handle_file_upload(self, form, field_name: str = 'file') -> Tuple[bool, Optional[str], Optional[Dict[str, str]]]:
         """
         Handle file upload from a multipart form.
         Saves the uploaded file to a temporary directory.
@@ -70,7 +69,7 @@ class BaseHandler:
             return False, None, {"message": f"Bad Request: No {field_name} field in form", "message_type": "error"}
 
         file_field = form[field_name]
-        if not isinstance(file_field, cgi.FieldStorage) or not file_field.filename:
+        if not hasattr(file_field, "filename") or not file_field.filename:
             return False, None, {"message": f"Bad Request: Invalid {field_name}", "message_type": "error"}
 
         try:

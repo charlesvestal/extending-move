@@ -1,4 +1,3 @@
-import cgi
 import re
 import os
 import logging
