@@ -29,6 +29,10 @@ bind = "0.0.0.0:909"
 # Number of worker processes; default to 2 if not specified
 workers = int(os.environ.get("WEB_CONCURRENCY", "2"))
 
+# Allow time-consuming operations like preset inspection to finish
+timeout = int(os.environ.get("WEB_TIMEOUT", "120"))
+graceful_timeout = timeout
+
 # Write PID and warm-up when the server starts
 
 def on_starting(server):

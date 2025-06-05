@@ -132,6 +132,11 @@ python3 -m gunicorn -c gunicorn_config.py move_webserver:app
 # logs will be written to move-webserver.log
 ```
 
+Long running operations may exceed Gunicorn's default timeout. The
+configuration sets a 120&nbsp;second limit which you can override by
+setting the `WEB_TIMEOUT` environment variable before starting the
+server.
+
 You can inspect the log file with `cat move-webserver.log` if the server fails
 to start or respond.
 
@@ -172,6 +177,7 @@ case "$1" in
     cd /data/UserData/extending-move
     # run as the 'ableton' user (drops privileges)
     su - ableton -s /bin/sh -c "cd /data/UserData/extending-move ; python3 -m gunicorn -c gunicorn_config.py move_webserver:app >> startup.log 2>&1 &"
+    # set WEB_TIMEOUT if you need a different timeout
     ;;
   stop)
     if [ -f /data/UserData/extending-move/move-webserver.pid ]; then
