@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import cgi
 import os
 from handlers.base_handler import BaseHandler
 from core.reverse_handler import reverse_wav_file
@@ -26,7 +25,7 @@ class ReverseHandler(BaseHandler):
             "browser_filter": "wav",
         }
 
-    def handle_post(self, form: cgi.FieldStorage):
+    def handle_post(self, form):
         """Handle POST request for WAV file reversal."""
         # Validate action
         valid, error_response = self.validate_action(form, "reverse_file")

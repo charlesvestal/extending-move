@@ -1,5 +1,4 @@
 import os
-import cgi
 import logging
 from handlers.base_handler import BaseHandler
 from core.list_msets_handler import list_msets
@@ -34,7 +33,7 @@ class RestoreHandler(BaseHandler):
                 "message": "Error retrieving available pads."
             }
 
-    def handle_post(self, form: cgi.FieldStorage):
+    def handle_post(self, form):
         """
         Handles POST requests to restore an uploaded .ablbundle file.
         """

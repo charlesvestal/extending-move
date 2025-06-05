@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import os
 import json
-import cgi
 from handlers.base_handler import BaseHandler
 from core.slice_handler import process_kit
 
@@ -73,7 +72,7 @@ class SliceHandler(BaseHandler):
         except Exception as e:
             print(f"Warning: Error cleaning directory {directory}: {e}")
 
-    def handle_post(self, form: cgi.FieldStorage, response_handler=None):
+    def handle_post(self, form, response_handler=None):
         """
         Handle POST request for slice processing.
         

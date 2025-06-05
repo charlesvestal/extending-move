@@ -3,10 +3,9 @@ import os
 import zipfile
 import shutil
 import json
-import cgi
 
 class FilePlacerHandler(BaseHandler):
-    def handle_post(self, form: cgi.FieldStorage):
+    def handle_post(self, form):
         mode = form.getvalue("mode")
         if mode == "zip":
             # Handle a zip file upload
