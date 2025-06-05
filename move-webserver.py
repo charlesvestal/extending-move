@@ -27,7 +27,6 @@ from handlers.synth_preset_inspector_handler_class import (
 from handlers.drum_rack_inspector_handler_class import DrumRackInspectorHandler
 from handlers.file_placer_handler_class import FilePlacerHandler
 from handlers.refresh_handler_class import RefreshHandler
-from dash import Dash, html
 from core.file_browser import generate_dir_html
 import cgi
 
@@ -92,8 +91,6 @@ synth_handler = SynthPresetInspectorHandler()
 file_placer_handler = FilePlacerHandler()
 refresh_handler = RefreshHandler()
 drum_rack_handler = DrumRackInspectorHandler()
-dash_app = Dash(__name__, server=app, routes_pathname_prefix="/dash/")
-dash_app.layout = html.Div([html.H1("Move Dash"), html.P("Placeholder")])
 
 
 @app.before_request
