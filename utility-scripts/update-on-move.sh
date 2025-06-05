@@ -36,7 +36,7 @@ tar czf - \
   --exclude='.git' \
   --exclude='utility-scripts' \
   core handlers templates_jinja static examples \
-  move-webserver.py move_webserver.py gunicorn_config.py requirements.txt | \
+  move-webserver.py move_webserver.py gunicorn_config.py tls_worker.py requirements.txt | \
 ssh -T "${REMOTE_USER}@${REMOTE_HOST}" "cd '${REMOTE_DIR}' && tar xzf - && cp -r /opt/move/HttpRoot/fonts static/"
 
 echo "Files copied."
