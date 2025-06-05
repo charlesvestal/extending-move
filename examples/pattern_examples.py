@@ -7,6 +7,8 @@ import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 
+OUTPUT_DIR = os.environ.get("MOVE_SET_DIR", "/data/UserData/UserLibrary/Sets")
+
 from core.midi_pattern_generator import (
     generate_pattern_set,
     create_c_major_downbeats,
@@ -26,7 +28,8 @@ def example_1_c_major_chords():
         set_name="C_Major_Downbeats",
         pattern=pattern,
         clip_length=4.0,
-        tempo=120.0
+        tempo=120.0,
+        output_dir=OUTPUT_DIR
     )
     
     if result['success']:
@@ -65,7 +68,8 @@ def example_2_custom_pattern():
         set_name="Chord_Progression",
         pattern=pattern,
         clip_length=4.0,
-        tempo=120.0
+        tempo=120.0,
+        output_dir=OUTPUT_DIR
     )
     
     if result['success']:
@@ -89,7 +93,8 @@ def example_3_scale_pattern():
         set_name="C_Major_Scale",
         pattern=pattern,
         clip_length=4.0,
-        tempo=120.0
+        tempo=120.0,
+        output_dir=OUTPUT_DIR
     )
     
     if result['success']:
@@ -122,7 +127,8 @@ def example_4_rhythm_pattern():
         set_name="Syncopated_Rhythm",
         pattern=pattern,
         clip_length=4.0,
-        tempo=120.0
+        tempo=120.0,
+        output_dir=OUTPUT_DIR
     )
     
     if result['success']:
@@ -160,7 +166,8 @@ def example_5_complex_pattern():
         set_name="Melody_And_Bass",
         pattern=pattern,
         clip_length=4.0,
-        tempo=120.0
+        tempo=120.0,
+        output_dir=OUTPUT_DIR
     )
     
     if result['success']:
@@ -201,7 +208,8 @@ def example_6_longer_clip():
         set_name="Eight_Bar_Pattern",
         pattern=pattern,
         clip_length=32.0,  # 8 bars * 4 beats
-        tempo=120.0
+        tempo=120.0,
+        output_dir=OUTPUT_DIR
     )
     
     if result['success']:
@@ -222,5 +230,5 @@ if __name__ == "__main__":
     example_6_longer_clip()
     
     print("\n✓ All examples completed!")
-    print("\nNote: These examples assume the Move device is connected and")
-    print("the output directory '/data/UserData/UserLibrary/Sets' exists.")
+    print("\nNote: These examples assume the Move device is connected.")
+    print("The output directory is configurable via the MOVE_SET_DIR environment variable.")
