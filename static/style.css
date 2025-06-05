@@ -308,6 +308,11 @@ input[type="submit"]:hover {
     margin-bottom: 1rem;
 }
 
+.current-preset {
+    font-weight: 500;
+    margin-bottom: 1rem;
+}
+
 /* Chord grid styling */
 .chord-list {
     margin-top: 2rem;
@@ -382,3 +387,23 @@ select {
 .drum-cell .sample-info {
     margin-top: auto;
 }
+/* File browser styling */
+.file-tree { list-style: none; padding-left: 0; }
+.file-tree ul { list-style: none; margin-left: 1rem; padding-left: 0; }
+.file-tree li { margin: 0; }
+.file-tree .dir > span,
+.file-tree .file-entry button { display: block; width: 100%; cursor: pointer; border: none; background: none; text-align: left; padding: 0; }
+.file-tree .dir > span:hover,
+.file-tree .file-entry button:hover { background: #f0f0f0; }
+.file-tree .file-entry button { color: #0066cc; }
+.file-tree .dir.closed > span::before { content: "\25B6"; display: inline-block; width: 1em; }
+.file-tree .dir.open > span::before { content: "\25BC"; display: inline-block; width: 1em; }
+.hidden { display: none; }
+.file-tree .dir, .file-tree .file-entry {margin-left: 10px;}
+.file-browser {
+    max-height: 240px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    padding: 0.25rem;
+}
+

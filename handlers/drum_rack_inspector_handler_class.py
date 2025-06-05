@@ -2,29 +2,47 @@
 import cgi
 import os
 import urllib.parse
+from core.file_browser import generate_dir_html
 from handlers.base_handler import BaseHandler
-from core.drum_rack_inspector_handler import scan_for_drum_rack_presets, get_drum_cell_samples, update_drum_cell_sample
+from core.drum_rack_inspector_handler import get_drum_cell_samples, update_drum_cell_sample
 from core.reverse_handler import reverse_wav_file
 from core.refresh_handler import refresh_library
 from core.time_stretch_handler import time_stretch_wav
 
 class DrumRackInspectorHandler(BaseHandler):
     def handle_get(self):
-        """Handle GET request for drum rack inspector page."""
+        """Return file browser HTML for drum rack presets."""
+        base_dir = "/data/UserData/UserLibrary/Track Presets"
+        if not os.path.exists(base_dir) and os.path.exists("examples/Track Presets"):
+            base_dir = "examples/Track Presets"
+        browser_html = generate_dir_html(
+            base_dir,
+            "",
+            '/drum-rack-inspector',
+            'preset_select',
+            'select_preset',
+            filter_key='drumrack'
+        )
         return {
-            'options': self.get_preset_options(),
+            'file_browser_html': browser_html,
             'message': '',
-            'samples_html': ''
+            'samples_html': '',
+            'selected_preset': None,
+            'browser_root': base_dir,
+            'browser_filter': 'drumrack',
+            'message_type': 'info',
         }
 
     def handle_post(self, form: cgi.FieldStorage):
         """Handle POST request for preset selection and sample operations."""
         # Get action
         action = form.getvalue('action')
+        if action == 'reset_preset':
+            return self.handle_get()
         if action == 'reverse_sample':
             return self.handle_reverse_sample(form)
         if action == 'time_stretch_sample':
-            return self.handle_time_stretch_sample(form)    
+            return self.handle_time_stretch_sample(form)
         # Validate preset selection action
         valid, error_response = self.validate_action(form, "select_preset")
         if not valid:
@@ -122,28 +140,34 @@ class DrumRackInspectorHandler(BaseHandler):
 
             samples_html += '</div>'
 
+            base_dir = "/data/UserData/UserLibrary/Track Presets"
+            if not os.path.exists(base_dir) and os.path.exists("examples/Track Presets"):
+                base_dir = "examples/Track Presets"
+            browser_html = generate_dir_html(
+                base_dir,
+                "",
+                '/drum-rack-inspector',
+                'preset_select',
+                'select_preset',
+                filter_key='drumrack'
+            )
+
             return {
-                'options': self.get_preset_options(),
+                'file_browser_html': browser_html,
                 'message': result['message'],
-                'samples_html': samples_html  # Changed from 'samples' to 'samples_html'
+                'samples_html': samples_html,
+                'selected_preset': preset_path,
+                'browser_root': base_dir,
+                'browser_filter': 'drumrack',
+                'message_type': 'success',
             }
 
         except Exception as e:
             return self.format_error_response(f"Error processing preset: {str(e)}")
 
     def get_preset_options(self):
-        """Get preset options for the template."""
-        try:
-            result = scan_for_drum_rack_presets()
-            if not result['success']:
-                return ''
-            options_html = ['<option value="">--Select a Preset--</option>']
-            for preset in result['presets']:
-                options_html.append(f'<option value="{preset["path"]}">{preset["name"]}</option>')
-            return '\n'.join(options_html)
-        except Exception as e:
-            print(f"Error getting preset options: {e}")
-            return ''
+        """Deprecated dropdown helper."""
+        return ''
     
     def handle_time_stretch_sample(self, form: cgi.FieldStorage):
         """Handle time-stretch action."""
@@ -172,10 +196,25 @@ class DrumRackInspectorHandler(BaseHandler):
                     </form>
                 </div>
             '''
+            base_dir = "/data/UserData/UserLibrary/Track Presets"
+            if not os.path.exists(base_dir) and os.path.exists("examples/Track Presets"):
+                base_dir = "examples/Track Presets"
+            browser_html = generate_dir_html(
+                base_dir,
+                "",
+                '/drum-rack-inspector',
+                'preset_select',
+                'select_preset',
+                filter_key='drumrack'
+            )
             return {
-                'options': self.get_preset_options(),
+                'file_browser_html': browser_html,
                 'message': '',
-                'samples_html': samples_html
+                'samples_html': samples_html,
+                'selected_preset': preset_path,
+                'browser_root': base_dir,
+                'browser_filter': 'drumrack',
+                'message_type': 'info',
             }
 
         # Step 2: Compute target duration
@@ -302,10 +341,25 @@ class DrumRackInspectorHandler(BaseHandler):
 
         samples_html += '</div>'
 
+        base_dir = "/data/UserData/UserLibrary/Track Presets"
+        if not os.path.exists(base_dir) and os.path.exists("examples/Track Presets"):
+            base_dir = "examples/Track Presets"
+        browser_html = generate_dir_html(
+            base_dir,
+            "",
+            '/drum-rack-inspector',
+            'preset_select',
+            'select_preset',
+            filter_key='drumrack'
+        )
         return {
-            'options': self.get_preset_options(),
+            'file_browser_html': browser_html,
             'message': f"Time-stretched sample created and loaded for pad {pad_number}! {ts_message} {update_message}",
-            'samples_html': samples_html
+            'samples_html': samples_html,
+            'selected_preset': preset_path,
+            'browser_root': base_dir,
+            'browser_filter': 'drumrack',
+            'message_type': 'success',
         }
     def handle_reverse_sample(self, form):
         """Handle reversing a sample."""
@@ -433,10 +487,25 @@ class DrumRackInspectorHandler(BaseHandler):
 
             samples_html += '</div>'
 
+            base_dir = "/data/UserData/UserLibrary/Track Presets"
+            if not os.path.exists(base_dir) and os.path.exists("examples/Track Presets"):
+                base_dir = "examples/Track Presets"
+            browser_html = generate_dir_html(
+                base_dir,
+                "",
+                '/drum-rack-inspector',
+                'preset_select',
+                'select_preset',
+                filter_key='drumrack'
+            )
             return {
-                'options': self.get_preset_options(),
+                'file_browser_html': browser_html,
                 'message': message,
-                'samples_html': samples_html
+                'samples_html': samples_html,
+                'selected_preset': preset_path,
+                'browser_root': base_dir,
+                'browser_filter': 'drumrack',
+                'message_type': 'success',
             }
 
         except Exception as e:
