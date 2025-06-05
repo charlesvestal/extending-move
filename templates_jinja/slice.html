@@ -5,7 +5,7 @@
   <p class="{{ message_type if message_type else ('success' if success else 'error') }}">{{ message }}</p>
 {% endif %}
 <p id="slice-message"></p>
-<form id="slice-form" action="/slice" method="post" enctype="multipart/form-data">
+<form id="slice-form" action="{{ host_prefix }}/slice" method="post" enctype="multipart/form-data">
   <input type="hidden" name="action" value="slice">
   <input type="hidden" name="regions" id="regions-input">
 
@@ -47,5 +47,5 @@
 {% block scripts %}
 <script src="https://unpkg.com/wavesurfer.js@6/dist/wavesurfer.js"></script>
 <script src="https://unpkg.com/wavesurfer.js@6/dist/plugin/wavesurfer.regions.js"></script>
-<script src="/static/slice_page.js"></script>
+<script src="{{ host_prefix }}/static/slice_page.js"></script>
 {% endblock %}
