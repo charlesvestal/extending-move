@@ -2,7 +2,8 @@
 /* Chord tool specific functions and event handlers */
 
 // --- New Code: Chord definitions with multiple voicings. CHORDS will be
-// built at runtime for the currently selected voicing style.
+// built for all keys and all voicing styles so each pad can choose
+// its own setting.
 const CHORD_DEFS = {
   "": {
     intervals: [0, 4, 7], // Major
@@ -158,7 +159,10 @@ const CHORD_DEFS = {
 
 // List of keys using flats for accidentals (as preferred in the default chords)
 const keys = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
-const keyOffsets = { "C": 0, "Db": 1, "D": 2, "Eb": 3, "E": 4, "F": 5, "Gb": 6, "G": 7, "Ab": 8, "A": 9, "Bb": 10, "B": 11 };
+const keyOffsets = {
+  "C": 0, "Db": 1, "D": 2, "Eb": 3, "E": 4, "F": 5,
+  "Gb": 6, "G": 7, "Ab": 8, "A": 9, "Bb": 10, "B": 11
+};
 
 // --- End of chord definitions
 
@@ -181,35 +185,40 @@ const BASE_DEFAULT_CHORDS = [
   "C",
 ];
 
-let currentVoicing = "default";
-let CHORDS = {};
+// Gather the available voicing styles
+const VOICING_NAMES = Array.from(
+  new Set(
+    Object.values(CHORD_DEFS)
+      .flatMap((def) => Object.keys(def.voicings))
+  )
+);
 
-function buildChordMap(voicingStyle = "default") {
-  currentVoicing = voicingStyle;
-  CHORDS = {};
-  for (let i = 0; i < keys.length; i++) {
-    const key = keys[i];
-    const offset = keyOffsets[key];
-    for (let variation in CHORD_DEFS) {
-      const voicing = CHORD_DEFS[variation].voicings[voicingStyle];
-      if (!voicing) continue;
-      const chordName = key + (variation === "" ? "" : variation);
-      CHORDS[chordName] = voicing.map((iv) => iv + offset);
+// Build CHORDS for every key and voicing
+const CHORDS = {};
+for (let key of keys) {
+  const offset = keyOffsets[key];
+  for (let variation in CHORD_DEFS) {
+    const def = CHORD_DEFS[variation];
+    const chordName = key + (variation === "" ? "" : variation);
+    CHORDS[chordName] = {};
+    for (let v of Object.keys(def.voicings)) {
+      CHORDS[chordName][v] = def.voicings[v].map((iv) => iv + offset);
     }
   }
-  // reset selections when the voicing changes
-  window.selectedChords = BASE_DEFAULT_CHORDS.slice(0, 16);
 }
 
-// initialize chord map on load
-buildChordMap(currentVoicing);
+const CHORD_NAMES = Object.keys(CHORDS);
+
+// Initialize default selections
+window.selectedChords = BASE_DEFAULT_CHORDS.slice(0, 16);
+window.selectedVoicings = Array(16).fill("default");
 
 function populateChordList() {
   const listElem = document.getElementById('chordList');
   listElem.innerHTML = '';
 
   // Get chord keys and ensure there are 16 items (fill with empty strings if needed)
-  let chordKeys = Object.keys(CHORDS);
+  let chordKeys = CHORD_NAMES.slice();
   while (chordKeys.length < 16) {
     chordKeys.push("");
   }
@@ -240,15 +249,20 @@ function populateChordList() {
       cell.style.padding = '10px';
       cell.style.textAlign = 'center';
 
-      // Build a dropdown <select> with all available chords
-      let availableChords = Object.keys(CHORDS);
-      let selectHTML = '<select id="chord-select-' + padNumber + '">';
-      availableChords.forEach(chord => {
-          selectHTML += '<option value="' + chord + '">' + chord + '</option>';
+      // Build dropdowns for chord and voicing
+      let chordHTML = '<select id="chord-select-' + padNumber + '">';
+      CHORD_NAMES.forEach(chord => {
+          chordHTML += '<option value="' + chord + '">' + chord + '</option>';
       });
-      selectHTML += '</select>';
+      chordHTML += '</select>';
 
-      cell.innerHTML = `<div class="chord-label">${padNumber}: ${selectHTML}</div>
+      let voicingHTML = '<select id="voicing-select-' + padNumber + '">';
+      VOICING_NAMES.forEach(v => {
+          voicingHTML += '<option value="' + v + '">' + v + '</option>';
+      });
+      voicingHTML += '</select>';
+
+      cell.innerHTML = `<div class="chord-label">${padNumber}: ${chordHTML} ${voicingHTML}</div>
                         <div class="chord-preview" id="chord-preview-${padNumber}" style="height: 50px; cursor: pointer;"></div>`;
       gridContainer.appendChild(cell);
 
@@ -257,6 +271,13 @@ function populateChordList() {
       selectElem.value = window.selectedChords[padNumber - 1];
       selectElem.addEventListener('change', function() {
           window.selectedChords[padNumber - 1] = this.value;
+          regenerateChordPreview(padNumber);
+      });
+
+      const voicingElem = cell.querySelector(`#voicing-select-${padNumber}`);
+      voicingElem.value = window.selectedVoicings[padNumber - 1];
+      voicingElem.addEventListener('change', function() {
+          window.selectedVoicings[padNumber - 1] = this.value;
           regenerateChordPreview(padNumber);
       });
     }
@@ -275,7 +296,8 @@ function populateChordList() {
 async function regenerateChordPreview(padNumber) {
     if (!window.decodedBuffer) return;
     const selectedChord = window.selectedChords[padNumber - 1];
-    const intervals = CHORDS[selectedChord];
+    const selectedVoicing = window.selectedVoicings[padNumber - 1];
+    const intervals = CHORDS[selectedChord][selectedVoicing] || CHORDS[selectedChord].default;
     const blob = await processChordSample(window.decodedBuffer, intervals);
     const url = URL.createObjectURL(blob);
     const previewContainer = document.getElementById(`chord-preview-${padNumber}`);
@@ -502,14 +524,6 @@ function showChordMessage(text, type = 'info') {
 }
 
 function initChordTab() {
-  const voicingSelect = document.getElementById('voicingStyle');
-  if (voicingSelect) {
-    voicingSelect.value = currentVoicing;
-    voicingSelect.addEventListener('change', () => {
-      buildChordMap(voicingSelect.value);
-      populateChordList();
-    });
-  }
   // Attach event listener for generatePreset
   const presetBtn = document.getElementById('generatePreset');
   if (presetBtn) {
@@ -537,8 +551,10 @@ function initChordTab() {
     const chordNames = window.selectedChords;
     let sampleFilenames = [];
     let processedSamples = {};
-    for (let chordName of chordNames) {
-      const intervals = CHORDS[chordName];
+    for (let i = 0; i < chordNames.length; i++) {
+      const chordName = chordNames[i];
+      const vStyle = window.selectedVoicings[i];
+      const intervals = CHORDS[chordName][vStyle] || CHORDS[chordName].default;
       const blob = await processChordSample(decodedBuffer, intervals);
       let safeChordName = chordName.replace(/\s+/g, '');
       let filename = `${baseName}_chord_${safeChordName}.wav`;
@@ -604,8 +620,10 @@ function initChordTab() {
     const chordNames = window.selectedChords;
     let sampleFilenames = [];
     let processedSamples = {};
-    for (let chordName of chordNames) {
-      const intervals = CHORDS[chordName];
+    for (let i = 0; i < chordNames.length; i++) {
+      const chordName = chordNames[i];
+      const vStyle = window.selectedVoicings[i];
+      const intervals = CHORDS[chordName][vStyle] || CHORDS[chordName].default;
       const blob = await processChordSample(decodedBuffer, intervals);
       let safeChordName = chordName.replace(/\s+/g, '');
       let filename = `${baseName}_chord_${safeChordName}.wav`;
@@ -705,8 +723,10 @@ function initChordTab() {
       // Process each chord sample and create its waveform preview sequentially
       for (let i = 0; i < chordNames.length; i++) {
           const chordName = chordNames[i];
-          console.log("Processing chord:", chordName);
-          const blob = await processChordSample(decodedBuffer, CHORDS[chordName]);
+          const vStyle = window.selectedVoicings[i];
+          console.log("Processing chord:", chordName, vStyle);
+          const intervals = CHORDS[chordName][vStyle] || CHORDS[chordName].default;
+          const blob = await processChordSample(decodedBuffer, intervals);
           const url = URL.createObjectURL(blob);
           const padNumber = i + 1;  // Adjust this if your grid order differs
           const previewContainer = document.getElementById(`chord-preview-${padNumber}`);
