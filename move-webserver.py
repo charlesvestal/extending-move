@@ -30,6 +30,10 @@ from handlers.file_placer_handler_class import FilePlacerHandler
 from handlers.refresh_handler_class import RefreshHandler
 from dash import Dash, html, dcc, Input, Output, State
 from core.reverse_handler import get_wav_files
+from core.list_msets_handler import list_msets
+import base64
+import io
+import types
 import cgi
 
 PID_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "move-webserver.pid")
@@ -183,6 +187,15 @@ drum_rack_handler = DrumRackInspectorHandler()
 dash_app = Dash(__name__, server=app, routes_pathname_prefix="/dash/")
 
 
+def get_free_pads():
+    """Return a list of available pad numbers for restore."""
+    try:
+        _, ids = list_msets(return_free_ids=True)
+        return sorted([pad_id + 1 for pad_id in ids.get("free", [])])
+    except Exception:
+        return []
+
+
 def dash_layout():
     """Dynamic layout for the Dash interface."""
     return html.Div(
@@ -228,12 +241,44 @@ def reverse_page_layout():
     )
 
 
+def restore_page_layout():
+    """Layout for restoring Move Sets."""
+    pad_options = [
+        {"label": str(pad), "value": str(pad)} for pad in get_free_pads()
+    ]
+    return html.Div(
+        [
+            html.H2("Restore Move Set"),
+            dcc.Upload(
+                id="restore-file",
+                children=html.Button("Select .ablbundle"),
+                multiple=False,
+            ),
+            html.Br(),
+            dcc.Dropdown(
+                id="restore-pad",
+                options=pad_options,
+                placeholder="Select pad",
+            ),
+            dcc.Input(
+                id="restore-color",
+                type="number",
+                min=1,
+                max=26,
+                value=1,
+            ),
+            html.Button("Upload & Restore", id="restore-submit"),
+            html.Div(id="restore-message"),
+        ]
+    )
+
+
 @dash_app.callback(Output("dash-page-content", "children"), Input("dash-url", "pathname"))
 def render_page(pathname):
     if pathname == "/dash/reverse":
         return reverse_page_layout()
     if pathname == "/dash/restore":
-        return html.Iframe(src="/restore", style={"width": "100%", "height": "800px", "border": "none"})
+        return restore_page_layout()
     if pathname == "/dash/slice":
         return html.Iframe(src="/slice", style={"width": "100%", "height": "800px", "border": "none"})
     if pathname == "/dash/midi-upload":
@@ -259,6 +304,39 @@ def perform_reverse(n_clicks, wav_file):
     form = SimpleForm({"action": "reverse_file", "wav_file": wav_file})
     result = reverse_handler.handle_post(form)
     return result.get("message", "")
+
+
+@dash_app.callback(
+    Output("restore-message", "children"),
+    Input("restore-submit", "n_clicks"),
+    State("restore-file", "contents"),
+    State("restore-file", "filename"),
+    State("restore-pad", "value"),
+    State("restore-color", "value"),
+    prevent_initial_call=True,
+)
+def perform_restore(n_clicks, contents, filename, pad, color):
+    if not contents or not filename:
+        return "No file selected"
+    if not pad or not color:
+        return "Pad and color required"
+    try:
+        content_type, content_string = contents.split(",", 1)
+        data = base64.b64decode(content_string)
+        stream = io.BytesIO(data)
+        fs = types.SimpleNamespace(filename=filename, stream=stream)
+        form = SimpleForm(
+            {
+                "action": "restore_ablbundle",
+                "ablbundle": FileField(fs),
+                "mset_index": str(pad),
+                "mset_color": str(color),
+            }
+        )
+        result = restore_handler.handle_post(form)
+        return result.get("message", "")
+    except Exception as exc:
+        return f"Error: {exc}"
 
 
 @app.before_request
