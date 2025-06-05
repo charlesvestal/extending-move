@@ -2,7 +2,10 @@
 import os
 import cgi
 import shutil
+import logging
 from typing import Dict, Any, Optional, Tuple
+
+logger = logging.getLogger(__name__)
 
 class BaseHandler:
     """
@@ -151,7 +154,7 @@ class BaseHandler:
             if filepath and os.path.exists(filepath):
                 os.remove(filepath)
         except Exception as e:
-            print(f"Warning: Failed to clean up uploaded file {filepath}: {e}")
+            logger.warning("Failed to clean up uploaded file %s: %s", filepath, e)
 
 
     def format_json_response(self, data, status=200):
