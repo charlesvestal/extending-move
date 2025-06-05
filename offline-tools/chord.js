@@ -1,47 +1,179 @@
 /* Chord tool specific functions and event handlers */
 
 // --- New Code: Generate a complete CHORDS object for every key (assume C as pitch 0)
-// Define base chord types relative to C. Each array includes:
-//   a lower-octave note (–12), the root (0), and then chord tones.
-const baseChordTypes = {
-  "":    [-12, 0, 4, 7, 12],       // Major
-  "m":   [-12, 0, 3, 7, 12],       // Minor
-  "dim": [-12, 0, 3, 6, 12],       // Diminished
-  "aug": [-12, 0, 4, 8, 12],       // Augmented
-  "7":   [-12, 0, 4, 7, 10],       // Dominant 7
-  "maj7":[-12, 0, 4, 7, 11],       // Major 7
-  "m7":  [-12, 0, 3, 7, 10],       // Minor 7
-  "sus2":[-12, 0, 2, 7, 12],       // Sus2
-  "sus4":[-12, 0, 5, 7, 12],       // Sus4
-  "7sus":[-12, 0, 5, 7, 10],       // Dominant 7 with sus4
-  "m9":  [-12, 0, 3, 7, 10, 15],   // Minor 9
-  "maj9":[-12, 0, 4, 7, 11, 14],   // Major 9
-  "m7b5":[-12, 0, 3, 6, 10],       // Half-diminished (m7b5)
-  "6":   [-12, 0, 4, 7, 9],        // 6 chord
-  "m6":  [-12, 0, 3, 7, 9],        // Minor 6
-  "add9":[-12, 0, 4, 7, 14],        // add9 chord
-  "7#9":  [-12, 0, 4, 7, 10, 15],   // Dominant 7 with sharp 9
-  "7#5":  [-12, 0, 4, 8, 10],        // Dominant 7 with sharp 5
-  "11sus": [-12, 0, 5, 7, 10, 17],   // 11 suspended chord
-  "madd9": [-12, 0, 3, 7, 14]        // Minor add9 chord
+// Chords are defined with pitch-class intervals and multiple voicings.
+const CHORD_DEFS = {
+  "": {
+    intervals: [0, 4, 7], // Major
+    voicings: {
+      default: [-12, 0, 4, 7, 12],
+      closed: [0, 4, 7],
+      drop2: [-12, 0, 7, 12],
+      drop3: [-12, -8, 0, 4, 7],
+    },
+  },
+  "m": {
+    intervals: [0, 3, 7], // Minor
+    voicings: {
+      default: [-12, 0, 3, 7, 12],
+      closed: [0, 3, 7],
+      drop2: [-12, 0, 7, 12],
+      drop3: [-12, -9, 0, 3, 7],
+    },
+  },
+  "dim": {
+    intervals: [0, 3, 6], // Diminished
+    voicings: {
+      default: [-12, 0, 3, 6, 12],
+      closed: [0, 3, 6],
+    },
+  },
+  "aug": {
+    intervals: [0, 4, 8], // Augmented
+    voicings: {
+      default: [-12, 0, 4, 8, 12],
+      closed: [0, 4, 8],
+    },
+  },
+  "7": {
+    intervals: [0, 4, 7, 10], // Dominant 7
+    voicings: {
+      default: [-12, 0, 4, 7, 10],
+      closed: [0, 4, 7, 10],
+      drop2: [-12, 0, 7, 10],
+      drop3: [-12, -8, 0, 4, 7, 10],
+    },
+  },
+  "maj7": {
+    intervals: [0, 4, 7, 11], // Major 7
+    voicings: {
+      default: [-12, 0, 4, 7, 11],
+      closed: [0, 4, 7, 11],
+      drop2: [-12, 0, 7, 11],
+      drop3: [-12, -8, 0, 4, 7, 11],
+    },
+  },
+  "m7": {
+    intervals: [0, 3, 7, 10], // Minor 7
+    voicings: {
+      default: [-12, 0, 3, 7, 10],
+      closed: [0, 3, 7, 10],
+      drop2: [-12, 0, 7, 10],
+      drop3: [-12, -9, 0, 3, 7, 10],
+    },
+  },
+  "sus2": {
+    intervals: [0, 2, 7], // Sus2
+    voicings: {
+      default: [-12, 0, 2, 7, 12],
+      closed: [0, 2, 7],
+    },
+  },
+  "sus4": {
+    intervals: [0, 5, 7], // Sus4
+    voicings: {
+      default: [-12, 0, 5, 7, 12],
+      closed: [0, 5, 7],
+    },
+  },
+  "7sus": {
+    intervals: [0, 5, 7, 10], // Dominant 7 with sus4
+    voicings: {
+      default: [-12, 0, 5, 7, 10],
+      closed: [0, 5, 7, 10],
+    },
+  },
+  "m9": {
+    intervals: [0, 3, 7, 10, 14], // Minor 9
+    voicings: {
+      default: [-12, 0, 3, 7, 10, 15],
+      closed: [0, 3, 7, 10, 14],
+    },
+  },
+  "maj9": {
+    intervals: [0, 4, 7, 11, 14], // Major 9
+    voicings: {
+      default: [-12, 0, 4, 7, 11, 14],
+      closed: [0, 4, 7, 11, 14],
+    },
+  },
+  "m7b5": {
+    intervals: [0, 3, 6, 10], // Half-diminished
+    voicings: {
+      default: [-12, 0, 3, 6, 10],
+      closed: [0, 3, 6, 10],
+    },
+  },
+  "6": {
+    intervals: [0, 4, 7, 9], // 6 chord
+    voicings: {
+      default: [-12, 0, 4, 7, 9],
+      closed: [0, 4, 7, 9],
+    },
+  },
+  "m6": {
+    intervals: [0, 3, 7, 9], // Minor 6
+    voicings: {
+      default: [-12, 0, 3, 7, 9],
+      closed: [0, 3, 7, 9],
+    },
+  },
+  "add9": {
+    intervals: [0, 4, 7, 14], // add9 chord
+    voicings: {
+      default: [-12, 0, 4, 7, 14],
+      closed: [0, 4, 7, 14],
+    },
+  },
+  "7#9": {
+    intervals: [0, 4, 7, 10, 15], // Dominant 7 with sharp 9
+    voicings: {
+      default: [-12, 0, 4, 7, 10, 15],
+      closed: [0, 4, 7, 10, 15],
+    },
+  },
+  "7#5": {
+    intervals: [0, 4, 8, 10], // Dominant 7 with sharp 5
+    voicings: {
+      default: [-12, 0, 4, 8, 10],
+      closed: [0, 4, 8, 10],
+    },
+  },
+  "11sus": {
+    intervals: [0, 5, 7, 10, 17], // 11 suspended chord
+    voicings: {
+      default: [-12, 0, 5, 7, 10, 17],
+      closed: [0, 5, 7, 10, 17],
+    },
+  },
+  "madd9": {
+    intervals: [0, 3, 7, 14], // Minor add9 chord
+    voicings: {
+      default: [-12, 0, 3, 7, 14],
+      closed: [0, 3, 7, 14],
+    },
+  },
 };
 
 // List of keys using flats for accidentals (as preferred in the default chords)
 const keys = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
 const keyOffsets = { "C": 0, "Db": 1, "D": 2, "Eb": 3, "E": 4, "F": 5, "Gb": 6, "G": 7, "Ab": 8, "A": 9, "Bb": 10, "B": 11 };
 
-// Build the CHORDS object by transposing each base chord type for every key.
+// Build the CHORDS object by transposing each voicing of every chord type
+// for all keys.
 const CHORDS = {};
 for (let i = 0; i < keys.length; i++) {
   const key = keys[i];
   const offset = keyOffsets[key];
-  for (let variation in baseChordTypes) {
-    // For an empty variation, the chord name is just the key.
-    const chordName = key + (variation === "" ? "" : variation);
-    const baseIntervals = baseChordTypes[variation];
-    // Transpose by adding the key's offset to each interval.
-    const transposed = baseIntervals.map(interval => interval + offset);
-    CHORDS[chordName] = transposed;
+  for (let variation in CHORD_DEFS) {
+    const { voicings } = CHORD_DEFS[variation];
+    for (let voicing in voicings) {
+      const chordName =
+        key + (variation === "" ? "" : variation) + (voicing === "default" ? "" : "_" + voicing);
+      const baseIntervals = voicings[voicing];
+      const transposed = baseIntervals.map((interval) => interval + offset);
+      CHORDS[chordName] = transposed;
+    }
   }
 }
 // --- End of new CHORDS generation code
