@@ -148,7 +148,7 @@ class RestoreHandler(BaseHandler):
         cells = []
         for row in range(3, -1, -1):
             for col in range(8):
-                idx = row * 8 + col
+                idx = (3 - row) * 8 + col
                 num = idx + 1
                 occupied = idx in used_ids
                 status = 'occupied' if occupied else 'free'
