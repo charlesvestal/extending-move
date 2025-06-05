@@ -303,6 +303,27 @@ async function pitchShiftOffline(buffer, semitoneShift) {
   return offlineCtx.startRendering();
 }
 
+function trimLeadingSilence(buffer, threshold = 0.0001) {
+  const numChannels = buffer.numberOfChannels;
+  const len = buffer.length;
+  let start = 0;
+  outer: for (let i = 0; i < len; i++) {
+    for (let ch = 0; ch < numChannels; ch++) {
+      if (Math.abs(buffer.getChannelData(ch)[i]) > threshold) {
+        start = i;
+        break outer;
+      }
+    }
+  }
+  if (start === 0) return buffer;
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const trimmed = ctx.createBuffer(numChannels, len - start, buffer.sampleRate);
+  for (let ch = 0; ch < numChannels; ch++) {
+    trimmed.getChannelData(ch).set(buffer.getChannelData(ch).subarray(start));
+  }
+  return trimmed;
+}
+
 function mixAudioBuffers(buffers) {
   if (buffers.length === 0) return null;
   const numChannels = buffers[0].numberOfChannels;
@@ -349,6 +370,7 @@ async function processChordSample(buffer, intervals, keepLength = false) {
   const pitchedBuffers = [];
   for (let semitone of intervals) {
     let pitched = await pitchShiftOffline(buffer, semitone);
+    pitched = trimLeadingSilence(pitched);
     if (keepLength) {
       pitched = await soundtouchStretch(pitched, buffer.length);
     }
