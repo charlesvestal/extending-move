@@ -4,7 +4,7 @@
 {% if message %}
   <p class="{{ message_type if message_type else ('success' if success else 'error') }}">{{ message }}</p>
 {% endif %}
-<form action="/restore" method="post" enctype="multipart/form-data">
+<form action="{{ host_prefix }}/restore" method="post" enctype="multipart/form-data">
     <label for="ablbundle">Select .ablbundle file:</label>
     <input type="file" name="ablbundle" accept=".ablbundle" required>
     <br>
@@ -18,5 +18,5 @@
     <input type="hidden" name="action" value="restore_ablbundle">
     <button type="submit">Upload & Restore</button>
 </form>
-<img src="/static/img/move_pads.png" alt="Pad map" style="width:30%;" />
+<img src="{{ host_prefix }}/static/img/move_pads.png" alt="Pad map" style="width:30%;" />
 {% endblock %}
