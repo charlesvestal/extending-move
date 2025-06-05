@@ -2,7 +2,10 @@
 import os
 import json
 import urllib.parse
+import logging
 from core.cache_manager import get_cache, set_cache
+
+logger = logging.getLogger(__name__)
 
 def update_drum_cell_sample(preset_path, pad_number, new_sample_path, new_playback_start=None, new_playback_length=None):
     """
@@ -99,8 +102,8 @@ def get_drum_cell_samples(preset_path):
                 if data.get('kind') == 'drumCell':
                     # Extract sample URI
                     sample_uri = data.get('deviceData', {}).get('sampleUri', '')
-                    print(f"\nProcessing drum cell:")  # Debug log
-                    print(f"Sample URI: {sample_uri}")  # Debug log
+                    logger.debug("Processing drum cell:")
+                    logger.debug("Sample URI: %s", sample_uri)
                     if sample_uri:
                         # Handle Ableton URI format
                         if sample_uri.startswith('ableton:/user-library/Samples/'):
@@ -110,13 +113,13 @@ def get_drum_cell_samples(preset_path):
                             # Fallback to original file:// handling
                             sample_path = sample_uri.split('file://')[-1]
                         
-                        print(f"After path translation - Path: {sample_path}")  # Debug log
+                        logger.debug("After path translation - Path: %s", sample_path)
                         sample_name = os.path.basename(sample_path)
                         # URL decode both
                         sample_path = urllib.parse.unquote(sample_path)
                         sample_name = urllib.parse.unquote(sample_name)
-                        print(f"Final decoded path: {sample_path}")  # Debug log
-                        print(f"Final decoded name: {sample_name}")  # Debug log
+                        logger.debug("Final decoded path: %s", sample_path)
+                        logger.debug("Final decoded name: %s", sample_name)
                     else:
                         sample_path = ""
                         sample_name = "No sample loaded"
@@ -212,7 +215,7 @@ def scan_for_drum_rack_presets():
                             })
 
                     except Exception as e:
-                        print(f"Warning: Could not parse preset {filename}: {e}")
+                        logger.warning("Could not parse preset %s: %s", filename, e)
                         continue
 
         set_cache(cache_key, drum_rack_presets)

@@ -1,5 +1,6 @@
 import re
 import os
+import logging
 from handlers.base_handler import BaseHandler
 from core.synth_preset_inspector_handler import (
     scan_for_synth_presets, 
@@ -10,6 +11,8 @@ from core.synth_preset_inspector_handler import (
     delete_parameter_mapping
 )
 from core.file_browser import generate_dir_html
+
+logger = logging.getLogger(__name__)
 
 class SynthPresetInspectorHandler(BaseHandler):
     def handle_get(self):
@@ -103,7 +106,9 @@ class SynthPresetInspectorHandler(BaseHandler):
                     parameter_path = None
                     if hasattr(self, 'parameter_paths') and parameter_name in self.parameter_paths:
                         parameter_path = self.parameter_paths[parameter_name]
-                        print(f"Found path for parameter {parameter_name}: {parameter_path}")
+                        logger.debug(
+                            "Found path for parameter %s: %s", parameter_name, parameter_path
+                        )
                     
                     # Create parameter update for just this one mapping
                     parameter_updates = {
@@ -221,7 +226,11 @@ class SynthPresetInspectorHandler(BaseHandler):
                     else:
                         available_parameters = all_parameters
                     
-                    print(f"Available parameters: {len(available_parameters)}, Mapped parameters: {len(mapped_parameters)}")
+                    logger.debug(
+                        "Available parameters: %d, Mapped parameters: %d",
+                        len(available_parameters),
+                        len(mapped_parameters),
+                    )
         
         html = '<div class="macros-container">'
         
