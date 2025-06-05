@@ -13,6 +13,13 @@ write_pid = move_webserver.write_pid
 remove_pid = move_webserver.remove_pid
 warm_up_modules = move_webserver.warm_up_modules
 
+# Use custom worker that ignores TLS handshake attempts
+worker_class = "tls_worker.TLSDroppingWorker"
+
+# Log to a single file so logs are easy to find
+accesslog = "move-webserver.log"
+errorlog = "move-webserver.log"
+
 # Preload the app so workers share memory and warm-up runs once
 preload_app = True
 

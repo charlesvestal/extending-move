@@ -129,7 +129,11 @@ ssh ableton@move.local
 cd /data/UserData/extending-move
 cp -r /opt/move/HttpRoot/fonts /data/UserData/extending-move/static/
 python3 -m gunicorn -c gunicorn_config.py move_webserver:app
+# logs will be written to move-webserver.log
 ```
+
+You can inspect the log file with `cat move-webserver.log` if the server fails
+to start or respond.
 
 The server will be accessible at http://move.local:909
 
@@ -204,6 +208,9 @@ Enable at boot with
 ```bash
 update-rc.d ableton-startup defaults
 ```
+
+Logs from the auto-start script are written to `startup.log` in the
+`/data/UserData/extending-move` directory.
 
 ## Documentation
 
