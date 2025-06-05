@@ -1,8 +1,8 @@
 //v180220250205
 /* Chord tool specific functions and event handlers */
 
-// --- New Code: Generate a complete CHORDS object for every key (assume C as pitch 0)
-// Chords are defined with pitch-class intervals and multiple voicings.
+// --- New Code: Chord definitions with multiple voicings. CHORDS will be
+// built at runtime for the currently selected voicing style.
 const CHORD_DEFS = {
   "": {
     intervals: [0, 4, 7], // Major
@@ -160,49 +160,49 @@ const CHORD_DEFS = {
 const keys = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
 const keyOffsets = { "C": 0, "Db": 1, "D": 2, "Eb": 3, "E": 4, "F": 5, "Gb": 6, "G": 7, "Ab": 8, "A": 9, "Bb": 10, "B": 11 };
 
-// Build the CHORDS object by transposing each voicing of every chord type
-// for all keys.
-const CHORDS = {};
-for (let i = 0; i < keys.length; i++) {
-  const key = keys[i];
-  const offset = keyOffsets[key];
-  for (let variation in CHORD_DEFS) {
-    const { voicings } = CHORD_DEFS[variation];
-    for (let voicing in voicings) {
-      const chordName =
-        key + (variation === "" ? "" : variation) + (voicing === "default" ? "" : "_" + voicing);
-      const baseIntervals = voicings[voicing];
-      const transposed = baseIntervals.map((interval) => interval + offset);
-      CHORDS[chordName] = transposed;
+// --- End of chord definitions
+
+const BASE_DEFAULT_CHORDS = [
+  "Cm9",
+  "Fm",
+  "Abmaj7",
+  "Bb11sus",
+  "Ebmaj9",
+  "Fm7",
+  "G7#9",
+  "C7#5",
+  "Fm9",
+  "Dbmaj7",
+  "Bbm7",
+  "C7sus",
+  "C",
+  "Fmadd9",
+  "C",
+  "C",
+];
+
+let currentVoicing = "default";
+let CHORDS = {};
+
+function buildChordMap(voicingStyle = "default") {
+  currentVoicing = voicingStyle;
+  CHORDS = {};
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i];
+    const offset = keyOffsets[key];
+    for (let variation in CHORD_DEFS) {
+      const voicing = CHORD_DEFS[variation].voicings[voicingStyle];
+      if (!voicing) continue;
+      const chordName = key + (variation === "" ? "" : variation);
+      CHORDS[chordName] = voicing.map((iv) => iv + offset);
     }
   }
+  // reset selections when the voicing changes
+  window.selectedChords = BASE_DEFAULT_CHORDS.slice(0, 16);
 }
-// --- End of new CHORDS generation code
 
-if (!window.selectedChords) {
-    const defaultChords = [
-        "Cm9",
-        "Fm",
-        "Abmaj7",
-        "Bb11sus",
-        "Ebmaj9",
-        "Fm7",
-        "G7#9",
-        "C7#5",
-        "Fm9",
-        "Dbmaj7",
-        "Bbm7",
-        "C7sus",
-        "C",
-        "Fmadd9",
-        "C",
-        "C"
-    ];
-    window.selectedChords = [];
-    for (let i = 0; i < 16; i++) {
-        window.selectedChords[i] = defaultChords[i] || "";
-    }
-}
+// initialize chord map on load
+buildChordMap(currentVoicing);
 
 function populateChordList() {
   const listElem = document.getElementById('chordList');
@@ -502,6 +502,14 @@ function showChordMessage(text, type = 'info') {
 }
 
 function initChordTab() {
+  const voicingSelect = document.getElementById('voicingStyle');
+  if (voicingSelect) {
+    voicingSelect.value = currentVoicing;
+    voicingSelect.addEventListener('change', () => {
+      buildChordMap(voicingSelect.value);
+      populateChordList();
+    });
+  }
   // Attach event listener for generatePreset
   const presetBtn = document.getElementById('generatePreset');
   if (presetBtn) {

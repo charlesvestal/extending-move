@@ -38,9 +38,10 @@ Tools for extending the Ableton Move. This project provides a companion webserve
 
 - **Chord Kit Generation**
   - Create chord variations from any WAV file
-  - Includes common chord voicings (Cm9, Fm7, AbMaj7, etc.)
-  - Chord types now support multiple octave "voicings" like closed, drop‑2 and drop‑3
-  - Automatic pitch-shifting and normalization
+- Includes common chord voicings (Cm9, Fm7, AbMaj7, etc.)
+- Chord types now support multiple octave "voicings" like closed, drop‑2 and drop‑3
+- Choose the voicing style from a new dropdown (Default, Closed, Drop‑2, Drop‑3)
+- Automatic pitch-shifting and normalization
   - Download as `.ablpresetbundle` or place directly on device
 
 - **Sliced Kit Creation**
