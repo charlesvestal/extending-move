@@ -191,7 +191,13 @@ def dash_layout():
             html.H1("Move Dash"),
             html.Nav(
                 [
+                    dcc.Link("Restore", href="/dash/restore", style={"margin-right": "10px"}),
                     dcc.Link("Reverse", href="/dash/reverse", style={"margin-right": "10px"}),
+                    dcc.Link("Slice", href="/dash/slice", style={"margin-right": "10px"}),
+                    dcc.Link("MIDI Upload", href="/dash/midi-upload", style={"margin-right": "10px"}),
+                    dcc.Link("Synth Macros", href="/dash/synth-macros", style={"margin-right": "10px"}),
+                    dcc.Link("Drum Rack", href="/dash/drum-rack-inspector", style={"margin-right": "10px"}),
+                    dcc.Link("Refresh", href="/dash/refresh", style={"margin-right": "10px"}),
                 ]
             ),
             html.Div(id="dash-page-content"),
@@ -226,6 +232,18 @@ def reverse_page_layout():
 def render_page(pathname):
     if pathname == "/dash/reverse":
         return reverse_page_layout()
+    if pathname == "/dash/restore":
+        return html.Iframe(src="/restore", style={"width": "100%", "height": "800px", "border": "none"})
+    if pathname == "/dash/slice":
+        return html.Iframe(src="/slice", style={"width": "100%", "height": "800px", "border": "none"})
+    if pathname == "/dash/midi-upload":
+        return html.Iframe(src="/midi-upload", style={"width": "100%", "height": "800px", "border": "none"})
+    if pathname == "/dash/synth-macros":
+        return html.Iframe(src="/synth-macros", style={"width": "100%", "height": "800px", "border": "none"})
+    if pathname == "/dash/drum-rack-inspector":
+        return html.Iframe(src="/drum-rack-inspector", style={"width": "100%", "height": "800px", "border": "none"})
+    if pathname == "/dash/refresh":
+        return html.Iframe(src="/refresh", style={"width": "100%", "height": "200px", "border": "none"})
     return html.Div("Select a tool from the navigation.")
 
 
