@@ -3,16 +3,16 @@ import cgi
 import os
 import urllib.parse
 from handlers.base_handler import BaseHandler
-from core.drum_rack_inspector_handler import scan_for_drum_rack_presets, get_drum_cell_samples, update_drum_cell_sample
+from core.drum_rack_inspector_handler import get_drum_cell_samples, update_drum_cell_sample
 from core.reverse_handler import reverse_wav_file
 from core.refresh_handler import refresh_library
 from core.time_stretch_handler import time_stretch_wav
+from core.file_browser import list_directory
 
 class DrumRackInspectorHandler(BaseHandler):
     def handle_get(self):
         """Handle GET request for drum rack inspector page."""
         return {
-            'options': self.get_preset_options(),
             'message': '',
             'samples_html': ''
         }
@@ -123,27 +123,13 @@ class DrumRackInspectorHandler(BaseHandler):
             samples_html += '</div>'
 
             return {
-                'options': self.get_preset_options(),
                 'message': result['message'],
-                'samples_html': samples_html  # Changed from 'samples' to 'samples_html'
+                'samples_html': samples_html
             }
 
         except Exception as e:
             return self.format_error_response(f"Error processing preset: {str(e)}")
 
-    def get_preset_options(self):
-        """Get preset options for the template."""
-        try:
-            result = scan_for_drum_rack_presets()
-            if not result['success']:
-                return ''
-            options_html = ['<option value="">--Select a Preset--</option>']
-            for preset in result['presets']:
-                options_html.append(f'<option value="{preset["path"]}">{preset["name"]}</option>')
-            return '\n'.join(options_html)
-        except Exception as e:
-            print(f"Error getting preset options: {e}")
-            return ''
     
     def handle_time_stretch_sample(self, form: cgi.FieldStorage):
         """Handle time-stretch action."""
@@ -173,7 +159,6 @@ class DrumRackInspectorHandler(BaseHandler):
                 </div>
             '''
             return {
-                'options': self.get_preset_options(),
                 'message': '',
                 'samples_html': samples_html
             }
@@ -303,7 +288,6 @@ class DrumRackInspectorHandler(BaseHandler):
         samples_html += '</div>'
 
         return {
-            'options': self.get_preset_options(),
             'message': f"Time-stretched sample created and loaded for pad {pad_number}! {ts_message} {update_message}",
             'samples_html': samples_html
         }
@@ -434,10 +418,17 @@ class DrumRackInspectorHandler(BaseHandler):
             samples_html += '</div>'
 
             return {
-                'options': self.get_preset_options(),
                 'message': message,
                 'samples_html': samples_html
             }
 
         except Exception as e:
             return self.format_error_response(f"Error reversing sample: {str(e)}")
+
+    def list_directory(self, rel_path: str):
+        """Return directories and preset files for a given relative path."""
+        return list_directory(
+            "/data/UserData/UserLibrary/Track Presets",
+            rel_path,
+            [".ablpreset"],
+        )

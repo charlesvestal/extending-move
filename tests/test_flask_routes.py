@@ -19,7 +19,7 @@ def client(monkeypatch):
 def test_reverse_get(client):
     resp = client.get('/reverse')
     assert resp.status_code == 200
-    assert b'id="file-list"' in resp.data
+    assert b'class="file-list"' in resp.data
 
 def test_reverse_post(client, monkeypatch):
     def fake_handle_post(form):
@@ -30,10 +30,10 @@ def test_reverse_post(client, monkeypatch):
     assert b'ok' in resp.data
 
 def test_reverse_list(client, monkeypatch):
-    def fake_list(path):
+    def fake_list(base, path, exts=None):
         return {"success": True, "dirs": ["d"], "files": ["f.wav"], "path": path}
-    monkeypatch.setattr(move_webserver.reverse_handler, 'list_directory', fake_list)
-    resp = client.get('/reverse/list?path=')
+    monkeypatch.setattr(move_webserver, 'list_dir', fake_list)
+    resp = client.get('/browse/samples?path=')
     assert resp.status_code == 200
     assert resp.json['dirs'] == ['d']
     assert resp.json['files'] == ['f.wav']
@@ -78,7 +78,6 @@ def test_synth_macros_get(client, monkeypatch):
         return {
             'message': 'choose',
             'message_type': 'info',
-            'options': '<option value="p">p</option>',
             'macros_html': '',
             'selected_preset': None,
         }
@@ -86,13 +85,13 @@ def test_synth_macros_get(client, monkeypatch):
     resp = client.get('/synth-macros')
     assert resp.status_code == 200
     assert b'choose' in resp.data
+    assert b'class="file-list"' in resp.data
 
 def test_synth_macros_post(client, monkeypatch):
     def fake_post(form):
         return {
             'message': 'saved',
             'message_type': 'success',
-            'options': '<option value="x" selected>Sub/preset (Drift)</option>',
             'macros_html': '<p>done</p>',
             'selected_preset': 'x',
         }
@@ -101,27 +100,23 @@ def test_synth_macros_post(client, monkeypatch):
     assert resp.status_code == 200
     assert b'saved' in resp.data
     assert b'name="preset_select" value="x"' in resp.data
-    assert b'id="preset_select"' in resp.data and b'disabled' in resp.data
-    assert b'Choose Another Preset' in resp.data
 
 def test_drum_rack_inspector_get(client, monkeypatch):
     def fake_get():
         return {
-            'options': '<option value="1">P</option>',
             'message': '',
             'samples_html': ''
         }
     monkeypatch.setattr(move_webserver.drum_rack_handler, 'handle_get', fake_get)
     resp = client.get('/drum-rack-inspector')
     assert resp.status_code == 200
-    assert b'<option value="1">P</option>' in resp.data
+    assert b'class="file-list"' in resp.data
 
 def test_drum_rack_inspector_post(client, monkeypatch):
     def fake_post(form):
         return {
             'message': 'ok',
             'message_type': 'success',
-            'options': '<option value="1">P</option>',
             'samples_html': '<div>grid</div>'
         }
     monkeypatch.setattr(move_webserver.drum_rack_handler, 'handle_post', fake_post)

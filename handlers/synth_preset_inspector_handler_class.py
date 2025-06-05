@@ -2,21 +2,20 @@ import cgi
 import re
 from handlers.base_handler import BaseHandler
 from core.synth_preset_inspector_handler import (
-    scan_for_synth_presets, 
-    extract_macro_information, 
+    extract_macro_information,
     update_preset_macro_names,
     extract_available_parameters,
     update_preset_parameter_mappings,
     delete_parameter_mapping
 )
+from core.file_browser import list_directory as list_dir
 
 class SynthPresetInspectorHandler(BaseHandler):
     def handle_get(self):
         """Initialize the synth macros with synth presets dropdown"""
         return {
-            "message": "Select a Drift preset from the dropdown",
+            "message": "Select a Drift preset from the browser",
             "message_type": "info",
-            "options": self.get_preset_options(),
             "macros_html": "",
             "selected_preset": None,
         }
@@ -140,7 +139,6 @@ class SynthPresetInspectorHandler(BaseHandler):
             return {
                 "message": message,
                 "message_type": "success",
-                "options": self.get_preset_options(selected_preset=preset_path),
                 "macros_html": macros_html,
                 "selected_preset": preset_path,
             }
@@ -275,26 +273,12 @@ class SynthPresetInspectorHandler(BaseHandler):
             
         html += '</div>'
         return html
-    
-    def get_preset_options(self, selected_preset=None):
-        """Get synth preset options for the template dropdown"""
-        try:
-            result = scan_for_synth_presets()
-            if not result['success']:
-                return ''
 
-            options_html = ['<option value="">--Select a Preset--</option>']
-            for preset in result['presets']:
-                # Include the device type and relative path in the display name
-                device_type = preset.get('type', '').capitalize()
-                selected = ''
-                if selected_preset and preset['path'] == selected_preset:
-                    selected = ' selected="selected"'
-                display_name = f"{preset.get('display_path', preset['name'])} ({device_type})"
-                options_html.append(
-                    f'<option value="{preset["path"]}"{selected}>{display_name}</option>'
-                )
-            return '\n'.join(options_html)
-        except Exception as e:
-            print(f"Error getting preset options: {e}")
-            return ''
+    def list_directory(self, rel_path: str):
+        """Return directories and preset files for a given relative path."""
+        return list_dir(
+            "/data/UserData/UserLibrary/Track Presets",
+            rel_path,
+            [".ablpreset"],
+        )
+    

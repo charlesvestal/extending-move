@@ -28,9 +28,26 @@ from handlers.drum_rack_inspector_handler_class import DrumRackInspectorHandler
 from handlers.file_placer_handler_class import FilePlacerHandler
 from handlers.refresh_handler_class import RefreshHandler
 from dash import Dash, html
+from core.file_browser import list_directory as list_dir
 import cgi
 
 PID_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "move-webserver.pid")
+
+# Directories exposed via the generic browse endpoint
+BROWSE_ROOTS = {
+    "samples": {
+        "path": "/data/UserData/UserLibrary/Samples",
+        "exts": [".wav", ".aif", ".aiff"],
+    },
+    "drum_presets": {
+        "path": "/data/UserData/UserLibrary/Track Presets",
+        "exts": [".ablpreset"],
+    },
+    "synth_presets": {
+        "path": "/data/UserData/UserLibrary/Track Presets",
+        "exts": [".ablpreset"],
+    },
+}
 
 
 class SimpleForm(dict):
@@ -218,10 +235,14 @@ def reverse():
     )
 
 
-@app.route("/reverse/list", methods=["GET"])
-def reverse_list():
+
+@app.route("/browse/<key>", methods=["GET"])
+def browse(key):
+    cfg = BROWSE_ROOTS.get(key)
+    if not cfg:
+        return jsonify({"success": False, "message": "Invalid browse key"}), 400
     path = request.args.get("path", "")
-    result = reverse_handler.list_directory(path)
+    result = list_dir(cfg["path"], path, cfg.get("exts"))
     status = 200 if result.get("success") else 400
     return jsonify(result), status
 

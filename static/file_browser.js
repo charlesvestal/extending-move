@@ -1,11 +1,12 @@
-Document.addEventListener('DOMContentLoaded', () => {
-  const listEl = document.getElementById('file-list');
-  const bcEl = document.getElementById('breadcrumb');
-  const wavInput = document.getElementById('wav_file');
+function initFileBrowser(container) {
+  const listEl = container.querySelector('.file-list');
+  const bcEl = container.querySelector('.breadcrumb');
+  const endpoint = container.dataset.endpoint;
+  const input = container.dataset.input ? document.getElementById(container.dataset.input) : null;
   let currentPath = '';
 
   function load(path) {
-    fetch(`${window.location.origin}/reverse/list?path=${encodeURIComponent(path)}`)
+    fetch(`${endpoint}?path=${encodeURIComponent(path)}`)
       .then(r => r.json())
       .then(data => {
         if (!data.success) {
@@ -22,7 +23,7 @@ Document.addEventListener('DOMContentLoaded', () => {
   }
 
   function render(data) {
-    bcEl.textContent = '/' + (currentPath || '');
+    if (bcEl) bcEl.textContent = '/' + (currentPath || '');
     listEl.innerHTML = '';
     if (currentPath) {
       const li = document.createElement('li');
@@ -56,7 +57,7 @@ Document.addEventListener('DOMContentLoaded', () => {
       a.textContent = f;
       a.addEventListener('click', e => {
         e.preventDefault();
-        wavInput.value = currentPath ? currentPath + '/' + f : f;
+        if (input) input.value = currentPath ? currentPath + '/' + f : f;
         const sel = listEl.querySelector('.selected');
         if (sel) sel.classList.remove('selected');
         li.classList.add('selected');
@@ -67,4 +68,8 @@ Document.addEventListener('DOMContentLoaded', () => {
   }
 
   load('');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.file-browser').forEach(initFileBrowser);
 });

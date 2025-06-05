@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 import cgi
-import os
 from handlers.base_handler import BaseHandler
 from core.reverse_handler import reverse_wav_file
+from core.file_browser import list_directory
 
 class ReverseHandler(BaseHandler):
     def handle_get(self):
@@ -42,23 +42,9 @@ class ReverseHandler(BaseHandler):
 
     def list_directory(self, rel_path: str):
         """Return directories and WAV files for a given relative path."""
-        base_dir = "/data/UserData/UserLibrary/Samples"
-        abs_dir = os.path.realpath(os.path.join(base_dir, rel_path))
-        base_real = os.path.realpath(base_dir)
-        if not abs_dir.startswith(base_real):
-            return {"success": False, "message": "Invalid path"}
-        if not os.path.isdir(abs_dir):
-            return {"success": False, "message": "Not a directory"}
-
-        dirs = []
-        files = []
-        for entry in sorted(os.listdir(abs_dir)):
-            if entry.startswith('.'):
-                continue
-            full = os.path.join(abs_dir, entry)
-            if os.path.isdir(full):
-                dirs.append(entry)
-            elif entry.lower().endswith((".wav", ".aif", ".aiff")):
-                files.append(entry)
-        return {"success": True, "dirs": dirs, "files": files, "path": rel_path}
+        return list_directory(
+            "/data/UserData/UserLibrary/Samples",
+            rel_path,
+            [".wav", ".aif", ".aiff"],
+        )
 

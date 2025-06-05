@@ -7,10 +7,11 @@
 {% endif %}
 <form method="POST" action="{{ host_prefix }}/drum-rack-inspector">
     <input type="hidden" name="action" value="select_preset">
-    <label for="preset_select">Select a Drum Rack:</label>
-    <select name="preset_select" id="preset_select">
-        {{ options_html | safe }}
-    </select>
+    <input type="hidden" name="preset_select" id="preset_select" required>
+    <div class="file-browser" data-endpoint="{{ host_prefix }}/browse/drum_presets" data-input="preset_select">
+        <div class="breadcrumb"></div>
+        <ul class="file-list"></ul>
+    </div>
     <button type="submit">Load</button>
 </form>
 <div class="samples-container">
@@ -82,6 +83,7 @@
 {% endblock %}
 {% block scripts %}
 <script src="https://unpkg.com/wavesurfer.js@6/dist/wavesurfer.js"></script>
+<script src="{{ host_prefix }}/static/file_browser.js"></script>
 <script type="module" src="{{ host_prefix }}/static/drum_rack.js"></script>
 <script type="module">
   import { initDrumRackTab } from '{{ host_prefix }}/static/drum_rack.js';
