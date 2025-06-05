@@ -41,7 +41,12 @@ PID_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "move-webser
 
 
 class SimpleForm(dict):
-    """Simple form wrapper providing ``getvalue`` like ``cgi.FieldStorage``."""
+    """Simple form wrapper with a ``getvalue`` method similar to ``cgi.FieldStorage``.
+
+    The webserver no longer depends on the ``cgi`` module, but some handler code
+    still expects this interface. This lightweight wrapper keeps compatibility
+    without importing ``cgi``.
+    """
 
     def getvalue(self, name, default=None):
         return self.get(name, default)
