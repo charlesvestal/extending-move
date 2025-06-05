@@ -59,7 +59,10 @@ def _has_kind(data: dict | list, kind: str) -> bool:
 
 FILTERS: dict[str, Callable[[str], bool]] = {
     "wav": lambda p: p.lower().endswith(".wav"),
-    "drift": lambda p: p.lower().endswith(".ablpreset")
+    "drift": lambda p: (
+        p.lower().endswith(".ablpreset")
+        or p.lower().endswith(".json")
+    )
     and _check_json_file(p, lambda d: _has_kind(d, "drift")),
     "drumrack": lambda p: (
         p.lower().endswith(".ablpreset")
