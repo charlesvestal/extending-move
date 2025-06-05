@@ -183,10 +183,10 @@ def scan_for_drum_rack_presets():
                 'presets': []
             }
 
-        # Recursively scan all .ablpreset files
+        # Recursively scan all preset files (.ablpreset or .json)
         for root, _, files in os.walk(presets_dir):
             for filename in files:
-                if filename.endswith('.ablpreset'):
+                if filename.endswith('.ablpreset') or filename.endswith('.json'):
                     filepath = os.path.join(root, filename)
                     try:
                         with open(filepath, 'r') as f:
