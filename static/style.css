@@ -416,12 +416,22 @@ select {
 }
 
 .pad-cell {
-    border: 1px solid #ccc;
+    border: 2px solid transparent;
     border-radius: 4px;
     padding: 0.5rem;
     text-align: center;
-    cursor: pointer;
     font-weight: 600;
+    box-sizing: border-box;
+}
+
+.pad-cell.free {
+    cursor: pointer;
+    background: #e6f7ef;
+}
+
+.pad-cell.occupied {
+    cursor: default;
+    background: #ffeef0;
 }
 
 .pad-grid input[type="radio"] {
@@ -429,15 +439,8 @@ select {
 }
 
 .pad-grid input[type="radio"]:checked + label {
-    border: 2px solid #333;
+    box-shadow: inset 0 0 0 2px #333;
     background: #d0e8ff;
 }
 
-.pad-cell.occupied {
-    background: #ffeef0;
-}
-
-.pad-cell.free {
-    background: #e6f7ef;
-}
 
