@@ -330,6 +330,17 @@ function mixAudioBuffers(buffers) {
   return mixedBuffer;
 }
 
+function scaleAudioBuffer(buffer, gain) {
+  const numChannels = buffer.numberOfChannels;
+  for (let channel = 0; channel < numChannels; channel++) {
+    const data = buffer.getChannelData(channel);
+    for (let i = 0; i < data.length; i++) {
+      data[i] *= gain;
+    }
+  }
+  return buffer;
+}
+
 function normalizeAudioBuffer(buffer, targetPeak = 0.9) {
   const numChannels = buffer.numberOfChannels;
   let maxVal = 0;
@@ -351,9 +362,11 @@ function normalizeAudioBuffer(buffer, targetPeak = 0.9) {
 
 async function processChordSample(buffer, intervals) {
   const pitchedBuffers = [];
+  const perBufferGain = 1 / intervals.length;
   for (let semitone of intervals) {
     const pitched = await pitchShiftOffline(buffer, semitone);
-    pitchedBuffers.push(pitched);
+    const scaled = scaleAudioBuffer(pitched, perBufferGain);
+    pitchedBuffers.push(scaled);
   }
   const mixed = mixAudioBuffers(pitchedBuffers);
   const normalized = normalizeAudioBuffer(mixed, 0.9);
