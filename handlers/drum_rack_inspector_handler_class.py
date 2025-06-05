@@ -22,6 +22,7 @@ class DrumRackInspectorHandler(BaseHandler):
             "message": "Select a Drum preset from the browser",
             "message_type": "info",
             "macros_html": "",
+        rel_preset = os.path.relpath(preset_path, PRESETS_ROOT)
             "samples_html": "",
             "selected_preset": None
         }
@@ -112,7 +113,7 @@ class DrumRackInspectorHandler(BaseHandler):
                 'selected_preset': preset_path,
                                             data-preset-path="{preset_path}"
                                             data-pad-number="{pad_num}"
-                                            onclick="
+                'selected_preset': rel_preset,
                                               var modal = document.getElementById('timeStretchModal');
                                               document.getElementById('ts_sample_path').value = this.getAttribute('data-sample-path');
                                               document.getElementById('ts_preset_path').value = this.getAttribute('data-preset-path');
@@ -282,7 +283,7 @@ class DrumRackInspectorHandler(BaseHandler):
             'selected_preset': preset_path,
                                     data-preset-path="{preset_path}"
                                     data-pad-number="{num}"
-                                    onclick="
+            'selected_preset': os.path.relpath(preset_path, PRESETS_ROOT),
                                       var modal = document.getElementById('timeStretchModal');
                                       document.getElementById('ts_sample_path').value = this.getAttribute('data-sample-path');
                                       document.getElementById('ts_preset_path').value = this.getAttribute('data-preset-path');
@@ -417,7 +418,7 @@ class DrumRackInspectorHandler(BaseHandler):
                 'selected_preset': preset_path,
         result = scan_for_drum_rack_presets()
         allowed = set()
-        if result.get("success"):
+                'selected_preset': os.path.relpath(preset_path, PRESETS_ROOT),
             allowed = {
                 os.path.relpath(p["path"], PRESETS_ROOT) for p in result["presets"]
             }

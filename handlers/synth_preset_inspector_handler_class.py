@@ -41,6 +41,7 @@ class SynthPresetInspectorHandler(BaseHandler):
                 preset_path = resolve_path(PRESETS_ROOT, preset_path)
             except Exception:
                 return self.format_error_response("Invalid preset path")
+            rel_preset = os.path.relpath(preset_path, PRESETS_ROOT)
             
             # If this is a save name action for a single macro, update just that macro name
             if action == 'save_name':
@@ -148,7 +149,7 @@ class SynthPresetInspectorHandler(BaseHandler):
                 "message": message,
                 "message_type": "success",
                 "macros_html": macros_html,
-                "selected_preset": preset_path,
+                "selected_preset": rel_preset,
             }
         
         return self.format_info_response("Unknown action")
