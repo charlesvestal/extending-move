@@ -387,13 +387,14 @@ select {
 .file-tree ul { list-style: none; margin-left: 1rem; padding-left: 0; }
 .file-tree li { margin: 0; }
 .file-tree .dir > span,
-.file-tree .file-entry button { display: block; width: 100%; cursor: pointer; border: none; background: none; text-align: left; padding: 0.2rem 0.4rem; }
+.file-tree .file-entry button { display: block; width: 100%; cursor: pointer; border: none; background: none; text-align: left; padding: 0; }
 .file-tree .dir > span:hover,
 .file-tree .file-entry button:hover { background: #f0f0f0; }
 .file-tree .file-entry button { color: #0066cc; }
 .file-tree .dir.closed > span::before { content: "\25B6"; display: inline-block; width: 1em; }
 .file-tree .dir.open > span::before { content: "\25BC"; display: inline-block; width: 1em; }
 .hidden { display: none; }
+.file-tree .dir, .file-tree .file-entry {margin-left: 10px;}
 .file-browser {
     max-height: 240px;
     overflow-y: auto;
