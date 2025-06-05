@@ -1,13 +1,5 @@
 import io
-import importlib.util
-from pathlib import Path
-
-spec = importlib.util.spec_from_file_location(
-    "move_webserver",
-    Path(__file__).resolve().parents[1] / "move-webserver.py",
-)
-move_webserver = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(move_webserver)
+import move_webserver
 import pytest
 
 @pytest.fixture

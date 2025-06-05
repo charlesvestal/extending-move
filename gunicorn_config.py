@@ -1,5 +1,17 @@
 import os
-from move-webserver import write_pid, remove_pid, warm_up_modules
+import importlib.util
+from pathlib import Path
+
+# Dynamically load the main server module which uses a hyphen in the filename
+spec = importlib.util.spec_from_file_location(
+    "move_webserver", Path(__file__).with_name("move-webserver.py")
+)
+move_webserver = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(move_webserver)
+
+write_pid = move_webserver.write_pid
+remove_pid = move_webserver.remove_pid
+warm_up_modules = move_webserver.warm_up_modules
 
 # Preload the app so workers share memory and warm-up runs once
 preload_app = True

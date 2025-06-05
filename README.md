@@ -128,7 +128,7 @@ pip install --no-cache-dir -r requirements.txt
 ssh ableton@move.local
 cd /data/UserData/extending-move
 cp -r /opt/move/HttpRoot/fonts /data/UserData/extending-move/static/
-python3 -m gunicorn -c gunicorn_config.py move-webserver:app
+python3 -m gunicorn -c gunicorn_config.py move_webserver:app
 ```
 
 The server will be accessible at http://move.local:909
@@ -167,7 +167,7 @@ case "$1" in
     # adjust this to whatever directory your code lives in:
     cd /data/UserData/extending-move
     # run as the 'ableton' user (drops privileges)
-    su - ableton -s /bin/sh -c "cd /data/UserData/extending-move ; python3 -m gunicorn -c gunicorn_config.py move-webserver:app >> startup.log 2>&1 &"
+    su - ableton -s /bin/sh -c "cd /data/UserData/extending-move ; python3 -m gunicorn -c gunicorn_config.py move_webserver:app >> startup.log 2>&1 &"
     ;;
   stop)
     if [ -f /data/UserData/extending-move/move-webserver.pid ]; then
