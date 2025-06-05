@@ -503,17 +503,17 @@ function initChordTab() {
       samplesForm.append("mode", "zip");
       samplesForm.append("file", samplesZipBlob);
       samplesForm.append("destination", "/data/UserData/UserLibrary/Samples/Preset Samples");
-      const resp1 = await fetch("/place-files", { method: "POST", body: samplesForm });
+      const resp1 = await fetch('http://' + location.host + '/place-files', { method: 'POST', body: samplesForm });
       if (!resp1.ok) throw new Error('sample placement failed');
 
       const presetForm = new FormData();
       presetForm.append("mode", "place");
       presetForm.append("file", new Blob([presetJson], { type: "application/json" }), presetName + ".ablpreset");
       presetForm.append("destination", "/data/UserData/UserLibrary/Track Presets");
-      const resp2 = await fetch("/place-files", { method: "POST", body: presetForm });
+      const resp2 = await fetch('http://' + location.host + '/place-files', { method: 'POST', body: presetForm });
       if (!resp2.ok) throw new Error('preset placement failed');
 
-      const resp3 = await fetch("/refresh", {
+      const resp3 = await fetch('http://' + location.host + '/refresh', {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: "action=refresh_library"

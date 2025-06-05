@@ -13,11 +13,10 @@ import os
 import atexit
 import signal
 import sys
-import socket
 import numpy as np
 import librosa
 import time
-from wsgiref.simple_server import make_server, WSGIRequestHandler, WSGIServer
+from wsgiref.simple_server import make_server, WSGIServer
 from handlers.reverse_handler_class import ReverseHandler
 from handlers.restore_handler_class import RestoreHandler
 from handlers.slice_handler_class import SliceHandler
@@ -75,99 +74,12 @@ def handle_exit(signum, frame):
     sys.exit(0)
 
 
-class TLSIgnoringWSGIRequestHandler(WSGIRequestHandler):
-    """WSGI request handler that ignores TLS handshake attempts."""
-    protocol_version = "HTTP/1.1"
-
-    def handle(self):
-        """Check for TLS handshakes before reading the request line."""
-        try:
-            self.connection.settimeout(0.5)
-            peek = self.connection.recv(3, socket.MSG_PEEK)
-            self.connection.settimeout(None)
-            if peek and len(peek) >= 3 and peek.startswith(b"\x16\x03"):
-                print("Ignored TLS handshake attempt (detected in handle)")
-                self.close_connection = True
-                try:
-                    self.connection.shutdown(socket.SHUT_RDWR)
-                except Exception:
-                    pass
-                self.connection.close()
-                return
-        except socket.timeout:
-            # No data arrived quickly; proceed with normal handling
-            self.connection.settimeout(None)
-        except Exception as exc:
-            self.connection.settimeout(None)
-            err_str = repr(str(exc))
-            if "\\x16\\x03" in err_str:
-                print(
-                    f"Ignored TLS handshake attempt (exception in handle): {err_str[:50]}..."
-                )
-                self.close_connection = True
-                try:
-                    self.connection.close()
-                except Exception:
-                    pass
-                return
-        super().handle()
-
-    def parse_request(self):
-        try:
-            self.connection.settimeout(0.5)
-            peek = self.connection.recv(5, socket.MSG_PEEK)
-            self.connection.settimeout(None)
-            if peek and len(peek) >= 3 and peek.startswith(b"\x16\x03"):
-                print("Ignored TLS handshake attempt (detected in parse_request)")
-                self.close_connection = True
-                try:
-                    self.connection.shutdown(socket.SHUT_RDWR)
-                except Exception:
-                    pass
-                self.connection.close()
-                return False
-            return super().parse_request()
-        except socket.timeout:
-            self.connection.settimeout(None)
-            return super().parse_request()
-        except Exception as exc:
-            self.connection.settimeout(None)
-            err_str = repr(str(exc))
-            if "\\x16\\x03" in err_str:
-                print(
-                    f"Ignored TLS handshake attempt (exception in parse_request): {err_str[:50]}..."
-                )
-                self.close_connection = True
-                try:
-                    self.connection.close()
-                except Exception:
-                    pass
-                return False
-            raise
-
-
-class TLSIgnoringWSGIServer(WSGIServer):
-    """WSGIServer that suppresses errors from TLS handshake attempts."""
-
-    def handle_error(self, request, client_address):
-        import traceback
-
-        exc_type, exc_value, _ = sys.exc_info()
-        is_tls = False
-        if exc_value and "\\x16\\x03" in repr(str(exc_value)):
-            is_tls = True
-        if not is_tls:
-            print("-" * 40)
-            print("Exception occurred during processing of request from", client_address)
-            traceback.print_exc()
-            print("-" * 40)
-
-
-# Threading-enabled WSGI server that ignores TLS handshake attempts
 from socketserver import ThreadingMixIn
 
-class ThreadingTLSIgnoringWSGIServer(ThreadingMixIn, TLSIgnoringWSGIServer):
-    """Threading-enabled WSGI server that ignores TLS handshake attempts."""
+
+class ThreadingWSGIServer(ThreadingMixIn, WSGIServer):
+    """Simple threading-capable WSGI server."""
+
     daemon_threads = True
 
 
@@ -188,17 +100,6 @@ dash_app.layout = html.Div([html.H1("Move Dash"), html.P("Placeholder")])
 def record_start_time():
     """Record the start time of the request."""
     g._start_time = time.perf_counter()
-
-
-@app.before_request
-def enforce_http():
-    """Redirect HTTPS requests to HTTP without persistent caching."""
-    proto = request.headers.get("X-Forwarded-Proto", "http").lower()
-    if proto == "https" or request.is_secure:
-        target = request.url.replace("https://", "http://", 1)
-        resp = redirect(target, code=307)
-        resp.headers["Cache-Control"] = "no-store"
-        return resp
 
 
 @app.after_request
@@ -554,8 +455,7 @@ if __name__ == "__main__":
         host,
         port,
         app,
-        server_class=ThreadingTLSIgnoringWSGIServer,
-        handler_class=TLSIgnoringWSGIRequestHandler,
+        server_class=ThreadingWSGIServer,
     ) as httpd:
         print(f"Server started http://{host}:{port}", flush=True)
         try:

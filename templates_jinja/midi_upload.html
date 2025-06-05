@@ -8,7 +8,7 @@
     <div  >
         <h3>Upload MIDI File</h3>
         <p>Upload a MIDI file to generate an Ableton Live set with the notes from the file.</p>
-        <form method="post" action="/midi-upload" enctype="multipart/form-data">
+        <form method="post" action="{{ host_prefix }}/midi-upload" enctype="multipart/form-data">
             <input type="hidden" name="action" value="upload_midi" />
             <div class="form-group">
                 <label for="midi_type">MIDI Type:</label>
