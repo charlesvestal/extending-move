@@ -4,4 +4,4 @@ __pycache__
 .DS_Store*
 /uploads
 /midi-env
-server.log
+*server.log
