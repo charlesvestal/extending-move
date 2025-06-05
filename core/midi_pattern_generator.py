@@ -12,7 +12,8 @@ def generate_pattern_set(
     set_name: str,
     pattern: List[Dict[str, Any]],
     clip_length: float = 4.0,
-    tempo: float = 120.0
+    tempo: float = 120.0,
+    output_dir: Optional[str] = None
 ) -> Dict[str, Any]:
     """
     Generate an Ableton Live set with a custom pattern of notes.
@@ -26,6 +27,9 @@ def generate_pattern_set(
             - 'velocity': Optional velocity (1-127, default 100)
         clip_length: Length of the clip in beats (default 4.0)
         tempo: Tempo in BPM (default 120)
+        output_dir: Optional directory to save the generated set. Uses the
+            ``MOVE_SET_DIR`` environment variable or the default Move path if
+            not provided.
         
     Returns:
         Result dictionary with success status and message
@@ -80,7 +84,8 @@ def generate_pattern_set(
         song['tempo'] = tempo
         
         # Save the modified set
-        output_dir = "/data/UserData/UserLibrary/Sets"
+        if output_dir is None:
+            output_dir = os.environ.get("MOVE_SET_DIR", "/data/UserData/UserLibrary/Sets")
         os.makedirs(output_dir, exist_ok=True)
         output_path = os.path.join(output_dir, set_name)
         if not output_path.endswith('.abl'):
