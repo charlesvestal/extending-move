@@ -32,10 +32,8 @@
                 <small>Leave blank to use tempo from MIDI file (or default 120 BPM)</small>
             </div>
             <div class="form-group">
-                <label for="pad_index">Device Pad:</label>
-                <select name="pad_index" id="pad_index" required>
-                    {{ pad_options | safe }}
-                </select>
+                <label>Select Pad:</label>
+                {{ pad_grid | safe }}
             </div>
             <div class="form-group">
                 <label for="pad_color">Pad Color:</label>
