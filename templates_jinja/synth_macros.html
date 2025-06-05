@@ -12,19 +12,13 @@
     <input type="hidden" name="param_path" id="param-path-input" value="">
     <input type="hidden" name="param_name" id="param-name-input" value="">
     <input type="hidden" name="macro_index" id="macro-index-input" value="">
-    <div class="preset-selection">
-        <select name="preset_select" id="preset_select" required {% if preset_selected %}disabled{% endif %}>
-            {{ options_html | safe }}
-        </select>
-        {% if preset_selected %}
-        <button type="submit" onclick="document.getElementById('action-input').value='reset_preset';">Choose Another Preset</button>
-        <input type="hidden" name="preset_select" value="{{ selected_preset }}">
-        {% else %}
-        <button type="submit">Load Preset</button>
-        {% endif %}
+    {% if not preset_selected %}
+    <div class="file-browser" data-root="{{ browser_root }}" data-action="{{ host_prefix }}/synth-macros" data-field="preset_select" data-value="select_preset" data-filter="drift">
+        {{ file_browser_html | safe }}
     </div>
-
-    {% if preset_selected %}
+    {% else %}
+    <button type="submit" onclick="document.getElementById('action-input').value='reset_preset';">Choose Another Preset</button>
+    <input type="hidden" name="preset_select" value="{{ selected_preset }}">
     <div class="macro-display">
         {{ macros_html | safe }}
     </div>
@@ -191,4 +185,7 @@
         background-color: #0b7dda;
     }
 </style>
+{% endblock %}
+{% block scripts %}
+<script type="module" src="{{ host_prefix }}/static/file_browser.js"></script>
 {% endblock %}

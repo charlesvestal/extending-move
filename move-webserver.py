@@ -28,7 +28,7 @@ from handlers.drum_rack_inspector_handler_class import DrumRackInspectorHandler
 from handlers.file_placer_handler_class import FilePlacerHandler
 from handlers.refresh_handler_class import RefreshHandler
 from dash import Dash, html
-from core.reverse_handler import get_wav_files
+from core.file_browser import generate_dir_html
 import cgi
 
 PID_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "move-webserver.pid")
@@ -197,6 +197,18 @@ def index():
     return redirect("/restore")
 
 
+@app.route("/browse-dir")
+def browse_dir():
+    root = request.args.get("root", "")
+    path = request.args.get("path", "")
+    action_url = request.args.get("action_url", "")
+    field_name = request.args.get("field_name", "")
+    action_value = request.args.get("action_value", "")
+    filter_key = request.args.get("filter")
+    html = generate_dir_html(root, path, action_url, field_name, action_value, filter_key)
+    return html
+
+
 @app.route("/reverse", methods=["GET", "POST"])
 def reverse():
     message = None
@@ -205,19 +217,24 @@ def reverse():
     if request.method == "POST":
         form = SimpleForm(request.form.to_dict())
         result = reverse_handler.handle_post(form)
-        message = result.get("message")
-        message_type = result.get("message_type")
-        success = message_type != "error"
     else:
-        message = "Select a WAV file to reverse"
-        message_type = "info"
-    wav_list = get_wav_files("/data/UserData/UserLibrary/Samples")
+        result = reverse_handler.handle_get()
+    message = result.get("message")
+    message_type = result.get("message_type")
+    success = message_type != "error" if message_type else False
+    browser_html = result.get("file_browser_html")
+    selected_file = result.get("selected_file")
+    browser_root = result.get("browser_root")
+    browser_filter = result.get("browser_filter")
     return render_template(
         "reverse.html",
         message=message,
         success=success,
         message_type=message_type,
-        wav_files=wav_list,
+        file_browser_html=browser_html,
+        selected_file=selected_file,
+        browser_root=browser_root,
+        browser_filter=browser_filter,
         active_tab="reverse",
     )
 
@@ -316,21 +333,18 @@ def midi_upload():
 
 @app.route("/synth-macros", methods=["GET", "POST"])
 def synth_macros():
-    message = None
-    success = False
-    message_type = None
-    options_html = ""
-    macros_html = ""
-    selected_preset = None
     if request.method == "POST":
         form = SimpleForm(request.form.to_dict())
         result = synth_handler.handle_post(form)
     else:
         result = synth_handler.handle_get()
+
     message = result.get("message")
     message_type = result.get("message_type")
-    success = message_type != "error"
-    options_html = result.get("options", "")
+    success = message_type != "error" if message_type else False
+    browser_html = result.get("file_browser_html")
+    browser_root = result.get("browser_root")
+    browser_filter = result.get("browser_filter")
     macros_html = result.get("macros_html", "")
     selected_preset = result.get("selected_preset")
     preset_selected = bool(selected_preset)
@@ -339,7 +353,9 @@ def synth_macros():
         message=message,
         success=success,
         message_type=message_type,
-        options_html=options_html,
+        file_browser_html=browser_html,
+        browser_root=browser_root,
+        browser_filter=browser_filter,
         macros_html=macros_html,
         preset_selected=preset_selected,
         selected_preset=selected_preset,
@@ -383,28 +399,30 @@ def serve_sample(sample_path):
 
 @app.route("/drum-rack-inspector", methods=["GET", "POST"])
 def drum_rack_inspector():
-    message = None
-    success = False
-    message_type = None
-    options_html = ""
-    samples_html = ""
     if request.method == "POST":
         form = SimpleForm(request.form.to_dict())
         result = drum_rack_handler.handle_post(form)
     else:
         result = drum_rack_handler.handle_get()
+
     message = result.get("message")
     message_type = result.get("message_type")
     success = message_type != "error" if message_type else False
-    options_html = result.get("options") or result.get("options_html", "")
+    browser_html = result.get("file_browser_html")
+    browser_root = result.get("browser_root")
+    browser_filter = result.get("browser_filter")
     samples_html = result.get("samples_html", "")
+    selected_preset = result.get("selected_preset")
     return render_template(
         "drum_rack_inspector.html",
         message=message,
         success=success,
         message_type=message_type,
-        options_html=options_html,
+        file_browser_html=browser_html,
+        browser_root=browser_root,
+        browser_filter=browser_filter,
         samples_html=samples_html,
+        selected_preset=selected_preset,
         active_tab="drum-rack-inspector",
     )
 

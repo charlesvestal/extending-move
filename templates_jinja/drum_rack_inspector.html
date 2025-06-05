@@ -5,17 +5,19 @@
 {% if message %}
   <p class="{{ message_type if message_type else ('success' if success else 'error') }}">{{ message }}</p>
 {% endif %}
-<form method="POST" action="{{ host_prefix }}/drum-rack-inspector">
-    <input type="hidden" name="action" value="select_preset">
-    <label for="preset_select">Select a Drum Rack:</label>
-    <select name="preset_select" id="preset_select">
-        {{ options_html | safe }}
-    </select>
-    <button type="submit">Load</button>
-</form>
-<div class="samples-container">
+{% if not selected_preset %}
+  <div class="file-browser" data-root="{{ browser_root }}" data-action="{{ host_prefix }}/drum-rack-inspector" data-field="preset_select" data-value="select_preset" data-filter="drumrack">
+    {{ file_browser_html | safe }}
+  </div>
+{% else %}
+  <form method="post" action="{{ host_prefix }}/drum-rack-inspector" style="margin-bottom:1rem;">
+    <input type="hidden" name="action" value="reset_preset">
+    <button type="submit">Choose Another Preset</button>
+  </form>
+  <div class="samples-container">
     {{ samples_html | safe }}
-</div>
+  </div>
+{% endif %}
 <!-- Time Stretch Modal -->
 <style>
   .modal .loading-overlay {
@@ -87,4 +89,5 @@
   import { initDrumRackTab } from '{{ host_prefix }}/static/drum_rack.js';
   document.addEventListener('DOMContentLoaded', initDrumRackTab);
 </script>
+<script type="module" src="{{ host_prefix }}/static/file_browser.js"></script>
 {% endblock %}
