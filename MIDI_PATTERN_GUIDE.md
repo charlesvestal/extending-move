@@ -29,6 +29,7 @@ This creates a 4-beat measure with C major triads (C, E, G) on beats 1, 2, 3, an
 For more control, use the pattern generator directly:
 
 ```python
+import os
 from core.midi_pattern_generator import generate_pattern_set
 
 # Define your pattern
@@ -44,7 +45,8 @@ result = generate_pattern_set(
     set_name="My_Pattern",
     pattern=pattern,
     clip_length=4.0,  # 4 beats
-    tempo=120.0
+    tempo=120.0,
+    output_dir=os.environ.get("MOVE_SET_DIR")  # Optional
 )
 ```
 

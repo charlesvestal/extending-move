@@ -46,19 +46,10 @@ def test_detect_transients(tmp_path):
     assert regions[0]['start'] <= regions[0]['end']
 
 
-def test_generate_pattern_set(tmp_path, monkeypatch):
+def test_generate_pattern_set(tmp_path):
     pattern = create_c_major_downbeats(1)
 
-    real_join = os.path.join
-
-    def fake_join(a, *rest):
-        if a == "/data/UserData/UserLibrary/Sets":
-            return real_join(tmp_path, *rest)
-        return real_join(a, *rest)
-
-    monkeypatch.setattr(os.path, "join", fake_join)
-
-    result = generate_pattern_set("TestSet", pattern)
+    result = generate_pattern_set("TestSet", pattern, output_dir=str(tmp_path))
     assert result['success'], result.get('message')
     output_path = os.path.join(tmp_path, "TestSet.abl")
     assert os.path.exists(output_path)
