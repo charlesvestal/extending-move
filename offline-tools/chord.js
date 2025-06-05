@@ -276,116 +276,15 @@ function writeString(view, offset, string) {
   }
 }
 
-// Simple FFT implementation for power-of-two sizes
-function fft(re, im) {
-  var n = re.length;
-  for (var i = 1, j = 0; i < n; i++) {
-    var bit = n >> 1;
-    for (; j & bit; bit >>= 1) {
-      j ^= bit;
-    }
-    j ^= bit;
-    if (i < j) {
-      var t = re[i];
-      re[i] = re[j];
-      re[j] = t;
-      t = im[i];
-      im[i] = im[j];
-      im[j] = t;
-    }
-  }
-  for (var len = 2; len <= n; len <<= 1) {
-    var step = -2 * Math.PI / len;
-    for (var i = 0; i < n; i += len) {
-      for (var j = 0; j < len / 2; j++) {
-        var uRe = re[i + j];
-        var uIm = im[i + j];
-        var vRe = re[i + j + len / 2];
-        var vIm = im[i + j + len / 2];
-        var ang = step * j;
-        var cos = Math.cos(ang);
-        var sin = Math.sin(ang);
-        var tre = vRe * cos - vIm * sin;
-        var tim = vRe * sin + vIm * cos;
-        re[i + j] = uRe + tre;
-        im[i + j] = uIm + tim;
-        re[i + j + len / 2] = uRe - tre;
-        im[i + j + len / 2] = uIm - tim;
-      }
-    }
-  }
-}
-
-function ifft(re, im) {
-  for (var i = 0; i < re.length; i++) im[i] = -im[i];
-  fft(re, im);
-  var n = re.length;
-  for (var i = 0; i < n; i++) {
-    re[i] /= n;
-    im[i] = -im[i] / n;
-  }
-}
-
-function hannWindow(size) {
-  var win = new Float32Array(size);
-  for (var i = 0; i < size; i++) {
-    win[i] = 0.5 * (1 - Math.cos(2 * Math.PI * i / size));
-  }
-  return win;
-}
-
-
-function estimatePitchPeriod(data, sampleRate) {
-  var minFreq = 80;
-  var maxFreq = 1000;
-  var minLag = Math.floor(sampleRate / maxFreq);
-  var maxLag = Math.floor(sampleRate / minFreq);
-  var bestLag = minLag;
-  var bestCorr = -Infinity;
-  var end = Math.min(data.length - maxLag - 1, sampleRate * 0.1);
-  for (var lag = minLag; lag <= maxLag; lag++) {
-    var corr = 0;
-    for (var i = 0; i < end; i++) {
-      corr += data[i] * data[i + lag];
-    }
-    if (corr > bestCorr) {
-      bestCorr = corr;
-      bestLag = lag;
-    }
-  }
-  return bestLag;
-}
-
-function psolaStretch(buffer, targetLength) {
-  var ratio = targetLength / buffer.length;
-  var numChannels = buffer.numberOfChannels;
-  var sr = buffer.sampleRate;
-  var outBuf = new AudioBuffer({ length: targetLength, numberOfChannels: numChannels, sampleRate: sr });
-  var windowCache = {};
-
-  for (var ch = 0; ch < numChannels; ch++) {
-    var input = buffer.getChannelData(ch);
-    var output = outBuf.getChannelData(ch);
-    var pitch = estimatePitchPeriod(input, sr) || 1;
-    var frameSize = 2 * pitch;
-    var A = pitch;
-    var S = Math.round(A * ratio);
-    var window = windowCache[frameSize] || (windowCache[frameSize] = hannWindow(frameSize));
-    var inPos = 0;
-    var outPos = 0;
-    while (outPos + frameSize < targetLength && inPos + frameSize < input.length) {
-      var frame = input.subarray(inPos, inPos + frameSize);
-      for (var j = 0; j < frameSize; j++) {
-        var idx = outPos + j;
-        if (idx < output.length) {
-          output[idx] += frame[j] * window[j];
-        }
-      }
-      inPos += A;
-      outPos += S;
-    }
-  }
-  return outBuf;
+async function soundtouchStretch(buffer, targetLength) {
+  const { PitchShifter } = await import('./soundtouch.js');
+  const ratio = targetLength / buffer.length;
+  const ctx = new OfflineAudioContext(buffer.numberOfChannels, targetLength, buffer.sampleRate);
+  const shifter = new PitchShifter(ctx, buffer, 4096);
+  shifter.tempo = ratio;
+  shifter.pitch = 1;
+  shifter.connect(ctx.destination);
+  return ctx.startRendering();
 }
 
 async function pitchShiftOffline(buffer, semitoneShift) {
@@ -451,7 +350,7 @@ async function processChordSample(buffer, intervals, keepLength = false) {
   for (let semitone of intervals) {
     let pitched = await pitchShiftOffline(buffer, semitone);
     if (keepLength) {
-      pitched = psolaStretch(pitched, buffer.length);
+      pitched = await soundtouchStretch(pitched, buffer.length);
     }
     pitchedBuffers.push(pitched);
   }
