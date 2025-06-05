@@ -30,6 +30,7 @@ class DrumRackInspectorHandler(BaseHandler):
             'selected_preset': None,
             'browser_root': base_dir,
             'browser_filter': 'drumrack',
+            'message_type': 'info',
         }
 
     def handle_post(self, form: cgi.FieldStorage):
@@ -158,6 +159,7 @@ class DrumRackInspectorHandler(BaseHandler):
                 'selected_preset': preset_path,
                 'browser_root': base_dir,
                 'browser_filter': 'drumrack',
+                'message_type': 'success',
             }
 
         except Exception as e:
@@ -212,6 +214,7 @@ class DrumRackInspectorHandler(BaseHandler):
                 'selected_preset': preset_path,
                 'browser_root': base_dir,
                 'browser_filter': 'drumrack',
+                'message_type': 'info',
             }
 
         # Step 2: Compute target duration
@@ -356,6 +359,7 @@ class DrumRackInspectorHandler(BaseHandler):
             'selected_preset': preset_path,
             'browser_root': base_dir,
             'browser_filter': 'drumrack',
+            'message_type': 'success',
         }
     def handle_reverse_sample(self, form):
         """Handle reversing a sample."""
@@ -501,6 +505,7 @@ class DrumRackInspectorHandler(BaseHandler):
                 'selected_preset': preset_path,
                 'browser_root': base_dir,
                 'browser_filter': 'drumrack',
+                'message_type': 'success',
             }
 
         except Exception as e:
