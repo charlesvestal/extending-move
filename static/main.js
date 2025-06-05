@@ -35,12 +35,15 @@ async function fetchContent(tabName) {
         const urlPath = tabName.replace(/([A-Z])/g, '-$1')  // Add hyphens before capitals
             .toLowerCase()  // Convert to lowercase
             .replace(/^-/, '');  // Remove leading hyphen if present
-        const response = await fetch(`/${urlPath}`);
+        const response = await fetch(getHttpUrl(`/${urlPath}`));
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
         const data = await response.text();
         document.getElementById(tabName).innerHTML = data;
+        if (typeof forceHttpForms === 'function') {
+            forceHttpForms();
+        }
         
         // Find and re-run any scripts in the loaded content
         const scripts = document.getElementById(tabName).querySelectorAll("script");
@@ -72,7 +75,7 @@ function initializeRestoreForm() {
 async function handleRestoreSubmit(form) {
     const formData = new FormData(form);
     try {
-        const response = await fetch("/restore", {
+        const response = await fetch(getHttpUrl("/restore"), {
             method: "POST",
             body: formData
         });
@@ -166,7 +169,7 @@ function attachFormHandler(tabName) {
                 formData.append('sensitivity', sensitivity);
                 // --- End sensitivity slider support ---
                 try {
-                    const response = await fetch('/detect-transients', {
+                    const response = await fetch(getHttpUrl('/detect-transients'), {
                         method: 'POST',
                         body: formData
                     });
@@ -298,7 +301,7 @@ async function submitForm(form, tabName) {
     const method = form.method.toUpperCase();
 
     try {
-        const response = await fetch(url, {
+        const response = await fetch(getHttpUrl(url), {
             method: method,
             body: formData
         });
@@ -417,7 +420,7 @@ function initializeDrumRackWaveforms() {
         
         // Load only the slice of the audio file
         const audioContext = wavesurfer.backend.getAudioContext();
-        fetch(audioPath)
+        fetch(getHttpUrl(audioPath))
           .then(res => res.arrayBuffer())
           .then(data => audioContext.decodeAudioData(data))
           .then(buffer => {
@@ -683,7 +686,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const formData = new FormData();
             formData.append('file', fileInput.files[0]);
             try {
-                const response = await fetch('/detect-transients', {
+                const response = await fetch(getHttpUrl('/detect-transients'), {
                     method: 'POST',
                     body: formData
                 });

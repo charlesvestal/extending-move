@@ -150,3 +150,33 @@ function createDrumCellChain(receivingNote, name, params, sampleUri) {
     }
   };
 }
+
+/**
+ * Convert a relative or HTTPS URL to an explicit HTTP URL for the current host.
+ * @param {string} path - The path or URL to convert.
+ * @returns {string} - An HTTP URL.
+ */
+function getHttpUrl(path) {
+  if (!path) return 'http://' + window.location.host + '/';
+  // If already absolute, just replace https with http
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path.replace(/^https:/, 'http:');
+  }
+  if (!path.startsWith('/')) path = '/' + path;
+  return 'http://' + window.location.host + path;
+}
+
+/**
+ * Ensure all forms submit over HTTP by adjusting their action attributes.
+ */
+function forceHttpForms() {
+  document.querySelectorAll('form').forEach(form => {
+    const action = form.getAttribute('action') || window.location.pathname;
+    form.setAttribute('action', getHttpUrl(action));
+  });
+}
+
+// Force HTTP when the page loads
+if (typeof window !== 'undefined') {
+  document.addEventListener('DOMContentLoaded', forceHttpForms);
+}
