@@ -29,6 +29,8 @@ from handlers.file_placer_handler_class import FilePlacerHandler
 from handlers.refresh_handler_class import RefreshHandler
 from dash import Dash, html
 from core.file_browser import list_directory as list_dir
+from core.drum_rack_inspector_handler import scan_for_drum_rack_presets
+from core.synth_preset_inspector_handler import scan_for_synth_presets
 import cgi
 
 PID_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "move-webserver.pid")
@@ -42,10 +44,12 @@ BROWSE_ROOTS = {
     "drum_presets": {
         "path": "/data/UserData/UserLibrary/Track Presets",
         "exts": [".ablpreset"],
+        "filter_func": scan_for_drum_rack_presets,
     },
     "synth_presets": {
         "path": "/data/UserData/UserLibrary/Track Presets",
         "exts": [".ablpreset"],
+        "filter_func": scan_for_synth_presets,
     },
 }
 
@@ -242,7 +246,14 @@ def browse(key):
     if not cfg:
         return jsonify({"success": False, "message": "Invalid browse key"}), 400
     path = request.args.get("path", "")
-    result = list_dir(cfg["path"], path, cfg.get("exts"))
+    allowed = None
+    if "filter_func" in cfg:
+        pres = cfg["filter_func"]()
+        if pres.get("success"):
+            allowed = {
+                os.path.relpath(p["path"], cfg["path"]) for p in pres["presets"]
+            }
+    result = list_dir(cfg["path"], path, cfg.get("exts"), allowed_files=allowed)
     status = 200 if result.get("success") else 400
     return jsonify(result), status
 
@@ -423,6 +434,8 @@ def drum_rack_inspector():
     success = message_type != "error" if message_type else False
     options_html = result.get("options") or result.get("options_html", "")
     samples_html = result.get("samples_html", "")
+    selected_preset = result.get("selected_preset")
+    preset_selected = bool(selected_preset)
     return render_template(
         "drum_rack_inspector.html",
         message=message,
@@ -430,6 +443,8 @@ def drum_rack_inspector():
         message_type=message_type,
         options_html=options_html,
         samples_html=samples_html,
+        preset_selected=preset_selected,
+        selected_preset=selected_preset,
         active_tab="drum-rack-inspector",
     )
 

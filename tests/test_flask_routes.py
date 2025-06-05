@@ -31,13 +31,27 @@ def test_reverse_post(client, monkeypatch):
     assert b'ok' in resp.data
 
 def test_reverse_list(client, monkeypatch):
-    def fake_list(base, path, exts=None):
+    def fake_list(base, path, exts=None, allowed_files=None):
+        assert allowed_files is None
         return {"success": True, "dirs": ["d"], "files": ["f.wav"], "path": path}
     monkeypatch.setattr(move_webserver, 'list_dir', fake_list)
     resp = client.get('/browse/samples?path=')
     assert resp.status_code == 200
     assert resp.json['dirs'] == ['d']
     assert resp.json['files'] == ['f.wav']
+
+def test_browse_filtered(client, monkeypatch):
+    def fake_scan():
+        return {"success": True, "presets": [{"path": "/data/UserData/UserLibrary/Track Presets/Drums/kit.ablpreset"}]}
+    monkeypatch.setattr(move_webserver, 'scan_for_drum_rack_presets', fake_scan)
+    move_webserver.BROWSE_ROOTS['drum_presets']['filter_func'] = fake_scan
+    def fake_list_dir(base, path, exts=None, allowed_files=None):
+        assert allowed_files == {"Drums/kit.ablpreset"}
+        return {"success": True, "dirs": ["Drums"], "files": ["kit.ablpreset"], "path": path}
+    monkeypatch.setattr(move_webserver, 'list_dir', fake_list_dir)
+    resp = client.get('/browse/drum_presets?path=')
+    assert resp.status_code == 200
+    assert resp.json['files'] == ['kit.ablpreset']
 
 def test_restore_get(client, monkeypatch):
     def fake_get():
@@ -118,12 +132,14 @@ def test_drum_rack_inspector_post(client, monkeypatch):
         return {
             'message': 'ok',
             'message_type': 'success',
-            'samples_html': '<div>grid</div>'
+            'samples_html': '<div>grid</div>',
+            'selected_preset': 'x'
         }
     monkeypatch.setattr(move_webserver.drum_rack_handler, 'handle_post', fake_post)
     resp = client.post('/drum-rack-inspector', data={'action':'select_preset', 'preset_select':'x'})
     assert resp.status_code == 200
     assert b'grid' in resp.data
+    assert b'name="preset_select" value="x"' in resp.data
 
 def test_chord_get(client):
     resp = client.get('/chord')

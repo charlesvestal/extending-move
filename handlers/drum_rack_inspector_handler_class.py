@@ -3,7 +3,11 @@ import cgi
 import os
 import urllib.parse
 from handlers.base_handler import BaseHandler
-from core.drum_rack_inspector_handler import get_drum_cell_samples, update_drum_cell_sample
+from core.drum_rack_inspector_handler import (
+    get_drum_cell_samples,
+    update_drum_cell_sample,
+    scan_for_drum_rack_presets,
+)
 from core.reverse_handler import reverse_wav_file
 from core.refresh_handler import refresh_library
 from core.time_stretch_handler import time_stretch_wav
@@ -13,8 +17,11 @@ PRESETS_ROOT = "/data/UserData/UserLibrary/Track Presets"
 
 class DrumRackInspectorHandler(BaseHandler):
     def handle_get(self):
-        "Handle GET request for drum rack inspector page."
-        return {
+            'samples_html': '',
+            'selected_preset': None,
+        if action == 'reset_preset':
+            return self.handle_get()
+            return self.handle_time_stretch_sample(form)
             "message": "Select a Drum preset from the browser",
             "message_type": "info",
             "macros_html": "",
@@ -104,7 +111,8 @@ class DrumRackInspectorHandler(BaseHandler):
                                             <button type="submit" class="reverse-button">Reverse</button>
                                         </form>
                                         <button type="button" class="time-stretch-button"
-                                            data-sample-path="{sample['path']}"
+                'samples_html': samples_html,
+                'selected_preset': preset_path,
                                             data-preset-path="{preset_path}"
                                             data-pad-number="{pad_num}"
                                             onclick="
@@ -273,7 +281,8 @@ class DrumRackInspectorHandler(BaseHandler):
                                     <button type="submit" class="reverse-button">Reverse</button>
                                 </form>
                                 <button type="button" class="time-stretch-button"
-                                    data-sample-path="{sample['path']}"
+            'samples_html': samples_html,
+            'selected_preset': preset_path,
                                     data-preset-path="{preset_path}"
                                     data-pad-number="{num}"
                                     onclick="
@@ -407,7 +416,15 @@ class DrumRackInspectorHandler(BaseHandler):
                                             <button type="submit" class="reverse-button">Reverse</button>
                                         </form>
                                         <button type="button" class="time-stretch-button"
-                                            data-sample-path="{sample['path']}"
+                'samples_html': samples_html,
+                'selected_preset': preset_path,
+        result = scan_for_drum_rack_presets()
+        allowed = set()
+        if result.get("success"):
+            allowed = {
+                os.path.relpath(p["path"], PRESETS_ROOT) for p in result["presets"]
+            }
+            allowed_files=allowed,
                                             data-preset-path="{preset_path}"
                                             data-pad-number="{pad_num}"
                                             onclick="

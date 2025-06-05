@@ -1,5 +1,6 @@
 import cgi
 import re
+import os
 from handlers.base_handler import BaseHandler
 from core.synth_preset_inspector_handler import (
     extract_macro_information,
@@ -9,6 +10,7 @@ from core.synth_preset_inspector_handler import (
     delete_parameter_mapping
 )
 from core.file_browser import list_directory as list_dir, resolve_path
+from core.synth_preset_inspector_handler import scan_for_synth_presets
 
 PRESETS_ROOT = "/data/UserData/UserLibrary/Track Presets"
 
@@ -286,9 +288,16 @@ class SynthPresetInspectorHandler(BaseHandler):
 
     def list_directory(self, rel_path: str):
         """Return directories and preset files for a given relative path."""
+        result = scan_for_synth_presets()
+        allowed = set()
+        if result.get("success"):
+            allowed = {
+                os.path.relpath(p["path"], PRESETS_ROOT) for p in result["presets"]
+            }
         return list_dir(
             PRESETS_ROOT,
             rel_path,
             [".ablpreset"],
+            allowed_files=allowed,
         )
     

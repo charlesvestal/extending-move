@@ -1,8 +1,8 @@
 import os
 
 
-def list_directory(base_dir: str, rel_path: str, extensions=None):
-    """Return directories and files filtered by extensions starting from base_dir."""
+def list_directory(base_dir: str, rel_path: str, extensions=None, allowed_files=None):
+    """Return directories and files filtered by ``extensions`` and ``allowed_files``."""
     abs_dir = os.path.realpath(os.path.join(base_dir, rel_path))
     base_real = os.path.realpath(base_dir)
     if not abs_dir.startswith(base_real):
@@ -12,18 +12,25 @@ def list_directory(base_dir: str, rel_path: str, extensions=None):
 
     dirs = []
     files = []
+    allowed_set = set(os.path.normpath(p) for p in allowed_files) if allowed_files else None
     for entry in sorted(os.listdir(abs_dir)):
         if entry.startswith('.'):
             continue
         full = os.path.join(abs_dir, entry)
+        rel = os.path.normpath(os.path.join(rel_path, entry)) if rel_path else entry
         if os.path.isdir(full):
-            dirs.append(entry)
+            include_dir = True
+            if allowed_set is not None:
+                prefix = rel + os.sep
+                include_dir = any(p.startswith(prefix) for p in allowed_set)
+            if include_dir:
+                dirs.append(entry)
         else:
-            if extensions:
-                if any(entry.lower().endswith(ext.lower()) for ext in extensions):
-                    files.append(entry)
-            else:
-                files.append(entry)
+            if extensions and not any(entry.lower().endswith(ext.lower()) for ext in extensions):
+                continue
+            if allowed_set is not None and rel not in allowed_set:
+                continue
+            files.append(entry)
     return {"success": True, "dirs": dirs, "files": files, "path": rel_path}
 
 
