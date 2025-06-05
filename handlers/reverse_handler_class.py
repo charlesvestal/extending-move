@@ -1,16 +1,24 @@
 #!/usr/bin/env python3
 import cgi
+import os
 from handlers.base_handler import BaseHandler
 from core.reverse_handler import get_wav_files, reverse_wav_file
+from core.file_browser import build_file_browser_html
 
 class ReverseHandler(BaseHandler):
     def handle_get(self):
-        """Provide options and an informational message for the reverse page."""
-        wav_files = get_wav_files("/data/UserData/UserLibrary/Samples")
+        """Provide the file browser HTML for reverse page."""
+        base_dir = "/data/UserData/UserLibrary/Samples"
+        wav_files = get_wav_files(base_dir)
+        file_paths = [os.path.join(base_dir, f) for f in wav_files]
+        browser_html = build_file_browser_html(
+            file_paths, base_dir, "/reverse", "wav_file", "reverse_file"
+        )
         return {
-            "wav_files": wav_files,
+            "file_browser_html": browser_html,
             "message": "Select a WAV file to reverse",
             "message_type": "info",
+            "selected_file": None,
         }
 
     def handle_post(self, form: cgi.FieldStorage):
@@ -28,19 +36,20 @@ class ReverseHandler(BaseHandler):
         try:
             success, message, new_path = reverse_wav_file(
                 filename=wav_file,
-                directory="/data/UserData/UserLibrary/Samples"
+                directory="/data/UserData/UserLibrary/Samples",
             )
-            if not success:
-                return self.format_error_response(message)
-                
-            # Include the new path in the success message if it's different from the original
-            if new_path and new_path != wav_file:
+            if success and new_path and new_path != wav_file:
                 message = f"{message}\nNew file path: {new_path}"
-            return self.format_success_response(message)
+            msg_type = "success" if success else "error"
+            return {
+                "message": message,
+                "message_type": msg_type,
+                "selected_file": wav_file,
+                "file_browser_html": None,
+            }
         except Exception as e:
             return self.format_error_response(f"Error processing reverse WAV file: {str(e)}")
 
     def get_wav_options(self):
-        """Get WAV file options for the template."""
-        wav_files = get_wav_files("/data/UserData/UserLibrary/Samples")
-        return ''.join([f'<option value="{file}">{file}</option>' for file in wav_files])
+        """Deprecated: dropdown options no longer used."""
+        return ""

@@ -382,3 +382,11 @@ select {
 .drum-cell .sample-info {
     margin-top: auto;
 }
+/* File browser styling */
+.file-tree { list-style: none; padding-left: 1rem; }
+.file-tree ul { list-style: none; margin-left: 1rem; }
+.file-tree .dir > span { cursor: pointer; font-weight: 500; }
+.file-tree .file-link { background: none; border: none; color: #0066cc; cursor: pointer; padding: 0; text-align: left; }
+.file-tree .file-link:hover { text-decoration: underline; }
+.hidden { display: none; }
+

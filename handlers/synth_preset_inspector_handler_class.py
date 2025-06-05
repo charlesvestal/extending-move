@@ -1,5 +1,6 @@
 import cgi
 import re
+import os
 from handlers.base_handler import BaseHandler
 from core.synth_preset_inspector_handler import (
     scan_for_synth_presets, 
@@ -9,14 +10,21 @@ from core.synth_preset_inspector_handler import (
     update_preset_parameter_mappings,
     delete_parameter_mapping
 )
+from core.file_browser import build_file_browser_html
 
 class SynthPresetInspectorHandler(BaseHandler):
     def handle_get(self):
-        """Initialize the synth macros with synth presets dropdown"""
+        """Return file browser for synth presets."""
+        presets = scan_for_synth_presets().get('presets', [])
+        paths = [p['path'] for p in presets]
+        base_dir = os.path.commonpath(paths) if paths else '/'
+        browser_html = build_file_browser_html(
+            paths, base_dir, '/synth-macros', 'preset_select', 'select_preset'
+        )
         return {
-            "message": "Select a Drift preset from the dropdown",
+            "message": "Select a Drift preset from the list",
             "message_type": "info",
-            "options": self.get_preset_options(),
+            "file_browser_html": browser_html,
             "macros_html": "",
             "selected_preset": None,
         }
@@ -137,10 +145,17 @@ class SynthPresetInspectorHandler(BaseHandler):
             # Generate HTML for displaying macros
             macros_html = self.generate_macros_html(macro_result['macros'])
             
+            presets = scan_for_synth_presets().get('presets', [])
+            paths = [p['path'] for p in presets]
+            base_dir = os.path.commonpath(paths) if paths else '/'
+            browser_html = build_file_browser_html(
+                paths, base_dir, '/synth-macros', 'preset_select', 'select_preset'
+            )
+
             return {
                 "message": message,
                 "message_type": "success",
-                "options": self.get_preset_options(selected_preset=preset_path),
+                "file_browser_html": browser_html,
                 "macros_html": macros_html,
                 "selected_preset": preset_path,
             }
@@ -277,24 +292,5 @@ class SynthPresetInspectorHandler(BaseHandler):
         return html
     
     def get_preset_options(self, selected_preset=None):
-        """Get synth preset options for the template dropdown"""
-        try:
-            result = scan_for_synth_presets()
-            if not result['success']:
-                return ''
-
-            options_html = ['<option value="">--Select a Preset--</option>']
-            for preset in result['presets']:
-                # Include the device type and relative path in the display name
-                device_type = preset.get('type', '').capitalize()
-                selected = ''
-                if selected_preset and preset['path'] == selected_preset:
-                    selected = ' selected="selected"'
-                display_name = f"{preset.get('display_path', preset['name'])} ({device_type})"
-                options_html.append(
-                    f'<option value="{preset["path"]}"{selected}>{display_name}</option>'
-                )
-            return '\n'.join(options_html)
-        except Exception as e:
-            print(f"Error getting preset options: {e}")
-            return ''
+        """Deprecated dropdown helper."""
+        return ''
