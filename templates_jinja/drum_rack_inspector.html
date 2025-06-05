@@ -6,7 +6,7 @@
   <p class="{{ message_type if message_type else ('success' if success else 'error') }}">{{ message }}</p>
 {% endif %}
 {% if not selected_preset %}
-  <div class="file-browser">
+  <div class="file-browser" data-root="{{ browser_root }}" data-action="{{ host_prefix }}/drum-rack-inspector" data-field="preset_select" data-value="select_preset" data-filter="drumrack">
     {{ file_browser_html | safe }}
   </div>
 {% else %}

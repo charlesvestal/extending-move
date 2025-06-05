@@ -389,4 +389,10 @@ select {
 .file-tree .file-link { background: none; border: none; color: #0066cc; cursor: pointer; padding: 0; text-align: left; }
 .file-tree .file-link:hover { text-decoration: underline; }
 .hidden { display: none; }
+.file-browser {
+    max-height: 240px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    padding: 0.5rem;
+}
 

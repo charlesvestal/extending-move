@@ -2,23 +2,28 @@
 import cgi
 import os
 from handlers.base_handler import BaseHandler
-from core.reverse_handler import get_wav_files, reverse_wav_file
-from core.file_browser import build_file_browser_html
+from core.reverse_handler import reverse_wav_file
+from core.file_browser import generate_dir_html
 
 class ReverseHandler(BaseHandler):
     def handle_get(self):
         """Provide the file browser HTML for reverse page."""
         base_dir = "/data/UserData/UserLibrary/Samples"
-        wav_files = get_wav_files(base_dir)
-        file_paths = [os.path.join(base_dir, f) for f in wav_files]
-        browser_html = build_file_browser_html(
-            file_paths, base_dir, "/reverse", "wav_file", "reverse_file"
+        browser_html = generate_dir_html(
+            base_dir,
+            "",
+            "/reverse",
+            "wav_file",
+            "reverse_file",
+            filter_key="wav",
         )
         return {
             "file_browser_html": browser_html,
             "message": "Select a WAV file to reverse",
             "message_type": "info",
             "selected_file": None,
+            "browser_root": base_dir,
+            "browser_filter": "wav",
         }
 
     def handle_post(self, form: cgi.FieldStorage):

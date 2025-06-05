@@ -16,11 +16,10 @@ def client(monkeypatch):
     move_webserver.app.config['TESTING'] = True
     return move_webserver.app.test_client()
 
-def test_reverse_get(client, monkeypatch):
-    monkeypatch.setattr(move_webserver, 'get_wav_files', lambda d: ['sample.wav'])
+def test_reverse_get(client):
     resp = client.get('/reverse')
     assert resp.status_code == 200
-    assert b'sample.wav' in resp.data
+    assert b'class="file-browser"' in resp.data
 
 def test_reverse_post(client, monkeypatch):
     def fake_handle_post(form):
@@ -84,42 +83,43 @@ def test_synth_macros_post(client, monkeypatch):
         return {
             'message': 'saved',
             'message_type': 'success',
-            'options': '<option value="x" selected>Sub/preset (Drift)</option>',
             'macros_html': '<p>done</p>',
             'selected_preset': 'x',
+            'browser_root': '/tmp',
         }
     monkeypatch.setattr(move_webserver.synth_handler, 'handle_post', fake_post)
     resp = client.post('/synth-macros', data={'action': 'select_preset'})
     assert resp.status_code == 200
     assert b'saved' in resp.data
-    assert b'name="preset_select" value="x"' in resp.data
-    assert b'id="preset_select"' in resp.data and b'disabled' in resp.data
     assert b'Choose Another Preset' in resp.data
+    assert b'<p>done</p>' in resp.data
 
 def test_drum_rack_inspector_get(client, monkeypatch):
     def fake_get():
         return {
-            'options': '<option value="1">P</option>',
+            'file_browser_html': '<ul></ul>',
             'message': '',
-            'samples_html': ''
+            'samples_html': '',
+            'browser_root': '/tmp'
         }
     monkeypatch.setattr(move_webserver.drum_rack_handler, 'handle_get', fake_get)
     resp = client.get('/drum-rack-inspector')
     assert resp.status_code == 200
-    assert b'<option value="1">P</option>' in resp.data
+    assert b'class="file-browser"' in resp.data
 
 def test_drum_rack_inspector_post(client, monkeypatch):
     def fake_post(form):
         return {
             'message': 'ok',
             'message_type': 'success',
-            'options': '<option value="1">P</option>',
-            'samples_html': '<div>grid</div>'
+            'samples_html': '<div>grid</div>',
+            'browser_root': '/tmp',
+            'selected_preset': 'x',
         }
     monkeypatch.setattr(move_webserver.drum_rack_handler, 'handle_post', fake_post)
     resp = client.post('/drum-rack-inspector', data={'action':'select_preset', 'preset_select':'x'})
     assert resp.status_code == 200
-    assert b'grid' in resp.data
+    assert b'<div>grid</div>' in resp.data
 
 def test_chord_get(client):
     resp = client.get('/chord')

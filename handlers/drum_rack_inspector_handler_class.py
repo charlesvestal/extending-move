@@ -2,9 +2,9 @@
 import cgi
 import os
 import urllib.parse
-from core.file_browser import build_file_browser_html
+from core.file_browser import generate_dir_html
 from handlers.base_handler import BaseHandler
-from core.drum_rack_inspector_handler import scan_for_drum_rack_presets, get_drum_cell_samples, update_drum_cell_sample
+from core.drum_rack_inspector_handler import get_drum_cell_samples, update_drum_cell_sample
 from core.reverse_handler import reverse_wav_file
 from core.refresh_handler import refresh_library
 from core.time_stretch_handler import time_stretch_wav
@@ -12,17 +12,24 @@ from core.time_stretch_handler import time_stretch_wav
 class DrumRackInspectorHandler(BaseHandler):
     def handle_get(self):
         """Return file browser HTML for drum rack presets."""
-        presets = scan_for_drum_rack_presets().get('presets', [])
-        paths = [p['path'] for p in presets]
-        base_dir = os.path.commonpath(paths) if paths else '/'
-        browser_html = build_file_browser_html(
-            paths, base_dir, '/drum-rack-inspector', 'preset_select', 'select_preset'
+        base_dir = "/data/UserData/UserLibrary/Track Presets"
+        if not os.path.exists(base_dir) and os.path.exists("examples/Track Presets"):
+            base_dir = "examples/Track Presets"
+        browser_html = generate_dir_html(
+            base_dir,
+            "",
+            '/drum-rack-inspector',
+            'preset_select',
+            'select_preset',
+            filter_key='drumrack'
         )
         return {
             'file_browser_html': browser_html,
             'message': '',
             'samples_html': '',
             'selected_preset': None,
+            'browser_root': base_dir,
+            'browser_filter': 'drumrack',
         }
 
     def handle_post(self, form: cgi.FieldStorage):
@@ -132,11 +139,16 @@ class DrumRackInspectorHandler(BaseHandler):
 
             samples_html += '</div>'
 
-            presets = scan_for_drum_rack_presets().get('presets', [])
-            paths = [p['path'] for p in presets]
-            base_dir = os.path.commonpath(paths) if paths else '/'
-            browser_html = build_file_browser_html(
-                paths, base_dir, '/drum-rack-inspector', 'preset_select', 'select_preset'
+            base_dir = "/data/UserData/UserLibrary/Track Presets"
+            if not os.path.exists(base_dir) and os.path.exists("examples/Track Presets"):
+                base_dir = "examples/Track Presets"
+            browser_html = generate_dir_html(
+                base_dir,
+                "",
+                '/drum-rack-inspector',
+                'preset_select',
+                'select_preset',
+                filter_key='drumrack'
             )
 
             return {
@@ -144,6 +156,8 @@ class DrumRackInspectorHandler(BaseHandler):
                 'message': result['message'],
                 'samples_html': samples_html,
                 'selected_preset': preset_path,
+                'browser_root': base_dir,
+                'browser_filter': 'drumrack',
             }
 
         except Exception as e:
@@ -180,17 +194,24 @@ class DrumRackInspectorHandler(BaseHandler):
                     </form>
                 </div>
             '''
-            presets = scan_for_drum_rack_presets().get('presets', [])
-            paths = [p['path'] for p in presets]
-            base_dir = os.path.commonpath(paths) if paths else '/'
-            browser_html = build_file_browser_html(
-                paths, base_dir, '/drum-rack-inspector', 'preset_select', 'select_preset'
+            base_dir = "/data/UserData/UserLibrary/Track Presets"
+            if not os.path.exists(base_dir) and os.path.exists("examples/Track Presets"):
+                base_dir = "examples/Track Presets"
+            browser_html = generate_dir_html(
+                base_dir,
+                "",
+                '/drum-rack-inspector',
+                'preset_select',
+                'select_preset',
+                filter_key='drumrack'
             )
             return {
                 'file_browser_html': browser_html,
                 'message': '',
                 'samples_html': samples_html,
                 'selected_preset': preset_path,
+                'browser_root': base_dir,
+                'browser_filter': 'drumrack',
             }
 
         # Step 2: Compute target duration
@@ -317,17 +338,24 @@ class DrumRackInspectorHandler(BaseHandler):
 
         samples_html += '</div>'
 
-        presets = scan_for_drum_rack_presets().get('presets', [])
-        paths = [p['path'] for p in presets]
-        base_dir = os.path.commonpath(paths) if paths else '/'
-        browser_html = build_file_browser_html(
-            paths, base_dir, '/drum-rack-inspector', 'preset_select', 'select_preset'
+        base_dir = "/data/UserData/UserLibrary/Track Presets"
+        if not os.path.exists(base_dir) and os.path.exists("examples/Track Presets"):
+            base_dir = "examples/Track Presets"
+        browser_html = generate_dir_html(
+            base_dir,
+            "",
+            '/drum-rack-inspector',
+            'preset_select',
+            'select_preset',
+            filter_key='drumrack'
         )
         return {
             'file_browser_html': browser_html,
             'message': f"Time-stretched sample created and loaded for pad {pad_number}! {ts_message} {update_message}",
             'samples_html': samples_html,
             'selected_preset': preset_path,
+            'browser_root': base_dir,
+            'browser_filter': 'drumrack',
         }
     def handle_reverse_sample(self, form):
         """Handle reversing a sample."""
@@ -455,17 +483,24 @@ class DrumRackInspectorHandler(BaseHandler):
 
             samples_html += '</div>'
 
-            presets = scan_for_drum_rack_presets().get('presets', [])
-            paths = [p['path'] for p in presets]
-            base_dir = os.path.commonpath(paths) if paths else '/'
-            browser_html = build_file_browser_html(
-                paths, base_dir, '/drum-rack-inspector', 'preset_select', 'select_preset'
+            base_dir = "/data/UserData/UserLibrary/Track Presets"
+            if not os.path.exists(base_dir) and os.path.exists("examples/Track Presets"):
+                base_dir = "examples/Track Presets"
+            browser_html = generate_dir_html(
+                base_dir,
+                "",
+                '/drum-rack-inspector',
+                'preset_select',
+                'select_preset',
+                filter_key='drumrack'
             )
             return {
                 'file_browser_html': browser_html,
                 'message': message,
                 'samples_html': samples_html,
                 'selected_preset': preset_path,
+                'browser_root': base_dir,
+                'browser_filter': 'drumrack',
             }
 
         except Exception as e:

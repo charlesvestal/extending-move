@@ -10,16 +10,21 @@ from core.synth_preset_inspector_handler import (
     update_preset_parameter_mappings,
     delete_parameter_mapping
 )
-from core.file_browser import build_file_browser_html
+from core.file_browser import generate_dir_html
 
 class SynthPresetInspectorHandler(BaseHandler):
     def handle_get(self):
         """Return file browser for synth presets."""
-        presets = scan_for_synth_presets().get('presets', [])
-        paths = [p['path'] for p in presets]
-        base_dir = os.path.commonpath(paths) if paths else '/'
-        browser_html = build_file_browser_html(
-            paths, base_dir, '/synth-macros', 'preset_select', 'select_preset'
+        base_dir = "/data/UserData/UserLibrary/Track Presets"
+        if not os.path.exists(base_dir) and os.path.exists("examples/Track Presets"):
+            base_dir = "examples/Track Presets"
+        browser_html = generate_dir_html(
+            base_dir,
+            "",
+            '/synth-macros',
+            'preset_select',
+            'select_preset',
+            filter_key='drift'
         )
         return {
             "message": "Select a Drift preset from the list",
@@ -27,6 +32,8 @@ class SynthPresetInspectorHandler(BaseHandler):
             "file_browser_html": browser_html,
             "macros_html": "",
             "selected_preset": None,
+            "browser_root": base_dir,
+            "browser_filter": 'drift',
         }
 
     def handle_post(self, form):
@@ -145,11 +152,16 @@ class SynthPresetInspectorHandler(BaseHandler):
             # Generate HTML for displaying macros
             macros_html = self.generate_macros_html(macro_result['macros'])
             
-            presets = scan_for_synth_presets().get('presets', [])
-            paths = [p['path'] for p in presets]
-            base_dir = os.path.commonpath(paths) if paths else '/'
-            browser_html = build_file_browser_html(
-                paths, base_dir, '/synth-macros', 'preset_select', 'select_preset'
+            base_dir = "/data/UserData/UserLibrary/Track Presets"
+            if not os.path.exists(base_dir) and os.path.exists("examples/Track Presets"):
+                base_dir = "examples/Track Presets"
+            browser_html = generate_dir_html(
+                base_dir,
+                "",
+                '/synth-macros',
+                'preset_select',
+                'select_preset',
+                filter_key='drift'
             )
 
             return {
@@ -158,6 +170,8 @@ class SynthPresetInspectorHandler(BaseHandler):
                 "file_browser_html": browser_html,
                 "macros_html": macros_html,
                 "selected_preset": preset_path,
+                "browser_root": base_dir,
+                "browser_filter": 'drift',
             }
         
         return self.format_info_response("Unknown action")
