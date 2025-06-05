@@ -1,7 +1,7 @@
 # Before You Start
 
 **Integration Reminders:**
-- If you use `cgi.FieldStorage` in your handler, ensure you `import cgi` at the top of your file.
+- Use Flask's built-in `request.form` and `request.files` for form data; the server no longer requires the `cgi` module.
 - The legacy server relies on JavaScript form handlers in `static/main.js`. If you add multiple forms per tab you must update that script accordingly.  The new Flask server uses standard HTML forms so no extra JavaScript is required.
 - Tab names/IDs must match exactly between your HTML (`index.html`), JavaScript (`static/main.js`), and route definitions (in your handler classes and webserver routing).
 
@@ -601,6 +601,6 @@ Remember to:
 
 ## Troubleshooting & Common Pitfalls
 
-- **Importing cgi**: If you use `cgi.FieldStorage` in your handler, be sure to `import cgi` at the top of your file.
+- **Using Flask Forms**: Handle form data with `request.form` and `request.files`. The server no longer relies on `cgi`.
 - **Multiple forms per tab**: If your tab contains more than one form, you must update `static/main.js` to attach event listeners to all forms in that tab (see "AJAX Forms and Dynamic Tabs").
 - **Tab name/ID consistency**: The tab name/ID must match exactly between your JS (`static/main.js`), HTML (`index.html`), and route handler code. Mismatches will break AJAX loading or form submission.
