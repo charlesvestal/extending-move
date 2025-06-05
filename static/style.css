@@ -318,6 +318,17 @@ input[type="submit"]:hover {
     margin-top: 2rem;
 }
 
+.chord-label {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-bottom: 0.25rem;
+}
+.chord-label select {
+    flex: 1;
+    width: auto;
+}
+
 .chord-preview {
     background-color: #f5f5f5;
     border-radius: 4px;
