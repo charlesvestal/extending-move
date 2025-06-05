@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 import os
 import json
+import logging
 from core.cache_manager import get_cache, set_cache
+
+logger = logging.getLogger(__name__)
 
 def extract_available_parameters(preset_path):
     """
@@ -35,7 +38,7 @@ def extract_available_parameters(preset_path):
                 # Check if this is a drift device
                 if data.get('kind') == 'drift':  # Only look for drift devices
                     synth_device_paths.add(path)
-                    print(f"Found {data.get('kind')} device at path: {path}")
+                    logger.debug("Found %s device at path: %s", data.get('kind'), path)
                 
                 # Recursively search in nested dictionaries
                 for key, value in data.items():
@@ -66,7 +69,7 @@ def extract_available_parameters(preset_path):
                             if key != "Enabled" and not key.startswith("Macro"):
                                 parameters.add(key)
                                 parameter_paths[key] = f"{path}.{key}"
-                                print(f"Adding synth parameter: {key} at path: {path}.{key}")
+                                logger.debug("Adding synth parameter: %s at path: %s.%s", key, path, key)
                 
                 # Recursively search in nested dictionaries
                 for key, value in data.items():
@@ -329,8 +332,8 @@ def update_preset_parameter_mappings(preset_path, parameter_updates):
         # Track parameters that were updated
         updated_params = []
         
-        # Debug: Print parameter updates
-        print(f"Parameter updates: {parameter_updates}")
+        # Debug: Log parameter updates
+        logger.debug("Parameter updates: %s", parameter_updates)
         
         # Helper function to get the object at a specific path
         def get_object_at_path(data, path):
@@ -378,7 +381,11 @@ def update_preset_parameter_mappings(preset_path, parameter_updates):
                 
                 parent = get_object_at_path(preset_data, parent_path)
                 if parent and key in parent and isinstance(parent[key], dict) and "macroMapping" in parent[key]:
-                    print(f"Removing existing mapping for {param_name} from macro {mapping_info['macro_index']}")
+                    logger.debug(
+                        "Removing existing mapping for %s from macro %s",
+                        param_name,
+                        mapping_info['macro_index'],
+                    )
                     # Remove the macroMapping
                     del parent[key]["macroMapping"]
                     return True
@@ -391,8 +398,8 @@ def update_preset_parameter_mappings(preset_path, parameter_updates):
                 param_name = param_path.split(".")[-1]
                 parent_path = param_path.rsplit(".", 1)[0]
                 
-                print(f"Using direct path for parameter {param_name}: {param_path}")
-                print(f"Parent path: {parent_path}")
+                logger.debug("Using direct path for parameter %s: %s", param_name, param_path)
+                logger.debug("Parent path: %s", parent_path)
                 
                 # Remove existing mapping if parameter is already mapped to a different macro
                 if param_name in mapped_parameters and mapped_parameters[param_name]['macro_index'] != macro_index:
@@ -402,8 +409,8 @@ def update_preset_parameter_mappings(preset_path, parameter_updates):
                 key = param_path.split(".")[-1]
                 
                 if parent and key in parent:
-                    print(f"Found parameter using direct path: {param_name}")
-                    print(f"Parameter value: {parent[key]}, Type: {type(parent[key])}")
+                    logger.debug("Found parameter using direct path: %s", param_name)
+                    logger.debug("Parameter value: %s, Type: %s", parent[key], type(parent[key]))
                     
                     # If this is a simple value (not an object with a value property)
                     if not isinstance(parent[key], dict) or "value" not in parent[key]:
@@ -452,7 +459,7 @@ def update_preset_parameter_mappings(preset_path, parameter_updates):
                 if path.endswith("parameters"):
                     for key in data.keys():
                         if key != "Enabled" and not key.startswith("Macro"):
-                            print(f"Found parameter: {key} at path: {path}.{key}")
+                            logger.debug("Found parameter: %s at path: %s.%s", key, path, key)
                 
                 for macro_index, update_info in parameter_updates.items():
                     # Skip parameters that have direct paths (already processed)
@@ -460,7 +467,7 @@ def update_preset_parameter_mappings(preset_path, parameter_updates):
                         continue
                         
                     if param_name == update_info.get('parameter'):
-                        print(f"Found parameter to update: {param_name} at path: {path}")
+                        logger.debug("Found parameter to update: %s at path: %s", param_name, path)
                         
                         # Remove existing mapping if parameter is already mapped to a different macro
                         if param_name in mapped_parameters and mapped_parameters[param_name]['macro_index'] != macro_index:
@@ -471,10 +478,19 @@ def update_preset_parameter_mappings(preset_path, parameter_updates):
                         parent = get_object_at_path(preset_data, parent_path)
                         key = path.split(".")[-1]
                         
-                        print(f"Parent path: {parent_path}, Key: {key}, Parent exists: {parent is not None}")
+                        logger.debug(
+                            "Parent path: %s, Key: %s, Parent exists: %s",
+                            parent_path,
+                            key,
+                            parent is not None,
+                        )
                         
                         if parent and key in parent:
-                            print(f"Parameter value: {parent[key]}, Type: {type(parent[key])}")
+                            logger.debug(
+                                "Parameter value: %s, Type: %s",
+                                parent[key],
+                                type(parent[key]),
+                            )
                             # If this is a simple value (not an object with a value property)
                             if not isinstance(parent[key], dict) or "value" not in parent[key]:
                                 # Store the original value
@@ -683,7 +699,7 @@ def scan_for_synth_presets():
                                 'type': device_type
                             })
                     except Exception as e:
-                        print(f"Warning: Could not parse preset {filename}: {e}")
+                        logger.warning("Could not parse preset %s: %s", filename, e)
                         continue
 
         set_cache(cache_key, synth_presets)

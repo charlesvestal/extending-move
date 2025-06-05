@@ -2,12 +2,15 @@
 import cgi
 import os
 import urllib.parse
+import logging
 from core.file_browser import generate_dir_html
 from handlers.base_handler import BaseHandler
 from core.drum_rack_inspector_handler import get_drum_cell_samples, update_drum_cell_sample
 from core.reverse_handler import reverse_wav_file
 from core.refresh_handler import refresh_library
 from core.time_stretch_handler import time_stretch_wav
+
+logger = logging.getLogger(__name__)
 
 class DrumRackInspectorHandler(BaseHandler):
     def handle_get(self):
@@ -58,8 +61,8 @@ class DrumRackInspectorHandler(BaseHandler):
             if not result['success']:
                 return self.format_error_response(result['message'])
 
-            print(f"Found samples: {result['samples']}")  # Debug log
-            print("\nProcessing samples for display:")  # Debug log
+            logger.debug("Found samples: %s", result['samples'])
+            logger.debug("Processing samples for display:")
             # Create a grid container
             samples_html = '<div class="drum-grid">'
 
@@ -81,7 +84,7 @@ class DrumRackInspectorHandler(BaseHandler):
                     cell_html = '<div class="drum-cell">'
 
                     if sample:
-                        print(f"\nSample: {sample}")  # Debug log
+                        logger.debug("Sample: %s", sample)
                         if sample.get('path') and sample['path'].startswith('/data/UserData/UserLibrary/Samples/'):
                             web_path = '/samples/' + sample['path'].replace('/data/UserData/UserLibrary/Samples/Preset Samples/', '', 1)
                             web_path = urllib.parse.quote(web_path)

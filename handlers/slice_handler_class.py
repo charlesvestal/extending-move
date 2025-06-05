@@ -2,7 +2,10 @@
 import os
 import json
 import cgi
+import logging
 from handlers.base_handler import BaseHandler
+
+logger = logging.getLogger(__name__)
 from core.slice_handler import process_kit
 
 class SliceHandler(BaseHandler):
@@ -64,14 +67,14 @@ class SliceHandler(BaseHandler):
                             self.cleanup_directory(filepath)
                             os.rmdir(filepath)
                     except Exception as e:
-                        print(f"Warning: Failed to clean up {filepath}: {e}")
+                        logger.warning("Failed to clean up %s: %s", filepath, e)
                 if os.path.exists(directory):  # Check if directory still exists
                     try:
                         os.rmdir(directory)
                     except Exception as e:
-                        print(f"Warning: Failed to remove directory {directory}: {e}")
+                        logger.warning("Failed to remove directory %s: %s", directory, e)
         except Exception as e:
-            print(f"Warning: Error cleaning directory {directory}: {e}")
+            logger.warning("Error cleaning directory %s: %s", directory, e)
 
     def handle_post(self, form: cgi.FieldStorage, response_handler=None):
         """
