@@ -5,7 +5,7 @@ import tempfile
 import shutil
 from core.set_management_handler import (
     create_set, generate_midi_set_from_file, generate_drum_set_from_file,
-    generate_c_major_chord_example, load_set_template
+    generate_c_major_chord_example
 )
 from core.list_msets_handler import list_msets
 from core.restore_handler import restore_ablbundle

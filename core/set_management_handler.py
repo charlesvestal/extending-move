@@ -4,6 +4,8 @@ import copy
 import mido
 from typing import Dict, List, Any, Optional
 
+from core.utils import load_set_template
+
 def create_set(set_name):
     """
     Create a blank set file in the UserLibrary/Sets directory.
@@ -16,22 +18,6 @@ def create_set(set_name):
         return {'success': True, 'message': f"Set '{set_name}' created successfully", 'path': path}
     except Exception as e:
         return {'success': False, 'message': str(e)}
-
-def load_set_template(template_path: str) -> Dict[str, Any]:
-    """
-    Load a set template from file.
-    
-    Args:
-        template_path: Path to the template .abl file
-        
-    Returns:
-        Dictionary containing the parsed set data
-    """
-    try:
-        with open(template_path, 'r') as f:
-            return json.load(f)
-    except Exception as e:
-        raise Exception(f"Failed to load template: {str(e)}")
 
 def generate_c_major_chord_example(set_name: str, tempo: float = 120.0) -> Dict[str, Any]:
     """
