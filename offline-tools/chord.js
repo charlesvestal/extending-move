@@ -420,12 +420,16 @@ async function processChordSample(buffer, intervals, keepLength = false) {
     pitched = trimLeadingSilence(pitched);
     if (keepLength) {
       pitched = await soundtouchStretch(pitched, buffer.length);
+      // Do not trim again so we keep the stretched length
+    } else {
       pitched = trimLeadingSilence(pitched);
     }
     pitchedBuffers.push(pitched);
   }
   let mixed = mixAudioBuffers(pitchedBuffers);
-  mixed = trimLeadingSilence(mixed);
+  if (!keepLength) {
+    mixed = trimLeadingSilence(mixed);
+  }
   const normalized = normalizeAudioBuffer(mixed, 0.9);
   const wavData = toWav(normalized);
   return new Blob([new DataView(wavData)], { type: 'audio/wav' });
