@@ -1,5 +1,15 @@
 let drumRackWaveforms = [];
 
+// Map keyboard keys to drum pad numbers
+const drumKeyMap = {
+    '1': 13, '2': 14, '3': 15, '4': 16,
+    'q': 9,  'w': 10, 'e': 11, 'r': 12,
+    'a': 5,  's': 6,  'd': 7,  'f': 8,
+    'z': 1,  'x': 2,  'c': 3,  'v': 4
+};
+
+let drumKeyHandler = null;
+
 function initializeDrumRackWaveforms() {
     drumRackWaveforms.forEach(ws => {
         try { ws.destroy(); } catch (e) { console.error('destroy error', e); }
@@ -58,6 +68,31 @@ function initializeDrumRackWaveforms() {
     });
 }
 
+function playDrumPad(padNumber) {
+    const container = document.getElementById(`waveform-${padNumber}`);
+    if (container && container.wavesurfer) {
+        drumRackWaveforms.forEach(other => { if (other.isPlaying()) other.stop(); });
+        const ws = container.wavesurfer;
+        ws.stop();
+        ws.seekTo(0);
+        requestAnimationFrame(() => ws.play(0));
+    }
+}
+
+function attachDrumRackKeyHandler() {
+    if (drumKeyHandler) {
+        document.removeEventListener('keydown', drumKeyHandler);
+    }
+    drumKeyHandler = function(e) {
+        const pad = drumKeyMap[e.key.toLowerCase()];
+        if (pad) {
+            e.preventDefault();
+            playDrumPad(pad);
+        }
+    };
+    document.addEventListener('keydown', drumKeyHandler);
+}
+
 function initializeTimeStretchModal() {
     const modal = document.getElementById('timeStretchModal');
     if (!modal) return;
@@ -89,6 +124,7 @@ function initializeTimeStretchModal() {
 function initDrumRackTab() {
     initializeDrumRackWaveforms();
     initializeTimeStretchModal();
+    attachDrumRackKeyHandler();
 }
 
 export { initDrumRackTab };

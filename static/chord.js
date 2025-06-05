@@ -47,6 +47,16 @@ for (let i = 0; i < keys.length; i++) {
 }
 // --- End of new CHORDS generation code
 
+// Map keyboard keys to pad numbers for playback
+const chordKeyMap = {
+  '1': 13, '2': 14, '3': 15, '4': 16,
+  'q': 9,  'w': 10, 'e': 11, 'r': 12,
+  'a': 5,  's': 6,  'd': 7,  'f': 8,
+  'z': 1,  'x': 2,  'c': 3,  'v': 4
+};
+
+let chordKeyHandler = null;
+
 if (!window.selectedChords) {
     const defaultChords = [
         "Cm9",
@@ -137,6 +147,30 @@ function populateChordList() {
           regenerateChordPreview(padNumber);
       }
   }
+}
+
+function playChordPad(padNumber) {
+  if (window.chordWaveforms && window.chordWaveforms[padNumber - 1]) {
+    const ws = window.chordWaveforms[padNumber - 1];
+    window.chordWaveforms.forEach(inst => { if (inst && inst.isPlaying()) inst.stop(); });
+    ws.stop();
+    ws.seekTo(0);
+    requestAnimationFrame(() => ws.play(0));
+  }
+}
+
+function attachChordKeyHandler() {
+  if (chordKeyHandler) {
+    document.removeEventListener('keydown', chordKeyHandler);
+  }
+  chordKeyHandler = function(e) {
+    const pad = chordKeyMap[e.key.toLowerCase()];
+    if (pad) {
+      e.preventDefault();
+      playChordPad(pad);
+    }
+  };
+  document.addEventListener('keydown', chordKeyHandler);
 }
 
 
@@ -658,5 +692,7 @@ function initChordTab() {
       }
     });
   }
+
+  attachChordKeyHandler();
 }
 
