@@ -193,6 +193,9 @@ const VOICING_NAMES = Array.from(
   )
 );
 
+// Available octave offsets (-2 to +2)
+const OCTAVE_OPTIONS = [-2, -1, 0, 1, 2];
+
 // Build CHORDS for every key and voicing
 const CHORDS = {};
 for (let key of keys) {
@@ -212,6 +215,7 @@ const CHORD_NAMES = Object.keys(CHORDS);
 // Initialize default selections
 window.selectedChords = BASE_DEFAULT_CHORDS.slice(0, 16);
 window.selectedVoicings = Array(16).fill("default");
+window.selectedOctaves = Array(16).fill(0);
 
 function populateChordList() {
   const listElem = document.getElementById('chordList');
@@ -249,7 +253,7 @@ function populateChordList() {
       cell.style.padding = '10px';
       cell.style.textAlign = 'center';
 
-      // Build dropdowns for chord and voicing
+      // Build dropdowns for chord, voicing and octave
       let chordHTML = '<select id="chord-select-' + padNumber + '">';
       CHORD_NAMES.forEach(chord => {
           chordHTML += '<option value="' + chord + '">' + chord + '</option>';
@@ -262,7 +266,14 @@ function populateChordList() {
       });
       voicingHTML += '</select>';
 
-      cell.innerHTML = `<div class="chord-label">${padNumber}: ${chordHTML} ${voicingHTML}</div>
+      let octaveHTML = '<select id="octave-select-' + padNumber + '">';
+      OCTAVE_OPTIONS.forEach(o => {
+          const label = o > 0 ? '+' + o : o;
+          octaveHTML += '<option value="' + o + '">' + label + '</option>';
+      });
+      octaveHTML += '</select>';
+
+      cell.innerHTML = `<div class="chord-label">${padNumber}: ${chordHTML} ${voicingHTML} ${octaveHTML}</div>
                         <div class="chord-preview" id="chord-preview-${padNumber}" style="height: 50px; cursor: pointer;"></div>`;
       gridContainer.appendChild(cell);
 
@@ -278,6 +289,13 @@ function populateChordList() {
       voicingElem.value = window.selectedVoicings[padNumber - 1];
       voicingElem.addEventListener('change', function() {
           window.selectedVoicings[padNumber - 1] = this.value;
+          regenerateChordPreview(padNumber);
+      });
+
+      const octaveElem = cell.querySelector(`#octave-select-${padNumber}`);
+      octaveElem.value = window.selectedOctaves[padNumber - 1];
+      octaveElem.addEventListener('change', function() {
+          window.selectedOctaves[padNumber - 1] = parseInt(this.value, 10);
           regenerateChordPreview(padNumber);
       });
     }
@@ -297,7 +315,9 @@ async function regenerateChordPreview(padNumber) {
     if (!window.decodedBuffer) return;
     const selectedChord = window.selectedChords[padNumber - 1];
     const selectedVoicing = window.selectedVoicings[padNumber - 1];
-    const intervals = CHORDS[selectedChord][selectedVoicing] || CHORDS[selectedChord].default;
+    const octaveOffset = (window.selectedOctaves[padNumber - 1] || 0) * 12;
+    const baseInts = CHORDS[selectedChord][selectedVoicing] || CHORDS[selectedChord].default;
+    const intervals = baseInts.map(iv => iv + octaveOffset);
     const blob = await processChordSample(window.decodedBuffer, intervals);
     const url = URL.createObjectURL(blob);
     const previewContainer = document.getElementById(`chord-preview-${padNumber}`);
@@ -554,7 +574,9 @@ function initChordTab() {
     for (let i = 0; i < chordNames.length; i++) {
       const chordName = chordNames[i];
       const vStyle = window.selectedVoicings[i];
-      const intervals = CHORDS[chordName][vStyle] || CHORDS[chordName].default;
+      const octaveOffset = (window.selectedOctaves[i] || 0) * 12;
+      const baseInts = CHORDS[chordName][vStyle] || CHORDS[chordName].default;
+      const intervals = baseInts.map(iv => iv + octaveOffset);
       const blob = await processChordSample(decodedBuffer, intervals);
       let safeChordName = chordName.replace(/\s+/g, '');
       let filename = `${baseName}_chord_${safeChordName}.wav`;
@@ -623,7 +645,9 @@ function initChordTab() {
     for (let i = 0; i < chordNames.length; i++) {
       const chordName = chordNames[i];
       const vStyle = window.selectedVoicings[i];
-      const intervals = CHORDS[chordName][vStyle] || CHORDS[chordName].default;
+      const octaveOffset = (window.selectedOctaves[i] || 0) * 12;
+      const baseInts = CHORDS[chordName][vStyle] || CHORDS[chordName].default;
+      const intervals = baseInts.map(iv => iv + octaveOffset);
       const blob = await processChordSample(decodedBuffer, intervals);
       let safeChordName = chordName.replace(/\s+/g, '');
       let filename = `${baseName}_chord_${safeChordName}.wav`;
@@ -725,7 +749,9 @@ function initChordTab() {
           const chordName = chordNames[i];
           const vStyle = window.selectedVoicings[i];
           console.log("Processing chord:", chordName, vStyle);
-          const intervals = CHORDS[chordName][vStyle] || CHORDS[chordName].default;
+          const octaveOffset = (window.selectedOctaves[i] || 0) * 12;
+          const baseInts = CHORDS[chordName][vStyle] || CHORDS[chordName].default;
+          const intervals = baseInts.map(iv => iv + octaveOffset);
           const blob = await processChordSample(decodedBuffer, intervals);
           const url = URL.createObjectURL(blob);
           const padNumber = i + 1;  // Adjust this if your grid order differs

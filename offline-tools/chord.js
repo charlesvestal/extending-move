@@ -163,6 +163,7 @@ const keyOffsets = { "C": 0, "Db": 1, "D": 2, "Eb": 3, "E": 4, "F": 5, "Gb": 6, 
 const VOICING_NAMES = Array.from(new Set(
   Object.values(CHORD_DEFS).flatMap(def => Object.keys(def.voicings))
 ));
+const OCTAVE_OPTIONS = [-2, -1, 0, 1, 2];
 const CHORDS = {};
 for (let key of keys) {
   const offset = keyOffsets[key];
@@ -202,6 +203,7 @@ if (!window.selectedChords) {
         window.selectedChords[i] = defaultChords[i] || "";
     }
     window.selectedVoicings = Array(16).fill("default");
+    window.selectedOctaves = Array(16).fill(0);
 }
 
 function populateChordList() {
@@ -253,7 +255,14 @@ function populateChordList() {
       });
       voicingHTML += '</select>';
 
-      cell.innerHTML = `<div class="chord-label">${padNumber}: ${chordHTML} ${voicingHTML}</div>
+      let octaveHTML = '<select id="octave-select-' + padNumber + '">';
+      OCTAVE_OPTIONS.forEach(o => {
+          const label = o > 0 ? '+' + o : o;
+          octaveHTML += '<option value="' + o + '">' + label + '</option>';
+      });
+      octaveHTML += '</select>';
+
+      cell.innerHTML = `<div class="chord-label">${padNumber}: ${chordHTML} ${voicingHTML} ${octaveHTML}</div>
                         <div class="chord-preview" id="chord-preview-${padNumber}" style="height: 50px; cursor: pointer;"></div>`;
       gridContainer.appendChild(cell);
 
@@ -269,6 +278,13 @@ function populateChordList() {
       voicingElem.value = window.selectedVoicings[padNumber - 1];
       voicingElem.addEventListener('change', function() {
           window.selectedVoicings[padNumber - 1] = this.value;
+          regenerateChordPreview(padNumber);
+      });
+
+      const octaveElem = cell.querySelector(`#octave-select-${padNumber}`);
+      octaveElem.value = window.selectedOctaves[padNumber - 1];
+      octaveElem.addEventListener('change', function() {
+          window.selectedOctaves[padNumber - 1] = parseInt(this.value, 10);
           regenerateChordPreview(padNumber);
       });
     }
@@ -288,7 +304,9 @@ async function regenerateChordPreview(padNumber) {
     if (!window.decodedBuffer) return;
     const selectedChord = window.selectedChords[padNumber - 1];
     const vStyle = window.selectedVoicings[padNumber - 1];
-    const intervals = CHORDS[selectedChord][vStyle] || CHORDS[selectedChord].default;
+    const octaveOffset = (window.selectedOctaves[padNumber - 1] || 0) * 12;
+    const baseInts = CHORDS[selectedChord][vStyle] || CHORDS[selectedChord].default;
+    const intervals = baseInts.map(iv => iv + octaveOffset);
     const blob = await processChordSample(window.decodedBuffer, intervals);
     const url = URL.createObjectURL(blob);
     const previewContainer = document.getElementById(`chord-preview-${padNumber}`);
@@ -519,7 +537,9 @@ function initChordTab() {
     for (let i = 0; i < chordNames.length; i++) {
       const chordName = chordNames[i];
       const vStyle = window.selectedVoicings[i];
-      const intervals = CHORDS[chordName][vStyle] || CHORDS[chordName].default;
+      const octaveOffset = (window.selectedOctaves[i] || 0) * 12;
+      const baseInts = CHORDS[chordName][vStyle] || CHORDS[chordName].default;
+      const intervals = baseInts.map(iv => iv + octaveOffset);
       const blob = await processChordSample(decodedBuffer, intervals);
       let safeChordName = chordName.replace(/\s+/g, '');
       let filename = `${baseName}_chord_${safeChordName}.wav`;
@@ -594,7 +614,9 @@ document.getElementById('wavFileInput').addEventListener('change', async functio
         const chordName = chordNames[i];
         const vStyle = window.selectedVoicings[i];
         console.log("Processing chord:", chordName, vStyle);
-        const intervals = CHORDS[chordName][vStyle] || CHORDS[chordName].default;
+        const octaveOffset = (window.selectedOctaves[i] || 0) * 12;
+        const baseInts = CHORDS[chordName][vStyle] || CHORDS[chordName].default;
+        const intervals = baseInts.map(iv => iv + octaveOffset);
         const blob = await processChordSample(decodedBuffer, intervals);
         const url = URL.createObjectURL(blob);
         const padNumber = i + 1;  // Adjust this if your grid order differs

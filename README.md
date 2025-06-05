@@ -41,6 +41,7 @@ Tools for extending the Ableton Move. This project provides a companion webserve
 - Includes common chord voicings (Cm9, Fm7, AbMaj7, etc.)
 - Chord types now support multiple octave "voicings" like closed, drop‑2 and drop‑3
 - Each pad has its own Voicing dropdown so you can mix Default, Closed, Drop‑2 and Drop‑3 styles
+- An Octave dropdown lets you shift each pad from -2 to +2 octaves
 - Automatic pitch-shifting and normalization
   - Download as `.ablpresetbundle` or place directly on device
 
