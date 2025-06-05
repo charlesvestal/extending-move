@@ -23,6 +23,8 @@ export function initFileBrowser() {
           }
         }
         ul.classList.toggle('hidden');
+        li.classList.toggle('open');
+        li.classList.toggle('closed');
       });
     }
     container.querySelectorAll('.file-tree.root .dir > span').forEach(bind);

@@ -79,17 +79,21 @@ def generate_dir_html(
         if rel_path else '<ul class="file-tree root" data-path="">'
     for d in dirs:
         sub_rel = os.path.join(rel_path, d) if rel_path else d
-        html += f'<li class="dir" data-path="{sub_rel}"><span>{d}</span><ul class="hidden"></ul></li>'
+        html += (
+            f'<li class="dir closed" data-path="{sub_rel}">'
+            f'<span>📁 {d}</span>'
+            '<ul class="hidden"></ul></li>'
+        )
     for f in files:
         full = os.path.join(base_dir, rel_path, f)
         if filter_func(full):
             rel = os.path.join(rel_path, f) if rel_path else f
             html += (
                 '<li class="file">'
-                f'<form method="post" action="{action_url}" class="file-select-form">'
+                f'<form method="post" action="{action_url}" class="file-entry">'
                 f'<input type="hidden" name="action" value="{action_value}">' \
                 f'<input type="hidden" name="{field_name}" value="{full}">' \
-                f'<button type="submit" class="file-link">{f}</button>'
+                f'<button type="submit">📄 {f}</button>'
                 '</form>'
                 '</li>'
             )
