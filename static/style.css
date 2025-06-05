@@ -407,3 +407,32 @@ select {
     padding: 0.25rem;
 }
 
+/* Pad grid for set management */
+.pad-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 0.25rem;
+    margin-bottom: 1rem;
+}
+
+.pad-cell {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 0.5rem;
+    text-align: center;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.pad-cell input[type="radio"] {
+    margin-right: 0.25rem;
+}
+
+.pad-cell.occupied {
+    background: #ffeef0;
+}
+
+.pad-cell.free {
+    background: #e6f7ef;
+}
+

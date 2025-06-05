@@ -149,12 +149,13 @@ def test_midi_upload_get(client, monkeypatch):
     def fake_get():
         return {
             'pad_options': '<option value="1">1</option>',
-            'pad_color_options': '<option value="1">1</option>'
+            'pad_color_options': '<option value="1">1</option>',
+            'pad_grid': '<div class="pad-grid"></div>'
         }
     monkeypatch.setattr(move_webserver.set_management_handler, 'handle_get', fake_get)
     resp = client.get('/midi-upload')
     assert resp.status_code == 200
-    assert b'<option value="1">1</option>' in resp.data
+    assert b'class="pad-grid"' in resp.data
 
 
 def test_midi_upload_post(client, monkeypatch):
@@ -163,7 +164,8 @@ def test_midi_upload_post(client, monkeypatch):
             'message': 'ok',
             'message_type': 'success',
             'pad_options': '<option value="2">2</option>',
-            'pad_color_options': '<option value="1">1</option>'
+            'pad_color_options': '<option value="1">1</option>',
+            'pad_grid': '<div class="pad-grid"></div>'
         }
     monkeypatch.setattr(move_webserver.set_management_handler, 'handle_post', fake_post)
     f = (io.BytesIO(b'data'), 'test.mid')

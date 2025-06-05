@@ -319,6 +319,7 @@ def midi_upload():
     context = set_management_handler.handle_get()
     pad_options = context.get("pad_options", "")
     pad_color_options = context.get("pad_color_options", "")
+    pad_grid = context.get("pad_grid", "")
     if request.method == "POST":
         form_data = request.form.to_dict()
         if "midi_file" in request.files:
@@ -329,6 +330,8 @@ def midi_upload():
         message_type = result.get("message_type")
         success = message_type != "error"
         pad_options = result.get("pad_options", pad_options)
+        pad_color_options = result.get("pad_color_options", pad_color_options)
+        pad_grid = result.get("pad_grid", pad_grid)
     else:
         message = context.get("message")
         message_type = context.get("message_type")
@@ -340,6 +343,7 @@ def midi_upload():
         message_type=message_type,
         pad_options=pad_options,
         pad_color_options=pad_color_options,
+        pad_grid=pad_grid,
         active_tab="midi-upload",
     )
 
