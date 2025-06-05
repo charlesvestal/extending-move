@@ -29,20 +29,19 @@ from handlers.file_placer_handler_class import FilePlacerHandler
 from handlers.refresh_handler_class import RefreshHandler
 from dash import Dash, html
 from core.file_browser import generate_dir_html
-import cgi
 
 PID_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "move-webserver.pid")
 
 
 class SimpleForm(dict):
-    """Mimic ``cgi.FieldStorage`` for our handler classes."""
+    """Simple form wrapper providing ``getvalue`` like ``cgi.FieldStorage``."""
 
     def getvalue(self, name, default=None):
         return self.get(name, default)
 
 
-class FileField(cgi.FieldStorage):
-    """Wrapper around Flask ``FileStorage`` objects."""
+class FileField:
+    """Minimal wrapper around Flask ``FileStorage`` objects."""
 
     def __init__(self, fs):
         self.filename = fs.filename

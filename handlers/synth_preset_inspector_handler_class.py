@@ -1,4 +1,3 @@
-import cgi
 import re
 import os
 from handlers.base_handler import BaseHandler

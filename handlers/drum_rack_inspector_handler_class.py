@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import cgi
 import os
 import urllib.parse
 from core.file_browser import generate_dir_html
@@ -33,7 +32,7 @@ class DrumRackInspectorHandler(BaseHandler):
             'message_type': 'info',
         }
 
-    def handle_post(self, form: cgi.FieldStorage):
+    def handle_post(self, form):
         """Handle POST request for preset selection and sample operations."""
         # Get action
         action = form.getvalue('action')
@@ -169,7 +168,7 @@ class DrumRackInspectorHandler(BaseHandler):
         """Deprecated dropdown helper."""
         return ''
     
-    def handle_time_stretch_sample(self, form: cgi.FieldStorage):
+    def handle_time_stretch_sample(self, form):
         """Handle time-stretch action."""
         sample_path = form.getvalue('sample_path')
         preset_path = form.getvalue('preset_path')
