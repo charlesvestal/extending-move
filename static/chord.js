@@ -144,7 +144,8 @@ async function regenerateChordPreview(padNumber) {
     if (!window.decodedBuffer) return;
     const selectedChord = window.selectedChords[padNumber - 1];
     const intervals = CHORDS[selectedChord];
-    const blob = await processChordSample(window.decodedBuffer, intervals);
+    const keepLen = document.getElementById('stretchOption')?.checked;
+    const blob = await processChordSample(window.decodedBuffer, intervals, keepLen);
     const url = URL.createObjectURL(blob);
     const previewContainer = document.getElementById(`chord-preview-${padNumber}`);
     if (previewContainer) {
@@ -291,6 +292,119 @@ function writeString(view, offset, string) {
   }
 }
 
+// Simple FFT implementation for power-of-two sizes
+function fft(re, im) {
+  var n = re.length;
+  for (var i = 1, j = 0; i < n; i++) {
+    var bit = n >> 1;
+    for (; j & bit; bit >>= 1) {
+      j ^= bit;
+    }
+    j ^= bit;
+    if (i < j) {
+      var t = re[i];
+      re[i] = re[j];
+      re[j] = t;
+      t = im[i];
+      im[i] = im[j];
+      im[j] = t;
+    }
+  }
+  for (var len = 2; len <= n; len <<= 1) {
+    var step = -2 * Math.PI / len;
+    for (var i = 0; i < n; i += len) {
+      for (var j = 0; j < len / 2; j++) {
+        var uRe = re[i + j];
+        var uIm = im[i + j];
+        var vRe = re[i + j + len / 2];
+        var vIm = im[i + j + len / 2];
+        var ang = step * j;
+        var cos = Math.cos(ang);
+        var sin = Math.sin(ang);
+        var tre = vRe * cos - vIm * sin;
+        var tim = vRe * sin + vIm * cos;
+        re[i + j] = uRe + tre;
+        im[i + j] = uIm + tim;
+        re[i + j + len / 2] = uRe - tre;
+        im[i + j + len / 2] = uIm - tim;
+      }
+    }
+  }
+}
+
+function ifft(re, im) {
+  for (var i = 0; i < re.length; i++) im[i] = -im[i];
+  fft(re, im);
+  var n = re.length;
+  for (var i = 0; i < n; i++) {
+    re[i] /= n;
+    im[i] = -im[i] / n;
+  }
+}
+
+function hannWindow(size) {
+  var win = new Float32Array(size);
+  for (var i = 0; i < size; i++) {
+    win[i] = 0.5 * (1 - Math.cos(2 * Math.PI * i / size));
+  }
+  return win;
+}
+
+function phaseVocoderStretch(buffer, targetLength) {
+  var ratio = targetLength / buffer.length;
+  var numChannels = buffer.numberOfChannels;
+  var sr = buffer.sampleRate;
+  var outBuf = new AudioBuffer({ length: targetLength, numberOfChannels: numChannels, sampleRate: sr });
+  var size = 1024;
+  var hopIn = size / 4;
+  var hopOut = hopIn * ratio;
+  var window = hannWindow(size);
+  var twoPi = 2 * Math.PI;
+
+  for (var ch = 0; ch < numChannels; ch++) {
+    var input = buffer.getChannelData(ch);
+    var output = outBuf.getChannelData(ch);
+    var prevPhase = new Float32Array(size);
+    var sumPhase = new Float32Array(size);
+    var outPos = 0;
+
+    for (var i = 0; i + size <= input.length; i += hopIn) {
+      var re = new Float32Array(size);
+      var im = new Float32Array(size);
+      for (var j = 0; j < size; j++) {
+        re[j] = input[i + j] * window[j];
+        im[j] = 0;
+      }
+
+      fft(re, im);
+
+      for (var k = 0; k < size; k++) {
+        var mag = Math.hypot(re[k], im[k]);
+        var phase = Math.atan2(im[k], re[k]);
+        var delta = phase - prevPhase[k];
+        prevPhase[k] = phase;
+        var expected = twoPi * hopIn * k / size;
+        var diff = delta - expected;
+        diff -= Math.round(diff / (2 * Math.PI)) * 2 * Math.PI;
+        sumPhase[k] += expected + diff * ratio;
+        re[k] = mag * Math.cos(sumPhase[k]);
+        im[k] = mag * Math.sin(sumPhase[k]);
+      }
+
+      ifft(re, im);
+
+      for (var j = 0; j < size; j++) {
+        var idx = Math.floor(outPos + j);
+        if (idx < output.length) {
+          output[idx] += re[j] * window[j];
+        }
+      }
+      outPos += hopOut;
+    }
+  }
+  return outBuf;
+}
+
 async function pitchShiftOffline(buffer, semitoneShift) {
   const factor = Math.pow(2, semitoneShift / 12);
   const newLength = Math.floor(buffer.length / factor);
@@ -349,10 +463,13 @@ function normalizeAudioBuffer(buffer, targetPeak = 0.9) {
   return buffer;
 }
 
-async function processChordSample(buffer, intervals) {
+async function processChordSample(buffer, intervals, keepLength = false) {
   const pitchedBuffers = [];
   for (let semitone of intervals) {
-    const pitched = await pitchShiftOffline(buffer, semitone);
+    let pitched = await pitchShiftOffline(buffer, semitone);
+    if (keepLength) {
+      pitched = phaseVocoderStretch(pitched, buffer.length);
+    }
     pitchedBuffers.push(pitched);
   }
   const mixed = mixAudioBuffers(pitchedBuffers);
@@ -397,9 +514,10 @@ function initChordTab() {
     const chordNames = window.selectedChords;
     let sampleFilenames = [];
     let processedSamples = {};
+    const keepLen = document.getElementById('stretchOption')?.checked;
     for (let chordName of chordNames) {
       const intervals = CHORDS[chordName];
-      const blob = await processChordSample(decodedBuffer, intervals);
+      const blob = await processChordSample(decodedBuffer, intervals, keepLen);
       let safeChordName = chordName.replace(/\s+/g, '');
       let filename = `${baseName}_chord_${safeChordName}.wav`;
       sampleFilenames.push(filename);
@@ -464,9 +582,10 @@ function initChordTab() {
     const chordNames = window.selectedChords;
     let sampleFilenames = [];
     let processedSamples = {};
+    const keepLen = document.getElementById('stretchOption')?.checked;
     for (let chordName of chordNames) {
       const intervals = CHORDS[chordName];
-      const blob = await processChordSample(decodedBuffer, intervals);
+      const blob = await processChordSample(decodedBuffer, intervals, keepLen);
       let safeChordName = chordName.replace(/\s+/g, '');
       let filename = `${baseName}_chord_${safeChordName}.wav`;
       sampleFilenames.push(filename);
@@ -563,10 +682,11 @@ function initChordTab() {
       window.chordWaveforms = [];
       
       // Process each chord sample and create its waveform preview sequentially
+      const keepLen = document.getElementById('stretchOption')?.checked;
       for (let i = 0; i < chordNames.length; i++) {
           const chordName = chordNames[i];
           console.log("Processing chord:", chordName);
-          const blob = await processChordSample(decodedBuffer, CHORDS[chordName]);
+          const blob = await processChordSample(decodedBuffer, CHORDS[chordName], keepLen);
           const url = URL.createObjectURL(blob);
           const padNumber = i + 1;  // Adjust this if your grid order differs
           const previewContainer = document.getElementById(`chord-preview-${padNumber}`);
