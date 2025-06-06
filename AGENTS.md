@@ -1,13 +1,17 @@
 # Before You Start
 
 **Integration Reminders:**
-- If you use `cgi.FieldStorage` in your handler, ensure you `import cgi` at the top of your file.
-- When adding multiple forms in a single tab, you must customize the form handler logic in `static/main.js` to attach event listeners to all forms in that tab.
-- Tab names/IDs must match exactly between your HTML (`index.html`), JavaScript (`static/main.js`), and route definitions (in your handler classes and webserver routing).
+- Use Flask's built-in `request.form` and `request.files` for form data; the server no longer requires the `cgi` module.
+- The Flask app renders each page with Jinja templates and standard HTML forms. No global JavaScript handler is required.
+- When adding a new feature, create a route in `move-webserver.py`, a template in `templates_jinja/`, and add a corresponding link in `templates_jinja/base.html` with a matching `active_tab` value.
 
 # Extending Move
 
-This guide explains how to add new features to the Move webserver. Move follows a modular structure, with each feature comprising three components:
+This guide explains how to add new features to the Move webserver.
+
+The project uses a single Flask-based server implemented in `move-webserver.py`.
+
+Move follows a modular structure, with each feature comprising three components:
 
 - **Core Logic**: Business logic (e.g., audio processing) in `core/`
 - **Web Handler**: HTTP request handling in `handlers/`
@@ -17,7 +21,7 @@ This guide explains how to add new features to the Move webserver. Move follows 
 
 ```
 extending-move/
-├── move-webserver.py      # Main webserver with routing and request handling
+├── move-webserver.py      # Flask web server
 ├── core/                  # Core functionality implementations
 │   ├── slice_handler.py         # Sample slicing and kit creation
 │   ├── refresh_handler.py       # Library refresh via D-Bus
@@ -38,16 +42,17 @@ extending-move/
 │   ├── synth_preset_inspector_handler_class.py  # Synth macro management interface
 │   ├── set_management_handler_class.py     # MIDI set generation and upload interface
 │   └── file_placer_handler_class.py       # File upload and placement
-├── templates/             # HTML templates and UI components
-│   ├── index.html                # Main navigation with tab system
+├── templates_jinja/       # Jinja templates used by the Flask app
+│   ├── base.html                # Shared layout and navigation
+│   ├── index.html               # Landing page
 │   ├── chord.html               # Chord generation interface
 │   ├── slice.html               # Waveform slicing interface
-│   ├── reverse.html             # File selection with AJAX
-│   ├── refresh.html             # Simple action template
-│   ├── restore.html             # File upload with options
-│   ├── drum_rack_inspector.html # Grid layout with actions
-│   ├── synth_preset_inspector.html # Synth macro management interface
-│   └── set_management.html      # MIDI file upload and set generation interface
+│   ├── reverse.html             # WAV reversal interface
+│   ├── restore.html             # Move Set restoration
+│   ├── drum_rack_inspector.html # Drum rack inspection
+│   ├── synth_macros.html        # Synth macro management
+│   └── midi_upload.html         # MIDI file upload and set creation
+├── static/               # JavaScript and CSS assets
 ├── examples/              # Example files for testing and development
 │   ├── Track Presets/          # Sample presets organized by instrument type
 │   │   ├── Drift/              # Drift instrument presets
@@ -62,12 +67,13 @@ extending-move/
     ├── install-on-move.sh     # Initial setup script
     ├── update-on-move.sh      # Update deployment script
     └── restart-webserver.sh   # Server management script
+├── tests/                 # pytest unit tests for the Flask app
 ```
 
 Each feature should follow this structure precisely:
 - Core logic: `core/feature_name_handler.py`
 - Handler class: `handlers/feature_name_handler_class.py`
-- UI template: `templates/feature_name.html`
+- UI template: `templates_jinja/feature_name.html`
 
 ## Core Components
 
@@ -352,73 +358,15 @@ class MyServer(BaseHTTPRequestHandler):
         return self.your_feature_handler.handle_post(form)
 ```
 
-### Step 5: Tab Integration
-In `templates/index.html`, add a tab entry:
+### Step 5: Navigation Link
+Add a link to your route in `templates_jinja/base.html` so users can access the page. Use the same `active_tab` value in your route handler to highlight the navigation item.
 
 ```html
-<button class="tablinks" onclick="openTab(event, 'YourFeature')">Your Feature</button>
-<div id="YourFeature" class="tabcontent"></div>
+<!-- base.html navigation snippet -->
+<nav class="tab">
+    <a href="{{ host_prefix }}/your-feature" class="{% if active_tab == 'your-feature' %}active{% endif %}">Your Feature</a>
+</nav>
 ```
-
-
-## Tab-Based Interface
-
-The Move Extended application uses a tab-based interface, defined in `templates/index.html`, where each feature is loaded in a tab without requiring full page reloads. This ensures users remain on the current page when submitting forms, providing a smoother experience.
-
-1. Each feature has a tab button and a content container.
-2. When a tab is clicked, the `openTab` function (see `static/main.js`) is called.
-3. Tab content is dynamically loaded via AJAX.
-4. Form handlers are attached to enable AJAX form submission.
-
-```html
-<!-- Tab buttons -->
-<button class="tablinks" onclick="openTab(event, 'YourFeature')">Your Feature</button>
-
-<!-- Tab content container -->
-<div id="YourFeature" class="tabcontent">
-    <!-- Content loaded dynamically -->
-</div>
-```
-
-## AJAX Forms and Dynamic Tabs
-
-AJAX form submission is used to keep users on the current page and to update tab content dynamically without a full reload.
-
-### How AJAX Submission Works
-
-When a form is submitted from a tab:
-1. The `attachFormHandler` function (see `static/main.js`) intercepts the form submission.
-2. The default behavior is prevented (`event.preventDefault()`).
-3. The form data is submitted via the Fetch API.
-4. The server response (HTML) is used to update the tab content.
-5. Event handlers are re-attached to maintain interactivity.
-
-See the implementation in `static/main.js` for details.
-
-### Special Case: Multiple Forms in One Tab
-
-Some features (e.g., MIDI Upload) use more than one form in a single tab. By default, only the first form will be handled by AJAX, and others may cause a full-page reload.
-
-To handle multiple forms in a single tab, update the `attachFormHandler` function in `static/main.js` to detect your tab name and bind every form inside its container. For example:
-
-```js
-// See static/main.js for the full implementation
-function attachFormHandler(tabName) {
-  if (tabName === 'SetManagement') {
-    const container = document.getElementById(tabName);
-    container.querySelectorAll('form').forEach(form => {
-      form.addEventListener('submit', async event => {
-        event.preventDefault();
-        await submitForm(form, tabName);
-      });
-    });
-    return;
-  }
-  // ...existing single-form logic...
-}
-```
-
-This ensures all forms in the tab are handled via AJAX and the page stays on `index.html`.
 
 ### Form Structure Requirements
 
@@ -487,15 +435,12 @@ def handle_post(self, form):
     }
 ```
 
-For more, see `static/main.js` for the core AJAX logic and how to extend it for your tab.
-
 ### Example: Time Stretch Feature
 
-This feature demonstrates audio time-stretching with dynamic tab updates:
+This feature demonstrates audio time-stretching:
 - Core: `core/time_stretch_handler.py` implements `time_stretch_wav`.
 - Web Handler: `handlers/drum_rack_inspector_handler_class.py` processes form inputs and calls the core function.
-- Template: `templates/drum_rack_inspector.html` provides a form and modal UI.
-- JavaScript: `static/main.js` handles AJAX form submission and waveform updates.
+- Template: `templates_jinja/drum_rack_inspector.html` provides a form and modal UI.
 
 Dependencies: `audiotsm`, `librosa`, `soundfile`.
 
@@ -595,6 +540,6 @@ Remember to:
 
 ## Troubleshooting & Common Pitfalls
 
-- **Importing cgi**: If you use `cgi.FieldStorage` in your handler, be sure to `import cgi` at the top of your file.
-- **Multiple forms per tab**: If your tab contains more than one form, you must update `static/main.js` to attach event listeners to all forms in that tab (see "AJAX Forms and Dynamic Tabs").
-- **Tab name/ID consistency**: The tab name/ID must match exactly between your JS (`static/main.js`), HTML (`index.html`), and route handler code. Mismatches will break AJAX loading or form submission.
+- **Using Flask Forms**: Handle form data with `request.form` and `request.files`. The server no longer relies on `cgi`.
+- **Multiple forms**: Standard HTML forms work without extra JavaScript. Ensure your handler processes all submitted fields.
+- **Navigation links**: When adding a new page, update `templates_jinja/base.html` with a matching link and use the same `active_tab` name in your route.

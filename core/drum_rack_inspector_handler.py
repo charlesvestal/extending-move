@@ -2,6 +2,10 @@
 import os
 import json
 import urllib.parse
+import logging
+from core.cache_manager import get_cache, set_cache
+
+logger = logging.getLogger(__name__)
 
 def update_drum_cell_sample(preset_path, pad_number, new_sample_path, new_playback_start=None, new_playback_length=None):
     """
@@ -98,8 +102,8 @@ def get_drum_cell_samples(preset_path):
                 if data.get('kind') == 'drumCell':
                     # Extract sample URI
                     sample_uri = data.get('deviceData', {}).get('sampleUri', '')
-                    print(f"\nProcessing drum cell:")  # Debug log
-                    print(f"Sample URI: {sample_uri}")  # Debug log
+                    logger.debug("Processing drum cell:")
+                    logger.debug("Sample URI: %s", sample_uri)
                     if sample_uri:
                         # Handle Ableton URI format
                         if sample_uri.startswith('ableton:/user-library/Samples/'):
@@ -109,13 +113,13 @@ def get_drum_cell_samples(preset_path):
                             # Fallback to original file:// handling
                             sample_path = sample_uri.split('file://')[-1]
                         
-                        print(f"After path translation - Path: {sample_path}")  # Debug log
+                        logger.debug("After path translation - Path: %s", sample_path)
                         sample_name = os.path.basename(sample_path)
                         # URL decode both
                         sample_path = urllib.parse.unquote(sample_path)
                         sample_name = urllib.parse.unquote(sample_name)
-                        print(f"Final decoded path: {sample_path}")  # Debug log
-                        print(f"Final decoded name: {sample_name}")  # Debug log
+                        logger.debug("Final decoded path: %s", sample_path)
+                        logger.debug("Final decoded name: %s", sample_name)
                     else:
                         sample_path = ""
                         sample_name = "No sample loaded"
@@ -160,15 +164,16 @@ def get_drum_cell_samples(preset_path):
         }
 
 def scan_for_drum_rack_presets():
-    """
-    Scan the Move Track Presets directory for .ablpreset files containing drumRack devices.
-    
-    Returns:
-        dict: Result with keys:
-            - success: bool indicating success/failure
-            - message: Status or error message
-            - presets: List of dicts with preset info (name and path)
-    """
+    """Scan ``Track Presets`` for drum rack presets with caching."""
+    cache_key = "drum_rack_presets"
+    cached = get_cache(cache_key)
+    if cached is not None:
+        return {
+            "success": True,
+            "message": f"Found {len(cached)} drum rack presets (cached)",
+            "presets": cached,
+        }
+
     try:
         presets_dir = "/data/UserData/UserLibrary/Track Presets"
         drum_rack_presets = []
@@ -181,10 +186,11 @@ def scan_for_drum_rack_presets():
                 'presets': []
             }
 
-        # Recursively scan all .ablpreset files
+        # Recursively scan all preset files (.ablpreset or .json)
         for root, _, files in os.walk(presets_dir):
             for filename in files:
-                if filename.endswith('.ablpreset'):
+                lower = filename.lower()
+                if lower.endswith('.ablpreset') or lower.endswith('.json'):
                     filepath = os.path.join(root, filename)
                     try:
                         with open(filepath, 'r') as f:
@@ -209,18 +215,52 @@ def scan_for_drum_rack_presets():
                             })
 
                     except Exception as e:
-                        print(f"Warning: Could not parse preset {filename}: {e}")
+                        logger.warning("Could not parse preset %s: %s", filename, e)
                         continue
 
+        set_cache(cache_key, drum_rack_presets)
         return {
-            'success': True,
-            'message': f"Found {len(drum_rack_presets)} drum rack presets",
-            'presets': drum_rack_presets
+            "success": True,
+            "message": f"Found {len(drum_rack_presets)} drum rack presets",
+            "presets": drum_rack_presets,
         }
 
     except Exception as e:
         return {
-            'success': False,
-            'message': f"Error scanning presets: {e}",
-            'presets': []
+            "success": False,
+            "message": f"Error scanning presets: {e}",
+            "presets": [],
         }
+
+
+def find_original_sample(sample_path):
+    """Try to locate the base sample by stripping transformation suffixes."""
+    directory = os.path.dirname(sample_path)
+    filename = os.path.basename(sample_path)
+    base, ext = os.path.splitext(filename)
+
+    candidate = None
+    current = base
+
+    while True:
+        possible = os.path.join(directory, current + ext)
+        if os.path.exists(possible):
+            candidate = possible
+
+        new = current
+        if new.endswith('_reversed'):
+            new = new[:-9]
+        elif new.endswith('_reverse'):
+            new = new[:-8]
+        else:
+            import re
+            m = re.search(r'-slice\d+-(?:stretched|repitched)-[\d.]+-[\d.]+$', new)
+            if m:
+                new = new[:m.start()]
+            else:
+                break
+        if new == current:
+            break
+        current = new
+
+    return candidate

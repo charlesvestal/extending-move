@@ -1,5 +1,6 @@
-import cgi
 import re
+import os
+import logging
 from handlers.base_handler import BaseHandler
 from core.synth_preset_inspector_handler import (
     scan_for_synth_presets, 
@@ -9,15 +10,32 @@ from core.synth_preset_inspector_handler import (
     update_preset_parameter_mappings,
     delete_parameter_mapping
 )
+from core.file_browser import generate_dir_html
+
+logger = logging.getLogger(__name__)
 
 class SynthPresetInspectorHandler(BaseHandler):
     def handle_get(self):
-        """Initialize the synth macros with synth presets dropdown"""
+        """Return file browser for synth presets."""
+        base_dir = "/data/UserData/UserLibrary/Track Presets"
+        if not os.path.exists(base_dir) and os.path.exists("examples/Track Presets"):
+            base_dir = "examples/Track Presets"
+        browser_html = generate_dir_html(
+            base_dir,
+            "",
+            '/synth-macros',
+            'preset_select',
+            'select_preset',
+            filter_key='drift'
+        )
         return {
-            "message": "Select a Drift preset from the dropdown",
+            "message": "Select a Drift preset from the list",
             "message_type": "info",
-            "options": self.get_preset_options(),
-            "macros_html": ""  # Initialize with empty string to avoid showing placeholder
+            "file_browser_html": browser_html,
+            "macros_html": "",
+            "selected_preset": None,
+            "browser_root": base_dir,
+            "browser_filter": 'drift',
         }
 
     def handle_post(self, form):
@@ -26,6 +44,9 @@ class SynthPresetInspectorHandler(BaseHandler):
         self.form = form
         
         action = form.getvalue('action')
+        if action == 'reset_preset':
+            return self.handle_get()
+
         if action in ['select_preset', 'save_names', 'save_name', 'delete_mapping', 'add_mapping']:
             preset_path = form.getvalue('preset_select')
             if not preset_path:
@@ -85,7 +106,9 @@ class SynthPresetInspectorHandler(BaseHandler):
                     parameter_path = None
                     if hasattr(self, 'parameter_paths') and parameter_name in self.parameter_paths:
                         parameter_path = self.parameter_paths[parameter_name]
-                        print(f"Found path for parameter {parameter_name}: {parameter_path}")
+                        logger.debug(
+                            "Found path for parameter %s: %s", parameter_name, parameter_path
+                        )
                     
                     # Create parameter update for just this one mapping
                     parameter_updates = {
@@ -133,11 +156,26 @@ class SynthPresetInspectorHandler(BaseHandler):
             # Generate HTML for displaying macros
             macros_html = self.generate_macros_html(macro_result['macros'])
             
+            base_dir = "/data/UserData/UserLibrary/Track Presets"
+            if not os.path.exists(base_dir) and os.path.exists("examples/Track Presets"):
+                base_dir = "examples/Track Presets"
+            browser_html = generate_dir_html(
+                base_dir,
+                "",
+                '/synth-macros',
+                'preset_select',
+                'select_preset',
+                filter_key='drift'
+            )
+
             return {
                 "message": message,
                 "message_type": "success",
-                "options": self.get_preset_options(),
-                "macros_html": macros_html
+                "file_browser_html": browser_html,
+                "macros_html": macros_html,
+                "selected_preset": preset_path,
+                "browser_root": base_dir,
+                "browser_filter": 'drift',
             }
         
         return self.format_info_response("Unknown action")
@@ -188,7 +226,11 @@ class SynthPresetInspectorHandler(BaseHandler):
                     else:
                         available_parameters = all_parameters
                     
-                    print(f"Available parameters: {len(available_parameters)}, Mapped parameters: {len(mapped_parameters)}")
+                    logger.debug(
+                        "Available parameters: %d, Mapped parameters: %d",
+                        len(available_parameters),
+                        len(mapped_parameters),
+                    )
         
         html = '<div class="macros-container">'
         
@@ -271,19 +313,6 @@ class SynthPresetInspectorHandler(BaseHandler):
         html += '</div>'
         return html
     
-    def get_preset_options(self):
-        """Get synth preset options for the template dropdown"""
-        try:
-            result = scan_for_synth_presets()
-            if not result['success']:
-                return ''
-            
-            options_html = ['<option value="">--Select a Preset--</option>']
-            for preset in result['presets']:
-                # Include the device type in the display name
-                device_type = preset.get('type', '').capitalize()
-                options_html.append(f'<option value="{preset["path"]}">{preset["name"]} ({device_type})</option>')
-            return '\n'.join(options_html)
-        except Exception as e:
-            print(f"Error getting preset options: {e}")
-            return ''
+    def get_preset_options(self, selected_preset=None):
+        """Deprecated dropdown helper."""
+        return ''

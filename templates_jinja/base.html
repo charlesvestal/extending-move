@@ -1,0 +1,25 @@
+{% set host_prefix = 'http://' + request.host %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Move - Extended</title>
+    <link rel="stylesheet" href="{{ host_prefix }}/static/style.css">
+</head>
+<body>
+    <h1 id="header">Move - Extended</h1>
+    <nav class="tab">
+        <a href="{{ host_prefix }}/restore" class="{% if active_tab == 'restore' %}active{% endif %}">Restore</a>
+        <a href="{{ host_prefix }}/slice" class="{% if active_tab == 'slice' %}active{% endif %}">Slice</a>
+        <a href="{{ host_prefix }}/chord" class="{% if active_tab == 'chord' %}active{% endif %}">Chords</a>
+        <a href="{{ host_prefix }}/drum-rack-inspector" class="{% if active_tab == 'drum-rack-inspector' %}active{% endif %}">Drums</a>
+        <a href="{{ host_prefix }}/synth-macros" class="{% if active_tab == 'synth-macros' %}active{% endif %}">Macros</a>
+        <a href="{{ host_prefix }}/reverse" class="{% if active_tab == 'reverse' %}active{% endif %}">Reverse</a>
+        <a href="{{ host_prefix }}/midi-upload" class="{% if active_tab == 'midi-upload' %}active{% endif %}">MIDI</a>
+    </nav>
+    <div class="tabcontent">
+        {% block content %}{% endblock %}
+    </div>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

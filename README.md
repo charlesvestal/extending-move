@@ -10,7 +10,7 @@ Tools for extending the Ableton Move. This project provides a companion webserve
 
 ## Features
 
-- **Move Set Management**
+- **MIDI Upload**
   - Upload and restore Move Sets (.ablbundle)
   - Choose target pad and color
 
@@ -40,6 +40,8 @@ Tools for extending the Ableton Move. This project provides a companion webserve
   - Create chord variations from any WAV file
   - Includes common chord voicings (Cm9, Fm7, AbMaj7, etc.)
   - Automatic pitch-shifting and normalization
+  - Optional Rubber Band processing (using the bundled binary) to keep notes the same length
+  - Cached chord samples so downloading or placing a preset reuses the previews
   - Download as `.ablpresetbundle` or place directly on device
 
 - **Sliced Kit Creation**
@@ -54,6 +56,8 @@ Tools for extending the Ableton Move. This project provides a companion webserve
   - Force refresh of Move's library cache
   - Useful after manual file changes
   - Uses Move's D-Bus interface
+  - Clears cached preset and sample lists used by the web tools
+  - File lists are cached for faster loading between scans
     
 ## Installation
 
@@ -128,7 +132,7 @@ pip install --no-cache-dir -r requirements.txt
 ssh ableton@move.local
 cd /data/UserData/extending-move
 cp -r /opt/move/HttpRoot/fonts /data/UserData/extending-move/static/
-python3 move-webserver.py
+python3 move-webserver.py  # Flask/Jinja web server on port 909
 ```
 
 The server will be accessible at http://move.local:909
@@ -170,7 +174,10 @@ case "$1" in
     su - ableton -s /bin/sh -c "cd /data/UserData/extending-move ; python3 move-webserver.py >> startup.log 2>&1 &"
     ;;
   stop)
-    pkill -u ableton -f move-webserver.py
+    if [ -f /data/UserData/extending-move/move-webserver.pid ]; then
+      kill $(cat /data/UserData/extending-move/move-webserver.pid)
+      rm /data/UserData/extending-move/move-webserver.pid
+    fi
     ;;
   restart)
     $0 stop
@@ -178,7 +185,8 @@ case "$1" in
     $0 start
     ;;
   status)
-    if pgrep -u ableton -f move-webserver.py >/dev/null; then
+    if [ -f /data/UserData/extending-move/move-webserver.pid ] && \
+       ps -p $(cat /data/UserData/extending-move/move-webserver.pid) >/dev/null 2>&1; then
       echo "Running"
     else
       echo "Not running"
@@ -219,6 +227,8 @@ Interested in chatting about more Move hacking? Come talk to us on [Discord](htt
 ## Disclaimer
 
 This project is not affiliated with, authorized by, or endorsed by Ableton. Use at your own risk. The authors cannot be held responsible for any damage or issues that may occur. Always refer to official documentation when modifying hardware.
+
+This project includes a statically linked binary of Rubber Band. The source code for Rubber Band is available under GPLv2 at [https://breakfastquay.com/rubberband/](https://breakfastquay.com/rubberband/).
 
 > These tools are third-party and require SSH access. That means:
 > * There’s a real risk (though unlikely) of breaking things, including potentially bricking a device. You are accessing the Move in ways it was not designed to do.

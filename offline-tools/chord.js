@@ -66,9 +66,29 @@ if (!window.selectedChords) {
         "C"
     ];
     window.selectedChords = [];
+    window.selectedVoicings = [];
+    window.selectedOctaves = [];
     for (let i = 0; i < 16; i++) {
         window.selectedChords[i] = defaultChords[i] || "";
+        window.selectedVoicings[i] = 0;
+        window.selectedOctaves[i] = 0;
     }
+}
+
+let keepLengthSame = false;
+
+function applyVoicing(intervals, inversion) {
+    const result = intervals.slice();
+    for (let i = 0; i < inversion && i < result.length; i++) {
+        result[i] += 12;
+    }
+    return result;
+}
+
+function getChordIntervals(chordName, inversion = 0, octave = 0) {
+    let base = CHORDS[chordName] ? CHORDS[chordName].slice() : [];
+    base = applyVoicing(base, inversion);
+    return base.map(n => n + octave * 12);
 }
 
 function populateChordList() {
@@ -115,7 +135,20 @@ function populateChordList() {
       });
       selectHTML += '</select>';
 
+      let voicingHTML = '<select id="voicing-select-' + padNumber + '">';
+      ['Root','1st Inv','2nd Inv','3rd Inv'].forEach((v,idx)=>{
+          voicingHTML += '<option value="' + idx + '">' + v + '</option>';
+      });
+      voicingHTML += '</select>';
+
+      let octaveHTML = '<select id="octave-select-' + padNumber + '">';
+      [-2,-1,0,1,2].forEach(val=>{
+          octaveHTML += '<option value="' + val + '">' + (val>=0? '+'+val: val) + ' oct</option>';
+      });
+      octaveHTML += '</select>';
+
       cell.innerHTML = `<div class="chord-label">${padNumber}: ${selectHTML}</div>
+                        <div style="margin-top:4px;">${voicingHTML} ${octaveHTML}</div>
                         <div class="chord-preview" id="chord-preview-${padNumber}" style="height: 50px; cursor: pointer;"></div>`;
       gridContainer.appendChild(cell);
 
@@ -124,7 +157,21 @@ function populateChordList() {
       selectElem.value = window.selectedChords[padNumber - 1];
       selectElem.addEventListener('change', function() {
           window.selectedChords[padNumber - 1] = this.value;
-          regenerateChordPreview(padNumber);
+          regenerateChordPreview(padNumber, true);
+      });
+
+      const voiceElem = cell.querySelector(`#voicing-select-${padNumber}`);
+      voiceElem.value = window.selectedVoicings[padNumber - 1];
+      voiceElem.addEventListener('change', function(){
+          window.selectedVoicings[padNumber - 1] = parseInt(this.value);
+          regenerateChordPreview(padNumber, true);
+      });
+
+      const octaveElem = cell.querySelector(`#octave-select-${padNumber}`);
+      octaveElem.value = window.selectedOctaves[padNumber - 1];
+      octaveElem.addEventListener('change', function(){
+          window.selectedOctaves[padNumber - 1] = parseInt(this.value);
+          regenerateChordPreview(padNumber, true);
       });
     }
   }
@@ -139,10 +186,17 @@ function populateChordList() {
 }
 
 
-async function regenerateChordPreview(padNumber) {
+async function regenerateChordPreview(padNumber, showOverlay = false) {
     if (!window.decodedBuffer) return;
+    const overlay = document.getElementById('stretchOverlay');
+    if (showOverlay && overlay) {
+        overlay.style.display = 'flex';
+        updateStretchProgress(1, 1);
+    }
     const selectedChord = window.selectedChords[padNumber - 1];
-    const intervals = CHORDS[selectedChord];
+    const inversion = window.selectedVoicings[padNumber - 1] || 0;
+    const octave = window.selectedOctaves[padNumber - 1] || 0;
+    const intervals = getChordIntervals(selectedChord, inversion, octave);
     const blob = await processChordSample(window.decodedBuffer, intervals);
     const url = URL.createObjectURL(blob);
     const previewContainer = document.getElementById(`chord-preview-${padNumber}`);
@@ -179,6 +233,9 @@ async function regenerateChordPreview(padNumber) {
         });
         if (!window.chordWaveforms) window.chordWaveforms = [];
         window.chordWaveforms[padNumber - 1] = ws;
+    }
+    if (showOverlay && overlay) {
+        overlay.style.display = 'none';
     }
 }
 
@@ -275,6 +332,7 @@ function writeString(view, offset, string) {
   }
 }
 
+
 async function pitchShiftOffline(buffer, semitoneShift) {
   const factor = Math.pow(2, semitoneShift / 12);
   const newLength = Math.floor(buffer.length / factor);
@@ -290,6 +348,18 @@ async function pitchShiftOffline(buffer, semitoneShift) {
   source.start(0);
   return offlineCtx.startRendering();
 }
+
+async function pitchShiftRubberBand(buffer, semitoneShift) {
+  const wavData = toWav(buffer);
+  const form = new FormData();
+  form.append('semitones', semitoneShift);
+  form.append('audio', new Blob([new DataView(wavData)], { type: 'audio/wav' }), 'src.wav');
+  const resp = await fetch('/pitch-shift', { method: 'POST', body: form });
+  const arrayBuffer = await resp.arrayBuffer();
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return await audioCtx.decodeAudioData(arrayBuffer);
+}
+
 
 function mixAudioBuffers(buffers) {
   if (buffers.length === 0) return null;
@@ -336,10 +406,15 @@ function normalizeAudioBuffer(buffer, targetPeak = 0.9) {
 async function processChordSample(buffer, intervals) {
   const pitchedBuffers = [];
   for (let semitone of intervals) {
-    const pitched = await pitchShiftOffline(buffer, semitone);
+    let pitched;
+    if (keepLengthSame) {
+      pitched = await pitchShiftRubberBand(buffer, semitone);
+    } else {
+      pitched = await pitchShiftOffline(buffer, semitone);
+    }
     pitchedBuffers.push(pitched);
   }
-  const mixed = mixAudioBuffers(pitchedBuffers);
+  let mixed = mixAudioBuffers(pitchedBuffers);
   const normalized = normalizeAudioBuffer(mixed, 0.9);
   const wavData = toWav(normalized);
   return new Blob([new DataView(wavData)], { type: 'audio/wav' });
@@ -370,8 +445,13 @@ function initChordTab() {
     const chordNames = window.selectedChords;
     let sampleFilenames = [];
     let processedSamples = {};
-    for (let chordName of chordNames) {
-      const intervals = CHORDS[chordName];
+    for (let i = 0; i < chordNames.length; i++) {
+      const chordName = chordNames[i];
+      const intervals = getChordIntervals(
+        chordName,
+        window.selectedVoicings[i] || 0,
+        window.selectedOctaves[i] || 0
+      );
       const blob = await processChordSample(decodedBuffer, intervals);
       let safeChordName = chordName.replace(/\s+/g, '');
       let filename = `${baseName}_chord_${safeChordName}.wav`;
@@ -410,6 +490,14 @@ function initChordTab() {
   });
   
   populateChordList();
+
+}
+
+function updateStretchProgress(current, total) {
+    const span = document.getElementById('stretchProgress');
+    if (span) {
+        span.textContent = `(${current}/${total})`;
+    }
 }
 
 // Process chord samples for preview when a file is uploaded
@@ -432,6 +520,11 @@ document.getElementById('wavFileInput').addEventListener('change', async functio
     
     console.log("File selected:", file);
     
+    const overlay = document.getElementById('stretchOverlay');
+    if (overlay) overlay.style.display = 'flex';
+    const total = window.selectedChords.filter(c => c).length;
+    let count = 0;
+
     const arrayBuffer = await file.arrayBuffer();
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const decodedBuffer = await audioCtx.decodeAudioData(arrayBuffer);
@@ -444,8 +537,16 @@ document.getElementById('wavFileInput').addEventListener('change', async functio
     // Process each chord sample and create its waveform preview sequentially
     for (let i = 0; i < chordNames.length; i++) {
         const chordName = chordNames[i];
+        if (!chordName) continue;
+        count++;
+        updateStretchProgress(count, total);
         console.log("Processing chord:", chordName);
-        const blob = await processChordSample(decodedBuffer, CHORDS[chordName]);
+        const intervals = getChordIntervals(
+            chordName,
+            window.selectedVoicings[i] || 0,
+            window.selectedOctaves[i] || 0
+        );
+        const blob = await processChordSample(decodedBuffer, intervals);
         const url = URL.createObjectURL(blob);
         const padNumber = i + 1;  // Adjust this if your grid order differs
         const previewContainer = document.getElementById(`chord-preview-${padNumber}`);
@@ -481,4 +582,26 @@ document.getElementById('wavFileInput').addEventListener('change', async functio
             window.chordWaveforms.push(ws);
         }
     }
+    if (overlay) overlay.style.display = 'none';
 });
+
+const lengthToggle = document.getElementById('keepLengthToggle');
+if (lengthToggle) {
+    lengthToggle.addEventListener('change', async function(){
+        keepLengthSame = lengthToggle.checked;
+        if (window.decodedBuffer) {
+        const overlay = document.getElementById('stretchOverlay');
+        if (overlay) overlay.style.display = 'flex';
+        const total = window.selectedChords.filter(c => c).length;
+        let count = 0;
+        for (let i = 1; i <= 16; i++) {
+            if (window.selectedChords[i - 1]) {
+                count++;
+                updateStretchProgress(count, total);
+                await regenerateChordPreview(i);
+            }
+        }
+        if (overlay) overlay.style.display = 'none';
+        }
+    });
+}

@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Slice a WAV File into a Kit</h2>
+{% if message %}
+  <p class="{{ message_type if message_type else ('success' if success else 'error') }}">{{ message }}</p>
+{% endif %}
+<p id="slice-message"></p>
+<form id="slice-form" action="{{ host_prefix }}/slice" method="post" enctype="multipart/form-data">
+  <input type="hidden" name="action" value="slice">
+  <input type="hidden" name="regions" id="regions-input">
+
+  <label for="file">Audio file (.wav/.aif):</label>
+  <input id="file" type="file" name="file" accept=".wav,.aif,.aiff" required>
+  <br>
+
+  <label for="kit_type">Kit type:</label>
+  <select name="kit_type" id="kit_type">
+    <option value="choke" selected>Choke Kit – Pads play through, one at a time</option>
+    <option value="gate">Gate Kit – Pads play while held, multiples at once</option>
+    <option value="drum">Drum Kit – Pads play through, multiples at once</option>
+  </select>
+  <br>
+
+  <div class="slice-even-group">
+    <button type="button" id="even-slices-btn">Slice into even slices</button>
+    <label for="num_slices" style="margin-left: 1em;">Slices (1–16):</label>
+    <input id="num_slices" name="num_slices" type="number" min="1" max="16" value="16">
+  </div>
+  <br>
+
+  <div class="slice-transient-group">
+    <button type="button" id="detect-transients-btn">Slice on transients</button>
+    <label for="sensitivity" style="margin-left: 1em;">Threshold:</label>
+    <input id="sensitivity" name="sensitivity" type="range" min="0.01" max="0.20" step="0.001" value="0.07">
+    <span id="sensitivity-value">0.07</span>
+    <span id="transient-detect-message" style="margin-left:1em;color:#337ab7;"></span>
+  </div>
+  <br>
+
+  <button type="submit" name="mode" value="download">Download .ablpresetbundle</button>
+  <button type="submit" name="mode" value="auto_place">Save Preset directly on Move</button>
+</form>
+<br>
+<div id="waveform" style="width:100%;height:128px;"></div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://unpkg.com/wavesurfer.js@6/dist/wavesurfer.js"></script>
+<script src="https://unpkg.com/wavesurfer.js@6/dist/plugin/wavesurfer.regions.js"></script>
+<script src="{{ host_prefix }}/static/slice_page.js"></script>
+{% endblock %}
