@@ -211,6 +211,11 @@ function attachChordKeyHandler() {
     document.removeEventListener('keydown', chordKeyHandler);
   }
   chordKeyHandler = function(e) {
+    // Ignore key events while typing in input fields or editable elements
+    const tag = (e.target && e.target.tagName) ? e.target.tagName.toUpperCase() : '';
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || e.target.isContentEditable) {
+      return;
+    }
     const pad = chordKeyMap[e.key.toLowerCase()];
     if (pad) {
       e.preventDefault();
