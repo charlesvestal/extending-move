@@ -207,7 +207,7 @@ class SetManagementHandler(BaseHandler):
                 color_id = color_map.get(idx)
                 style = f' style="background-color: {rgb_string(color_id)}"' if color_id else ''
                 cell_html = (
-                cells.append(cell_html)
+                    + f'<label for="pad_{num}" class="pad-cell {status}"{style}>{label_text}</label>'
             option = f'<option value="{i}" style="color: {rgb};">&#9632; {i} - {name}</option>'
             options.append(option)
                     f'<label for="pad_{num}" class="pad-cell {status}"{style}>{label_text}</label>'
