@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Color Dropdown Demo</h2>
+<div id="color-dropdown" class="color-dropdown">
+  <div class="dropdown-toggle">
+    <span class="preview-square"></span>
+    <span class="preview-label"></span>
+    <span class="arrow">&#9662;</span>
+  </div>
+  <div class="dropdown-menu"></div>
+  <input type="hidden" id="color-index" name="color_index" value="0">
+</div>
+{% endblock %}
+{% block scripts %}
+<style>
+.color-dropdown { position: relative; width: 200px; font-size: 0.875rem; }
+.color-dropdown .dropdown-toggle { border: 1px solid #ddd; border-radius: 4px; padding: 0.5rem; cursor: pointer; display: flex; align-items: center; background: #fff; }
+.color-dropdown .preview-square { width: 16px; height: 16px; margin-right: 8px; border: 1px solid #ccc; }
+.color-dropdown .arrow { margin-left: auto; }
+.color-dropdown .dropdown-menu { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #ddd; border-radius: 4px; max-height: 200px; overflow-y: auto; z-index: 1000; }
+.color-dropdown .dropdown-item { padding: 0.5rem; display: flex; align-items: center; cursor: pointer; }
+.color-dropdown .dropdown-item:hover { background-color: #f0f0f0; }
+.color-dropdown .dropdown-item .preview-square { margin-right: 8px; }
+</style>
+<script>
+const padColors = {{ pad_colors_json|safe }};
+const padNames = {{ pad_names_json|safe }};
+
+function initColorDropdown() {
+  const container = document.getElementById('color-dropdown');
+  const toggle = container.querySelector('.dropdown-toggle');
+  const menu = container.querySelector('.dropdown-menu');
+  const hiddenInput = container.querySelector('input[type="hidden"]');
+  let open = false;
+  let selectedIndex = 0;
+
+  function renderMenu() {
+    menu.innerHTML = '';
+    padColors.forEach((c, idx) => {
+      const item = document.createElement('div');
+      item.className = 'dropdown-item';
+      item.dataset.index = idx;
+      item.innerHTML = `<span class="preview-square" style="background-color: rgb(${c[0]}, ${c[1]}, ${c[2]});"></span> <span class="label">${padNames[idx]}</span>`;
+      item.addEventListener('click', () => {
+        selectedIndex = idx;
+        hiddenInput.value = idx;
+        updateToggle();
+        closeMenu();
+      });
+      menu.appendChild(item);
+    });
+  }
+
+  function updateToggle() {
+    const c = padColors[selectedIndex];
+    toggle.querySelector('.preview-square').style.backgroundColor = `rgb(${c[0]}, ${c[1]}, ${c[2]})`;
+    toggle.querySelector('.preview-label').textContent = padNames[selectedIndex];
+  }
+
+  function openMenu() { menu.style.display = 'block'; open = true; }
+  function closeMenu() { menu.style.display = 'none'; open = false; }
+
+  toggle.addEventListener('click', (e) => { e.stopPropagation(); open ? closeMenu() : openMenu(); });
+  document.addEventListener('click', (e) => { if (open && !container.contains(e.target)) closeMenu(); });
+
+  renderMenu();
+  updateToggle();
+  closeMenu();
+}
+
+document.addEventListener('DOMContentLoaded', initColorDropdown);
+</script>
+{% endblock %}
+

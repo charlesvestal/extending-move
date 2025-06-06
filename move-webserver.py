@@ -17,6 +17,7 @@ import logging
 import numpy as np
 import librosa
 import time
+import json
 from wsgiref.simple_server import make_server, WSGIServer
 from handlers.reverse_handler_class import ReverseHandler
 from handlers.restore_handler_class import RestoreHandler
@@ -28,6 +29,7 @@ from handlers.synth_preset_inspector_handler_class import (
 from handlers.drum_rack_inspector_handler_class import DrumRackInspectorHandler
 from handlers.file_placer_handler_class import FilePlacerHandler
 from handlers.refresh_handler_class import RefreshHandler
+from handlers.color_dropdown_handler_class import ColorDropdownHandler
 from core.file_browser import generate_dir_html
 
 logging.basicConfig(
@@ -103,6 +105,7 @@ synth_handler = SynthPresetInspectorHandler()
 file_placer_handler = FilePlacerHandler()
 refresh_handler = RefreshHandler()
 drum_rack_handler = DrumRackInspectorHandler()
+color_dropdown_handler = ColorDropdownHandler()
 
 
 @app.before_request
@@ -392,6 +395,17 @@ def synth_macros():
 @app.route("/chord", methods=["GET"])
 def chord():
     return render_template("chord.html", active_tab="chord")
+
+
+@app.route("/color-dropdown", methods=["GET"])
+def color_dropdown_page():
+    result = color_dropdown_handler.handle_get()
+    return render_template(
+        "color_dropdown.html",
+        pad_colors_json=json.dumps(result["pad_colors"]),
+        pad_names_json=json.dumps(result["pad_names"]),
+        active_tab="color-dropdown",
+    )
 
 
 @app.route("/samples/<path:sample_path>", methods=["GET", "OPTIONS"])
