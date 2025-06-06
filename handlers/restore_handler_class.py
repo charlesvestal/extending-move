@@ -257,7 +257,9 @@ class RestoreHandler(BaseHandler):
             f' function close() {{ menu.style.display = "none"; open = false; }}' \
             f' toggle.addEventListener("click", e => {{ e.stopPropagation(); open ? close() : openMenu(); }});' \
             f' document.addEventListener("click", e => {{ if (open && !container.contains(e.target)) close(); }});' \
+            f' const labelPrefix = padName === "mset_index" ? "restore_pad_" : "pad_";' \
             f' document.querySelectorAll(`input[name="${{padName}}"]`).forEach(r => r.addEventListener("change", previewPad));' \
+            f' document.querySelectorAll(`label[for^="${{labelPrefix}}"]`).forEach(l => l.addEventListener("click", () => setTimeout(previewPad, 0)));' \
             f' document.addEventListener("DOMContentLoaded", update);' \
             f' render(); update(); close();' \
             f'}})();' \
