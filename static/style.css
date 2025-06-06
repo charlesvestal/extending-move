@@ -426,7 +426,7 @@ select {
 
 .pad-cell.free {
     cursor: pointer;
-    background: #e6f7ef;
+    background: #f0f0f0;
 }
 
 .pad-cell.occupied {
