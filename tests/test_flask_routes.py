@@ -2,6 +2,8 @@ import io
 import importlib.util
 from pathlib import Path
 import sys
+import numpy as np
+import soundfile as sf
 
 # Ensure project root is on the path
 sys.path.append(str(Path(__file__).resolve().parents[1]))
@@ -271,3 +273,27 @@ def test_samples_route_not_found(client, tmp_path, monkeypatch):
     monkeypatch.setattr(move_webserver.os.path, 'realpath', fake_real)
     resp = client.get('/samples/missing.wav')
     assert resp.status_code == 404
+
+
+def test_pitch_shift_route(client, monkeypatch):
+    import sys
+    monkeypatch.setattr(
+        sys.modules['core.time_stretch_handler'],
+        'pitch_shift_array',
+        lambda d, sr, st: d,
+    )
+    sr = 22050
+    t = np.linspace(0, 1, sr, endpoint=False)
+    data = np.sin(2 * np.pi * 440 * t).astype(np.float32)
+    buf = io.BytesIO()
+    sf.write(buf, data, sr, format='WAV')
+    buf.seek(0)
+    resp = client.post(
+        '/pitch-shift',
+        data={'semitones': '2', 'audio': (buf, 'test.wav')},
+        content_type='multipart/form-data'
+    )
+    assert resp.status_code == 200
+    shifted, sr2 = sf.read(io.BytesIO(resp.data), dtype='float32')
+    assert sr2 == sr
+    assert len(shifted) == len(data)
