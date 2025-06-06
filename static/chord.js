@@ -152,9 +152,9 @@ function populateChordList() {
       });
       voicingHTML += '</select>';
 
-      // Octave transpose select (-1,0,1)
+      // Octave transpose select (-2..2)
       let octaveHTML = '<select id="octave-select-' + padNumber + '">';
-      [-1,0,1].forEach(val => {
+      [-2,-1,0,1,2].forEach(val => {
           octaveHTML += '<option value="' + val + '">' + (val >= 0 ? '+'+val : val) + ' oct</option>';
       });
       octaveHTML += '</select>';
@@ -169,21 +169,21 @@ function populateChordList() {
       selectElem.value = window.selectedChords[padNumber - 1];
       selectElem.addEventListener('change', function() {
           window.selectedChords[padNumber - 1] = this.value;
-          regenerateChordPreview(padNumber);
+          regenerateChordPreview(padNumber, true);
       });
 
       const voiceElem = cell.querySelector(`#voicing-select-${padNumber}`);
       voiceElem.value = window.selectedVoicings[padNumber - 1];
       voiceElem.addEventListener('change', function() {
           window.selectedVoicings[padNumber - 1] = parseInt(this.value);
-          regenerateChordPreview(padNumber);
+          regenerateChordPreview(padNumber, true);
       });
 
       const octaveElem = cell.querySelector(`#octave-select-${padNumber}`);
       octaveElem.value = window.selectedOctaves[padNumber - 1];
       octaveElem.addEventListener('change', function() {
           window.selectedOctaves[padNumber - 1] = parseInt(this.value);
-          regenerateChordPreview(padNumber);
+          regenerateChordPreview(padNumber, true);
       });
     }
   }
@@ -227,8 +227,13 @@ function attachChordKeyHandler() {
 }
 
 
-async function regenerateChordPreview(padNumber) {
+async function regenerateChordPreview(padNumber, showOverlay = false) {
     if (!window.decodedBuffer) return;
+    const overlay = document.getElementById('stretchOverlay');
+    if (showOverlay && overlay) {
+        overlay.style.display = 'flex';
+        updateStretchProgress(1, 1);
+    }
     const selectedChord = window.selectedChords[padNumber - 1];
     const inversion = window.selectedVoicings[padNumber - 1] || 0;
     const octave = window.selectedOctaves[padNumber - 1] || 0;
@@ -269,6 +274,9 @@ async function regenerateChordPreview(padNumber) {
         });
         if (!window.chordWaveforms) window.chordWaveforms = [];
         window.chordWaveforms[padNumber - 1] = ws;
+    }
+    if (showOverlay && overlay) {
+        overlay.style.display = 'none';
     }
 }
 
