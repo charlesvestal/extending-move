@@ -56,6 +56,7 @@ const chordKeyMap = {
 };
 
 let chordKeyHandler = null;
+let keepLengthSame = false;
 
 if (!window.selectedChords) {
     const defaultChords = [
@@ -396,6 +397,17 @@ async function pitchShiftOffline(buffer, semitoneShift) {
   return offlineCtx.startRendering();
 }
 
+async function pitchShiftRubberBand(buffer, semitoneShift) {
+  const wavData = toWav(buffer);
+  const form = new FormData();
+  form.append('semitones', semitoneShift);
+  form.append('audio', new Blob([new DataView(wavData)], { type: 'audio/wav' }), 'src.wav');
+  const resp = await fetch('/pitch-shift', { method: 'POST', body: form });
+  const arrayBuffer = await resp.arrayBuffer();
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return await audioCtx.decodeAudioData(arrayBuffer);
+}
+
 
 function mixAudioBuffers(buffers) {
   if (buffers.length === 0) return null;
@@ -439,11 +451,15 @@ function normalizeAudioBuffer(buffer, targetPeak = 0.9) {
   return buffer;
 }
 
-  async function processChordSample(buffer, intervals) {
+async function processChordSample(buffer, intervals) {
   const pitchedBuffers = [];
   for (let semitone of intervals) {
-    let pitched = await pitchShiftOffline(buffer, semitone);
-    // Rubber Band processing retains length automatically
+    let pitched;
+    if (keepLengthSame) {
+      pitched = await pitchShiftRubberBand(buffer, semitone);
+    } else {
+      pitched = await pitchShiftOffline(buffer, semitone);
+    }
     pitchedBuffers.push(pitched);
   }
   let mixed = mixAudioBuffers(pitchedBuffers);
@@ -710,7 +726,21 @@ function initChordTab() {
       }
     });
   }
-  
+
+  const lengthToggle = document.getElementById('keepLengthToggle');
+  if (lengthToggle) {
+    lengthToggle.addEventListener('change', () => {
+      keepLengthSame = lengthToggle.checked;
+      if (window.decodedBuffer) {
+        for (let i = 1; i <= 16; i++) {
+          if (window.selectedChords[i - 1]) {
+            regenerateChordPreview(i);
+          }
+        }
+      }
+    });
+  }
+
   populateChordList();
 
   attachChordKeyHandler();

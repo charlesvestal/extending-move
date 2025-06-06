@@ -8,6 +8,7 @@ from flask import (
     jsonify,
     redirect,
     g,
+    make_response,
 )
 import os
 import atexit
@@ -17,7 +18,10 @@ import logging
 import numpy as np
 import librosa
 import time
+import io
+import soundfile as sf
 from pathlib import Path
+import pyrubberband.pyrb as pyrb
 from wsgiref.simple_server import make_server, WSGIServer
 from handlers.reverse_handler_class import ReverseHandler
 from handlers.restore_handler_class import RestoreHandler
@@ -471,6 +475,35 @@ def refresh_route():
     form = SimpleForm(request.form.to_dict())
     result = refresh_handler.handle_post(form)
     return jsonify(result)
+
+
+@app.route("/pitch-shift", methods=["POST"])
+def pitch_shift_route():
+    """Pitch-shift uploaded audio using Rubber Band."""
+    if "audio" not in request.files:
+        return ("Missing audio file", 400)
+    file = request.files["audio"]
+    try:
+        semitones = float(request.form.get("semitones", "0"))
+    except ValueError:
+        semitones = 0.0
+
+    data, sr = sf.read(file, dtype="float32")
+    try:
+        from core.time_stretch_handler import pitch_shift_array
+
+        shifted = pitch_shift_array(data, sr, semitones)
+    except Exception as exc:
+        logger.error("Pitch shift error: %s", exc)
+        return (f"Error: {exc}", 500)
+
+    buf = io.BytesIO()
+    sf.write(buf, shifted, sr, format="WAV")
+    buf.seek(0)
+    resp = make_response(buf.read())
+    resp.headers["Content-Type"] = "audio/wav"
+    resp.headers["Access-Control-Allow-Origin"] = "*"
+    return resp
 
 
 @app.route("/detect-transients", methods=["POST"])

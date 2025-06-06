@@ -9,6 +9,13 @@ from audiotsm import wsola
 
 from core.refresh_handler import refresh_library
 
+
+def pitch_shift_array(data, sr, semitones):
+    """Pitch-shift audio using Rubber Band while preserving length."""
+    rb_binary = Path(__file__).resolve().parents[1] / 'bin' / 'rubberband' / 'rubberband'
+    pyrb.__RUBBERBAND_UTIL = str(rb_binary)
+    return pyrb.pitch_shift(data, sr, semitones)
+
 def time_stretch_wav(
     input_path,
     target_duration,

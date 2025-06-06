@@ -40,7 +40,7 @@ Tools for extending the Ableton Move. This project provides a companion webserve
   - Create chord variations from any WAV file
   - Includes common chord voicings (Cm9, Fm7, AbMaj7, etc.)
   - Automatic pitch-shifting and normalization
-  - High-quality time-stretching powered by Rubber Band
+  - Optional Rubber Band processing to keep notes the same length
   - Download as `.ablpresetbundle` or place directly on device
 
 - **Sliced Kit Creation**
