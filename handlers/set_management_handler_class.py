@@ -206,10 +206,10 @@ class SetManagementHandler(BaseHandler):
                 disabled = 'disabled' if occupied else ''
                 color_id = color_map.get(idx)
                 style = f' style="background-color: {rgb_string(color_id)}"' if color_id else ''
-            name = color_name(i)
-                f'<option value="{i}" style="color: {rgb};">&#9632; {i} - {name}</option>'
-                cells.append(
-                    f'<input type="radio" id="pad_{num}" name="pad_index" value="{num}" {disabled}>'
+                cell_html = (
+                cells.append(cell_html)
+            option = f'<option value="{i}" style="color: {rgb};">&#9632; {i} - {name}</option>'
+            options.append(option)
                     f'<label for="pad_{num}" class="pad-cell {status}"{style}>{label_text}</label>'
                 )
         return '<div class="pad-grid">' + ''.join(cells) + '</div>'
