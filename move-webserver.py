@@ -20,8 +20,8 @@ import librosa
 import time
 import io
 import soundfile as sf
-from pathlib import Path
 import pyrubberband.pyrb as pyrb
+from core.time_stretch_handler import get_rubberband_binary
 from wsgiref.simple_server import make_server, WSGIServer
 from handlers.reverse_handler_class import ReverseHandler
 from handlers.restore_handler_class import RestoreHandler
@@ -159,8 +159,7 @@ def warm_up_modules():
         start = time.perf_counter()
         import pyrubberband.pyrb as pyrb
 
-        rb_binary = Path(__file__).resolve().parent / 'bin' / 'rubberband' / 'rubberband'
-        pyrb.__RUBBERBAND_UTIL = str(rb_binary)
+        pyrb.__RUBBERBAND_UTIL = str(get_rubberband_binary())
         pyrb.time_stretch(np.zeros(22050, dtype=np.float32), 22050, 1.0)
         logger.info(
             "Pyrubberband warm-up complete in %.3fs",

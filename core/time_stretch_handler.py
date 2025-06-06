@@ -10,10 +10,16 @@ from audiotsm import wsola
 from core.refresh_handler import refresh_library
 
 
+def get_rubberband_binary():
+    """Return path to the bundled Rubber Band binary."""
+    return (
+        Path(__file__).resolve().parents[1] / "bin" / "rubberband" / "rubberband"
+    )
+
+
 def pitch_shift_array(data, sr, semitones):
     """Pitch-shift audio using Rubber Band while preserving length."""
-    rb_binary = Path(__file__).resolve().parents[1] / 'bin' / 'rubberband' / 'rubberband'
-    pyrb.__RUBBERBAND_UTIL = str(rb_binary)
+    pyrb.__RUBBERBAND_UTIL = str(get_rubberband_binary())
     return pyrb.pitch_shift(data, sr, semitones)
 
 def time_stretch_wav(
@@ -63,8 +69,7 @@ def time_stretch_wav(
 
         if preserve_pitch:
             if algorithm == 'rubberband':
-                rb_binary = Path(__file__).resolve().parents[1] / 'bin' / 'rubberband' / 'rubberband'
-                pyrb.__RUBBERBAND_UTIL = str(rb_binary)
+                pyrb.__RUBBERBAND_UTIL = str(get_rubberband_binary())
                 try:
                     y_stretched = pyrb.time_stretch(y, sr, rate)
                 except Exception:
