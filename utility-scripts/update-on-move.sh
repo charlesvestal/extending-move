@@ -52,7 +52,7 @@ EOF
 echo "Installing requirements with pip on remote..."
 ssh -T "${REMOTE_USER}@${REMOTE_HOST}" <<EOF
 export TMPDIR=/data/UserData/tmp
-export PATH="${REMOTE_DIR}/bin/rubberband:$PATH"
+export PATH="${REMOTE_DIR}/bin/rubberband:\$PATH"
 echo "TMPDIR is set to: \$TMPDIR"
 pip install --no-cache-dir -r "${REMOTE_DIR}/requirements.txt" | grep -v 'already satisfied'
 EOF
