@@ -413,6 +413,7 @@ select {
     grid-template-columns: repeat(8, 1fr);
     gap: 0.25rem;
     margin-bottom: 1rem;
+    max-width:600px;
 }
 
 .pad-cell {
@@ -422,6 +423,7 @@ select {
     text-align: center;
     font-weight: 600;
     box-sizing: border-box;
+    height:45px;
 }
 
 .pad-cell.free {
