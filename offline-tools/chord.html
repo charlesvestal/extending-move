@@ -46,5 +46,12 @@
   <script src="shared.js"></script>
   <!-- Chord tool specific JavaScript -->
   <script src="chord.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof initChordTab === 'function') {
+        initChordTab();
+      }
+    });
+  </script>
 </body>
 </html>
