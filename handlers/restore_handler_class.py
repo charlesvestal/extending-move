@@ -170,7 +170,7 @@ class RestoreHandler(BaseHandler):
                 disabled = 'disabled' if occupied else ''
                 color_id = color_map.get(idx)
                 style = f' style="background-color: {rgb_string(color_id)}"' if color_id else ''
-                label_text = "[Empty]" if not occupied else ""
+                label_text = "" if not occupied else ""
                 cells.append(
                     f'<input type="radio" id="restore_pad_{num}" name="mset_index" value="{num}" {disabled}>'
                     f'<label for="restore_pad_{num}" class="pad-cell {status}"{style}>{label_text}</label>'
