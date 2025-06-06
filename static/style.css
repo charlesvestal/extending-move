@@ -416,7 +416,7 @@ select {
 }
 
 .pad-cell {
-    border: 2px solid transparent;
+    box-shadow: inset 0 0 0 2px transparent;
     border-radius: 4px;
     padding: 0.5rem;
     text-align: center;
