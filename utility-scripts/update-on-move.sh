@@ -35,7 +35,7 @@ echo "Uploading project files to ${REMOTE_HOST}:${REMOTE_DIR}…"
 tar czf - \
   --exclude='.git' \
   --exclude='utility-scripts' \
-  core handlers templates_jinja static examples \
+  core handlers templates_jinja static examples bin \
   move-webserver.py requirements.txt | \
 ssh -T "${REMOTE_USER}@${REMOTE_HOST}" "cd '${REMOTE_DIR}' && tar xzf - && cp -r /opt/move/HttpRoot/fonts static/"
 
