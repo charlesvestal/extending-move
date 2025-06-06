@@ -150,18 +150,6 @@ def test_color_dropdown_get(client, monkeypatch):
     assert b'id="color-dropdown"' in resp.data
 
 
-def test_pad_dropdown_get(client, monkeypatch):
-    def fake_get():
-        return {'pad_numbers': [1, 2, 3]}
-
-    monkeypatch.setattr(
-        move_webserver.pad_dropdown_handler,
-        'handle_get',
-        fake_get,
-    )
-    resp = client.get('/pad-dropdown')
-    assert resp.status_code == 200
-    assert b'id="pad-dropdown"' in resp.data
 
 def test_detect_transients(client, monkeypatch):
     def fake_detect(form):

@@ -36,10 +36,8 @@
                 {{ pad_grid | safe }}
             </div>
             <div class="form-group">
-                <label for="pad_color">Pad Color:</label>
-                <select name="pad_color" id="pad_color" required>
-                    {{ pad_color_options | safe }}
-                </select>
+                <label for="pad_color_dropdown">Pad Color:</label>
+                {{ pad_color_options | safe }}
             </div>
             <button type="submit" >Generate Set from MIDI</button>
         </form>
