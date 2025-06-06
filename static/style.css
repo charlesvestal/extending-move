@@ -407,6 +407,46 @@ select {
     padding: 0.25rem;
 }
 
+/* Pad grid for set management */
+.pad-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 0.25rem;
+    margin-bottom: 1rem;
+    max-width:600px;
+}
+
+.pad-cell {
+    box-shadow: inset 0 0 0 2px transparent;
+    border-radius: 4px;
+    padding: 0.5rem;
+    text-align: center;
+    font-weight: 600;
+    box-sizing: border-box;
+    height:45px;
+}
+
+.pad-cell.free {
+    cursor: pointer;
+    background: #f0f0f0;
+}
+
+.pad-cell.occupied {
+    cursor: default;
+    background: #ffeef0;
+}
+
+.pad-grid input[type="radio"] {
+    display: none;
+}
+
+.pad-grid input[type="radio"]:checked + label {
+    box-shadow: inset 0 0 0 2px #333;
+    background: #d0e8ff;
+}
+
+
+
 /* Small icon button for reverting samples */
 .sample-header .revert-button {
     background: none;
