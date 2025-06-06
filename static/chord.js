@@ -56,6 +56,7 @@ const chordKeyMap = {
 };
 
 let chordKeyHandler = null;
+let keepLengthSame = false;
 
 if (!window.selectedChords) {
     const defaultChords = [
@@ -232,8 +233,7 @@ async function regenerateChordPreview(padNumber) {
     const inversion = window.selectedVoicings[padNumber - 1] || 0;
     const octave = window.selectedOctaves[padNumber - 1] || 0;
     const intervals = getChordIntervals(selectedChord, inversion, octave);
-    const keepLen = document.getElementById('stretchOption')?.checked;
-    const blob = await processChordSample(window.decodedBuffer, intervals, keepLen);
+    const blob = await processChordSample(window.decodedBuffer, intervals);
     const url = URL.createObjectURL(blob);
     const previewContainer = document.getElementById(`chord-preview-${padNumber}`);
     if (previewContainer) {
@@ -380,16 +380,6 @@ function writeString(view, offset, string) {
   }
 }
 
-async function soundtouchStretch(buffer, targetLength) {
-  const { PitchShifter } = await import('./soundtouch.js');
-  const tempo = buffer.length / targetLength;
-  const ctx = new OfflineAudioContext(buffer.numberOfChannels, targetLength, buffer.sampleRate);
-  const shifter = new PitchShifter(ctx, buffer, 4096);
-  shifter.tempo = tempo;
-  shifter.pitch = 1;
-  shifter.connect(ctx.destination);
-  return ctx.startRendering();
-}
 
 async function pitchShiftOffline(buffer, semitoneShift) {
   const factor = Math.pow(2, semitoneShift / 12);
@@ -407,26 +397,17 @@ async function pitchShiftOffline(buffer, semitoneShift) {
   return offlineCtx.startRendering();
 }
 
-function trimLeadingSilence(buffer, threshold = 0.0001) {
-  const numChannels = buffer.numberOfChannels;
-  const len = buffer.length;
-  let start = 0;
-  outer: for (let i = 0; i < len; i++) {
-    for (let ch = 0; ch < numChannels; ch++) {
-      if (Math.abs(buffer.getChannelData(ch)[i]) > threshold) {
-        start = i;
-        break outer;
-      }
-    }
-  }
-  if (start === 0) return buffer;
-  const ctx = new (window.AudioContext || window.webkitAudioContext)();
-  const trimmed = ctx.createBuffer(numChannels, len - start, buffer.sampleRate);
-  for (let ch = 0; ch < numChannels; ch++) {
-    trimmed.getChannelData(ch).set(buffer.getChannelData(ch).subarray(start));
-  }
-  return trimmed;
+async function pitchShiftRubberBand(buffer, semitoneShift) {
+  const wavData = toWav(buffer);
+  const form = new FormData();
+  form.append('semitones', semitoneShift);
+  form.append('audio', new Blob([new DataView(wavData)], { type: 'audio/wav' }), 'src.wav');
+  const resp = await fetch('/pitch-shift', { method: 'POST', body: form });
+  const arrayBuffer = await resp.arrayBuffer();
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return await audioCtx.decodeAudioData(arrayBuffer);
 }
+
 
 function mixAudioBuffers(buffers) {
   if (buffers.length === 0) return null;
@@ -470,19 +451,18 @@ function normalizeAudioBuffer(buffer, targetPeak = 0.9) {
   return buffer;
 }
 
-  async function processChordSample(buffer, intervals, keepLength = false) {
+async function processChordSample(buffer, intervals) {
   const pitchedBuffers = [];
   for (let semitone of intervals) {
-    let pitched = await pitchShiftOffline(buffer, semitone);
-    pitched = trimLeadingSilence(pitched);
-    if (keepLength) {
-      pitched = await soundtouchStretch(pitched, buffer.length);
-      pitched = trimLeadingSilence(pitched);
+    let pitched;
+    if (keepLengthSame) {
+      pitched = await pitchShiftRubberBand(buffer, semitone);
+    } else {
+      pitched = await pitchShiftOffline(buffer, semitone);
     }
     pitchedBuffers.push(pitched);
   }
   let mixed = mixAudioBuffers(pitchedBuffers);
-  mixed = trimLeadingSilence(mixed);
   const normalized = normalizeAudioBuffer(mixed, 0.9);
   const wavData = toWav(normalized);
   return new Blob([new DataView(wavData)], { type: 'audio/wav' });
@@ -524,7 +504,6 @@ function initChordTab() {
     const chordNames = window.selectedChords;
     let sampleFilenames = [];
     let processedSamples = {};
-    const keepLen = document.getElementById('stretchOption')?.checked;
     for (let i = 0; i < chordNames.length; i++) {
       const chordName = chordNames[i];
       const intervals = getChordIntervals(
@@ -532,7 +511,7 @@ function initChordTab() {
         window.selectedVoicings[i] || 0,
         window.selectedOctaves[i] || 0
       );
-      const blob = await processChordSample(decodedBuffer, intervals, keepLen);
+      const blob = await processChordSample(decodedBuffer, intervals);
       let safeChordName = chordName.replace(/\s+/g, '');
       let filename = `${baseName}_chord_${safeChordName}.wav`;
       sampleFilenames.push(filename);
@@ -597,7 +576,6 @@ function initChordTab() {
     const chordNames = window.selectedChords;
     let sampleFilenames = [];
     let processedSamples = {};
-    const keepLen = document.getElementById('stretchOption')?.checked;
     for (let i = 0; i < chordNames.length; i++) {
       const chordName = chordNames[i];
       const intervals = getChordIntervals(
@@ -605,7 +583,7 @@ function initChordTab() {
         window.selectedVoicings[i] || 0,
         window.selectedOctaves[i] || 0
       );
-      const blob = await processChordSample(decodedBuffer, intervals, keepLen);
+      const blob = await processChordSample(decodedBuffer, intervals);
       let safeChordName = chordName.replace(/\s+/g, '');
       let filename = `${baseName}_chord_${safeChordName}.wav`;
       sampleFilenames.push(filename);
@@ -702,7 +680,6 @@ function initChordTab() {
       window.chordWaveforms = [];
       
       // Process each chord sample and create its waveform preview sequentially
-      const keepLen = document.getElementById('stretchOption')?.checked;
       for (let i = 0; i < chordNames.length; i++) {
           const chordName = chordNames[i];
           console.log("Processing chord:", chordName);
@@ -711,7 +688,7 @@ function initChordTab() {
               window.selectedVoicings[i] || 0,
               window.selectedOctaves[i] || 0
           );
-          const blob = await processChordSample(decodedBuffer, intervals, keepLen);
+          const blob = await processChordSample(decodedBuffer, intervals);
           const url = URL.createObjectURL(blob);
           const padNumber = i + 1;  // Adjust this if your grid order differs
           const previewContainer = document.getElementById(`chord-preview-${padNumber}`);
@@ -749,20 +726,22 @@ function initChordTab() {
       }
     });
   }
-  
-  populateChordList();
 
-  const stretchOption = document.getElementById('stretchOption');
-  if (stretchOption) {
-    stretchOption.addEventListener('change', () => {
-      if (!window.decodedBuffer) return;
-      for (let pad = 1; pad <= 16; pad++) {
-        if (window.selectedChords[pad - 1]) {
-          regenerateChordPreview(pad);
+  const lengthToggle = document.getElementById('keepLengthToggle');
+  if (lengthToggle) {
+    lengthToggle.addEventListener('change', () => {
+      keepLengthSame = lengthToggle.checked;
+      if (window.decodedBuffer) {
+        for (let i = 1; i <= 16; i++) {
+          if (window.selectedChords[i - 1]) {
+            regenerateChordPreview(i);
+          }
         }
       }
     });
   }
+
+  populateChordList();
 
   attachChordKeyHandler();
 }
