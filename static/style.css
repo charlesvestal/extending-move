@@ -407,3 +407,13 @@ select {
     padding: 0.25rem;
 }
 
+/* Small icon button for reverting samples */
+.sample-header .revert-button {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+}
+
