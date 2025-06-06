@@ -22,7 +22,8 @@ class RestoreHandler(BaseHandler):
             msets, ids = list_msets(return_free_ids=True)
             free_pads = sorted([pad_id + 1 for pad_id in ids.get("free", [])])
             color_map = {int(m["mset_id"]): int(m["mset_color"]) for m in msets if str(m["mset_color"]).isdigit()}
-            pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map)
+            first_free = free_pads[0] if free_pads else None
+            pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map, first_free)
             logging.info(f"Available Pads: {free_pads}")
 
             return {
@@ -51,7 +52,8 @@ class RestoreHandler(BaseHandler):
             free_pads = sorted([pad_id + 1 for pad_id in ids.get("free", [])])
             options = self.generate_pad_options(free_pads)
             color_map = {int(m["mset_id"]): int(m["mset_color"]) for m in msets if str(m["mset_color"]).isdigit()}
-            pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map)
+            first_free = free_pads[0] if free_pads else None
+            pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map, first_free)
             error_response["options"] = options
             error_response["color_options"] = self.generate_color_options()
             error_response["pad_grid"] = pad_grid
@@ -66,7 +68,8 @@ class RestoreHandler(BaseHandler):
             free_pads = sorted([pad_id + 1 for pad_id in ids.get("free", [])])
             options = self.generate_pad_options(free_pads)
             color_map = {int(m["mset_id"]): int(m["mset_color"]) for m in msets if str(m["mset_color"]).isdigit()}
-            pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map)
+            first_free = free_pads[0] if free_pads else None
+            pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map, first_free)
             return self.format_error_response("Invalid pad selection provided.", options=options, pad_grid=pad_grid, color_options=self.generate_color_options())
         # Early validation: color
         if not pad_color or not pad_color.isdigit():
@@ -74,7 +77,8 @@ class RestoreHandler(BaseHandler):
             free_pads = sorted([pad_id + 1 for pad_id in ids.get("free", [])])
             options = self.generate_pad_options(free_pads)
             color_map = {int(m["mset_id"]): int(m["mset_color"]) for m in msets if str(m["mset_color"]).isdigit()}
-            pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map)
+            first_free = free_pads[0] if free_pads else None
+            pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map, first_free)
             return self.format_error_response("Invalid pad color provided.", options=options, pad_grid=pad_grid, color_options=self.generate_color_options())
 
         pad_selected = int(pad_selected) - 1  # Convert back to internal ID
@@ -85,14 +89,16 @@ class RestoreHandler(BaseHandler):
             free_pads = sorted([pad_id + 1 for pad_id in ids.get("free", [])])
             options = self.generate_pad_options(free_pads)
             color_map = {int(m["mset_id"]): int(m["mset_color"]) for m in msets if str(m["mset_color"]).isdigit()}
-            pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map)
+            first_free = free_pads[0] if free_pads else None
+            pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map, first_free)
             return self.format_error_response("Invalid pad selection. Must be between 1 and 32.", options=options, pad_grid=pad_grid, color_options=self.generate_color_options())
         if not (1 <= pad_color <= 25):
             msets, ids = list_msets(return_free_ids=True)
             free_pads = sorted([pad_id + 1 for pad_id in ids.get("free", [])])
             options = self.generate_pad_options(free_pads)
             color_map = {int(m["mset_id"]): int(m["mset_color"]) for m in msets if str(m["mset_color"]).isdigit()}
-            pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map)
+            first_free = free_pads[0] if free_pads else None
+            pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map, first_free)
             return self.format_error_response("Invalid pad color. Must be between 1 and 25.", options=options, pad_grid=pad_grid, color_options=self.generate_color_options())
 
         success, filepath, error_response = self.handle_file_upload(form, "ablbundle")
@@ -101,7 +107,8 @@ class RestoreHandler(BaseHandler):
             free_pads = sorted([pad_id + 1 for pad_id in ids.get("free", [])])
             options = self.generate_pad_options(free_pads)
             color_map = {int(m["mset_id"]): int(m["mset_color"]) for m in msets if str(m["mset_color"]).isdigit()}
-            pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map)
+            first_free = free_pads[0] if free_pads else None
+            pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map, first_free)
             if error_response is None:
                 error_response = {}
             error_response["options"] = options
@@ -119,7 +126,8 @@ class RestoreHandler(BaseHandler):
                 free_pads = sorted([pad_id + 1 for pad_id in ids.get("free", [])])
                 options = self.generate_pad_options(free_pads)
                 color_map = {int(m["mset_id"]): int(m["mset_color"]) for m in msets if str(m["mset_color"]).isdigit()}
-                pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map)
+                first_free = free_pads[0] if free_pads else None
+                pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map, first_free)
                 return self.format_success_response(result["message"], options, pad_grid)
             else:
                 # Regenerate available pad options on error
@@ -127,14 +135,16 @@ class RestoreHandler(BaseHandler):
                 free_pads = sorted([pad_id + 1 for pad_id in ids.get("free", [])])
                 options = self.generate_pad_options(free_pads)
                 color_map = {int(m["mset_id"]): int(m["mset_color"]) for m in msets if str(m["mset_color"]).isdigit()}
-                pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map)
+                first_free = free_pads[0] if free_pads else None
+                pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map, first_free)
                 return self.format_error_response(result["message"], options=options, pad_grid=pad_grid, color_options=self.generate_color_options())
         except Exception as e:
             msets, ids = list_msets(return_free_ids=True)
             free_pads = sorted([pad_id + 1 for pad_id in ids.get("free", [])])
             options = self.generate_pad_options(free_pads)
             color_map = {int(m["mset_id"]): int(m["mset_color"]) for m in msets if str(m["mset_color"]).isdigit()}
-            pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map)
+            first_free = free_pads[0] if free_pads else None
+            pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map, first_free)
             return self.format_error_response(f"Error restoring bundle: {str(e)}", options=options, pad_grid=pad_grid, color_options=self.generate_color_options())
 
     def generate_pad_options(self, free_pads):
@@ -159,8 +169,14 @@ class RestoreHandler(BaseHandler):
             "pad_grid": pad_grid,
         }
 
-    def generate_pad_grid(self, used_ids, color_map):
-        """Return HTML for a 32-pad grid showing occupied pads with colors."""
+    def generate_pad_grid(self, used_ids, color_map, selected_pad=None):
+        """Return HTML for a 32-pad grid showing occupied pads with colors.
+
+        Args:
+            used_ids (set): pad ids already occupied (0-indexed).
+            color_map (dict): mapping of pad id to color id.
+            selected_pad (int, optional): 1-based pad number to pre-select.
+        """
         cells = []
         for row in range(4):
             for col in range(8):
@@ -169,11 +185,12 @@ class RestoreHandler(BaseHandler):
                 occupied = idx in used_ids
                 status = 'occupied' if occupied else 'free'
                 disabled = 'disabled' if occupied else ''
+                checked = 'checked' if selected_pad and num == selected_pad and not occupied else ''
                 color_id = color_map.get(idx)
                 style = f' style="background-color: {rgb_string(color_id)}"' if color_id else ''
                 label_text = "" if not occupied else ""
                 cells.append(
-                    f'<input type="radio" id="restore_pad_{num}" name="mset_index" value="{num}" {disabled}>'
+                    f'<input type="radio" id="restore_pad_{num}" name="mset_index" value="{num}" {checked} {disabled}>'
                     f'<label for="restore_pad_{num}" class="pad-cell {status}"{style}>{label_text}</label>'
                 )
         return '<div class="pad-grid">' + ''.join(cells) + '</div>'
