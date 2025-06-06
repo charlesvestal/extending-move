@@ -41,6 +41,7 @@ Tools for extending the Ableton Move. This project provides a companion webserve
   - Includes common chord voicings (Cm9, Fm7, AbMaj7, etc.)
   - Automatic pitch-shifting and normalization
   - Optional Rubber Band processing (using the bundled binary) to keep notes the same length
+  - Cached chord samples so downloading or placing a preset reuses the previews
   - Download as `.ablpresetbundle` or place directly on device
 
 - **Sliced Kit Creation**
