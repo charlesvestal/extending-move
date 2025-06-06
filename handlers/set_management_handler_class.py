@@ -28,7 +28,7 @@ class SetManagementHandler(BaseHandler):
         pad_color_options = self.generate_color_options()
         color_map = {int(m["mset_id"]): int(m["mset_color"]) for m in msets if str(m["mset_color"]).isdigit()}
         first_free = free_pads[0] if free_pads else None
-        pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map, first_free)
+        pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map, first_free, "pad_index")
         return {
             'pad_options': pad_options,
             'pad_color_options': pad_color_options,
@@ -50,7 +50,7 @@ class SetManagementHandler(BaseHandler):
         pad_color_options = self.generate_color_options()
         color_map = {int(m["mset_id"]): int(m["mset_color"]) for m in msets if str(m["mset_color"]).isdigit()}
         first_free = free_pads[0] if free_pads else None
-        pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map, first_free)
+        pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map, first_free, "pad_index")
 
         if action == 'upload_midi':
             # Generate set from uploaded MIDI file
@@ -189,21 +189,22 @@ class SetManagementHandler(BaseHandler):
             updated_pad_options = '<option value="" disabled selected>-- Select Pad --</option>' + updated_pad_options
             color_map = {int(m["mset_id"]): int(m["mset_color"]) for m in msets_updated if str(m["mset_color"]).isdigit()}
             first_free = updated_free_pads[0] if updated_free_pads else None
-            pad_grid = self.generate_pad_grid(updated_ids.get("used", set()), color_map, first_free)
+            pad_grid = self.generate_pad_grid(updated_ids.get("used", set()), color_map, first_free, "pad_index")
             return self.format_success_response(restore_result['message'], pad_options=updated_pad_options, pad_color_options=pad_color_options, pad_grid=pad_grid)
         else:
             color_map = {int(m["mset_id"]): int(m["mset_color"]) for m in msets if str(m["mset_color"]).isdigit()}
             first_free = free_pads[0] if free_pads else None
-            pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map, first_free)
+            pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map, first_free, "pad_index")
             return self.format_error_response(restore_result.get('message'), pad_options=pad_options, pad_color_options=pad_color_options, pad_grid=pad_grid)
 
-    def generate_pad_grid(self, used_ids, color_map, selected_pad=None):
+    def generate_pad_grid(self, used_ids, color_map, selected_pad=None, input_name="pad_index"):
         """Return HTML for a 32-pad grid showing occupied pads with colors.
 
         Args:
             used_ids (set): pad ids already occupied (0-indexed).
             color_map (dict): mapping of pad id to color id.
             selected_pad (int, optional): 1-based pad number to pre-select.
+            input_name (str): name attribute for the radio inputs.
         """
         cells = []
         # Pad numbering starts with 1 on the bottom-left
@@ -219,10 +220,11 @@ class SetManagementHandler(BaseHandler):
                 style = f' style="background-color: {rgb_string(color_id)}"' if color_id else ''
                 label_text = "" if not occupied else ""
                 cells.append(
-                    f'<input type="radio" id="pad_{num}" name="pad_index" value="{num}" {checked} {disabled}>'
+                    f'<input type="radio" id="pad_{num}" name="{input_name}" value="{num}" {checked} {disabled}>'
                     f'<label for="pad_{num}" class="pad-cell {status}"{style}>{label_text}</label>'
                 )
-        return '<div class="pad-grid">' + ''.join(cells) + '</div>'
+        grid_id = f'{input_name}_grid'
+        return f'<div id="{grid_id}" class="pad-grid">' + ''.join(cells) + '</div>'
 
     def generate_color_options(self, input_name="pad_color", pad_input_name="pad_index"):
         """Return HTML for the custom color dropdown with pad preview."""
@@ -286,9 +288,8 @@ class SetManagementHandler(BaseHandler):
             f' function close() {{ menu.style.display = "none"; open = false; }}'
             f' toggle.addEventListener("click", e => {{ e.stopPropagation(); open ? close() : openMenu(); }});'
             f' document.addEventListener("click", e => {{ if (open && !container.contains(e.target)) close(); }});'
-            f' const labelPrefix = padName === "pad_index" ? "pad_" : "restore_pad_";'
-            f' document.querySelectorAll(`input[name="${{padName}}"]`).forEach(r => r.addEventListener("change", previewPad));'
-            f' document.querySelectorAll(`label[for^="${{labelPrefix}}"]`).forEach(l => l.addEventListener("click", () => setTimeout(previewPad, 0)));'
+            f' const grid = document.getElementById(`${{padName}}_grid`);'
+            f' if(grid) grid.addEventListener("change", previewPad);'
             f' document.addEventListener("DOMContentLoaded", update);'
             f' render(); update(); close();'
             f'}})();'
