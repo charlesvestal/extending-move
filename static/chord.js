@@ -57,6 +57,9 @@ const chordKeyMap = {
 
 let chordKeyHandler = null;
 let keepLengthSame = false;
+if (!window.processedChordSamples) {
+    window.processedChordSamples = new Array(16).fill(null);
+}
 
 if (!window.selectedChords) {
     const defaultChords = [
@@ -239,6 +242,7 @@ async function regenerateChordPreview(padNumber, showOverlay = false) {
     const octave = window.selectedOctaves[padNumber - 1] || 0;
     const intervals = getChordIntervals(selectedChord, inversion, octave);
     const blob = await processChordSample(window.decodedBuffer, intervals);
+    window.processedChordSamples[padNumber - 1] = blob;
     const url = URL.createObjectURL(blob);
     const previewContainer = document.getElementById(`chord-preview-${padNumber}`);
     if (previewContainer) {
@@ -508,18 +512,25 @@ function initChordTab() {
     const arrayBuffer = await file.arrayBuffer();
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const decodedBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+    if (!window.processedChordSamples) {
+      window.processedChordSamples = new Array(16).fill(null);
+    }
     
     const chordNames = window.selectedChords;
     let sampleFilenames = [];
     let processedSamples = {};
     for (let i = 0; i < chordNames.length; i++) {
       const chordName = chordNames[i];
-      const intervals = getChordIntervals(
-        chordName,
-        window.selectedVoicings[i] || 0,
-        window.selectedOctaves[i] || 0
-      );
-      const blob = await processChordSample(decodedBuffer, intervals);
+      let blob = window.processedChordSamples[i];
+      if (!blob) {
+        const intervals = getChordIntervals(
+          chordName,
+          window.selectedVoicings[i] || 0,
+          window.selectedOctaves[i] || 0
+        );
+        blob = await processChordSample(decodedBuffer, intervals);
+        window.processedChordSamples[i] = blob;
+      }
       let safeChordName = chordName.replace(/\s+/g, '');
       let filename = `${baseName}_chord_${safeChordName}.wav`;
       sampleFilenames.push(filename);
@@ -580,18 +591,25 @@ function initChordTab() {
     const arrayBuffer = await file.arrayBuffer();
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const decodedBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-    
+    if (!window.processedChordSamples) {
+      window.processedChordSamples = new Array(16).fill(null);
+    }
+
     const chordNames = window.selectedChords;
     let sampleFilenames = [];
     let processedSamples = {};
     for (let i = 0; i < chordNames.length; i++) {
       const chordName = chordNames[i];
-      const intervals = getChordIntervals(
-        chordName,
-        window.selectedVoicings[i] || 0,
-        window.selectedOctaves[i] || 0
-      );
-      const blob = await processChordSample(decodedBuffer, intervals);
+      let blob = window.processedChordSamples[i];
+      if (!blob) {
+        const intervals = getChordIntervals(
+          chordName,
+          window.selectedVoicings[i] || 0,
+          window.selectedOctaves[i] || 0
+        );
+        blob = await processChordSample(decodedBuffer, intervals);
+        window.processedChordSamples[i] = blob;
+      }
       let safeChordName = chordName.replace(/\s+/g, '');
       let filename = `${baseName}_chord_${safeChordName}.wav`;
       sampleFilenames.push(filename);
@@ -686,6 +704,7 @@ function initChordTab() {
       const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       const decodedBuffer = await audioCtx.decodeAudioData(arrayBuffer);
       window.decodedBuffer = decodedBuffer;
+      window.processedChordSamples = new Array(16).fill(null);
       const chordNames = window.selectedChords;
           
       // Clear any previous chord waveform instances
@@ -704,6 +723,7 @@ function initChordTab() {
               window.selectedOctaves[i] || 0
           );
           const blob = await processChordSample(decodedBuffer, intervals);
+          window.processedChordSamples[i] = blob;
           const url = URL.createObjectURL(blob);
           const padNumber = i + 1;  // Adjust this if your grid order differs
           const previewContainer = document.getElementById(`chord-preview-${padNumber}`);
