@@ -257,7 +257,7 @@ class RestoreHandler(BaseHandler):
             f' function close() {{ menu.style.display = "none"; open = false; }}' \
             f' toggle.addEventListener("click", e => {{ e.stopPropagation(); open ? close() : openMenu(); }});' \
             f' document.addEventListener("click", e => {{ if (open && !container.contains(e.target)) close(); }});' \
-            f' document.querySelectorAll(`input[name="${{padName}}"]`).forEach(r => r.addEventListener("change", previewPad));' \
+            f' document.querySelectorAll(`input[name="${{padName}}"]`).forEach(r => {{r.addEventListener("change", previewPad); const lab = document.querySelector(`label[for="${{r.id}}"]`); if(lab) lab.addEventListener("click", previewPad);}});' \
             f' document.addEventListener("DOMContentLoaded", update);' \
             f' render(); update(); close();' \
             f'}})();' \
