@@ -167,7 +167,7 @@ class DrumRackInspectorHandler(BaseHandler):
         bpm = form.getvalue('bpm')
         measures = form.getvalue('measures')
         preserve_pitch = form.getvalue('preserve_pitch') is not None
-        algorithm = form.getvalue('algorithm') or 'wsola'
+        algorithm = form.getvalue('algorithm') or 'rubberband'
 
         # Step 1: Ask for BPM and measures if not provided
         if bpm is None or measures is None:

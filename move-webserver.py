@@ -8,6 +8,7 @@ from flask import (
     jsonify,
     redirect,
     g,
+    make_response,
 )
 import os
 import atexit
@@ -18,6 +19,10 @@ import numpy as np
 import librosa
 import time
 import json
+import io
+import soundfile as sf
+import pyrubberband.pyrb as pyrb
+from core.time_stretch_handler import get_rubberband_binary
 from wsgiref.simple_server import make_server, WSGIServer
 from handlers.reverse_handler_class import ReverseHandler
 from handlers.restore_handler_class import RestoreHandler
@@ -149,6 +154,20 @@ def warm_up_modules():
         )
     except Exception as exc:
         logger.error("Error during librosa time_stretch warm-up: %s", exc)
+
+    # Warm-up pyrubberband
+    try:
+        start = time.perf_counter()
+        import pyrubberband.pyrb as pyrb
+
+        pyrb.__RUBBERBAND_UTIL = str(get_rubberband_binary())
+        pyrb.time_stretch(np.zeros(22050, dtype=np.float32), 22050, 1.0)
+        logger.info(
+            "Pyrubberband warm-up complete in %.3fs",
+            time.perf_counter() - start,
+        )
+    except Exception as exc:
+        logger.error("Error during pyrubberband warm-up: %s", exc)
 
     # Warm-up audiotsm WSOLA
     try:
@@ -473,6 +492,35 @@ def refresh_route():
     form = SimpleForm(request.form.to_dict())
     result = refresh_handler.handle_post(form)
     return jsonify(result)
+
+
+@app.route("/pitch-shift", methods=["POST"])
+def pitch_shift_route():
+    """Pitch-shift uploaded audio using Rubber Band."""
+    if "audio" not in request.files:
+        return ("Missing audio file", 400)
+    file = request.files["audio"]
+    try:
+        semitones = float(request.form.get("semitones", "0"))
+    except ValueError:
+        semitones = 0.0
+
+    data, sr = sf.read(file, dtype="float32")
+    try:
+        from core.time_stretch_handler import pitch_shift_array
+
+        shifted = pitch_shift_array(data, sr, semitones)
+    except Exception as exc:
+        logger.error("Pitch shift error: %s", exc)
+        return (f"Error: {exc}", 500)
+
+    buf = io.BytesIO()
+    sf.write(buf, shifted, sr, format="WAV")
+    buf.seek(0)
+    resp = make_response(buf.read())
+    resp.headers["Content-Type"] = "audio/wav"
+    resp.headers["Access-Control-Allow-Origin"] = "*"
+    return resp
 
 
 @app.route("/detect-transients", methods=["POST"])
