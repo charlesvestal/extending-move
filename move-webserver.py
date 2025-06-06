@@ -17,6 +17,7 @@ import logging
 import numpy as np
 import librosa
 import time
+from pathlib import Path
 from wsgiref.simple_server import make_server, WSGIServer
 from handlers.reverse_handler_class import ReverseHandler
 from handlers.restore_handler_class import RestoreHandler
@@ -149,24 +150,20 @@ def warm_up_modules():
     except Exception as exc:
         logger.error("Error during librosa time_stretch warm-up: %s", exc)
 
-    # Warm-up audiotsm WSOLA
+    # Warm-up pyrubberband
     try:
         start = time.perf_counter()
-        from audiotsm.io.array import ArrayReader, ArrayWriter
-        from audiotsm import wsola
+        import pyrubberband.pyrb as pyrb
 
-        dummy = np.zeros((1, 512), dtype=float)
-        reader = ArrayReader(dummy)
-        writer = ArrayWriter(dummy.shape[0])
-        tsm = wsola(writer.channels)
-        tsm.set_speed(1.0)
-        tsm.run(reader, writer)
+        rb_binary = Path(__file__).resolve().parent / 'bin' / 'rubberband' / 'rubberband'
+        pyrb.__RUBBERBAND_UTIL = str(rb_binary)
+        pyrb.time_stretch(np.zeros(22050, dtype=np.float32), 22050, 1.0)
         logger.info(
-            "Audiotsm WSOLA warm-up complete in %.3fs",
+            "Pyrubberband warm-up complete in %.3fs",
             time.perf_counter() - start,
         )
     except Exception as exc:
-        logger.error("Error during audiotsm WSOLA warm-up: %s", exc)
+        logger.error("Error during pyrubberband warm-up: %s", exc)
 
     # Full Librosa onset pipeline
     try:

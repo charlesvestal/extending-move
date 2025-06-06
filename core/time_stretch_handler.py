@@ -1,14 +1,13 @@
 import os
-import librosa
+from pathlib import Path
 import soundfile as sf
-import tempfile
+import pyrubberband.pyrb as pyrb
+import librosa
 import numpy as np
-from audiotsm.io.array import ArrayReader, ArrayWriter
-from audiotsm import wsola
 
 from core.refresh_handler import refresh_library
 
-def time_stretch_wav(input_path, target_duration, output_path, preserve_pitch=True, algorithm='wsola'):
+def time_stretch_wav(input_path, target_duration, output_path, preserve_pitch=True, algorithm='rubberband'):
     """
     Time-stretch a WAV file to a target duration, keeping pitch constant.
 
@@ -33,11 +32,14 @@ def time_stretch_wav(input_path, target_duration, output_path, preserve_pitch=Tr
         }
         write_format = format_map.get(ext_lower)
 
-        # Load audio
-        y, sr = librosa.load(input_path, sr=None, mono=True)
-        original_duration = librosa.get_duration(y=y, sr=sr)
-        if original_duration == 0:
+        # Load audio (preserve channels)
+        y, sr = sf.read(input_path, dtype='float32')
+        if y.size == 0:
             return False, "Source file duration is zero", None
+        if y.ndim == 1:
+            original_duration = len(y) / sr
+        else:
+            original_duration = y.shape[0] / sr
 
         # Compute stretch ratio
         rate = original_duration / target_duration
@@ -45,47 +47,25 @@ def time_stretch_wav(input_path, target_duration, output_path, preserve_pitch=Tr
             return False, "Invalid target duration.", None
 
         if preserve_pitch:
-            if algorithm == 'wsola':
-                # Load audio data for WSOLA
-                data, sr = sf.read(input_path, dtype='float32')
-                # Ensure shape is (channels, frames)
-                if data.ndim == 1:
-                    data = data[np.newaxis, :]
+            rb_binary = Path(__file__).resolve().parents[1] / 'bin' / 'rubberband' / 'rubberband'
+            pyrb.__RUBBERBAND_UTIL = str(rb_binary)
+            try:
+                # Use pyrubberband for high-quality time stretching
+                y_stretched = pyrb.time_stretch(y, sr, rate)
+            except Exception:
+                # Fallback to librosa if rubberband fails
+                if y.ndim > 1:
+                    y_mono = np.mean(y, axis=1)
                 else:
-                    data = data.T
-                # Time-stretch using array-based WSOLA
-                reader = ArrayReader(data)
-                writer = ArrayWriter(data.shape[0])
-                tsm = wsola(data.shape[0])
-                tsm.set_speed(rate)
-                tsm.run(reader, writer)
-                # Retrieve stretched data
-                y_stretched = writer.data
-                # Convert back to (frames, channels) or 1D
-                if y_stretched.shape[0] == 1:
-                    y_stretched = y_stretched.flatten()
-                else:
-                    y_stretched = y_stretched.T
-                # Write output preserving original format and subtype
-                sf.write(
-                    output_path,
-                    y_stretched,
-                    sr,
-                    format=write_format,
-                    subtype=subtype
-                )
-            elif algorithm == 'phase':
-                # Phase-vocoder via librosa for smooth harmonic material
-                y_stretched = librosa.effects.time_stretch(y, rate=rate)
-                sf.write(
-                    output_path,
-                    y_stretched,
-                    sr,
-                    format=write_format,
-                    subtype=subtype
-                )
-            else:
-                return False, f"Unknown algorithm: {algorithm}", None
+                    y_mono = y
+                y_stretched = librosa.effects.time_stretch(y_mono, rate=rate)
+            sf.write(
+                output_path,
+                y_stretched,
+                sr,
+                format=write_format,
+                subtype=subtype
+            )
         else:
             # Repitch by adjusting sample rate
             new_sr = int(sr * rate)
