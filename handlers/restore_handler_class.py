@@ -260,7 +260,7 @@ class RestoreHandler(BaseHandler):
             f' toggle.addEventListener("click", e => {{ e.stopPropagation(); open ? close() : openMenu(); }});' \
             f' document.addEventListener("click", e => {{ if (open && !container.contains(e.target)) close(); }});' \
             f' const grid = document.getElementById(`${{padName}}_grid`);' \
-            f' if(grid) grid.addEventListener("change", previewPad);' \
+            f' if(grid) {{ grid.addEventListener("change", previewPad); grid.addEventListener("click", e => {{ if(e.target.tagName==="LABEL") previewPad(); }}); }}' \
             f' document.addEventListener("DOMContentLoaded", update);' \
             f' render(); update(); close();' \
             f'}})();' \
