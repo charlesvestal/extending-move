@@ -10,7 +10,7 @@ from core.set_management_handler import (
 )
 from core.list_msets_handler import list_msets
 from core.restore_handler import restore_ablbundle
-from core.pad_colors import PAD_COLORS, rgb_string
+from core.pad_colors import PAD_COLORS, rgb_string, color_name
 import json
 
 logger = logging.getLogger(__name__)
@@ -214,10 +214,12 @@ class SetManagementHandler(BaseHandler):
         return '<div class="pad-grid">' + ''.join(cells) + '</div>'
 
     def generate_color_options(self):
+        """Generate HTML <option> elements for pad colors with previews."""
         options = ['<option value="" disabled selected>-- Select Color --</option>']
         for i in range(1, 26):
             rgb = rgb_string(i)
+            name = color_name(i)
             options.append(
-                f'<option value="{i}" style="background-color: {rgb};">&#9632; {i}</option>'
+                f'<option value="{i}" style="color: {rgb};">&#9632; {name}</option>'
             )
         return ''.join(options)
