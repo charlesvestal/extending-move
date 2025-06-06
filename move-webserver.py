@@ -30,6 +30,7 @@ from handlers.drum_rack_inspector_handler_class import DrumRackInspectorHandler
 from handlers.file_placer_handler_class import FilePlacerHandler
 from handlers.refresh_handler_class import RefreshHandler
 from handlers.color_dropdown_handler_class import ColorDropdownHandler
+from handlers.pad_dropdown_handler_class import PadDropdownHandler
 from core.file_browser import generate_dir_html
 
 logging.basicConfig(
@@ -106,6 +107,7 @@ file_placer_handler = FilePlacerHandler()
 refresh_handler = RefreshHandler()
 drum_rack_handler = DrumRackInspectorHandler()
 color_dropdown_handler = ColorDropdownHandler()
+pad_dropdown_handler = PadDropdownHandler()
 
 
 @app.before_request
@@ -405,6 +407,16 @@ def color_dropdown_page():
         pad_colors_json=json.dumps(result["pad_colors"]),
         pad_names_json=json.dumps(result["pad_names"]),
         active_tab="color-dropdown",
+    )
+
+
+@app.route("/pad-dropdown", methods=["GET"])
+def pad_dropdown_page():
+    result = pad_dropdown_handler.handle_get()
+    return render_template(
+        "pad_dropdown.html",
+        pad_numbers_json=json.dumps(result["pad_numbers"]),
+        active_tab="pad-dropdown",
     )
 
 
