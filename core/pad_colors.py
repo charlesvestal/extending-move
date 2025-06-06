@@ -55,6 +55,35 @@ PAD_COLOR_NAMES = {
     25: "fuchsia",
 }
 
+# Human-readable names for each pad color
+PAD_COLOR_LABELS = {
+    1: "Scarlet Red",
+    2: "Pumpkin Orange",
+    3: "Tangerine Blaze",
+    4: "Salmon Glow",
+    5: "Rust",
+    6: "Khaki Tan",
+    7: "Sunny Yellow",
+    8: "Pale Green",
+    9: "Fresh Green",
+    10: "Lime",
+    11: "Olive",
+    12: "Aqua",
+    13: "Turquoise",
+    14: "Bright Turquoise",
+    15: "Sea Green",
+    16: "Steel Blue",
+    17: "Deep Blue",
+    18: "Indigo",
+    19: "Cyan",
+    20: "Slate Blue",
+    21: "Royal Purple",
+    22: "Lavender",
+    23: "Orchid",
+    24: "Crimson",
+    25: "Fuchsia",
+}
+
 # Emoji preview for each color ID mapped to the closest square color emoji
 PAD_COLOR_EMOJIS = {
     1: "🟥",
