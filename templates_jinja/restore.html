@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Restore Move Set (.ablbundle)</h2>
+{% if message %}
+  <p class="{{ message_type if message_type else ('success' if success else 'error') }}">{{ message }}</p>
+{% endif %}
+<form action="{{ host_prefix }}/restore" method="post" enctype="multipart/form-data">
+    <label for="ablbundle">Select .ablbundle file:</label>
+    <input type="file" name="ablbundle" accept=".ablbundle" required>
+    <br>
+    <label for="mset_color_dropdown">Pad color:</label>
+    {{ color_options | safe }}
+    <label>Select Pad:</label>
+    {{ pad_grid | safe }}
+    <br>
+    <input type="hidden" name="action" value="restore_ablbundle">
+    <button type="submit">Upload & Restore</button>
+</form>
+{% endblock %}

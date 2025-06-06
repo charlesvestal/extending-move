@@ -47,6 +47,20 @@ for (let i = 0; i < keys.length; i++) {
 }
 // --- End of new CHORDS generation code
 
+// Map keyboard keys to pad numbers for playback
+const chordKeyMap = {
+  '1': 13, '2': 14, '3': 15, '4': 16,
+  'q': 9,  'w': 10, 'e': 11, 'r': 12,
+  'a': 5,  's': 6,  'd': 7,  'f': 8,
+  'z': 1,  'x': 2,  'c': 3,  'v': 4
+};
+
+let chordKeyHandler = null;
+let keepLengthSame = false;
+if (!window.processedChordSamples) {
+    window.processedChordSamples = new Array(16).fill(null);
+}
+
 if (!window.selectedChords) {
     const defaultChords = [
         "Cm9",
@@ -67,9 +81,27 @@ if (!window.selectedChords) {
         "C"
     ];
     window.selectedChords = [];
+    window.selectedVoicings = [];
+    window.selectedOctaves = [];
     for (let i = 0; i < 16; i++) {
         window.selectedChords[i] = defaultChords[i] || "";
+        window.selectedVoicings[i] = 0; // root position
+        window.selectedOctaves[i] = 0;   // no transpose
     }
+}
+
+function applyVoicing(intervals, inversion) {
+    const result = intervals.slice();
+    for (let i = 0; i < inversion && i < result.length; i++) {
+        result[i] += 12;
+    }
+    return result;
+}
+
+function getChordIntervals(chordName, inversion = 0, octave = 0) {
+    let base = CHORDS[chordName] ? CHORDS[chordName].slice() : [];
+    base = applyVoicing(base, inversion);
+    return base.map(n => n + octave * 12);
 }
 
 function populateChordList() {
@@ -116,7 +148,22 @@ function populateChordList() {
       });
       selectHTML += '</select>';
 
+      // Voicing select (Root, 1st, 2nd, 3rd inversion)
+      let voicingHTML = '<select id="voicing-select-' + padNumber + '">';
+      ['Root', '1st Inv', '2nd Inv', '3rd Inv'].forEach((v, idx) => {
+          voicingHTML += '<option value="' + idx + '">' + v + '</option>';
+      });
+      voicingHTML += '</select>';
+
+      // Octave transpose select (-2..2)
+      let octaveHTML = '<select id="octave-select-' + padNumber + '">';
+      [-2,-1,0,1,2].forEach(val => {
+          octaveHTML += '<option value="' + val + '">' + (val >= 0 ? '+'+val : val) + ' oct</option>';
+      });
+      octaveHTML += '</select>';
+
       cell.innerHTML = `<div class="chord-label">${padNumber}: ${selectHTML}</div>
+                        <div style="margin-top:4px;">${voicingHTML} ${octaveHTML}</div>
                         <div class="chord-preview" id="chord-preview-${padNumber}" style="height: 50px; cursor: pointer;"></div>`;
       gridContainer.appendChild(cell);
 
@@ -125,7 +172,21 @@ function populateChordList() {
       selectElem.value = window.selectedChords[padNumber - 1];
       selectElem.addEventListener('change', function() {
           window.selectedChords[padNumber - 1] = this.value;
-          regenerateChordPreview(padNumber);
+          regenerateChordPreview(padNumber, true);
+      });
+
+      const voiceElem = cell.querySelector(`#voicing-select-${padNumber}`);
+      voiceElem.value = window.selectedVoicings[padNumber - 1];
+      voiceElem.addEventListener('change', function() {
+          window.selectedVoicings[padNumber - 1] = parseInt(this.value);
+          regenerateChordPreview(padNumber, true);
+      });
+
+      const octaveElem = cell.querySelector(`#octave-select-${padNumber}`);
+      octaveElem.value = window.selectedOctaves[padNumber - 1];
+      octaveElem.addEventListener('change', function() {
+          window.selectedOctaves[padNumber - 1] = parseInt(this.value);
+          regenerateChordPreview(padNumber, true);
       });
     }
   }
@@ -139,12 +200,49 @@ function populateChordList() {
   }
 }
 
+function playChordPad(padNumber) {
+  if (window.chordWaveforms && window.chordWaveforms[padNumber - 1]) {
+    const ws = window.chordWaveforms[padNumber - 1];
+    window.chordWaveforms.forEach(inst => { if (inst && inst.isPlaying()) inst.stop(); });
+    ws.stop();
+    ws.seekTo(0);
+    requestAnimationFrame(() => ws.play(0));
+  }
+}
 
-async function regenerateChordPreview(padNumber) {
+function attachChordKeyHandler() {
+  if (chordKeyHandler) {
+    document.removeEventListener('keydown', chordKeyHandler);
+  }
+  chordKeyHandler = function(e) {
+    // Ignore key events while typing in input fields or editable elements
+    const tag = (e.target && e.target.tagName) ? e.target.tagName.toUpperCase() : '';
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || e.target.isContentEditable) {
+      return;
+    }
+    const pad = chordKeyMap[e.key.toLowerCase()];
+    if (pad) {
+      e.preventDefault();
+      playChordPad(pad);
+    }
+  };
+  document.addEventListener('keydown', chordKeyHandler);
+}
+
+
+async function regenerateChordPreview(padNumber, showOverlay = false) {
     if (!window.decodedBuffer) return;
+    const overlay = document.getElementById('stretchOverlay');
+    if (showOverlay && overlay) {
+        overlay.style.display = 'flex';
+        updateStretchProgress(1, 1);
+    }
     const selectedChord = window.selectedChords[padNumber - 1];
-    const intervals = CHORDS[selectedChord];
+    const inversion = window.selectedVoicings[padNumber - 1] || 0;
+    const octave = window.selectedOctaves[padNumber - 1] || 0;
+    const intervals = getChordIntervals(selectedChord, inversion, octave);
     const blob = await processChordSample(window.decodedBuffer, intervals);
+    window.processedChordSamples[padNumber - 1] = blob;
     const url = URL.createObjectURL(blob);
     const previewContainer = document.getElementById(`chord-preview-${padNumber}`);
     if (previewContainer) {
@@ -180,6 +278,9 @@ async function regenerateChordPreview(padNumber) {
         });
         if (!window.chordWaveforms) window.chordWaveforms = [];
         window.chordWaveforms[padNumber - 1] = ws;
+    }
+    if (showOverlay && overlay) {
+        overlay.style.display = 'none';
     }
 }
 
@@ -291,6 +392,7 @@ function writeString(view, offset, string) {
   }
 }
 
+
 async function pitchShiftOffline(buffer, semitoneShift) {
   const factor = Math.pow(2, semitoneShift / 12);
   const newLength = Math.floor(buffer.length / factor);
@@ -306,6 +408,18 @@ async function pitchShiftOffline(buffer, semitoneShift) {
   source.start(0);
   return offlineCtx.startRendering();
 }
+
+async function pitchShiftRubberBand(buffer, semitoneShift) {
+  const wavData = toWav(buffer);
+  const form = new FormData();
+  form.append('semitones', semitoneShift);
+  form.append('audio', new Blob([new DataView(wavData)], { type: 'audio/wav' }), 'src.wav');
+  const resp = await fetch('/pitch-shift', { method: 'POST', body: form });
+  const arrayBuffer = await resp.arrayBuffer();
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return await audioCtx.decodeAudioData(arrayBuffer);
+}
+
 
 function mixAudioBuffers(buffers) {
   if (buffers.length === 0) return null;
@@ -352,13 +466,26 @@ function normalizeAudioBuffer(buffer, targetPeak = 0.9) {
 async function processChordSample(buffer, intervals) {
   const pitchedBuffers = [];
   for (let semitone of intervals) {
-    const pitched = await pitchShiftOffline(buffer, semitone);
+    let pitched;
+    if (keepLengthSame) {
+      pitched = await pitchShiftRubberBand(buffer, semitone);
+    } else {
+      pitched = await pitchShiftOffline(buffer, semitone);
+    }
     pitchedBuffers.push(pitched);
   }
-  const mixed = mixAudioBuffers(pitchedBuffers);
+  let mixed = mixAudioBuffers(pitchedBuffers);
   const normalized = normalizeAudioBuffer(mixed, 0.9);
   const wavData = toWav(normalized);
   return new Blob([new DataView(wavData)], { type: 'audio/wav' });
+  }
+
+function showChordMessage(text, type = 'info') {
+  const msgEl = document.getElementById('chord-message');
+  if (msgEl) {
+    msgEl.textContent = text;
+    msgEl.className = type;
+  }
 }
 
 function initChordTab() {
@@ -375,7 +502,7 @@ function initChordTab() {
     const fileInput = document.getElementById('wavFileInput');
     const presetNameInput = document.getElementById('presetName');
     if (!fileInput.files || fileInput.files.length === 0) {
-      alert("Please select a WAV file.");
+      showChordMessage('Please select a WAV file.', 'error');
       return;
     }
     const file = fileInput.files[0];
@@ -385,13 +512,25 @@ function initChordTab() {
     const arrayBuffer = await file.arrayBuffer();
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const decodedBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+    if (!window.processedChordSamples) {
+      window.processedChordSamples = new Array(16).fill(null);
+    }
     
     const chordNames = window.selectedChords;
     let sampleFilenames = [];
     let processedSamples = {};
-    for (let chordName of chordNames) {
-      const intervals = CHORDS[chordName];
-      const blob = await processChordSample(decodedBuffer, intervals);
+    for (let i = 0; i < chordNames.length; i++) {
+      const chordName = chordNames[i];
+      let blob = window.processedChordSamples[i];
+      if (!blob) {
+        const intervals = getChordIntervals(
+          chordName,
+          window.selectedVoicings[i] || 0,
+          window.selectedOctaves[i] || 0
+        );
+        blob = await processChordSample(decodedBuffer, intervals);
+        window.processedChordSamples[i] = blob;
+      }
       let safeChordName = chordName.replace(/\s+/g, '');
       let filename = `${baseName}_chord_${safeChordName}.wav`;
       sampleFilenames.push(filename);
@@ -418,6 +557,7 @@ function initChordTab() {
       let zipProgress = 50 + Math.round(metadata.percent / 2);
       document.getElementById('progressPercent').textContent = zipProgress + "%";
     }).then(function(content) {
+      document.getElementById('progressPercent').textContent = '100%';
       document.getElementById('loadingIndicator').style.display = 'none';
       const a = document.createElement("a");
       a.href = URL.createObjectURL(content);
@@ -425,6 +565,10 @@ function initChordTab() {
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
+    }).catch(function(err) {
+      console.error('Error generating bundle', err);
+      document.getElementById('loadingIndicator').style.display = 'none';
+      showChordMessage('Failed to generate bundle', 'error');
     });
     });
   }
@@ -437,7 +581,7 @@ function initChordTab() {
     const fileInput = document.getElementById('wavFileInput');
     const presetNameInput = document.getElementById('presetName');
     if (!fileInput.files || fileInput.files.length === 0) {
-      alert("Please select a WAV file.");
+      showChordMessage('Please select a WAV file.', 'error');
       return;
     }
     const file = fileInput.files[0];
@@ -447,13 +591,25 @@ function initChordTab() {
     const arrayBuffer = await file.arrayBuffer();
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const decodedBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-    
+    if (!window.processedChordSamples) {
+      window.processedChordSamples = new Array(16).fill(null);
+    }
+
     const chordNames = window.selectedChords;
     let sampleFilenames = [];
     let processedSamples = {};
-    for (let chordName of chordNames) {
-      const intervals = CHORDS[chordName];
-      const blob = await processChordSample(decodedBuffer, intervals);
+    for (let i = 0; i < chordNames.length; i++) {
+      const chordName = chordNames[i];
+      let blob = window.processedChordSamples[i];
+      if (!blob) {
+        const intervals = getChordIntervals(
+          chordName,
+          window.selectedVoicings[i] || 0,
+          window.selectedOctaves[i] || 0
+        );
+        blob = await processChordSample(decodedBuffer, intervals);
+        window.processedChordSamples[i] = blob;
+      }
       let safeChordName = chordName.replace(/\s+/g, '');
       let filename = `${baseName}_chord_${safeChordName}.wav`;
       sampleFilenames.push(filename);
@@ -472,37 +628,60 @@ function initChordTab() {
       const blob = processedSamples[chordName];
       zip.file(filename, blob);
     }
-    const samplesZipBlob = await zip.generateAsync({ type: "blob" });
-    
-    // Place samples via the File Placer API (ZIP mode)
-    const samplesForm = new FormData();
-    samplesForm.append("mode", "zip");
-    samplesForm.append("file", samplesZipBlob);
-    samplesForm.append("destination", "/data/UserData/UserLibrary/Samples/Preset Samples");
-    await fetch("/place-files", { method: "POST", body: samplesForm });
-    
-    // Place the preset file via the File Placer API (place mode)
-    const presetForm = new FormData();
-    presetForm.append("mode", "place");
-    presetForm.append("file", new Blob([presetJson], { type: "application/json" }), presetName + ".ablpreset");
-    presetForm.append("destination", "/data/UserData/UserLibrary/Track Presets");
-    await fetch("/place-files", { method: "POST", body: presetForm });
-    
-    // Refresh the library after placement.
-    await fetch("/refresh", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: "action=refresh_library"
-    });
-    
+    let samplesZipBlob;
+    try {
+      samplesZipBlob = await zip.generateAsync({ type: "blob" }, meta => {
+        let zipProg = Math.round(meta.percent / 2) + 50;
+        document.getElementById('progressPercent').textContent = zipProg + "%";
+      });
+    } catch (err) {
+      console.error('Error zipping samples', err);
+      document.getElementById('loadingIndicator').style.display = 'none';
+      showChordMessage('Failed to package samples', 'error');
+      return;
+    }
+
+    try {
+      const samplesForm = new FormData();
+      samplesForm.append("mode", "zip");
+      samplesForm.append("file", samplesZipBlob);
+      samplesForm.append("destination", "/data/UserData/UserLibrary/Samples/Preset Samples");
+      const resp1 = await fetch('http://' + location.host + '/place-files', { method: 'POST', body: samplesForm });
+      if (!resp1.ok) throw new Error('sample placement failed');
+
+      const presetForm = new FormData();
+      presetForm.append("mode", "place");
+      presetForm.append("file", new Blob([presetJson], { type: "application/json" }), presetName + ".ablpreset");
+      presetForm.append("destination", "/data/UserData/UserLibrary/Track Presets");
+      const resp2 = await fetch('http://' + location.host + '/place-files', { method: 'POST', body: presetForm });
+      if (!resp2.ok) throw new Error('preset placement failed');
+
+      const resp3 = await fetch('http://' + location.host + '/refresh', {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: "action=refresh_library"
+      });
+      if (!resp3.ok) throw new Error('refresh failed');
+    } catch (err) {
+      console.error('Error placing preset', err);
+      document.getElementById('loadingIndicator').style.display = 'none';
+      showChordMessage('Failed to place preset', 'error');
+      return;
+    }
+
+    document.getElementById('progressPercent').textContent = '100%';
     document.getElementById('loadingIndicator').style.display = 'none';
-    alert("Preset and samples placed successfully.");
+    showChordMessage('Preset and samples placed successfully.', 'success');
   });
 
   // Attach event listener for file input
   const fileInput = document.getElementById('wavFileInput');
   if (fileInput) {
     fileInput.addEventListener('change', async function(e) {
+      const overlay = document.getElementById('stretchOverlay');
+      if (overlay) overlay.style.display = 'flex';
+      const total = window.selectedChords.filter(c => c).length;
+      let count = 0;
       // Clear any previously generated waveform previews
       if (window.chordWaveforms && window.chordWaveforms.length) {
           window.chordWaveforms.forEach(ws => ws.destroy());
@@ -525,6 +704,7 @@ function initChordTab() {
       const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       const decodedBuffer = await audioCtx.decodeAudioData(arrayBuffer);
       window.decodedBuffer = decodedBuffer;
+      window.processedChordSamples = new Array(16).fill(null);
       const chordNames = window.selectedChords;
           
       // Clear any previous chord waveform instances
@@ -533,8 +713,17 @@ function initChordTab() {
       // Process each chord sample and create its waveform preview sequentially
       for (let i = 0; i < chordNames.length; i++) {
           const chordName = chordNames[i];
+          if (!chordName) continue;
+          count++;
+          updateStretchProgress(count, total);
           console.log("Processing chord:", chordName);
-          const blob = await processChordSample(decodedBuffer, CHORDS[chordName]);
+          const intervals = getChordIntervals(
+              chordName,
+              window.selectedVoicings[i] || 0,
+              window.selectedOctaves[i] || 0
+          );
+          const blob = await processChordSample(decodedBuffer, intervals);
+          window.processedChordSamples[i] = blob;
           const url = URL.createObjectURL(blob);
           const padNumber = i + 1;  // Adjust this if your grid order differs
           const previewContainer = document.getElementById(`chord-preview-${padNumber}`);
@@ -570,9 +759,40 @@ function initChordTab() {
               window.chordWaveforms.push(ws);
           }
       }
+      if (overlay) overlay.style.display = 'none';
     });
   }
-  
+
+  const lengthToggle = document.getElementById('keepLengthToggle');
+  if (lengthToggle) {
+    lengthToggle.addEventListener('change', async () => {
+      keepLengthSame = lengthToggle.checked;
+      if (window.decodedBuffer) {
+        const overlay = document.getElementById('stretchOverlay');
+        if (overlay) overlay.style.display = 'flex';
+        const total = window.selectedChords.filter(c => c).length;
+        let count = 0;
+        for (let i = 1; i <= 16; i++) {
+          if (window.selectedChords[i - 1]) {
+            count++;
+            updateStretchProgress(count, total);
+            await regenerateChordPreview(i);
+          }
+        }
+        if (overlay) overlay.style.display = 'none';
+      }
+    });
+  }
+
   populateChordList();
+
+  attachChordKeyHandler();
+}
+
+function updateStretchProgress(current, total) {
+  const span = document.getElementById('stretchProgress');
+  if (span) {
+    span.textContent = `(${current}/${total})`;
+  }
 }
 

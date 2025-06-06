@@ -1,4 +1,8 @@
 import subprocess
+import logging
+from core.cache_manager import invalidate_cache
+
+logger = logging.getLogger(__name__)
 
 def refresh_library():
     """
@@ -29,14 +33,15 @@ def refresh_library():
         ]
         # Execute command and capture output
         subprocess.check_output(cmd, stderr=subprocess.STDOUT)
-        print("Library refreshed successfully.")
+        invalidate_cache()
+        logger.info("Library refreshed successfully.")
         return True, "Library refreshed successfully."
     except subprocess.CalledProcessError as e:
         # Handle D-Bus command failure
         error_message = e.output.decode().strip() if e.output else "Unknown error."
-        print(f"Failed to refresh library: {error_message}")
+        logger.error("Failed to refresh library: %s", error_message)
         return False, f"Failed to refresh library: {error_message}"
     except Exception as e:
         # Handle any other unexpected errors
-        print(f"An error occurred while refreshing library: {e}")
+        logger.error("An error occurred while refreshing library: %s", e)
         return False, f"An error occurred while refreshing library: {e}"

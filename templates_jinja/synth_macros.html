@@ -1,23 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
 <h2>Synth Macros (Drift)</h2>
 <p><em>Note: Deleting and adding macro assignments will immediately alter your preset files and can result in broken presets. Back them up! Ranges are optional, and not all parameters take them (i.e. Voice1_Filter1_Type). Experiement!</em></p>
 
-{message_html}
+{% if message %}
+  <p class="{{ message_type if message_type else ('success' if success else 'error') }}">{{ message }}</p>
+{% endif %}
 
-<form method="POST" action="/synth-preset-inspector" id="preset-form">
-    <input type="hidden" name="action" id="action-input" value="select_preset">
+{% if not preset_selected %}
+<div class="file-browser" data-root="{{ browser_root }}" data-action="{{ host_prefix }}/synth-macros" data-field="preset_select" data-value="select_preset" data-filter="drift">
+    {{ file_browser_html | safe }}
+</div>
+{% else %}
+<form method="post" action="{{ host_prefix }}/synth-macros" id="preset-form">
+    <input type="hidden" name="action" id="action-input" value="reset_preset">
     <input type="hidden" name="param_path" id="param-path-input" value="">
     <input type="hidden" name="param_name" id="param-name-input" value="">
     <input type="hidden" name="macro_index" id="macro-index-input" value="">
-    <div class="preset-selection">
-        <select name="preset_select" id="preset_select">
-            {{ options }}
-        </select>
-    </div>
-    
+    <button type="submit">Choose Another Preset</button>
+    <input type="hidden" name="preset_select" value="{{ selected_preset }}">
+    <p class="current-preset">Currently loaded preset: {{ selected_preset.split('/')[-1] }}</p>
     <div class="macro-display">
-        {{ macros_html }}
+        {{ macros_html | safe }}
     </div>
 </form>
+{% endif %}
 
 <!-- The dropdown change event is handled by main.js using AJAX -->
 
@@ -179,3 +186,7 @@
         background-color: #0b7dda;
     }
 </style>
+{% endblock %}
+{% block scripts %}
+<script type="module" src="{{ host_prefix }}/static/file_browser.js"></script>
+{% endblock %}

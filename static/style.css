@@ -127,7 +127,8 @@ h3 {
     overflow: visible;
 }
 
-.tab button {
+.tab button,
+.tab a {
     background: transparent;
     border: none;
     padding: 0.75rem 1.25rem;
@@ -136,14 +137,17 @@ h3 {
     font-weight: 400;
     margin-right: 0.25rem;
     transition: color 0.2s;
+    text-decoration: none;
 }
 
-.tab button:hover {
+.tab button:hover,
+.tab a:hover {
     color: #262626;
     background-color: transparent;
 }
 
-.tab button.active {
+.tab button.active,
+.tab a.active {
     color: #ff764d;
     background-color: transparent;
     border-bottom: none;
@@ -205,6 +209,7 @@ input[type="submit"] {
     transition: background-color 0.2s;
     margin-right: 0.5rem;
     margin-bottom: 0.5rem;
+    margin-top: 0.5rem;
     font-family: 'Ableton Sans', Arial, sans-serif;
 }
 
@@ -294,6 +299,20 @@ input[type="submit"]:hover {
     margin-bottom: 1rem;
 }
 
+/* Informational messages */
+.info {
+    color: #155724;
+    padding: 0.75rem;
+    background-color: #e9f7fc;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}
+
+.current-preset {
+    font-weight: 500;
+    margin-bottom: 1rem;
+}
+
 /* Chord grid styling */
 .chord-list {
     margin-top: 2rem;
@@ -368,3 +387,73 @@ select {
 .drum-cell .sample-info {
     margin-top: auto;
 }
+/* File browser styling */
+.file-tree { list-style: none; padding-left: 0; }
+.file-tree ul { list-style: none; margin-left: 1rem; padding-left: 0; }
+.file-tree li { margin: 0; }
+.file-tree .dir > span,
+.file-tree .file-entry button { display: block; width: 100%; cursor: pointer; border: none; background: none; text-align: left; padding: 0; }
+.file-tree .dir > span:hover,
+.file-tree .file-entry button:hover { background: #f0f0f0; }
+.file-tree .file-entry button { color: #0066cc; }
+.file-tree .dir.closed > span::before { content: "\25B6"; display: inline-block; width: 1em; }
+.file-tree .dir.open > span::before { content: "\25BC"; display: inline-block; width: 1em; }
+.hidden { display: none; }
+.file-tree .dir, .file-tree .file-entry {margin-left: 10px;}
+.file-browser {
+    max-height: 240px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    padding: 0.25rem;
+}
+
+/* Pad grid for set management */
+.pad-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 0.25rem;
+    margin-bottom: 1rem;
+    max-width:600px;
+}
+
+.pad-cell {
+    box-shadow: inset 0 0 0 2px transparent;
+    border-radius: 4px;
+    padding: 0.5rem;
+    text-align: center;
+    font-weight: 600;
+    box-sizing: border-box;
+    height:45px;
+}
+
+.pad-cell.free {
+    cursor: pointer;
+    background: #f0f0f0;
+}
+
+.pad-cell.occupied {
+    cursor: default;
+    background: #ffeef0;
+}
+
+.pad-grid input[type="radio"] {
+    display: none;
+}
+
+.pad-grid input[type="radio"]:checked + label {
+    box-shadow: inset 0 0 0 2px #333;
+    background: #d0e8ff;
+}
+
+
+
+/* Small icon button for reverting samples */
+.sample-header .revert-button {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+}
+

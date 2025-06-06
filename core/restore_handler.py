@@ -106,4 +106,4 @@ def restore_ablbundle(ablbundle_path, mset_restoreid, mset_restorecolor):
         return {"success": False, "message": f"Error setting attributes: {e}"}
     
     logging.info(f"Successfully restored {ablbundle_path} to {uuid_dir}")
-    return {"success": True, "message": f"Successfully restored {mset_name} to pad ID {mset_restoreid} with color {mset_restorecolor}"}
+    return {"success": True, "message": f"Successfully restored {mset_name} to pad {mset_restoreid}"} # with color {mset_restorecolor}"}
