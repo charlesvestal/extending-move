@@ -652,6 +652,8 @@ function initChordTab() {
   const fileInput = document.getElementById('wavFileInput');
   if (fileInput) {
     fileInput.addEventListener('change', async function(e) {
+      const overlay = document.getElementById('stretchOverlay');
+      if (overlay) overlay.style.display = 'flex';
       // Clear any previously generated waveform previews
       if (window.chordWaveforms && window.chordWaveforms.length) {
           window.chordWaveforms.forEach(ws => ws.destroy());
@@ -724,19 +726,23 @@ function initChordTab() {
               window.chordWaveforms.push(ws);
           }
       }
+      if (overlay) overlay.style.display = 'none';
     });
   }
 
   const lengthToggle = document.getElementById('keepLengthToggle');
   if (lengthToggle) {
-    lengthToggle.addEventListener('change', () => {
+    lengthToggle.addEventListener('change', async () => {
       keepLengthSame = lengthToggle.checked;
       if (window.decodedBuffer) {
+        const overlay = document.getElementById('stretchOverlay');
+        if (overlay) overlay.style.display = 'flex';
         for (let i = 1; i <= 16; i++) {
           if (window.selectedChords[i - 1]) {
-            regenerateChordPreview(i);
+            await regenerateChordPreview(i);
           }
         }
+        if (overlay) overlay.style.display = 'none';
       }
     });
   }
