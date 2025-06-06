@@ -27,7 +27,7 @@
     <input type="file" id="wavFileInput" accept=".wav, .aiff, .aif, .mp3"><br>
     <label for="presetName">Preset Name (optional): </label>
     <input type="text" id="presetName" placeholder="Preset name"><br>
-    <label><input type="checkbox" id="stretchOption"> Keep original length (SoundTouch)</label><br>
+    <label><input type="checkbox" id="keepLengthToggle"> Keep all notes the same length</label><br>
     <button id="generatePreset">Download Preset</button>
     <div id="loadingIndicator" style="display:none; margin-top:10px;">
       Generating bundle... <span id="progressPercent">0%</span>
@@ -46,5 +46,12 @@
   <script src="shared.js"></script>
   <!-- Chord tool specific JavaScript -->
   <script src="chord.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof initChordTab === 'function') {
+        initChordTab();
+      }
+    });
+  </script>
 </body>
 </html>

@@ -35,7 +35,7 @@ echo "Uploading project files to ${REMOTE_HOST}:${REMOTE_DIR}…"
 tar czf - \
   --exclude='.git' \
   --exclude='utility-scripts' \
-  core handlers templates_jinja static examples \
+  core handlers templates_jinja static examples bin \
   move-webserver.py requirements.txt | \
 ssh -T "${REMOTE_USER}@${REMOTE_HOST}" "cd '${REMOTE_DIR}' && tar xzf - && cp -r /opt/move/HttpRoot/fonts static/"
 
@@ -46,11 +46,13 @@ echo "Setting permissions on remote…"
 ssh -T "${REMOTE_USER}@${REMOTE_HOST}" <<EOF
 chmod +x "${REMOTE_DIR}/move-webserver.py"
 chmod -R 755 "${REMOTE_DIR}/static"
+chmod -R 755 "${REMOTE_DIR}/bin"
 EOF
 
 echo "Installing requirements with pip on remote..."
 ssh -T "${REMOTE_USER}@${REMOTE_HOST}" <<EOF
 export TMPDIR=/data/UserData/tmp
+export PATH="${REMOTE_DIR}/bin/rubberband:\$PATH"
 echo "TMPDIR is set to: \$TMPDIR"
 pip install --no-cache-dir -r "${REMOTE_DIR}/requirements.txt" | grep -v 'already satisfied'
 EOF
