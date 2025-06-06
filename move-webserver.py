@@ -258,6 +258,7 @@ def restore():
     success = False
     message_type = None
     options_html = ""
+    color_options = ""
     pad_grid = ""
     if request.method == "POST":
         form_data = request.form.to_dict()
@@ -269,9 +270,11 @@ def restore():
         message_type = result.get("message_type")
         success = message_type != "error"
         options_html = result.get("options", options_html)
+        color_options = result.get("color_options", color_options)
         pad_grid = result.get("pad_grid", pad_grid)
     context = restore_handler.handle_get()
     options_html = context.get("options", options_html)
+    color_options = context.get("color_options", color_options)
     pad_grid = context.get("pad_grid", pad_grid)
     return render_template(
         "restore.html",
@@ -279,6 +282,7 @@ def restore():
         success=success,
         message_type=message_type,
         options_html=options_html,
+        color_options=color_options,
         pad_grid=pad_grid,
         active_tab="restore",
     )
