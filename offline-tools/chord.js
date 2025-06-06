@@ -505,6 +505,9 @@ document.getElementById('wavFileInput').addEventListener('change', async functio
     
     console.log("File selected:", file);
     
+    const overlay = document.getElementById('stretchOverlay');
+    if (overlay) overlay.style.display = 'flex';
+
     const arrayBuffer = await file.arrayBuffer();
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const decodedBuffer = await audioCtx.decodeAudioData(arrayBuffer);
@@ -559,18 +562,22 @@ document.getElementById('wavFileInput').addEventListener('change', async functio
             window.chordWaveforms.push(ws);
         }
     }
+    if (overlay) overlay.style.display = 'none';
 });
 
 const lengthToggle = document.getElementById('keepLengthToggle');
 if (lengthToggle) {
-    lengthToggle.addEventListener('change', function(){
+    lengthToggle.addEventListener('change', async function(){
         keepLengthSame = lengthToggle.checked;
         if (window.decodedBuffer) {
+            const overlay = document.getElementById('stretchOverlay');
+            if (overlay) overlay.style.display = 'flex';
             for (let i = 1; i <= 16; i++) {
                 if (window.selectedChords[i - 1]) {
-                    regenerateChordPreview(i);
+                    await regenerateChordPreview(i);
                 }
             }
+            if (overlay) overlay.style.display = 'none';
         }
     });
 }
