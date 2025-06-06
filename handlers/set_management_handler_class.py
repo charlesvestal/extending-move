@@ -10,7 +10,7 @@ from core.set_management_handler import (
 )
 from core.list_msets_handler import list_msets
 from core.restore_handler import restore_ablbundle
-from core.pad_colors import PAD_COLORS, rgb_string
+from core.pad_colors import PAD_COLORS, rgb_string, color_name
 import json
 
 logger = logging.getLogger(__name__)
@@ -206,7 +206,8 @@ class SetManagementHandler(BaseHandler):
                 disabled = 'disabled' if occupied else ''
                 color_id = color_map.get(idx)
                 style = f' style="background-color: {rgb_string(color_id)}"' if color_id else ''
-                label_text = "" if not occupied else ""
+            name = color_name(i)
+                f'<option value="{i}" style="color: {rgb};">&#9632; {i} - {name}</option>'
                 cells.append(
                     f'<input type="radio" id="pad_{num}" name="pad_index" value="{num}" {disabled}>'
                     f'<label for="pad_{num}" class="pad-cell {status}"{style}>{label_text}</label>'

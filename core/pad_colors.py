@@ -26,8 +26,40 @@ PAD_COLORS = {
     25: (217, 43, 255),
 }
 
-def rgb_string(color_id):
+# Names are approximate interpretations of the RGB values.
+PAD_COLOR_NAMES = {
+    1: "Red",
+    2: "Orange",
+    3: "Bright Orange",
+    4: "Peach",
+    5: "Burnt Orange",
+    6: "Beige",
+    7: "Yellow",
+    8: "Lime",
+    9: "Light Green",
+    10: "Green",
+    11: "Olive",
+    12: "Aqua",
+    13: "Teal",
+    14: "Turquoise",
+    15: "Cyan",
+    16: "Sky Blue",
+    17: "Ocean Blue",
+    18: "Indigo",
+    19: "Azure",
+    20: "Slate Blue",
+    21: "Steel Blue",
+    22: "Violet",
+    23: "Magenta",
+    24: "Pink",
+    25: "Purple",
+}
+
+def rgb_string(color_id: int) -> str:
     rgb = PAD_COLORS.get(color_id)
     if rgb:
         return f"rgb({rgb[0]}, {rgb[1]}, {rgb[2]})"
     return ""
+
+def color_name(color_id: int) -> str:
+    return PAD_COLOR_NAMES.get(color_id, str(color_id))
