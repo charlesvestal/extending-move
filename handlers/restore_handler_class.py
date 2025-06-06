@@ -258,6 +258,7 @@ class RestoreHandler(BaseHandler):
             f' toggle.addEventListener("click", e => {{ e.stopPropagation(); open ? close() : openMenu(); }});' \
             f' document.addEventListener("click", e => {{ if (open && !container.contains(e.target)) close(); }});' \
             f' document.querySelectorAll(`input[name="${{padName}}"]`).forEach(r => r.addEventListener("change", previewPad));' \
+            f' document.addEventListener("DOMContentLoaded", update);' \
             f' render(); update(); close();' \
             f'}})();' \
             f'</script>' \
