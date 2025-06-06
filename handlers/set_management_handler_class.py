@@ -192,7 +192,7 @@ class SetManagementHandler(BaseHandler):
         """Return HTML for a 32-pad grid showing occupied pads."""
         cells = []
         # Pad numbering starts with 1 on the bottom-left
-        for row in range(3, -1, -1):
+        for row in range(4):
             for col in range(8):
                 idx = (3 - row) * 8 + col
                 num = idx + 1

@@ -146,7 +146,7 @@ class RestoreHandler(BaseHandler):
     def generate_pad_grid(self, used_ids):
         """Return HTML for a 32-pad grid showing occupied pads."""
         cells = []
-        for row in range(3, -1, -1):
+        for row in range(4):
             for col in range(8):
                 idx = (3 - row) * 8 + col
                 num = idx + 1
