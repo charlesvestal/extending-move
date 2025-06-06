@@ -11,10 +11,8 @@
     <label>Select Pad:</label>
     {{ pad_grid | safe }}
     <br>
-    <label for="mset_color">Pad color:</label>
-    <select name="mset_color" id="mset_color" required>
-        {{ color_options | safe }}
-    </select>
+    <label for="mset_color_dropdown">Pad color:</label>
+    {{ color_options | safe }}
     <input type="hidden" name="action" value="restore_ablbundle">
     <button type="submit">Upload & Restore</button>
 </form>

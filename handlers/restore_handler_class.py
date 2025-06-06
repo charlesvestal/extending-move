@@ -3,7 +3,8 @@ import logging
 from handlers.base_handler import BaseHandler
 from core.list_msets_handler import list_msets
 from core.restore_handler import restore_ablbundle
-from core.pad_colors import PAD_COLORS, rgb_string, color_name, color_emoji
+from core.pad_colors import PAD_COLORS, PAD_COLOR_LABELS, rgb_string
+import json
 
 class RestoreHandler(BaseHandler):
     """
@@ -177,13 +178,65 @@ class RestoreHandler(BaseHandler):
                 )
         return '<div class="pad-grid">' + ''.join(cells) + '</div>'
 
-    def generate_color_options(self):
-        """Generate HTML <option> elements for pad colors with previews."""
-        options = ['<option value="" disabled selected>-- Select Color --</option>']
-        for i in range(1, 26):
-            emoji = color_emoji(i)
-            name = color_name(i)
-            options.append(
-                f'<option value="{i}">{emoji} {name}</option>'
-            )
-        return ''.join(options)
+    def generate_color_options(self, input_name="mset_color"):
+        """Return HTML for the custom color dropdown."""
+        colors = [PAD_COLORS[i] for i in sorted(PAD_COLORS)]
+        names = [PAD_COLOR_LABELS[i] for i in sorted(PAD_COLOR_LABELS)]
+        dropdown_id = f"{input_name}_dropdown"
+        colors_json = json.dumps(colors)
+        names_json = json.dumps(names)
+        return (
+            f'<div class="color-dropdown" id="{dropdown_id}">' \
+            f'<div class="dropdown-toggle">' \
+            f'<span class="preview-square"></span>' \
+            f'<span class="preview-label"></span>' \
+            f'<span class="arrow">&#9662;</span>' \
+            f'</div>' \
+            f'<div class="dropdown-menu"></div>' \
+            f'<input type="hidden" name="{input_name}" value="1">' \
+            f'</div>' \
+            f'<script>' \
+            f'const colors_{dropdown_id} = {colors_json};' \
+            f'const names_{dropdown_id} = {names_json};' \
+            f'(function() {{' \
+            f' const c = colors_{dropdown_id};' \
+            f' const n = names_{dropdown_id};' \
+            f' const container = document.getElementById("{dropdown_id}");' \
+            f' const toggle = container.querySelector(".dropdown-toggle");' \
+            f' const menu = container.querySelector(".dropdown-menu");' \
+            f' const hidden = container.querySelector("input");' \
+            f' let open = false;' \
+            f' let selected = parseInt(hidden.value) - 1;' \
+            f' function render() {{' \
+            f'  menu.innerHTML = "";' \
+            f'  c.forEach((col, idx) => {{' \
+            f'    const item = document.createElement("div");' \
+            f'    item.className = "dropdown-item";' \
+            f'    item.innerHTML = `<span class="preview-square" style="background-color: rgb(${{col[0]}}, ${{col[1]}}, ${{col[2]}});"></span> <span class="label">${{n[idx]}}</span>`;' \
+            f'    item.addEventListener("click", () => {{selected = idx; hidden.value = idx + 1; update(); close();}});' \
+            f'    menu.appendChild(item);' \
+            f'  }});' \
+            f' }}' \
+            f' function update() {{' \
+            f'  const col = c[selected];' \
+            f'  toggle.querySelector(".preview-square").style.backgroundColor = `rgb(${{col[0]}}, ${{col[1]}}, ${{col[2]}})`;'
+            f'  toggle.querySelector(".preview-label").textContent = n[selected];' \
+            f' }}' \
+            f' function openMenu() {{ menu.style.display = "block"; open = true; }}' \
+            f' function close() {{ menu.style.display = "none"; open = false; }}' \
+            f' toggle.addEventListener("click", e => {{ e.stopPropagation(); open ? close() : openMenu(); }});' \
+            f' document.addEventListener("click", e => {{ if (open && !container.contains(e.target)) close(); }});' \
+            f' render(); update(); close();' \
+            f'}})();' \
+            f'</script>' \
+            f'<style>' \
+            f'.color-dropdown {{ position: relative; width: 200px; font-size: 0.875rem; }}' \
+            f'.color-dropdown .dropdown-toggle {{ border: 1px solid #ddd; border-radius: 4px; padding: 0.5rem; cursor: pointer; display: flex; align-items: center; background: #fff; }}' \
+            f'.color-dropdown .preview-square {{ width: 16px; height: 16px; margin-right: 8px; border: 1px solid #ccc; }}' \
+            f'.color-dropdown .arrow {{ margin-left: auto; }}' \
+            f'.color-dropdown .dropdown-menu {{ position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #ddd; border-radius: 4px; max-height: 200px; overflow-y: auto; z-index: 1000; }}' \
+            f'.color-dropdown .dropdown-item {{ padding: 0.5rem; display: flex; align-items: center; cursor: pointer; }}' \
+            f'.color-dropdown .dropdown-item:hover {{ background-color: #f0f0f0; }}' \
+            f'.color-dropdown .dropdown-item .preview-square {{ margin-right: 8px; }}' \
+            f'</style>'
+        )
