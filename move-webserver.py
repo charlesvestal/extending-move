@@ -18,6 +18,7 @@ import logging
 import numpy as np
 import librosa
 import time
+import json
 import io
 import soundfile as sf
 import pyrubberband.pyrb as pyrb
@@ -277,6 +278,8 @@ def restore():
     success = False
     message_type = None
     options_html = ""
+    color_options = ""
+    pad_grid = ""
     if request.method == "POST":
         form_data = request.form.to_dict()
         if "ablbundle" in request.files:
@@ -286,14 +289,21 @@ def restore():
         message = result.get("message")
         message_type = result.get("message_type")
         success = message_type != "error"
+        options_html = result.get("options", options_html)
+        color_options = result.get("color_options", color_options)
+        pad_grid = result.get("pad_grid", pad_grid)
     context = restore_handler.handle_get()
-    options_html = context.get("options", "")
+    options_html = context.get("options", options_html)
+    color_options = context.get("color_options", color_options)
+    pad_grid = context.get("pad_grid", pad_grid)
     return render_template(
         "restore.html",
         message=message,
         success=success,
         message_type=message_type,
         options_html=options_html,
+        color_options=color_options,
+        pad_grid=pad_grid,
         active_tab="restore",
     )
 
@@ -338,6 +348,7 @@ def midi_upload():
     context = set_management_handler.handle_get()
     pad_options = context.get("pad_options", "")
     pad_color_options = context.get("pad_color_options", "")
+    pad_grid = context.get("pad_grid", "")
     if request.method == "POST":
         form_data = request.form.to_dict()
         if "midi_file" in request.files:
@@ -348,6 +359,8 @@ def midi_upload():
         message_type = result.get("message_type")
         success = message_type != "error"
         pad_options = result.get("pad_options", pad_options)
+        pad_color_options = result.get("pad_color_options", pad_color_options)
+        pad_grid = result.get("pad_grid", pad_grid)
     else:
         message = context.get("message")
         message_type = context.get("message_type")
@@ -359,6 +372,7 @@ def midi_upload():
         message_type=message_type,
         pad_options=pad_options,
         pad_color_options=pad_color_options,
+        pad_grid=pad_grid,
         active_tab="midi-upload",
     )
 
@@ -398,6 +412,10 @@ def synth_macros():
 @app.route("/chord", methods=["GET"])
 def chord():
     return render_template("chord.html", active_tab="chord")
+
+
+
+
 
 
 @app.route("/samples/<path:sample_path>", methods=["GET", "OPTIONS"])

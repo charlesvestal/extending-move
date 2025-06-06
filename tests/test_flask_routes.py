@@ -37,15 +37,15 @@ def test_reverse_post(client, monkeypatch):
 
 def test_restore_get(client, monkeypatch):
     def fake_get():
-        return {'options': '<option value="1">1</option>', 'message': ''}
+        return {'options': '<option value="1">1</option>', 'pad_grid': '<div class="pad-grid"></div>', 'message': ''}
     monkeypatch.setattr(move_webserver.restore_handler, 'handle_get', fake_get)
     resp = client.get('/restore')
     assert resp.status_code == 200
-    assert b'<option value="1">1</option>' in resp.data
+    assert b'class="pad-grid"' in resp.data
 
 def test_restore_post(client, monkeypatch):
     def fake_handle_post(form):
-        return {'message': 'restored', 'message_type': 'success'}
+        return {'message': 'restored', 'message_type': 'success', 'pad_grid': '<div class="pad-grid"></div>', 'options': ''}
     monkeypatch.setattr(move_webserver.restore_handler, 'handle_post', fake_handle_post)
     data = {
         'action': 'restore_ablbundle',
@@ -136,7 +136,6 @@ def test_chord_get(client):
     assert resp.status_code == 200
     assert b'Chord Kit Generator' in resp.data
     assert b'id="chordList"' in resp.data
-
 def test_detect_transients(client, monkeypatch):
     def fake_detect(form):
         return {'content': '{"success": true}', 'status': 200, 'headers': [('Content-Type', 'application/json')]}
@@ -151,12 +150,13 @@ def test_midi_upload_get(client, monkeypatch):
     def fake_get():
         return {
             'pad_options': '<option value="1">1</option>',
-            'pad_color_options': '<option value="1">1</option>'
+            'pad_color_options': '<option value="1">1</option>',
+            'pad_grid': '<div class="pad-grid"></div>'
         }
     monkeypatch.setattr(move_webserver.set_management_handler, 'handle_get', fake_get)
     resp = client.get('/midi-upload')
     assert resp.status_code == 200
-    assert b'<option value="1">1</option>' in resp.data
+    assert b'class="pad-grid"' in resp.data
 
 
 def test_midi_upload_post(client, monkeypatch):
@@ -165,7 +165,8 @@ def test_midi_upload_post(client, monkeypatch):
             'message': 'ok',
             'message_type': 'success',
             'pad_options': '<option value="2">2</option>',
-            'pad_color_options': '<option value="1">1</option>'
+            'pad_color_options': '<option value="1">1</option>',
+            'pad_grid': '<div class="pad-grid"></div>'
         }
     monkeypatch.setattr(move_webserver.set_management_handler, 'handle_post', fake_post)
     f = (io.BytesIO(b'data'), 'test.mid')
