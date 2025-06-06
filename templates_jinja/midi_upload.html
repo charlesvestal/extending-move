@@ -31,13 +31,13 @@
                 <input type="number" name="tempo" id="tempo" min="20" max="300" placeholder="Auto-detect from MIDI" />
                 <small>Leave blank to use tempo from MIDI file (or default 120 BPM)</small>
             </div>
+           <div class="form-group">
+                <label for="pad_color_dropdown">Pad Color:</label>
+                {{ pad_color_options | safe }}
+            </div>
             <div class="form-group">
                 <label>Select Pad:</label>
                 {{ pad_grid | safe }}
-            </div>
-            <div class="form-group">
-                <label for="pad_color_dropdown">Pad Color:</label>
-                {{ pad_color_options | safe }}
             </div>
             <button type="submit" >Generate Set from MIDI</button>
         </form>
