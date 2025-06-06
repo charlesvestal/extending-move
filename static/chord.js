@@ -654,6 +654,8 @@ function initChordTab() {
     fileInput.addEventListener('change', async function(e) {
       const overlay = document.getElementById('stretchOverlay');
       if (overlay) overlay.style.display = 'flex';
+      const total = window.selectedChords.filter(c => c).length;
+      let count = 0;
       // Clear any previously generated waveform previews
       if (window.chordWaveforms && window.chordWaveforms.length) {
           window.chordWaveforms.forEach(ws => ws.destroy());
@@ -684,6 +686,9 @@ function initChordTab() {
       // Process each chord sample and create its waveform preview sequentially
       for (let i = 0; i < chordNames.length; i++) {
           const chordName = chordNames[i];
+          if (!chordName) continue;
+          count++;
+          updateStretchProgress(count, total);
           console.log("Processing chord:", chordName);
           const intervals = getChordIntervals(
               chordName,
@@ -737,8 +742,12 @@ function initChordTab() {
       if (window.decodedBuffer) {
         const overlay = document.getElementById('stretchOverlay');
         if (overlay) overlay.style.display = 'flex';
+        const total = window.selectedChords.filter(c => c).length;
+        let count = 0;
         for (let i = 1; i <= 16; i++) {
           if (window.selectedChords[i - 1]) {
+            count++;
+            updateStretchProgress(count, total);
             await regenerateChordPreview(i);
           }
         }
@@ -750,5 +759,12 @@ function initChordTab() {
   populateChordList();
 
   attachChordKeyHandler();
+}
+
+function updateStretchProgress(current, total) {
+  const span = document.getElementById('stretchProgress');
+  if (span) {
+    span.textContent = `(${current}/${total})`;
+  }
 }
 
