@@ -178,8 +178,8 @@ class RestoreHandler(BaseHandler):
                 )
         return '<div class="pad-grid">' + ''.join(cells) + '</div>'
 
-    def generate_color_options(self, input_name="mset_color"):
-        """Return HTML for the custom color dropdown."""
+    def generate_color_options(self, input_name="mset_color", pad_input_name="mset_index"):
+        """Return HTML for the custom color dropdown with pad preview."""
         colors = [PAD_COLORS[i] for i in sorted(PAD_COLORS)]
         names = [PAD_COLOR_LABELS[i] for i in sorted(PAD_COLOR_LABELS)]
         dropdown_id = f"{input_name}_dropdown"
@@ -205,6 +205,7 @@ class RestoreHandler(BaseHandler):
             f' const toggle = container.querySelector(".dropdown-toggle");' \
             f' const menu = container.querySelector(".dropdown-menu");' \
             f' const hidden = container.querySelector("input");' \
+            f' const padName = "{pad_input_name}";' \
             f' let open = false;' \
             f' let selected = parseInt(hidden.value) - 1;' \
             f' function render() {{' \
@@ -217,15 +218,29 @@ class RestoreHandler(BaseHandler):
             f'    menu.appendChild(item);' \
             f'  }});' \
             f' }}' \
+            f' function previewPad() {{' \
+            f'  const radios = document.querySelectorAll(`input[name="${{padName}}"]`);' \
+            f'  radios.forEach(r => {{' \
+            f'    const lab = document.querySelector(`label[for="${{r.id}}"]`);' \
+            f'    if(lab && !r.checked && !r.disabled) lab.style.backgroundColor = "";' \
+            f'  }});' \
+            f'  const checked = document.querySelector(`input[name="${{padName}}"]:checked`);' \
+            f'  if(checked) {{' \
+            f'    const lab = document.querySelector(`label[for="${{checked.id}}"]`);' \
+            f'    if(lab) {{ const col = c[selected]; lab.style.backgroundColor = `rgb(${{col[0]}}, ${{col[1]}}, ${{col[2]}})`; }}' \
+            f'  }}' \
+            f' }}' \
             f' function update() {{' \
             f'  const col = c[selected];' \
             f'  toggle.querySelector(".preview-square").style.backgroundColor = `rgb(${{col[0]}}, ${{col[1]}}, ${{col[2]}})`;'
             f'  toggle.querySelector(".preview-label").textContent = n[selected];' \
+            f'  previewPad();' \
             f' }}' \
             f' function openMenu() {{ menu.style.display = "block"; open = true; }}' \
             f' function close() {{ menu.style.display = "none"; open = false; }}' \
             f' toggle.addEventListener("click", e => {{ e.stopPropagation(); open ? close() : openMenu(); }});' \
             f' document.addEventListener("click", e => {{ if (open && !container.contains(e.target)) close(); }});' \
+            f' document.querySelectorAll(`input[name="${{padName}}"]`).forEach(r => r.addEventListener("change", previewPad));' \
             f' render(); update(); close();' \
             f'}})();' \
             f'</script>' \

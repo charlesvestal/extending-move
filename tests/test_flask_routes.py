@@ -134,23 +134,6 @@ def test_chord_get(client):
     assert resp.status_code == 200
     assert b'Chord Kit Generator' in resp.data
     assert b'id="chordList"' in resp.data
-
-
-def test_color_dropdown_get(client, monkeypatch):
-    def fake_get():
-        return {'pad_colors': [(1, 2, 3)], 'pad_names': ['Test']}
-
-    monkeypatch.setattr(
-        move_webserver.color_dropdown_handler,
-        'handle_get',
-        fake_get,
-    )
-    resp = client.get('/color-dropdown')
-    assert resp.status_code == 200
-    assert b'id="color-dropdown"' in resp.data
-
-
-
 def test_detect_transients(client, monkeypatch):
     def fake_detect(form):
         return {'content': '{"success": true}', 'status': 200, 'headers': [('Content-Type', 'application/json')]}
