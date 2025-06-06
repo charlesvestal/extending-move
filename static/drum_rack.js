@@ -84,6 +84,15 @@ function attachDrumRackKeyHandler() {
         document.removeEventListener('keydown', drumKeyHandler);
     }
     drumKeyHandler = function(e) {
+        // Ignore key events while typing in inputs or when the time-stretch
+        // modal is visible. This mirrors the behaviour in chord.js so that
+        // keyboard playback doesn't interfere with form entry.
+        const tag = (e.target && e.target.tagName) ? e.target.tagName.toUpperCase() : '';
+        const modal = document.getElementById('timeStretchModal');
+        const modalVisible = modal && !modal.classList.contains('hidden');
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || e.target.isContentEditable || modalVisible) {
+            return;
+        }
         const pad = drumKeyMap[e.key.toLowerCase()];
         if (pad) {
             e.preventDefault();
