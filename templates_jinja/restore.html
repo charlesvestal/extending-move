@@ -8,11 +8,11 @@
     <label for="ablbundle">Select .ablbundle file:</label>
     <input type="file" name="ablbundle" accept=".ablbundle" required>
     <br>
+    <label for="mset_color_dropdown">Pad color:</label>
+    {{ color_options | safe }}
     <label>Select Pad:</label>
     {{ pad_grid | safe }}
     <br>
-    <label for="mset_color_dropdown">Pad color:</label>
-    {{ color_options | safe }}
     <input type="hidden" name="action" value="restore_ablbundle">
     <button type="submit">Upload & Restore</button>
 </form>
