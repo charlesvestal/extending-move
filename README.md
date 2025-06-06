@@ -227,6 +227,8 @@ Interested in chatting about more Move hacking? Come talk to us on [Discord](htt
 
 This project is not affiliated with, authorized by, or endorsed by Ableton. Use at your own risk. The authors cannot be held responsible for any damage or issues that may occur. Always refer to official documentation when modifying hardware.
 
+This project includes a statically linked binary of Rubber Band. The source code for Rubber Band is available under GPLv2 at [https://breakfastquay.com/rubberband/](https://breakfastquay.com/rubberband/).
+
 > These tools are third-party and require SSH access. That means:
 > * There’s a real risk (though unlikely) of breaking things, including potentially bricking a device. You are accessing the Move in ways it was not designed to do.
 > * Ableton can’t offer individual support if something goes wrong.
