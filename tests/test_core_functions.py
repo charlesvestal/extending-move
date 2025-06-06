@@ -11,7 +11,7 @@ sys.path.append(str(Path(__file__).resolve().parents[1]))
 from core.reverse_handler import reverse_wav_file
 from core.slice_handler import detect_transients
 from core.file_browser import generate_dir_html
-from core.time_stretch_handler import time_stretch_wav
+from core.time_stretch_handler import time_stretch_wav, get_rubberband_binary
 from core.midi_pattern_generator import (
     generate_pattern_set,
     create_c_major_downbeats,
@@ -94,3 +94,8 @@ def test_time_stretch_wav(tmp_path, monkeypatch):
     assert os.path.exists(path)
     stretched, sr2 = sf.read(path, dtype="float32")
     assert abs(len(stretched) / sr2 - 2.0) < 0.2
+
+
+def test_get_rubberband_binary_exists():
+    path = get_rubberband_binary()
+    assert path.exists()
