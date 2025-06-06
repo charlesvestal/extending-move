@@ -127,7 +127,17 @@ class DrumRackInspectorHandler(BaseHandler):
                               <svg fill="none" viewBox="0 0 20 18" height="18" width="20" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M10 12.2892V0M10 12.2892L14.6667 8.19277M10 12.2892L5.33333 8.19277M17 17H3" stroke="currentColor" stroke-width="1.5"/>
                               </svg>
-                            </a>
+                            </a>'''
+                    original = find_original_sample(sample['path'])
+                    if original and original != sample['path']:
+                        cell += f'''<form method="POST" action="/drum-rack-inspector" style="display:inline;">
+                                    <input type="hidden" name="action" value="revert_sample">
+                                    <input type="hidden" name="sample_path" value="{sample['path']}">
+                                    <input type="hidden" name="preset_path" value="{preset_path}">
+                                    <input type="hidden" name="pad_number" value="{pad_num}">
+                                    <button type="submit" class="revert-button" title="Revert to original sample">🔙</button>
+                                  </form>'''
+                    cell += '''
                           </div>
                           <div class="sample-actions">'''
                     cell += f'''<form method="POST" action="/drum-rack-inspector" style="display:inline;">
@@ -138,19 +148,6 @@ class DrumRackInspectorHandler(BaseHandler):
                                 <button type="submit" class="reverse-button">Reverse</button>
                               </form>'''
                     cell += f'''<button type="button" class="time-stretch-button" data-sample-path="{sample['path']}" data-preset-path="{preset_path}" data-pad-number="{pad_num}" onclick="var modal = document.getElementById('timeStretchModal'); document.getElementById('ts_sample_path').value = this.getAttribute('data-sample-path'); document.getElementById('ts_preset_path').value = this.getAttribute('data-preset-path'); document.getElementById('ts_pad_number').value = this.getAttribute('data-pad-number'); modal.classList.remove('hidden');">Time Stretch</button>'''
-                    original = find_original_sample(sample['path'])
-                    if original and original != sample['path']:
-                        cell += f'''<form method="POST" action="/drum-rack-inspector" style="display:inline;">
-                                    <input type="hidden" name="action" value="revert_sample">
-                                    <input type="hidden" name="sample_path" value="{sample['path']}">
-                                    <input type="hidden" name="preset_path" value="{preset_path}">
-                                    <input type="hidden" name="pad_number" value="{pad_num}">
-                                    <button type="submit" class="revert-button" title="Revert to original sample">
-                                      <svg viewBox="0 0 20 18" height="18" width="20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M3 9H17M3 9L7 5M3 9L7 13" stroke="currentColor" stroke-width="1.5"/>
-                                      </svg>
-                                    </button>
-                                  </form>'''
                     cell += '</div></div>'
                 elif sample:
                     cell += f'<div class="pad-info"><span class="pad-number">Pad {pad_num}</span><span>No sample</span></div>'
