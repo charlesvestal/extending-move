@@ -55,6 +55,35 @@ PAD_COLOR_NAMES = {
     25: "fuchsia",
 }
 
+# Emoji preview for each color ID mapped to the closest square color emoji
+PAD_COLOR_EMOJIS = {
+    1: "🟥",
+    2: "🟧",
+    3: "🟥",
+    4: "🟧",
+    5: "🟫",
+    6: "🟫",
+    7: "🟨",
+    8: "🟩",
+    9: "🟩",
+    10: "🟩",
+    11: "🟩",
+    12: "🟦",
+    13: "🟦",
+    14: "🟦",
+    15: "🟦",
+    16: "🟦",
+    17: "🟦",
+    18: "🟪",
+    19: "🟦",
+    20: "🟪",
+    21: "🟪",
+    22: "🟪",
+    23: "🟪",
+    24: "🟥",
+    25: "🟪",
+}
+
 def rgb_string(color_id):
     rgb = PAD_COLORS.get(color_id)
     if rgb:
@@ -64,3 +93,7 @@ def rgb_string(color_id):
 def color_name(color_id):
     """Return a CSS-style color name for the given pad color ID."""
     return PAD_COLOR_NAMES.get(color_id, "")
+
+def color_emoji(color_id):
+    """Return a square emoji approximating the pad color."""
+    return PAD_COLOR_EMOJIS.get(color_id, "⬜")
