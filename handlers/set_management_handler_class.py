@@ -10,6 +10,7 @@ from core.set_management_handler import (
 )
 from core.list_msets_handler import list_msets
 from core.restore_handler import restore_ablbundle
+from core.pad_colors import PAD_COLORS, rgb_string
 import json
 
 logger = logging.getLogger(__name__)
@@ -20,12 +21,13 @@ class SetManagementHandler(BaseHandler):
         Return context for rendering the MIDI Upload page.
         """
         # Get available pads
-        _, ids = list_msets(return_free_ids=True)
+        msets, ids = list_msets(return_free_ids=True)
         free_pads = sorted([pad_id + 1 for pad_id in ids.get("free", [])])
         pad_options = ''.join(f'<option value="{pad}">{pad}</option>' for pad in free_pads)
         pad_options = '<option value="" disabled selected>-- Select Pad --</option>' + pad_options
-        pad_color_options = ''.join(f'<option value="{i}">{i}</option>' for i in range(1,27))
-        pad_grid = self.generate_pad_grid(ids.get("used", set()))
+        pad_color_options = self.generate_color_options()
+        color_map = {int(m["mset_id"]): int(m["mset_color"]) for m in msets if str(m["mset_color"]).isdigit()}
+        pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map)
         return {
             'pad_options': pad_options,
             'pad_color_options': pad_color_options,
@@ -41,11 +43,12 @@ class SetManagementHandler(BaseHandler):
         action = form.getvalue('action', 'create')
 
         # Get pad options for error responses
-        _, ids = list_msets(return_free_ids=True)
+        msets, ids = list_msets(return_free_ids=True)
         free_pads = sorted([pad_id + 1 for pad_id in ids.get("free", [])])
         pad_options = ''.join(f'<option value="{pad}">{pad}</option>' for pad in free_pads)
-        pad_color_options = ''.join(f'<option value="{i}">{i}</option>' for i in range(1,27))
-        pad_grid = self.generate_pad_grid(ids.get("used", set()))
+        pad_color_options = self.generate_color_options()
+        color_map = {int(m["mset_id"]): int(m["mset_color"]) for m in msets if str(m["mset_color"]).isdigit()}
+        pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map)
 
         if action == 'upload_midi':
             # Generate set from uploaded MIDI file
@@ -178,18 +181,20 @@ class SetManagementHandler(BaseHandler):
                 logger.warning("Failed to clean up set file %s: %s", set_path, e)
 
             # Refresh pad list after successful placement
-            _, updated_ids = list_msets(return_free_ids=True)
+            msets_updated, updated_ids = list_msets(return_free_ids=True)
             updated_free_pads = sorted([pad_id + 1 for pad_id in updated_ids.get("free", [])])
             updated_pad_options = ''.join(f'<option value="{pad}">{pad}</option>' for pad in updated_free_pads)
             updated_pad_options = '<option value="" disabled selected>-- Select Pad --</option>' + updated_pad_options
-            pad_grid = self.generate_pad_grid(updated_ids.get("used", set()))
+            color_map = {int(m["mset_id"]): int(m["mset_color"]) for m in msets_updated if str(m["mset_color"]).isdigit()}
+            pad_grid = self.generate_pad_grid(updated_ids.get("used", set()), color_map)
             return self.format_success_response(restore_result['message'], pad_options=updated_pad_options, pad_color_options=pad_color_options, pad_grid=pad_grid)
         else:
-            pad_grid = self.generate_pad_grid(ids.get("used", set()))
+            color_map = {int(m["mset_id"]): int(m["mset_color"]) for m in msets if str(m["mset_color"]).isdigit()}
+            pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map)
             return self.format_error_response(restore_result.get('message'), pad_options=pad_options, pad_color_options=pad_color_options, pad_grid=pad_grid)
 
-    def generate_pad_grid(self, used_ids):
-        """Return HTML for a 32-pad grid showing occupied pads."""
+    def generate_pad_grid(self, used_ids, color_map):
+        """Return HTML for a 32-pad grid showing occupied pads with colors."""
         cells = []
         # Pad numbering starts with 1 on the bottom-left
         for row in range(4):
@@ -199,8 +204,17 @@ class SetManagementHandler(BaseHandler):
                 occupied = idx in used_ids
                 status = 'occupied' if occupied else 'free'
                 disabled = 'disabled' if occupied else ''
+                color_id = color_map.get(idx)
+                style = f' style="background-color: {rgb_string(color_id)}"' if color_id else ''
                 cells.append(
                     f'<input type="radio" id="pad_{num}" name="pad_index" value="{num}" {disabled}>'
-                    f'<label for="pad_{num}" class="pad-cell {status}">{num}</label>'
+                    f'<label for="pad_{num}" class="pad-cell {status}"{style}>{num}</label>'
                 )
         return '<div class="pad-grid">' + ''.join(cells) + '</div>'
+
+    def generate_color_options(self):
+        options = ['<option value="" disabled selected>-- Select Color --</option>']
+        for i in range(1, 26):
+            rgb = rgb_string(i)
+            options.append(f'<option value="{i}" style="color: {rgb}">&#9632; {i}</option>')
+        return ''.join(options)
