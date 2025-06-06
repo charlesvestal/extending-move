@@ -199,6 +199,7 @@ class RestoreHandler(BaseHandler):
             f'const colors_{dropdown_id} = {colors_json};' \
             f'const names_{dropdown_id} = {names_json};' \
             f'(function() {{' \
+            f' document.addEventListener("DOMContentLoaded", function() {{' \
             f' const c = colors_{dropdown_id};' \
             f' const n = names_{dropdown_id};' \
             f' const container = document.getElementById("{dropdown_id}");' \
@@ -242,6 +243,7 @@ class RestoreHandler(BaseHandler):
             f' document.addEventListener("click", e => {{ if (open && !container.contains(e.target)) close(); }});' \
             f' document.querySelectorAll(`input[name="${{padName}}"]`).forEach(r => r.addEventListener("change", previewPad));' \
             f' render(); update(); close();' \
+            f' }});' \
             f'}})();' \
             f'</script>' \
             f'<style>' \
