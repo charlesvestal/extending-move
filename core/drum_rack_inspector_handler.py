@@ -231,3 +231,36 @@ def scan_for_drum_rack_presets():
             "message": f"Error scanning presets: {e}",
             "presets": [],
         }
+
+
+def find_original_sample(sample_path):
+    """Try to locate the base sample by stripping transformation suffixes."""
+    directory = os.path.dirname(sample_path)
+    filename = os.path.basename(sample_path)
+    base, ext = os.path.splitext(filename)
+
+    candidate = None
+    current = base
+
+    while True:
+        possible = os.path.join(directory, current + ext)
+        if os.path.exists(possible):
+            candidate = possible
+
+        new = current
+        if new.endswith('_reversed'):
+            new = new[:-9]
+        elif new.endswith('_reverse'):
+            new = new[:-8]
+        else:
+            import re
+            m = re.search(r'-slice\d+-(?:stretched|repitched)-[\d.]+-[\d.]+$', new)
+            if m:
+                new = new[:m.start()]
+            else:
+                break
+        if new == current:
+            break
+        current = new
+
+    return candidate
