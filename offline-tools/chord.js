@@ -485,6 +485,13 @@ function initChordTab() {
 
 }
 
+function updateStretchProgress(current, total) {
+    const span = document.getElementById('stretchProgress');
+    if (span) {
+        span.textContent = `(${current}/${total})`;
+    }
+}
+
 // Process chord samples for preview when a file is uploaded
 document.getElementById('wavFileInput').addEventListener('change', async function(e) {
     // Clear any previously generated waveform previews
@@ -507,6 +514,8 @@ document.getElementById('wavFileInput').addEventListener('change', async functio
     
     const overlay = document.getElementById('stretchOverlay');
     if (overlay) overlay.style.display = 'flex';
+    const total = window.selectedChords.filter(c => c).length;
+    let count = 0;
 
     const arrayBuffer = await file.arrayBuffer();
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -520,6 +529,9 @@ document.getElementById('wavFileInput').addEventListener('change', async functio
     // Process each chord sample and create its waveform preview sequentially
     for (let i = 0; i < chordNames.length; i++) {
         const chordName = chordNames[i];
+        if (!chordName) continue;
+        count++;
+        updateStretchProgress(count, total);
         console.log("Processing chord:", chordName);
         const intervals = getChordIntervals(
             chordName,
@@ -570,14 +582,18 @@ if (lengthToggle) {
     lengthToggle.addEventListener('change', async function(){
         keepLengthSame = lengthToggle.checked;
         if (window.decodedBuffer) {
-            const overlay = document.getElementById('stretchOverlay');
-            if (overlay) overlay.style.display = 'flex';
-            for (let i = 1; i <= 16; i++) {
-                if (window.selectedChords[i - 1]) {
-                    await regenerateChordPreview(i);
-                }
+        const overlay = document.getElementById('stretchOverlay');
+        if (overlay) overlay.style.display = 'flex';
+        const total = window.selectedChords.filter(c => c).length;
+        let count = 0;
+        for (let i = 1; i <= 16; i++) {
+            if (window.selectedChords[i - 1]) {
+                count++;
+                updateStretchProgress(count, total);
+                await regenerateChordPreview(i);
             }
-            if (overlay) overlay.style.display = 'none';
+        }
+        if (overlay) overlay.style.display = 'none';
         }
     });
 }
