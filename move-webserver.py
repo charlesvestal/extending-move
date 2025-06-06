@@ -165,6 +165,25 @@ def warm_up_modules():
     except Exception as exc:
         logger.error("Error during pyrubberband warm-up: %s", exc)
 
+    # Warm-up audiotsm WSOLA
+    try:
+        start = time.perf_counter()
+        from audiotsm.io.array import ArrayReader, ArrayWriter
+        from audiotsm import wsola
+
+        dummy = np.zeros((1, 512), dtype=float)
+        reader = ArrayReader(dummy)
+        writer = ArrayWriter(dummy.shape[0])
+        tsm = wsola(writer.channels)
+        tsm.set_speed(1.0)
+        tsm.run(reader, writer)
+        logger.info(
+            "Audiotsm WSOLA warm-up complete in %.3fs",
+            time.perf_counter() - start,
+        )
+    except Exception as exc:
+        logger.error("Error during audiotsm WSOLA warm-up: %s", exc)
+
     # Full Librosa onset pipeline
     try:
         start = time.perf_counter()
