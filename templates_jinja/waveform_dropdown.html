@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Oscillator Waveform</h2>
+<div class="waveform-dropdown">
+  <button type="button" class="dropdown-toggle" aria-haspopup="listbox" aria-expanded="false">
+    <svg class="waveform-icon" aria-hidden="true">
+      <use xlink:href="{{ host_prefix }}/static/osc_waveform_sprite.svg#sine"></use>
+    </svg>
+    <span class="visually-hidden">Sine</span>
+  </button>
+  <ul class="dropdown-menu" role="listbox" tabindex="-1">
+    <li role="option" data-waveform="pulse">
+      <svg class="waveform-icon" aria-hidden="true">
+        <use xlink:href="{{ host_prefix }}/static/osc_waveform_sprite.svg#pulse"></use>
+      </svg>
+      <span class="visually-hidden">Pulse</span>
+    </li>
+    <li role="option" data-waveform="rectangle">
+      <svg class="waveform-icon" aria-hidden="true">
+        <use xlink:href="{{ host_prefix }}/static/osc_waveform_sprite.svg#rectangle"></use>
+      </svg>
+      <span class="visually-hidden">Rectangle</span>
+    </li>
+    <li role="option" data-waveform="saturated">
+      <svg class="waveform-icon" aria-hidden="true">
+        <use xlink:href="{{ host_prefix }}/static/osc_waveform_sprite.svg#saturated"></use>
+      </svg>
+      <span class="visually-hidden">Saturated</span>
+    </li>
+    <li role="option" data-waveform="saw">
+      <svg class="waveform-icon" aria-hidden="true">
+        <use xlink:href="{{ host_prefix }}/static/osc_waveform_sprite.svg#saw"></use>
+      </svg>
+      <span class="visually-hidden">Saw</span>
+    </li>
+    <li role="option" data-waveform="sharktooth">
+      <svg class="waveform-icon" aria-hidden="true">
+        <use xlink:href="{{ host_prefix }}/static/osc_waveform_sprite.svg#sharktooth"></use>
+      </svg>
+      <span class="visually-hidden">Sharktooth</span>
+    </li>
+    <li role="option" data-waveform="sine">
+      <svg class="waveform-icon" aria-hidden="true">
+        <use xlink:href="{{ host_prefix }}/static/osc_waveform_sprite.svg#sine"></use>
+      </svg>
+      <span class="visually-hidden">Sine</span>
+    </li>
+    <li role="option" data-waveform="triangle">
+      <svg class="waveform-icon" aria-hidden="true">
+        <use xlink:href="{{ host_prefix }}/static/osc_waveform_sprite.svg#triangle"></use>
+      </svg>
+      <span class="visually-hidden">Triangle</span>
+    </li>
+  </ul>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ host_prefix }}/static/waveform_dropdown.js"></script>
+{% endblock %}

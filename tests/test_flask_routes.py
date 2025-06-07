@@ -361,3 +361,9 @@ def test_synth_knobs_get(client):
     resp = client.get('/synth-knobs')
     assert resp.status_code == 200
     assert b'id="knob-container"' in resp.data
+
+
+def test_waveform_dropdown_get(client):
+    resp = client.get('/waveform-dropdown')
+    assert resp.status_code == 200
+    assert b'waveform-dropdown' in resp.data
