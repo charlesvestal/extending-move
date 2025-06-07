@@ -184,6 +184,7 @@ class SynthParamEditorHandler(BaseHandler):
         "Envelope2_Sustain": "Sustain",
         "Envelope2_Release": "Release",
         "CyclingEnvelope_Tilt": "Tilt",
+        "CyclingEnvelope_MidPoint": "Midpoint",
         "CyclingEnvelope_Hold": "Hold",
         "CyclingEnvelope_Rate": "Rate",
         "CyclingEnvelope_Mode": "Mode",
@@ -246,79 +247,120 @@ class SynthParamEditorHandler(BaseHandler):
         return "Other"
 
     def generate_params_html(self, params):
-        """Return HTML controls for the given parameter values."""
-        if not params:
-            return '<p>No parameters found.</p>'
+    """Return HTML controls for the given parameter values."""
+    if not params:
+        return '<p>No parameters found.</p>'
 
-        schema = load_drift_schema()
-        sections = {s: [] for s in self.SECTION_ORDER}
-        filter_items = {}
+    schema = load_drift_schema()
+    sections = {s: [] for s in self.SECTION_ORDER}
+    item_map = {}
+    filter_items = {}
 
-        for i, item in enumerate(params):
-            name = item['name']
-            val = item['value']
-            meta = schema.get(name, {})
-            p_type = meta.get('type')
+    for i, item in enumerate(params):
+        name = item['name']
+        val = item['value']
+        meta = schema.get(name, {})
+        p_type = meta.get('type')
 
-            label = self.LABEL_OVERRIDES.get(name, name)
-            html = '<div class="param-item">'
-            html += f'<label>{label}: '
-            if p_type == 'enum' and meta.get('options'):
-                html += f'<select name="param_{i}_value">'
-                for opt in meta['options']:
-                    selected = ' selected' if str(val) == str(opt) else ''
-                    html += f'<option value="{opt}"{selected}>{opt}</option>'
-                html += '</select>'
-            else:
-                min_attr = f' data-min="{meta.get("min")}"' if meta.get("min") is not None else ''
-                max_attr = f' data-max="{meta.get("max")}"' if meta.get("max") is not None else ''
-                val_attr = f' data-value="{val}"'
-                unit_attr = f' data-unit="{meta.get("unit")}"' if meta.get("unit") else ''
-                dec_attr = f' data-decimals="{meta.get("decimals")}"' if meta.get("decimals") is not None else ''
-                display_id = f'param_{i}_display'
-                html += (
-                    f'<div id="param_{i}_dial" class="param-dial" data-target="param_{i}_value" data-display="{display_id}"{min_attr}{max_attr}{val_attr}{unit_attr}{dec_attr}></div>'
-                )
-                html += f'<span id="{display_id}" class="param-number"></span>'
-                html += f'<input type="hidden" name="param_{i}_value" value="{val}">'
-            html += '</label>'
-            html += f'<input type="hidden" name="param_{i}_name" value="{name}">' 
-            html += '</div>'
+        label = self.LABEL_OVERRIDES.get(name, name)
+        html = '<div class="param-item">'
+        html += f'<label>{label}: '
+        if p_type == 'enum' and meta.get('options'):
+            html += f'<select name="param_{i}_value">'
+            for opt in meta['options']:
+                selected = ' selected' if str(val) == str(opt) else ''
+                html += f'<option value="{opt}"{selected}>{opt}</option>'
+            html += '</select>'
+        else:
+            min_attr = f' data-min="{meta.get("min")}"' if meta.get("min") is not None else ''
+            max_attr = f' data-max="{meta.get("max")}"' if meta.get("max") is not None else ''
+            val_attr = f' data-value="{val}"'
+            unit_attr = f' data-unit="{meta.get("unit")}"' if meta.get("unit") else ''
+            dec_attr = f' data-decimals="{meta.get("decimals")}"' if meta.get("decimals") is not None else ''
+            display_id = f'param_{i}_display'
+            html += (
+                f'<div id="param_{i}_dial" class="param-dial" data-target="param_{i}_value" data-display="{display_id}"{min_attr}{max_attr}{val_attr}{unit_attr}{dec_attr}></div>'
+            )
+            html += f'<span id="{display_id}" class="param-number"></span>'
+            html += f'<input type="hidden" name="param_{i}_value" value="{val}">'
+        html += '</label>'
+        html += f'<input type="hidden" name="param_{i}_name" value="{name}">' 
+        html += '</div>'
 
-            section = self._get_section(name)
-            if section == "Filter":
-                filter_items[name] = html
-            else:
-                sections[section].append(html)
+        section = self._get_section(name)
+        if section == "Filter":
+            filter_items[name] = html
+        else:
+            sections[section].append(html)
 
-        if filter_items:
-            filter_rows = [
-                ["Filter_Frequency", "Filter_Type", "Filter_Tracking"],
-                ["Filter_Resonance", "Filter_HiPassFrequency"],
-                [
-                    "Filter_ModSource1",
-                    "Filter_ModAmount1",
-                    "Filter_ModSource2",
-                    "Filter_ModAmount2",
-                ],
-            ]
-            ordered = []
-            for row in filter_rows:
-                row_html = "".join(filter_items.pop(p, "") for p in row if p in filter_items)
-                if row_html:
-                    ordered.append(f'<div class="param-row">{row_html}</div>')
-            ordered.extend(filter_items.values())
-            sections["Filter"] = ordered
+        item_map[name] = html
 
-        out_html = '<div class="drift-param-panels">'
-        for sec in self.SECTION_ORDER:
-            items = sections.get(sec)
+    # Handle Filter section with rows if needed
+    if filter_items:
+        filter_rows = [
+            ["Filter_Frequency", "Filter_Type", "Filter_Tracking"],
+            ["Filter_Resonance", "Filter_HiPassFrequency"],
+            [
+                "Filter_ModSource1",
+                "Filter_ModAmount1",
+                "Filter_ModSource2",
+                "Filter_ModAmount2",
+            ],
+        ]
+        ordered = []
+        for row in filter_rows:
+            row_html = "".join(filter_items.pop(p, "") for p in row if p in filter_items)
+            if row_html:
+                ordered.append(f'<div class="param-row">{row_html}</div>')
+        # Add any remaining items not in a defined row
+        ordered.extend(filter_items.values())
+        sections["Filter"] = ordered
+
+    # Final HTML output
+    out_html = '<div class="drift-param-panels">'
+    for sec in self.SECTION_ORDER:
+        items = sections.get(sec)
+        if not items:
+            continue
+        cls = sec.lower().replace(' ', '-').replace('+', '')
+        out_html += f'<div class="param-panel {cls}"><h3>{sec}</h3>'
+        if sec == "Envelopes":
+            out_html += self._envelope_rows_html(item_map)
+        else:
+            out_html += '<div class="param-items">'
+            out_html += ''.join(items)
+            out_html += '</div>'
+        out_html += '</div>'
+    out_html += '</div>'
+    return out_html
+
+    def _envelope_rows_html(self, item_map):
+        rows = [
+            ("Amp ADSR", [
+                "Envelope1_Attack",
+                "Envelope1_Decay",
+                "Envelope1_Sustain",
+                "Envelope1_Release",
+            ]),
+            ("Env 1 ADSR", [
+                "Envelope2_Attack",
+                "Envelope2_Decay",
+                "Envelope2_Sustain",
+                "Envelope2_Release",
+            ]),
+            ("Env 2 Tilt (Midpoint), Hold, Rate", [
+                "CyclingEnvelope_MidPoint",
+                "CyclingEnvelope_Hold",
+                "CyclingEnvelope_Rate",
+            ]),
+        ]
+        html = ''
+        for label, names in rows:
+            items = [item_map.get(n) for n in names if item_map.get(n)]
             if not items:
                 continue
-            cls = sec.lower().replace(' ', '-').replace('+', '')
-            out_html += f'<div class="param-panel {cls}"><h3>{sec}</h3><div class="param-items">'
-            out_html += ''.join(items)
-            out_html += '</div></div>'
-        out_html += '</div>'
-        return out_html
+            html += f'<div class="env-row"><h4>{label}</h4><div class="param-items">'
+            html += ''.join(items)
+            html += '</div></div>'
+        return html
 
