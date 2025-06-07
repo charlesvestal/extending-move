@@ -233,6 +233,8 @@ const driftSchema = {{ schema_json|safe }};
     };
 
     const container = sel.closest('.parameter-mapping');
+    const minWrap = container.querySelector('.min-wrapper');
+    const maxWrap = container.querySelector('.max-wrapper');
     const minInput = container.querySelector('.range-min');
     const maxInput = container.querySelector('.range-max');
     const optDiv = container.querySelector('.options-display');
@@ -244,11 +246,15 @@ const driftSchema = {{ schema_json|safe }};
       maxInput.placeholder = '';
       minInput.disabled = true;
       maxInput.disabled = true;
+      if (minWrap) minWrap.style.display = 'none';
+      if (maxWrap) maxWrap.style.display = 'none';
     } else {
       minInput.disabled = false;
       maxInput.disabled = false;
       minInput.placeholder = info.min !== null ? info.min : '';
       maxInput.placeholder = info.max !== null ? info.max : '';
+      if (minWrap) minWrap.style.display = 'inline-block';
+      if (maxWrap) maxWrap.style.display = 'inline-block';
     }
 
     if (info.options && Array.isArray(info.options) && info.options.length > 0) {

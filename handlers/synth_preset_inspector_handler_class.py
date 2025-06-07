@@ -298,11 +298,11 @@ class SynthPresetInspectorHandler(BaseHandler):
             # Range inputs inline with Add button
             html += '<div class="range-inputs-inline">'
             html += (
-                f'<label>Min: <input type="number" class="range-min" '
+                f'<label class="min-wrapper">Min: <input type="number" class="range-min" '
                 f'name="macro_{macro["index"]}_range_min" value="{default_range_min}" step="any"></label>'
             )
             html += (
-                f'<label>Max: <input type="number" class="range-max" '
+                f'<label class="max-wrapper">Max: <input type="number" class="range-max" '
                 f'name="macro_{macro["index"]}_range_max" value="{default_range_max}" step="any"></label>'
             )
             html += '<div class="options-display"></div>'
