@@ -416,6 +416,11 @@ def chord():
     return render_template("chord.html", active_tab="chord")
 
 
+@app.route("/drift-params", methods=["GET"])
+def drift_params():
+    return render_template("drift_params.html", active_tab="drift-params")
+
+
 
 
 

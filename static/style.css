@@ -457,3 +457,24 @@ select {
     cursor: pointer;
 }
 
+/* Layout helpers for Drift params tool */
+.drift-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    text-align: center;
+}
+
+.pitch-mod-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    text-align: center;
+}
+
+.control-pair {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+

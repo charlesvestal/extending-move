@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Drift Parameter Tool</h2>
+<div class="drift-grid" id="osc1-row">
+  <div class="control-pair">
+    <label>Osc 1</label>
+    <select id="osc1_type">
+      <option>Sine</option>
+      <option>Square</option>
+      <option>Saw</option>
+    </select>
+  </div>
+  <div class="control-pair">
+    <label>Semitone</label>
+    <div id="osc1_semitone"></div>
+    <span id="osc1_semitone_val"></span>
+  </div>
+  <div class="control-pair">
+    <label>Shape</label>
+    <div id="osc1_shape"></div>
+    <span id="osc1_shape_val"></span>
+  </div>
+  <div class="control-pair">
+    <select id="osc1_shape_mod_source">
+      <option>None</option>
+      <option>LFO 1</option>
+      <option>Env 2</option>
+    </select>
+    <div id="osc1_shape_mod_amt"></div>
+  </div>
+</div>
+<div class="drift-grid" id="osc2-row" style="margin-top:1rem;">
+  <div class="control-pair">
+    <label>Osc 2</label>
+    <select id="osc2_type">
+      <option>Sine</option>
+      <option>Square</option>
+      <option>Saw</option>
+    </select>
+  </div>
+  <div class="control-pair">
+    <label>Semitone</label>
+    <div id="osc2_semitone"></div>
+    <span id="osc2_semitone_val"></span>
+  </div>
+  <div class="control-pair">
+    <label>Shape</label>
+    <div id="osc2_shape"></div>
+    <span id="osc2_shape_val"></span>
+  </div>
+  <div class="control-pair">
+    <label>Detune</label>
+    <div id="osc2_detune"></div>
+    <span id="osc2_detune_val"></span>
+  </div>
+</div>
+<div style="margin-top:1.5rem;">
+  <h3 style="text-align:center;">Pitch Mod</h3>
+  <div class="pitch-mod-grid">
+    <div class="control-pair">
+      <select id="pitch_mod_src1">
+        <option>None</option>
+        <option>LFO 1</option>
+        <option>Env 2</option>
+      </select>
+      <div id="pitch_mod_amt1"></div>
+    </div>
+    <div class="control-pair">
+      <select id="pitch_mod_src2">
+        <option>None</option>
+        <option>LFO 2</option>
+        <option>Env 3</option>
+      </select>
+      <div id="pitch_mod_amt2"></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<link rel="stylesheet" href="https://unpkg.com/nexusui@2.0.10/dist/nexusui.css">
+<script src="https://unpkg.com/nexusui@2.0.10/dist/NexusUI.min.js"></script>
+<script src="{{ host_prefix }}/static/drift_params.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', initDriftParams);
+</script>
+{% endblock %}
