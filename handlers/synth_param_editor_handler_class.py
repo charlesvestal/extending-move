@@ -253,6 +253,7 @@ class SynthParamEditorHandler(BaseHandler):
 
         schema = load_drift_schema()
         sections = {s: [] for s in self.SECTION_ORDER}
+        filter_items = {}
 
         for i, item in enumerate(params):
             name = item['name']
@@ -287,6 +288,30 @@ class SynthParamEditorHandler(BaseHandler):
 
             section = self._get_section(name)
             sections[section].append((name, html))
+
+            if section == "Filter":
+                filter_items[name] = html
+            else:
+                sections[section].append(html)
+
+        if filter_items:
+            filter_rows = [
+                ["Filter_Frequency", "Filter_Type", "Filter_Tracking"],
+                ["Filter_Resonance", "Filter_HiPassFrequency"],
+                [
+                    "Filter_ModSource1",
+                    "Filter_ModAmount1",
+                    "Filter_ModSource2",
+                    "Filter_ModAmount2",
+                ],
+            ]
+            ordered = []
+            for row in filter_rows:
+                row_html = "".join(filter_items.pop(p, "") for p in row if p in filter_items)
+                if row_html:
+                    ordered.append(f'<div class="param-row">{row_html}</div>')
+            ordered.extend(filter_items.values())
+            sections["Filter"] = ordered
 
         out_html = '<div class="drift-param-panels">'
         for sec in self.SECTION_ORDER:
