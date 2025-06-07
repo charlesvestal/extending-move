@@ -529,7 +529,7 @@ select {
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 90px;
+}
 
 .param-number {
     margin-top: 0.25rem;
