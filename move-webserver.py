@@ -32,6 +32,7 @@ from handlers.synth_preset_inspector_handler_class import (
     SynthPresetInspectorHandler,
 )
 from handlers.synth_param_editor_handler_class import SynthParamEditorHandler
+from handlers.drift_editor_handler_class import DriftEditorHandler
 from handlers.drum_rack_inspector_handler_class import DrumRackInspectorHandler
 from handlers.file_placer_handler_class import FilePlacerHandler
 from handlers.refresh_handler_class import RefreshHandler
@@ -40,11 +41,16 @@ from core.file_browser import generate_dir_html
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-    handlers=[logging.FileHandler("move-webserver.log"), logging.StreamHandler(sys.stdout)],
+    handlers=[
+        logging.FileHandler("move-webserver.log"),
+        logging.StreamHandler(sys.stdout),
+    ],
 )
 logger = logging.getLogger(__name__)
 
-PID_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "move-webserver.pid")
+PID_FILE = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "move-webserver.pid"
+)
 
 
 class SimpleForm(dict):
@@ -108,6 +114,7 @@ slice_handler = SliceHandler()
 set_management_handler = SetManagementHandler()
 synth_handler = SynthPresetInspectorHandler()
 synth_param_handler = SynthParamEditorHandler()
+drift_editor_handler = DriftEditorHandler()
 file_placer_handler = FilePlacerHandler()
 refresh_handler = RefreshHandler()
 drum_rack_handler = DrumRackInspectorHandler()
@@ -222,9 +229,7 @@ def warm_up_modules():
     except Exception as exc:
         logger.error("Error during Librosa warm-up: %s", exc)
 
-    logger.info(
-        "Module warm-up finished in %.3fs", time.perf_counter() - overall_start
-    )
+    logger.info("Module warm-up finished in %.3fs", time.perf_counter() - overall_start)
 
 
 @app.route("/")
@@ -240,7 +245,9 @@ def browse_dir():
     field_name = request.args.get("field_name", "")
     action_value = request.args.get("action_value", "")
     filter_key = request.args.get("filter")
-    html = generate_dir_html(root, path, action_url, field_name, action_value, filter_key)
+    html = generate_dir_html(
+        root, path, action_url, field_name, action_value, filter_key
+    )
     return html
 
 
@@ -451,13 +458,45 @@ def synth_params():
     )
 
 
+@app.route("/drift-editor", methods=["GET", "POST"])
+def drift_editor():
+    if request.method == "POST":
+        form = SimpleForm(request.form.to_dict())
+        result = drift_editor_handler.handle_post(form)
+    else:
+        result = drift_editor_handler.handle_get()
+
+    message = result.get("message")
+    message_type = result.get("message_type")
+    success = message_type != "error" if message_type else False
+    browser_html = result.get("file_browser_html")
+    browser_root = result.get("browser_root")
+    browser_filter = result.get("browser_filter")
+    params_html = result.get("params_html", "")
+    selected_preset = result.get("selected_preset")
+    param_count = result.get("param_count", 0)
+    default_preset_path = result.get("default_preset_path")
+    preset_selected = bool(selected_preset)
+    return render_template(
+        "drift_editor.html",
+        message=message,
+        success=success,
+        message_type=message_type,
+        file_browser_html=browser_html,
+        browser_root=browser_root,
+        browser_filter=browser_filter,
+        params_html=params_html,
+        preset_selected=preset_selected,
+        selected_preset=selected_preset,
+        param_count=param_count,
+        default_preset_path=default_preset_path,
+        active_tab="drift-editor",
+    )
+
+
 @app.route("/chord", methods=["GET"])
 def chord():
     return render_template("chord.html", active_tab="chord")
-
-
-
-
 
 
 @app.route("/samples/<path:sample_path>", methods=["GET", "OPTIONS"])

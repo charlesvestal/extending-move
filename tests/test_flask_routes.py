@@ -355,3 +355,39 @@ def test_pitch_shift_route(client, monkeypatch):
     shifted, sr2 = sf.read(io.BytesIO(resp.data), dtype='float32')
     assert sr2 == sr
     assert len(shifted) == len(data)
+
+def test_drift_editor_get(client, monkeypatch):
+    def fake_get():
+        return {
+            'message': 'edit',
+            'message_type': 'info',
+            'file_browser_html': '<ul></ul>',
+            'params_html': '',
+            'selected_preset': None,
+            'param_count': 0,
+            'browser_root': '/tmp',
+            'default_preset_path': '/examples/Analog Shape.ablpreset',
+        }
+    monkeypatch.setattr(move_webserver.drift_editor_handler, 'handle_get', fake_get)
+    resp = client.get('/drift-editor')
+    assert resp.status_code == 200
+    assert b'edit' in resp.data
+    assert b'Create New Drift Preset' in resp.data
+
+def test_drift_editor_post(client, monkeypatch):
+    def fake_post(form):
+        return {
+            'message': 'saved',
+            'message_type': 'success',
+            'params_html': '<div>stuff</div>',
+            'browser_root': '/tmp',
+            'selected_preset': 'x',
+            'param_count': 2,
+            'default_preset_path': '/examples/Analog Shape.ablpreset',
+        }
+    monkeypatch.setattr(move_webserver.drift_editor_handler, 'handle_post', fake_post)
+    resp = client.post('/drift-editor', data={'action': 'select_preset'})
+    assert resp.status_code == 200
+    assert b'saved' in resp.data
+    assert b'Editing:' in resp.data
+    assert b'<div>stuff</div>' in resp.data
