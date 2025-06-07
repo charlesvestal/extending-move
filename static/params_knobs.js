@@ -1,5 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
     const dialMap = {};
+    const numMap = {};
+    const inputMap = {};
+    let suppressDialChange = false;
+    let suppressEnvChange = false;
     document.querySelectorAll('.param-dial').forEach(el => {
         // Read range and initial value from data attributes
         const min = parseFloat(el.dataset.min);
@@ -16,7 +20,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         dialMap[param] = dial;
         const input = document.querySelector(`input[name="${target}"]`);
+        if (input) {
+            inputMap[param] = input;
+        }
         dial.on('change', v => {
+            if (suppressDialChange) return;
             if (input) {
                 input.value = v;
             }
@@ -29,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 num.link(dial);
                 num.element.readOnly = true;
                 num.element.style.pointerEvents = 'none';
+                numMap[param] = num;
             }
         }
     });
@@ -41,13 +50,19 @@ document.addEventListener('DOMContentLoaded', () => {
         return (d.value - d.min) / (d.max - d.min);
     }
 
+    function denorm(x, d) {
+        if (!d) return 0;
+        return d.min + (d.max - d.min) * x;
+    }
+
     function makeEnv(selector, prefix) {
         const atk = dialMap[`${prefix}_Attack`];
         const dec = dialMap[`${prefix}_Decay`];
         const sus = dialMap[`${prefix}_Sustain`];
         const rel = dialMap[`${prefix}_Release`];
-        return new Nexus.Envelope(selector, {
+        const env = new Nexus.Envelope(selector, {
             size: [180, 100],
+            noNewPoints: true,
             points: [
                 { x: 0, y: 0 },
                 { x: norm(atk), y: 1 },
@@ -55,6 +70,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 { x: norm(rel), y: 0 },
             ],
         });
+        env.on('change', pts => {
+            if (suppressEnvChange) return;
+            const a = dialMap[`${prefix}_Attack`];
+            const d = dialMap[`${prefix}_Decay`];
+            const s = dialMap[`${prefix}_Sustain`];
+            const r = dialMap[`${prefix}_Release`];
+            if (a && d && s && r) {
+                suppressDialChange = true;
+                a.value = denorm(pts[1].x, a);
+                d.value = denorm(pts[2].x, d);
+                s.value = pts[2].y;
+                r.value = denorm(pts[3].x, r);
+                if (inputMap[`${prefix}_Attack`]) inputMap[`${prefix}_Attack`].value = a.value;
+                if (inputMap[`${prefix}_Decay`]) inputMap[`${prefix}_Decay`].value = d.value;
+                if (inputMap[`${prefix}_Sustain`]) inputMap[`${prefix}_Sustain`].value = s.value;
+                if (inputMap[`${prefix}_Release`]) inputMap[`${prefix}_Release`].value = r.value;
+                suppressDialChange = false;
+            }
+        });
+        return env;
     }
 
     const env1 = env1Elem ? makeEnv('#env1-display', 'Envelope1') : null;
@@ -62,6 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateEnv(env, prefix) {
         if (!env) return;
+        suppressEnvChange = true;
         const atk = dialMap[`${prefix}_Attack`];
         const dec = dialMap[`${prefix}_Decay`];
         const sus = dialMap[`${prefix}_Sustain`];
@@ -73,6 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
             env.points[3].x = norm(rel);
             env.draw();
         }
+        suppressEnvChange = false;
     }
 
     updateEnv(env1, 'Envelope1');
