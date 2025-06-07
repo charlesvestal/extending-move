@@ -21,7 +21,7 @@
     <input type="hidden" name="param_count" value="{{ param_count }}">
     <button type="submit" onclick="document.getElementById('action-input').value='reset_preset';">Choose Another Preset</button>
     <p class="current-preset">Editing: {{ selected_preset.split('/')[-1] }}</p>
-    <div class="param-list">
+    <div class="params-list">
         {{ params_html | safe }}
     </div>
     <label>New Preset Name: <input type="text" name="new_preset_name"></label>
@@ -30,6 +30,12 @@
 {% endif %}
 {% endblock %}
 {% block scripts %}
+<script src="https://unpkg.com/nexusui@2.0.8/dist/nexusui.min.js"></script>
+<script type="module" src="{{ host_prefix }}/static/synth_knobs.js"></script>
+<script type="module">
+  import { initSynthKnobs } from '{{ host_prefix }}/static/synth_knobs.js';
+  document.addEventListener('DOMContentLoaded', initSynthKnobs);
+</script>
 <script type="module" src="{{ host_prefix }}/static/file_browser.js"></script>
 {% endblock %}
 

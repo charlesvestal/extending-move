@@ -21,6 +21,30 @@ DEFAULT_PRESET = os.path.join(
 
 logger = logging.getLogger(__name__)
 
+TARGET_PARAMS = [
+    "Oscillator1_Transpose",
+    "Oscillator1_Shape",
+    "Oscillator2_Transpose",
+    "Oscillator2_Detune",
+    "Mixer_OscillatorGain1",
+    "Mixer_OscillatorGain2",
+    "Mixer_NoiseLevel",
+    "Filter_Frequency",
+    "Filter_Resonance",
+    "Filter_HiPassFrequency",
+    "Envelope1_Attack",
+    "Envelope1_Sustain",
+    "Envelope1_Decay",
+    "Envelope1_Release",
+    "Envelope2_Attack",
+    "Envelope2_Sustain",
+    "Envelope2_Decay",
+    "Envelope2_Release",
+    "Lfo_Ratio",
+    "Lfo_Amount",
+    "Global_Volume",
+]
+
 
 class SynthParamEditorHandler(BaseHandler):
     def handle_get(self):
@@ -99,8 +123,7 @@ class SynthParamEditorHandler(BaseHandler):
         params_html = ''
         param_count = 0
         if values['success']:
-            params_html = self.generate_params_html(values['parameters'])
-            param_count = len(values['parameters'])
+            params_html, param_count = self.generate_params_html(values['parameters'])
 
         base_dir = "/data/UserData/UserLibrary/Track Presets"
         if not os.path.exists(base_dir) and os.path.exists("examples/Track Presets"):
@@ -127,64 +150,36 @@ class SynthParamEditorHandler(BaseHandler):
         }
 
     def generate_params_html(self, params):
-        """Return HTML controls for the given parameter values."""
+        """Return HTML controls for the selected parameter values."""
         if not params:
-            return '<p>No parameters found.</p>'
+            return '<p>No parameters found.</p>', 0
 
         schema = load_drift_schema()
         html = '<div class="params-list">'
-        for i, item in enumerate(params):
+        idx = 0
+        for item in params:
             name = item['name']
+            if name not in TARGET_PARAMS:
+                continue
             val = item['value']
             meta = schema.get(name, {})
-            p_type = meta.get('type')
-            html += '<div class="param-item">'
-            html += f'<label>{name}: '
-            if p_type == 'enum' and meta.get('options'):
-                html += f'<select name="param_{i}_value">'
-                for opt in meta['options']:
-                    selected = ' selected' if str(val) == str(opt) else ''
-                    html += f'<option value="{opt}"{selected}>{opt}</option>'
-                html += '</select>'
+            min_val = meta.get('min', 0)
+            max_val = meta.get('max', 1)
+            if min_val is not None and max_val is not None and -1 <= min_val and max_val <= 1:
+                step = 0.01
             else:
-                # Numeric slider + input with dynamic step handling
-                min_attr = f' min="{meta.get("min")}"' if meta.get("min") is not None else ''
-                max_attr = f' max="{meta.get("max")}"' if meta.get("max") is not None else ''
-
-                step_input = "any"
-                if isinstance(val, (int, float)):
-                    val_str = str(val)
-                    if "." in val_str:
-                        digits = len(val_str.split(".")[1].rstrip("0"))
-                        if digits:
-                            step_input = str(10 ** -digits)
-                        else:
-                            step_input = "1"
-                    else:
-                        step_input = "1"
-
-                step_slider = step_input
-                rng_min = meta.get("min")
-                rng_max = meta.get("max")
-                if rng_min is not None and rng_max is not None:
-                    if -1 <= rng_min and rng_max <= 1:
-                        if step_slider == "any" or float(step_slider) > 0.01:
-                            step_slider = "0.01"
-                if step_input == "1" and step_slider != "any":
-                    step_input = step_slider
-                slider_step_attr = f' step="{step_slider}"' if step_slider != "any" else ' step="any"'
-                input_step_attr = f' step="{step_input}"' if step_input != "any" else ' step="any"'
-                html += (
-                    f'<input type="range" name="param_{i}_slider" value="{val}"{min_attr}{max_attr}{slider_step_attr} '
-                    f'oninput="this.nextElementSibling.value=this.value">'
-                )
-                html += (
-                    f'<input type="number" name="param_{i}_value" value="{val}"{min_attr}{max_attr}{input_step_attr} '
-                    f'oninput="this.previousElementSibling.value=this.value">'
-                )
-            html += '</label>'
-            html += f'<input type="hidden" name="param_{i}_name" value="{name}">' 
+                step = 1
+            knob_id = f'knob_{idx}'
+            html += '<div class="param-item">'
+            html += f'<label for="{knob_id}">{name}</label>'
+            html += (
+                f'<div id="{knob_id}" class="nexus-knob" data-min="{min_val}" '
+                f'data-max="{max_val}" data-step="{step}" data-target="param_{idx}_value" data-value="{val}"></div>'
+            )
+            html += f'<input type="hidden" name="param_{idx}_value" id="param_{idx}_value" value="{val}">' 
+            html += f'<input type="hidden" name="param_{idx}_name" value="{name}">' 
             html += '</div>'
+            idx += 1
         html += '</div>'
-        return html
+        return html, idx
 
