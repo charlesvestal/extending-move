@@ -11,6 +11,14 @@ from core.synth_preset_inspector_handler import (
 )
 from core.synth_param_editor_handler import update_parameter_values
 
+# Path to the example preset used when creating a new preset
+DEFAULT_PRESET = os.path.join(
+    "examples",
+    "Track Presets",
+    "Drift",
+    "Analog Shape.ablpreset",
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -29,7 +37,7 @@ class SynthParamEditorHandler(BaseHandler):
         )
         schema = load_drift_schema()
         return {
-            'message': 'Select a Drift preset from the list',
+            'message': 'Select a Drift preset from the list or create a new one',
             'message_type': 'info',
             'file_browser_html': browser_html,
             'params_html': '',
@@ -38,6 +46,7 @@ class SynthParamEditorHandler(BaseHandler):
             'browser_root': base_dir,
             'browser_filter': 'drift',
             'schema_json': json.dumps(schema),
+            'default_preset_path': DEFAULT_PRESET,
         }
 
     def handle_post(self, form):
@@ -45,7 +54,11 @@ class SynthParamEditorHandler(BaseHandler):
         if action == 'reset_preset':
             return self.handle_get()
 
-        preset_path = form.getvalue('preset_select')
+        if action == 'new_preset':
+            preset_path = DEFAULT_PRESET
+        else:
+            preset_path = form.getvalue('preset_select')
+
         if not preset_path:
             return self.format_error_response("No preset selected")
 
@@ -74,8 +87,11 @@ class SynthParamEditorHandler(BaseHandler):
             message = result['message']
             if output_path:
                 message += f" Saved as {os.path.basename(output_path)}"
-        elif action == 'select_preset':
-            message = f"Selected preset: {os.path.basename(preset_path)}"
+        elif action in ['select_preset', 'new_preset']:
+            if action == 'new_preset':
+                message = "Loaded default preset"
+            else:
+                message = f"Selected preset: {os.path.basename(preset_path)}"
         else:
             return self.format_error_response("Unknown action")
 
@@ -107,6 +123,7 @@ class SynthParamEditorHandler(BaseHandler):
             'browser_root': base_dir,
             'browser_filter': 'drift',
             'schema_json': json.dumps(load_drift_schema()),
+            'default_preset_path': DEFAULT_PRESET,
         }
 
     def generate_params_html(self, params):
