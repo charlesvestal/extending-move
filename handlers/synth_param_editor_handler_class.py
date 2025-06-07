@@ -272,6 +272,13 @@ class SynthParamEditorHandler(BaseHandler):
                     selected = ' selected' if str(val) == str(opt) else ''
                     html += f'<option value="{opt}"{selected}>{opt}</option>'
                 html += '</select>'
+            elif p_type == 'boolean':
+                bool_val = 1 if str(val).lower() in ("true", "1") else 0
+                html += (
+                    f'<div id="param_{i}_toggle" class="param-toggle" '
+                    f'data-target="param_{i}_value" data-value="{bool_val}"></div>'
+                )
+                html += f'<input type="hidden" name="param_{i}_value" value="{bool_val}">'
             else:
                 min_attr = f' data-min="{meta.get("min")}"' if meta.get("min") is not None else ''
                 max_attr = f' data-max="{meta.get("max")}"' if meta.get("max") is not None else ''
