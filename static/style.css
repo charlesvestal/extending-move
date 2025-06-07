@@ -457,3 +457,8 @@ select {
     cursor: pointer;
 }
 
+
+.drift-section { margin-bottom: 2rem; }
+.drift-section-img { max-width: 100%; height: auto; display: block; margin-bottom: 0.5rem; }
+.params-list { margin-bottom: 1rem; }
+.param-item { margin-bottom: 0.5rem; }
