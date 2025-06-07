@@ -139,12 +139,13 @@ class SynthParamEditorHandler(BaseHandler):
 
     LABEL_OVERRIDES = {
         # Oscillators
-        "Oscillator1_Type": "Type",
+        # Use explicit oscillator labels for clarity
+        "Oscillator1_Type": "Osc 1",
         "Oscillator1_Transpose": "Oct",
         "Oscillator1_Shape": "Shape",
         "Oscillator1_ShapeModSource": "Shape Mod Source",
         "Oscillator1_ShapeMod": "Shape Mod Amount",
-        "Oscillator2_Type": "Type",
+        "Oscillator2_Type": "Osc 2",
         "Oscillator2_Transpose": "Oct",
         "Oscillator2_Detune": "Detune",
         "PitchModulation_Source1": "Source",
@@ -154,10 +155,10 @@ class SynthParamEditorHandler(BaseHandler):
 
         # Mixer
         "Mixer_OscillatorOn1": "On/Off",
-        "Mixer_OscillatorGain1": "Level",
+        "Mixer_OscillatorGain1": "Osc 1 Mix",
         "Filter_OscillatorThrough1": "Filter",
         "Mixer_OscillatorOn2": "On/Off",
-        "Mixer_OscillatorGain2": "Level",
+        "Mixer_OscillatorGain2": "Osc 2 Mix",
         "Filter_OscillatorThrough2": "Filter",
         "Mixer_NoiseOn": "On/Off",
         "Mixer_NoiseLevel": "Level",
