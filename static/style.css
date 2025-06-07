@@ -445,6 +445,14 @@ select {
     background: #d0e8ff;
 }
 
+/* Images used in the Drift editor */
+.drift-reference img {
+    max-width: 300px;
+    margin: 0.5rem;
+    border: 1px solid #ccc;
+    background: #fff;
+}
+
 
 
 /* Small icon button for reverting samples */

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Drift Synth Editor</h2>
+<p class="mb-3">Use the controls below to load a preset and edit its parameters. Reference images from the manual are provided for clarity.</p>
+<div class="drift-reference">
+{% include "drift_images_snippet.html" %}
+</div>
+{% if message %}
+  <p class="{{ message_type if message_type else ('success' if success else 'error') }}">{{ message }}</p>
+{% endif %}
+{% if not preset_selected %}
+<form method="post" action="{{ host_prefix }}/drift-editor" style="margin-bottom:1em;">
+    <input type="hidden" name="action" value="new_preset">
+    <input type="hidden" name="preset_select" value="{{ default_preset_path }}">
+    <button type="submit">Create New Drift Preset</button>
+</form>
+<div class="file-browser" data-root="{{ browser_root }}" data-action="{{ host_prefix }}/drift-editor" data-field="preset_select" data-value="select_preset" data-filter="drift">
+    {{ file_browser_html | safe }}
+</div>
+{% else %}
+<form method="post" action="{{ host_prefix }}/drift-editor" id="param-form">
+    <input type="hidden" name="action" id="action-input" value="save_params">
+    <input type="hidden" name="preset_select" value="{{ selected_preset }}">
+    <input type="hidden" name="param_count" value="{{ param_count }}">
+    <button type="submit" onclick="document.getElementById('action-input').value='reset_preset';">Choose Another Preset</button>
+    <p class="current-preset">Editing: {{ selected_preset.split('/')[-1] }}</p>
+    <div class="param-list">
+        {{ params_html | safe }}
+    </div>
+    <label>New Preset Name: <input type="text" name="new_preset_name"></label>
+    <button type="submit">Save Parameters</button>
+</form>
+{% endif %}
+{% endblock %}
+{% block scripts %}
+<script type="module" src="{{ host_prefix }}/static/file_browser.js"></script>
+{% endblock %}

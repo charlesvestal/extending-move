@@ -16,10 +16,10 @@
     "min": null,
     "max": null,
     "options": [
-      "Freq",
+      "Rate",
       "Ratio",
-      "Sync",
-      "Time"
+      "Time",
+      "Sync"
     ]
   },
   "CyclingEnvelope_Rate": {
@@ -181,8 +181,8 @@
     "min": null,
     "max": null,
     "options": [
-      "I",
-      "II"
+      "Type I",
+      "Type II"
     ]
   },
   "Global_DriftDepth": {
@@ -336,10 +336,10 @@
     "min": null,
     "max": null,
     "options": [
-      "Freq",
+      "Rate",
       "Ratio",
-      "Sync",
-      "Time"
+      "Time",
+      "Sync"
     ]
   },
   "Lfo_Rate": {
@@ -365,8 +365,9 @@
     "min": null,
     "max": null,
     "options": [
-      "Exponential Env",
+      "Exponential Envelope",
       "Sample & Hold",
+      "Linear Envelope",
       "Saw Down",
       "Saw Up",
       "Sine",
