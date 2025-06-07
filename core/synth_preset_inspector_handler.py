@@ -6,9 +6,13 @@ from core.cache_manager import get_cache, set_cache
 
 logger = logging.getLogger(__name__)
 
-# Path to the Drift parameter schema relative to this file
-SCHEMA_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)),
-                           "drift_schema.json")
+# Path to the Drift parameter schema relative to the project root
+SCHEMA_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(__file__)),
+    "static",
+    "schemas",
+    "drift_schema.json",
+)
 
 
 def load_drift_schema():
