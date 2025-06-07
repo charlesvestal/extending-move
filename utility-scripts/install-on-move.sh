@@ -23,6 +23,29 @@ if [ "$response" != "yes" ]; then
     exit 1
 fi
 
+# Port selection
+echo "Choose a port for the webserver:" >&2
+echo "1) 909 - New school (default)" >&2
+echo "2) 808 - Old school" >&2
+echo "3) 707 - Backbeat" >&2
+echo "4) 606 - Vintage" >&2
+echo "5) Custom" >&2
+read -p "Selection [1]: " port_choice
+case "$port_choice" in
+    2) PORT=808 ;;
+    3) PORT=707 ;;
+    4) PORT=606 ;;
+    5)
+        read -p "Enter custom port number: " PORT
+        ;;
+    *) PORT=909 ;;
+esac
+
+# Write port to config file
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+echo "$PORT" > "${PROJECT_ROOT}/port.conf"
+
 # Remote configuration
 REMOTE_USER="ableton"
 REMOTE_HOST="move.local"
@@ -96,12 +119,12 @@ echo "*                                                            *"
 echo "*   Deployment and remote setup complete.                    *"
 echo "*                                                            *"
 echo "*   Your new Move tools are now available at:                *"
-echo "*   http://move.local:909                                    *"
+echo "*   http://move.local:${PORT}                                    *"
 echo "*                                                            *"
 echo "**************************************************************"
 echo
 printf "Would you like to open the tools in your browser? (y/n): "
 read -r response
 if [ "$response" = "y" ] || [ "$response" = "Y" ]; then
-    open "http://move.local:909"
+    open "http://move.local:${PORT}"
 fi

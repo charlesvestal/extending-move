@@ -1,6 +1,6 @@
 # extending-move
 
-Tools for extending the Ableton Move. This project provides a companion webserver that runs alongside the official Move server, accessible at move.local:909.
+Tools for extending the Ableton Move. This project provides a companion webserver that runs alongside the official Move server, accessible at ``move.local:<port>`` (909 by default).
 
 ![CleanShot 2025-05-11 at 10 56 02](https://github.com/user-attachments/assets/be64a1d8-992a-4a84-bbbf-15095479d11d)
 
@@ -52,7 +52,7 @@ Tools for extending the Ableton Move. This project provides a companion webserve
   - Create a choke group configuration for one-shot behavior, or use Gate and Drum kit style presets
 
 - **Manual Library Refresh**
-  - Accessible via move.local:909/refresh
+  - Accessible via ``move.local:<port>/refresh``
   - Force refresh of Move's library cache
   - Useful after manual file changes
   - Uses Move's D-Bus interface
@@ -132,10 +132,10 @@ pip install --no-cache-dir -r requirements.txt
 ssh ableton@move.local
 cd /data/UserData/extending-move
 cp -r /opt/move/HttpRoot/fonts /data/UserData/extending-move/static/
-python3 move-webserver.py  # Flask/Jinja web server on port 909
+python3 move-webserver.py  # Flask/Jinja web server (default port 909)
 ```
 
-The server will be accessible at http://move.local:909
+The server will be accessible at ``http://move.local:<port>``
 
 ## Utility Scripts
 
