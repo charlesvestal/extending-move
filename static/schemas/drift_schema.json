@@ -114,7 +114,7 @@
   },
   "Filter_Frequency": {
     "type": "number",
-    "min": 40.790009,
+    "min": 20.0,
     "max": 20000.0,
     "options": [],
     "unit": "Hz",
@@ -123,14 +123,14 @@
   "Filter_HiPassFrequency": {
     "type": "number",
     "min": 10.0,
-    "max": 612.444885,
+    "max": 20500.00,
     "options": [],
     "unit": "Hz",
     "decimals": 2
   },
   "Filter_ModAmount1": {
     "type": "number",
-    "min": -0.439532,
+    "min": -1.0,
     "max": 1.0,
     "options": [],
     "unit": "%",
@@ -139,7 +139,7 @@
   "Filter_ModAmount2": {
     "type": "number",
     "min": -1.0,
-    "max": 0.852254,
+    "max": 1.0,
     "options": [],
     "unit": "%",
     "decimals": 0
@@ -429,7 +429,7 @@
   "Mixer_NoiseLevel": {
     "type": "number",
     "min": 0.0,
-    "max": 1.0,
+    "max": 2.0,
     "options": [],
     "unit": "dB",
     "decimals": 1
@@ -442,7 +442,7 @@
   },
   "Mixer_OscillatorGain1": {
     "type": "number",
-    "min": 0.169407,
+    "min": 0.0,
     "max": 2.0,
     "options": [],
     "unit": "dB",
@@ -619,7 +619,7 @@
     "min": -2,
     "max": 3,
     "options": [],
-    "unit": "st",
+    "unit": "oct",
     "decimals": 0
   },
   "Oscillator1_Type": {
@@ -664,15 +664,15 @@
   },
   "PitchModulation_Amount1": {
     "type": "number",
-    "min": 0.0,
-    "max": 0.720503,
+    "min": -1.0,
+    "max": 1.0,
     "options": [],
     "unit": "%",
     "decimals": 1
   },
   "PitchModulation_Amount2": {
     "type": "number",
-    "min": -0.121687,
+    "min": -1.0,
     "max": 1.0,
     "options": [],
     "unit": "%",
