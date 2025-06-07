@@ -497,7 +497,7 @@ select {
     flex: 1;
 }
 
-.param-panel.oscillator,
+.param-panel.oscillators,
 .param-panel.envelopes {
     flex: 2;
 }
