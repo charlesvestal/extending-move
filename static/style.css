@@ -367,6 +367,26 @@ select {
     }
 }
 
+/* Layout for Drift parameter editor */
+.param-sections {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.synth-section {
+    flex: 1 1 280px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 1rem;
+    background: #f5f5f5;
+}
+
+.synth-section h3 {
+    margin-top: 0;
+    margin-bottom: 0.75rem;
+}
+
 
 /* Sample-info layout tweaks */
 .sample-info .sample-header {

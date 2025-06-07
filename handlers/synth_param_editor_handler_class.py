@@ -132,58 +132,86 @@ class SynthParamEditorHandler(BaseHandler):
             return '<p>No parameters found.</p>'
 
         schema = load_drift_schema()
-        html = '<div class="params-list">'
-        for i, item in enumerate(params):
-            name = item['name']
-            val = item['value']
-            meta = schema.get(name, {})
-            p_type = meta.get('type')
-            html += '<div class="param-item">'
-            html += f'<label>{name}: '
-            if p_type == 'enum' and meta.get('options'):
-                html += f'<select name="param_{i}_value">'
-                for opt in meta['options']:
-                    selected = ' selected' if str(val) == str(opt) else ''
-                    html += f'<option value="{opt}"{selected}>{opt}</option>'
-                html += '</select>'
-            else:
-                # Numeric slider + input with dynamic step handling
-                min_attr = f' min="{meta.get("min")}"' if meta.get("min") is not None else ''
-                max_attr = f' max="{meta.get("max")}"' if meta.get("max") is not None else ''
 
-                step_input = "any"
-                if isinstance(val, (int, float)):
-                    val_str = str(val)
-                    if "." in val_str:
-                        digits = len(val_str.split(".")[1].rstrip("0"))
-                        if digits:
-                            step_input = str(10 ** -digits)
+        sections = {
+            "Oscillator Section": ("Oscillator1_", "Oscillator2_", "PitchModulation_"),
+            "Oscillator Mixer": ("Mixer_",),
+            "Filter Section": ("Filter_",),
+            "Envelope Section": ("Envelope1_", "Envelope2_", "CyclingEnvelope_"),
+            "LFO Section": ("Lfo_",),
+            "Modulation Matrix": ("ModulationMatrix_",),
+            "Global Controls": ("Global_",),
+        }
+
+        section_data = {name: [] for name in sections}
+        section_data["Other"] = []
+
+        for item in params:
+            pname = item["name"]
+            placed = False
+            for label, prefixes in sections.items():
+                if any(pname.startswith(pref) for pref in prefixes):
+                    section_data[label].append(item)
+                    placed = True
+                    break
+            if not placed:
+                section_data["Other"].append(item)
+
+        html = '<div class="param-sections">'
+        idx = 0
+        for label, items in section_data.items():
+            if not items:
+                continue
+            html += f'<div class="synth-section"><h3>{label}</h3>'
+            for item in items:
+                name = item["name"]
+                val = item["value"]
+                meta = schema.get(name, {})
+                p_type = meta.get("type")
+                html += '<div class="param-item">'
+                html += f'<label>{name}: '
+                if p_type == "enum" and meta.get("options"):
+                    html += f'<select name="param_{idx}_value">'
+                    for opt in meta["options"]:
+                        selected = " selected" if str(val) == str(opt) else ""
+                        html += f'<option value="{opt}"{selected}>{opt}</option>'
+                    html += "</select>"
+                else:
+                    min_attr = f' min="{meta.get("min")}"' if meta.get("min") is not None else ""
+                    max_attr = f' max="{meta.get("max")}"' if meta.get("max") is not None else ""
+
+                    step_input = "any"
+                    if isinstance(val, (int, float)):
+                        val_str = str(val)
+                        if "." in val_str:
+                            digits = len(val_str.split(".")[1].rstrip("0"))
+                            step_input = str(10 ** -digits) if digits else "1"
                         else:
                             step_input = "1"
-                    else:
-                        step_input = "1"
 
-                step_slider = step_input
-                rng_min = meta.get("min")
-                rng_max = meta.get("max")
-                if rng_min is not None and rng_max is not None:
-                    if -1 <= rng_min and rng_max <= 1:
-                        if step_slider == "any" or float(step_slider) > 0.01:
-                            step_slider = "0.01"
-                if step_input == "1" and step_slider != "any":
-                    step_input = step_slider
-                slider_step_attr = f' step="{step_slider}"' if step_slider != "any" else ' step="any"'
-                input_step_attr = f' step="{step_input}"' if step_input != "any" else ' step="any"'
-                html += (
-                    f'<input type="range" name="param_{i}_slider" value="{val}"{min_attr}{max_attr}{slider_step_attr} '
-                    f'oninput="this.nextElementSibling.value=this.value">'
-                )
-                html += (
-                    f'<input type="number" name="param_{i}_value" value="{val}"{min_attr}{max_attr}{input_step_attr} '
-                    f'oninput="this.previousElementSibling.value=this.value">'
-                )
-            html += '</label>'
-            html += f'<input type="hidden" name="param_{i}_name" value="{name}">' 
+                    step_slider = step_input
+                    rng_min = meta.get("min")
+                    rng_max = meta.get("max")
+                    if rng_min is not None and rng_max is not None:
+                        if -1 <= rng_min and rng_max <= 1:
+                            if step_slider == "any" or float(step_slider) > 0.01:
+                                step_slider = "0.01"
+                    if step_input == "1" and step_slider != "any":
+                        step_input = step_slider
+                    slider_step_attr = f' step="{step_slider}"' if step_slider != "any" else ' step="any"'
+                    input_step_attr = f' step="{step_input}"' if step_input != "any" else ' step="any"'
+                    html += (
+                        f'<input type="range" name="param_{idx}_slider" value="{val}"{min_attr}{max_attr}{slider_step_attr} '
+                        f'oninput="this.nextElementSibling.value=this.value">'
+                    )
+                    html += (
+                        f'<input type="number" name="param_{idx}_value" value="{val}"{min_attr}{max_attr}{input_step_attr} '
+                        f'oninput="this.previousElementSibling.value=this.value">'
+                    )
+                html += '</label>'
+                html += f'<input type="hidden" name="param_{idx}_name" value="{name}">' 
+                html += '</div>'
+                idx += 1
             html += '</div>'
         html += '</div>'
         return html

@@ -21,9 +21,7 @@
     <input type="hidden" name="param_count" value="{{ param_count }}">
     <button type="submit" onclick="document.getElementById('action-input').value='reset_preset';">Choose Another Preset</button>
     <p class="current-preset">Editing: {{ selected_preset.split('/')[-1] }}</p>
-    <div class="param-list">
-        {{ params_html | safe }}
-    </div>
+    {{ params_html | safe }}
     <label>New Preset Name: <input type="text" name="new_preset_name"></label>
     <button type="submit">Save Parameters</button>
 </form>
