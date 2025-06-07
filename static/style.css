@@ -502,6 +502,15 @@ select {
     flex: 2;
 }
 
+.param-panel.filter .param-items {
+    flex-direction: column;
+}
+
+.param-row {
+    display: flex;
+    gap: 0.5rem;
+}
+
 .param-items {
     display: flex;
     flex-wrap: wrap;
