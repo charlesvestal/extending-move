@@ -524,10 +524,26 @@ select {
     width: 90px;
 
 .param-number {
-    margin-left: 0.5rem;
+    margin-top: 0.25rem;
     min-width: 60px;
     display: inline-block;
-    text-align: right;
+    text-align: center;
+}
+
+.param-label {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    text-align: center;
+}
+
+.shape-mod {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.pitch-mod {
+    margin-top: 0.5rem;
 }
   
 .param-item {

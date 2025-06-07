@@ -255,37 +255,65 @@ class SynthParamEditorHandler(BaseHandler):
         filter_items = {}
         osc_items = {}
         env_items = {}
+        extra_controls = {}
+
+        def build_control(idx, val, meta):
+            p_type = meta.get('type')
+            if p_type == 'enum' and meta.get('options'):
+                ctrl = '<select name="param_%d_value">' % idx
+                for opt in meta['options']:
+                    selected = ' selected' if str(val) == str(opt) else ''
+                    ctrl += f'<option value="{opt}"{selected}>{opt}</option>'
+                ctrl += '</select>'
+            else:
+                min_attr = f' data-min="{meta.get("min")}"' if meta.get("min") is not None else ''
+                max_attr = f' data-max="{meta.get("max")}"' if meta.get("max") is not None else ''
+                val_attr = f' data-value="{val}"'
+                unit_attr = ''
+                if meta.get("unit"):
+                    unit = meta.get("unit")
+                    if unit == 'st':
+                        unit = 'semitone'
+                    unit_attr = f' data-unit="{unit}"'
+                dec_attr = f' data-decimals="{meta.get("decimals")}"' if meta.get("decimals") is not None else ''
+                display_id = f'param_{idx}_display'
+                ctrl = (
+                    f'<div id="param_{idx}_dial" class="param-dial" data-target="param_{idx}_value" '
+                    f'data-display="{display_id}"{min_attr}{max_attr}{val_attr}{unit_attr}{dec_attr}></div>'
+                )
+                ctrl += f'<span id="{display_id}" class="param-number"></span>'
+                ctrl += f'<input type="hidden" name="param_{idx}_value" value="{val}">' 
+            return ctrl
+
+        def build_item(idx, name, val, meta, hide_label=False):
+            label = self.LABEL_OVERRIDES.get(name, name)
+            ctrl = build_control(idx, val, meta)
+            html = '<div class="param-item">'
+            if not hide_label:
+                html += f'<span class="param-label">{label}</span>'
+            html += ctrl
+            html += f'<input type="hidden" name="param_{idx}_name" value="{name}"></div>'
+            return html, ctrl
 
         for i, item in enumerate(params):
             name = item['name']
             val = item['value']
             meta = schema.get(name, {})
-            p_type = meta.get('type')
 
-            label = self.LABEL_OVERRIDES.get(name, name)
-            html = '<div class="param-item">'
-            html += f'<label>{label}: '
-            if p_type == 'enum' and meta.get('options'):
-                html += f'<select name="param_{i}_value">'
-                for opt in meta['options']:
-                    selected = ' selected' if str(val) == str(opt) else ''
-                    html += f'<option value="{opt}"{selected}>{opt}</option>'
-                html += '</select>'
-            else:
-                min_attr = f' data-min="{meta.get("min")}"' if meta.get("min") is not None else ''
-                max_attr = f' data-max="{meta.get("max")}"' if meta.get("max") is not None else ''
-                val_attr = f' data-value="{val}"'
-                unit_attr = f' data-unit="{meta.get("unit")}"' if meta.get("unit") else ''
-                dec_attr = f' data-decimals="{meta.get("decimals")}"' if meta.get("decimals") is not None else ''
-                display_id = f'param_{i}_display'
-                html += (
-                    f'<div id="param_{i}_dial" class="param-dial" data-target="param_{i}_value" data-display="{display_id}"{min_attr}{max_attr}{val_attr}{unit_attr}{dec_attr}></div>'
-                )
-                html += f'<span id="{display_id}" class="param-number"></span>'
-                html += f'<input type="hidden" name="param_{i}_value" value="{val}">'
-            html += '</label>'
-            html += f'<input type="hidden" name="param_{i}_name" value="{name}">' 
-            html += '</div>'
+            hide_label = name in {
+                "Oscillator1_ShapeModSource",
+                "Oscillator1_ShapeMod",
+                "PitchModulation_Source1",
+                "PitchModulation_Amount1",
+                "PitchModulation_Source2",
+                "PitchModulation_Amount2",
+            }
+
+            html, ctrl = build_item(i, name, val, meta, hide_label=hide_label)
+
+            if name in {"Oscillator1_ShapeModSource", "Oscillator1_ShapeMod", "PitchModulation_Source1", "PitchModulation_Amount1", "PitchModulation_Source2", "PitchModulation_Amount2"}:
+                extra_controls[name] = html  # store full item for later placement
+                continue
 
             section = self._get_section(name)
             if section == "Filter":
@@ -317,32 +345,44 @@ class SynthParamEditorHandler(BaseHandler):
             sections["Filter"] = ordered
 
         if osc_items:
-            osc_rows = [
-                [
-                    "Oscillator1_Type",
-                    "Oscillator1_Transpose",
-                    "Oscillator1_Shape",
-                    "Mixer_OscillatorGain1",
-                ],
-                [
-                    "Oscillator2_Type",
-                    "Oscillator2_Transpose",
-                    "Oscillator2_Detune",
-                    "Mixer_OscillatorGain2",
-                ],
-                [
-                    "PitchModulation_Source1",
-                    "PitchModulation_Amount1",
-                    "PitchModulation_Source2",
-                    "PitchModulation_Amount2",
-                    "Mixer_NoiseLevel",
-                ],
-            ]
             ordered = []
-            for row in osc_rows:
-                row_html = "".join(osc_items.pop(p, "") for p in row if p in osc_items)
-                if row_html:
-                    ordered.append(f'<div class="param-row">{row_html}</div>')
+            row1 = "".join(osc_items.pop(p, "") for p in [
+                "Oscillator1_Type",
+                "Oscillator1_Transpose",
+                "Oscillator1_Shape",
+            ] if p in osc_items)
+            shape_src = extra_controls.pop("Oscillator1_ShapeModSource", "")
+            shape_amt = extra_controls.pop("Oscillator1_ShapeMod", "")
+            if shape_src or shape_amt:
+                row1 += f'<div class="shape-mod">{shape_src}{shape_amt}</div>'
+            if row1:
+                ordered.append(f'<div class="param-row">{row1}</div>')
+
+            row2 = "".join(osc_items.pop(p, "") for p in [
+                "Oscillator2_Type",
+                "Oscillator2_Transpose",
+                "Oscillator2_Detune",
+            ] if p in osc_items)
+            if row2:
+                ordered.append(f'<div class="param-row">{row2}</div>')
+
+            pm_src1 = extra_controls.pop("PitchModulation_Source1", "")
+            pm_src2 = extra_controls.pop("PitchModulation_Source2", "")
+            pm_amt1 = extra_controls.pop("PitchModulation_Amount1", "")
+            pm_amt2 = extra_controls.pop("PitchModulation_Amount2", "")
+            pitch_html = ""
+            if pm_src1 or pm_src2 or pm_amt1 or pm_amt2:
+                pitch_html += '<div class="pitch-mod"><h4>Pitch Mod</h4>'
+                row_a = pm_src1 + pm_src2
+                row_b = pm_amt1 + pm_amt2
+                if row_a:
+                    pitch_html += f'<div class="param-row">{row_a}</div>'
+                if row_b:
+                    pitch_html += f'<div class="param-row">{row_b}</div>'
+                pitch_html += '</div>'
+            if pitch_html:
+                ordered.append(pitch_html)
+
             ordered.extend(osc_items.values())
             sections["Oscillators"] = ordered
 
