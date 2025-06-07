@@ -160,7 +160,7 @@ class SynthParamEditorHandler(BaseHandler):
         "Mixer_OscillatorGain2": "Osc 2",
         "Filter_OscillatorThrough2": "Filter",
         "Mixer_NoiseOn": "On/Off",
-        "Mixer_NoiseLevel": "Level",
+        "Mixer_NoiseLevel": "Noise",
         "Filter_NoiseThrough": "Filter",
 
         # Filter
@@ -357,18 +357,22 @@ class SynthParamEditorHandler(BaseHandler):
             filter_rows = [
                 ["Filter_Frequency", "Filter_Type", "Filter_Tracking"],
                 ["Filter_Resonance", "Filter_HiPassFrequency"],
-                [
-                    "Filter_ModSource1",
-                    "Filter_ModAmount1",
-                    "Filter_ModSource2",
-                    "Filter_ModAmount2",
-                ],
             ]
             ordered = []
             for row in filter_rows:
                 row_html = "".join(filter_items.pop(p, "") for p in row if p in filter_items)
                 if row_html:
                     ordered.append(f'<div class="param-row">{row_html}</div>')
+
+            src1 = filter_items.pop("Filter_ModSource1", "")
+            amt1 = filter_items.pop("Filter_ModAmount1", "")
+            src2 = filter_items.pop("Filter_ModSource2", "")
+            amt2 = filter_items.pop("Filter_ModAmount2", "")
+            pair1 = f'<div class="param-pair">{src1}{amt1}</div>' if (src1 or amt1) else ""
+            pair2 = f'<div class="param-pair">{src2}{amt2}</div>' if (src2 or amt2) else ""
+            if pair1.strip() or pair2.strip():
+                ordered.append(f'<div class="param-row filter-mod-row">{pair1}{pair2}</div>')
+
             ordered.extend(filter_items.values())
             sections["Filter"] = ordered
 

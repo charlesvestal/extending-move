@@ -510,6 +510,10 @@ select {
     justify-content: center;
 }
 
+.filter-mod-row {
+    justify-content: center;
+}
+
 .param-toggle {
     margin: 0.25rem;
     display: inline-block;
@@ -566,3 +570,7 @@ select {
 .param-item {
     margin-bottom: 0.75rem;
   }
+
+.param-item select {
+    width: 50%;
+}
