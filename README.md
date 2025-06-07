@@ -137,6 +137,10 @@ python3 move-webserver.py  # Flask/Jinja web server (default port 909)
 
 The server will be accessible at ``http://move.local:<port>``
 
+The chosen port is saved in ``port.conf`` in the project directory.
+Edit this file if you need to change the port later. Invalid or
+missing values cause the server to fall back to ``909``.
+
 ## Utility Scripts
 
 Note: Execute these scripts from your computer, not the Move.
