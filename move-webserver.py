@@ -31,6 +31,7 @@ from handlers.set_management_handler_class import SetManagementHandler
 from handlers.synth_preset_inspector_handler_class import (
     SynthPresetInspectorHandler,
 )
+from handlers.synth_param_editor_handler_class import SynthParamEditorHandler
 from handlers.drum_rack_inspector_handler_class import DrumRackInspectorHandler
 from handlers.file_placer_handler_class import FilePlacerHandler
 from handlers.refresh_handler_class import RefreshHandler
@@ -106,6 +107,7 @@ restore_handler = RestoreHandler()
 slice_handler = SliceHandler()
 set_management_handler = SetManagementHandler()
 synth_handler = SynthPresetInspectorHandler()
+synth_param_handler = SynthParamEditorHandler()
 file_placer_handler = FilePlacerHandler()
 refresh_handler = RefreshHandler()
 drum_rack_handler = DrumRackInspectorHandler()
@@ -410,6 +412,40 @@ def synth_macros():
         selected_preset=selected_preset,
         schema_json=schema_json,
         active_tab="synth-macros",
+    )
+
+
+@app.route("/synth-params", methods=["GET", "POST"])
+def synth_params():
+    if request.method == "POST":
+        form = SimpleForm(request.form.to_dict())
+        result = synth_param_handler.handle_post(form)
+    else:
+        result = synth_param_handler.handle_get()
+
+    message = result.get("message")
+    message_type = result.get("message_type")
+    success = message_type != "error" if message_type else False
+    browser_html = result.get("file_browser_html")
+    browser_root = result.get("browser_root")
+    browser_filter = result.get("browser_filter")
+    params_html = result.get("params_html", "")
+    selected_preset = result.get("selected_preset")
+    param_count = result.get("param_count", 0)
+    preset_selected = bool(selected_preset)
+    return render_template(
+        "synth_params.html",
+        message=message,
+        success=success,
+        message_type=message_type,
+        file_browser_html=browser_html,
+        browser_root=browser_root,
+        browser_filter=browser_filter,
+        params_html=params_html,
+        preset_selected=preset_selected,
+        selected_preset=selected_preset,
+        param_count=param_count,
+        active_tab="synth-params",
     )
 
 

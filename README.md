@@ -30,6 +30,9 @@ Tools for extending the Ableton Move. This project provides a companion webserve
   - Add and delete parameter mappings
   - Assign multiple parameters to a single macro control
   - Set custom range values for more precise control
+- **Synth Parameter Editor**
+  - Modify any Drift parameter value
+  - Save changes as a new preset file
  
 - **MIDI Import**
   - Upload MIDI files to create new sets
