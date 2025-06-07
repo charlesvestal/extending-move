@@ -1,0 +1,174 @@
+{
+  "Voice_AmplitudeEnvelope_Attack": {
+    "type": "number",
+    "min": 0.00010000000149011613,
+    "max": 0.15449017333984374,
+    "options": []
+  },
+  "Voice_AmplitudeEnvelope_Decay": {
+    "type": "number",
+    "min": 0.0010000000474974513,
+    "max": 60.0,
+    "options": []
+  },
+  "Voice_AmplitudeEnvelope_Release": {
+    "type": "number",
+    "min": 0.008,
+    "max": 22.999998046875,
+    "options": []
+  },
+  "Voice_AmplitudeEnvelope_Sustain": {
+    "type": "number",
+    "min": 0.0003162277571391314,
+    "max": 1.0,
+    "options": []
+  },
+  "Voice_AmplitudeEnvelope_SustainMode": {
+    "type": "enum",
+    "min": null,
+    "max": null,
+    "options": [
+      "Gate"
+    ]
+  },
+  "Voice_Detune": {
+    "type": "number",
+    "min": 0.0,
+    "max": 0.0,
+    "options": []
+  },
+  "Voice_FilterEnvelope_Attack": {
+    "type": "number",
+    "min": 0.00010000000149011613,
+    "max": 0.00010000000149011613,
+    "options": []
+  },
+  "Voice_FilterEnvelope_Decay": {
+    "type": "number",
+    "min": 0.17368344116210938,
+    "max": 2.96227587890625,
+    "options": []
+  },
+  "Voice_FilterEnvelope_On": {
+    "type": "boolean",
+    "min": null,
+    "max": null,
+    "options": []
+  },
+  "Voice_FilterEnvelope_Release": {
+    "type": "number",
+    "min": 0.05,
+    "max": 3.8336586914062503,
+    "options": []
+  },
+  "Voice_FilterEnvelope_Sustain": {
+    "type": "number",
+    "min": 0.0,
+    "max": 0.7265625,
+    "options": []
+  },
+  "Voice_Filter_Frequency": {
+    "type": "number",
+    "min": 30.0,
+    "max": 22000.0,
+    "options": []
+  },
+  "Voice_Filter_FrequencyModulationAmounts_EnvelopeAmount": {
+    "type": "number",
+    "min": -72,
+    "max": 0,
+    "options": []
+  },
+  "Voice_Filter_FrequencyModulationAmounts_LfoAmount": {
+    "type": "number",
+    "min": 0.0,
+    "max": 21.732282638549805,
+    "options": []
+  },
+  "Voice_Filter_On": {
+    "type": "boolean",
+    "min": null,
+    "max": null,
+    "options": []
+  },
+  "Voice_Filter_Resonance": {
+    "type": "number",
+    "min": 0.0,
+    "max": 0.677548348903656,
+    "options": []
+  },
+  "Voice_Filter_Slope": {
+    "type": "enum",
+    "min": null,
+    "max": null,
+    "options": [
+      "12",
+      "24"
+    ]
+  },
+  "Voice_Filter_Type": {
+    "type": "enum",
+    "min": null,
+    "max": null,
+    "options": [
+      "Highpass",
+      "Lowpass"
+    ]
+  },
+  "Voice_Gain": {
+    "type": "number",
+    "min": 1.0,
+    "max": 1.0,
+    "options": []
+  },
+  "Voice_Lfo_On": {
+    "type": "boolean",
+    "min": null,
+    "max": null,
+    "options": []
+  },
+  "Voice_Lfo_Rate": {
+    "type": "number",
+    "min": 1.0,
+    "max": 8.999999046325684,
+    "options": []
+  },
+  "Voice_Lfo_Type": {
+    "type": "enum",
+    "min": null,
+    "max": null,
+    "options": [
+      "Sine"
+    ]
+  },
+  "Voice_PlaybackLength": {
+    "type": "number",
+    "min": 1.0,
+    "max": 1.0,
+    "options": []
+  },
+  "Voice_PlaybackStart": {
+    "type": "number",
+    "min": 0.0,
+    "max": 0.015625,
+    "options": []
+  },
+  "Voice_Transpose": {
+    "type": "number",
+    "min": -36,
+    "max": 36,
+    "options": []
+  },
+  "Voice_VelocityToVolume": {
+    "type": "number",
+    "min": 0.0,
+    "max": 0.3499999940395355,
+    "options": []
+  },
+  "Volume": {
+    "type": "number",
+    "min": -23.799999237060547,
+    "max": 0.0,
+    "options": []
+  }
+}

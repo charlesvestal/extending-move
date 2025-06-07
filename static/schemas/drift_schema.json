@@ -214,8 +214,8 @@
   },
   "Global_Legato": {
     "type": "boolean",
-    "min": null,
-    "max": null,
+    "min": false,
+    "max": false,
     "options": []
   },
   "Global_MonoVoiceDepth": {
