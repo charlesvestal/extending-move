@@ -24,14 +24,14 @@
   },
   "CyclingEnvelope_Rate": {
     "type": "number",
-    "min": 0.17000000178813934,
+    "min": 0.17,
     "max": 1700.0,
     "options": []
   },
   "CyclingEnvelope_Ratio": {
     "type": "number",
     "min": 0.25,
-    "max": 5.787109375,
+    "max": 5.787109,
     "options": []
   },
   "CyclingEnvelope_SyncedRate": {
@@ -42,26 +42,26 @@
   },
   "CyclingEnvelope_Time": {
     "type": "number",
-    "min": 0.10000000149011612,
-    "max": 1.1479036808013916,
+    "min": 0.1,
+    "max": 1.147904,
     "options": []
   },
   "Envelope1_Attack": {
     "type": "number",
     "min": 0.0,
-    "max": 1.9999994039535522,
+    "max": 2.0,
     "options": []
   },
   "Envelope1_Decay": {
     "type": "number",
-    "min": 0.004999999888241291,
-    "max": 45.08636474609375,
+    "min": 0.0,
+    "max": 45.086365,
     "options": []
   },
   "Envelope1_Release": {
     "type": "number",
-    "min": 0.01070136297494173,
-    "max": 4.201648235321045,
+    "min": 0.0,
+    "max": 4.201648,
     "options": []
   },
   "Envelope1_Sustain": {
@@ -73,18 +73,18 @@
   "Envelope2_Attack": {
     "type": "number",
     "min": 0.0,
-    "max": 35.47605514526367,
+    "max": 35.476055,
     "options": []
   },
   "Envelope2_Decay": {
     "type": "number",
-    "min": 0.004999999888241291,
+    "min": 0.0,
     "max": 60.0,
     "options": []
   },
   "Envelope2_Release": {
     "type": "number",
-    "min": 0.009999999776482582,
+    "min": 0.0,
     "max": 60.0,
     "options": []
   },
@@ -96,26 +96,26 @@
   },
   "Filter_Frequency": {
     "type": "number",
-    "min": 40.790008544921875,
-    "max": 19999.99609375,
+    "min": 40.790009,
+    "max": 20000.0,
     "options": []
   },
   "Filter_HiPassFrequency": {
     "type": "number",
     "min": 10.0,
-    "max": 612.4448852539062,
+    "max": 612.444885,
     "options": []
   },
   "Filter_ModAmount1": {
     "type": "number",
-    "min": -0.4395323097705841,
+    "min": -0.439532,
     "max": 1.0,
     "options": []
   },
   "Filter_ModAmount2": {
     "type": "number",
     "min": -1.0,
-    "max": 0.8522539734840393,
+    "max": 0.852254,
     "options": []
   },
   "Filter_ModSource1": {
@@ -203,7 +203,7 @@
   "Global_Glide": {
     "type": "number",
     "min": 0.0,
-    "max": 0.3368569612503052,
+    "max": 0.336857,
     "options": []
   },
   "Global_HiQuality": {
@@ -295,12 +295,12 @@
   "Global_VolVelMod": {
     "type": "number",
     "min": 0.0,
-    "max": 0.7265625,
+    "max": 0.726562,
     "options": []
   },
   "Global_Volume": {
     "type": "number",
-    "min": 0.18387213349342346,
+    "min": 0.183872,
     "max": 1.0,
     "options": []
   },
@@ -344,7 +344,7 @@
   },
   "Lfo_Rate": {
     "type": "number",
-    "min": 0.17000000178813934,
+    "min": 0.17,
     "max": 1700.0,
     "options": []
   },
@@ -383,7 +383,7 @@
   },
   "Lfo_Time": {
     "type": "number",
-    "min": 0.10000000149011612,
+    "min": 0.1,
     "max": 60.0,
     "options": []
   },
@@ -401,14 +401,14 @@
   },
   "Mixer_OscillatorGain1": {
     "type": "number",
-    "min": 0.16940703988075256,
-    "max": 1.9952679872512817,
+    "min": 0.169407,
+    "max": 2.0,
     "options": []
   },
   "Mixer_OscillatorGain2": {
     "type": "number",
     "min": 0.0,
-    "max": 1.9952679872512817,
+    "max": 2.0,
     "options": []
   },
   "Mixer_OscillatorOn1": {
@@ -609,13 +609,13 @@
   },
   "PitchModulation_Amount1": {
     "type": "number",
-    "min": -0.01752549223601818,
-    "max": 0.7205032110214233,
+    "min": 0.0,
+    "max": 0.720503,
     "options": []
   },
   "PitchModulation_Amount2": {
     "type": "number",
-    "min": -0.12168736755847931,
+    "min": -0.121687,
     "max": 1.0,
     "options": []
   },

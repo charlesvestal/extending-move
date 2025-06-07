@@ -1,25 +1,25 @@
 {
   "Voice_AmplitudeEnvelope_Attack": {
     "type": "number",
-    "min": 0.00010000000149011613,
-    "max": 0.15449017333984374,
+    "min": 0.0,
+    "max": 0.15449,
     "options": []
   },
   "Voice_AmplitudeEnvelope_Decay": {
     "type": "number",
-    "min": 0.0010000000474974513,
+    "min": 0.0,
     "max": 60.0,
     "options": []
   },
   "Voice_AmplitudeEnvelope_Release": {
     "type": "number",
-    "min": 0.008,
-    "max": 22.999998046875,
+    "min": 0.0,
+    "max": 23.0,
     "options": []
   },
   "Voice_AmplitudeEnvelope_Sustain": {
     "type": "number",
-    "min": 0.0003162277571391314,
+    "min": 0.0,
     "max": 1.0,
     "options": []
   },
@@ -39,14 +39,14 @@
   },
   "Voice_FilterEnvelope_Attack": {
     "type": "number",
-    "min": 0.00010000000149011613,
-    "max": 0.00010000000149011613,
+    "min": 0.0,
+    "max": 0.0,
     "options": []
   },
   "Voice_FilterEnvelope_Decay": {
     "type": "number",
-    "min": 0.17368344116210938,
-    "max": 2.96227587890625,
+    "min": 0.173683,
+    "max": 2.962276,
     "options": []
   },
   "Voice_FilterEnvelope_On": {
@@ -58,13 +58,13 @@
   "Voice_FilterEnvelope_Release": {
     "type": "number",
     "min": 0.05,
-    "max": 3.8336586914062503,
+    "max": 3.833659,
     "options": []
   },
   "Voice_FilterEnvelope_Sustain": {
     "type": "number",
     "min": 0.0,
-    "max": 0.7265625,
+    "max": 0.726562,
     "options": []
   },
   "Voice_Filter_Frequency": {
@@ -82,7 +82,7 @@
   "Voice_Filter_FrequencyModulationAmounts_LfoAmount": {
     "type": "number",
     "min": 0.0,
-    "max": 21.732282638549805,
+    "max": 21.732283,
     "options": []
   },
   "Voice_Filter_On": {
@@ -94,7 +94,7 @@
   "Voice_Filter_Resonance": {
     "type": "number",
     "min": 0.0,
-    "max": 0.677548348903656,
+    "max": 0.677548,
     "options": []
   },
   "Voice_Filter_Slope": {
@@ -130,7 +130,7 @@
   "Voice_Lfo_Rate": {
     "type": "number",
     "min": 1.0,
-    "max": 8.999999046325684,
+    "max": 9.0,
     "options": []
   },
   "Voice_Lfo_Type": {
@@ -150,7 +150,7 @@
   "Voice_PlaybackStart": {
     "type": "number",
     "min": 0.0,
-    "max": 0.015625,
+    "max": 0.0,
     "options": []
   },
   "Voice_Transpose": {
@@ -162,12 +162,12 @@
   "Voice_VelocityToVolume": {
     "type": "number",
     "min": 0.0,
-    "max": 0.3499999940395355,
+    "max": 0.35,
     "options": []
   },
   "Volume": {
     "type": "number",
-    "min": -23.799999237060547,
+    "min": -23.799999,
     "max": 0.0,
     "options": []
   }
