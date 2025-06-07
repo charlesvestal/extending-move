@@ -23,6 +23,8 @@ logger = logging.getLogger(__name__)
 
 
 class SynthParamEditorHandler(BaseHandler):
+    ACTION_URL = "/synth-params"
+
     def handle_get(self):
         base_dir = "/data/UserData/UserLibrary/Track Presets"
         if not os.path.exists(base_dir) and os.path.exists("examples/Track Presets"):
@@ -30,7 +32,7 @@ class SynthParamEditorHandler(BaseHandler):
         browser_html = generate_dir_html(
             base_dir,
             "",
-            '/synth-params',
+            self.ACTION_URL,
             'preset_select',
             'select_preset',
             filter_key='drift',
@@ -108,7 +110,7 @@ class SynthParamEditorHandler(BaseHandler):
         browser_html = generate_dir_html(
             base_dir,
             "",
-            '/synth-params',
+            self.ACTION_URL,
             'preset_select',
             'select_preset',
             filter_key='drift',

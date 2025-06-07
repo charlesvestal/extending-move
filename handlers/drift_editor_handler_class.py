@@ -14,6 +14,8 @@ logger = logging.getLogger(__name__)
 class DriftEditorHandler(SynthParamEditorHandler):
     """Extended parameter editor that groups Drift parameters by section."""
 
+    ACTION_URL = "/drift-editor"
+
     SECTION_MAP = [
         (
             "Oscillator Section",
