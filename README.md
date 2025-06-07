@@ -33,7 +33,8 @@ Tools for extending the Ableton Move. This project provides a companion webserve
 - **Synth Parameter Editor**
   - Modify any Drift parameter value
   - Save changes as a new preset file
-  - Numeric parameters use sliders with an input field (0.01 step for 0-1 ranges)
+  - Numeric parameters use sliders with an input field
+  - Slider steps are 0.01 for values near ±1 and adapt to the parameter's default precision
   - Enum parameters provide a dropdown of options
   - Create new presets starting from the included Analog Shape example
  
