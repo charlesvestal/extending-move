@@ -126,7 +126,11 @@ async def capture_pages(base_url: str, out_dir: Path) -> None:
         except Exception as e:  # noqa: BLE001
             print(f"Warning: step {step.__name__} failed: {e}")
         finally:
-            await page.close()
+            if not page.isClosed():
+                try:
+                    await page.close()
+                except Exception:  # noqa: BLE001
+                    pass
 
     await browser.close()
 
