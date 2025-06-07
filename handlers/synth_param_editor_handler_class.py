@@ -236,6 +236,10 @@ class SynthParamEditorHandler(BaseHandler):
         "PitchModulation_Source2",
         "PitchModulation_Amount1",
         "PitchModulation_Amount2",
+        "Filter_ModSource1",
+        "Filter_ModSource2",
+        "Filter_ModAmount1",
+        "Filter_ModAmount2",
     }
 
     # Parameters that use a horizontal slider instead of a dial
@@ -243,6 +247,8 @@ class SynthParamEditorHandler(BaseHandler):
         "Oscillator1_ShapeMod",
         "PitchModulation_Amount1",
         "PitchModulation_Amount2",
+        "Filter_ModAmount1",
+        "Filter_ModAmount2",
     }
 
     def _build_param_item(self, idx, name, value, meta, label=None,
@@ -371,6 +377,7 @@ class SynthParamEditorHandler(BaseHandler):
             pair1 = f'<div class="param-pair">{src1}{amt1}</div>' if (src1 or amt1) else ""
             pair2 = f'<div class="param-pair">{src2}{amt2}</div>' if (src2 or amt2) else ""
             if pair1.strip() or pair2.strip():
+                ordered.append('<div class="freq-mod-label">Freq Mod</div>')
                 ordered.append(f'<div class="param-row filter-mod-row">{pair1}{pair2}</div>')
 
             ordered.extend(filter_items.values())
