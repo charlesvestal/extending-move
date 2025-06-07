@@ -255,6 +255,7 @@ class SynthParamEditorHandler(BaseHandler):
         filter_items = {}
         osc_items = {}
         env_items = {}
+        mixer_items = {}
 
         for i, item in enumerate(params):
             name = item['name']
@@ -271,6 +272,13 @@ class SynthParamEditorHandler(BaseHandler):
                     selected = ' selected' if str(val) == str(opt) else ''
                     html += f'<option value="{opt}"{selected}>{opt}</option>'
                 html += '</select>'
+            elif p_type == 'boolean':
+                bool_val = 1 if str(val).lower() in ("true", "1") else 0
+                html += (
+                    f'<div id="param_{i}_toggle" class="param-toggle" '
+                    f'data-target="param_{i}_value" data-value="{bool_val}"></div>'
+                )
+                html += f'<input type="hidden" name="param_{i}_value" value="{bool_val}">'
             else:
                 min_attr = f' data-min="{meta.get("min")}"' if meta.get("min") is not None else ''
                 max_attr = f' data-max="{meta.get("max")}"' if meta.get("max") is not None else ''
@@ -294,6 +302,8 @@ class SynthParamEditorHandler(BaseHandler):
                 osc_items[name] = html
             elif section == "Envelopes":
                 env_items[name] = html
+            elif section == "Mixer":
+                mixer_items[name] = html
             else:
                 sections[section].append(html)
 
@@ -316,26 +326,37 @@ class SynthParamEditorHandler(BaseHandler):
             ordered.extend(filter_items.values())
             sections["Filter"] = ordered
 
+        if mixer_items:
+            mixer_rows = [
+                ["Mixer_OscillatorOn1", "Mixer_OscillatorGain1", "Filter_OscillatorThrough1"],
+                ["Mixer_OscillatorOn2", "Mixer_OscillatorGain2", "Filter_OscillatorThrough2"],
+                ["Mixer_NoiseOn", "Mixer_NoiseLevel", "Filter_NoiseThrough"],
+            ]
+            ordered = []
+            for row in mixer_rows:
+                row_html = "".join(mixer_items.pop(p, "") for p in row if p in mixer_items)
+                if row_html:
+                    ordered.append(f'<div class="param-row">{row_html}</div>')
+            ordered.extend(mixer_items.values())
+            sections["Mixer"] = ordered
+
         if osc_items:
             osc_rows = [
                 [
                     "Oscillator1_Type",
                     "Oscillator1_Transpose",
                     "Oscillator1_Shape",
-                    "Mixer_OscillatorGain1",
                 ],
                 [
                     "Oscillator2_Type",
                     "Oscillator2_Transpose",
                     "Oscillator2_Detune",
-                    "Mixer_OscillatorGain2",
                 ],
                 [
                     "PitchModulation_Source1",
                     "PitchModulation_Amount1",
                     "PitchModulation_Source2",
                     "PitchModulation_Amount2",
-                    "Mixer_NoiseLevel",
                 ],
             ]
             ordered = []
