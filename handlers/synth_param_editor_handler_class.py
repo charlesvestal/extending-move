@@ -151,10 +151,14 @@ class SynthParamEditorHandler(BaseHandler):
                 min_attr = f' data-min="{meta.get("min")}"' if meta.get("min") is not None else ''
                 max_attr = f' data-max="{meta.get("max")}"' if meta.get("max") is not None else ''
                 val_attr = f' data-value="{val}"'
+                unit_attr = f' data-unit="{meta.get("unit")}"' if meta.get("unit") else ''
+                dec_attr = f' data-decimals="{meta.get("decimals")}"' if meta.get("decimals") is not None else ''
+                display_id = f'param_{i}_display'
                 html += (
-                    f'<div id="param_{i}_dial" class="param-dial" data-target="param_{i}_value"{min_attr}{max_attr}{val_attr}></div>'
+                    f'<div id="param_{i}_dial" class="param-dial" data-target="param_{i}_value" data-display="{display_id}"{min_attr}{max_attr}{val_attr}{unit_attr}{dec_attr}></div>'
                 )
-                html += f'<input type="hidden" name="param_{i}_value" value="{val}">' 
+                html += f'<span id="{display_id}" class="param-number"></span>'
+                html += f'<input type="hidden" name="param_{i}_value" value="{val}">'
             html += '</label>'
             html += f'<input type="hidden" name="param_{i}_name" value="{name}">'
             html += '</div>'
