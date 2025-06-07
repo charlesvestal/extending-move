@@ -558,8 +558,8 @@ select {
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 90px;
-
+    /* width: 90px; */
+}
 .param-number {
     margin-left: 0.5rem;
     min-width: 60px;
@@ -571,6 +571,3 @@ select {
     margin-bottom: 0.75rem;
   }
 
-.param-item select {
-    width: 50%;
-}
