@@ -148,14 +148,15 @@ class SynthParamEditorHandler(BaseHandler):
                 html += '</select>'
             else:
                 # Numeric slider + input
-                min_attr = f' min="{meta.get("min")}"' if meta.get('min') is not None else ''
-                max_attr = f' max="{meta.get("max")}"' if meta.get('max') is not None else ''
+                min_attr = f' min="{meta.get("min")}"' if meta.get("min") is not None else ''
+                max_attr = f' max="{meta.get("max")}"' if meta.get("max") is not None else ''
+                step_attr = ' step="0.01"' if meta.get("max") is not None and meta.get("min") is not None and meta.get("max") - meta.get("min") <= 1 else ' step="any"'
                 html += (
-                    f'<input type="range" name="param_{i}_slider" value="{val}"{min_attr}{max_attr} '
+                    f'<input type="range" name="param_{i}_slider" value="{val}"{min_attr}{max_attr}{step_attr} '
                     f'oninput="this.nextElementSibling.value=this.value">'
                 )
                 html += (
-                    f'<input type="number" name="param_{i}_value" value="{val}"{min_attr}{max_attr} '
+                    f'<input type="number" name="param_{i}_value" value="{val}"{min_attr}{max_attr}{step_attr} '
                     f'oninput="this.previousElementSibling.value=this.value">'
                 )
             html += '</label>'
