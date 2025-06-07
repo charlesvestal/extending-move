@@ -379,10 +379,12 @@ class SynthParamEditorHandler(BaseHandler):
             pm_amt1 = extra_controls.pop("PitchModulation_Amount1", "")
             pm_amt2 = extra_controls.pop("PitchModulation_Amount2", "")
                 pitch_html = (
-                    '<div class="pitch-mod"><h4>Pitch Mod</h4>'
+                    '<div class="pitch-mod">'
+                    '<h4>Pitch Mod</h4>'
+                    '<div class="param-row pitch-mod-row">'
                     f'<div class="pitch-mod-pair">{pm_src1}{pm_amt1}</div>'
                     f'<div class="pitch-mod-pair">{pm_src2}{pm_amt2}</div>'
-                    '</div>'
+                    '</div></div>'
                 )
             sections["Oscillators"] = ordered
 

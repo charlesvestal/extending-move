@@ -534,6 +534,9 @@ select {
 }
 
     display: flex;
+}
+
+.pitch-mod-row {
     display: flex;
     gap: 1rem;
 }
