@@ -214,4 +214,30 @@
 {% endblock %}
 {% block scripts %}
 <script type="module" src="{{ host_prefix }}/static/file_browser.js"></script>
+<script>
+const driftSchema = {{ schema_json|safe }};
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.parameter-mapping select').forEach(sel => {
+    sel.addEventListener('change', () => {
+      const info = driftSchema[sel.value] || {};
+      const container = sel.closest('.parameter-mapping');
+      const minInput = container.querySelector('.range-min');
+      const maxInput = container.querySelector('.range-max');
+      if (!info.type || info.type === 'enum' || info.type === 'boolean') {
+        minInput.value = '';
+        maxInput.value = '';
+        minInput.placeholder = '';
+        maxInput.placeholder = '';
+        minInput.disabled = true;
+        maxInput.disabled = true;
+      } else {
+        minInput.disabled = false;
+        maxInput.disabled = false;
+        minInput.placeholder = info.min !== undefined && info.min !== null ? info.min : '';
+        maxInput.placeholder = info.max !== undefined && info.max !== null ? info.max : '';
+      }
+    });
+  });
+});
+</script>
 {% endblock %}
