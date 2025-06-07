@@ -228,6 +228,70 @@ class SynthParamEditorHandler(BaseHandler):
         "Global_ResetOscillatorPhase": "R",
     }
 
+    # Parameters that should display without a text label
+    UNLABELED_PARAMS = {
+        "Oscillator1_ShapeModSource",
+        "Oscillator1_ShapeMod",
+        "PitchModulation_Source1",
+        "PitchModulation_Source2",
+        "PitchModulation_Amount1",
+        "PitchModulation_Amount2",
+    }
+
+    # Parameters that use a horizontal slider instead of a dial
+    SLIDER_PARAMS = {
+        "Oscillator1_ShapeMod",
+        "PitchModulation_Amount1",
+        "PitchModulation_Amount2",
+    }
+
+    def _build_param_item(self, idx, name, value, meta, label=None,
+                           hide_label=False, slider=False):
+        """Create HTML for a single parameter control."""
+        p_type = meta.get("type")
+        label = label if label is not None else self.LABEL_OVERRIDES.get(name, name)
+
+        html = ['<div class="param-item">']
+        if not hide_label:
+            html.append(f'<span class="param-label">{label}</span>')
+
+        if p_type == "enum" and meta.get("options"):
+            html.append(f'<select name="param_{idx}_value">')
+            for opt in meta["options"]:
+                sel = " selected" if str(value) == str(opt) else ""
+                html.append(f'<option value="{opt}"{sel}>{opt}</option>')
+            html.append('</select>')
+            html.append(f'<input type="hidden" name="param_{idx}_value" value="{value}">')
+        elif p_type == "boolean":
+            bool_val = 1 if str(value).lower() in ("true", "1") else 0
+            html.append(
+                f'<div id="param_{idx}_toggle" class="param-toggle" '
+                f'data-target="param_{idx}_value" data-value="{bool_val}"></div>'
+            )
+            html.append(f'<input type="hidden" name="param_{idx}_value" value="{bool_val}">')
+        else:
+            min_attr = f' data-min="{meta.get("min")}"' if meta.get("min") is not None else ''
+            max_attr = f' data-max="{meta.get("max")}"' if meta.get("max") is not None else ''
+            val_attr = f' data-value="{value}"'
+            unit_attr = f' data-unit="{meta.get("unit")}"' if meta.get("unit") else ''
+            dec_attr = f' data-decimals="{meta.get("decimals")}"' if meta.get("decimals") is not None else ''
+            disp_id = f'param_{idx}_display'
+            klass = "param-dial"
+            orient = ""
+            if slider:
+                klass = "param-slider"
+                orient = ' data-orientation="horizontal"'
+            html.append(
+                f'<div id="param_{idx}_dial" class="{klass}" data-target="param_{idx}_value" '
+                f'data-display="{disp_id}"{orient}{min_attr}{max_attr}{val_attr}{unit_attr}{dec_attr}></div>'
+            )
+            html.append(f'<span id="{disp_id}" class="param-number"></span>')
+            html.append(f'<input type="hidden" name="param_{idx}_value" value="{value}">')
+
+        html.append(f'<input type="hidden" name="param_{idx}_name" value="{name}">')
+        html.append('</div>')
+        return ''.join(html)
+
     def _get_section(self, name):
         if name.startswith(("Oscillator1_", "Oscillator2_", "PitchModulation_")):
             return "Oscillators"
@@ -252,48 +316,30 @@ class SynthParamEditorHandler(BaseHandler):
 
         schema = load_drift_schema()
         sections = {s: [] for s in self.SECTION_ORDER}
-        filter_items = {}
-        osc_items = {}
-        env_items = {}
-        mixer_items = {}
+        filter_items: dict[str, str] = {}
+        osc_items: dict[str, str] = {}
+        env_items: dict[str, str] = {}
+        mixer_items: dict[str, str] = {}
 
         for i, item in enumerate(params):
             name = item['name']
             val = item['value']
-            meta = schema.get(name, {})
-            p_type = meta.get('type')
+            meta = dict(schema.get(name, {}))
 
-            label = self.LABEL_OVERRIDES.get(name, name)
-            html = '<div class="param-item">'
-            html += f'<label>{label}: '
-            if p_type == 'enum' and meta.get('options'):
-                html += f'<select name="param_{i}_value">'
-                for opt in meta['options']:
-                    selected = ' selected' if str(val) == str(opt) else ''
-                    html += f'<option value="{opt}"{selected}>{opt}</option>'
-                html += '</select>'
-            elif p_type == 'boolean':
-                bool_val = 1 if str(val).lower() in ("true", "1") else 0
-                html += (
-                    f'<div id="param_{i}_toggle" class="param-toggle" '
-                    f'data-target="param_{i}_value" data-value="{bool_val}"></div>'
-                )
-                html += f'<input type="hidden" name="param_{i}_value" value="{bool_val}">'
-            else:
-                min_attr = f' data-min="{meta.get("min")}"' if meta.get("min") is not None else ''
-                max_attr = f' data-max="{meta.get("max")}"' if meta.get("max") is not None else ''
-                val_attr = f' data-value="{val}"'
-                unit_attr = f' data-unit="{meta.get("unit")}"' if meta.get("unit") else ''
-                dec_attr = f' data-decimals="{meta.get("decimals")}"' if meta.get("decimals") is not None else ''
-                display_id = f'param_{i}_display'
-                html += (
-                    f'<div id="param_{i}_dial" class="param-dial" data-target="param_{i}_value" data-display="{display_id}"{min_attr}{max_attr}{val_attr}{unit_attr}{dec_attr}></div>'
-                )
-                html += f'<span id="{display_id}" class="param-number"></span>'
-                html += f'<input type="hidden" name="param_{i}_value" value="{val}">'
-            html += '</label>'
-            html += f'<input type="hidden" name="param_{i}_name" value="{name}">' 
-            html += '</div>'
+            if name in ("Oscillator1_Transpose", "Oscillator2_Transpose") and meta.get("unit") == "st":
+                meta.pop("unit", None)
+
+            hide = name in self.UNLABELED_PARAMS
+            slider = name in self.SLIDER_PARAMS
+            html = self._build_param_item(
+                i,
+                name,
+                val,
+                meta,
+                label=self.LABEL_OVERRIDES.get(name, name),
+                hide_label=hide,
+                slider=slider,
+            )
 
             section = self._get_section(name)
             if section == "Filter":
@@ -341,29 +387,39 @@ class SynthParamEditorHandler(BaseHandler):
             sections["Mixer"] = ordered
 
         if osc_items:
-            osc_rows = [
-                [
-                    "Oscillator1_Type",
-                    "Oscillator1_Transpose",
-                    "Oscillator1_Shape",
-                ],
-                [
-                    "Oscillator2_Type",
-                    "Oscillator2_Transpose",
-                    "Oscillator2_Detune",
-                ],
-                [
-                    "PitchModulation_Source1",
-                    "PitchModulation_Amount1",
-                    "PitchModulation_Source2",
-                    "PitchModulation_Amount2",
-                ],
-            ]
             ordered = []
-            for row in osc_rows:
-                row_html = "".join(osc_items.pop(p, "") for p in row if p in osc_items)
-                if row_html:
-                    ordered.append(f'<div class="param-row">{row_html}</div>')
+            row1_parts = [
+                osc_items.pop("Oscillator1_Type", ""),
+                osc_items.pop("Oscillator1_Transpose", ""),
+                osc_items.pop("Oscillator1_Shape", ""),
+            ]
+            shape_src = osc_items.pop("Oscillator1_ShapeModSource", "")
+            shape_amt = osc_items.pop("Oscillator1_ShapeMod", "")
+            shape_pair = f'<div class="param-pair">{shape_src}{shape_amt}</div>' if (shape_src or shape_amt) else ""
+            row1 = "".join(row1_parts) + shape_pair
+            if row1:
+                ordered.append(f'<div class="param-row">{row1}</div>')
+
+            row2 = "".join([
+                osc_items.pop("Oscillator2_Type", ""),
+                osc_items.pop("Oscillator2_Transpose", ""),
+                osc_items.pop("Oscillator2_Detune", ""),
+            ])
+            if row2:
+                ordered.append(f'<div class="param-row">{row2}</div>')
+
+            pm_pair1 = (
+                f'<div class="param-pair">{osc_items.pop("PitchModulation_Source1", "")}'
+                f'{osc_items.pop("PitchModulation_Amount1", "")}</div>'
+            )
+            pm_pair2 = (
+                f'<div class="param-pair">{osc_items.pop("PitchModulation_Source2", "")}'
+                f'{osc_items.pop("PitchModulation_Amount2", "")}</div>'
+            )
+            if pm_pair1.strip() or pm_pair2.strip():
+                ordered.append('<div class="pitch-mod-label">Pitch Mod</div>')
+                ordered.append(f'<div class="param-row pitch-mod-row">{pm_pair1}{pm_pair2}</div>')
+
             ordered.extend(osc_items.values())
             sections["Oscillators"] = ordered
 
