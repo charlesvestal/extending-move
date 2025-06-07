@@ -251,7 +251,7 @@ class SynthParamEditorHandler(BaseHandler):
         p_type = meta.get("type")
         label = label if label is not None else self.LABEL_OVERRIDES.get(name, name)
 
-        html = ['<div class="param-item">']
+        html = [f'<div class="param-item" data-name="{name}">']
         if not hide_label:
             html.append(f'<span class="param-label">{label}</span>')
 
@@ -428,30 +428,48 @@ class SynthParamEditorHandler(BaseHandler):
             sections["Oscillators"] = ordered
 
         if env_items:
-            env_rows = [
-                [
-                    "Envelope1_Attack",
-                    "Envelope1_Decay",
-                    "Envelope1_Sustain",
-                    "Envelope1_Release",
-                ],
-                [
-                    "Envelope2_Attack",
-                    "Envelope2_Decay",
-                    "Envelope2_Sustain",
-                    "Envelope2_Release",
-                ],
-                [
-                    "CyclingEnvelope_MidPoint",
-                    "CyclingEnvelope_Hold",
-                    "CyclingEnvelope_Rate",
-                ],
+            amp_adsr = [
+                env_items.pop("Envelope1_Attack", ""),
+                env_items.pop("Envelope1_Decay", ""),
+                env_items.pop("Envelope1_Sustain", ""),
+                env_items.pop("Envelope1_Release", ""),
             ]
+            env1_adsr = [
+                env_items.pop("Envelope2_Attack", ""),
+                env_items.pop("Envelope2_Decay", ""),
+                env_items.pop("Envelope2_Sustain", ""),
+                env_items.pop("Envelope2_Release", ""),
+            ]
+            cycle_toggle = env_items.pop("Global_Envelope2Mode", "")
+            cycle_extras = [
+                env_items.pop("CyclingEnvelope_MidPoint", ""),
+                env_items.pop("CyclingEnvelope_Hold", ""),
+                env_items.pop("CyclingEnvelope_Rate", ""),
+                env_items.pop("CyclingEnvelope_Mode", ""),
+            ]
+
             ordered = []
-            for row in env_rows:
-                row_html = "".join(env_items.pop(p, "") for p in row if p in env_items)
-                if row_html:
-                    ordered.append(f'<div class="param-row">{row_html}</div>')
+            row1 = "".join(amp_adsr)
+            if row1:
+                ordered.append(
+                    f'<div class="param-row"><span class="param-row-label">Amp envelope</span>{row1}</div>'
+                )
+            row2 = "".join(env1_adsr)
+            if row2:
+                ordered.append(
+                    f'<div class="param-row"><span class="param-row-label">Env 1</span>{row2}</div>'
+                )
+            row3_main = row2 + cycle_toggle
+            if row3_main.strip():
+                ordered.append(
+                    f'<div class="param-row env2-main"><span class="param-row-label">Env 2</span>{row3_main}</div>'
+                )
+            row3_extra = "".join(cycle_extras)
+            if row3_extra.strip():
+                ordered.append(
+                    f'<div class="param-row env2-cycling hidden">{row3_extra}</div>'
+                )
+
             ordered.extend(env_items.values())
             sections["Envelopes"] = ordered
 
