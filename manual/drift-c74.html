@@ -1,0 +1,983 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width"/><style>
+						html {
+							font-family: &#x27;__Lato_f5bf52&#x27;, &#x27;__Lato_Fallback_f5bf52&#x27;;
+						}
+
+						:root {
+							--c74-font-size-base: 16px;
+							--c74-font-family: &#x27;__Lato_f5bf52&#x27;, &#x27;__Lato_Fallback_f5bf52&#x27;;
+							--c74-font-family-monospace: &#x27;__Ubuntu_Mono_fa6322&#x27;, &#x27;__Ubuntu_Mono_Fallback_fa6322&#x27;;
+							--c74-font-family-patcher: Arial;
+						}
+					</style><title>abl.device.drift~ - Ableton DSP Reference | Cycling &#x27;74 Documentation</title><meta name="description" content="Drift synthesizer"/><meta property="og:title" content="abl.device.drift~ - Ableton DSP Reference | Cycling &#x27;74 Documentation"/><meta property="og:description" content="Drift synthesizer"/><meta property="og:image" content="https://cycling74-docs-production.nyc3.cdn.digitaloceanspaces.com/images/seo_poster.jpeg"/><meta name="twitter:site" content="@cycling74"/><meta name="twitter:creator" content="@cycling74"/><meta name="twitter:card" content="summary_large_image"/><meta name="twitter:description" content="Drift synthesizer"/><meta name="twitter:image" content="https://cycling74-docs-production.nyc3.cdn.digitaloceanspaces.com/images/seo_poster.jpeg"/><meta name="next-head-count" content="13"/><link rel="icon" href="/favicon.ico" type="image/x-icon"/><link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/><link href="/styles/dark.css" rel="stylesheet" type="text/css"/><link href="/styles/light.css" rel="stylesheet" type="text/css"/><link rel="preload" href="/_next/static/media/2f9f484c332ee5de-s.p.woff2" as="font" type="font/woff2" crossorigin="anonymous" data-next-font="size-adjust"/><link rel="preload" href="/_next/static/media/1c6f4cbc58bf1b54-s.p.woff2" as="font" type="font/woff2" crossorigin="anonymous" data-next-font="size-adjust"/><link rel="preload" href="/_next/static/media/6ec89c3f4265bc9b-s.p.woff2" as="font" type="font/woff2" crossorigin="anonymous" data-next-font="size-adjust"/><link rel="preload" href="/_next/static/media/18663a228a3c9261-s.p.woff2" as="font" type="font/woff2" crossorigin="anonymous" data-next-font="size-adjust"/><link rel="preload" href="/_next/static/media/b15a336eec276995-s.p.woff2" as="font" type="font/woff2" crossorigin="anonymous" data-next-font="size-adjust"/><link rel="preload" href="/_next/static/media/162938472036e0a8-s.p.woff2" as="font" type="font/woff2" crossorigin="anonymous" data-next-font="size-adjust"/><link rel="preload" href="/_next/static/media/f1df658da56627d0-s.p.woff2" as="font" type="font/woff2" crossorigin="anonymous" data-next-font="size-adjust"/><link rel="preload" href="/_next/static/media/af4d27004aa34222-s.p.woff2" as="font" type="font/woff2" crossorigin="anonymous" data-next-font="size-adjust"/><link rel="preload" href="/_next/static/media/b82c0038f5b398f5-s.p.woff2" as="font" type="font/woff2" crossorigin="anonymous" data-next-font="size-adjust"/><script id="matomo-config" data-nscript="beforeInteractive">
+								window.matomoConfig = {
+									siteId: "14",
+									tagManagerScript: "https://analytics.ableton.com/js/container_MFtOznH0.js",
+								};
+							</script><link rel="preload" href="/_next/static/css/8ce65bb0bd6684f5.css" as="style"/><link rel="stylesheet" href="/_next/static/css/8ce65bb0bd6684f5.css" data-n-g=""/><link rel="preload" href="/_next/static/css/094f513764aa4d4c.css" as="style"/><link rel="stylesheet" href="/_next/static/css/094f513764aa4d4c.css" data-n-p=""/><noscript data-n-css=""></noscript><script defer="" nomodule="" src="/_next/static/chunks/polyfills-42372ed130431b0a.js"></script><script id="bickies-lib" src="https://assets.cycling74.com/web/bickies/1.1.0.js" defer="" data-nscript="beforeInteractive"></script><script src="/_next/static/chunks/webpack-cf2bf4da91ab394d.js" defer=""></script><script src="/_next/static/chunks/framework-e82a91356956e6c8.js" defer=""></script><script src="/_next/static/chunks/main-bb3a08087a3e1e81.js" defer=""></script><script src="/_next/static/chunks/pages/_app-a233ec45a0927508.js" defer=""></script><script src="/_next/static/chunks/pages/reference/%5Bname%5D-46a7be06e437cb1c.js" defer=""></script><script src="/_next/static/DovVRgswvQsh7EnHmtzCf/_buildManifest.js" defer=""></script><script src="/_next/static/DovVRgswvQsh7EnHmtzCf/_ssgManifest.js" defer=""></script></head><body><script>
+try {
+	var t = window.localStorage.getItem("c74docs_colortheme");
+	if (!t && window.matchMedia) {
+		var tMatch = window.matchMedia("(prefers-color-scheme: dark)");
+		t = tMatch && tMatch.matches ? "default" : "light";
+	}
+	document.documentElement.dataset.theme = t !== "light" && t !== "default" ? "light" : t;
+} catch (err) {
+	document.documentElement.dataset.theme = "default";
+}
+	</script><div id="__next"><div class="header_wrapper__VS506"><header class="container_container___sP76 header_header__Awatn"><button class="actionIcon_root__2uIzC actionIcon_size-md__bb9vc actionIcon_color-default__8bzTM header_burger__QdUqz"><svg aria-hidden="true" focusable="false" data-prefix="far" data-icon="bars" class="svg-inline--fa fa-bars fa-fw " role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="currentColor" d="M0 88C0 74.7 10.7 64 24 64l400 0c13.3 0 24 10.7 24 24s-10.7 24-24 24L24 112C10.7 112 0 101.3 0 88zM0 248c0-13.3 10.7-24 24-24l400 0c13.3 0 24 10.7 24 24s-10.7 24-24 24L24 272c-13.3 0-24-10.7-24-24zM448 408c0 13.3-10.7 24-24 24L24 432c-13.3 0-24-10.7-24-24s10.7-24 24-24l400 0c13.3 0 24 10.7 24 24z"></path></svg></button><a class="anchor_anchor__voHdm" href="/"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="20" viewBox="0 0 36 20" fill="none" style="display:block"><path fill-rule="evenodd" clip-rule="evenodd" d="M7.017 7.10713C7.017 5.2226 6.27779 3.41522 4.96185 2.08263C3.64591 0.750034 1.86112 0.00146484 0.000148713 0.00146484C-8.17423e-08 0.00146484 0 0.00146484 0 0.00146484L0 4.8786C0 6.76313 0.73921 8.57051 2.05515 9.9031C3.37109 11.2357 5.15588 11.9843 7.01685 11.9843C7.017 11.9843 7.017 11.9843 7.017 11.9843V7.10713Z" fill="var(--c74-header-logo-color)"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M28.25 7.05581C28.25 5.18451 27.5126 3.38981 26.1998 2.06656C24.8871 0.743317 23.1066 0 21.2501 0C21.25 0 21.25 0 21.25 0V11.8987H28.25V7.05581Z" fill="var(--c74-header-logo-color)"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M36.0001 0L36 0C34.1435 0 32.363 0.74864 31.0503 2.08136C29.7375 3.41408 29.0001 5.22163 29.0001 7.10634C29.0001 12.8551 29.0001 20 29.0001 20H29.0003C30.8567 20 32.6372 19.2514 33.95 17.9186C35.2627 16.5859 36.0001 14.7784 36.0001 12.8937C36.0001 7.14491 36.0001 0 36.0001 0Z" fill="var(--c74-header-logo-color)"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M20 7.84814H13V20H13.0001C14.8566 20 16.6371 19.2409 17.9498 17.8895C19.2626 16.5381 20 14.7052 20 12.7941C20 10.1761 20 7.84814 20 7.84814Z" fill="var(--c74-header-logo-color)"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M20.009 7.10581V7.10566C20.009 5.22114 19.2697 3.41375 17.9538 2.08116C16.6379 0.748567 14.8531 0 12.9922 0C9.49403 0 5.99995 0 5.99995 0V0.000150595C5.99995 1.88468 6.7391 3.69206 8.055 5.02465C9.37107 6.35725 11.1557 7.10581 13.0168 7.10581C16.515 7.10581 20.009 7.10581 20.009 7.10581Z" fill="var(--c74-header-logo-color)"></path></svg></a><nav aria-label="Main Navigation" class="header_nav___1UFd"><ul class="header_navList__CHfco"><li class="header_navEntry__WGZyx" data-open="false"><a class="anchor_anchor__voHdm" href="/userguide/">User Guide</a></li><li class="header_navEntry__WGZyx" data-open="false"><div data-key="nav.reference">Reference<!-- --> <svg aria-hidden="true" focusable="false" data-prefix="far" data-icon="caret-down" class="svg-inline--fa fa-caret-down fa-fw " role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path fill="currentColor" d="M160 329.4L249.4 240 70.6 240 160 329.4zm22.6 45.3c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-9.2-9.2-11.9-22.9-6.9-34.9s16.6-19.8 29.6-19.8l256 0c12.9 0 24.6 7.8 29.6 19.8s2.2 25.7-6.9 34.9l-128 128z"></path></svg></div><div class="header_navDropdown__G6rGy"><div class="header_navDropdownColumns__sQppo"><div class="header_navDropdownColumn__Oufsf"><h4 class="header_navDropdownColumnTitle__FjJUJ">API Reference</h4><ul class="header_navDropdownColumnList__yUCn0"><li class="header_navDropdownColumnListItem__UwF1Q"><a class="anchor_anchor__voHdm" href="/apiref/js/">Max JavaScript API</a></li><li class="header_navDropdownColumnListItem__UwF1Q"><a class="anchor_anchor__voHdm" href="/apiref/lom/">Live Object Model</a></li><li class="header_navDropdownColumnListItem__UwF1Q"><a class="anchor_anchor__voHdm" href="/apiref/nodeformax/">Node for Max API</a></li></ul></div><div class="header_navDropdownColumn__Oufsf"><h4 class="header_navDropdownColumnTitle__FjJUJ">Object Reference</h4><ul class="header_navDropdownColumnList__yUCn0"><li class="header_navDropdownColumnListItem__UwF1Q"><a class="anchor_anchor__voHdm" href="/reference/">Object &amp; Operator Reference</a></li></ul></div></div></div></li><li class="header_navEntry__WGZyx" data-open="false"><a class="anchor_anchor__voHdm" href="/learn/">Learn</a></li></ul></nav><div class="header_actionWrap__fHRF_"><button class="actionIcon_root__2uIzC actionIcon_size-md__bb9vc actionIcon_color-default__8bzTM header_colorSchemeDesktop__enKe9"><svg aria-hidden="true" focusable="false" data-prefix="far" data-icon="circle-half-stroke" class="svg-inline--fa fa-circle-half-stroke fa-fw " role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M464 256c0-114.9-93.1-208-208-208l0 416c114.9 0 208-93.1 208-208zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256z"></path></svg></button><button class="actionIcon_root__2uIzC actionIcon_size-md__bb9vc actionIcon_color-default__8bzTM"><svg aria-hidden="true" focusable="false" data-prefix="far" data-icon="magnifying-glass" class="svg-inline--fa fa-magnifying-glass fa-fw " role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M368 208A160 160 0 1 0 48 208a160 160 0 1 0 320 0zM337.1 371.1C301.7 399.2 256.8 416 208 416C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208c0 48.8-16.8 93.7-44.9 129.1L505 471c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0L337.1 371.1z"></path></svg></button></div></header></div><div class="header_mobileNavWrap__rBMx5" data-show="false"><button class="actionIcon_root__2uIzC actionIcon_size-xl__Aj2NJ actionIcon_color-default__8bzTM header_mobileNavCloser__q22BJ"><svg aria-hidden="true" focusable="false" data-prefix="far" data-icon="xmark" class="svg-inline--fa fa-xmark fa-fw " role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path fill="currentColor" d="M345 137c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0l-119 119L73 103c-9.4-9.4-24.6-9.4-33.9 0s-9.4 24.6 0 33.9l119 119L39 375c-9.4 9.4-9.4 24.6 0 33.9s24.6 9.4 33.9 0l119-119L311 409c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-119-119L345 137z"></path></svg></button><nav class="container_container___sP76"><ul class="header_mobileNavList__JEEHv"><li class="header_mobileNavEntry__ucXHt"><a class="anchor_anchor__voHdm" href="/userguide/">User Guide</a></li><li class="header_mobileNavEntry__ucXHt"><div>Reference</div><ul class="header_mobileNavDropdownList__kuXya"><li class="header_mobileNavDropdownListItem__jDjU_"><a class="anchor_anchor__voHdm" href="/apiref/js/">Max JavaScript API</a></li><li class="header_mobileNavDropdownListItem__jDjU_"><a class="anchor_anchor__voHdm" href="/apiref/lom/">Live Object Model</a></li><li class="header_mobileNavDropdownListItem__jDjU_"><a class="anchor_anchor__voHdm" href="/apiref/nodeformax/">Node for Max API</a></li><li class="header_mobileNavDropdownListItem__jDjU_"><a class="anchor_anchor__voHdm" href="/reference/">Object &amp; Operator Reference</a></li></ul></li><li class="header_mobileNavEntry__ucXHt"><a class="anchor_anchor__voHdm" href="/learn/">Learn</a></li></ul><button class="button_root__gu50S button_size-md__t9GPp undefined header_colorSchemeMobile__SPLxT"><span class="button_inner__e9qV6"><span class="button_leftSection__cV6kG"><svg aria-hidden="true" focusable="false" data-prefix="far" data-icon="circle-half-stroke" class="svg-inline--fa fa-circle-half-stroke " role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M464 256c0-114.9-93.1-208-208-208l0 416c114.9 0 208-93.1 208-208zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256z"></path></svg></span><span class="button_label__D97gv">Switch Theme</span></span></button></nav></div><div class="article_wrapper__3zirf article_articleWithAsideOnly__uHP7G"><div class="article_mobileSecondaryHeaderWrap__rfHg5"><div class="container_container___sP76 article_mobileSecondaryHeader__VFiK3"><div></div><div><button class="actionIcon_root__2uIzC actionIcon_size-md__bb9vc actionIcon_color-default__8bzTM"><svg aria-hidden="true" focusable="false" data-prefix="far" data-icon="bars-staggered" class="svg-inline--fa fa-bars-staggered fa-fw " role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M0 88C0 74.7 10.7 64 24 64l400 0c13.3 0 24 10.7 24 24s-10.7 24-24 24L24 112C10.7 112 0 101.3 0 88zM64 248c0-13.3 10.7-24 24-24l400 0c13.3 0 24 10.7 24 24s-10.7 24-24 24L88 272c-13.3 0-24-10.7-24-24zM448 408c0 13.3-10.7 24-24 24L24 432c-13.3 0-24-10.7-24-24s10.7-24 24-24l400 0c13.3 0 24 10.7 24 24z"></path></svg></button></div></div></div><div class="article_sidebarsWrapper__hv_fz"><aside class="article_asideWrapper__EYa1D" data-show="false"><nav class="article_asideInner__P3erm"><header class="article_asideHeader__C1tMw">On this page</header><ol class="article_asideList__cnz9P"><li><a href="#description" class="anchor_anchor__voHdm article_asideLink__oRmKv">Description</a></li><li><a href="#arguments" class="anchor_anchor__voHdm article_asideLink__oRmKv">Arguments</a></li><li><div data-open="false" class="article_asideGroup__e8D1q"><div class="article_asideGroupLabelWrap__Y_rAg"><span class="article_asideGroupDisclosure___z6Yd"><svg aria-hidden="true" focusable="false" data-prefix="far" data-icon="caret-right" class="svg-inline--fa fa-caret-right fa-fw article_asideGroupDisclosureIcon__DfpSN" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 512"><path fill="currentColor" d="M201.4 256L112 166.6l0 178.7L201.4 256zm45.3-22.6c12.5 12.5 12.5 32.8 0 45.3l-128 128c-9.2 9.2-22.9 11.9-34.9 6.9s-19.8-16.6-19.8-29.6l0-256c0-12.9 7.8-24.6 19.8-29.6s25.7-2.2 34.9 6.9l128 128z"></path></svg></span><a href="#attributes" class="anchor_anchor__voHdm article_asideGroupLabel__QMw_b">Attributes</a></div><ol class="article_asideGroupChildren__hyI2j"><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_drift" class="anchor_anchor__voHdm article_asideLink__oRmKv">drift</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_env1attack" class="anchor_anchor__voHdm article_asideLink__oRmKv">env1attack</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_env1decay" class="anchor_anchor__voHdm article_asideLink__oRmKv">env1decay</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_env1release" class="anchor_anchor__voHdm article_asideLink__oRmKv">env1release</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_env1sustain" class="anchor_anchor__voHdm article_asideLink__oRmKv">env1sustain</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_env2attack" class="anchor_anchor__voHdm article_asideLink__oRmKv">env2attack</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_env2decay" class="anchor_anchor__voHdm article_asideLink__oRmKv">env2decay</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_env2freq" class="anchor_anchor__voHdm article_asideLink__oRmKv">env2freq</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_env2hold" class="anchor_anchor__voHdm article_asideLink__oRmKv">env2hold</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_env2mode" class="anchor_anchor__voHdm article_asideLink__oRmKv">env2mode</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_env2release" class="anchor_anchor__voHdm article_asideLink__oRmKv">env2release</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_env2sustain" class="anchor_anchor__voHdm article_asideLink__oRmKv">env2sustain</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_env2tilt" class="anchor_anchor__voHdm article_asideLink__oRmKv">env2tilt</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_filtermod1amount" class="anchor_anchor__voHdm article_asideLink__oRmKv">filtermod1amount</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_filtermod2amount" class="anchor_anchor__voHdm article_asideLink__oRmKv">filtermod2amount</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_filtermodsrc1" class="anchor_anchor__voHdm article_asideLink__oRmKv">filtermodsrc1</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_filtermodsrc2" class="anchor_anchor__voHdm article_asideLink__oRmKv">filtermodsrc2</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_filtertracking" class="anchor_anchor__voHdm article_asideLink__oRmKv">filtertracking</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_gain" class="anchor_anchor__voHdm article_asideLink__oRmKv">gain</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_glidetime" class="anchor_anchor__voHdm article_asideLink__oRmKv">glidetime</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_hpfreq" class="anchor_anchor__voHdm article_asideLink__oRmKv">hpfreq</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_legato" class="anchor_anchor__voHdm article_asideLink__oRmKv">legato</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_lfoamount" class="anchor_anchor__voHdm article_asideLink__oRmKv">lfoamount</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_lfofreq" class="anchor_anchor__voHdm article_asideLink__oRmKv">lfofreq</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_lfomodamount" class="anchor_anchor__voHdm article_asideLink__oRmKv">lfomodamount</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_lfomodsrc" class="anchor_anchor__voHdm article_asideLink__oRmKv">lfomodsrc</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_lforetrigger" class="anchor_anchor__voHdm article_asideLink__oRmKv">lforetrigger</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_lfoshape" class="anchor_anchor__voHdm article_asideLink__oRmKv">lfoshape</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_lpfreq" class="anchor_anchor__voHdm article_asideLink__oRmKv">lpfreq</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_lpres" class="anchor_anchor__voHdm article_asideLink__oRmKv">lpres</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_modamt1" class="anchor_anchor__voHdm article_asideLink__oRmKv">modamt1</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_modamt2" class="anchor_anchor__voHdm article_asideLink__oRmKv">modamt2</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_modamt3" class="anchor_anchor__voHdm article_asideLink__oRmKv">modamt3</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_moddst1" class="anchor_anchor__voHdm article_asideLink__oRmKv">moddst1</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_moddst2" class="anchor_anchor__voHdm article_asideLink__oRmKv">moddst2</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_moddst3" class="anchor_anchor__voHdm article_asideLink__oRmKv">moddst3</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_modsrc1" class="anchor_anchor__voHdm article_asideLink__oRmKv">modsrc1</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_modsrc2" class="anchor_anchor__voHdm article_asideLink__oRmKv">modsrc2</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_modsrc3" class="anchor_anchor__voHdm article_asideLink__oRmKv">modsrc3</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_noiseenable" class="anchor_anchor__voHdm article_asideLink__oRmKv">noiseenable</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_noisefilter" class="anchor_anchor__voHdm article_asideLink__oRmKv">noisefilter</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_noisegain" class="anchor_anchor__voHdm article_asideLink__oRmKv">noisegain</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_notepitchbend" class="anchor_anchor__voHdm article_asideLink__oRmKv">notepitchbend</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_osc1enable" class="anchor_anchor__voHdm article_asideLink__oRmKv">osc1enable</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_osc1filter" class="anchor_anchor__voHdm article_asideLink__oRmKv">osc1filter</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_osc1gain" class="anchor_anchor__voHdm article_asideLink__oRmKv">osc1gain</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_osc1octave" class="anchor_anchor__voHdm article_asideLink__oRmKv">osc1octave</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_osc1shape" class="anchor_anchor__voHdm article_asideLink__oRmKv">osc1shape</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_osc1shapemod" class="anchor_anchor__voHdm article_asideLink__oRmKv">osc1shapemod</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_osc1shapemodsrc" class="anchor_anchor__voHdm article_asideLink__oRmKv">osc1shapemodsrc</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_osc1type" class="anchor_anchor__voHdm article_asideLink__oRmKv">osc1type</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_osc2detune" class="anchor_anchor__voHdm article_asideLink__oRmKv">osc2detune</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_osc2enable" class="anchor_anchor__voHdm article_asideLink__oRmKv">osc2enable</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_osc2filter" class="anchor_anchor__voHdm article_asideLink__oRmKv">osc2filter</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_osc2gain" class="anchor_anchor__voHdm article_asideLink__oRmKv">osc2gain</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_osc2octave" class="anchor_anchor__voHdm article_asideLink__oRmKv">osc2octave</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_osc2type" class="anchor_anchor__voHdm article_asideLink__oRmKv">osc2type</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_oscmod1amount" class="anchor_anchor__voHdm article_asideLink__oRmKv">oscmod1amount</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_oscmod2amount" class="anchor_anchor__voHdm article_asideLink__oRmKv">oscmod2amount</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_oscmodsrc1" class="anchor_anchor__voHdm article_asideLink__oRmKv">oscmodsrc1</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_oscmodsrc2" class="anchor_anchor__voHdm article_asideLink__oRmKv">oscmodsrc2</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_pitchbendrange" class="anchor_anchor__voHdm article_asideLink__oRmKv">pitchbendrange</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_retrigger" class="anchor_anchor__voHdm article_asideLink__oRmKv">retrigger</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_stereospread" class="anchor_anchor__voHdm article_asideLink__oRmKv">stereospread</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_thickness" class="anchor_anchor__voHdm article_asideLink__oRmKv">thickness</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_transpose" class="anchor_anchor__voHdm article_asideLink__oRmKv">transpose</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_unison" class="anchor_anchor__voHdm article_asideLink__oRmKv">unison</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_velocityvolume" class="anchor_anchor__voHdm article_asideLink__oRmKv">velocityvolume</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_voicemode" class="anchor_anchor__voHdm article_asideLink__oRmKv">voicemode</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_voices" class="anchor_anchor__voHdm article_asideLink__oRmKv">voices</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_annotation" class="anchor_anchor__voHdm article_asideLink__oRmKv">annotation</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_background" class="anchor_anchor__voHdm article_asideLink__oRmKv">background</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_color" class="anchor_anchor__voHdm article_asideLink__oRmKv">color</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_fontface" class="anchor_anchor__voHdm article_asideLink__oRmKv">fontface</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_fontname" class="anchor_anchor__voHdm article_asideLink__oRmKv">fontname</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_fontsize" class="anchor_anchor__voHdm article_asideLink__oRmKv">fontsize</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_hidden" class="anchor_anchor__voHdm article_asideLink__oRmKv">hidden</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_hint" class="anchor_anchor__voHdm article_asideLink__oRmKv">hint</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_ignoreclick" class="anchor_anchor__voHdm article_asideLink__oRmKv">ignoreclick</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_jspainterfile" class="anchor_anchor__voHdm article_asideLink__oRmKv">jspainterfile</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_patching_rect" class="anchor_anchor__voHdm article_asideLink__oRmKv">patching_rect</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_position" class="anchor_anchor__voHdm article_asideLink__oRmKv">position</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_presentation" class="anchor_anchor__voHdm article_asideLink__oRmKv">presentation</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_presentation_rect" class="anchor_anchor__voHdm article_asideLink__oRmKv">presentation_rect</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_rect" class="anchor_anchor__voHdm article_asideLink__oRmKv">rect</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_size" class="anchor_anchor__voHdm article_asideLink__oRmKv">size</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_textcolor" class="anchor_anchor__voHdm article_asideLink__oRmKv">textcolor</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_textjustification" class="anchor_anchor__voHdm article_asideLink__oRmKv">textjustification</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_valuepopup" class="anchor_anchor__voHdm article_asideLink__oRmKv">valuepopup</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_valuepopuplabel" class="anchor_anchor__voHdm article_asideLink__oRmKv">valuepopuplabel</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#attr_varname" class="anchor_anchor__voHdm article_asideLink__oRmKv">varname</a></li></ol></div></li><li><div data-open="false" class="article_asideGroup__e8D1q"><div class="article_asideGroupLabelWrap__Y_rAg"><span class="article_asideGroupDisclosure___z6Yd"><svg aria-hidden="true" focusable="false" data-prefix="far" data-icon="caret-right" class="svg-inline--fa fa-caret-right fa-fw article_asideGroupDisclosureIcon__DfpSN" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 512"><path fill="currentColor" d="M201.4 256L112 166.6l0 178.7L201.4 256zm45.3-22.6c12.5 12.5 12.5 32.8 0 45.3l-128 128c-9.2 9.2-22.9 11.9-34.9 6.9s-19.8-16.6-19.8-29.6l0-256c0-12.9 7.8-24.6 19.8-29.6s25.7-2.2 34.9 6.9l128 128z"></path></svg></span><a href="#messages" class="anchor_anchor__voHdm article_asideGroupLabel__QMw_b">Messages</a></div><ol class="article_asideGroupChildren__hyI2j"><li class="article_asideGroupChildEntry__qv5MS"><a href="#method_int" class="anchor_anchor__voHdm article_asideLink__oRmKv">int</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#method_reset" class="anchor_anchor__voHdm article_asideLink__oRmKv">reset</a></li><li class="article_asideGroupChildEntry__qv5MS"><a href="#method_float" class="anchor_anchor__voHdm article_asideLink__oRmKv">float</a></li></ol></div></li></ol></nav></aside></div><main class="article_contentWrap__daprD" data-fullwidth="false"><article class="article_content__OHg47 c74-article-content html-content"><i>Package <!-- -->Ableton DSP</i><h1 style="margin-top:var(--c74-spacing-lg);margin-bottom:0">abl.device.drift~</h1><div>
+
+<p class="digest"> Drift synthesizer </p>
+<section class="object_description" id="description"><h2>Description</h2>
+<p> Drift synthesizer </p></section><section class="argument_section" id="arguments"><h2>Arguments</h2>
+<p class="description no_arguments">None.</p></section><section class="attribute_section" id="attributes"><h2>Attributes</h2>
+<div class="attribute_group" id="attr_drift">
+<h3 class="attribute_name" id="" name="drift">
+<div class="title">
+<span class="name">drift</span><span class="type">[float64]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Sets the amount of variation per voice. The variation slightly affects different aspects of the voice's sound, such as the pitch and filter cutoff. </p></div>
+</div>
+<div class="attribute_group" id="attr_env1attack">
+<h3 class="attribute_name" id="" name="env1attack">
+<div class="title">
+<span class="name">env1attack</span><span class="type">[float64]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Time in seconds needed to travel from the initial value to the peak </p></div>
+</div>
+<div class="attribute_group" id="attr_env1decay">
+<h3 class="attribute_name" id="" name="env1decay">
+<div class="title">
+<span class="name">env1decay</span><span class="type">[float64]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Time in seconds needed to travel from the peak to the sustain level </p></div>
+</div>
+<div class="attribute_group" id="attr_env1release">
+<h3 class="attribute_name" id="" name="env1release">
+<div class="title">
+<span class="name">env1release</span><span class="type">[float64]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Time in seconds needed to travel back to zero after a note ends </p></div>
+</div>
+<div class="attribute_group" id="attr_env1sustain">
+<h3 class="attribute_name" id="" name="env1sustain">
+<div class="title">
+<span class="name">env1sustain</span><span class="type">[float64]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> The level reached at the end of the decay stage until the note ends. </p></div>
+</div>
+<div class="attribute_group" id="attr_env2attack">
+<h3 class="attribute_name" id="" name="env2attack">
+<div class="title">
+<span class="name">env2attack</span><span class="type">[float64]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Time in seconds needed to travel from the initial value to the peak </p></div>
+</div>
+<div class="attribute_group" id="attr_env2decay">
+<h3 class="attribute_name" id="" name="env2decay">
+<div class="title">
+<span class="name">env2decay</span><span class="type">[float64]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Time in seconds needed to travel from the peak to the sustain level </p></div>
+</div>
+<div class="attribute_group" id="attr_env2freq">
+<h3 class="attribute_name" id="" name="env2freq">
+<div class="title">
+<span class="name">env2freq</span><span class="type">[float64]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Sets the frequency of the cycling envelope in Hz. </p></div>
+</div>
+<div class="attribute_group" id="attr_env2hold">
+<h3 class="attribute_name" id="" name="env2hold">
+<div class="title">
+<span class="name">env2hold</span><span class="type">[float64]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Sets how long the cycling envelope will stay at its maximum level. </p></div>
+</div>
+<div class="attribute_group" id="attr_env2mode">
+<h3 class="attribute_name" id="" name="env2mode">
+<div class="title">
+<span class="name">env2mode</span><span class="type">[long]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Enable/disable whether envelope 2 functions as a cycling envelope. </p></div>
+</div>
+<div class="attribute_group" id="attr_env2release">
+<h3 class="attribute_name" id="" name="env2release">
+<div class="title">
+<span class="name">env2release</span><span class="type">[float64]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Time in seconds needed to travel back to zero after a note ends </p></div>
+</div>
+<div class="attribute_group" id="attr_env2sustain">
+<h3 class="attribute_name" id="" name="env2sustain">
+<div class="title">
+<span class="name">env2sustain</span><span class="type">[float64]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> The level reached at the end of the decay stage until the note ends. </p></div>
+</div>
+<div class="attribute_group" id="attr_env2tilt">
+<h3 class="attribute_name" id="" name="env2tilt">
+<div class="title">
+<span class="name">env2tilt</span><span class="type">[float64]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Sets the midpoint of the cycling envelope. At very low or high values, this also affects the envelope's slopes. </p></div>
+</div>
+<div class="attribute_group" id="attr_filtermod1amount">
+<h3 class="attribute_name" id="" name="filtermod1amount">
+<div class="title">
+<span class="name">filtermod1amount</span><span class="type">[float64]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Modulates the low-pass filter frequency using the selected modulation source. If set to 100%, the modulation creates a frequency shift of approximately nine octaves. </p></div>
+</div>
+<div class="attribute_group" id="attr_filtermod2amount">
+<h3 class="attribute_name" id="" name="filtermod2amount">
+<div class="title">
+<span class="name">filtermod2amount</span><span class="type">[float64]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Modulates the low-pass filter frequency using the selected modulation source. If set to 100%, the modulation creates a frequency shift of approximately nine octaves. </p></div>
+</div>
+<div class="attribute_group" id="attr_filtermodsrc1">
+<h3 class="attribute_name" id="" name="filtermodsrc1">
+<div class="title">
+<span class="name">filtermodsrc1</span><span class="type">[long]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Select a modulation source to modulate the low-pass filter cutoff frequency. </p></div>
+</div>
+<div class="attribute_group" id="attr_filtermodsrc2">
+<h3 class="attribute_name" id="" name="filtermodsrc2">
+<div class="title">
+<span class="name">filtermodsrc2</span><span class="type">[long]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Select a modulation source to modulate the low-pass filter cutoff frequency. </p></div>
+</div>
+<div class="attribute_group" id="attr_filtertracking">
+<h3 class="attribute_name" id="" name="filtertracking">
+<div class="title">
+<span class="name">filtertracking</span><span class="type">[float64]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Sets the amount of filter modulation based on which note is played. </p></div>
+</div>
+<div class="attribute_group" id="attr_gain">
+<h3 class="attribute_name" id="" name="gain">
+<div class="title">
+<span class="name">gain</span><span class="type">[float64]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Set the overall volume of the instrument </p></div>
+</div>
+<div class="attribute_group" id="attr_glidetime">
+<h3 class="attribute_name" id="" name="glidetime">
+<div class="title">
+<span class="name">glidetime</span><span class="type">[float64]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Adjusts the time in seconds that overlapping notes take to slide their pitch to the next incoming pitch. Glide is only available if the voice mode is set to mono and notes are played legato. </p></div>
+</div>
+<div class="attribute_group" id="attr_hpfreq">
+<h3 class="attribute_name" id="" name="hpfreq">
+<div class="title">
+<span class="name">hpfreq</span><span class="type">[float64]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Defines the center of the cutoff frequency of the high-pass filter. </p></div>
+</div>
+<div class="attribute_group" id="attr_legato">
+<h3 class="attribute_name" id="" name="legato">
+<div class="title">
+<span class="name">legato</span><span class="type">[long]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Enable/disable whether triggering a new voice will change its pitch without retriggering the envelopes. Legato is only available if the voice mode is set to mono. </p></div>
+</div>
+<div class="attribute_group" id="attr_lfoamount">
+<h3 class="attribute_name" id="" name="lfoamount">
+<div class="title">
+<span class="name">lfoamount</span><span class="type">[float64]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Adjusts the amount of LFO modulation applied to incoming signals. </p></div>
+</div>
+<div class="attribute_group" id="attr_lfofreq">
+<h3 class="attribute_name" id="" name="lfofreq">
+<div class="title">
+<span class="name">lfofreq</span><span class="type">[float64]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Sets the rate of the LFO in Hz. </p></div>
+</div>
+<div class="attribute_group" id="attr_lfomodamount">
+<h3 class="attribute_name" id="" name="lfomodamount">
+<div class="title">
+<span class="name">lfomodamount</span><span class="type">[float64]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Sets how much the LFO amount if modulated by the selected modulation source. </p></div>
+</div>
+<div class="attribute_group" id="attr_lfomodsrc">
+<h3 class="attribute_name" id="" name="lfomodsrc">
+<div class="title">
+<span class="name">lfomodsrc</span><span class="type">[long]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Select a source to modulate the LFO amount. </p></div>
+</div>
+<div class="attribute_group" id="attr_lforetrigger">
+<h3 class="attribute_name" id="" name="lforetrigger">
+<div class="title">
+<span class="name">lforetrigger</span><span class="type">[long]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Enable/disable LFO retrigger. When enabled, the LFO restarts at the same phase position each time a note is triggered. </p></div>
+</div>
+<div class="attribute_group" id="attr_lfoshape">
+<h3 class="attribute_name" id="" name="lfoshape">
+<div class="title">
+<span class="name">lfoshape</span><span class="type">[long]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Select from among several LFO waveforms. The `oneShot` waveforms turn the LFO into a one-shot decay envelope. </p></div>
+</div>
+<div class="attribute_group" id="attr_lpfreq">
+<h3 class="attribute_name" id="" name="lpfreq">
+<div class="title">
+<span class="name">lpfreq</span><span class="type">[float64]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Defines the center of the cutoff frequency of the low-pass filter. </p></div>
+</div>
+<div class="attribute_group" id="attr_lpres">
+<h3 class="attribute_name" id="" name="lpres">
+<div class="title">
+<span class="name">lpres</span><span class="type">[float64]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Sets the resonance of the low-pass filter </p></div>
+</div>
+<div class="attribute_group" id="attr_modamt1">
+<h3 class="attribute_name" id="" name="modamt1">
+<div class="title">
+<span class="name">modamt1</span><span class="type">[float64]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Modulation amount 1 </p></div>
+</div>
+<div class="attribute_group" id="attr_modamt2">
+<h3 class="attribute_name" id="" name="modamt2">
+<div class="title">
+<span class="name">modamt2</span><span class="type">[float64]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Modulation amount 2 </p></div>
+</div>
+<div class="attribute_group" id="attr_modamt3">
+<h3 class="attribute_name" id="" name="modamt3">
+<div class="title">
+<span class="name">modamt3</span><span class="type">[float64]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Modulation amount 3 </p></div>
+</div>
+<div class="attribute_group" id="attr_moddst1">
+<h3 class="attribute_name" id="" name="moddst1">
+<div class="title">
+<span class="name">moddst1</span><span class="type">[long]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Modulation destination 1 </p></div>
+</div>
+<div class="attribute_group" id="attr_moddst2">
+<h3 class="attribute_name" id="" name="moddst2">
+<div class="title">
+<span class="name">moddst2</span><span class="type">[long]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Modulation destination 2 </p></div>
+</div>
+<div class="attribute_group" id="attr_moddst3">
+<h3 class="attribute_name" id="" name="moddst3">
+<div class="title">
+<span class="name">moddst3</span><span class="type">[long]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Modulation destination 3 </p></div>
+</div>
+<div class="attribute_group" id="attr_modsrc1">
+<h3 class="attribute_name" id="" name="modsrc1">
+<div class="title">
+<span class="name">modsrc1</span><span class="type">[long]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Modulation source 1 </p></div>
+</div>
+<div class="attribute_group" id="attr_modsrc2">
+<h3 class="attribute_name" id="" name="modsrc2">
+<div class="title">
+<span class="name">modsrc2</span><span class="type">[long]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Modulation source 2 </p></div>
+</div>
+<div class="attribute_group" id="attr_modsrc3">
+<h3 class="attribute_name" id="" name="modsrc3">
+<div class="title">
+<span class="name">modsrc3</span><span class="type">[long]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Modulation source 3 </p></div>
+</div>
+<div class="attribute_group" id="attr_noiseenable">
+<h3 class="attribute_name" id="" name="noiseenable">
+<div class="title">
+<span class="name">noiseenable</span><span class="type">[long]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Enable/disable the noise generator. </p></div>
+</div>
+<div class="attribute_group" id="attr_noisefilter">
+<h3 class="attribute_name" id="" name="noisefilter">
+<div class="title">
+<span class="name">noisefilter</span><span class="type">[long]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Enable/disable filter for the noise generator </p></div>
+</div>
+<div class="attribute_group" id="attr_noisegain">
+<h3 class="attribute_name" id="" name="noisegain">
+<div class="title">
+<span class="name">noisegain</span><span class="type">[float64]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Sets the gain of the noise generator in dB. </p></div>
+</div>
+<div class="attribute_group" id="attr_notepitchbend">
+<h3 class="attribute_name" id="" name="notepitchbend">
+<div class="title">
+<span class="name">notepitchbend</span><span class="type">[long]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Enable/disable per-note pitch bend </p></div>
+</div>
+<div class="attribute_group" id="attr_osc1enable">
+<h3 class="attribute_name" id="" name="osc1enable">
+<div class="title">
+<span class="name">osc1enable</span><span class="type">[long]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Enable/disable oscillator 1 </p></div>
+</div>
+<div class="attribute_group" id="attr_osc1filter">
+<h3 class="attribute_name" id="" name="osc1filter">
+<div class="title">
+<span class="name">osc1filter</span><span class="type">[long]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Enable/disable filter for oscillator 1 </p></div>
+</div>
+<div class="attribute_group" id="attr_osc1gain">
+<h3 class="attribute_name" id="" name="osc1gain">
+<div class="title">
+<span class="name">osc1gain</span><span class="type">[float64]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Sets the Oscillator 1 gain in dB. If filter processing is on, high oscillator gain values can cause the filters to recreate some of the behaviors found in analog circuits. </p></div>
+</div>
+<div class="attribute_group" id="attr_osc1octave">
+<h3 class="attribute_name" id="" name="osc1octave">
+<div class="title">
+<span class="name">osc1octave</span><span class="type">[long]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Transpose oscillator 1 in octave increments </p></div>
+</div>
+<div class="attribute_group" id="attr_osc1shape">
+<h3 class="attribute_name" id="" name="osc1shape">
+<div class="title">
+<span class="name">osc1shape</span><span class="type">[float64]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Morphs the shape of the Oscillator 1 waveform. The shaping effect changes depending on the selected waveform. </p></div>
+</div>
+<div class="attribute_group" id="attr_osc1shapemod">
+<h3 class="attribute_name" id="" name="osc1shapemod">
+<div class="title">
+<span class="name">osc1shapemod</span><span class="type">[float64]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Set the amount of modulation of osc1_shape by osc1shapemodsrc. </p></div>
+</div>
+<div class="attribute_group" id="attr_osc1shapemodsrc">
+<h3 class="attribute_name" id="" name="osc1shapemodsrc">
+<div class="title">
+<span class="name">osc1shapemodsrc</span><span class="type">[long]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Select the modulation source for osc1_shape. </p></div>
+</div>
+<div class="attribute_group" id="attr_osc1type">
+<h3 class="attribute_name" id="" name="osc1type">
+<div class="title">
+<span class="name">osc1type</span><span class="type">[long]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Set the oscillator 1 waveform shape </p></div>
+</div>
+<div class="attribute_group" id="attr_osc2detune">
+<h3 class="attribute_name" id="" name="osc2detune">
+<div class="title">
+<span class="name">osc2detune</span><span class="type">[float64]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Sets the pitch of Oscillator 2 in semitones in relation to the global transpose attribute. </p></div>
+</div>
+<div class="attribute_group" id="attr_osc2enable">
+<h3 class="attribute_name" id="" name="osc2enable">
+<div class="title">
+<span class="name">osc2enable</span><span class="type">[long]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Enable/disable oscillator 2 </p></div>
+</div>
+<div class="attribute_group" id="attr_osc2filter">
+<h3 class="attribute_name" id="" name="osc2filter">
+<div class="title">
+<span class="name">osc2filter</span><span class="type">[long]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Enable/disable filter for oscillator 2 </p></div>
+</div>
+<div class="attribute_group" id="attr_osc2gain">
+<h3 class="attribute_name" id="" name="osc2gain">
+<div class="title">
+<span class="name">osc2gain</span><span class="type">[float64]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Sets the Oscillator 2 gain in dB. If filter processing is on, high oscillator gain values can cause the filters to recreate some of the behaviors found in analog circuits. </p></div>
+</div>
+<div class="attribute_group" id="attr_osc2octave">
+<h3 class="attribute_name" id="" name="osc2octave">
+<div class="title">
+<span class="name">osc2octave</span><span class="type">[long]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Transpose oscillator 2 in octave increments </p></div>
+</div>
+<div class="attribute_group" id="attr_osc2type">
+<h3 class="attribute_name" id="" name="osc2type">
+<div class="title">
+<span class="name">osc2type</span><span class="type">[long]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Set the oscillator 2 waveform shape </p></div>
+</div>
+<div class="attribute_group" id="attr_oscmod1amount">
+<h3 class="attribute_name" id="" name="oscmod1amount">
+<div class="title">
+<span class="name">oscmod1amount</span><span class="type">[float64]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Sets the amount of modulation of both oscillators from oscmod1src. </p></div>
+</div>
+<div class="attribute_group" id="attr_oscmod2amount">
+<h3 class="attribute_name" id="" name="oscmod2amount">
+<div class="title">
+<span class="name">oscmod2amount</span><span class="type">[float64]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Sets the amount of modulation of both oscillators from oscmod2src. </p></div>
+</div>
+<div class="attribute_group" id="attr_oscmodsrc1">
+<h3 class="attribute_name" id="" name="oscmodsrc1">
+<div class="title">
+<span class="name">oscmodsrc1</span><span class="type">[long]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Select a modulation source to modulate the pitch of both oscillators. </p></div>
+</div>
+<div class="attribute_group" id="attr_oscmodsrc2">
+<h3 class="attribute_name" id="" name="oscmodsrc2">
+<div class="title">
+<span class="name">oscmodsrc2</span><span class="type">[long]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Select a modulation source to modulate the pitch of both oscillators. </p></div>
+</div>
+<div class="attribute_group" id="attr_pitchbendrange">
+<h3 class="attribute_name" id="" name="pitchbendrange">
+<div class="title">
+<span class="name">pitchbendrange</span><span class="type">[long]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Sets the global pitch bend range in semitones. </p></div>
+</div>
+<div class="attribute_group" id="attr_retrigger">
+<h3 class="attribute_name" id="" name="retrigger">
+<div class="title">
+<span class="name">retrigger</span><span class="type">[long]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Enable/disable restarting both oscillators at the same phase position each time a note is triggered. </p></div>
+</div>
+<div class="attribute_group" id="attr_stereospread">
+<h3 class="attribute_name" id="" name="stereospread">
+<div class="title">
+<span class="name">stereospread</span><span class="type">[float64]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Sets how much panning variation is applied across individual voices. </p></div>
+</div>
+<div class="attribute_group" id="attr_thickness">
+<h3 class="attribute_name" id="" name="thickness">
+<div class="title">
+<span class="name">thickness</span><span class="type">[float64]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Adjusts the relative volume of the 4 mono voices associated with each note. </p></div>
+</div>
+<div class="attribute_group" id="attr_transpose">
+<h3 class="attribute_name" id="" name="transpose">
+<div class="title">
+<span class="name">transpose</span><span class="type">[long]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Transpose the instrument's global pitch in semitones. </p></div>
+</div>
+<div class="attribute_group" id="attr_unison">
+<h3 class="attribute_name" id="" name="unison">
+<div class="title">
+<span class="name">unison</span><span class="type">[float64]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Sets how much pitch variation is applied across individual voices. </p></div>
+</div>
+<div class="attribute_group" id="attr_velocityvolume">
+<h3 class="attribute_name" id="" name="velocityvolume">
+<div class="title">
+<span class="name">velocityvolume</span><span class="type">[float64]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Sets how much the volume is modulated by incoming MIDI note velocity. </p></div>
+</div>
+<div class="attribute_group" id="attr_voicemode">
+<h3 class="attribute_name" id="" name="voicemode">
+<div class="title">
+<span class="name">voicemode</span><span class="type">[long]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Sets the instrument's voice mode. Poly offers polyphonic voicing. Mono offers monophonic voicing. Stereo spreads the voices across the stereo field. Unison slightly detunes each voice independently from one another. </p></div>
+</div>
+<div class="attribute_group" id="attr_voices">
+<h3 class="attribute_name" id="" name="voices">
+<div class="title">
+<span class="name">voices</span><span class="type">[long]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description"> Sets the maximum number of voices that can be played back at the same time. Note that certain voice modes can utilize more voices than notes played. </p></div>
+</div>
+<div class="disclosure">
+<h3>Common Box Attributes</h3>
+<div class="disclosure_body">
+<div class="disclosure_intro">
+		Below is a list of attributes shared by all objects. If you want to change one of these attributes for an object based on the object box, you need to place the word <span class="messagename" data-message="sendbox"> sendbox </span> in front of the attribute name, or use the object's <a href="/userguide/inspector">Inspector</a>.
+	 </div>
+<div class="attribute_group" id="attr_annotation">
+<h3 class="attribute_name" id="" name="annotation">
+<div class="title">
+<span class="name">annotation</span><span class="type">[symbol]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description">
+				Sets the text that will be displayed in the Clue window when the user moves the mouse over the object.
+			 </p></div>
+</div>
+<div class="attribute_group" id="attr_background">
+<h3 class="attribute_name" id="" name="background">
+<div class="title">
+<span class="name">background</span><span class="type">[int]</span><span class="defaultval">: 0</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description">
+				Adds or removes the object from the patcher's background layer. <span class="messagename" data-message="background 1"> background 1 </span> adds the object to the background layer, <span class="messagename" data-message="background 0"> background 0 </span> removes it. Objects in the background layer are shown behind all objects in the default foreground layer.
+			 </p></div>
+</div>
+<div class="attribute_group" id="attr_color">
+<h3 class="attribute_name" id="" name="color">
+<div class="title">
+<span class="name">color</span><span class="type">[4 floats]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description">
+				Sets the color for the object box outline.
+			 </p></div>
+</div>
+<div class="attribute_group" id="attr_fontface">
+<h3 class="attribute_name" id="" name="fontface">
+<div class="title">
+<span class="name">fontface</span><span class="type">[int]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description">
+				Sets the type style used by the object. The options are:
+				 <br>
+				 <br>
+				plain
+				 <br>
+				bold
+				 <br>
+				italic
+				 <br>
+				bold italic
+			 
+              Possible values:<br><br>0 = 'regular'
+                  <br>1 = 'bold'
+                  <br>2 = 'italic'
+                  <br>3 = 'bold italic'
+                  </p></div>
+</div>
+<div class="attribute_group" id="attr_fontname">
+<h3 class="attribute_name" id="" name="fontname">
+<div class="title">
+<span class="name">fontname</span><span class="type">[symbol]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description">
+				Sets the object's font.
+			 </p></div>
+</div>
+<div class="attribute_group" id="attr_fontsize">
+<h3 class="attribute_name" id="" name="fontsize">
+<div class="title">
+<span class="name">fontsize</span><span class="type">[float]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description">
+				Sets the object's font size (in points).
+			 
+              Possible values:<br><br>
+                    '8'
+                  <br>
+                    '9'
+                  <br>
+                    '10'
+                  <br>
+                    '11'
+                  <br>
+                    '12'
+                  <br>
+                    '13'
+                  <br>
+                    '14'
+                  <br>
+                    '16'
+                  <br>
+                    '18'
+                  <br>
+                    '20'
+                  <br>
+                    '24'
+                  <br>
+                    '30'
+                  <br>
+                    '36'
+                  <br>
+                    '48'
+                  <br>
+                    '64'
+                  <br>
+                    '72'
+                  </p></div>
+</div>
+<div class="attribute_group" id="attr_hidden">
+<h3 class="attribute_name" id="" name="hidden">
+<div class="title">
+<span class="name">hidden</span><span class="type">[int]</span><span class="defaultval">: 0</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description">
+				Toggles whether an object is hidden when the patcher is locked.
+			 </p></div>
+</div>
+<div class="attribute_group" id="attr_hint">
+<h3 class="attribute_name" id="" name="hint">
+<div class="title">
+<span class="name">hint</span><span class="type">[symbol]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description">
+				Sets the text that will be displayed in as a pop-up hint when the user moves the mouse over the object in a locked patcher.
+			 </p></div>
+</div>
+<div class="attribute_group" id="attr_ignoreclick">
+<h3 class="attribute_name" id="" name="ignoreclick">
+<div class="title">
+<span class="name">ignoreclick</span><span class="type">[int]</span><span class="defaultval">: 0</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description">
+				Toggles whether an object ignores mouse clicks in a locked patcher.
+			 </p></div>
+</div>
+<div class="attribute_group" id="attr_jspainterfile">
+<h3 class="attribute_name" id="" name="jspainterfile">
+<div class="title">
+<span class="name">jspainterfile</span><span class="type">[symbol]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description">
+				You can override the default appearance of a user interface object by assigning a <a href="/userguide/javascript">JavaScript</a> file with code for painting the object. The file must be in the search path.
+			 </p></div>
+</div>
+<div class="attribute_group" id="attr_patching_rect">
+<h3 class="attribute_name" id="" name="patching_rect">
+<div class="title">
+<span class="name">patching_rect</span><span class="type">[4 floats]</span><span class="defaultval">: 0. 0. 100. 0.</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description">
+				Sets the position and size of the object in the patcher window.
+			 </p></div>
+</div>
+<div class="attribute_group" id="attr_position">
+<h3 class="attribute_name" id="" name="position">
+<div class="title">
+<span class="name">position</span><span class="type">[2 floats]</span>
+</div>
+<div class="modifiers"><span class="gs">write-only</span></div>
+</h3>
+<div class="attribute_body"><p class="description">
+				Sets the object's x and y position in both patching and presentation modes (if the object belongs to its patcher's presentation), leaving its size unchanged.
+			 </p></div>
+</div>
+<div class="attribute_group" id="attr_presentation">
+<h3 class="attribute_name" id="" name="presentation">
+<div class="title">
+<span class="name">presentation</span><span class="type">[int]</span><span class="defaultval">: 0</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description">
+				Sets whether an object belongs to the patcher's presentation.
+			 </p></div>
+</div>
+<div class="attribute_group" id="attr_presentation_rect">
+<h3 class="attribute_name" id="" name="presentation_rect">
+<div class="title">
+<span class="name">presentation_rect</span><span class="type">[4 floats]</span><span class="defaultval">: 0. 0. 0. 0.</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description">
+				Sets the x and y position and width and height of the object in the patcher's presentation, leaving its patching position unchanged.
+			 </p></div>
+</div>
+<div class="attribute_group" id="attr_rect">
+<h3 class="attribute_name" id="" name="rect">
+<div class="title">
+<span class="name">rect</span><span class="type">[4 floats]</span>
+</div>
+<div class="modifiers"><span class="gs">write-only</span></div>
+</h3>
+<div class="attribute_body"><p class="description">
+				Sets the x and y position and width and height of the object in both patching and presentation modes (if the object belongs to its patcher's presentation).
+			 </p></div>
+</div>
+<div class="attribute_group" id="attr_size">
+<h3 class="attribute_name" id="" name="size">
+<div class="title">
+<span class="name">size</span><span class="type">[2 floats]</span>
+</div>
+<div class="modifiers"><span class="gs">write-only</span></div>
+</h3>
+<div class="attribute_body"><p class="description">
+				Sets the object's width and height in both patching and presentation modes (if the object belongs to its patcher's presentation), leaving its position unchanged.
+			 </p></div>
+</div>
+<div class="attribute_group" id="attr_textcolor">
+<h3 class="attribute_name" id="" name="textcolor">
+<div class="title">
+<span class="name">textcolor</span><span class="type">[4 floats]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description">
+				Sets the color for the object's text in RGBA format.
+			 </p></div>
+</div>
+<div class="attribute_group" id="attr_textjustification">
+<h3 class="attribute_name" id="" name="textjustification">
+<div class="title">
+<span class="name">textjustification</span><span class="type">[int]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description">
+				Sets the justification for the object's text.
+			 
+              Possible values:<br><br>0 = 'left'
+                  <br>1 = 'center'
+                  <br>2 = 'right'
+                  </p></div>
+</div>
+<div class="attribute_group" id="attr_valuepopup">
+<h3 class="attribute_name" id="" name="valuepopup">
+<div class="title">
+<span class="name">valuepopup</span><span class="type">[int]</span><span class="defaultval">: 0</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description">
+				For objects with single values, enabling <span class="attrname" data-attribute="valuepopup">valuepopup</span> will display the object's current value in a popup caption when the mouse is over the object or it is being changed with the mouse.
+			 </p></div>
+</div>
+<div class="attribute_group" id="attr_valuepopuplabel">
+<h3 class="attribute_name" id="" name="valuepopuplabel">
+<div class="title">
+<span class="name">valuepopuplabel</span><span class="type">[int]</span><span class="defaultval">: 0</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description">
+				Sets the source of a text label shown in a value popup caption.
+			 
+              Possible values:<br><br>0 = 'None'
+                  <br>1 = 'Hint'
+                  <br>2 = 'Scripting Name'
+                  <br>3 = 'Parameter Long Name'
+                  <br>4 = 'Parameter Short Name'
+                  </p></div>
+</div>
+<div class="attribute_group" id="attr_varname">
+<h3 class="attribute_name" id="" name="varname">
+<div class="title">
+<span class="name">varname</span><span class="type">[symbol]</span>
+</div>
+<div class="modifiers"></div>
+</h3>
+<div class="attribute_body"><p class="description">
+				Sets the patcher's scripting name, which can be used to address the object by name in <a href="/reference/pattr">pattr</a>, scripting messages to <a href="/reference/thispatcher">thispatcher</a>, and the <a href="/reference/js">js</a> object.
+			 </p></div>
+</div>
+</div>
+</div></section><section class="method_section" id="messages"><h2>Messages</h2>
+<div class="method_group" id="method_int">
+<h3 class="method_name" id="" name="int">
+<div class="title"><span class="name">int</span></div>
+<div class="modifiers"></div>
+</h3>
+<div class="method_body"><p class="description"> MIDI input </p></div>
+</div>
+<div class="method_group" id="method_reset">
+<h3 class="method_name" id="" name="reset">
+<div class="title"><span class="name">reset</span></div>
+<div class="modifiers"></div>
+</h3>
+<div class="method_body"><p class="description"> Reset </p></div>
+</div>
+<div class="method_group" id="method_float">
+<h3 class="method_name" id="" name="float">
+<div class="title"><span class="name">float</span></div>
+<div class="modifiers"></div>
+</h3>
+<div class="method_body"></div>
+</div></section>
+
+
+</div></article></main></div><footer class="footer_wrapper__9ME5W"><div class="container_container___sP76"><div class="footer_columns__lkkxt"><div class="footer_logo__pe9i3"></div><div class="footer_column__P27Bf"><h3 class="footer_columnHeader__MVQZl">Resources</h3><ul class="footer_columnEntries__s32wD"><li class="footer_columnEntry__bGytC"><a href="https://rnbo.cycling74.com" target="_blank">RNBO Documentation</a></li><li class="footer_columnEntry__bGytC"><a href="/pdfs">PDF Documentation</a></li><li class="footer_columnEntry__bGytC"><a href="/legacy">Legacy Documentation</a></li><li class="footer_columnEntry__bGytC"><a href="https://cycling74.com" target="_blank">Cycling &#x27;74 Website</a></li></ul></div><div class="footer_column__P27Bf"><h3 class="footer_columnHeader__MVQZl">Support</h3><ul class="footer_columnEntries__s32wD"><li class="footer_columnEntry__bGytC"><a href="https://support.cycling74.com/hc" target="_blank">Knowledge Base</a></li><li class="footer_columnEntry__bGytC"><a href="https://cycling74.com/support/contact" target="_blank">Report an issue</a></li></ul></div><div class="footer_column__P27Bf"><h3 class="footer_columnHeader__MVQZl">Communities</h3><ul class="footer_columnEntries__s32wD"><li class="footer_columnEntry__bGytC"><a href="https://cycling74.com/forums" target="_blank">Cycling &#x27;74 Forums</a></li><li class="footer_columnEntry__bGytC"><a href="https://discord.gg/pmStRfUr2k" target="_blank">Max Discord</a></li></ul></div></div><hr class="divider_divider__oJjnx"/><ul class="footer_linkList__lumTd"><li><a href="https://cycling74.com/legal" rel="noopener noreferrer" target="_blank" class="footer_link__GYo3a">Legal Info</a></li><li><a href="https://cycling74.com/privacy-policy" rel="noopener noreferrer" target="_blank" class="footer_link__GYo3a">Privacy Policy</a></li><li>Copyright © 2024 Cycling &#x27;74</li></ul></div></footer><div class="notifications_root__h8csz"><div class="notifications_list__N7CB_"></div></div></div><script id="__NEXT_DATA__" type="application/json">{"props":{"pageProps":{"messages":{"APIRef":{"title":"API Reference","description":"Reference documentation for Max' Application Progamming Interfaces","intro":"Max exposes several APIs—Application Programming Interfaces—that let you use code to control various systems in Max. You can write short scripts to automate simple tasks, or large programs that completely change the way Max behaves. Some of the APIs that Max offers:","apis":{"js":"Use the \u003cobject\u003ev8\u003c/object\u003e, \u003cobject\u003ev8ui\u003c/object\u003e and \u003cobject\u003ev8.codebox\u003c/object\u003e to embed JavaScript in a Max patch. Define custom objects, programmatically create objects and patch cords, and operate the Max application.","lom":"Use Max objects like \u003cobject\u003elive.object\u003c/object\u003e and \u003cobject\u003elive.path\u003c/object\u003e to read and modify the state of Ableton Live from within a Max for Live device. Also accessible from the JavaScript API.","nodeformax":"Use the \u003cobject\u003enode.script\u003c/object\u003e and \u003cobject\u003enode.debug\u003c/object\u003e objects to launch custom Node.js scripts from Max. Send Max messages to a running Node process and fetch a result."}},"Article":{"aside":{"header":"On this page"},"assets":{"download":{"article":"Download Article Assets","series":"Download Series Assets"}},"content":{"copied":"Copied","code":{"copy":{"error":{"title":"Failed to copy patcher"}}},"message":{"copy":{"action":"Copy","error":{"title":"Failed to copy message"}}},"patcher":{"copy":{"action":"Copy"}},"image":{"expand":"Expand","minimize":"Minimize"}},"meta":{"author":{"title":"Author"},"contributors":{"title":"Contributors"},"category":{"title":"{count, plural, =1 {Category} other {Categories}}","options":{"analysis":"Analysis","audio":"Audio","communication":"Communication","gen":"Gen","graphics":"Graphics","installation":"Installation","javascript":"JavaScript","max":"Max","midi":"MIDI","music":"Music","performance":"Performance","physical computing":"Physical Computing","rnbo":"RNBO","synthesis":"Synthesis","theory":"Theory","user interface":"User Interface","video":"Video","visualization":"Visualization"}},"kind":{"title":"{count, plural, =1 {Kind} other {Kinds}}","options":{"example":"Example","tutorial":"Tutorial"}},"license":"The content of this article and any downloadable files are available under the following \u003clink\u003elicense\u003c/link\u003e."},"notifications":{"openfilelink":{"message":"Please open the file in Max"}}},"Error":{"codes":{"401":{"title":"Unauthorized","info":"Please login to access this resource."},"403":{"title":"Forbidden","info":"Sorry, but looks like you don't the required permissions to access this resource."},"500":{"title":"Internal Server Error","info":"Sorry, but we encountered an error while trying to load the page you were looking for."}}},"Header":{"colorScheme":{"toggle":"Switch Theme"},"nav":{"userguide":{"label":"User Guide"},"reference":{"label":"Reference","columns":{"apiColumn":{"title":"API Reference","children":{"js":"Max JavaScript API","lom":"Live Object Model","nodeformax":"Node for Max API"}},"refColumn":{"title":"Object Reference","children":{"objects":"Object \u0026 Operator Reference"}}}},"learn":{"label":"Learn"}}},"Home":{"title":"Max Documentation","hero":{"title":"Welcome to the Online Docs","description":"Browse the Max online documentation to find helpful \u003cstrong\u003eguides\u003c/strong\u003e, detailed \u003cstrong\u003ereference\u003c/strong\u003e, and \u003cstrong\u003etutorials\u003c/strong\u003e."},"highlights":{"title":"Documentation Highlights"},"quicklinks":{"title":"Quick Links","entries":{"max9":"What's New in Max 9","learn":"Examples and Tutorials","maxTutorials":"Max Tutorial Series","legacy":"Legacy Documentation","support":"Cycling '74 Support"}},"search":{"label":"Search","placeholder":"Search the documentation..."}},"Footer":{"columns":{"community":{"title":"Communities","entries":{"forums":"Cycling '74 Forums","discord":"Max Discord"}},"resources":{"title":"Resources","entries":{"legacy":"Legacy Documentation","pdf":"PDF Documentation","website":"Cycling '74 Website","rnbo":"RNBO Documentation"}},"support":{"title":"Support","entries":{"help":"Knowledge Base","report":"Report an issue"}}},"links":{"privacy":"Privacy Policy","legalInfo":"Legal Info"}},"Learn":{"title":"Learn","description":"Learn Max by exploring a vast range of tutorials, demos and examples","articlesSection":{"title":"All Articles","filters":{"clear":"Clear Filters","all":"All","show":"Show Filters","hide":"Hide Filters","keyword":{"label":"Search","placeholder":"Search..."}},"list":{"resultCount":"{ count } {count, plural, =1 {result} other {results} }"}},"featuredSection":{},"series":{"articles":"In this series"},"license":{"title":"Learn Article License","description":"License for content in the Learn section of the Cycling '74 online documentation"}},"LegacyDocs":{"title":"Older Max Documentation","description":"This site provides documentation for the latest version of Max.","versionInfo":"We keep the Max documentation updated within major versions. When a new major is released, previous versions of the Max Documentation are archived and made availalable below.","previousTitle":"Previous versions","versionLink":"{ name } Documentation"},"NotFound":{"title":"404 Page Not Found","info":"Sorry, but we can't find the page you were looking for. It may have been moved, deleted, or the URL might be wrong.","suggestion":"You can try using the site's search, or maybe you were looking for one of these resources:"},"ObjectRef":{"title":"Object \u0026 Operator Reference","description":"Browse and find object and operator reference,","meta":{"package":{"title":"Package"}},"refpageSection":{"list":{"resultCount":"{ count } {count, plural, =1 {result} other {results} }"},"filters":{"clear":"Clear Filters","all":"All","show":"Show Filters","hide":"Hide Filters","keyword":{"placeholder":"Search...","label":"Search"},"category":{"title":"Category","placeholder":"All"},"package":{"title":"Package"},"kind":{"title":"Kind"}}}},"Patchers":{"copy":{"action":"Copy","error":{"title":"Failed to copy patcher"}}},"PDFDocs":{"title":"PDF Documentation","description":"The user guide and reference documentation is also available in PDF format. Download the files to view or print from the list below.","files":{"userguide":"User Guide","js":"Max JavaScript API Reference","n4m":"Node for Max API Reference","lom":"Live Object Model Reference"}},"Search":{"filters":{"kind":{"label":"Kind","placeholder":"All","options":{"apiref":"API Reference","article":"Article","objectref":"Object \u0026 Operator Reference","refpage":"Refpage","series":"Article Series","userguide":"User Guide"}}},"input":{"placeholder":"Search..."},"overlay":{"intro":"Enter your query to perform a search.","advanced":"For more filtering options use the \u003clink\u003eadvanced search.\u003c/link\u003e"},"count":"{ count } {count, plural, =1 {result} other {results}}","showAll":"Show all results","title":"Search"},"SEO":{"default":{"title":"Cycling '74 Documentation","description":"Cycling '74 Online Documentation. Browse and search the Max Documentation and Reference online"}},"UserGuide":{"title":"User Guide"}},"refpage":{"id":1759,"name":"abl.device.drift~","displayname":"abl.device.drift~","kind":"object","typedesc":"Max Object","description":"Drift synthesizer","package":"Ableton DSP","locale":"en","html":"\n\n\u003cp class=\"digest\"\u003e Drift synthesizer \u003c/p\u003e\n\u003csection class=\"object_description\" id=\"description\"\u003e\u003ch2\u003eDescription\u003c/h2\u003e\n\u003cp\u003e Drift synthesizer \u003c/p\u003e\u003c/section\u003e\u003csection class=\"argument_section\" id=\"arguments\"\u003e\u003ch2\u003eArguments\u003c/h2\u003e\n\u003cp class=\"description no_arguments\"\u003eNone.\u003c/p\u003e\u003c/section\u003e\u003csection class=\"attribute_section\" id=\"attributes\"\u003e\u003ch2\u003eAttributes\u003c/h2\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_drift\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"drift\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003edrift\u003c/span\u003e\u003cspan class=\"type\"\u003e[float64]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Sets the amount of variation per voice. The variation slightly affects different aspects of the voice's sound, such as the pitch and filter cutoff. \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_env1attack\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"env1attack\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003eenv1attack\u003c/span\u003e\u003cspan class=\"type\"\u003e[float64]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Time in seconds needed to travel from the initial value to the peak \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_env1decay\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"env1decay\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003eenv1decay\u003c/span\u003e\u003cspan class=\"type\"\u003e[float64]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Time in seconds needed to travel from the peak to the sustain level \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_env1release\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"env1release\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003eenv1release\u003c/span\u003e\u003cspan class=\"type\"\u003e[float64]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Time in seconds needed to travel back to zero after a note ends \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_env1sustain\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"env1sustain\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003eenv1sustain\u003c/span\u003e\u003cspan class=\"type\"\u003e[float64]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e The level reached at the end of the decay stage until the note ends. \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_env2attack\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"env2attack\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003eenv2attack\u003c/span\u003e\u003cspan class=\"type\"\u003e[float64]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Time in seconds needed to travel from the initial value to the peak \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_env2decay\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"env2decay\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003eenv2decay\u003c/span\u003e\u003cspan class=\"type\"\u003e[float64]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Time in seconds needed to travel from the peak to the sustain level \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_env2freq\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"env2freq\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003eenv2freq\u003c/span\u003e\u003cspan class=\"type\"\u003e[float64]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Sets the frequency of the cycling envelope in Hz. \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_env2hold\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"env2hold\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003eenv2hold\u003c/span\u003e\u003cspan class=\"type\"\u003e[float64]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Sets how long the cycling envelope will stay at its maximum level. \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_env2mode\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"env2mode\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003eenv2mode\u003c/span\u003e\u003cspan class=\"type\"\u003e[long]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Enable/disable whether envelope 2 functions as a cycling envelope. \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_env2release\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"env2release\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003eenv2release\u003c/span\u003e\u003cspan class=\"type\"\u003e[float64]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Time in seconds needed to travel back to zero after a note ends \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_env2sustain\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"env2sustain\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003eenv2sustain\u003c/span\u003e\u003cspan class=\"type\"\u003e[float64]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e The level reached at the end of the decay stage until the note ends. \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_env2tilt\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"env2tilt\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003eenv2tilt\u003c/span\u003e\u003cspan class=\"type\"\u003e[float64]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Sets the midpoint of the cycling envelope. At very low or high values, this also affects the envelope's slopes. \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_filtermod1amount\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"filtermod1amount\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003efiltermod1amount\u003c/span\u003e\u003cspan class=\"type\"\u003e[float64]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Modulates the low-pass filter frequency using the selected modulation source. If set to 100%, the modulation creates a frequency shift of approximately nine octaves. \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_filtermod2amount\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"filtermod2amount\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003efiltermod2amount\u003c/span\u003e\u003cspan class=\"type\"\u003e[float64]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Modulates the low-pass filter frequency using the selected modulation source. If set to 100%, the modulation creates a frequency shift of approximately nine octaves. \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_filtermodsrc1\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"filtermodsrc1\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003efiltermodsrc1\u003c/span\u003e\u003cspan class=\"type\"\u003e[long]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Select a modulation source to modulate the low-pass filter cutoff frequency. \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_filtermodsrc2\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"filtermodsrc2\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003efiltermodsrc2\u003c/span\u003e\u003cspan class=\"type\"\u003e[long]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Select a modulation source to modulate the low-pass filter cutoff frequency. \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_filtertracking\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"filtertracking\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003efiltertracking\u003c/span\u003e\u003cspan class=\"type\"\u003e[float64]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Sets the amount of filter modulation based on which note is played. \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_gain\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"gain\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003egain\u003c/span\u003e\u003cspan class=\"type\"\u003e[float64]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Set the overall volume of the instrument \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_glidetime\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"glidetime\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003eglidetime\u003c/span\u003e\u003cspan class=\"type\"\u003e[float64]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Adjusts the time in seconds that overlapping notes take to slide their pitch to the next incoming pitch. Glide is only available if the voice mode is set to mono and notes are played legato. \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_hpfreq\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"hpfreq\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003ehpfreq\u003c/span\u003e\u003cspan class=\"type\"\u003e[float64]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Defines the center of the cutoff frequency of the high-pass filter. \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_legato\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"legato\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003elegato\u003c/span\u003e\u003cspan class=\"type\"\u003e[long]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Enable/disable whether triggering a new voice will change its pitch without retriggering the envelopes. Legato is only available if the voice mode is set to mono. \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_lfoamount\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"lfoamount\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003elfoamount\u003c/span\u003e\u003cspan class=\"type\"\u003e[float64]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Adjusts the amount of LFO modulation applied to incoming signals. \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_lfofreq\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"lfofreq\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003elfofreq\u003c/span\u003e\u003cspan class=\"type\"\u003e[float64]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Sets the rate of the LFO in Hz. \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_lfomodamount\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"lfomodamount\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003elfomodamount\u003c/span\u003e\u003cspan class=\"type\"\u003e[float64]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Sets how much the LFO amount if modulated by the selected modulation source. \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_lfomodsrc\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"lfomodsrc\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003elfomodsrc\u003c/span\u003e\u003cspan class=\"type\"\u003e[long]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Select a source to modulate the LFO amount. \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_lforetrigger\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"lforetrigger\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003elforetrigger\u003c/span\u003e\u003cspan class=\"type\"\u003e[long]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Enable/disable LFO retrigger. When enabled, the LFO restarts at the same phase position each time a note is triggered. \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_lfoshape\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"lfoshape\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003elfoshape\u003c/span\u003e\u003cspan class=\"type\"\u003e[long]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Select from among several LFO waveforms. The `oneShot` waveforms turn the LFO into a one-shot decay envelope. \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_lpfreq\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"lpfreq\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003elpfreq\u003c/span\u003e\u003cspan class=\"type\"\u003e[float64]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Defines the center of the cutoff frequency of the low-pass filter. \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_lpres\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"lpres\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003elpres\u003c/span\u003e\u003cspan class=\"type\"\u003e[float64]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Sets the resonance of the low-pass filter \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_modamt1\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"modamt1\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003emodamt1\u003c/span\u003e\u003cspan class=\"type\"\u003e[float64]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Modulation amount 1 \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_modamt2\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"modamt2\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003emodamt2\u003c/span\u003e\u003cspan class=\"type\"\u003e[float64]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Modulation amount 2 \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_modamt3\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"modamt3\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003emodamt3\u003c/span\u003e\u003cspan class=\"type\"\u003e[float64]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Modulation amount 3 \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_moddst1\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"moddst1\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003emoddst1\u003c/span\u003e\u003cspan class=\"type\"\u003e[long]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Modulation destination 1 \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_moddst2\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"moddst2\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003emoddst2\u003c/span\u003e\u003cspan class=\"type\"\u003e[long]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Modulation destination 2 \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_moddst3\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"moddst3\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003emoddst3\u003c/span\u003e\u003cspan class=\"type\"\u003e[long]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Modulation destination 3 \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_modsrc1\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"modsrc1\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003emodsrc1\u003c/span\u003e\u003cspan class=\"type\"\u003e[long]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Modulation source 1 \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_modsrc2\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"modsrc2\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003emodsrc2\u003c/span\u003e\u003cspan class=\"type\"\u003e[long]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Modulation source 2 \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_modsrc3\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"modsrc3\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003emodsrc3\u003c/span\u003e\u003cspan class=\"type\"\u003e[long]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Modulation source 3 \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_noiseenable\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"noiseenable\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003enoiseenable\u003c/span\u003e\u003cspan class=\"type\"\u003e[long]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Enable/disable the noise generator. \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_noisefilter\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"noisefilter\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003enoisefilter\u003c/span\u003e\u003cspan class=\"type\"\u003e[long]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Enable/disable filter for the noise generator \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_noisegain\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"noisegain\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003enoisegain\u003c/span\u003e\u003cspan class=\"type\"\u003e[float64]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Sets the gain of the noise generator in dB. \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_notepitchbend\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"notepitchbend\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003enotepitchbend\u003c/span\u003e\u003cspan class=\"type\"\u003e[long]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Enable/disable per-note pitch bend \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_osc1enable\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"osc1enable\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003eosc1enable\u003c/span\u003e\u003cspan class=\"type\"\u003e[long]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Enable/disable oscillator 1 \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_osc1filter\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"osc1filter\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003eosc1filter\u003c/span\u003e\u003cspan class=\"type\"\u003e[long]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Enable/disable filter for oscillator 1 \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_osc1gain\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"osc1gain\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003eosc1gain\u003c/span\u003e\u003cspan class=\"type\"\u003e[float64]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Sets the Oscillator 1 gain in dB. If filter processing is on, high oscillator gain values can cause the filters to recreate some of the behaviors found in analog circuits. \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_osc1octave\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"osc1octave\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003eosc1octave\u003c/span\u003e\u003cspan class=\"type\"\u003e[long]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Transpose oscillator 1 in octave increments \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_osc1shape\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"osc1shape\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003eosc1shape\u003c/span\u003e\u003cspan class=\"type\"\u003e[float64]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Morphs the shape of the Oscillator 1 waveform. The shaping effect changes depending on the selected waveform. \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_osc1shapemod\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"osc1shapemod\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003eosc1shapemod\u003c/span\u003e\u003cspan class=\"type\"\u003e[float64]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Set the amount of modulation of osc1_shape by osc1shapemodsrc. \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_osc1shapemodsrc\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"osc1shapemodsrc\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003eosc1shapemodsrc\u003c/span\u003e\u003cspan class=\"type\"\u003e[long]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Select the modulation source for osc1_shape. \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_osc1type\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"osc1type\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003eosc1type\u003c/span\u003e\u003cspan class=\"type\"\u003e[long]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Set the oscillator 1 waveform shape \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_osc2detune\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"osc2detune\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003eosc2detune\u003c/span\u003e\u003cspan class=\"type\"\u003e[float64]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Sets the pitch of Oscillator 2 in semitones in relation to the global transpose attribute. \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_osc2enable\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"osc2enable\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003eosc2enable\u003c/span\u003e\u003cspan class=\"type\"\u003e[long]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Enable/disable oscillator 2 \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_osc2filter\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"osc2filter\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003eosc2filter\u003c/span\u003e\u003cspan class=\"type\"\u003e[long]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Enable/disable filter for oscillator 2 \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_osc2gain\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"osc2gain\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003eosc2gain\u003c/span\u003e\u003cspan class=\"type\"\u003e[float64]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Sets the Oscillator 2 gain in dB. If filter processing is on, high oscillator gain values can cause the filters to recreate some of the behaviors found in analog circuits. \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_osc2octave\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"osc2octave\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003eosc2octave\u003c/span\u003e\u003cspan class=\"type\"\u003e[long]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Transpose oscillator 2 in octave increments \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_osc2type\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"osc2type\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003eosc2type\u003c/span\u003e\u003cspan class=\"type\"\u003e[long]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Set the oscillator 2 waveform shape \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_oscmod1amount\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"oscmod1amount\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003eoscmod1amount\u003c/span\u003e\u003cspan class=\"type\"\u003e[float64]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Sets the amount of modulation of both oscillators from oscmod1src. \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_oscmod2amount\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"oscmod2amount\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003eoscmod2amount\u003c/span\u003e\u003cspan class=\"type\"\u003e[float64]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Sets the amount of modulation of both oscillators from oscmod2src. \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_oscmodsrc1\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"oscmodsrc1\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003eoscmodsrc1\u003c/span\u003e\u003cspan class=\"type\"\u003e[long]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Select a modulation source to modulate the pitch of both oscillators. \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_oscmodsrc2\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"oscmodsrc2\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003eoscmodsrc2\u003c/span\u003e\u003cspan class=\"type\"\u003e[long]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Select a modulation source to modulate the pitch of both oscillators. \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_pitchbendrange\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"pitchbendrange\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003epitchbendrange\u003c/span\u003e\u003cspan class=\"type\"\u003e[long]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Sets the global pitch bend range in semitones. \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_retrigger\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"retrigger\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003eretrigger\u003c/span\u003e\u003cspan class=\"type\"\u003e[long]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Enable/disable restarting both oscillators at the same phase position each time a note is triggered. \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_stereospread\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"stereospread\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003estereospread\u003c/span\u003e\u003cspan class=\"type\"\u003e[float64]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Sets how much panning variation is applied across individual voices. \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_thickness\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"thickness\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003ethickness\u003c/span\u003e\u003cspan class=\"type\"\u003e[float64]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Adjusts the relative volume of the 4 mono voices associated with each note. \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_transpose\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"transpose\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003etranspose\u003c/span\u003e\u003cspan class=\"type\"\u003e[long]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Transpose the instrument's global pitch in semitones. \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_unison\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"unison\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003eunison\u003c/span\u003e\u003cspan class=\"type\"\u003e[float64]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Sets how much pitch variation is applied across individual voices. \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_velocityvolume\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"velocityvolume\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003evelocityvolume\u003c/span\u003e\u003cspan class=\"type\"\u003e[float64]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Sets how much the volume is modulated by incoming MIDI note velocity. \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_voicemode\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"voicemode\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003evoicemode\u003c/span\u003e\u003cspan class=\"type\"\u003e[long]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Sets the instrument's voice mode. Poly offers polyphonic voicing. Mono offers monophonic voicing. Stereo spreads the voices across the stereo field. Unison slightly detunes each voice independently from one another. \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_voices\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"voices\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003evoices\u003c/span\u003e\u003cspan class=\"type\"\u003e[long]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e Sets the maximum number of voices that can be played back at the same time. Note that certain voice modes can utilize more voices than notes played. \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"disclosure\"\u003e\n\u003ch3\u003eCommon Box Attributes\u003c/h3\u003e\n\u003cdiv class=\"disclosure_body\"\u003e\n\u003cdiv class=\"disclosure_intro\"\u003e\n\t\tBelow is a list of attributes shared by all objects. If you want to change one of these attributes for an object based on the object box, you need to place the word \u003cspan class=\"messagename\" data-message=\"sendbox\"\u003e sendbox \u003c/span\u003e in front of the attribute name, or use the object's \u003ca href=\"/userguide/inspector\"\u003eInspector\u003c/a\u003e.\n\t \u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_annotation\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"annotation\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003eannotation\u003c/span\u003e\u003cspan class=\"type\"\u003e[symbol]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e\n\t\t\t\tSets the text that will be displayed in the Clue window when the user moves the mouse over the object.\n\t\t\t \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_background\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"background\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003ebackground\u003c/span\u003e\u003cspan class=\"type\"\u003e[int]\u003c/span\u003e\u003cspan class=\"defaultval\"\u003e: 0\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e\n\t\t\t\tAdds or removes the object from the patcher's background layer. \u003cspan class=\"messagename\" data-message=\"background 1\"\u003e background 1 \u003c/span\u003e adds the object to the background layer, \u003cspan class=\"messagename\" data-message=\"background 0\"\u003e background 0 \u003c/span\u003e removes it. Objects in the background layer are shown behind all objects in the default foreground layer.\n\t\t\t \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_color\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"color\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003ecolor\u003c/span\u003e\u003cspan class=\"type\"\u003e[4 floats]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e\n\t\t\t\tSets the color for the object box outline.\n\t\t\t \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_fontface\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"fontface\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003efontface\u003c/span\u003e\u003cspan class=\"type\"\u003e[int]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e\n\t\t\t\tSets the type style used by the object. The options are:\n\t\t\t\t \u003cbr\u003e\n\t\t\t\t \u003cbr\u003e\n\t\t\t\tplain\n\t\t\t\t \u003cbr\u003e\n\t\t\t\tbold\n\t\t\t\t \u003cbr\u003e\n\t\t\t\titalic\n\t\t\t\t \u003cbr\u003e\n\t\t\t\tbold italic\n\t\t\t \n              Possible values:\u003cbr\u003e\u003cbr\u003e0 = 'regular'\n                  \u003cbr\u003e1 = 'bold'\n                  \u003cbr\u003e2 = 'italic'\n                  \u003cbr\u003e3 = 'bold italic'\n                  \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_fontname\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"fontname\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003efontname\u003c/span\u003e\u003cspan class=\"type\"\u003e[symbol]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e\n\t\t\t\tSets the object's font.\n\t\t\t \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_fontsize\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"fontsize\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003efontsize\u003c/span\u003e\u003cspan class=\"type\"\u003e[float]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e\n\t\t\t\tSets the object's font size (in points).\n\t\t\t \n              Possible values:\u003cbr\u003e\u003cbr\u003e\n                    '8'\n                  \u003cbr\u003e\n                    '9'\n                  \u003cbr\u003e\n                    '10'\n                  \u003cbr\u003e\n                    '11'\n                  \u003cbr\u003e\n                    '12'\n                  \u003cbr\u003e\n                    '13'\n                  \u003cbr\u003e\n                    '14'\n                  \u003cbr\u003e\n                    '16'\n                  \u003cbr\u003e\n                    '18'\n                  \u003cbr\u003e\n                    '20'\n                  \u003cbr\u003e\n                    '24'\n                  \u003cbr\u003e\n                    '30'\n                  \u003cbr\u003e\n                    '36'\n                  \u003cbr\u003e\n                    '48'\n                  \u003cbr\u003e\n                    '64'\n                  \u003cbr\u003e\n                    '72'\n                  \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_hidden\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"hidden\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003ehidden\u003c/span\u003e\u003cspan class=\"type\"\u003e[int]\u003c/span\u003e\u003cspan class=\"defaultval\"\u003e: 0\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e\n\t\t\t\tToggles whether an object is hidden when the patcher is locked.\n\t\t\t \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_hint\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"hint\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003ehint\u003c/span\u003e\u003cspan class=\"type\"\u003e[symbol]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e\n\t\t\t\tSets the text that will be displayed in as a pop-up hint when the user moves the mouse over the object in a locked patcher.\n\t\t\t \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_ignoreclick\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"ignoreclick\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003eignoreclick\u003c/span\u003e\u003cspan class=\"type\"\u003e[int]\u003c/span\u003e\u003cspan class=\"defaultval\"\u003e: 0\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e\n\t\t\t\tToggles whether an object ignores mouse clicks in a locked patcher.\n\t\t\t \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_jspainterfile\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"jspainterfile\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003ejspainterfile\u003c/span\u003e\u003cspan class=\"type\"\u003e[symbol]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e\n\t\t\t\tYou can override the default appearance of a user interface object by assigning a \u003ca href=\"/userguide/javascript\"\u003eJavaScript\u003c/a\u003e file with code for painting the object. The file must be in the search path.\n\t\t\t \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_patching_rect\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"patching_rect\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003epatching_rect\u003c/span\u003e\u003cspan class=\"type\"\u003e[4 floats]\u003c/span\u003e\u003cspan class=\"defaultval\"\u003e: 0. 0. 100. 0.\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e\n\t\t\t\tSets the position and size of the object in the patcher window.\n\t\t\t \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_position\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"position\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003eposition\u003c/span\u003e\u003cspan class=\"type\"\u003e[2 floats]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003cspan class=\"gs\"\u003ewrite-only\u003c/span\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e\n\t\t\t\tSets the object's x and y position in both patching and presentation modes (if the object belongs to its patcher's presentation), leaving its size unchanged.\n\t\t\t \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_presentation\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"presentation\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003epresentation\u003c/span\u003e\u003cspan class=\"type\"\u003e[int]\u003c/span\u003e\u003cspan class=\"defaultval\"\u003e: 0\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e\n\t\t\t\tSets whether an object belongs to the patcher's presentation.\n\t\t\t \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_presentation_rect\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"presentation_rect\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003epresentation_rect\u003c/span\u003e\u003cspan class=\"type\"\u003e[4 floats]\u003c/span\u003e\u003cspan class=\"defaultval\"\u003e: 0. 0. 0. 0.\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e\n\t\t\t\tSets the x and y position and width and height of the object in the patcher's presentation, leaving its patching position unchanged.\n\t\t\t \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_rect\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"rect\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003erect\u003c/span\u003e\u003cspan class=\"type\"\u003e[4 floats]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003cspan class=\"gs\"\u003ewrite-only\u003c/span\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e\n\t\t\t\tSets the x and y position and width and height of the object in both patching and presentation modes (if the object belongs to its patcher's presentation).\n\t\t\t \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_size\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"size\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003esize\u003c/span\u003e\u003cspan class=\"type\"\u003e[2 floats]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003cspan class=\"gs\"\u003ewrite-only\u003c/span\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e\n\t\t\t\tSets the object's width and height in both patching and presentation modes (if the object belongs to its patcher's presentation), leaving its position unchanged.\n\t\t\t \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_textcolor\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"textcolor\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003etextcolor\u003c/span\u003e\u003cspan class=\"type\"\u003e[4 floats]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e\n\t\t\t\tSets the color for the object's text in RGBA format.\n\t\t\t \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_textjustification\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"textjustification\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003etextjustification\u003c/span\u003e\u003cspan class=\"type\"\u003e[int]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e\n\t\t\t\tSets the justification for the object's text.\n\t\t\t \n              Possible values:\u003cbr\u003e\u003cbr\u003e0 = 'left'\n                  \u003cbr\u003e1 = 'center'\n                  \u003cbr\u003e2 = 'right'\n                  \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_valuepopup\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"valuepopup\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003evaluepopup\u003c/span\u003e\u003cspan class=\"type\"\u003e[int]\u003c/span\u003e\u003cspan class=\"defaultval\"\u003e: 0\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e\n\t\t\t\tFor objects with single values, enabling \u003cspan class=\"attrname\" data-attribute=\"valuepopup\"\u003evaluepopup\u003c/span\u003e will display the object's current value in a popup caption when the mouse is over the object or it is being changed with the mouse.\n\t\t\t \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_valuepopuplabel\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"valuepopuplabel\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003evaluepopuplabel\u003c/span\u003e\u003cspan class=\"type\"\u003e[int]\u003c/span\u003e\u003cspan class=\"defaultval\"\u003e: 0\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e\n\t\t\t\tSets the source of a text label shown in a value popup caption.\n\t\t\t \n              Possible values:\u003cbr\u003e\u003cbr\u003e0 = 'None'\n                  \u003cbr\u003e1 = 'Hint'\n                  \u003cbr\u003e2 = 'Scripting Name'\n                  \u003cbr\u003e3 = 'Parameter Long Name'\n                  \u003cbr\u003e4 = 'Parameter Short Name'\n                  \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"attribute_group\" id=\"attr_varname\"\u003e\n\u003ch3 class=\"attribute_name\" id=\"\" name=\"varname\"\u003e\n\u003cdiv class=\"title\"\u003e\n\u003cspan class=\"name\"\u003evarname\u003c/span\u003e\u003cspan class=\"type\"\u003e[symbol]\u003c/span\u003e\n\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"attribute_body\"\u003e\u003cp class=\"description\"\u003e\n\t\t\t\tSets the patcher's scripting name, which can be used to address the object by name in \u003ca href=\"/reference/pattr\"\u003epattr\u003c/a\u003e, scripting messages to \u003ca href=\"/reference/thispatcher\"\u003ethispatcher\u003c/a\u003e, and the \u003ca href=\"/reference/js\"\u003ejs\u003c/a\u003e object.\n\t\t\t \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003c/div\u003e\n\u003c/div\u003e\u003c/section\u003e\u003csection class=\"method_section\" id=\"messages\"\u003e\u003ch2\u003eMessages\u003c/h2\u003e\n\u003cdiv class=\"method_group\" id=\"method_int\"\u003e\n\u003ch3 class=\"method_name\" id=\"\" name=\"int\"\u003e\n\u003cdiv class=\"title\"\u003e\u003cspan class=\"name\"\u003eint\u003c/span\u003e\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"method_body\"\u003e\u003cp class=\"description\"\u003e MIDI input \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"method_group\" id=\"method_reset\"\u003e\n\u003ch3 class=\"method_name\" id=\"\" name=\"reset\"\u003e\n\u003cdiv class=\"title\"\u003e\u003cspan class=\"name\"\u003ereset\u003c/span\u003e\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"method_body\"\u003e\u003cp class=\"description\"\u003e Reset \u003c/p\u003e\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"method_group\" id=\"method_float\"\u003e\n\u003ch3 class=\"method_name\" id=\"\" name=\"float\"\u003e\n\u003cdiv class=\"title\"\u003e\u003cspan class=\"name\"\u003efloat\u003c/span\u003e\u003c/div\u003e\n\u003cdiv class=\"modifiers\"\u003e\u003c/div\u003e\n\u003c/h3\u003e\n\u003cdiv class=\"method_body\"\u003e\u003c/div\u003e\n\u003c/div\u003e\u003c/section\u003e\n\n\n","headings":[{"id":"description","depth":2,"text":"Description"},{"id":"arguments","depth":2,"text":"Arguments"},{"id":"attributes","depth":2,"text":"Attributes"},{"id":"attr_drift","depth":3,"text":"drift"},{"id":"attr_env1attack","depth":3,"text":"env1attack"},{"id":"attr_env1decay","depth":3,"text":"env1decay"},{"id":"attr_env1release","depth":3,"text":"env1release"},{"id":"attr_env1sustain","depth":3,"text":"env1sustain"},{"id":"attr_env2attack","depth":3,"text":"env2attack"},{"id":"attr_env2decay","depth":3,"text":"env2decay"},{"id":"attr_env2freq","depth":3,"text":"env2freq"},{"id":"attr_env2hold","depth":3,"text":"env2hold"},{"id":"attr_env2mode","depth":3,"text":"env2mode"},{"id":"attr_env2release","depth":3,"text":"env2release"},{"id":"attr_env2sustain","depth":3,"text":"env2sustain"},{"id":"attr_env2tilt","depth":3,"text":"env2tilt"},{"id":"attr_filtermod1amount","depth":3,"text":"filtermod1amount"},{"id":"attr_filtermod2amount","depth":3,"text":"filtermod2amount"},{"id":"attr_filtermodsrc1","depth":3,"text":"filtermodsrc1"},{"id":"attr_filtermodsrc2","depth":3,"text":"filtermodsrc2"},{"id":"attr_filtertracking","depth":3,"text":"filtertracking"},{"id":"attr_gain","depth":3,"text":"gain"},{"id":"attr_glidetime","depth":3,"text":"glidetime"},{"id":"attr_hpfreq","depth":3,"text":"hpfreq"},{"id":"attr_legato","depth":3,"text":"legato"},{"id":"attr_lfoamount","depth":3,"text":"lfoamount"},{"id":"attr_lfofreq","depth":3,"text":"lfofreq"},{"id":"attr_lfomodamount","depth":3,"text":"lfomodamount"},{"id":"attr_lfomodsrc","depth":3,"text":"lfomodsrc"},{"id":"attr_lforetrigger","depth":3,"text":"lforetrigger"},{"id":"attr_lfoshape","depth":3,"text":"lfoshape"},{"id":"attr_lpfreq","depth":3,"text":"lpfreq"},{"id":"attr_lpres","depth":3,"text":"lpres"},{"id":"attr_modamt1","depth":3,"text":"modamt1"},{"id":"attr_modamt2","depth":3,"text":"modamt2"},{"id":"attr_modamt3","depth":3,"text":"modamt3"},{"id":"attr_moddst1","depth":3,"text":"moddst1"},{"id":"attr_moddst2","depth":3,"text":"moddst2"},{"id":"attr_moddst3","depth":3,"text":"moddst3"},{"id":"attr_modsrc1","depth":3,"text":"modsrc1"},{"id":"attr_modsrc2","depth":3,"text":"modsrc2"},{"id":"attr_modsrc3","depth":3,"text":"modsrc3"},{"id":"attr_noiseenable","depth":3,"text":"noiseenable"},{"id":"attr_noisefilter","depth":3,"text":"noisefilter"},{"id":"attr_noisegain","depth":3,"text":"noisegain"},{"id":"attr_notepitchbend","depth":3,"text":"notepitchbend"},{"id":"attr_osc1enable","depth":3,"text":"osc1enable"},{"id":"attr_osc1filter","depth":3,"text":"osc1filter"},{"id":"attr_osc1gain","depth":3,"text":"osc1gain"},{"id":"attr_osc1octave","depth":3,"text":"osc1octave"},{"id":"attr_osc1shape","depth":3,"text":"osc1shape"},{"id":"attr_osc1shapemod","depth":3,"text":"osc1shapemod"},{"id":"attr_osc1shapemodsrc","depth":3,"text":"osc1shapemodsrc"},{"id":"attr_osc1type","depth":3,"text":"osc1type"},{"id":"attr_osc2detune","depth":3,"text":"osc2detune"},{"id":"attr_osc2enable","depth":3,"text":"osc2enable"},{"id":"attr_osc2filter","depth":3,"text":"osc2filter"},{"id":"attr_osc2gain","depth":3,"text":"osc2gain"},{"id":"attr_osc2octave","depth":3,"text":"osc2octave"},{"id":"attr_osc2type","depth":3,"text":"osc2type"},{"id":"attr_oscmod1amount","depth":3,"text":"oscmod1amount"},{"id":"attr_oscmod2amount","depth":3,"text":"oscmod2amount"},{"id":"attr_oscmodsrc1","depth":3,"text":"oscmodsrc1"},{"id":"attr_oscmodsrc2","depth":3,"text":"oscmodsrc2"},{"id":"attr_pitchbendrange","depth":3,"text":"pitchbendrange"},{"id":"attr_retrigger","depth":3,"text":"retrigger"},{"id":"attr_stereospread","depth":3,"text":"stereospread"},{"id":"attr_thickness","depth":3,"text":"thickness"},{"id":"attr_transpose","depth":3,"text":"transpose"},{"id":"attr_unison","depth":3,"text":"unison"},{"id":"attr_velocityvolume","depth":3,"text":"velocityvolume"},{"id":"attr_voicemode","depth":3,"text":"voicemode"},{"id":"attr_voices","depth":3,"text":"voices"},{"id":"attr_annotation","depth":3,"text":"annotation"},{"id":"attr_background","depth":3,"text":"background"},{"id":"attr_color","depth":3,"text":"color"},{"id":"attr_fontface","depth":3,"text":"fontface"},{"id":"attr_fontname","depth":3,"text":"fontname"},{"id":"attr_fontsize","depth":3,"text":"fontsize"},{"id":"attr_hidden","depth":3,"text":"hidden"},{"id":"attr_hint","depth":3,"text":"hint"},{"id":"attr_ignoreclick","depth":3,"text":"ignoreclick"},{"id":"attr_jspainterfile","depth":3,"text":"jspainterfile"},{"id":"attr_patching_rect","depth":3,"text":"patching_rect"},{"id":"attr_position","depth":3,"text":"position"},{"id":"attr_presentation","depth":3,"text":"presentation"},{"id":"attr_presentation_rect","depth":3,"text":"presentation_rect"},{"id":"attr_rect","depth":3,"text":"rect"},{"id":"attr_size","depth":3,"text":"size"},{"id":"attr_textcolor","depth":3,"text":"textcolor"},{"id":"attr_textjustification","depth":3,"text":"textjustification"},{"id":"attr_valuepopup","depth":3,"text":"valuepopup"},{"id":"attr_valuepopuplabel","depth":3,"text":"valuepopuplabel"},{"id":"attr_varname","depth":3,"text":"varname"},{"id":"messages","depth":2,"text":"Messages"},{"id":"method_int","depth":3,"text":"int"},{"id":"method_reset","depth":3,"text":"reset"},{"id":"method_float","depth":3,"text":"float"}],"categories":["instrument"]},"basePath":"/reference"},"__N_SSG":true},"page":"/reference/[name]","query":{"name":"abl.device.drift~"},"buildId":"DovVRgswvQsh7EnHmtzCf","isFallback":false,"isExperimentalCompile":false,"gsp":true,"locale":"en","locales":["en"],"defaultLocale":"en","scriptLoader":[{"id":"bickies-config","strategy":"afterInteractive","children":"\n\t\t\t\t\t\t\t\twindow.c74Bickies.init({\n\t\t\t\t\t\t\t\t\tcookieName: \"c74_cookie_settings\",\n\t\t\t\t\t\t\t\t\tsettingsHref: \"https://cycling74.com/cookie-settings\",\n\t\t\t\t\t\t\t\t\tlocale: \"en\"\n\t\t\t\t\t\t\t\t});\n\t\t\t\t\t\t\t"}]}</script></body></html>
