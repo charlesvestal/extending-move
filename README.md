@@ -150,7 +150,7 @@ Located in `utility-scripts/`:
 - `install-on-move.sh` / `.command`: Content installation
 - `update-on-move.sh` / `.command`: Update with latest files
 - `restart-webserver.sh`: Restart the webserver
-- `record_demo_video.py`: Generate a short demo video of each tool using pyppeteer and ffmpeg
+- `record_demo_video.py`: Generate a short demo video of each tool using pyppeteer and ffmpeg. The script automatically loads example files so every feature is visible.
 
 
 ## How to Auto-start on Boot

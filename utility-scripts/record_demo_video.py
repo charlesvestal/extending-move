@@ -13,31 +13,118 @@ import argparse
 import asyncio
 import subprocess
 from pathlib import Path
-from typing import Sequence, Tuple
+from typing import Callable
 
 from pyppeteer import launch
 
-PAGES: Sequence[Tuple[str, int]] = [
-    ("/restore", 2),
-    ("/reverse", 2),
-    ("/drum-rack-inspector", 2),
-    ("/synth-macros", 2),
-    ("/midi-upload", 2),
-    ("/chord", 2),
-]
+# Example files used to populate the forms during the demo. If you have your own
+# files you would like to showcase simply replace these paths.
+EXAMPLE_SET = Path("examples/Sets/808.abl")
+EXAMPLE_SAMPLE = Path("examples/Samples/organ.wav")
+EXAMPLE_CHORD_SAMPLE = Path("examples/Samples/010 Pizz Str.wav")
+EXAMPLE_DRUM_RACK = Path("examples/Track Presets/drumRack/Drum Kit.json")
+EXAMPLE_SYNTH_PRESET = Path("examples/Track Presets/Drift/Analog Shape.ablpreset")
+EXAMPLE_MIDI = Path("examples/Midi/I Need Your Love.mid")
+
+
+
+async def _screenshot(page, out_dir: Path, name: str) -> None:
+    """Helper to save a screenshot with a consistent name."""
+    await page.screenshot({"path": str(out_dir / f"{name}.png")})
+
+
+async def demo_restore(page, base_url: str, out_dir: Path) -> None:
+    await page.goto(f"{base_url}/restore")
+    await page.waitForSelector("input[name=ablbundle]")
+    input_el = await page.querySelector("input[name=ablbundle]")
+    await input_el.uploadFile(str(EXAMPLE_SET))
+    # select the first pad
+    await page.waitForSelector("label.pad-cell")
+    await page.click("label.pad-cell")
+    await asyncio.sleep(1)
+    await _screenshot(page, out_dir, "restore")
+
+
+async def demo_reverse(page, base_url: str, out_dir: Path) -> None:
+    await page.goto(f"{base_url}/reverse")
+    await page.waitForSelector(".file-entry button")
+    await asyncio.gather(page.waitForNavigation(), page.click(".file-entry button"))
+    await page.waitForSelector("form[method='post'] button")
+    await asyncio.sleep(1)
+    await _screenshot(page, out_dir, "reverse")
+
+
+async def demo_drum_rack(page, base_url: str, out_dir: Path) -> None:
+    await page.goto(f"{base_url}/drum-rack-inspector")
+    await page.waitForSelector(".file-entry button")
+    await asyncio.gather(page.waitForNavigation(), page.click(".file-entry button"))
+    await page.waitForSelector(".drum-grid")
+    await asyncio.sleep(1)
+    await _screenshot(page, out_dir, "drum_rack_inspector")
+
+
+async def demo_synth_macros(page, base_url: str, out_dir: Path) -> None:
+    await page.goto(f"{base_url}/synth-macros")
+    await page.waitForSelector(".file-entry button")
+    await asyncio.gather(page.waitForNavigation(), page.click(".file-entry button"))
+    await page.waitForSelector(".macro-display")
+    await asyncio.sleep(1)
+    await _screenshot(page, out_dir, "synth_macros")
+
+
+async def demo_midi_upload(page, base_url: str, out_dir: Path) -> None:
+    await page.goto(f"{base_url}/midi-upload")
+    await page.waitForSelector("input#midi_file")
+    input_el = await page.querySelector("input#midi_file")
+    await input_el.uploadFile(str(EXAMPLE_MIDI))
+    await page.type("#set_name", "Demo Set")
+    # select a pad
+    await page.waitForSelector("label.pad-cell")
+    await page.click("label.pad-cell")
+    await asyncio.sleep(1)
+    await _screenshot(page, out_dir, "midi_upload")
+
+
+async def demo_chord(page, base_url: str, out_dir: Path) -> None:
+    await page.goto(f"{base_url}/chord")
+    await page.waitForSelector("#wavFileInput")
+    input_el = await page.querySelector("#wavFileInput")
+    await input_el.uploadFile(str(EXAMPLE_CHORD_SAMPLE))
+    await page.evaluate("document.getElementById('wavFileInput').dispatchEvent(new Event('change'))")
+    await asyncio.sleep(2)
+    await _screenshot(page, out_dir, "chord")
+
+
+async def demo_slice(page, base_url: str, out_dir: Path) -> None:
+    await page.goto(f"{base_url}/slice")
+    await page.waitForSelector("input#file")
+    input_el = await page.querySelector("input#file")
+    await input_el.uploadFile(str(EXAMPLE_SAMPLE))
+    await page.evaluate("document.getElementById('file').dispatchEvent(new Event('change'))")
+    await asyncio.sleep(2)
+    await _screenshot(page, out_dir, "slice")
 
 
 async def capture_pages(base_url: str, out_dir: Path) -> None:
-    """Capture screenshots for each page."""
+    """Capture screenshots for each main page with example data loaded."""
     browser = await launch(headless=True, args=["--no-sandbox"])
     page = await browser.newPage()
     await page.setViewport({"width": 1280, "height": 720})
     out_dir.mkdir(parents=True, exist_ok=True)
-    for path, wait in PAGES:
-        await page.goto(base_url + path)
-        await asyncio.sleep(wait)
-        name = path.strip("/").replace("-", "_") or "index"
-        await page.screenshot({"path": str(out_dir / f"{name}.png")})
+
+    steps: list[Callable[[any, str, Path], asyncio.Future]] = [
+        demo_restore,
+        demo_reverse,
+        demo_drum_rack,
+        demo_synth_macros,
+        demo_midi_upload,
+        demo_chord,
+        demo_slice,
+    ]
+
+    for step in steps:
+        await step(page, base_url, out_dir)
+
     await browser.close()
 
 
