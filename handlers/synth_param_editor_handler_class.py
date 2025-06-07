@@ -126,19 +126,46 @@ class SynthParamEditorHandler(BaseHandler):
             'default_preset_path': DEFAULT_PRESET,
         }
 
+    SECTION_ORDER = [
+        "Oscillator",
+        "Mixer",
+        "Filter",
+        "Envelopes",
+        "LFO + Mod",
+        "Global",
+        "Other",
+    ]
+
+    def _get_section(self, name):
+        if name.startswith(("Oscillator1_", "Oscillator2_", "PitchModulation_")):
+            return "Oscillator"
+        if name.startswith("Mixer_"):
+            return "Mixer"
+        if name.startswith("Filter_"):
+            return "Filter"
+        if name.startswith(("Envelope1_", "Envelope2_")):
+            return "Envelopes"
+        if name.startswith(("CyclingEnvelope_", "ModulationMatrix_")):
+            return "LFO + Mod"
+        if name.startswith("Global_"):
+            return "Global"
+        return "Other"
+
     def generate_params_html(self, params):
         """Return HTML controls for the given parameter values."""
         if not params:
             return '<p>No parameters found.</p>'
 
         schema = load_drift_schema()
-        html = '<div class="params-list">'
+        sections = {s: [] for s in self.SECTION_ORDER}
+
         for i, item in enumerate(params):
             name = item['name']
             val = item['value']
             meta = schema.get(name, {})
             p_type = meta.get('type')
-            html += '<div class="param-item">'
+
+            html = '<div class="param-item">'
             html += f'<label>{name}: '
             if p_type == 'enum' and meta.get('options'):
                 html += f'<select name="param_{i}_value">'
@@ -147,7 +174,6 @@ class SynthParamEditorHandler(BaseHandler):
                     html += f'<option value="{opt}"{selected}>{opt}</option>'
                 html += '</select>'
             else:
-                # Numeric knob using NexusUI dial
                 min_attr = f' data-min="{meta.get("min")}"' if meta.get("min") is not None else ''
                 max_attr = f' data-max="{meta.get("max")}"' if meta.get("max") is not None else ''
                 val_attr = f' data-value="{val}"'
@@ -160,8 +186,21 @@ class SynthParamEditorHandler(BaseHandler):
                 html += f'<span id="{display_id}" class="param-number"></span>'
                 html += f'<input type="hidden" name="param_{i}_value" value="{val}">'
             html += '</label>'
-            html += f'<input type="hidden" name="param_{i}_name" value="{name}">'
+            html += f'<input type="hidden" name="param_{i}_name" value="{name}">' 
             html += '</div>'
-        html += '</div>'
-        return html
+
+            section = self._get_section(name)
+            sections[section].append(html)
+
+        out_html = '<div class="drift-param-panels">'
+        for sec in self.SECTION_ORDER:
+            items = sections.get(sec)
+            if not items:
+                continue
+            cls = sec.lower().replace(' ', '-').replace('+', '')
+            out_html += f'<div class="param-panel {cls}"><h3>{sec}</h3><div class="param-items">'
+            out_html += ''.join(items)
+            out_html += '</div></div>'
+        out_html += '</div>'
+        return out_html
 

@@ -481,12 +481,46 @@ select {
     margin: 0.25rem;
     display: inline-block;
 }
+
+/* Layout for the Drift parameter editor */
+.drift-param-panels {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.param-panel {
+    border: 1px solid #ccc;
+    padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.param-panel.oscillator,
+.param-panel.envelopes {
+    flex: 2;
+}
+
+.param-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.param-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 90px;
+
 .param-number {
     margin-left: 0.5rem;
     min-width: 60px;
     display: inline-block;
     text-align: right;
 }
+  
 .param-item {
     margin-bottom: 0.75rem;
-}
+  }
