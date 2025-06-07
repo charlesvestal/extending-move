@@ -29,5 +29,22 @@
 {% endblock %}
 {% block scripts %}
 <script type="module" src="{{ host_prefix }}/static/file_browser.js"></script>
+<script>
+function initKnobs() {
+  document.querySelectorAll('.drift-editor input.knob').forEach((el) => {
+    const min = parseFloat(el.min || 0);
+    const max = parseFloat(el.max || 100);
+    function update() {
+      const val = parseFloat(el.value);
+      const ratio = (val - min) / (max - min || 1);
+      const angle = -135 + ratio * 270;
+      el.style.setProperty('--angle', angle + 'deg');
+    }
+    el.addEventListener('input', update);
+    update();
+  });
+}
+window.addEventListener('DOMContentLoaded', initKnobs);
+</script>
 {% endblock %}
 

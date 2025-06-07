@@ -410,6 +410,59 @@ select {
     flex: 1;
 }
 
+/* Round knob styling */
+.drift-editor input.knob {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 55%, #555 30%, #222 80%);
+    border: 2px solid #111;
+    position: relative;
+}
+
+.drift-editor input.knob::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 50%;
+    width: 4px;
+    height: 24px;
+    background: #ddd;
+    border-radius: 2px;
+    transform-origin: bottom center;
+    transform: translateX(-50%) rotate(var(--angle, -135deg));
+}
+
+.drift-editor input.knob::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 0;
+    height: 0;
+}
+
+.drift-editor input.knob::-moz-range-thumb {
+    width: 0;
+    height: 0;
+    border: none;
+}
+
+.drift-editor input.knob::-webkit-slider-runnable-track,
+.drift-editor input.knob::-moz-range-track {
+    background: transparent;
+}
+
+.drift-editor input[type="number"],
+.drift-editor select {
+    background: #222;
+    color: #eee;
+    border: 1px solid #555;
+    border-radius: 4px;
+    padding: 0.25rem;
+    font-size: 0.9rem;
+}
+
 
 /* Sample-info layout tweaks */
 .sample-info .sample-header {

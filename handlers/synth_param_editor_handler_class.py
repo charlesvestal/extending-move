@@ -160,7 +160,7 @@ class SynthParamEditorHandler(BaseHandler):
             if not placed:
                 section_data["Other"].append(item)
 
-        html = '<div class="param-sections">'
+        html = '<div class="drift-editor"><div class="param-sections">'
         idx = 0
         for label, items in section_data.items():
             if not items:
@@ -222,7 +222,7 @@ class SynthParamEditorHandler(BaseHandler):
                         else ' step="any"'
                     )
                     html += (
-                        f'<input type="range" name="param_{idx}_slider" value="{val}"{min_attr}{max_attr}{slider_step_attr} '
+                        f'<input type="range" class="knob" name="param_{idx}_slider" value="{val}"{min_attr}{max_attr}{slider_step_attr} '
                         f'oninput="this.nextElementSibling.value=this.value">'
                     )
                     html += (
@@ -234,5 +234,5 @@ class SynthParamEditorHandler(BaseHandler):
                 html += "</div>"
                 idx += 1
             html += "</div></div>"
-        html += "</div>"
+        html += "</div></div>"
         return html
