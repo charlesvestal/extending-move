@@ -4,48 +4,50 @@
 <div id="knob-container">
   <div class="knob-group">
     <h3>Oscillator 1</h3>
-    <div id="osc1-octave"></div>
-    <div id="osc1-shape"></div>
+    <div class="knob-control"><div id="osc1-octave"></div><span id="osc1-octave-val" class="knob-value"></span></div>
+    <div class="knob-control"><div id="osc1-shape"></div><span id="osc1-shape-val" class="knob-value"></span></div>
   </div>
   <div class="knob-group">
     <h3>Oscillator 2</h3>
-    <div id="osc2-octave"></div>
-    <div id="osc2-detune"></div>
+    <div class="knob-control"><div id="osc2-octave"></div><span id="osc2-octave-val" class="knob-value"></span></div>
+    <div class="knob-control"><div id="osc2-detune"></div><span id="osc2-detune-val" class="knob-value"></span></div>
   </div>
   <div class="knob-group">
     <h3>Mix</h3>
-    <div id="mix-osc1"></div>
-    <div id="mix-osc2"></div>
-    <div id="mix-noise"></div>
+    <div class="knob-control"><div id="mix-osc1"></div><span id="mix-osc1-val" class="knob-value"></span></div>
+    <div class="knob-control"><div id="mix-osc2"></div><span id="mix-osc2-val" class="knob-value"></span></div>
+    <div class="knob-control"><div id="mix-noise"></div><span id="mix-noise-val" class="knob-value"></span></div>
   </div>
   <div class="knob-group">
     <h3>Filter</h3>
-    <div id="filter-freq"></div>
-    <div id="filter-res"></div>
-    <div id="filter-hp"></div>
+    <div class="knob-control"><div id="filter-freq"></div><span id="filter-freq-val" class="knob-value"></span></div>
+    <div class="knob-control"><div id="filter-res"></div><span id="filter-res-val" class="knob-value"></span></div>
+    <div class="knob-control"><div id="filter-hp"></div><span id="filter-hp-val" class="knob-value"></span></div>
   </div>
   <div class="knob-group">
     <h3>Envelope 1</h3>
-    <div id="env1-attack"></div>
-    <div id="env1-decay"></div>
-    <div id="env1-sustain"></div>
-    <div id="env1-release"></div>
+    <div id="env1-display" class="env-display"></div>
+    <div class="knob-control"><div id="env1-attack"></div><span id="env1-attack-val" class="knob-value"></span></div>
+    <div class="knob-control"><div id="env1-decay"></div><span id="env1-decay-val" class="knob-value"></span></div>
+    <div class="knob-control"><div id="env1-sustain"></div><span id="env1-sustain-val" class="knob-value"></span></div>
+    <div class="knob-control"><div id="env1-release"></div><span id="env1-release-val" class="knob-value"></span></div>
   </div>
   <div class="knob-group">
     <h3>Envelope 2</h3>
-    <div id="env2-attack"></div>
-    <div id="env2-decay"></div>
-    <div id="env2-sustain"></div>
-    <div id="env2-release"></div>
+    <div id="env2-display" class="env-display"></div>
+    <div class="knob-control"><div id="env2-attack"></div><span id="env2-attack-val" class="knob-value"></span></div>
+    <div class="knob-control"><div id="env2-decay"></div><span id="env2-decay-val" class="knob-value"></span></div>
+    <div class="knob-control"><div id="env2-sustain"></div><span id="env2-sustain-val" class="knob-value"></span></div>
+    <div class="knob-control"><div id="env2-release"></div><span id="env2-release-val" class="knob-value"></span></div>
   </div>
   <div class="knob-group">
     <h3>LFO</h3>
-    <div id="lfo-ratio"></div>
-    <div id="lfo-amount"></div>
+    <div class="knob-control"><div id="lfo-ratio"></div><span id="lfo-ratio-val" class="knob-value"></span></div>
+    <div class="knob-control"><div id="lfo-amount"></div><span id="lfo-amount-val" class="knob-value"></span></div>
   </div>
   <div class="knob-group">
     <h3>Volume</h3>
-    <div id="mixer-volume"></div>
+    <div class="knob-control"><div id="mixer-volume"></div><span id="mixer-volume-val" class="knob-value"></span></div>
   </div>
 </div>
 {% endblock %}

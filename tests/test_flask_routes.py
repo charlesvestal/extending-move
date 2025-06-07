@@ -361,3 +361,4 @@ def test_synth_knobs_get(client):
     resp = client.get('/synth-knobs')
     assert resp.status_code == 200
     assert b'id="knob-container"' in resp.data
+    assert b'id="env1-display"' in resp.data
