@@ -99,8 +99,7 @@ class SynthParamEditorHandler(BaseHandler):
         params_html = ''
         param_count = 0
         if values['success']:
-            params_html = self.generate_params_html(values['parameters'])
-            param_count = len(values['parameters'])
+            params_html, param_count = self.generate_params_html(values['parameters'])
 
         base_dir = "/data/UserData/UserLibrary/Track Presets"
         if not os.path.exists(base_dir) and os.path.exists("examples/Track Presets"):
@@ -246,11 +245,34 @@ class SynthParamEditorHandler(BaseHandler):
         return "Other"
 
     def generate_params_html(self, params):
-        """Return HTML controls for the given parameter values."""
+        """Return HTML controls for the given parameter values.
+
+        Returns a tuple ``(html, count)`` where ``count`` is the total number of
+        parameters rendered. When a preset omits pitch modulation parameters,
+        default entries are inserted so users can set them.
+        """
         if not params:
-            return '<p>No parameters found.</p>'
+            return '<p>No parameters found.</p>', 0
 
         schema = load_drift_schema()
+
+        # Add missing pitch modulation controls with harmless defaults
+        param_names = {p['name'] for p in params}
+        required = [
+            'PitchModulation_Source1',
+            'PitchModulation_Amount1',
+            'PitchModulation_Source2',
+            'PitchModulation_Amount2',
+        ]
+        for name in required:
+            if name not in param_names:
+                meta = schema.get(name, {})
+                if meta.get('type') == 'enum' and meta.get('options'):
+                    default = meta['options'][0]
+                else:
+                    default = 0
+                params.append({'name': name, 'value': default})
+
         sections = {s: [] for s in self.SECTION_ORDER}
         filter_items = {}
         osc_items = {}
@@ -378,17 +400,16 @@ class SynthParamEditorHandler(BaseHandler):
             pm_src2 = extra_controls.pop("PitchModulation_Source2", "")
             pm_amt1 = extra_controls.pop("PitchModulation_Amount1", "")
             pm_amt2 = extra_controls.pop("PitchModulation_Amount2", "")
-            if any((pm_src1, pm_src2, pm_amt1, pm_amt2)):
-                    '<div class="pitch-mod">'
-                    '<h4>Pitch Mod</h4>'
-                    '<div class="param-row pitch-mod-row">'
-                    f'<div class="pitch-mod-pair">{pm_src1}{pm_amt1}</div>'
-                    f'<div class="pitch-mod-pair">{pm_src2}{pm_amt2}</div>'
-                    '</div>'
-                    '</div>'
-                )
-            sections["Oscillators"] = ordered
-
+            pitch_html = (
+                '<div class="pitch-mod">'
+                '<h4>Pitch Mod</h4>'
+                '<div class="param-row pitch-mod-row">'
+                f'<div class="pitch-mod-pair">{pm_src1}{pm_amt1}</div>'
+                f'<div class="pitch-mod-pair">{pm_src2}{pm_amt2}</div>'
+                '</div>'
+                '</div>'
+            )
+            ordered.append(pitch_html)
         if env_items:
             env_rows = [
                 [
@@ -427,5 +448,5 @@ class SynthParamEditorHandler(BaseHandler):
             out_html += ''.join(items)
             out_html += '</div></div>'
         out_html += '</div>'
-        return out_html
+        return out_html, len(params)
 
