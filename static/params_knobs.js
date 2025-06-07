@@ -38,7 +38,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const unit = el.dataset.unit || '';
         const displayId = el.dataset.display;
         const slider = new Nexus.Slider(el, {
-            size: [20, 70],
+            size: [70, 20],
+            orientation: 'horizontal',
             min: isNaN(min) ? 0 : min,
             max: isNaN(max) ? 1 : max,
             value: isNaN(val) ? 0 : val,
