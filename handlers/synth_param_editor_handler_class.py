@@ -281,7 +281,7 @@ class SynthParamEditorHandler(BaseHandler):
                     use_href = f"{sprite_path}#{icon_map.get(val, 'sine')}"
                     html += (
                         f'<div class="waveform-dropdown" id="{dropdown_id}">' 
-                        f'<button class="dropdown-toggle" aria-haspopup="listbox" aria-expanded="false">'
+                        f'<button type="button" class="dropdown-toggle" aria-haspopup="listbox" aria-expanded="false">'
                         f'<svg class="waveform-icon" aria-hidden="true"><use xlink:href="{use_href}"></use></svg>'
                         f'<span class="visually-hidden">{val}</span></button>'
                         f'<ul class="dropdown-menu" role="listbox" tabindex="-1">'
