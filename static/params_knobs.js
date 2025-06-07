@@ -34,8 +34,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const env1Elem = document.getElementById('env1-display');
     const env2Elem = document.getElementById('env2-display');
-    const env1 = env1Elem ? new Nexus.Envelope('#env1-display', { size: [180, 100] }) : null;
-    const env2 = env2Elem ? new Nexus.Envelope('#env2-display', { size: [180, 100] }) : null;
+
+    function makeEnv(selector, prefix) {
+        const atk = dialMap[`${prefix}_Attack`];
+        const dec = dialMap[`${prefix}_Decay`];
+        const sus = dialMap[`${prefix}_Sustain`];
+        const rel = dialMap[`${prefix}_Release`];
+        return new Nexus.Envelope(selector, {
+            size: [180, 100],
+            points: [
+                { x: 0, y: 0 },
+                { x: atk ? atk.value : 0.1, y: 1 },
+                { x: dec ? dec.value : 0.4, y: sus ? sus.value : 0.5 },
+                { x: rel ? rel.value : 1, y: 0 },
+            ],
+        });
+    }
+
+    const env1 = env1Elem ? makeEnv('#env1-display', 'Envelope1') : null;
+    const env2 = env2Elem ? makeEnv('#env2-display', 'Envelope2') : null;
 
     function updateEnv(env, prefix) {
         if (!env) return;
@@ -44,10 +61,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const sus = dialMap[`${prefix}_Sustain`];
         const rel = dialMap[`${prefix}_Release`];
         if (atk && dec && sus && rel) {
-            env.attack = atk.value;
-            env.decay = dec.value;
-            env.sustain = sus.value;
-            env.release = rel.value;
+            env.points[1].x = atk.value;
+            env.points[2].x = dec.value;
+            env.points[2].y = sus.value;
+            env.points[3].x = rel.value;
             env.draw();
         }
     }
