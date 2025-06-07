@@ -139,12 +139,12 @@ class SynthParamEditorHandler(BaseHandler):
 
     LABEL_OVERRIDES = {
         # Oscillators
-        "Oscillator1_Type": "Type",
+        "Oscillator1_Type": "Osc 1",
         "Oscillator1_Transpose": "Oct",
         "Oscillator1_Shape": "Shape",
         "Oscillator1_ShapeModSource": "Shape Mod Source",
         "Oscillator1_ShapeMod": "Shape Mod Amount",
-        "Oscillator2_Type": "Type",
+        "Oscillator2_Type": "Osc 2",
         "Oscillator2_Transpose": "Oct",
         "Oscillator2_Detune": "Detune",
         "PitchModulation_Source1": "Source",
@@ -154,10 +154,10 @@ class SynthParamEditorHandler(BaseHandler):
 
         # Mixer
         "Mixer_OscillatorOn1": "On/Off",
-        "Mixer_OscillatorGain1": "Level",
+        "Mixer_OscillatorGain1": "Osc 1",
         "Filter_OscillatorThrough1": "Filter",
         "Mixer_OscillatorOn2": "On/Off",
-        "Mixer_OscillatorGain2": "Level",
+        "Mixer_OscillatorGain2": "Osc 2",
         "Filter_OscillatorThrough2": "Filter",
         "Mixer_NoiseOn": "On/Off",
         "Mixer_NoiseLevel": "Level",
@@ -253,6 +253,8 @@ class SynthParamEditorHandler(BaseHandler):
         schema = load_drift_schema()
         sections = {s: [] for s in self.SECTION_ORDER}
         filter_items = {}
+        osc_items = {}
+        env_items = {}
 
         for i, item in enumerate(params):
             name = item['name']
@@ -288,6 +290,10 @@ class SynthParamEditorHandler(BaseHandler):
             section = self._get_section(name)
             if section == "Filter":
                 filter_items[name] = html
+            elif section == "Oscillators":
+                osc_items[name] = html
+            elif section == "Envelopes":
+                env_items[name] = html
             else:
                 sections[section].append(html)
 
@@ -309,6 +315,64 @@ class SynthParamEditorHandler(BaseHandler):
                     ordered.append(f'<div class="param-row">{row_html}</div>')
             ordered.extend(filter_items.values())
             sections["Filter"] = ordered
+
+        if osc_items:
+            osc_rows = [
+                [
+                    "Oscillator1_Type",
+                    "Oscillator1_Transpose",
+                    "Oscillator1_Shape",
+                    "Mixer_OscillatorGain1",
+                ],
+                [
+                    "Oscillator2_Type",
+                    "Oscillator2_Transpose",
+                    "Oscillator2_Detune",
+                    "Mixer_OscillatorGain2",
+                ],
+                [
+                    "PitchModulation_Source1",
+                    "PitchModulation_Amount1",
+                    "PitchModulation_Source2",
+                    "PitchModulation_Amount2",
+                    "Mixer_NoiseLevel",
+                ],
+            ]
+            ordered = []
+            for row in osc_rows:
+                row_html = "".join(osc_items.pop(p, "") for p in row if p in osc_items)
+                if row_html:
+                    ordered.append(f'<div class="param-row">{row_html}</div>')
+            ordered.extend(osc_items.values())
+            sections["Oscillators"] = ordered
+
+        if env_items:
+            env_rows = [
+                [
+                    "Envelope1_Attack",
+                    "Envelope1_Decay",
+                    "Envelope1_Sustain",
+                    "Envelope1_Release",
+                ],
+                [
+                    "Envelope2_Attack",
+                    "Envelope2_Decay",
+                    "Envelope2_Sustain",
+                    "Envelope2_Release",
+                ],
+                [
+                    "CyclingEnvelope_MidPoint",
+                    "CyclingEnvelope_Hold",
+                    "CyclingEnvelope_Rate",
+                ],
+            ]
+            ordered = []
+            for row in env_rows:
+                row_html = "".join(env_items.pop(p, "") for p in row if p in env_items)
+                if row_html:
+                    ordered.append(f'<div class="param-row">{row_html}</div>')
+            ordered.extend(env_items.values())
+            sections["Envelopes"] = ordered
 
         out_html = '<div class="drift-param-panels">'
         for sec in self.SECTION_ORDER:
