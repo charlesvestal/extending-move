@@ -16,6 +16,7 @@ from core.midi_pattern_generator import (
     generate_pattern_set,
     create_c_major_downbeats,
 )
+from core.synth_param_editor_handler import update_parameter_values
 
 
 def test_reverse_wav_file(tmp_path):
@@ -99,3 +100,22 @@ def test_time_stretch_wav(tmp_path, monkeypatch):
 def test_get_rubberband_binary_exists():
     path = get_rubberband_binary()
     assert path.exists()
+
+
+def test_update_parameter_values(tmp_path):
+    src = Path("examples/Track Presets/Drift/Analog Shape.ablpreset")
+    dest = tmp_path / "out.ablpreset"
+    result = update_parameter_values(str(src), {"Oscillator1_Shape": "0.5"}, str(dest))
+    assert result["success"], result.get("message")
+    with open(dest, "rb") as f:
+        data = f.read()
+    assert data.endswith(b"\n")
+    preset = json.loads(data)
+    val = (
+        preset["chains"][0]
+        ["devices"][0]
+        ["chains"][0]
+        ["devices"][0]
+        ["parameters"]["Oscillator1_Shape"]["value"]
+    )
+    assert abs(val - 0.5) < 1e-6
