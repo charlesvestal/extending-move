@@ -222,13 +222,21 @@
 <script type="module" src="{{ host_prefix }}/static/file_browser.js"></script>
 <script>
 const driftSchema = {{ schema_json|safe }};
-document.addEventListener('DOMContentLoaded', () => {
+(function() {
   function updateControls(sel) {
-    const info = driftSchema[sel.value] || {};
+    const opt = sel.options[sel.selectedIndex];
+    const info = {
+      type: opt.dataset.type,
+      min: opt.dataset.min ? parseFloat(opt.dataset.min) : null,
+      max: opt.dataset.max ? parseFloat(opt.dataset.max) : null,
+      options: opt.dataset.options ? opt.dataset.options.split(',') : null,
+    };
+
     const container = sel.closest('.parameter-mapping');
     const minInput = container.querySelector('.range-min');
     const maxInput = container.querySelector('.range-max');
     const optDiv = container.querySelector('.options-display');
+
     if (!info.type || info.type === 'enum' || info.type === 'boolean') {
       minInput.value = '';
       maxInput.value = '';
@@ -239,10 +247,11 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       minInput.disabled = false;
       maxInput.disabled = false;
-      minInput.placeholder = info.min !== undefined && info.min !== null ? info.min : '';
-      maxInput.placeholder = info.max !== undefined && info.max !== null ? info.max : '';
+      minInput.placeholder = info.min !== null ? info.min : '';
+      maxInput.placeholder = info.max !== null ? info.max : '';
     }
-    if (info.options && Array.isArray(info.options)) {
+
+    if (info.options && Array.isArray(info.options) && info.options.length > 0) {
       optDiv.textContent = 'Options: ' + info.options.join(', ');
       optDiv.style.display = 'inline';
     } else {
@@ -255,6 +264,6 @@ document.addEventListener('DOMContentLoaded', () => {
     sel.addEventListener('change', () => updateControls(sel));
     updateControls(sel);
   });
-});
+})();
 </script>
 {% endblock %}
