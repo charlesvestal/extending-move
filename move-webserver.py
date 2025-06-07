@@ -456,6 +456,11 @@ def chord():
     return render_template("chord.html", active_tab="chord")
 
 
+@app.route("/synth-knobs", methods=["GET"])
+def synth_knobs():
+    return render_template("synth_knobs.html", active_tab="synth-knobs")
+
+
 
 
 
