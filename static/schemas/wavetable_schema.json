@@ -48,13 +48,13 @@
   "Voice_Filter1_Frequency": {
     "type": "number",
     "min": 20.0,
-    "max": 20479.998046875,
+    "max": 20480.0,
     "options": []
   },
   "Voice_Filter1_Morph": {
     "type": "number",
     "min": 0.0,
-    "max": 0.3046875,
+    "max": 0.304688,
     "options": []
   },
   "Voice_Filter1_On": {
@@ -66,7 +66,7 @@
   "Voice_Filter1_Resonance": {
     "type": "number",
     "min": 0.0,
-    "max": 0.694444477558136,
+    "max": 0.694444,
     "options": []
   },
   "Voice_Filter1_Slope": {
@@ -117,13 +117,13 @@
   "Voice_Filter2_Frequency": {
     "type": "number",
     "min": 20.0,
-    "max": 20479.998046875,
+    "max": 20480.0,
     "options": []
   },
   "Voice_Filter2_Morph": {
     "type": "number",
     "min": 0.0,
-    "max": 0.6171875,
+    "max": 0.617188,
     "options": []
   },
   "Voice_Filter2_On": {
@@ -135,7 +135,7 @@
   "Voice_Filter2_Resonance": {
     "type": "number",
     "min": 0.0,
-    "max": 0.8134920597076416,
+    "max": 0.813492,
     "options": []
   },
   "Voice_Filter2_Slope": {
@@ -172,7 +172,7 @@
   "Voice_Global_Glide": {
     "type": "number",
     "min": 0.0,
-    "max": 3.149017333984375,
+    "max": 3.149017,
     "options": []
   },
   "Voice_Global_Transpose": {
@@ -183,7 +183,7 @@
   },
   "Voice_Modulators_Amount": {
     "type": "number",
-    "min": 0.07874015718698502,
+    "min": 0.07874,
     "max": 2.0,
     "options": []
   },
@@ -199,19 +199,19 @@
   },
   "Voice_Modulators_AmpEnvelope_Slopes_Attack": {
     "type": "number",
-    "min": -0.953125,
-    "max": 0.8211382627487183,
+    "min": -1.0,
+    "max": 0.821138,
     "options": []
   },
   "Voice_Modulators_AmpEnvelope_Slopes_Decay": {
     "type": "number",
-    "min": -0.162162184715271,
+    "min": -0.162162,
     "max": 1.0,
     "options": []
   },
   "Voice_Modulators_AmpEnvelope_Slopes_Release": {
     "type": "number",
-    "min": -0.26923078298568726,
+    "min": -0.269231,
     "max": 1.0,
     "options": []
   },
@@ -224,19 +224,19 @@
   "Voice_Modulators_AmpEnvelope_Times_Attack": {
     "type": "number",
     "min": 0.0,
-    "max": 0.03376510739326477,
+    "max": 0.0,
     "options": []
   },
   "Voice_Modulators_AmpEnvelope_Times_Decay": {
     "type": "number",
-    "min": 0.00616668164730072,
+    "min": 0.0,
     "max": 20.0,
     "options": []
   },
   "Voice_Modulators_AmpEnvelope_Times_Release": {
     "type": "number",
-    "min": 0.001500000013038516,
-    "max": 3.0530290603637695,
+    "min": 0.0,
+    "max": 3.053029,
     "options": []
   },
   "Voice_Modulators_Envelope2_LoopMode": {
@@ -257,14 +257,14 @@
   },
   "Voice_Modulators_Envelope2_Slopes_Decay": {
     "type": "number",
-    "min": -0.6000000238418579,
+    "min": -0.6,
     "max": 1.0,
     "options": []
   },
   "Voice_Modulators_Envelope2_Slopes_Release": {
     "type": "number",
     "min": -1.0,
-    "max": 0.692307710647583,
+    "max": 0.692308,
     "options": []
   },
   "Voice_Modulators_Envelope2_Times_Attack": {
@@ -275,13 +275,13 @@
   },
   "Voice_Modulators_Envelope2_Times_Decay": {
     "type": "number",
-    "min": 0.002256757579743862,
+    "min": 0.0,
     "max": 20.0,
     "options": []
   },
   "Voice_Modulators_Envelope2_Times_Release": {
     "type": "number",
-    "min": 0.001500000013038516,
+    "min": 0.0,
     "max": 20.0,
     "options": []
   },
@@ -345,13 +345,13 @@
   },
   "Voice_Modulators_Envelope3_Times_Decay": {
     "type": "number",
-    "min": 0.002511759288609028,
+    "min": 0.0,
     "max": 20.0,
     "options": []
   },
   "Voice_Modulators_Envelope3_Times_Release": {
     "type": "number",
-    "min": 0.001500000013038516,
+    "min": 0.0,
     "max": 20.0,
     "options": []
   },
@@ -418,12 +418,12 @@
   "Voice_Modulators_Lfo1_Time_AttackTime": {
     "type": "number",
     "min": 0.0,
-    "max": 14.445019721984863,
+    "max": 14.44502,
     "options": []
   },
   "Voice_Modulators_Lfo1_Time_Rate": {
     "type": "number",
-    "min": 0.009999999776482582,
+    "min": 0.0,
     "max": 30.0,
     "options": []
   },
@@ -480,12 +480,12 @@
   "Voice_Modulators_Lfo2_Time_AttackTime": {
     "type": "number",
     "min": 0.0,
-    "max": 14.940940856933594,
+    "max": 14.940941,
     "options": []
   },
   "Voice_Modulators_Lfo2_Time_Rate": {
     "type": "number",
-    "min": 0.009999999776482582,
+    "min": 0.0,
     "max": 30.0,
     "options": []
   },
@@ -535,7 +535,7 @@
   },
   "Voice_Oscillator1_Gain": {
     "type": "number",
-    "min": 0.19337090849876404,
+    "min": 0.193371,
     "max": 1.0,
     "options": []
   },
@@ -553,8 +553,8 @@
   },
   "Voice_Oscillator1_Pitch_Detune": {
     "type": "number",
-    "min": -0.12999999523162842,
-    "max": 0.48000001907348633,
+    "min": -0.13,
+    "max": 0.48,
     "options": []
   },
   "Voice_Oscillator1_Pitch_Transpose": {
@@ -612,8 +612,8 @@
   },
   "Voice_Oscillator2_Pitch_Detune": {
     "type": "number",
-    "min": -0.2265625,
-    "max": 0.3515625,
+    "min": -0.226562,
+    "max": 0.351562,
     "options": []
   },
   "Voice_Oscillator2_Pitch_Transpose": {
@@ -680,7 +680,7 @@
   },
   "Volume": {
     "type": "number",
-    "min": 0.08557222038507462,
+    "min": 0.085572,
     "max": 1.0,
     "options": []
   }
