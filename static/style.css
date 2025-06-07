@@ -513,4 +513,14 @@ select {
     flex-direction: column;
     align-items: center;
     width: 90px;
+
+.param-number {
+    margin-left: 0.5rem;
+    min-width: 60px;
+    display: inline-block;
+    text-align: right;
 }
+  
+.param-item {
+    margin-bottom: 0.75rem;
+  }
