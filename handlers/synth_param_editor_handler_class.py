@@ -174,13 +174,15 @@ class SynthParamEditorHandler(BaseHandler):
             else:
                 min_attr = f' min="{meta.get("min")}"' if meta.get("min") is not None else ''
                 max_attr = f' max="{meta.get("max")}"' if meta.get("max") is not None else ''
+                data_min_attr = f' data-min="{meta.get("min")}"' if meta.get("min") is not None else ''
+                data_max_attr = f' data-max="{meta.get("max")}"' if meta.get("max") is not None else ''
                 if name in KNOB_PARAMS:
                     # Use a NexusUI dial for specified parameters
                     val_attr = f' data-value="{val}"'
                     num_id = f"param_{i}_num"
                     html += (
                         f'<div class="param-dial-wrapper">'
-                        f'<div id="param_{i}_dial" class="param-dial" data-param="{name}" data-target="param_{i}_value" data-number="{num_id}"{min_attr}{max_attr}{val_attr}></div>'
+                        f'<div id="param_{i}_dial" class="param-dial" data-param="{name}" data-target="param_{i}_value" data-number="{num_id}"{data_min_attr}{data_max_attr}{val_attr}></div>'
                         f'<div id="{num_id}" class="dial-number"></div>'
                         f'</div>'
                     )

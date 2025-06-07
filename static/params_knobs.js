@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const dialMap = {};
     document.querySelectorAll('.param-dial').forEach(el => {
+        // Read range and initial value from data attributes
         const min = parseFloat(el.dataset.min);
         const max = parseFloat(el.dataset.max);
         const val = parseFloat(el.dataset.value);
@@ -35,6 +36,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const env1Elem = document.getElementById('env1-display');
     const env2Elem = document.getElementById('env2-display');
 
+    function norm(d) {
+        if (!d) return 0;
+        return (d.value - d.min) / (d.max - d.min);
+    }
+
     function makeEnv(selector, prefix) {
         const atk = dialMap[`${prefix}_Attack`];
         const dec = dialMap[`${prefix}_Decay`];
@@ -44,9 +50,9 @@ document.addEventListener('DOMContentLoaded', () => {
             size: [180, 100],
             points: [
                 { x: 0, y: 0 },
-                { x: atk ? atk.value : 0.1, y: 1 },
-                { x: dec ? dec.value : 0.4, y: sus ? sus.value : 0.5 },
-                { x: rel ? rel.value : 1, y: 0 },
+                { x: norm(atk), y: 1 },
+                { x: norm(dec), y: sus ? sus.value : 0.5 },
+                { x: norm(rel), y: 0 },
             ],
         });
     }
@@ -61,10 +67,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const sus = dialMap[`${prefix}_Sustain`];
         const rel = dialMap[`${prefix}_Release`];
         if (atk && dec && sus && rel) {
-            env.points[1].x = atk.value;
-            env.points[2].x = dec.value;
+            env.points[1].x = norm(atk);
+            env.points[2].x = norm(dec);
             env.points[2].y = sus.value;
-            env.points[3].x = rel.value;
+            env.points[3].x = norm(rel);
             env.draw();
         }
     }
