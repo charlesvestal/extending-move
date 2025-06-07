@@ -75,4 +75,22 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     });
+
+    const env2Select = document.querySelector('.param-item[data-name="Global_Envelope2Mode"] select');
+    const cyclingRows = document.querySelectorAll('.env2-cycling');
+    function updateCycling() {
+        if (!env2Select) return;
+        const show = env2Select.value === 'Cyc';
+        cyclingRows.forEach(r => {
+            if (show) {
+                r.classList.remove('hidden');
+            } else {
+                r.classList.add('hidden');
+            }
+        });
+    }
+    if (env2Select) {
+        env2Select.addEventListener('change', updateCycling);
+        updateCycling();
+    }
 });
