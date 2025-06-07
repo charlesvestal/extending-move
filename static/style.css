@@ -531,8 +531,17 @@ select {
     align-items: center;
 }
 }
+}
 
     display: flex;
+    display: flex;
+    gap: 1rem;
+}
+
+.pitch-mod-pair {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     gap: 1rem;
 }
 

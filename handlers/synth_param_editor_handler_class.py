@@ -378,16 +378,12 @@ class SynthParamEditorHandler(BaseHandler):
             pm_src2 = extra_controls.pop("PitchModulation_Source2", "")
             pm_amt1 = extra_controls.pop("PitchModulation_Amount1", "")
             pm_amt2 = extra_controls.pop("PitchModulation_Amount2", "")
-            if pm_src1 or pm_src2 or pm_amt1 or pm_amt2:
                 pitch_html = (
                     '<div class="pitch-mod"><h4>Pitch Mod</h4>'
                     f'<div class="pitch-mod-pair">{pm_src1}{pm_amt1}</div>'
                     f'<div class="pitch-mod-pair">{pm_src2}{pm_amt2}</div>'
                     '</div>'
                 )
-                ordered.append(pitch_html)
-
-            ordered.extend(osc_items.values())
             sections["Oscillators"] = ordered
 
         if env_items:
