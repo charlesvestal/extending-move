@@ -33,6 +33,8 @@ Tools for extending the Ableton Move. This project provides a companion webserve
 - **Synth Parameter Editor**
   - Modify any Drift parameter value
   - Save changes as a new preset file
+  - Numeric parameters use sliders with an input field
+  - Enum parameters provide a dropdown of options
  
 - **MIDI Import**
   - Upload MIDI files to create new sets
