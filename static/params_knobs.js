@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const unit = el.dataset.unit || '';
         const displayId = el.dataset.display;
         const dial = new Nexus.Dial(el, {
-            size: [60,60],
+            size: [30,30],
             min: isNaN(min) ? 0 : min,
             max: isNaN(max) ? 1 : max,
             value: isNaN(val) ? 0 : val,
