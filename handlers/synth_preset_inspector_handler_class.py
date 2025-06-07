@@ -296,7 +296,6 @@ class SynthPresetInspectorHandler(BaseHandler):
             html += '</select>'
             
             # Range inputs inline with Add button
-            html += '<div class="range-inputs-inline">'
             html += (
                 f'<label class="min-wrapper">Min: <input type="number" class="range-min" '
                 f'name="macro_{macro["index"]}_range_min" value="{default_range_min}" step="any"></label>'
@@ -306,16 +305,14 @@ class SynthPresetInspectorHandler(BaseHandler):
                 f'name="macro_{macro["index"]}_range_max" value="{default_range_max}" step="any"></label>'
             )
             html += '<div class="options-display"></div>'
-            
-            # Add the "Add" button inline with range inputs
+
+            # Add the "Add" button
             html += f'<button type="submit" class="add-mapping-btn" '
             html += f'onclick="document.getElementById(\'action-input\').value=\'add_mapping\'; '
             html += f'document.getElementById(\'macro-index-input\').value=\'{macro["index"]}\';">'
-            html += f'Add</button>'
-            html += '</div>'
-            
+            html += 'Add</button>'
             html += '</div>'  # Close parameter-controls
-            
+
             html += '</div>'
             
             # Display current mappings
