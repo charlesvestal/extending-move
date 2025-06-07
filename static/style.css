@@ -376,15 +376,38 @@ select {
 
 .synth-section {
     flex: 1 1 280px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    background: #333;
+    color: #eee;
+    border-radius: 6px;
     padding: 1rem;
-    background: #f5f5f5;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.25);
 }
 
 .synth-section h3 {
     margin-top: 0;
     margin-bottom: 0.75rem;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.param-grid {
+    display: flex;
+    flex-direction: column;
+}
+
+.param-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.param-item label {
+    flex: 0 0 160px;
+}
+
+.param-item input[type="range"] {
+    flex: 1;
 }
 
 

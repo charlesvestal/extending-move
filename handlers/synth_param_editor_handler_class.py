@@ -30,65 +30,65 @@ class SynthParamEditorHandler(BaseHandler):
         browser_html = generate_dir_html(
             base_dir,
             "",
-            '/synth-params',
-            'preset_select',
-            'select_preset',
-            filter_key='drift',
+            "/synth-params",
+            "preset_select",
+            "select_preset",
+            filter_key="drift",
         )
         schema = load_drift_schema()
         return {
-            'message': 'Select a Drift preset from the list or create a new one',
-            'message_type': 'info',
-            'file_browser_html': browser_html,
-            'params_html': '',
-            'selected_preset': None,
-            'param_count': 0,
-            'browser_root': base_dir,
-            'browser_filter': 'drift',
-            'schema_json': json.dumps(schema),
-            'default_preset_path': DEFAULT_PRESET,
+            "message": "Select a Drift preset from the list or create a new one",
+            "message_type": "info",
+            "file_browser_html": browser_html,
+            "params_html": "",
+            "selected_preset": None,
+            "param_count": 0,
+            "browser_root": base_dir,
+            "browser_filter": "drift",
+            "schema_json": json.dumps(schema),
+            "default_preset_path": DEFAULT_PRESET,
         }
 
     def handle_post(self, form):
-        action = form.getvalue('action')
-        if action == 'reset_preset':
+        action = form.getvalue("action")
+        if action == "reset_preset":
             return self.handle_get()
 
-        if action == 'new_preset':
+        if action == "new_preset":
             preset_path = DEFAULT_PRESET
         else:
-            preset_path = form.getvalue('preset_select')
+            preset_path = form.getvalue("preset_select")
 
         if not preset_path:
             return self.format_error_response("No preset selected")
 
-        message = ''
-        if action == 'save_params':
+        message = ""
+        if action == "save_params":
             try:
-                count = int(form.getvalue('param_count', '0'))
+                count = int(form.getvalue("param_count", "0"))
             except ValueError:
                 count = 0
             updates = {}
             for i in range(count):
-                name = form.getvalue(f'param_{i}_name')
-                value = form.getvalue(f'param_{i}_value')
+                name = form.getvalue(f"param_{i}_name")
+                value = form.getvalue(f"param_{i}_value")
                 if name is not None and value is not None:
                     updates[name] = value
-            new_name = form.getvalue('new_preset_name')
+            new_name = form.getvalue("new_preset_name")
             output_path = None
             if new_name:
                 directory = os.path.dirname(preset_path)
-                if not new_name.endswith('.ablpreset'):
-                    new_name += '.ablpreset'
+                if not new_name.endswith(".ablpreset"):
+                    new_name += ".ablpreset"
                 output_path = os.path.join(directory, new_name)
             result = update_parameter_values(preset_path, updates, output_path)
-            if not result['success']:
-                return self.format_error_response(result['message'])
-            message = result['message']
+            if not result["success"]:
+                return self.format_error_response(result["message"])
+            message = result["message"]
             if output_path:
                 message += f" Saved as {os.path.basename(output_path)}"
-        elif action in ['select_preset', 'new_preset']:
-            if action == 'new_preset':
+        elif action in ["select_preset", "new_preset"]:
+            if action == "new_preset":
                 message = "Loaded default preset"
             else:
                 message = f"Selected preset: {os.path.basename(preset_path)}"
@@ -96,11 +96,11 @@ class SynthParamEditorHandler(BaseHandler):
             return self.format_error_response("Unknown action")
 
         values = extract_parameter_values(preset_path)
-        params_html = ''
+        params_html = ""
         param_count = 0
-        if values['success']:
-            params_html = self.generate_params_html(values['parameters'])
-            param_count = len(values['parameters'])
+        if values["success"]:
+            params_html = self.generate_params_html(values["parameters"])
+            param_count = len(values["parameters"])
 
         base_dir = "/data/UserData/UserLibrary/Track Presets"
         if not os.path.exists(base_dir) and os.path.exists("examples/Track Presets"):
@@ -108,39 +108,42 @@ class SynthParamEditorHandler(BaseHandler):
         browser_html = generate_dir_html(
             base_dir,
             "",
-            '/synth-params',
-            'preset_select',
-            'select_preset',
-            filter_key='drift',
+            "/synth-params",
+            "preset_select",
+            "select_preset",
+            filter_key="drift",
         )
         return {
-            'message': message,
-            'message_type': 'success',
-            'file_browser_html': browser_html,
-            'params_html': params_html,
-            'selected_preset': preset_path,
-            'param_count': param_count,
-            'browser_root': base_dir,
-            'browser_filter': 'drift',
-            'schema_json': json.dumps(load_drift_schema()),
-            'default_preset_path': DEFAULT_PRESET,
+            "message": message,
+            "message_type": "success",
+            "file_browser_html": browser_html,
+            "params_html": params_html,
+            "selected_preset": preset_path,
+            "param_count": param_count,
+            "browser_root": base_dir,
+            "browser_filter": "drift",
+            "schema_json": json.dumps(load_drift_schema()),
+            "default_preset_path": DEFAULT_PRESET,
         }
 
     def generate_params_html(self, params):
         """Return HTML controls for the given parameter values."""
         if not params:
-            return '<p>No parameters found.</p>'
+            return "<p>No parameters found.</p>"
 
         schema = load_drift_schema()
 
+        # Map UI panel labels to parameter name prefixes. This lets us
+        # organize the long parameter list into sections that roughly
+        # match Drift's interface in Live.
         sections = {
-            "Oscillator Section": ("Oscillator1_", "Oscillator2_", "PitchModulation_"),
-            "Oscillator Mixer": ("Mixer_",),
-            "Filter Section": ("Filter_",),
-            "Envelope Section": ("Envelope1_", "Envelope2_", "CyclingEnvelope_"),
-            "LFO Section": ("Lfo_",),
-            "Modulation Matrix": ("ModulationMatrix_",),
-            "Global Controls": ("Global_",),
+            "Oscillators": ("Oscillator1_", "Oscillator2_", "PitchModulation_"),
+            "Mixer": ("Mixer_",),
+            "Filter": ("Filter_",),
+            "Envelopes": ("Envelope1_", "Envelope2_", "CyclingEnvelope_"),
+            "LFO": ("Lfo_",),
+            "Modulation": ("ModulationMatrix_",),
+            "Global": ("Global_",),
         }
 
         section_data = {name: [] for name in sections}
@@ -162,14 +165,16 @@ class SynthParamEditorHandler(BaseHandler):
         for label, items in section_data.items():
             if not items:
                 continue
-            html += f'<div class="synth-section"><h3>{label}</h3>'
+            html += (
+                f'<div class="synth-section"><h3>{label}</h3><div class="param-grid">'
+            )
             for item in items:
                 name = item["name"]
                 val = item["value"]
                 meta = schema.get(name, {})
                 p_type = meta.get("type")
                 html += '<div class="param-item">'
-                html += f'<label>{name}: '
+                html += f"<label>{name}: "
                 if p_type == "enum" and meta.get("options"):
                     html += f'<select name="param_{idx}_value">'
                     for opt in meta["options"]:
@@ -177,15 +182,23 @@ class SynthParamEditorHandler(BaseHandler):
                         html += f'<option value="{opt}"{selected}>{opt}</option>'
                     html += "</select>"
                 else:
-                    min_attr = f' min="{meta.get("min")}"' if meta.get("min") is not None else ""
-                    max_attr = f' max="{meta.get("max")}"' if meta.get("max") is not None else ""
+                    min_attr = (
+                        f' min="{meta.get("min")}"'
+                        if meta.get("min") is not None
+                        else ""
+                    )
+                    max_attr = (
+                        f' max="{meta.get("max")}"'
+                        if meta.get("max") is not None
+                        else ""
+                    )
 
                     step_input = "any"
                     if isinstance(val, (int, float)):
                         val_str = str(val)
                         if "." in val_str:
                             digits = len(val_str.split(".")[1].rstrip("0"))
-                            step_input = str(10 ** -digits) if digits else "1"
+                            step_input = str(10**-digits) if digits else "1"
                         else:
                             step_input = "1"
 
@@ -198,8 +211,16 @@ class SynthParamEditorHandler(BaseHandler):
                                 step_slider = "0.01"
                     if step_input == "1" and step_slider != "any":
                         step_input = step_slider
-                    slider_step_attr = f' step="{step_slider}"' if step_slider != "any" else ' step="any"'
-                    input_step_attr = f' step="{step_input}"' if step_input != "any" else ' step="any"'
+                    slider_step_attr = (
+                        f' step="{step_slider}"'
+                        if step_slider != "any"
+                        else ' step="any"'
+                    )
+                    input_step_attr = (
+                        f' step="{step_input}"'
+                        if step_input != "any"
+                        else ' step="any"'
+                    )
                     html += (
                         f'<input type="range" name="param_{idx}_slider" value="{val}"{min_attr}{max_attr}{slider_step_attr} '
                         f'oninput="this.nextElementSibling.value=this.value">'
@@ -208,11 +229,10 @@ class SynthParamEditorHandler(BaseHandler):
                         f'<input type="number" name="param_{idx}_value" value="{val}"{min_attr}{max_attr}{input_step_attr} '
                         f'oninput="this.previousElementSibling.value=this.value">'
                     )
-                html += '</label>'
-                html += f'<input type="hidden" name="param_{idx}_name" value="{name}">' 
-                html += '</div>'
+                html += "</label>"
+                html += f'<input type="hidden" name="param_{idx}_name" value="{name}">'
+                html += "</div>"
                 idx += 1
-            html += '</div>'
-        html += '</div>'
+            html += "</div></div>"
+        html += "</div>"
         return html
-
