@@ -1,0 +1,127 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "instrumentRack",
+  "name": "Clav Anvil",
+  "lockId": 1001,
+  "lockSeal": 2077242674,
+  "parameters": {
+    "Enabled": true,
+    "Macro0": 0.0,
+    "Macro1": 0.0,
+    "Macro2": 0.0,
+    "Macro3": 0.0,
+    "Macro4": 0.0,
+    "Macro5": 0.0,
+    "Macro6": 0.0,
+    "Macro7": 0.0
+  },
+  "chains": [
+    {
+      "name": "",
+      "color": 0,
+      "devices": [
+        {
+          "presetUri": null,
+          "kind": "melodicSampler",
+          "name": "Clav Anvil",
+          "parameters": {
+            "Enabled": true,
+            "Voice_AmplitudeEnvelope_Attack": 0.00010000000149011613,
+            "Voice_AmplitudeEnvelope_Decay": 46.172734375,
+            "Voice_AmplitudeEnvelope_Release": 0.2,
+            "Voice_AmplitudeEnvelope_Sustain": 0.0003162277571391314,
+            "Voice_AmplitudeEnvelope_SustainMode": "Gate",
+            "Voice_Detune": 0.0,
+            "Voice_FilterEnvelope_Attack": 0.00010000000149011613,
+            "Voice_FilterEnvelope_Decay": 0.6,
+            "Voice_FilterEnvelope_On": true,
+            "Voice_FilterEnvelope_Release": 0.05,
+            "Voice_FilterEnvelope_Sustain": 0.0,
+            "Voice_Filter_Frequency": 20877.673828125,
+            "Voice_Filter_FrequencyModulationAmounts_EnvelopeAmount": 0,
+            "Voice_Filter_FrequencyModulationAmounts_LfoAmount": 0.0,
+            "Voice_Filter_On": true,
+            "Voice_Filter_Resonance": 0.5199999809265137,
+            "Voice_Filter_Slope": "24",
+            "Voice_Filter_Type": "Lowpass",
+            "Voice_Gain": 1.0,
+            "Voice_Lfo_On": true,
+            "Voice_Lfo_Rate": 5.999998569488525,
+            "Voice_Lfo_Type": "Sine",
+            "Voice_PlaybackLength": 1.0,
+            "Voice_PlaybackStart": 0.0,
+            "Voice_Transpose": 0,
+            "Voice_VelocityToVolume": 0.3499999940395355,
+            "Volume": -22.371427536010742
+          },
+          "deviceData": {
+            "sampleUri": "ableton:/packs/abl-core-library/Samples/Notes/Clav%20Anvil%20C3.aif"
+          }
+        },
+        {
+          "presetUri": null,
+          "kind": "channelEq",
+          "name": "",
+          "parameters": {
+            "Enabled": true,
+            "Gain": 1.0,
+            "HighShelfGain": 1.1197587251663208,
+            "HighpassOn": false,
+            "LowShelfGain": 0.6144077181816101,
+            "MidFrequency": 1696.942138671875,
+            "MidGain": 1.6957279443740845
+          },
+          "deviceData": {}
+        },
+        {
+          "presetUri": null,
+          "kind": "reverb",
+          "name": "Reverb",
+          "parameters": {
+            "AllPassGain": 0.9295555353164673,
+            "AllPassSize": 0.3214285671710968,
+            "BandFreq": 2407.684814453125,
+            "BandHighOn": false,
+            "BandLowOn": true,
+            "BandWidth": 4.142857074737549,
+            "ChorusOn": true,
+            "CutOn": false,
+            "DecayTime": 328.6034240722656,
+            "DiffuseDelay": 0.6507936716079712,
+            "EarlyReflectModDepth": 17.5,
+            "EarlyReflectModFreq": 0.29770001769065857,
+            "Enabled": true,
+            "FlatOn": false,
+            "FreezeOn": false,
+            "HighFilterType": "Shelf",
+            "MixDiffuse": 1.3246023654937744,
+            "MixDirect": 0.2142857164144516,
+            "MixReflect": 1.0,
+            "PreDelay": 1.7158523797988892,
+            "RoomSize": 4.7506890296936035,
+            "RoomType": "SuperEco",
+            "ShelfHiFreq": 1691.5751953125,
+            "ShelfHiGain": 0.5809524059295654,
+            "ShelfHighOn": true,
+            "ShelfLoFreq": 90.00000762939453,
+            "ShelfLoGain": 1.0,
+            "ShelfLowOn": true,
+            "SizeModDepth": 1.5374218225479126,
+            "SizeModFreq": 1.5848854780197144,
+            "SizeSmoothing": "Fast",
+            "SpinOn": true,
+            "StereoSeparation": 100.0
+          },
+          "deviceData": {}
+        }
+      ],
+      "mixer": {
+        "pan": 0.0,
+        "solo-cue": false,
+        "speakerOn": true,
+        "volume": 0.0,
+        "sends": []
+      }
+    }
+  ]
+}

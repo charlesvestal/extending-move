@@ -1,0 +1,382 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "instrumentRack",
+  "name": "Theremin Whistle",
+  "lockId": 1001,
+  "lockSeal": 558758403,
+  "parameters": {
+    "Enabled": true,
+    "Macro0": 0.0,
+    "Macro1": 0.0,
+    "Macro2": 0.0,
+    "Macro3": 0.0,
+    "Macro4": 0.0,
+    "Macro5": 0.0,
+    "Macro6": 0.0,
+    "Macro7": 0.0
+  },
+  "chains": [
+    {
+      "name": "",
+      "color": 0,
+      "devices": [
+        {
+          "presetUri": null,
+          "kind": "instrumentRack",
+          "name": "Wavetable",
+          "lockId": 1001,
+          "lockSeal": 570097652,
+          "parameters": {
+            "Enabled": true,
+            "Macro0": {
+              "value": 127.0,
+              "customName": "Filter Cutoff"
+            },
+            "Macro1": {
+              "value": 0.0,
+              "customName": "Wave Position"
+            },
+            "Macro2": {
+              "value": 0.0,
+              "customName": "FM Amount"
+            },
+            "Macro3": {
+              "value": 63.5,
+              "customName": "FM Tune"
+            },
+            "Macro4": {
+              "value": 44.0,
+              "customName": "Attack"
+            },
+            "Macro5": {
+              "value": 79.0,
+              "customName": "Release"
+            },
+            "Macro6": {
+              "value": 46.9900016784668,
+              "customName": "LFO Amount"
+            },
+            "Macro7": {
+              "value": 67.43629455566406,
+              "customName": "LFO Rate"
+            }
+          },
+          "chains": [
+            {
+              "name": "",
+              "color": 0,
+              "devices": [
+                {
+                  "presetUri": null,
+                  "kind": "wavetable",
+                  "name": "",
+                  "parameters": {
+                    "Enabled": true,
+                    "HiQ": false,
+                    "MonoPoly": "Mono",
+                    "PolyVoices": "4",
+                    "Voice_Filter1_CircuitBpNoMo": "Clean",
+                    "Voice_Filter1_CircuitLpHp": "Clean",
+                    "Voice_Filter1_Drive": 0.0,
+                    "Voice_Filter1_Frequency": {
+                      "value": 19999.99609375,
+                      "macroMapping": {
+                        "macroIndex": 0,
+                        "rangeMin": 80.0,
+                        "rangeMax": 20479.998046875
+                      }
+                    },
+                    "Voice_Filter1_Morph": 0.0,
+                    "Voice_Filter1_On": true,
+                    "Voice_Filter1_Resonance": 0.0,
+                    "Voice_Filter1_Slope": "24",
+                    "Voice_Filter1_Type": "Lowpass",
+                    "Voice_Filter2_CircuitBpNoMo": "Clean",
+                    "Voice_Filter2_CircuitLpHp": "Clean",
+                    "Voice_Filter2_Drive": 0.0,
+                    "Voice_Filter2_Frequency": 20.000307083129883,
+                    "Voice_Filter2_Morph": 0.0,
+                    "Voice_Filter2_On": false,
+                    "Voice_Filter2_Resonance": 0.0,
+                    "Voice_Filter2_Slope": "12",
+                    "Voice_Filter2_Type": "Highpass",
+                    "Voice_Global_FilterRouting": "Serial",
+                    "Voice_Global_Glide": 0.23183941841125488,
+                    "Voice_Global_Transpose": 0,
+                    "Voice_Modulators_Amount": 1.0,
+                    "Voice_Modulators_AmpEnvelope_LoopMode": "None",
+                    "Voice_Modulators_AmpEnvelope_Slopes_Attack": 0.0,
+                    "Voice_Modulators_AmpEnvelope_Slopes_Decay": 0.5,
+                    "Voice_Modulators_AmpEnvelope_Slopes_Release": 0.5,
+                    "Voice_Modulators_AmpEnvelope_Sustain": 0.3981052041053772,
+                    "Voice_Modulators_AmpEnvelope_Times_Attack": {
+                      "value": 0.0010000001639127731,
+                      "macroMapping": {
+                        "macroIndex": 4,
+                        "rangeMin": 0.0010000000474974513,
+                        "rangeMax": 7.0
+                      }
+                    },
+                    "Voice_Modulators_AmpEnvelope_Times_Decay": 0.6473096609115601,
+                    "Voice_Modulators_AmpEnvelope_Times_Release": {
+                      "value": 0.5999999642372131,
+                      "macroMapping": {
+                        "macroIndex": 5,
+                        "rangeMin": 0.001500000013038516,
+                        "rangeMax": 7.0
+                      }
+                    },
+                    "Voice_Modulators_Envelope2_LoopMode": "None",
+                    "Voice_Modulators_Envelope2_Slopes_Attack": 0.0,
+                    "Voice_Modulators_Envelope2_Slopes_Decay": 0.5,
+                    "Voice_Modulators_Envelope2_Slopes_Release": 0.5,
+                    "Voice_Modulators_Envelope2_Times_Attack": 0.0010000001639127731,
+                    "Voice_Modulators_Envelope2_Times_Decay": 0.5999999642372131,
+                    "Voice_Modulators_Envelope2_Times_Release": 0.5999999642372131,
+                    "Voice_Modulators_Envelope2_Values_Final": 0.0,
+                    "Voice_Modulators_Envelope2_Values_Initial": 0.0,
+                    "Voice_Modulators_Envelope2_Values_Peak": 1.0,
+                    "Voice_Modulators_Envelope2_Values_Sustain": 0.5,
+                    "Voice_Modulators_Envelope3_LoopMode": "None",
+                    "Voice_Modulators_Envelope3_Slopes_Attack": 0.0,
+                    "Voice_Modulators_Envelope3_Slopes_Decay": 0.5,
+                    "Voice_Modulators_Envelope3_Slopes_Release": 0.5,
+                    "Voice_Modulators_Envelope3_Times_Attack": 0.0010000001639127731,
+                    "Voice_Modulators_Envelope3_Times_Decay": 0.5999999642372131,
+                    "Voice_Modulators_Envelope3_Times_Release": 0.5999999642372131,
+                    "Voice_Modulators_Envelope3_Values_Final": 0.0,
+                    "Voice_Modulators_Envelope3_Values_Initial": 0.0,
+                    "Voice_Modulators_Envelope3_Values_Peak": 1.0,
+                    "Voice_Modulators_Envelope3_Values_Sustain": 0.5,
+                    "Voice_Modulators_Lfo1_Retrigger": true,
+                    "Voice_Modulators_Lfo1_Shape_Amount": {
+                      "value": 1.0,
+                      "macroMapping": {
+                        "macroIndex": 6,
+                        "rangeMin": 0.0,
+                        "rangeMax": 1.0
+                      }
+                    },
+                    "Voice_Modulators_Lfo1_Shape_PhaseOffset": 0.0,
+                    "Voice_Modulators_Lfo1_Shape_Shaping": 0.0,
+                    "Voice_Modulators_Lfo1_Shape_Type": "Sine",
+                    "Voice_Modulators_Lfo1_Time_AttackTime": 0.19999998807907104,
+                    "Voice_Modulators_Lfo1_Time_Rate": {
+                      "value": 0.9999998807907104,
+                      "macroMapping": {
+                        "macroIndex": 7,
+                        "rangeMin": 0.009999999776482582,
+                        "rangeMax": 30.0
+                      }
+                    },
+                    "Voice_Modulators_Lfo1_Time_Sync": "Free",
+                    "Voice_Modulators_Lfo1_Time_SyncedRate": 15,
+                    "Voice_Modulators_Lfo2_Retrigger": true,
+                    "Voice_Modulators_Lfo2_Shape_Amount": 1.0,
+                    "Voice_Modulators_Lfo2_Shape_PhaseOffset": 0.0,
+                    "Voice_Modulators_Lfo2_Shape_Shaping": 0.0,
+                    "Voice_Modulators_Lfo2_Shape_Type": "Sine",
+                    "Voice_Modulators_Lfo2_Time_AttackTime": 0.0,
+                    "Voice_Modulators_Lfo2_Time_Rate": 0.9999998807907104,
+                    "Voice_Modulators_Lfo2_Time_Sync": "Free",
+                    "Voice_Modulators_Lfo2_Time_SyncedRate": 15,
+                    "Voice_Modulators_TimeScale": 0.0,
+                    "Voice_Oscillator1_Effects_Effect1": {
+                      "value": 0.0,
+                      "macroMapping": {
+                        "macroIndex": 3,
+                        "rangeMin": -1.0,
+                        "rangeMax": 1.0
+                      }
+                    },
+                    "Voice_Oscillator1_Effects_Effect2": {
+                      "value": 0.0,
+                      "macroMapping": {
+                        "macroIndex": 2,
+                        "rangeMin": 0.0,
+                        "rangeMax": 1.0
+                      }
+                    },
+                    "Voice_Oscillator1_Effects_EffectMode": "Fm",
+                    "Voice_Oscillator1_Gain": 1.0,
+                    "Voice_Oscillator1_On": true,
+                    "Voice_Oscillator1_Pan": 0.0,
+                    "Voice_Oscillator1_Pitch_Detune": 0.0,
+                    "Voice_Oscillator1_Pitch_Transpose": 12,
+                    "Voice_Oscillator1_Wavetables_WavePosition": {
+                      "value": 0.0,
+                      "macroMapping": {
+                        "macroIndex": 1,
+                        "rangeMin": 0.0,
+                        "rangeMax": 1.0
+                      }
+                    },
+                    "Voice_Oscillator2_Effects_Effect1": {
+                      "value": 0.0,
+                      "macroMapping": {
+                        "macroIndex": 3,
+                        "rangeMin": -1.0,
+                        "rangeMax": 1.0
+                      }
+                    },
+                    "Voice_Oscillator2_Effects_Effect2": {
+                      "value": 0.0,
+                      "macroMapping": {
+                        "macroIndex": 2,
+                        "rangeMin": 0.0,
+                        "rangeMax": 1.0
+                      }
+                    },
+                    "Voice_Oscillator2_Effects_EffectMode": "Fm",
+                    "Voice_Oscillator2_Gain": 1.0,
+                    "Voice_Oscillator2_On": true,
+                    "Voice_Oscillator2_Pan": 0.0,
+                    "Voice_Oscillator2_Pitch_Detune": 0.0,
+                    "Voice_Oscillator2_Pitch_Transpose": 12,
+                    "Voice_Oscillator2_Wavetables_WavePosition": {
+                      "value": 0.0,
+                      "macroMapping": {
+                        "macroIndex": 1,
+                        "rangeMin": 0.0,
+                        "rangeMax": 1.0
+                      }
+                    },
+                    "Voice_SubOscillator_Gain": 0.0,
+                    "Voice_SubOscillator_On": true,
+                    "Voice_SubOscillator_Tone": 1.0,
+                    "Voice_SubOscillator_Transpose": "-1",
+                    "Voice_Unison_Amount": 0.0,
+                    "Voice_Unison_Mode": "None",
+                    "Voice_Unison_VoiceCount": 2,
+                    "Volume": 0.18491168320178986
+                  },
+                  "deviceData": {
+                    "spriteUri1": "ableton:/device-resources/wavetable-sprites/Basic%20Shapes",
+                    "spriteUri2": "ableton:/device-resources/wavetable-sprites/Basic%20Shapes",
+                    "modulations": {
+                      "Voice_Global_AmpModulation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.6499999761581421,
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0
+                      ],
+                      "Voice_Global_PitchModulation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.03125,
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.041666626930236816,
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0
+                      ],
+                      "Voice_Oscillator1_Wavetables_WavePosition": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                      ]
+                    }
+                  }
+                }
+              ],
+              "mixer": {
+                "pan": 0.0,
+                "solo-cue": false,
+                "speakerOn": true,
+                "volume": 0.0,
+                "sends": []
+              }
+            }
+          ]
+        },
+        {
+          "presetUri": null,
+          "kind": "reverb",
+          "name": "Reverb",
+          "parameters": {
+            "AllPassGain": 0.6022777557373047,
+            "AllPassSize": 0.6700000166893005,
+            "BandFreq": 290.9698181152344,
+            "BandHighOn": true,
+            "BandLowOn": true,
+            "BandWidth": 8.114582061767578,
+            "ChorusOn": true,
+            "CutOn": false,
+            "DecayTime": 1889.185302734375,
+            "DiffuseDelay": 0.6349206566810608,
+            "EarlyReflectModDepth": 19.52410888671875,
+            "EarlyReflectModFreq": 0.3499999940395355,
+            "Enabled": true,
+            "FlatOn": false,
+            "FreezeOn": false,
+            "HighFilterType": "Shelf",
+            "MixDiffuse": 1.4382071495056152,
+            "MixDirect": 0.23622047901153564,
+            "MixReflect": 1.7179083824157715,
+            "PreDelay": 15.000001907348633,
+            "RoomSize": 177.90760803222656,
+            "RoomType": "SuperEco",
+            "ShelfHiFreq": 6591.9853515625,
+            "ShelfHiGain": 0.4833333492279053,
+            "ShelfHighOn": true,
+            "ShelfLoFreq": 341.3493957519531,
+            "ShelfLoGain": 0.6499999761581421,
+            "ShelfLowOn": true,
+            "SizeModDepth": 0.07368063181638718,
+            "SizeModFreq": 1.7510427236557007,
+            "SizeSmoothing": "Fast",
+            "SpinOn": true,
+            "StereoSeparation": 102.99212646484375
+          },
+          "deviceData": {}
+        },
+        {
+          "presetUri": null,
+          "kind": "channelEq",
+          "name": "Channel EQ",
+          "parameters": {
+            "Enabled": true,
+            "Gain": 1.0,
+            "HighShelfGain": 1.0,
+            "HighpassOn": false,
+            "LowShelfGain": 1.0,
+            "MidFrequency": 1500.0001220703125,
+            "MidGain": 1.0
+          },
+          "deviceData": {}
+        }
+      ],
+      "mixer": {
+        "pan": 0.0,
+        "solo-cue": false,
+        "speakerOn": true,
+        "volume": 0.0,
+        "sends": []
+      }
+    }
+  ]
+}
