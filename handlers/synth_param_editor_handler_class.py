@@ -257,7 +257,7 @@ class SynthParamEditorHandler(BaseHandler):
         env_items = {}
         extra_controls = {}
 
-        def build_control(idx, val, meta):
+        def build_control(idx, name, val, meta):
             p_type = meta.get('type')
             if p_type == 'enum' and meta.get('options'):
                 ctrl = '<select name="param_%d_value">' % idx
@@ -270,24 +270,32 @@ class SynthParamEditorHandler(BaseHandler):
                 max_attr = f' data-max="{meta.get("max")}"' if meta.get("max") is not None else ''
                 val_attr = f' data-value="{val}"'
                 unit_attr = ''
-                if meta.get("unit"):
-                    unit = meta.get("unit")
-                    if unit == 'st':
-                        unit = 'semitone'
-                    unit_attr = f' data-unit="{unit}"'
+                if meta.get("unit") and meta.get("unit") != 'st':
+                    unit_attr = f' data-unit="{meta.get("unit")}"'
                 dec_attr = f' data-decimals="{meta.get("decimals")}"' if meta.get("decimals") is not None else ''
                 display_id = f'param_{idx}_display'
-                ctrl = (
-                    f'<div id="param_{idx}_dial" class="param-dial" data-target="param_{idx}_value" '
-                    f'data-display="{display_id}"{min_attr}{max_attr}{val_attr}{unit_attr}{dec_attr}></div>'
-                )
+                slider_names = {
+                    "Oscillator1_ShapeMod",
+                    "PitchModulation_Amount1",
+                    "PitchModulation_Amount2",
+                }
+                if name in slider_names:
+                    ctrl = (
+                        f'<div id="param_{idx}_slider" class="param-slider" data-target="param_{idx}_value" '
+                        f'data-display="{display_id}"{min_attr}{max_attr}{val_attr}{unit_attr}{dec_attr}></div>'
+                    )
+                else:
+                    ctrl = (
+                        f'<div id="param_{idx}_dial" class="param-dial" data-target="param_{idx}_value" '
+                        f'data-display="{display_id}"{min_attr}{max_attr}{val_attr}{unit_attr}{dec_attr}></div>'
+                    )
                 ctrl += f'<span id="{display_id}" class="param-number"></span>'
-                ctrl += f'<input type="hidden" name="param_{idx}_value" value="{val}">' 
+                ctrl += f'<input type="hidden" name="param_{idx}_value" value="{val}">'
             return ctrl
 
         def build_item(idx, name, val, meta, hide_label=False):
             label = self.LABEL_OVERRIDES.get(name, name)
-            ctrl = build_control(idx, val, meta)
+            ctrl = build_control(idx, name, val, meta)
             html = '<div class="param-item">'
             if not hide_label:
                 html += f'<span class="param-label">{label}</span>'

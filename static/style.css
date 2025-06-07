@@ -482,6 +482,14 @@ select {
     display: inline-block;
 }
 
+/* Slider controls */
+.param-slider {
+    margin: 0.25rem;
+    display: inline-block;
+    height: 70px;
+    width: 20px;
+}
+
 /* Layout for the Drift parameter editor */
 .drift-param-panels {
     display: flex;
