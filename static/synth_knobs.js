@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     function createDial(selector, options = {}) {
-        const opts = Object.assign({ size: [60,60], min: 0, max: 1, value: 0 }, options);
+        const opts = Object.assign({ size: [30,30], min: 0, max: 1, value: 0 }, options);
         return new Nexus.Dial(selector, opts);
     }
 
