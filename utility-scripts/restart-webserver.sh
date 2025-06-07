@@ -24,6 +24,14 @@ echo "Restarting the webserver on ${REMOTE_HOST}..."
 ssh -T "${REMOTE_USER}@${REMOTE_HOST}" bash <<'EOF'
 set -euo pipefail
 
+# Load port configuration on the remote machine
+CONFIG_FILE="/data/UserData/extending-move/port.conf"
+if [ -f "$CONFIG_FILE" ]; then
+  PORT=$(cat "$CONFIG_FILE")
+else
+  PORT=909
+fi
+
 # Use the absolute paths
 PID_FILE="/data/UserData/extending-move/move-webserver.pid"
 WEB_SERVER_CMD="cd /data/UserData/extending-move && PYTHONPATH=/data/UserData/extending-move python3 -u move-webserver.py"
