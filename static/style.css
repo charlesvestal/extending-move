@@ -481,3 +481,12 @@ select {
     margin: 0.25rem;
     display: inline-block;
 }
+.param-number {
+    margin-left: 0.5rem;
+    min-width: 60px;
+    display: inline-block;
+    text-align: right;
+}
+.param-item {
+    margin-bottom: 0.75rem;
+}
