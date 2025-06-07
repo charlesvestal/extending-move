@@ -75,4 +75,30 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     });
+
+    const env2Select = document.querySelector('.param-item[data-name="Global_Envelope2Mode"] select');
+    const env2Main = document.querySelector('.env2-main');
+    const env2Cycling = document.querySelector('.env2-cycling');
+    function updateCycling() {
+        if (!env2Select) return;
+        const cyc = env2Select.value === 'Cyc';
+        if (env2Main) {
+            if (cyc) {
+                env2Main.classList.add('hidden');
+            } else {
+                env2Main.classList.remove('hidden');
+            }
+        }
+        if (env2Cycling) {
+            if (cyc) {
+                env2Cycling.classList.remove('hidden');
+            } else {
+                env2Cycling.classList.add('hidden');
+            }
+        }
+    }
+    if (env2Select) {
+        env2Select.addEventListener('change', updateCycling);
+        updateCycling();
+    }
 });
