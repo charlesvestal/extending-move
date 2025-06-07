@@ -127,26 +127,120 @@ class SynthParamEditorHandler(BaseHandler):
         }
 
     SECTION_ORDER = [
-        "Oscillator",
+        "Oscillators",
         "Mixer",
         "Filter",
         "Envelopes",
-        "LFO + Mod",
+        "LFO",
+        "Modulation",
         "Global",
         "Other",
     ]
 
+    LABEL_OVERRIDES = {
+        # Oscillators
+        "Oscillator1_Type": "Type",
+        "Oscillator1_Transpose": "Oct",
+        "Oscillator1_Shape": "Shape",
+        "Oscillator1_ShapeModSource": "Shape Mod Source",
+        "Oscillator1_ShapeMod": "Shape Mod Amount",
+        "Oscillator2_Type": "Type",
+        "Oscillator2_Transpose": "Oct",
+        "Oscillator2_Detune": "Detune",
+        "PitchModulation_Source1": "Source",
+        "PitchModulation_Amount1": "Amount",
+        "PitchModulation_Source2": "Source",
+        "PitchModulation_Amount2": "Amount",
+
+        # Mixer
+        "Mixer_OscillatorOn1": "On/Off",
+        "Mixer_OscillatorGain1": "Level",
+        "Filter_OscillatorThrough1": "Filter",
+        "Mixer_OscillatorOn2": "On/Off",
+        "Mixer_OscillatorGain2": "Level",
+        "Filter_OscillatorThrough2": "Filter",
+        "Mixer_NoiseOn": "On/Off",
+        "Mixer_NoiseLevel": "Level",
+        "Filter_NoiseThrough": "Filter",
+
+        # Filter
+        "Filter_Frequency": "Freq",
+        "Filter_Type": "Type",
+        "Filter_Tracking": "Key",
+        "Filter_Resonance": "Res",
+        "Filter_HiPassFrequency": "HP",
+        "Filter_ModSource1": "Mod Source 1",
+        "Filter_ModAmount1": "Mod Amount 1",
+        "Filter_ModSource2": "Mod Source 2",
+        "Filter_ModAmount2": "Mod Amount 2",
+
+        # Envelopes
+        "Envelope1_Attack": "Attack",
+        "Envelope1_Decay": "Decay",
+        "Envelope1_Sustain": "Sustain",
+        "Envelope1_Release": "Release",
+        "Envelope2_Attack": "Attack",
+        "Envelope2_Decay": "Decay",
+        "Envelope2_Sustain": "Sustain",
+        "Envelope2_Release": "Release",
+        "CyclingEnvelope_Tilt": "Tilt",
+        "CyclingEnvelope_Hold": "Hold",
+        "CyclingEnvelope_Rate": "Rate",
+        "CyclingEnvelope_Mode": "Mode",
+
+        # LFO
+        "Lfo_Shape": "Shape",
+        "Lfo_Rate": "Rate",
+        "Lfo_Time": "Rate",
+        "Lfo_Ratio": "Rate",
+        "Lfo_SyncedRate": "Rate",
+        "Lfo_Retrigger": "R",
+        "Lfo_Amount": "Amount",
+        "Lfo_ModSource": "Mod Source",
+        "Lfo_ModAmount": "Mod Amount",
+
+        # Modulation Matrix
+        "ModulationMatrix_Source1": "Source",
+        "ModulationMatrix_Target1": "Destination",
+        "ModulationMatrix_Amount1": "Amount",
+        "ModulationMatrix_Source2": "Source",
+        "ModulationMatrix_Target2": "Destination",
+        "ModulationMatrix_Amount2": "Amount",
+        "ModulationMatrix_Source3": "Source",
+        "ModulationMatrix_Target3": "Destination",
+        "ModulationMatrix_Amount3": "Amount",
+
+        # Global
+        "Global_VoiceMode": "Mode",
+        "Global_VoiceCount": "Voices",
+        "Global_MonoVoiceDepth": "Mono Thickness",
+        "Global_StereoVoiceDepth": "Stereo Spread",
+        "Global_UnisonVoiceDepth": "Unison Strength",
+        "Global_PolyVoiceDepth": "Poly Depth",
+        "Global_Legato": "Legato",
+        "Global_Glide": "Glide",
+        "Global_DriftDepth": "Drift",
+        "Global_Volume": "Volume",
+        "Global_VolVelMod": "Vel > Vol",
+        "Global_Transpose": "Transpose",
+        "Global_NotePitchBend": "Note PB",
+        "Global_PitchBendRange": "PB Range",
+        "Global_ResetOscillatorPhase": "R",
+    }
+
     def _get_section(self, name):
         if name.startswith(("Oscillator1_", "Oscillator2_", "PitchModulation_")):
-            return "Oscillator"
-        if name.startswith("Mixer_"):
+            return "Oscillators"
+        if name.startswith("Mixer_") or name.startswith("Filter_OscillatorThrough") or name.startswith("Filter_NoiseThrough"):
             return "Mixer"
         if name.startswith("Filter_"):
             return "Filter"
-        if name.startswith(("Envelope1_", "Envelope2_")):
+        if name.startswith(("Envelope1_", "Envelope2_", "CyclingEnvelope_")):
             return "Envelopes"
-        if name.startswith(("CyclingEnvelope_", "ModulationMatrix_")):
-            return "LFO + Mod"
+        if name.startswith("Lfo_"):
+            return "LFO"
+        if name.startswith("ModulationMatrix_"):
+            return "Modulation"
         if name.startswith("Global_"):
             return "Global"
         return "Other"
@@ -165,8 +259,9 @@ class SynthParamEditorHandler(BaseHandler):
             meta = schema.get(name, {})
             p_type = meta.get('type')
 
+            label = self.LABEL_OVERRIDES.get(name, name)
             html = '<div class="param-item">'
-            html += f'<label>{name}: '
+            html += f'<label>{label}: '
             if p_type == 'enum' and meta.get('options'):
                 html += f'<select name="param_{i}_value">'
                 for opt in meta['options']:
