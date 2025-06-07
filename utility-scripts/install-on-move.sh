@@ -41,6 +41,12 @@ case "$port_choice" in
     *) PORT=909 ;;
 esac
 
+# Validate port number
+if ! [[ "$PORT" =~ ^[0-9]+$ ]] || [ "$PORT" -le 0 ] || [ "$PORT" -ge 65536 ]; then
+    echo "Error: Invalid port '$PORT'. Must be an integer between 1 and 65535." >&2
+    exit 1
+fi
+
 # Write port to config file
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
