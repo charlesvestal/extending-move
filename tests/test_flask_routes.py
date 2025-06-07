@@ -116,12 +116,14 @@ def test_synth_params_get(client, monkeypatch):
             'selected_preset': None,
             'param_count': 0,
             'browser_root': '/tmp',
+            'default_preset_path': '/examples/Analog Shape.ablpreset',
         }
     monkeypatch.setattr(move_webserver.synth_param_handler, 'handle_get', fake_get)
     resp = client.get('/synth-params')
     assert resp.status_code == 200
     assert b'pick' in resp.data
     assert b'Editing:' not in resp.data
+    assert b'Create New Drift Preset' in resp.data
 
 def test_synth_params_post(client, monkeypatch):
     def fake_post(form):
@@ -139,6 +141,23 @@ def test_synth_params_post(client, monkeypatch):
     assert b'done' in resp.data
     assert b'Editing:' in resp.data
     assert b'<div>p</div>' in resp.data
+
+def test_synth_params_new_preset(client, monkeypatch):
+    def fake_post(form):
+        return {
+            'message': 'loaded',
+            'message_type': 'success',
+            'params_html': '<div>x</div>',
+            'browser_root': '/tmp',
+            'selected_preset': '/examples/Analog Shape.ablpreset',
+            'param_count': 2,
+            'default_preset_path': '/examples/Analog Shape.ablpreset',
+        }
+    monkeypatch.setattr(move_webserver.synth_param_handler, 'handle_post', fake_post)
+    resp = client.post('/synth-params', data={'action': 'new_preset'})
+    assert resp.status_code == 200
+    assert b'loaded' in resp.data
+    assert b'Editing:' in resp.data
 
 def test_drum_rack_inspector_get(client, monkeypatch):
     def fake_get():

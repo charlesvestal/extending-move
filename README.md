@@ -35,6 +35,7 @@ Tools for extending the Ableton Move. This project provides a companion webserve
   - Save changes as a new preset file
   - Numeric parameters use sliders with an input field
   - Enum parameters provide a dropdown of options
+  - Create new presets starting from the included Analog Shape example
  
 - **MIDI Import**
   - Upload MIDI files to create new sets
