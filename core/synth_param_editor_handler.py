@@ -86,6 +86,7 @@ def update_parameter_values(preset_path, param_updates, output_path=None):
         dest = output_path or preset_path
         with open(dest, "w") as f:
             json.dump(preset_data, f, indent=2)
+            f.write("\n")
 
         return {
             "success": True,
