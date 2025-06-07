@@ -21,6 +21,31 @@ DEFAULT_PRESET = os.path.join(
 
 logger = logging.getLogger(__name__)
 
+# Parameters that should use a NexusUI knob instead of a slider
+KNOB_PARAMS = {
+    'Oscillator1_Transpose',
+    'Oscillator1_Shape',
+    'Oscillator2_Transpose',
+    'Oscillator2_Detune',
+    'Mixer_OscillatorGain1',
+    'Mixer_OscillatorGain2',
+    'Mixer_NoiseLevel',
+    'Filter_Frequency',
+    'Filter_Resonance',
+    'Filter_HiPassFrequency',
+    'Envelope1_Attack',
+    'Envelope1_Decay',
+    'Envelope1_Sustain',
+    'Envelope1_Release',
+    'Envelope2_Attack',
+    'Envelope2_Decay',
+    'Envelope2_Sustain',
+    'Envelope2_Release',
+    'Lfo_Ratio',
+    'Lfo_Amount',
+    'Global_Volume'
+}
+
 
 class SynthParamEditorHandler(BaseHandler):
     def handle_get(self):
@@ -147,16 +172,52 @@ class SynthParamEditorHandler(BaseHandler):
                     html += f'<option value="{opt}"{selected}>{opt}</option>'
                 html += '</select>'
             else:
-                # Numeric knob using NexusUI dial
-                min_attr = f' data-min="{meta.get("min")}"' if meta.get("min") is not None else ''
-                max_attr = f' data-max="{meta.get("max")}"' if meta.get("max") is not None else ''
-                val_attr = f' data-value="{val}"'
-                display_id = f"param_{i}_display"
-                html += (
-                    f'<div class="param-dial-wrapper"><div id="param_{i}_dial" class="param-dial" data-target="param_{i}_value" data-display="{display_id}"{min_attr}{max_attr}{val_attr}></div>'
-                    f'<span id="{display_id}" class="dial-value">{val}</span></div>'
-                )
-                html += f'<input type="hidden" name="param_{i}_value" value="{val}">' 
+                min_attr = f' min="{meta.get("min")}"' if meta.get("min") is not None else ''
+                max_attr = f' max="{meta.get("max")}"' if meta.get("max") is not None else ''
+                if name in KNOB_PARAMS:
+                    # Use a NexusUI dial for specified parameters
+                    val_attr = f' data-value="{val}"'
+                    num_id = f"param_{i}_num"
+                    html += (
+                        f'<div class="param-dial-wrapper">'
+                        f'<div id="param_{i}_dial" class="param-dial" data-param="{name}" data-target="param_{i}_value" data-number="{num_id}"{min_attr}{max_attr}{val_attr}></div>'
+                        f'<div id="{num_id}" class="dial-number"></div>'
+                        f'</div>'
+                    )
+                    html += f'<input type="hidden" name="param_{i}_value" value="{val}">'
+                else:
+                    # Fallback to numeric slider + input
+                    step_input = "any"
+                    if isinstance(val, (int, float)):
+                        val_str = str(val)
+                        if "." in val_str:
+                            digits = len(val_str.split(".")[1].rstrip("0"))
+                            if digits:
+                                step_input = str(10 ** -digits)
+                            else:
+                                step_input = "1"
+                        else:
+                            step_input = "1"
+
+                    step_slider = step_input
+                    rng_min = meta.get("min")
+                    rng_max = meta.get("max")
+                    if rng_min is not None and rng_max is not None:
+                        if -1 <= rng_min and rng_max <= 1:
+                            if step_slider == "any" or float(step_slider) > 0.01:
+                                step_slider = "0.01"
+                    if step_input == "1" and step_slider != "any":
+                        step_input = step_slider
+                    slider_step_attr = f' step="{step_slider}"' if step_slider != "any" else ' step="any"'
+                    input_step_attr = f' step="{step_input}"' if step_input != "any" else ' step="any"'
+                    html += (
+                        f'<input type="range" name="param_{i}_slider" value="{val}"{min_attr}{max_attr}{slider_step_attr} '
+                        f'oninput="this.nextElementSibling.value=this.value">'
+                    )
+                    html += (
+                        f'<input type="number" name="param_{i}_value" value="{val}"{min_attr}{max_attr}{input_step_attr} '
+                        f'oninput="this.previousElementSibling.value=this.value">'
+                    )
             html += '</label>'
             html += f'<input type="hidden" name="param_{i}_name" value="{name}">'
             html += '</div>'

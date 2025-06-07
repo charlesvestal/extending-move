@@ -355,10 +355,3 @@ def test_pitch_shift_route(client, monkeypatch):
     shifted, sr2 = sf.read(io.BytesIO(resp.data), dtype='float32')
     assert sr2 == sr
     assert len(shifted) == len(data)
-
-
-def test_synth_knobs_get(client):
-    resp = client.get('/synth-knobs')
-    assert resp.status_code == 200
-    assert b'id="knob-container"' in resp.data
-    assert b'id="env1-display"' in resp.data

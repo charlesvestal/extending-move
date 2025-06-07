@@ -21,6 +21,10 @@
     <input type="hidden" name="param_count" value="{{ param_count }}">
     <button type="submit" onclick="document.getElementById('action-input').value='reset_preset';">Choose Another Preset</button>
     <p class="current-preset">Editing: {{ selected_preset.split('/')[-1] }}</p>
+    <div id="envelope-displays">
+        <div id="env1-display" class="env-display"></div>
+        <div id="env2-display" class="env-display"></div>
+    </div>
     <div class="param-list">
         {{ params_html | safe }}
     </div>
