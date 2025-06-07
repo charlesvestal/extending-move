@@ -110,15 +110,39 @@ class SynthParamEditorHandler(BaseHandler):
         }
 
     def generate_params_html(self, params):
+        """Return HTML controls for the given parameter values."""
         if not params:
             return '<p>No parameters found.</p>'
+
+        schema = load_drift_schema()
         html = '<div class="params-list">'
         for i, item in enumerate(params):
+            name = item['name']
             val = item['value']
+            meta = schema.get(name, {})
+            p_type = meta.get('type')
             html += '<div class="param-item">'
-            html += f'<label>{item["name"]}: '
-            html += f'<input type="text" name="param_{i}_value" value="{val}"></label>'
-            html += f'<input type="hidden" name="param_{i}_name" value="{item["name"]}">' 
+            html += f'<label>{name}: '
+            if p_type == 'enum' and meta.get('options'):
+                html += f'<select name="param_{i}_value">'
+                for opt in meta['options']:
+                    selected = ' selected' if str(val) == str(opt) else ''
+                    html += f'<option value="{opt}"{selected}>{opt}</option>'
+                html += '</select>'
+            else:
+                # Numeric slider + input
+                min_attr = f' min="{meta.get("min")}"' if meta.get('min') is not None else ''
+                max_attr = f' max="{meta.get("max")}"' if meta.get('max') is not None else ''
+                html += (
+                    f'<input type="range" name="param_{i}_slider" value="{val}"{min_attr}{max_attr} '
+                    f'oninput="this.nextElementSibling.value=this.value">'
+                )
+                html += (
+                    f'<input type="number" name="param_{i}_value" value="{val}"{min_attr}{max_attr} '
+                    f'oninput="this.previousElementSibling.value=this.value">'
+                )
+            html += '</label>'
+            html += f'<input type="hidden" name="param_{i}_name" value="{name}">' 
             html += '</div>'
         html += '</div>'
         return html
