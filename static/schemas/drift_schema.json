@@ -3,7 +3,8 @@
     "type": "number",
     "min": 0.0,
     "max": 1.0,
-    "options": []
+    "options": [],
+    "decimals": 2
   },
   "CyclingEnvelope_MidPoint": {
     "type": "number",
@@ -26,7 +27,8 @@
     "type": "number",
     "min": 0.17,
     "max": 1700.0,
-    "options": []
+    "options": [],
+    "decimals": 1
   },
   "CyclingEnvelope_Ratio": {
     "type": "number",
@@ -50,73 +52,97 @@
     "type": "number",
     "min": 0.0,
     "max": 2.0,
-    "options": []
+    "options": [],
+    "unit": "ms",
+    "decimals": 2
   },
   "Envelope1_Decay": {
     "type": "number",
     "min": 0.0,
     "max": 45.086365,
-    "options": []
+    "options": [],
+    "unit": "ms",
+    "decimals": 0
   },
   "Envelope1_Release": {
     "type": "number",
     "min": 0.0,
     "max": 4.201648,
-    "options": []
+    "options": [],
+    "unit": "ms",
+    "decimals": 2
   },
   "Envelope1_Sustain": {
     "type": "number",
     "min": 0.0,
     "max": 1.0,
-    "options": []
+    "options": [],
+    "unit": "%",
+    "decimals": 0
   },
   "Envelope2_Attack": {
     "type": "number",
     "min": 0.0,
     "max": 35.476055,
-    "options": []
+    "options": [],
+    "unit": "ms",
+    "decimals": 2
   },
   "Envelope2_Decay": {
     "type": "number",
     "min": 0.0,
     "max": 60.0,
-    "options": []
+    "options": [],
+    "unit": "ms",
+    "decimals": 0
   },
   "Envelope2_Release": {
     "type": "number",
     "min": 0.0,
     "max": 60.0,
-    "options": []
+    "options": [],
+    "unit": "ms",
+    "decimals": 2
   },
   "Envelope2_Sustain": {
     "type": "number",
     "min": 0.0,
     "max": 1.0,
-    "options": []
+    "options": [],
+    "unit": "%",
+    "decimals": 0
   },
   "Filter_Frequency": {
     "type": "number",
     "min": 40.790009,
     "max": 20000.0,
-    "options": []
+    "options": [],
+    "unit": "Hz",
+    "decimals": 0
   },
   "Filter_HiPassFrequency": {
     "type": "number",
     "min": 10.0,
     "max": 612.444885,
-    "options": []
+    "options": [],
+    "unit": "Hz",
+    "decimals": 2
   },
   "Filter_ModAmount1": {
     "type": "number",
     "min": -0.439532,
     "max": 1.0,
-    "options": []
+    "options": [],
+    "unit": "%",
+    "decimals": 0
   },
   "Filter_ModAmount2": {
     "type": "number",
     "min": -1.0,
     "max": 0.852254,
-    "options": []
+    "options": [],
+    "unit": "%",
+    "decimals": 0
   },
   "Filter_ModSource1": {
     "type": "enum",
@@ -189,7 +215,8 @@
     "type": "number",
     "min": 0.0,
     "max": 1.0,
-    "options": []
+    "options": [],
+    "decimals": 1
   },
   "Global_Envelope2Mode": {
     "type": "enum",
@@ -204,7 +231,9 @@
     "type": "number",
     "min": 0.0,
     "max": 0.336857,
-    "options": []
+    "options": [],
+    "unit": "%",
+    "decimals": 2
   },
   "Global_HiQuality": {
     "type": "boolean",
@@ -234,7 +263,9 @@
     "type": "number",
     "min": 2,
     "max": 12,
-    "options": []
+    "options": [],
+    "unit": "st",
+    "decimals": 0
   },
   "Global_PolyVoiceDepth": {
     "type": "number",
@@ -264,13 +295,17 @@
     "type": "number",
     "min": -24,
     "max": 36,
-    "options": []
+    "options": [],
+    "unit": "st",
+    "decimals": 0
   },
   "Global_UnisonVoiceDepth": {
     "type": "number",
     "min": 0.0,
     "max": 1.0,
-    "options": []
+    "options": [],
+    "unit": "%",
+    "decimals": 0
   },
   "Global_VoiceCount": {
     "type": "enum",
@@ -308,13 +343,17 @@
     "type": "number",
     "min": 0.0,
     "max": 1.0,
-    "options": []
+    "options": [],
+    "unit": "%",
+    "decimals": 2
   },
   "Lfo_ModAmount": {
     "type": "number",
     "min": -1.0,
     "max": 1.0,
-    "options": []
+    "options": [],
+    "unit": "%",
+    "decimals": 2
   },
   "Lfo_ModSource": {
     "type": "enum",
@@ -391,7 +430,9 @@
     "type": "number",
     "min": 0.0,
     "max": 1.0,
-    "options": []
+    "options": [],
+    "unit": "dB",
+    "decimals": 1
   },
   "Mixer_NoiseOn": {
     "type": "boolean",
@@ -403,13 +444,17 @@
     "type": "number",
     "min": 0.169407,
     "max": 2.0,
-    "options": []
+    "options": [],
+    "unit": "dB",
+    "decimals": 1
   },
   "Mixer_OscillatorGain2": {
     "type": "number",
     "min": 0.0,
     "max": 2.0,
-    "options": []
+    "options": [],
+    "unit": "dB",
+    "decimals": 1
   },
   "Mixer_OscillatorOn1": {
     "type": "boolean",
@@ -427,19 +472,25 @@
     "type": "number",
     "min": -1.0,
     "max": 1.0,
-    "options": []
+    "options": [],
+    "unit": "%",
+    "decimals": 0
   },
   "ModulationMatrix_Amount2": {
     "type": "number",
     "min": -1.0,
     "max": 1.0,
-    "options": []
+    "options": [],
+    "unit": "%",
+    "decimals": 0
   },
   "ModulationMatrix_Amount3": {
     "type": "number",
     "min": -1.0,
     "max": 1.0,
-    "options": []
+    "options": [],
+    "unit": "%",
+    "decimals": 0
   },
   "ModulationMatrix_Source1": {
     "type": "enum",
@@ -567,7 +618,9 @@
     "type": "number",
     "min": -2,
     "max": 3,
-    "options": []
+    "options": [],
+    "unit": "st",
+    "decimals": 0
   },
   "Oscillator1_Type": {
     "type": "enum",
@@ -593,7 +646,9 @@
     "type": "number",
     "min": -3,
     "max": 2,
-    "options": []
+    "options": [],
+    "unit": "st",
+    "decimals": 0
   },
   "Oscillator2_Type": {
     "type": "enum",
@@ -611,13 +666,17 @@
     "type": "number",
     "min": 0.0,
     "max": 0.720503,
-    "options": []
+    "options": [],
+    "unit": "%",
+    "decimals": 1
   },
   "PitchModulation_Amount2": {
     "type": "number",
     "min": -0.121687,
     "max": 1.0,
-    "options": []
+    "options": [],
+    "unit": "%",
+    "decimals": 1
   },
   "PitchModulation_Source1": {
     "type": "enum",
