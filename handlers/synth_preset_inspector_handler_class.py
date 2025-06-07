@@ -1,6 +1,7 @@
 import re
 import os
 import logging
+import json
 from handlers.base_handler import BaseHandler
 from core.synth_preset_inspector_handler import (
     scan_for_synth_presets, 
@@ -9,7 +10,8 @@ from core.synth_preset_inspector_handler import (
     extract_available_parameters,
     extract_parameter_values,
     update_preset_parameter_mappings,
-    delete_parameter_mapping
+    delete_parameter_mapping,
+    load_drift_schema
 )
 from core.file_browser import generate_dir_html
 
@@ -29,6 +31,7 @@ class SynthPresetInspectorHandler(BaseHandler):
             'select_preset',
             filter_key='drift'
         )
+        schema = load_drift_schema()
         return {
             "message": "Select a Drift preset from the list",
             "message_type": "info",
@@ -38,6 +41,7 @@ class SynthPresetInspectorHandler(BaseHandler):
             "selected_preset": None,
             "browser_root": base_dir,
             "browser_filter": 'drift',
+            "schema_json": json.dumps(schema),
         }
 
     def handle_post(self, form):
@@ -186,6 +190,7 @@ class SynthPresetInspectorHandler(BaseHandler):
                 "selected_preset": preset_path,
                 "browser_root": base_dir,
                 "browser_filter": 'drift',
+                "schema_json": json.dumps(self.parameter_info),
             }
         
         return self.format_info_response("Unknown action")
@@ -210,6 +215,7 @@ class SynthPresetInspectorHandler(BaseHandler):
         available_parameters = []
         parameter_paths = {}
         mapped_parameters = {}
+        self.parameter_info = {}
         if preset_path:
             # Extract the preset path from the form value
             preset_select = self.form.getvalue('preset_select') if hasattr(self, 'form') else None
@@ -219,6 +225,7 @@ class SynthPresetInspectorHandler(BaseHandler):
                 if param_result['success']:
                     all_parameters = param_result['parameters']
                     parameter_paths = param_result.get('parameter_paths', {})
+                    self.parameter_info = param_result.get('parameter_info', {})
                     
                     # Store parameter paths in the class for use in handle_post
                     self.parameter_paths = parameter_paths
@@ -273,14 +280,31 @@ class SynthPresetInspectorHandler(BaseHandler):
             # Add options for all available parameters
             for param in available_parameters:
                 selected = ' selected="selected"' if param == default_param else ''
-                html += f'<option value="{param}"{selected}>{param}</option>'
+                info = self.parameter_info.get(param, {})
+                data_attrs = ''
+                if info.get('type'):
+                    data_attrs += f' data-type="{info["type"]}"'
+                if info.get('min') is not None:
+                    data_attrs += f' data-min="{info["min"]}"'
+                if info.get('max') is not None:
+                    data_attrs += f' data-max="{info["max"]}"'
+                if info.get('options'):
+                    opts = ",".join(map(str, info['options']))
+                    data_attrs += f' data-options="{opts}"'
+                html += f'<option value="{param}"{selected}{data_attrs}>{param}</option>'
             
             html += '</select>'
             
             # Range inputs inline with Add button
             html += '<div class="range-inputs-inline">'
-            html += f'<label>Min: <input type="number" name="macro_{macro["index"]}_range_min" value="{default_range_min}" step="any"></label>'
-            html += f'<label>Max: <input type="number" name="macro_{macro["index"]}_range_max" value="{default_range_max}" step="any"></label>'
+            html += (
+                f'<label>Min: <input type="number" class="range-min" '
+                f'name="macro_{macro["index"]}_range_min" value="{default_range_min}" step="any"></label>'
+            )
+            html += (
+                f'<label>Max: <input type="number" class="range-max" '
+                f'name="macro_{macro["index"]}_range_max" value="{default_range_max}" step="any"></label>'
+            )
             
             # Add the "Add" button inline with range inputs
             html += f'<button type="submit" class="add-mapping-btn" '

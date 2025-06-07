@@ -6,6 +6,20 @@ from core.cache_manager import get_cache, set_cache
 
 logger = logging.getLogger(__name__)
 
+# Path to the Drift parameter schema relative to this file
+SCHEMA_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                           "drift_schema.json")
+
+
+def load_drift_schema():
+    """Load parameter metadata for Drift from ``drift_schema.json``."""
+    try:
+        with open(SCHEMA_PATH, "r") as f:
+            return json.load(f)
+    except Exception as exc:
+        logger.warning("Could not load drift schema: %s", exc)
+        return {}
+
 def extract_available_parameters(preset_path):
     """
     Extract available parameters from drift or wavetable devices in a preset file.
@@ -84,12 +98,16 @@ def extract_available_parameters(preset_path):
         
         # Convert set to sorted list
         parameters_list = sorted(list(parameters))
-        
+
+        schema = load_drift_schema()
+        parameter_info = {p: schema.get(p, {}) for p in parameters_list}
+
         return {
             'success': True,
             'message': f"Found {len(parameters_list)} parameters",
             'parameters': parameters_list,
-            'parameter_paths': parameter_paths
+            'parameter_paths': parameter_paths,
+            'parameter_info': parameter_info,
         }
         
     except Exception as e:

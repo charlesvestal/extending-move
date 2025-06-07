@@ -1,0 +1,646 @@
+{
+  "CyclingEnvelope_Hold": {
+    "type": "number",
+    "min": 0.0,
+    "max": 1.0,
+    "options": []
+  },
+  "CyclingEnvelope_MidPoint": {
+    "type": "number",
+    "min": 0.0,
+    "max": 1.0,
+    "options": []
+  },
+  "CyclingEnvelope_Mode": {
+    "type": "enum",
+    "min": null,
+    "max": null,
+    "options": [
+      "Freq",
+      "Ratio",
+      "Sync",
+      "Time"
+    ]
+  },
+  "CyclingEnvelope_Rate": {
+    "type": "number",
+    "min": 0.17000000178813934,
+    "max": 1700.0,
+    "options": []
+  },
+  "CyclingEnvelope_Ratio": {
+    "type": "number",
+    "min": 0.25,
+    "max": 5.787109375,
+    "options": []
+  },
+  "CyclingEnvelope_SyncedRate": {
+    "type": "number",
+    "min": 15,
+    "max": 17,
+    "options": []
+  },
+  "CyclingEnvelope_Time": {
+    "type": "number",
+    "min": 0.10000000149011612,
+    "max": 1.1479036808013916,
+    "options": []
+  },
+  "Envelope1_Attack": {
+    "type": "number",
+    "min": 0.0,
+    "max": 1.9999994039535522,
+    "options": []
+  },
+  "Envelope1_Decay": {
+    "type": "number",
+    "min": 0.004999999888241291,
+    "max": 45.08636474609375,
+    "options": []
+  },
+  "Envelope1_Release": {
+    "type": "number",
+    "min": 0.01070136297494173,
+    "max": 4.201648235321045,
+    "options": []
+  },
+  "Envelope1_Sustain": {
+    "type": "number",
+    "min": 0.0,
+    "max": 1.0,
+    "options": []
+  },
+  "Envelope2_Attack": {
+    "type": "number",
+    "min": 0.0,
+    "max": 35.47605514526367,
+    "options": []
+  },
+  "Envelope2_Decay": {
+    "type": "number",
+    "min": 0.004999999888241291,
+    "max": 60.0,
+    "options": []
+  },
+  "Envelope2_Release": {
+    "type": "number",
+    "min": 0.009999999776482582,
+    "max": 60.0,
+    "options": []
+  },
+  "Envelope2_Sustain": {
+    "type": "number",
+    "min": 0.0,
+    "max": 1.0,
+    "options": []
+  },
+  "Filter_Frequency": {
+    "type": "number",
+    "min": 40.790008544921875,
+    "max": 19999.99609375,
+    "options": []
+  },
+  "Filter_HiPassFrequency": {
+    "type": "number",
+    "min": 10.0,
+    "max": 612.4448852539062,
+    "options": []
+  },
+  "Filter_ModAmount1": {
+    "type": "number",
+    "min": -0.4395323097705841,
+    "max": 1.0,
+    "options": []
+  },
+  "Filter_ModAmount2": {
+    "type": "number",
+    "min": -1.0,
+    "max": 0.8522539734840393,
+    "options": []
+  },
+  "Filter_ModSource1": {
+    "type": "enum",
+    "min": null,
+    "max": null,
+    "options": [
+      "Env 1",
+      "Env 2 / Cyc",
+      "Key",
+      "LFO",
+      "Pressure",
+      "Slide",
+      "Velocity"
+    ]
+  },
+  "Filter_ModSource2": {
+    "type": "enum",
+    "min": null,
+    "max": null,
+    "options": [
+      "Env 1",
+      "Env 2 / Cyc",
+      "LFO",
+      "Modwheel",
+      "Pressure",
+      "Slide",
+      "Velocity"
+    ]
+  },
+  "Filter_NoiseThrough": {
+    "type": "boolean",
+    "min": null,
+    "max": null,
+    "options": []
+  },
+  "Filter_OscillatorThrough1": {
+    "type": "boolean",
+    "min": null,
+    "max": null,
+    "options": []
+  },
+  "Filter_OscillatorThrough2": {
+    "type": "boolean",
+    "min": null,
+    "max": null,
+    "options": []
+  },
+  "Filter_Resonance": {
+    "type": "number",
+    "min": 0.0,
+    "max": 0.75,
+    "options": []
+  },
+  "Filter_Tracking": {
+    "type": "number",
+    "min": 0.0,
+    "max": 1.0,
+    "options": []
+  },
+  "Filter_Type": {
+    "type": "enum",
+    "min": null,
+    "max": null,
+    "options": [
+      "I",
+      "II"
+    ]
+  },
+  "Global_DriftDepth": {
+    "type": "number",
+    "min": 0.0,
+    "max": 1.0,
+    "options": []
+  },
+  "Global_Envelope2Mode": {
+    "type": "enum",
+    "min": null,
+    "max": null,
+    "options": [
+      "Cyc",
+      "Env"
+    ]
+  },
+  "Global_Glide": {
+    "type": "number",
+    "min": 0.0,
+    "max": 0.3368569612503052,
+    "options": []
+  },
+  "Global_HiQuality": {
+    "type": "boolean",
+    "min": null,
+    "max": null,
+    "options": []
+  },
+  "Global_Legato": {
+    "type": "boolean",
+    "min": null,
+    "max": null,
+    "options": []
+  },
+  "Global_MonoVoiceDepth": {
+    "type": "number",
+    "min": 0.0,
+    "max": 1.0,
+    "options": []
+  },
+  "Global_NotePitchBend": {
+    "type": "boolean",
+    "min": null,
+    "max": null,
+    "options": []
+  },
+  "Global_PitchBendRange": {
+    "type": "number",
+    "min": 2,
+    "max": 12,
+    "options": []
+  },
+  "Global_PolyVoiceDepth": {
+    "type": "number",
+    "min": 0.0,
+    "max": 1.0,
+    "options": []
+  },
+  "Global_ResetOscillatorPhase": {
+    "type": "boolean",
+    "min": null,
+    "max": null,
+    "options": []
+  },
+  "Global_SerialNumber": {
+    "type": "number",
+    "min": 0,
+    "max": 8388607,
+    "options": []
+  },
+  "Global_StereoVoiceDepth": {
+    "type": "number",
+    "min": 0.0,
+    "max": 1.0,
+    "options": []
+  },
+  "Global_Transpose": {
+    "type": "number",
+    "min": -24,
+    "max": 36,
+    "options": []
+  },
+  "Global_UnisonVoiceDepth": {
+    "type": "number",
+    "min": 0.0,
+    "max": 1.0,
+    "options": []
+  },
+  "Global_VoiceCount": {
+    "type": "enum",
+    "min": null,
+    "max": null,
+    "options": [
+      "4",
+      "8"
+    ]
+  },
+  "Global_VoiceMode": {
+    "type": "enum",
+    "min": null,
+    "max": null,
+    "options": [
+      "Mono",
+      "Poly",
+      "Stereo",
+      "Unison"
+    ]
+  },
+  "Global_VolVelMod": {
+    "type": "number",
+    "min": 0.0,
+    "max": 0.7265625,
+    "options": []
+  },
+  "Global_Volume": {
+    "type": "number",
+    "min": 0.18387213349342346,
+    "max": 1.0,
+    "options": []
+  },
+  "Lfo_Amount": {
+    "type": "number",
+    "min": 0.0,
+    "max": 1.0,
+    "options": []
+  },
+  "Lfo_ModAmount": {
+    "type": "number",
+    "min": -1.0,
+    "max": 1.0,
+    "options": []
+  },
+  "Lfo_ModSource": {
+    "type": "enum",
+    "min": null,
+    "max": null,
+    "options": [
+      "Env 1",
+      "Env 2 / Cyc",
+      "Key",
+      "LFO",
+      "Modwheel",
+      "Pressure",
+      "Slide",
+      "Velocity"
+    ]
+  },
+  "Lfo_Mode": {
+    "type": "enum",
+    "min": null,
+    "max": null,
+    "options": [
+      "Freq",
+      "Ratio",
+      "Sync",
+      "Time"
+    ]
+  },
+  "Lfo_Rate": {
+    "type": "number",
+    "min": 0.17000000178813934,
+    "max": 1700.0,
+    "options": []
+  },
+  "Lfo_Ratio": {
+    "type": "number",
+    "min": 0.25,
+    "max": 16.0,
+    "options": []
+  },
+  "Lfo_Retrigger": {
+    "type": "boolean",
+    "min": null,
+    "max": null,
+    "options": []
+  },
+  "Lfo_Shape": {
+    "type": "enum",
+    "min": null,
+    "max": null,
+    "options": [
+      "Exponential Env",
+      "Sample & Hold",
+      "Saw Down",
+      "Saw Up",
+      "Sine",
+      "Square",
+      "Triangle",
+      "Wander"
+    ]
+  },
+  "Lfo_SyncedRate": {
+    "type": "number",
+    "min": 9,
+    "max": 21,
+    "options": []
+  },
+  "Lfo_Time": {
+    "type": "number",
+    "min": 0.10000000149011612,
+    "max": 60.0,
+    "options": []
+  },
+  "Mixer_NoiseLevel": {
+    "type": "number",
+    "min": 0.0,
+    "max": 1.0,
+    "options": []
+  },
+  "Mixer_NoiseOn": {
+    "type": "boolean",
+    "min": null,
+    "max": null,
+    "options": []
+  },
+  "Mixer_OscillatorGain1": {
+    "type": "number",
+    "min": 0.16940703988075256,
+    "max": 1.9952679872512817,
+    "options": []
+  },
+  "Mixer_OscillatorGain2": {
+    "type": "number",
+    "min": 0.0,
+    "max": 1.9952679872512817,
+    "options": []
+  },
+  "Mixer_OscillatorOn1": {
+    "type": "boolean",
+    "min": null,
+    "max": null,
+    "options": []
+  },
+  "Mixer_OscillatorOn2": {
+    "type": "boolean",
+    "min": null,
+    "max": null,
+    "options": []
+  },
+  "ModulationMatrix_Amount1": {
+    "type": "number",
+    "min": -1.0,
+    "max": 1.0,
+    "options": []
+  },
+  "ModulationMatrix_Amount2": {
+    "type": "number",
+    "min": -1.0,
+    "max": 1.0,
+    "options": []
+  },
+  "ModulationMatrix_Amount3": {
+    "type": "number",
+    "min": -1.0,
+    "max": 1.0,
+    "options": []
+  },
+  "ModulationMatrix_Source1": {
+    "type": "enum",
+    "min": null,
+    "max": null,
+    "options": [
+      "Env 1",
+      "Env 2 / Cyc",
+      "LFO",
+      "Modwheel",
+      "Pressure",
+      "Slide",
+      "Velocity"
+    ]
+  },
+  "ModulationMatrix_Source2": {
+    "type": "enum",
+    "min": null,
+    "max": null,
+    "options": [
+      "Env 1",
+      "Env 2 / Cyc",
+      "LFO",
+      "Modwheel",
+      "Pressure",
+      "Slide",
+      "Velocity"
+    ]
+  },
+  "ModulationMatrix_Source3": {
+    "type": "enum",
+    "min": null,
+    "max": null,
+    "options": [
+      "Env 1",
+      "Env 2 / Cyc",
+      "LFO",
+      "Modwheel",
+      "Pressure",
+      "Slide",
+      "Velocity"
+    ]
+  },
+  "ModulationMatrix_Target1": {
+    "type": "enum",
+    "min": null,
+    "max": null,
+    "options": [
+      "Cyc Env Rate",
+      "HP Frequency",
+      "LFO Rate",
+      "LP Frequency",
+      "LP Resonance",
+      "Noise Gain",
+      "None",
+      "Osc 1 Gain",
+      "Osc 1 Shape",
+      "Osc 2 Detune"
+    ]
+  },
+  "ModulationMatrix_Target2": {
+    "type": "enum",
+    "min": null,
+    "max": null,
+    "options": [
+      "HP Frequency",
+      "LFO Rate",
+      "LP Frequency",
+      "LP Resonance",
+      "Main Volume",
+      "Noise Gain",
+      "None",
+      "Osc 1 Gain",
+      "Osc 1 Shape",
+      "Osc 2 Detune",
+      "Osc 2 Gain"
+    ]
+  },
+  "ModulationMatrix_Target3": {
+    "type": "enum",
+    "min": null,
+    "max": null,
+    "options": [
+      "Cyc Env Rate",
+      "HP Frequency",
+      "LFO Rate",
+      "LP Frequency",
+      "LP Resonance",
+      "Noise Gain",
+      "None",
+      "Osc 1 Gain",
+      "Osc 1 Shape",
+      "Osc 2 Detune",
+      "Osc 2 Gain"
+    ]
+  },
+  "Oscillator1_Shape": {
+    "type": "number",
+    "min": 0.0,
+    "max": 1.0,
+    "options": []
+  },
+  "Oscillator1_ShapeMod": {
+    "type": "number",
+    "min": -1.0,
+    "max": 1.0,
+    "options": []
+  },
+  "Oscillator1_ShapeModSource": {
+    "type": "enum",
+    "min": null,
+    "max": null,
+    "options": [
+      "Env 1",
+      "Env 2 / Cyc",
+      "Key",
+      "LFO",
+      "Modwheel",
+      "Pressure",
+      "Slide",
+      "Velocity"
+    ]
+  },
+  "Oscillator1_Transpose": {
+    "type": "number",
+    "min": -2,
+    "max": 3,
+    "options": []
+  },
+  "Oscillator1_Type": {
+    "type": "enum",
+    "min": null,
+    "max": null,
+    "options": [
+      "Pulse",
+      "Rectangle",
+      "Saturated",
+      "Saw",
+      "Shark Tooth",
+      "Sine",
+      "Triangle"
+    ]
+  },
+  "Oscillator2_Detune": {
+    "type": "number",
+    "min": -7.0,
+    "max": 7.0,
+    "options": []
+  },
+  "Oscillator2_Transpose": {
+    "type": "number",
+    "min": -3,
+    "max": 2,
+    "options": []
+  },
+  "Oscillator2_Type": {
+    "type": "enum",
+    "min": null,
+    "max": null,
+    "options": [
+      "Rectangle",
+      "Saturated",
+      "Saw",
+      "Sine",
+      "Triangle"
+    ]
+  },
+  "PitchModulation_Amount1": {
+    "type": "number",
+    "min": -0.01752549223601818,
+    "max": 0.7205032110214233,
+    "options": []
+  },
+  "PitchModulation_Amount2": {
+    "type": "number",
+    "min": -0.12168736755847931,
+    "max": 1.0,
+    "options": []
+  },
+  "PitchModulation_Source1": {
+    "type": "enum",
+    "min": null,
+    "max": null,
+    "options": [
+      "Env 1",
+      "Env 2 / Cyc",
+      "Pressure",
+      "Velocity"
+    ]
+  },
+  "PitchModulation_Source2": {
+    "type": "enum",
+    "min": null,
+    "max": null,
+    "options": [
+      "Env 1",
+      "Env 2 / Cyc",
+      "LFO",
+      "Modwheel",
+      "Slide",
+      "Velocity"
+    ]
+  }
+}
