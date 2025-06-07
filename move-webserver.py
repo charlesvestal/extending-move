@@ -394,6 +394,7 @@ def synth_macros():
     macros_html = result.get("macros_html", "")
     all_params_html = result.get("all_params_html", "")
     selected_preset = result.get("selected_preset")
+    schema_json = result.get("schema_json", "{}")
     preset_selected = bool(selected_preset)
     return render_template(
         "synth_macros.html",
@@ -407,6 +408,7 @@ def synth_macros():
         all_params_html=all_params_html,
         preset_selected=preset_selected,
         selected_preset=selected_preset,
+        schema_json=schema_json,
         active_tab="synth-macros",
     )
 
