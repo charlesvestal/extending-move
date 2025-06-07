@@ -78,6 +78,7 @@ def test_synth_macros_get(client, monkeypatch):
             'options': '<option value="p">p</option>',
             'macros_html': '',
             'selected_preset': None,
+            'schema_json': '{}',
         }
     monkeypatch.setattr(move_webserver.synth_handler, 'handle_get', fake_get)
     resp = client.get('/synth-macros')
@@ -94,6 +95,7 @@ def test_synth_macros_post(client, monkeypatch):
             'all_params_html': '<ul></ul>',
             'selected_preset': 'x',
             'browser_root': '/tmp',
+            'schema_json': '{}',
         }
     monkeypatch.setattr(move_webserver.synth_handler, 'handle_post', fake_post)
     resp = client.post('/synth-macros', data={'action': 'select_preset'})

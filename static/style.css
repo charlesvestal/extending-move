@@ -170,7 +170,7 @@ input[type="number"],
 input[type="file"],
 select {
     /* display: block; */
-    width: 100%;
+    /* width: 100%; */
     max-width: 400px;
     padding: 0.625rem;
     /* margin-bottom: 1rem; */
