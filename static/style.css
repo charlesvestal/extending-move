@@ -530,7 +530,16 @@ select {
     flex-direction: column;
     align-items: center;
 }
+}
 
+    display: flex;
+    gap: 1rem;
+}
+
+.pitch-mod-pair {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 .param-number {
     margin-top: 0.25rem;
     min-width: 60px;

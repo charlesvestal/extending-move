@@ -378,17 +378,13 @@ class SynthParamEditorHandler(BaseHandler):
             pm_src2 = extra_controls.pop("PitchModulation_Source2", "")
             pm_amt1 = extra_controls.pop("PitchModulation_Amount1", "")
             pm_amt2 = extra_controls.pop("PitchModulation_Amount2", "")
-            pitch_html = ""
             if pm_src1 or pm_src2 or pm_amt1 or pm_amt2:
-                pitch_html += '<div class="pitch-mod"><h4>Pitch Mod</h4>'
-                row_a = pm_src1 + pm_src2
-                row_b = pm_amt1 + pm_amt2
-                if row_a:
-                    pitch_html += f'<div class="param-row">{row_a}</div>'
-                if row_b:
-                    pitch_html += f'<div class="param-row">{row_b}</div>'
-                pitch_html += '</div>'
-            if pitch_html:
+                pitch_html = (
+                    '<div class="pitch-mod"><h4>Pitch Mod</h4>'
+                    f'<div class="pitch-mod-pair">{pm_src1}{pm_amt1}</div>'
+                    f'<div class="pitch-mod-pair">{pm_src2}{pm_amt2}</div>'
+                    '</div>'
+                )
                 ordered.append(pitch_html)
 
             ordered.extend(osc_items.values())
