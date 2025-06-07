@@ -184,6 +184,7 @@ class SynthParamEditorHandler(BaseHandler):
         "Envelope2_Sustain": "Sustain",
         "Envelope2_Release": "Release",
         "CyclingEnvelope_Tilt": "Tilt",
+        "CyclingEnvelope_MidPoint": "Midpoint",
         "CyclingEnvelope_Hold": "Hold",
         "CyclingEnvelope_Rate": "Rate",
         "CyclingEnvelope_Mode": "Mode",
@@ -252,6 +253,7 @@ class SynthParamEditorHandler(BaseHandler):
 
         schema = load_drift_schema()
         sections = {s: [] for s in self.SECTION_ORDER}
+        item_map = {}
 
         for i, item in enumerate(params):
             name = item['name']
@@ -286,6 +288,7 @@ class SynthParamEditorHandler(BaseHandler):
 
             section = self._get_section(name)
             sections[section].append(html)
+            item_map[name] = html
 
         out_html = '<div class="drift-param-panels">'
         for sec in self.SECTION_ORDER:
@@ -293,9 +296,44 @@ class SynthParamEditorHandler(BaseHandler):
             if not items:
                 continue
             cls = sec.lower().replace(' ', '-').replace('+', '')
-            out_html += f'<div class="param-panel {cls}"><h3>{sec}</h3><div class="param-items">'
-            out_html += ''.join(items)
-            out_html += '</div></div>'
+            out_html += f'<div class="param-panel {cls}"><h3>{sec}</h3>'
+            if sec == "Envelopes":
+                out_html += self._envelope_rows_html(item_map)
+            else:
+                out_html += '<div class="param-items">'
+                out_html += ''.join(items)
+                out_html += '</div>'
+            out_html += '</div>'
         out_html += '</div>'
         return out_html
+
+    def _envelope_rows_html(self, item_map):
+        rows = [
+            ("Amp ADSR", [
+                "Envelope1_Attack",
+                "Envelope1_Decay",
+                "Envelope1_Sustain",
+                "Envelope1_Release",
+            ]),
+            ("Env 1 ADSR", [
+                "Envelope2_Attack",
+                "Envelope2_Decay",
+                "Envelope2_Sustain",
+                "Envelope2_Release",
+            ]),
+            ("Env 2 Tilt (Midpoint), Hold, Rate", [
+                "CyclingEnvelope_MidPoint",
+                "CyclingEnvelope_Hold",
+                "CyclingEnvelope_Rate",
+            ]),
+        ]
+        html = ''
+        for label, names in rows:
+            items = [item_map.get(n) for n in names if item_map.get(n)]
+            if not items:
+                continue
+            html += f'<div class="env-row"><h4>{label}</h4><div class="param-items">'
+            html += ''.join(items)
+            html += '</div></div>'
+        return html
 

@@ -524,3 +524,15 @@ select {
 .param-item {
     margin-bottom: 0.75rem;
   }
+
+.env-row {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 0.75rem;
+}
+
+.env-row .param-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
