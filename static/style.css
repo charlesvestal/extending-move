@@ -533,3 +533,64 @@ select {
 .param-item {
     margin-bottom: 0.75rem;
   }
+
+/* Waveform dropdown styles */
+.waveform-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.waveform-dropdown .dropdown-toggle {
+  background: white;
+  border: 1px solid #ccc;
+  padding: 4px 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.waveform-dropdown .dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: white;
+  border: 1px solid #ccc;
+  padding: 4px;
+  margin: 0;
+  list-style: none;
+  z-index: 1000;
+}
+
+.waveform-dropdown .dropdown-menu li {
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.waveform-dropdown .dropdown-menu li:hover,
+.waveform-dropdown .dropdown-menu li:focus {
+  background-color: #f0f0f0;
+  outline: none;
+}
+
+.waveform-icon {
+  width: 24px;
+  height: 24px;
+  stroke: black;
+  fill: none;
+  stroke-width: 2;
+  display: inline-block;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  height: 1px;
+  width: 1px;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  white-space: nowrap;
+}

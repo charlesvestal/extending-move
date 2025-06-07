@@ -461,6 +461,12 @@ def synth_knobs():
     return render_template("synth_knobs.html", active_tab="synth-knobs")
 
 
+@app.route("/waveform-dropdown", methods=["GET"])
+def waveform_dropdown():
+    """Demo page for oscillator waveform dropdown."""
+    return render_template("waveform_dropdown.html", active_tab="waveform-dropdown")
+
+
 
 
 
