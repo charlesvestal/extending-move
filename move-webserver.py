@@ -539,6 +539,22 @@ def detect_transients_route():
     )
 
 
+CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "port.conf")
+
+
+def read_port():
+    """Return the webserver port from ``port.conf`` or 909 if unavailable."""
+    try:
+        with open(CONFIG_PATH, "r") as f:
+            value = int(f.read().strip())
+            if 0 < value < 65536:
+                return value
+            raise ValueError
+    except Exception:
+        logger.warning("Falling back to default port 909")
+        return 909
+
+
 if __name__ == "__main__":
     write_pid()
     atexit.register(remove_pid)
@@ -548,7 +564,7 @@ if __name__ == "__main__":
     warm_up_modules()
 
     host = "0.0.0.0"
-    port = 909
+    port = read_port()
     logger.info("Starting webserver")
     with make_server(
         host,

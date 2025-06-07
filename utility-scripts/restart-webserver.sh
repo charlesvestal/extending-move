@@ -11,10 +11,26 @@ PID_FILE="/data/UserData/extending-move/move-webserver.pid"
 WEB_SERVER_CMD="cd /data/UserData/extending-move && PYTHONPATH=/data/UserData/extending-move python3 -u move-webserver.py"
 LOG_FILE="/data/UserData/extending-move/move-webserver.log"
 
+# Read the port from port.conf if present
+CONFIG_FILE="/data/UserData/extending-move/port.conf"
+if [ -f "$CONFIG_FILE" ]; then
+  PORT=$(cat "$CONFIG_FILE")
+else
+  PORT=909
+fi
+
 echo "Restarting the webserver on ${REMOTE_HOST}..."
 
 ssh -T "${REMOTE_USER}@${REMOTE_HOST}" bash <<'EOF'
 set -euo pipefail
+
+# Load port configuration on the remote machine
+CONFIG_FILE="/data/UserData/extending-move/port.conf"
+if [ -f "$CONFIG_FILE" ]; then
+  PORT=$(cat "$CONFIG_FILE")
+else
+  PORT=909
+fi
 
 # Use the absolute paths
 PID_FILE="/data/UserData/extending-move/move-webserver.pid"
@@ -66,20 +82,20 @@ if ! ps -p "$NEW_PID" > /dev/null; then
     exit 1
 fi
 
-# Wait for the server to respond on port 909 (allow time for warm-up)
+# Wait for the server to respond on configured port (allow time for warm-up)
 for i in {1..30}; do
     if command -v curl >/dev/null 2>&1; then
-        if curl -sf http://localhost:909/ > /dev/null; then
+        if curl -sf http://localhost:${PORT}/ > /dev/null; then
             PORT_READY=true
             break
         fi
     elif command -v ss >/dev/null 2>&1; then
-        if ss -tln | grep -q ':909'; then
+        if ss -tln | grep -q ":${PORT}"; then
             PORT_READY=true
             break
         fi
     else
-        if netstat -tln | grep -q ':909'; then
+        if netstat -tln | grep -q ":${PORT}"; then
             PORT_READY=true
             break
         fi
@@ -88,7 +104,7 @@ for i in {1..30}; do
 done
 
 if [ "${PORT_READY:-}" != "true" ]; then
-    echo "Error: Server not listening on port 909. Check logs:"
+    echo "Error: Server not listening on port ${PORT}. Check logs:"
     tail -n 20 "$LOG_FILE"
     exit 1
 fi
