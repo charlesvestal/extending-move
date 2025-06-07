@@ -548,6 +548,13 @@ select {
     gap: 0.5rem;
 }
 
+.param-row-label {
+    width: 80px;
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+}
+
 .param-items {
     display: flex;
     flex-wrap: wrap;
