@@ -508,6 +508,12 @@ select {
     gap: 0.5rem;
 }
 
+.param-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
 .param-item {
     display: flex;
     flex-direction: column;
