@@ -482,6 +482,11 @@ select {
     display: inline-block;
 }
 
+.param-toggle {
+    margin: 0.25rem;
+    display: inline-block;
+}
+
 /* Layout for the Drift parameter editor */
 .drift-param-panels {
     display: flex;

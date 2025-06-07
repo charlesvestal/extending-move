@@ -27,4 +27,20 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     });
+
+    const toggles = document.querySelectorAll('.param-toggle');
+    toggles.forEach(el => {
+        const val = parseFloat(el.dataset.value);
+        const target = el.dataset.target;
+        const toggle = new Nexus.Toggle(el, {
+            size: [30,15],
+            state: val > 0,
+        });
+        const input = document.querySelector(`input[name="${target}"]`);
+        if (input) {
+            toggle.on('change', v => {
+                input.value = v ? 1 : 0;
+            });
+        }
+    });
 });
