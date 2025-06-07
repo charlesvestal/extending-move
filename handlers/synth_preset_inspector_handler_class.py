@@ -305,6 +305,7 @@ class SynthPresetInspectorHandler(BaseHandler):
                 f'<label>Max: <input type="number" class="range-max" '
                 f'name="macro_{macro["index"]}_range_max" value="{default_range_max}" step="any"></label>'
             )
+            html += '<div class="options-display"></div>'
             
             # Add the "Add" button inline with range inputs
             html += f'<button type="submit" class="add-mapping-btn" '
@@ -327,6 +328,10 @@ class SynthPresetInspectorHandler(BaseHandler):
                     param_info = f'{param["name"]}'
                     if "rangeMin" in param and "rangeMax" in param:
                         param_info += f' (Range: {param["rangeMin"]} - {param["rangeMax"]})'
+                    info = self.parameter_info.get(param["name"], {})
+                    if info.get("options"):
+                        opts = ", ".join(map(str, info["options"]))
+                        param_info += f' [Options: {opts}]'
                     
                     # Add delete button with onclick handler to set action and parameter info
                     html += f'<li class="parameter-item">'
