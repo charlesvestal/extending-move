@@ -392,6 +392,7 @@ def synth_macros():
     browser_root = result.get("browser_root")
     browser_filter = result.get("browser_filter")
     macros_html = result.get("macros_html", "")
+    all_params_html = result.get("all_params_html", "")
     selected_preset = result.get("selected_preset")
     preset_selected = bool(selected_preset)
     return render_template(
@@ -403,6 +404,7 @@ def synth_macros():
         browser_root=browser_root,
         browser_filter=browser_filter,
         macros_html=macros_html,
+        all_params_html=all_params_html,
         preset_selected=preset_selected,
         selected_preset=selected_preset,
         active_tab="synth-macros",
