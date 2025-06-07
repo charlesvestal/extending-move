@@ -147,16 +147,39 @@ class SynthParamEditorHandler(BaseHandler):
                     html += f'<option value="{opt}"{selected}>{opt}</option>'
                 html += '</select>'
             else:
-                # Numeric slider + input
+                # Numeric slider + input with dynamic step handling
                 min_attr = f' min="{meta.get("min")}"' if meta.get("min") is not None else ''
                 max_attr = f' max="{meta.get("max")}"' if meta.get("max") is not None else ''
-                step_attr = ' step="0.01"' if meta.get("max") is not None and meta.get("min") is not None and meta.get("max") - meta.get("min") <= 1 else ' step="any"'
+
+                step_input = "any"
+                if isinstance(val, (int, float)):
+                    val_str = str(val)
+                    if "." in val_str:
+                        digits = len(val_str.split(".")[1].rstrip("0"))
+                        if digits:
+                            step_input = str(10 ** -digits)
+                        else:
+                            step_input = "1"
+                    else:
+                        step_input = "1"
+
+                step_slider = step_input
+                rng_min = meta.get("min")
+                rng_max = meta.get("max")
+                if rng_min is not None and rng_max is not None:
+                    if -1 <= rng_min and rng_max <= 1:
+                        if step_slider == "any" or float(step_slider) > 0.01:
+                            step_slider = "0.01"
+                if step_input == "1" and step_slider != "any":
+                    step_input = step_slider
+                slider_step_attr = f' step="{step_slider}"' if step_slider != "any" else ' step="any"'
+                input_step_attr = f' step="{step_input}"' if step_input != "any" else ' step="any"'
                 html += (
-                    f'<input type="range" name="param_{i}_slider" value="{val}"{min_attr}{max_attr}{step_attr} '
+                    f'<input type="range" name="param_{i}_slider" value="{val}"{min_attr}{max_attr}{slider_step_attr} '
                     f'oninput="this.nextElementSibling.value=this.value">'
                 )
                 html += (
-                    f'<input type="number" name="param_{i}_value" value="{val}"{min_attr}{max_attr}{step_attr} '
+                    f'<input type="number" name="param_{i}_value" value="{val}"{min_attr}{max_attr}{input_step_attr} '
                     f'oninput="this.previousElementSibling.value=this.value">'
                 )
             html += '</label>'
