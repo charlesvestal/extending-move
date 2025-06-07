@@ -153,6 +153,15 @@ Located in `utility-scripts/`:
 - `install-on-move.sh` / `.command`: Content installation
 - `update-on-move.sh` / `.command`: Update with latest files
 - `restart-webserver.sh`: Restart the webserver
+- `drift_param_smoke_test.py`: Generate preset files with boundary values for every Drift parameter
+
+To create the presets, run:
+
+```bash
+python utility-scripts/drift_param_smoke_test.py --output-dir my_presets
+```
+
+This writes every generated `.ablpreset` and a `results.csv` file to `my_presets/`.
 
 
 ## How to Auto-start on Boot
