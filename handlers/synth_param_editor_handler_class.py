@@ -139,12 +139,13 @@ class SynthParamEditorHandler(BaseHandler):
 
     LABEL_OVERRIDES = {
         # Oscillators
-        "Oscillator1_Type": "Type",
+        # Use explicit oscillator labels for clarity
+        "Oscillator1_Type": "Osc 1",
         "Oscillator1_Transpose": "Oct",
         "Oscillator1_Shape": "Shape",
         "Oscillator1_ShapeModSource": "Shape Mod Source",
         "Oscillator1_ShapeMod": "Shape Mod Amount",
-        "Oscillator2_Type": "Type",
+        "Oscillator2_Type": "Osc 2",
         "Oscillator2_Transpose": "Oct",
         "Oscillator2_Detune": "Detune",
         "PitchModulation_Source1": "Source",
@@ -154,10 +155,10 @@ class SynthParamEditorHandler(BaseHandler):
 
         # Mixer
         "Mixer_OscillatorOn1": "On/Off",
-        "Mixer_OscillatorGain1": "Level",
+        "Mixer_OscillatorGain1": "Osc 1 Mix",
         "Filter_OscillatorThrough1": "Filter",
         "Mixer_OscillatorOn2": "On/Off",
-        "Mixer_OscillatorGain2": "Level",
+        "Mixer_OscillatorGain2": "Osc 2 Mix",
         "Filter_OscillatorThrough2": "Filter",
         "Mixer_NoiseOn": "On/Off",
         "Mixer_NoiseLevel": "Level",
@@ -286,6 +287,8 @@ class SynthParamEditorHandler(BaseHandler):
             html += '</div>'
 
             section = self._get_section(name)
+            sections[section].append((name, html))
+
             if section == "Filter":
                 filter_items[name] = html
             else:
@@ -317,8 +320,47 @@ class SynthParamEditorHandler(BaseHandler):
                 continue
             cls = sec.lower().replace(' ', '-').replace('+', '')
             out_html += f'<div class="param-panel {cls}"><h3>{sec}</h3><div class="param-items">'
-            out_html += ''.join(items)
+            if sec == 'Oscillators':
+                out_html += self._render_oscillator_rows(items)
+            else:
+                out_html += ''.join(html for _, html in items)
             out_html += '</div></div>'
         out_html += '</div>'
         return out_html
+
+    def _render_oscillator_rows(self, items):
+        mapping = {name: html for name, html in items}
+        rows = [
+            [
+                "Oscillator1_Type",
+                "Oscillator1_Transpose",
+                "Oscillator1_Shape",
+                "Mixer_OscillatorGain1",
+            ],
+            [
+                "Oscillator2_Type",
+                "Oscillator2_Transpose",
+                "Oscillator2_Detune",
+                "Mixer_OscillatorGain2",
+            ],
+            [
+                "PitchModulation_Source1",
+                "PitchModulation_Amount1",
+                "PitchModulation_Source2",
+                "PitchModulation_Amount2",
+                "Mixer_NoiseLevel",
+            ],
+        ]
+
+        out = ''
+        for row in rows:
+            out += '<div class="param-row">'
+            for key in row:
+                html = mapping.pop(key, '')
+                out += html
+            out += '</div>'
+
+        if mapping:
+            out += '<div class="param-row">' + ''.join(mapping.values()) + '</div>'
+        return out
 
