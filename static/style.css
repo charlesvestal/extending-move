@@ -475,3 +475,9 @@ select {
 .knob-group > div {
     margin: 0.5rem 0;
 }
+
+/* Parameter editor dials */
+.param-dial {
+    margin: 0.25rem;
+    display: inline-block;
+}
