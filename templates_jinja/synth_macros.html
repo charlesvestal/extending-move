@@ -91,34 +91,29 @@
     }
     
     .parameter-mapping select {
-        display: block;
-        width: 100%;
         padding: 8px;
-        margin: 8px 0 15px;
         border: 1px solid #ccc;
         border-radius: 4px;
     }
-    
+
     .parameter-controls {
         display: flex;
         align-items: center;
+        flex-wrap: wrap;
         gap: 15px;
         margin-bottom: 10px;
     }
     
-    .range-inputs-inline {
-        display: flex;
-        gap: 10px;
-    }
-    
-    .range-inputs-inline label {
+    .min-wrapper,
+    .max-wrapper {
         display: flex;
         align-items: center;
         font-size: 0.9em;
         color: #555;
     }
-    
-    .range-inputs-inline input {
+
+    .range-min,
+    .range-max {
         padding: 6px;
         border: 1px solid #ccc;
         border-radius: 3px;
