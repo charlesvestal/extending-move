@@ -99,6 +99,71 @@ def extract_available_parameters(preset_path):
             'parameters': []
         }
 
+
+def extract_parameter_values(preset_path):
+    """Return all parameter names and their values from drift presets."""
+    try:
+        with open(preset_path, "r") as f:
+            preset_data = json.load(f)
+
+        parameter_values = {}
+        synth_device_paths = set()
+
+        def find_synth_devices(data, path=""):
+            if isinstance(data, dict):
+                if data.get("kind") == "drift":
+                    synth_device_paths.add(path)
+                for key, value in data.items():
+                    new_path = f"{path}.{key}" if path else key
+                    find_synth_devices(value, new_path)
+            elif isinstance(data, list):
+                for i, item in enumerate(data):
+                    find_synth_devices(item, f"{path}[{i}]")
+
+        find_synth_devices(preset_data)
+
+        def find_parameters(data, path=""):
+            if isinstance(data, dict):
+                if path.endswith("parameters"):
+                    is_synth_parameter = False
+                    for device_path in synth_device_paths:
+                        if path.startswith(device_path) or device_path.startswith(path.rsplit(".parameters", 1)[0]):
+                            is_synth_parameter = True
+                            break
+                    if is_synth_parameter:
+                        for key, val in data.items():
+                            if key != "Enabled" and not key.startswith("Macro"):
+                                if isinstance(val, dict) and "value" in val:
+                                    parameter_values[key] = val["value"]
+                                else:
+                                    parameter_values[key] = val
+                for key, value in data.items():
+                    new_path = f"{path}.{key}" if path else key
+                    find_parameters(value, new_path)
+            elif isinstance(data, list):
+                for i, item in enumerate(data):
+                    find_parameters(item, f"{path}[{i}]")
+
+        find_parameters(preset_data)
+
+        params = [
+            {"name": name, "value": parameter_values[name]}
+            for name in sorted(parameter_values.keys())
+        ]
+
+        return {
+            "success": True,
+            "parameters": params,
+            "message": f"Found {len(params)} parameters",
+        }
+
+    except Exception as exc:
+        return {
+            "success": False,
+            "message": f"Error extracting parameter values: {exc}",
+            "parameters": [],
+        }
+
 def extract_macro_information(preset_path):
     """
     Extract macro information from a preset file.

@@ -23,6 +23,12 @@
     <div class="macro-display">
         {{ macros_html | safe }}
     </div>
+    <details class="all-params">
+        <summary>View All Parameters</summary>
+        <div class="all-params-content">
+            {{ all_params_html | safe }}
+        </div>
+    </details>
 </form>
 {% endif %}
 
@@ -184,6 +190,25 @@
     
     .save-name-btn:hover {
         background-color: #0b7dda;
+    }
+
+    .all-params {
+        margin-top: 20px;
+    }
+
+    .all-params summary {
+        cursor: pointer;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .all-params-list {
+        list-style-type: none;
+        padding-left: 0;
+    }
+
+    .all-params-list li {
+        margin-bottom: 5px;
     }
 </style>
 {% endblock %}

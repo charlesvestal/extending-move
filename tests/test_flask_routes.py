@@ -91,6 +91,7 @@ def test_synth_macros_post(client, monkeypatch):
             'message': 'saved',
             'message_type': 'success',
             'macros_html': '<p>done</p>',
+            'all_params_html': '<ul></ul>',
             'selected_preset': 'x',
             'browser_root': '/tmp',
         }
@@ -101,6 +102,7 @@ def test_synth_macros_post(client, monkeypatch):
     assert b'Choose Another Preset' in resp.data
     assert b'<p>done</p>' in resp.data
     assert b'Currently loaded preset:' in resp.data
+    assert b'View All Parameters' in resp.data
 
 def test_drum_rack_inspector_get(client, monkeypatch):
     def fake_get():
