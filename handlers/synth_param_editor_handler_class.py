@@ -266,11 +266,41 @@ class SynthParamEditorHandler(BaseHandler):
             html = '<div class="param-item">'
             html += f'<label>{label}: '
             if p_type == 'enum' and meta.get('options'):
-                html += f'<select name="param_{i}_value">'
-                for opt in meta['options']:
-                    selected = ' selected' if str(val) == str(opt) else ''
-                    html += f'<option value="{opt}"{selected}>{opt}</option>'
-                html += '</select>'
+                if name in ("Oscillator1_Type", "Oscillator2_Type"):
+                    dropdown_id = f"waveformDropdown{i}"
+                    sprite_path = "/static/osc_waveform_sprite.svg"
+                    icon_map = {
+                        "Pulse": "pulse",
+                        "Rectangle": "rectangle",
+                        "Saturated": "saturated",
+                        "Saw": "saw",
+                        "Shark Tooth": "sharktooth",
+                        "Sine": "sine",
+                        "Triangle": "triangle",
+                    }
+                    use_href = f"{sprite_path}#{icon_map.get(val, 'sine')}"
+                    html += (
+                        f'<div class="waveform-dropdown" id="{dropdown_id}">' 
+                        f'<button class="dropdown-toggle" aria-haspopup="listbox" aria-expanded="false">'
+                        f'<svg class="waveform-icon" aria-hidden="true"><use xlink:href="{use_href}"></use></svg>'
+                        f'<span class="visually-hidden">{val}</span></button>'
+                        f'<ul class="dropdown-menu" role="listbox" tabindex="-1">'
+                    )
+                    for opt in meta['options']:
+                        icon_id = icon_map.get(opt, 'sine')
+                        selected_attr = ' aria-selected="true"' if str(val) == str(opt) else ''
+                        html += (
+                            f'<li role="option" data-waveform="{icon_id}" data-value="{opt}"{selected_attr}>'
+                            f'<svg class="waveform-icon" aria-hidden="true"><use xlink:href="{sprite_path}#{icon_id}"></use></svg>'
+                            f'<span class="visually-hidden">{opt}</span></li>'
+                        )
+                    html += f'</ul><input type="hidden" name="param_{i}_value" value="{val}"></div>'
+                else:
+                    html += f'<select name="param_{i}_value">'
+                    for opt in meta['options']:
+                        selected = ' selected' if str(val) == str(opt) else ''
+                        html += f'<option value="{opt}"{selected}>{opt}</option>'
+                    html += '</select>'
             else:
                 min_attr = f' data-min="{meta.get("min")}"' if meta.get("min") is not None else ''
                 max_attr = f' data-max="{meta.get("max")}"' if meta.get("max") is not None else ''
