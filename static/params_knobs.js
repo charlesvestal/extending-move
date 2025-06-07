@@ -14,7 +14,11 @@ document.addEventListener('DOMContentLoaded', () => {
             max: isNaN(max) ? 1 : max,
             value: isNaN(val) ? 0 : val,
         });
-        const format = (v) => Number(v).toFixed(decimals) + (unit ? ' ' + unit : '');
+        const shouldScale = unit === '%' && Math.abs(max) <= 1 && Math.abs(min) <= 1;
+        const format = (v) => {
+            const displayVal = shouldScale ? v * 100 : v;
+            return Number(displayVal).toFixed(decimals) + (unit ? ' ' + unit : '');
+        };
         const displayEl = displayId ? document.getElementById(displayId) : null;
         if (displayEl) {
             displayEl.textContent = isNaN(val) ? 'not set' : format(val);
@@ -46,7 +50,11 @@ document.addEventListener('DOMContentLoaded', () => {
             value: isNaN(val) ? 0 : val,
             orientation: 'horizontal'
         });
-        const format = (v) => Number(v).toFixed(decimals) + (unit ? ' ' + unit : '');
+        const shouldScale = unit === '%' && Math.abs(max) <= 1 && Math.abs(min) <= 1;
+        const format = (v) => {
+            const displayVal = shouldScale ? v * 100 : v;
+            return Number(displayVal).toFixed(decimals) + (unit ? ' ' + unit : '');
+        };
         const displayEl = displayId ? document.getElementById(displayId) : null;
         if (displayEl) {
             displayEl.textContent = isNaN(val) ? 'not set' : format(val);
