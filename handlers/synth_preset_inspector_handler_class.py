@@ -4,9 +4,10 @@ import logging
 from handlers.base_handler import BaseHandler
 from core.synth_preset_inspector_handler import (
     scan_for_synth_presets, 
-    extract_macro_information, 
+    extract_macro_information,
     update_preset_macro_names,
     extract_available_parameters,
+    extract_parameter_values,
     update_preset_parameter_mappings,
     delete_parameter_mapping
 )
@@ -33,6 +34,7 @@ class SynthPresetInspectorHandler(BaseHandler):
             "message_type": "info",
             "file_browser_html": browser_html,
             "macros_html": "",
+            "all_params_html": "",
             "selected_preset": None,
             "browser_root": base_dir,
             "browser_filter": 'drift',
@@ -152,10 +154,17 @@ class SynthPresetInspectorHandler(BaseHandler):
             macro_result = extract_macro_information(preset_path)
             if not macro_result['success']:
                 return self.format_error_response(macro_result['message'])
-            
+
             # Generate HTML for displaying macros
             macros_html = self.generate_macros_html(macro_result['macros'])
-            
+
+            # Get all parameters with their values
+            all_params = extract_parameter_values(preset_path)
+            if all_params['success']:
+                all_params_html = self.generate_all_params_html(all_params['parameters'])
+            else:
+                all_params_html = f"<p>{all_params['message']}</p>"
+
             base_dir = "/data/UserData/UserLibrary/Track Presets"
             if not os.path.exists(base_dir) and os.path.exists("examples/Track Presets"):
                 base_dir = "examples/Track Presets"
@@ -173,6 +182,7 @@ class SynthPresetInspectorHandler(BaseHandler):
                 "message_type": "success",
                 "file_browser_html": browser_html,
                 "macros_html": macros_html,
+                "all_params_html": all_params_html,
                 "selected_preset": preset_path,
                 "browser_root": base_dir,
                 "browser_filter": 'drift',
@@ -312,7 +322,17 @@ class SynthPresetInspectorHandler(BaseHandler):
             
         html += '</div>'
         return html
-    
+
     def get_preset_options(self, selected_preset=None):
         """Deprecated dropdown helper."""
         return ''
+
+    def generate_all_params_html(self, parameters):
+        """Return HTML list of all parameters and their values."""
+        if not parameters:
+            return "<p>No parameters found.</p>"
+        html = '<ul class="all-params-list">'
+        for item in parameters:
+            html += f'<li>{item["name"]}: {item["value"]}</li>'
+        html += '</ul>'
+        return html
