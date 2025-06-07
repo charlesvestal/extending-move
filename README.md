@@ -30,6 +30,13 @@ Tools for extending the Ableton Move. This project provides a companion webserve
   - Add and delete parameter mappings
   - Assign multiple parameters to a single macro control
   - Set custom range values for more precise control
+- **Synth Parameter Editor**
+  - Modify any Drift parameter value
+  - Save changes as a new preset file
+  - Numeric parameters use sliders with an input field
+  - Slider steps are 0.01 for values near ±1 and adapt to the parameter's default precision
+  - Enum parameters provide a dropdown of options
+  - Create new presets starting from the included Analog Shape example
  
 - **MIDI Import**
   - Upload MIDI files to create new sets
