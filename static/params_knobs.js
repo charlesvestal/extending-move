@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const format = (v) => Number(v).toFixed(decimals) + (unit ? ' ' + unit : '');
         const displayEl = displayId ? document.getElementById(displayId) : null;
         if (displayEl) {
-            displayEl.textContent = format(val);
+            displayEl.textContent = isNaN(val) ? 'not set' : format(val);
         }
         const input = document.querySelector(`input[name="${target}"]`);
         if (input) {
