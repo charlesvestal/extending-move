@@ -13,7 +13,7 @@ import argparse
 import asyncio
 import subprocess
 from pathlib import Path
-from typing import Callable
+from typing import Callable, Awaitable
 
 from pyppeteer import launch
 
@@ -22,8 +22,6 @@ from pyppeteer import launch
 EXAMPLE_SET = Path("examples/Sets/808.abl")
 EXAMPLE_SAMPLE = Path("examples/Samples/organ.wav")
 EXAMPLE_CHORD_SAMPLE = Path("examples/Samples/010 Pizz Str.wav")
-EXAMPLE_DRUM_RACK = Path("examples/Track Presets/drumRack/Drum Kit.json")
-EXAMPLE_SYNTH_PRESET = Path("examples/Track Presets/Drift/Analog Shape.ablpreset")
 EXAMPLE_MIDI = Path("examples/Midi/I Need Your Love.mid")
 
 
@@ -108,11 +106,9 @@ async def demo_slice(page, base_url: str, out_dir: Path) -> None:
 async def capture_pages(base_url: str, out_dir: Path) -> None:
     """Capture screenshots for each main page with example data loaded."""
     browser = await launch(headless=True, args=["--no-sandbox"])
-    page = await browser.newPage()
-    await page.setViewport({"width": 1280, "height": 720})
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    steps: list[Callable[[any, str, Path], asyncio.Future]] = [
+    steps: list[Callable[[any, str, Path], Awaitable[None]]] = [
         demo_restore,
         demo_reverse,
         demo_drum_rack,
@@ -123,7 +119,14 @@ async def capture_pages(base_url: str, out_dir: Path) -> None:
     ]
 
     for step in steps:
-        await step(page, base_url, out_dir)
+        page = await browser.newPage()
+        await page.setViewport({"width": 1280, "height": 720})
+        try:
+            await step(page, base_url, out_dir)
+        except Exception as e:  # noqa: BLE001
+            print(f"Warning: step {step.__name__} failed: {e}")
+        finally:
+            await page.close()
 
     await browser.close()
 
@@ -160,7 +163,7 @@ def create_video(img_dir: Path, output: Path) -> None:
 
 def main(base_url: str, output: str) -> None:
     screenshots = Path("demo_screens")
-    asyncio.get_event_loop().run_until_complete(capture_pages(base_url, screenshots))
+    asyncio.run(capture_pages(base_url, screenshots))
     create_video(screenshots, Path(output))
     print(f"Demo video saved to {output}")
 
