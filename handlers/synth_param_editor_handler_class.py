@@ -59,9 +59,6 @@ MACRO_HIGHLIGHT_COLORS = {
 
 class SynthParamEditorHandler(BaseHandler):
     def handle_get(self):
-        base_dir = "/data/UserData/UserLibrary/Track Presets"
-        if not os.path.exists(base_dir) and os.path.exists("examples/Track Presets"):
-            base_dir = "examples/Track Presets"
         browser_html = generate_dir_html(
             base_dir,
             "",
@@ -94,6 +91,10 @@ class SynthParamEditorHandler(BaseHandler):
         action = form.getvalue('action')
         if action == 'reset_preset':
             return self.handle_get()
+
+        base_dir = "/data/UserData/UserLibrary/Track Presets"
+        if not os.path.exists(base_dir) and os.path.exists("examples/Track Presets"):
+            base_dir = "examples/Track Presets"
 
         message = ''
         if action == 'new_preset':
@@ -225,9 +226,6 @@ class SynthParamEditorHandler(BaseHandler):
             params_html = self.generate_params_html(values['parameters'], mapped_params)
             param_count = len(values['parameters'])
 
-        base_dir = "/data/UserData/UserLibrary/Track Presets"
-        if not os.path.exists(base_dir) and os.path.exists("examples/Track Presets"):
-            base_dir = "examples/Track Presets"
         browser_html = generate_dir_html(
             base_dir,
             "",
