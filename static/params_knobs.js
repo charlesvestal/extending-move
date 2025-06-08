@@ -104,4 +104,22 @@ document.addEventListener('DOMContentLoaded', () => {
         env2Input.addEventListener('change', updateCycling);
         updateCycling();
     }
+
+    const modeSelect = document.querySelector('.param-item[data-name="CyclingEnvelope_Mode"] select');
+    const rateItem = document.querySelector('.param-item[data-name="CyclingEnvelope_Rate"]');
+    const ratioItem = document.querySelector('.param-item[data-name="CyclingEnvelope_Ratio"]');
+    const timeItem = document.querySelector('.param-item[data-name="CyclingEnvelope_Time"]');
+    const syncItem = document.querySelector('.param-item[data-name="CyclingEnvelope_SyncedRate"]');
+    function updateCycleRateDisplay() {
+        if (!modeSelect) return;
+        const mode = modeSelect.value;
+        if (rateItem) rateItem.classList.toggle('hidden', mode !== 'Freq');
+        if (ratioItem) ratioItem.classList.toggle('hidden', mode !== 'Ratio');
+        if (timeItem) timeItem.classList.toggle('hidden', mode !== 'Time');
+        if (syncItem) syncItem.classList.toggle('hidden', mode !== 'Sync');
+    }
+    if (modeSelect) {
+        modeSelect.addEventListener('change', updateCycleRateDisplay);
+        updateCycleRateDisplay();
+    }
 });
