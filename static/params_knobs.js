@@ -11,9 +11,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const displayEl = displayId ? document.getElementById(displayId) : null;
         const min = parseFloat(el.min);
         const max = parseFloat(el.max);
+        const oscGain = unit === 'dB' && !isNaN(min) && !isNaN(max) && min === 0 && max === 2;
+        if (oscGain) {
+            // allow smooth input; actual rounding happens in handler
+            el.step = '0.001';
+        }
         const shouldScale = unit === '%' && Math.abs(max) <= 1 && Math.abs(min) <= 1;
         const getStep = (v) => getPercentStep(v, unit, step, shouldScale);
         const getDisplayDecimals = (v) => getPercentDecimals(v, unit, displayDecimalsDefault, shouldScale);
+        const oscValToDb = (val) => {
+            if (val <= 0) return -Infinity;
+            if (val <= 1) return val * 64 - 64;
+            return (val - 1) * 6;
+        };
+        const dbToOscVal = (db) => {
+            if (!isFinite(db) || db <= -64) return 0;
+            if (db <= 0) return (db + 64) / 64;
+            return 1 + db / 6;
+        };
         const format = (v) => {
             let displayVal = shouldScale ? v * 100 : v;
             let unitLabel = unit;
@@ -29,18 +44,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     return (displayVal * 1000).toFixed(0) + ' ms';
                 }
                 return Number(displayVal).toFixed(getDisplayDecimals(v)) + ' s';
-            } else if (
-                unit === 'dB' &&
-                !isNaN(min) &&
-                !isNaN(max) &&
-                min === 0 &&
-                max === 2
-            ) {
+            } else if (oscGain) {
                 if (v <= 0) return '-inf dB';
-                if (v <= 1) {
-                    return (v * 64 - 64).toFixed(1) + ' dB';
-                }
-                return ((v - 1) * 6).toFixed(1) + ' dB';
+                const db = oscValToDb(v);
+                return db.toFixed(1) + ' dB';
             }
             return Number(displayVal).toFixed(getDisplayDecimals(v)) + (unit ? ' ' + unitLabel : '');
         };
@@ -49,9 +56,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (hidden) {
             el.addEventListener('input', () => {
-                const v = parseFloat(el.value);
-                const st = getStep(v);
-                const q = Math.round((v - min) / st) * st + min;
+                let v = parseFloat(el.value);
+                let q;
+                if (oscGain) {
+                    let db = oscValToDb(v);
+                    if (isFinite(db)) {
+                        db = Math.round(db * 10) / 10;
+                        q = dbToOscVal(db);
+                    } else {
+                        q = 0;
+                    }
+                } else {
+                    const st = getStep(v);
+                    q = Math.round((v - min) / st) * st + min;
+                }
                 hidden.value = q;
                 if (displayEl) displayEl.textContent = format(q);
                 hidden.dispatchEvent(new Event('change'));
