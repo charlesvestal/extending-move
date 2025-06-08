@@ -530,6 +530,10 @@ select {
     justify-content: center;
 }
 
+.mod-matrix-row .mod-group {
+    flex: 1;
+}
+
 .mod-label {
     font-weight: bold;
     margin-bottom: 0.25rem;
