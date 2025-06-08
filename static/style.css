@@ -599,6 +599,12 @@ select {
     display: inline-block;
     text-align: right;
 }
+
+.param-input {
+    margin: 0.25rem;
+    width: 80px;
+    text-align: center;
+}
   
 .param-item {
     margin-bottom: 0.75rem;
