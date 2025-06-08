@@ -14,6 +14,7 @@ from core.synth_param_editor_handler import (
     update_parameter_values,
     update_macro_values,
 )
+from core.refresh_handler import refresh_library
 
 # Path to the preset used when creating a new preset. Prefer the version in the
 # user's library but fall back to the bundled example if it doesn't exist.
@@ -113,6 +114,11 @@ class SynthParamEditorHandler(BaseHandler):
             message = result['message'] + "; " + macro_result['message']
             if output_path:
                 message += f" Saved as {os.path.basename(output_path)}"
+            refresh_success, refresh_message = refresh_library()
+            if refresh_success:
+                message += " Library refreshed."
+            else:
+                message += f" Library refresh failed: {refresh_message}"
         elif action in ['select_preset', 'new_preset']:
             if action == 'new_preset':
                 message = "Loaded default preset"
