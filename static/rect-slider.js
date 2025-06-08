@@ -6,9 +6,12 @@ function initSlider(el){
   const min=parseFloat(el.dataset.min||0);
   const max=parseFloat(el.dataset.max||1);
   const step=parseFloat(el.dataset.step||1);
-  const decimals=parseInt(el.dataset.decimals||2,10);
   const unit=el.dataset.unit||'';
-  const displayDecimals=unit==='%'?0:decimals;
+  function getStep(v){
+    return getPercentStep(v, unit, step, shouldScale);
+  }
+  const decimals=parseInt(el.dataset.decimals||2,10);
+  const displayDecimalsDefault=unit==='%'?0:decimals;
   const shouldScale=unit==='%' && Math.abs(max)<=1 && Math.abs(min)<=1;
   let value=parseFloat(el.dataset.value||min);
   const centered=el.classList.contains('center')||el.dataset.centered==='true';
@@ -22,6 +25,9 @@ function initSlider(el){
   const label=document.createElement('span');
   label.className='rect-slider-label';
   el.appendChild(label);
+  function getDisplayDecimals(v){
+    return getPercentDecimals(v, unit, displayDecimalsDefault, shouldScale);
+  }
   function format(v){
     let displayVal=shouldScale?v*100:v;
     let unitLabel=unit;
@@ -36,9 +42,9 @@ function initSlider(el){
       if(displayVal<1){
         return (displayVal*1000).toFixed(0)+` ms`;
       }
-      return Number(displayVal).toFixed(displayDecimals)+` s`;
+      return Number(displayVal).toFixed(getDisplayDecimals(v))+` s`;
     }
-    return Number(displayVal).toFixed(displayDecimals)+(unit?` ${unitLabel}`:'');
+    return Number(displayVal).toFixed(getDisplayDecimals(v))+(unit?` ${unitLabel}`:'');
   }
   function update(){
     label.textContent=format(value);
@@ -68,9 +74,13 @@ function initSlider(el){
     function move(e){
       const y=e.touches?e.touches[0].clientY:e.clientY;
       const dy=startY-y;
-      const scale=(max-min)/100;
+      const isShift = e.shiftKey;
+      // slower movement when holding Shift
+      const dragSense = isShift ? 2000 : 200;
+      const scale=(max-min)/dragSense;
       let v=startVal+dy*scale;
-      v=Math.round(v/step)*step;
+      let st=getStep(v);
+      v=Math.round(v/st)*st;
       value=clamp(v,min,max);
       update();
     }

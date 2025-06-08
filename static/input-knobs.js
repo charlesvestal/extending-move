@@ -182,10 +182,14 @@ input[type=checkbox].input-switch:checked,input[type=radio].input-switch:checked
         el.style.backgroundSize=`100% ${(ik.sprites+1)*100}%`;
       }
       ik.valrange={min:+el.min, max:(el.max=="")?100:+el.max, step:(el.step=="")?1:+el.step};
+      ik.percentUnit=el.getAttribute("data-unit")==="%";
+      ik.shouldScale=ik.percentUnit && ik.valrange.max<=1 && ik.valrange.min>=-1;
+      ik.getStep=(v)=>getPercentStep(v, ik.percentUnit?'%':'', ik.valrange.step, ik.shouldScale);
       el.redraw(true);
     };
     el.setValue=(v)=>{
-      v=(Math.round((v-ik.valrange.min)/ik.valrange.step))*ik.valrange.step+ik.valrange.min;
+      let st=ik.getStep(v);
+      v=(Math.round((v-ik.valrange.min)/st))*st+ik.valrange.min;
       if(v<ik.valrange.min) v=ik.valrange.min;
       if(v>ik.valrange.max) v=ik.valrange.max;
       el.value=v;
@@ -285,7 +289,8 @@ input[type=checkbox].input-switch:checked,input[type=radio].input-switch:checked
       el.redraw();
     };
     ik.wheel=(ev)=>{
-      let delta=ev.deltaY>0?-ik.valrange.step:ik.valrange.step;
+      let st=ik.getStep(+el.value);
+      let delta=ev.deltaY>0?-st:st;
       if(!ev.shiftKey)
         delta*=5;
       el.setValue(+el.value+delta);

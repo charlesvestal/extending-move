@@ -3,13 +3,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const target = el.dataset.target;
         const decimals = parseInt(el.dataset.decimals || '2', 10);
         const unit = el.dataset.unit || '';
-        const displayDecimals = unit === '%' ? 0 : decimals;
+        const step = parseFloat(el.step || el.dataset.step || '1');
+        const percentUnit = unit === '%';
+        const displayDecimalsDefault = percentUnit ? 0 : decimals;
         const displayId = el.dataset.display;
         const hidden = document.querySelector(`input[name="${target}"]`);
         const displayEl = displayId ? document.getElementById(displayId) : null;
         const min = parseFloat(el.min);
         const max = parseFloat(el.max);
         const shouldScale = unit === '%' && Math.abs(max) <= 1 && Math.abs(min) <= 1;
+        const getStep = (v) => getPercentStep(v, unit, step, shouldScale);
+        const getDisplayDecimals = (v) => getPercentDecimals(v, unit, displayDecimalsDefault, shouldScale);
         const format = (v) => {
             let displayVal = shouldScale ? v * 100 : v;
             let unitLabel = unit;
@@ -24,9 +28,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (displayVal < 1) {
                     return (displayVal * 1000).toFixed(0) + ' ms';
                 }
-                return Number(displayVal).toFixed(displayDecimals) + ' s';
+                return Number(displayVal).toFixed(getDisplayDecimals(v)) + ' s';
             }
-            return Number(displayVal).toFixed(displayDecimals) + (unit ? ' ' + unitLabel : '');
+            return Number(displayVal).toFixed(getDisplayDecimals(v)) + (unit ? ' ' + unitLabel : '');
         };
         if (displayEl) {
             displayEl.textContent = isNaN(el.value) ? 'not set' : format(parseFloat(el.value));
@@ -34,8 +38,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (hidden) {
             el.addEventListener('input', () => {
                 const v = parseFloat(el.value);
-                const m = Math.pow(10, decimals);
-                const q = Math.round(v * m) / m;
+                const st = getStep(v);
+                const q = Math.round((v - min) / st) * st + min;
                 hidden.value = q;
                 if (displayEl) displayEl.textContent = format(q);
                 hidden.dispatchEvent(new Event('change'));
