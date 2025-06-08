@@ -143,6 +143,9 @@ def test_synth_params_post(client, monkeypatch):
     assert b'done' in resp.data
     assert b'Editing:' in resp.data
     assert b'<div>p</div>' in resp.data
+    assert b'name="rename"' in resp.data
+    assert b'name="new_preset_name"' in resp.data
+    assert b'disabled' in resp.data
 
 def test_synth_params_new_preset(client, monkeypatch):
     from handlers.synth_param_editor_handler_class import DEFAULT_PRESET
@@ -162,6 +165,8 @@ def test_synth_params_new_preset(client, monkeypatch):
     assert resp.status_code == 200
     assert b'loaded' in resp.data
     assert b'Editing:' in resp.data
+    assert b'name="rename"' in resp.data
+    assert b'name="new_preset_name"' in resp.data
 
 def test_drum_rack_inspector_get(client, monkeypatch):
     def fake_get():

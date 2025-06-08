@@ -14,6 +14,7 @@ from core.synth_param_editor_handler import (
     update_parameter_values,
     update_macro_values,
 )
+from core.refresh_handler import refresh_library
 
 # Path to the preset used when creating a new preset. Prefer the version in the
 # user's library but fall back to the bundled example if it doesn't exist.
@@ -59,6 +60,7 @@ class SynthParamEditorHandler(BaseHandler):
             'schema_json': json.dumps(schema),
             'default_preset_path': DEFAULT_PRESET,
             'macro_knobs_html': '',
+            'rename_checked': False,
         }
 
     def handle_post(self, form):
@@ -75,6 +77,7 @@ class SynthParamEditorHandler(BaseHandler):
             return self.format_error_response("No preset selected")
 
         message = ''
+        rename_flag = False
         if action == 'save_params':
             try:
                 count = int(form.getvalue('param_count', '0'))
@@ -86,9 +89,10 @@ class SynthParamEditorHandler(BaseHandler):
                 value = form.getvalue(f'param_{i}_value')
                 if name is not None and value is not None:
                     updates[name] = value
+            rename_flag = form.getvalue('rename') in ('on', 'true', '1')
             new_name = form.getvalue('new_preset_name')
             output_path = None
-            if new_name:
+            if rename_flag and new_name:
                 directory = os.path.dirname(preset_path)
                 if not new_name.endswith('.ablpreset'):
                     new_name += '.ablpreset'
@@ -110,6 +114,11 @@ class SynthParamEditorHandler(BaseHandler):
             message = result['message'] + "; " + macro_result['message']
             if output_path:
                 message += f" Saved as {os.path.basename(output_path)}"
+            refresh_success, refresh_message = refresh_library()
+            if refresh_success:
+                message += " Library refreshed."
+            else:
+                message += f" Library refresh failed: {refresh_message}"
         elif action in ['select_preset', 'new_preset']:
             if action == 'new_preset':
                 message = "Loaded default preset"
@@ -153,6 +162,7 @@ class SynthParamEditorHandler(BaseHandler):
             'schema_json': json.dumps(load_drift_schema()),
             'default_preset_path': DEFAULT_PRESET,
             'macro_knobs_html': macro_knobs_html,
+            'rename_checked': rename_flag if action == 'save_params' else False,
         }
 
     SECTION_ORDER = [
