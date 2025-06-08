@@ -350,6 +350,7 @@ class SynthParamEditorHandler(BaseHandler):
         "ModulationMatrix_Amount2",
         "ModulationMatrix_Amount3",
         "Lfo_ModAmount",
+        "Filter_Tracking",
 
     }
 
@@ -578,15 +579,21 @@ class SynthParamEditorHandler(BaseHandler):
                 sections[section].append(html)
 
         if filter_items:
-            filter_rows = [
-                ["Filter_Frequency", "Filter_Type", "Filter_Tracking"],
-                ["Filter_Resonance", "Filter_HiPassFrequency"],
-            ]
             ordered = []
-            for row in filter_rows:
-                row_html = "".join(filter_items.pop(p, "") for p in row if p in filter_items)
-                if row_html:
-                    ordered.append(f'<div class="param-row">{row_html}</div>')
+
+            freq = filter_items.pop("Filter_Frequency", "")
+            f_type = filter_items.pop("Filter_Type", "")
+            tracking = filter_items.pop("Filter_Tracking", "")
+            pair = ""
+            if f_type or tracking:
+                pair = f'<div class="param-pair">{f_type}{tracking}</div>'
+            row1_html = f"{freq}{pair}"
+            if row1_html.strip():
+                ordered.append(f'<div class="param-row">{row1_html}</div>')
+
+            row2_html = "".join(filter_items.pop(p, "") for p in ["Filter_Resonance", "Filter_HiPassFrequency"] if p in filter_items)
+            if row2_html:
+                ordered.append(f'<div class="param-row">{row2_html}</div>')
 
             src1 = filter_items.pop("Filter_ModSource1", "")
             amt1 = filter_items.pop("Filter_ModAmount1", "")
