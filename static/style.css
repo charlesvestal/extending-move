@@ -472,7 +472,7 @@ select {
     padding: 0.5rem;
 }
 
-.knob-group > div {
+.knob-group > * {
     margin: 0.5rem 0;
 }
 

@@ -322,10 +322,10 @@ class SynthParamEditorHandler(BaseHandler):
         if name == "Global_Envelope2Mode":
             true_val = "Cyc"
             false_val = "Env"
+            checked = "checked" if value == true_val else ""
             html.append(
-                f'<div id="param_{idx}_toggle" class="param-toggle" '
-                f'data-target="param_{idx}_value" data-value="{value}" '
-                f'data-true-value="{true_val}" data-false-value="{false_val}"></div>'
+                f'<input type="checkbox" id="param_{idx}_toggle" class="param-toggle input-switch" '
+                f'data-target="param_{idx}_value" data-true-value="{true_val}" data-false-value="{false_val}" {checked}>'
             )
             html.append(f'<input type="hidden" name="param_{idx}_value" value="{value}">')
         elif p_type == "enum" and meta.get("options"):
@@ -345,8 +345,9 @@ class SynthParamEditorHandler(BaseHandler):
         elif p_type == "boolean":
             bool_val = 1 if str(value).lower() in ("true", "1") else 0
             html.append(
-                f'<div id="param_{idx}_toggle" class="param-toggle" '
-                f'data-target="param_{idx}_value" data-value="{bool_val}"></div>'
+                f'<input type="checkbox" id="param_{idx}_toggle" class="param-toggle input-switch" '
+                f'data-target="param_{idx}_value" data-true-value="1" data-false-value="0"'
+                f' {"checked" if bool_val else ""}>'
             )
             html.append(f'<input type="hidden" name="param_{idx}_value" value="{bool_val}">')
         elif name == "Global_SerialNumber":
@@ -356,20 +357,19 @@ class SynthParamEditorHandler(BaseHandler):
                 f'<input type="number" class="param-input" name="param_{idx}_value" value="{value}"{min_attr}{max_attr}>'
             )
         else:
-            min_attr = f' data-min="{meta.get("min")}"' if meta.get("min") is not None else ''
-            max_attr = f' data-max="{meta.get("max")}"' if meta.get("max") is not None else ''
-            val_attr = f' data-value="{value}"'
+            min_attr = f' min="{meta.get("min")}"' if meta.get("min") is not None else ''
+            max_attr = f' max="{meta.get("max")}"' if meta.get("max") is not None else ''
+            step_attr = ''
+            if meta.get("decimals") is not None:
+                step_attr = f' step="{10 ** (-meta["decimals"])}"'
             unit_attr = f' data-unit="{meta.get("unit")}"' if meta.get("unit") else ''
-            dec_attr = f' data-decimals="{meta.get("decimals")}"' if meta.get("decimals") is not None else ''
             disp_id = f'param_{idx}_display'
-            klass = "param-dial"
-            orient = ""
+            klass = "param-dial input-knob"
             if slider:
-                klass = "param-slider"
-                orient = ' data-orientation="horizontal"'
+                klass = "param-slider input-hslider"
             html.append(
-                f'<div id="param_{idx}_dial" class="{klass}" data-target="param_{idx}_value" '
-                f'data-display="{disp_id}"{orient}{min_attr}{max_attr}{val_attr}{unit_attr}{dec_attr}></div>'
+                f'<input id="param_{idx}_dial" type="range" class="{klass}" data-target="param_{idx}_value" '
+                f'data-display="{disp_id}" value="{value}"{min_attr}{max_attr}{step_attr}{unit_attr}>'
             )
             html.append(f'<span id="{disp_id}" class="param-number"></span>')
             html.append(f'<input type="hidden" name="param_{idx}_value" value="{value}">')
