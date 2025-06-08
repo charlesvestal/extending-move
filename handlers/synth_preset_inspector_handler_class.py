@@ -265,11 +265,17 @@ class SynthPresetInspectorHandler(BaseHandler):
             html += f'<div class="macro-item">'
             html += '<div class="macro-top">'
             name_label = macro.get("name", f"Macro {macro['index']}")
-            if name_label == f"Macro {macro['index']}":
-                name_label = f"Knob {macro['index'] + 1}"
+            label_class = ""
+            if not name_label or name_label == f"Macro {macro['index']}":
+                params = macro.get("parameters") or []
+                if len(params) == 1:
+                    name_label = params[0].get("name", f"Knob {macro['index'] + 1}")
+                    label_class = " placeholder"
+                else:
+                    name_label = f"Knob {macro['index'] + 1}"
             html += (
                 f'<div class="macro-knob macro-{macro["index"]}">'
-                f'<span class="macro-label">{name_label}</span>'
+                f'<span class="macro-label{label_class}">{name_label}</span>'
                 f'<input type="range" class="macro-dial input-knob" '
                 f'value="{display_val}" min="0" max="127" step="0.1" data-decimals="1" disabled>'
                 f'<span class="macro-number">{display_val}</span>'
