@@ -37,9 +37,9 @@
         <button type="submit" onclick="document.getElementById('action-input').value='reset_preset';">Choose Another Preset</button>
     </div>
     {{ macro_knobs_html | safe }}
-    <input type="hidden" name="macros_data" id="macros-data-input" value='{{ macros_json|safe }}'>
-    <input type="hidden" id="available-params-input" value='{{ available_params_json|safe }}'>
-    <input type="hidden" id="param-paths-input" value='{{ param_paths_json|safe }}'>
+    <input type="hidden" name="macros_data" id="macros-data-input" value='{{ macros_json }}'>
+    <input type="hidden" id="available-params-input" value='{{ available_params_json }}'>
+    <input type="hidden" id="param-paths-input" value='{{ param_paths_json }}'>
     <div id="macro-sidebar" class="macro-sidebar hidden">
         <h3 id="macro-sidebar-title"></h3>
         <label>Custom Name: <input type="text" id="macro-name-input"></label>
