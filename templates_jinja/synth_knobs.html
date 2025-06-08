@@ -1,55 +1,54 @@
 {% extends "base.html" %}
 {% block content %}
 <h2>Synth Control Panel</h2>
-<div id="knob-container">
-  <div class="knob-group">
-    <h3>Oscillator 1</h3>
-    <div id="osc1-octave"></div>
-    <div id="osc1-shape"></div>
+  <div id="knob-container">
+    <div class="knob-group">
+      <h3>Oscillator 1</h3>
+      <input id="osc1-octave" type="range" class="input-knob" min="-2" max="2" value="0">
+      <input id="osc1-shape" type="range" class="input-knob" min="0" max="1" value="0">
+    </div>
+    <div class="knob-group">
+      <h3>Oscillator 2</h3>
+      <input id="osc2-octave" type="range" class="input-knob" min="-2" max="2" value="0">
+      <input id="osc2-detune" type="range" class="input-knob" min="-50" max="50" value="0">
+    </div>
+    <div class="knob-group">
+      <h3>Mix</h3>
+      <input id="mix-osc1" type="range" class="input-knob" min="0" max="1" value="0.5">
+      <input id="mix-osc2" type="range" class="input-knob" min="0" max="1" value="0.5">
+      <input id="mix-noise" type="range" class="input-knob" min="0" max="1" value="0">
+    </div>
+    <div class="knob-group">
+      <h3>Filter</h3>
+      <input id="filter-freq" type="range" class="input-knob" min="20" max="20000" value="1000">
+      <input id="filter-res" type="range" class="input-knob" min="0.1" max="10" value="1">
+      <input id="filter-hp" type="range" class="input-knob" min="20" max="5000" value="20">
+    </div>
+    <div class="knob-group">
+      <h3>Envelope 1</h3>
+      <input id="env1-attack" type="range" class="input-knob" min="0" max="5" value="0.01" step="0.01">
+      <input id="env1-decay" type="range" class="input-knob" min="0" max="5" value="0.5" step="0.01">
+      <input id="env1-sustain" type="range" class="input-knob" min="0" max="1" value="0.7" step="0.01">
+      <input id="env1-release" type="range" class="input-knob" min="0" max="5" value="1" step="0.01">
+    </div>
+    <div class="knob-group">
+      <h3>Envelope 2</h3>
+      <input id="env2-attack" type="range" class="input-knob" min="0" max="5" value="0.01" step="0.01">
+      <input id="env2-decay" type="range" class="input-knob" min="0" max="5" value="0.5" step="0.01">
+      <input id="env2-sustain" type="range" class="input-knob" min="0" max="1" value="0.7" step="0.01">
+      <input id="env2-release" type="range" class="input-knob" min="0" max="5" value="1" step="0.01">
+    </div>
+    <div class="knob-group">
+      <h3>LFO</h3>
+      <input id="lfo-ratio" type="range" class="input-knob" min="0.1" max="10" value="1" step="0.01">
+      <input id="lfo-amount" type="range" class="input-knob" min="0" max="1" value="0" step="0.01">
+    </div>
+    <div class="knob-group">
+      <h3>Volume</h3>
+      <input id="mixer-volume" type="range" class="input-knob" min="0" max="1" value="0.8" step="0.01">
+    </div>
   </div>
-  <div class="knob-group">
-    <h3>Oscillator 2</h3>
-    <div id="osc2-octave"></div>
-    <div id="osc2-detune"></div>
-  </div>
-  <div class="knob-group">
-    <h3>Mix</h3>
-    <div id="mix-osc1"></div>
-    <div id="mix-osc2"></div>
-    <div id="mix-noise"></div>
-  </div>
-  <div class="knob-group">
-    <h3>Filter</h3>
-    <div id="filter-freq"></div>
-    <div id="filter-res"></div>
-    <div id="filter-hp"></div>
-  </div>
-  <div class="knob-group">
-    <h3>Envelope 1</h3>
-    <div id="env1-attack"></div>
-    <div id="env1-decay"></div>
-    <div id="env1-sustain"></div>
-    <div id="env1-release"></div>
-  </div>
-  <div class="knob-group">
-    <h3>Envelope 2</h3>
-    <div id="env2-attack"></div>
-    <div id="env2-decay"></div>
-    <div id="env2-sustain"></div>
-    <div id="env2-release"></div>
-  </div>
-  <div class="knob-group">
-    <h3>LFO</h3>
-    <div id="lfo-ratio"></div>
-    <div id="lfo-amount"></div>
-  </div>
-  <div class="knob-group">
-    <h3>Volume</h3>
-    <div id="mixer-volume"></div>
-  </div>
-</div>
 {% endblock %}
 {% block scripts %}
-<script src="https://unpkg.com/nexusui@latest/dist/NexusUI.js"></script>
-<script src="{{ host_prefix }}/static/synth_knobs.js"></script>
+<script src="{{ host_prefix }}/static/input-knobs.js"></script>
 {% endblock %}

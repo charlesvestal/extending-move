@@ -1,96 +1,46 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const dials = document.querySelectorAll('.param-dial');
-    dials.forEach(el => {
-        const min = parseFloat(el.dataset.min);
-        const max = parseFloat(el.dataset.max);
-        const val = parseFloat(el.dataset.value);
+    function setupControl(el) {
         const target = el.dataset.target;
         const decimals = parseInt(el.dataset.decimals || '2', 10);
         const unit = el.dataset.unit || '';
         const displayId = el.dataset.display;
-        const dial = new Nexus.Dial(el, {
-            size: [30,30],
-            min: isNaN(min) ? 0 : min,
-            max: isNaN(max) ? 1 : max,
-            value: isNaN(val) ? 0 : val,
-        });
-        const step = Math.pow(10, -decimals);
-        dial.step = step;
+        const hidden = document.querySelector(`input[name="${target}"]`);
+        const displayEl = displayId ? document.getElementById(displayId) : null;
+        const min = parseFloat(el.min);
+        const max = parseFloat(el.max);
         const shouldScale = unit === '%' && Math.abs(max) <= 1 && Math.abs(min) <= 1;
         const format = (v) => {
             const displayVal = shouldScale ? v * 100 : v;
             return Number(displayVal).toFixed(decimals) + (unit ? ' ' + unit : '');
         };
-        const displayEl = displayId ? document.getElementById(displayId) : null;
         if (displayEl) {
-            displayEl.textContent = isNaN(val) ? 'not set' : format(val);
+            displayEl.textContent = isNaN(el.value) ? 'not set' : format(parseFloat(el.value));
         }
-        const input = document.querySelector(`input[name="${target}"]`);
-        if (input) {
-            dial.on('change', v => {
+        if (hidden) {
+            el.addEventListener('input', () => {
+                const v = parseFloat(el.value);
                 const m = Math.pow(10, decimals);
                 const q = Math.round(v * m) / m;
-                input.value = q;
+                hidden.value = q;
                 if (displayEl) displayEl.textContent = format(q);
+                hidden.dispatchEvent(new Event('change'));
             });
         }
-    });
+    }
 
-    const sliders = document.querySelectorAll('.param-slider');
-    sliders.forEach(el => {
-        const min = parseFloat(el.dataset.min);
-        const max = parseFloat(el.dataset.max);
-        const val = parseFloat(el.dataset.value);
-        const target = el.dataset.target;
-        const decimals = parseInt(el.dataset.decimals || '2', 10);
-        const unit = el.dataset.unit || '';
-        const displayId = el.dataset.display;
-        const slider = new Nexus.Slider(el, {
-            size: [80,20],
-            mode: 'absolute',
-            min: isNaN(min) ? 0 : min,
-            max: isNaN(max) ? 1 : max,
-            step: 0,
-            value: isNaN(val) ? 0 : val,
-            orientation: 'horizontal'
-        });
-        const step = Math.pow(10, -decimals);
-        slider.step = step;
-        const shouldScale = unit === '%' && Math.abs(max) <= 1 && Math.abs(min) <= 1;
-        const format = (v) => {
-            const displayVal = shouldScale ? v * 100 : v;
-            return Number(displayVal).toFixed(decimals) + (unit ? ' ' + unit : '');
-        };
-        const displayEl = displayId ? document.getElementById(displayId) : null;
-        if (displayEl) {
-            displayEl.textContent = isNaN(val) ? 'not set' : format(val);
-        }
-        const input = document.querySelector(`input[name="${target}"]`);
-        if (input) {
-            slider.on('change', v => {
-                const m = Math.pow(10, decimals);
-                const q = Math.round(v * m) / m;
-                input.value = q;
-                if (displayEl) displayEl.textContent = format(q);
-            });
-        }
-    });
+    document.querySelectorAll('input.param-dial').forEach(setupControl);
+    document.querySelectorAll('input.param-slider').forEach(setupControl);
 
-    const toggles = document.querySelectorAll('.param-toggle');
-    toggles.forEach(el => {
-        const val = el.dataset.value;
+    document.querySelectorAll('input.param-toggle').forEach(el => {
         const target = el.dataset.target;
+        const hidden = document.querySelector(`input[name="${target}"]`);
         const trueVal = el.dataset.trueValue ?? '1';
         const falseVal = el.dataset.falseValue ?? '0';
-        const toggle = new Nexus.Toggle(el, {
-            size: [30,15],
-            state: val === trueVal,
-        });
-        const input = document.querySelector(`input[name="${target}"]`);
-        if (input) {
-            toggle.on('change', v => {
-                input.value = v ? trueVal : falseVal;
-                input.dispatchEvent(new Event('change'));
+        if (hidden) {
+            el.checked = hidden.value === trueVal;
+            el.addEventListener('change', () => {
+                hidden.value = el.checked ? trueVal : falseVal;
+                hidden.dispatchEvent(new Event('change'));
             });
         }
     });
