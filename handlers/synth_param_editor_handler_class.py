@@ -351,6 +351,7 @@ class SynthParamEditorHandler(BaseHandler):
                 "Global_ResetOscillatorPhase",
                 "Global_StereoVoiceDepth",
                 "Global_UnisonVoiceDepth",
+                "Global_SerialNumber",
             }:
                 return "Extras"
             return "Global"
