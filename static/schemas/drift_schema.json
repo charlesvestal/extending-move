@@ -219,7 +219,8 @@
     "min": 0.0,
     "max": 1.0,
     "options": [],
-    "decimals": 1
+    "unit": "%",
+    "decimals": 2
   },
   "Global_Envelope2Mode": {
     "type": "enum",
@@ -233,10 +234,10 @@
   "Global_Glide": {
     "type": "number",
     "min": 0.0,
-    "max": 0.336857,
+    "max": 2.0,
     "options": [],
-    "unit": "ms",
-    "decimals": 0
+    "unit": "s",
+    "decimals": 2
   },
   "Global_HiQuality": {
     "type": "boolean",
@@ -264,7 +265,7 @@
   },
   "Global_PitchBendRange": {
     "type": "number",
-    "min": 2,
+    "min": 0,
     "max": 12,
     "options": [],
     "unit": "st",
@@ -296,8 +297,8 @@
   },
   "Global_Transpose": {
     "type": "number",
-    "min": -24,
-    "max": 36,
+    "min": -48,
+    "max": 48,
     "options": [],
     "unit": "st",
     "decimals": 0
@@ -333,7 +334,7 @@
   "Global_VolVelMod": {
     "type": "number",
     "min": 0.0,
-    "max": 0.726562,
+    "max": 1.0,
     "options": [],
     "unit": "%",
     "decimals": 2
