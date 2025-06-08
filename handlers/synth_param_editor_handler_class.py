@@ -59,9 +59,6 @@ MACRO_HIGHLIGHT_COLORS = {
 
 class SynthParamEditorHandler(BaseHandler):
     def handle_get(self):
-        base_dir = "/data/UserData/UserLibrary/Track Presets"
-        if not os.path.exists(base_dir) and os.path.exists("examples/Track Presets"):
-            base_dir = "examples/Track Presets"
         browser_html = generate_dir_html(
             base_dir,
             "",
@@ -77,6 +74,7 @@ class SynthParamEditorHandler(BaseHandler):
             'file_browser_html': browser_html,
             'params_html': '',
             'selected_preset': None,
+            'selected_preset_rel': None,
             'param_count': 0,
             'browser_root': base_dir,
             'browser_filter': 'drift',
@@ -93,6 +91,10 @@ class SynthParamEditorHandler(BaseHandler):
         action = form.getvalue('action')
         if action == 'reset_preset':
             return self.handle_get()
+
+        base_dir = "/data/UserData/UserLibrary/Track Presets"
+        if not os.path.exists(base_dir) and os.path.exists("examples/Track Presets"):
+            base_dir = "examples/Track Presets"
 
         message = ''
         if action == 'new_preset':
@@ -195,7 +197,8 @@ class SynthParamEditorHandler(BaseHandler):
                 message += f" Library refresh failed: {refresh_message}"
         elif action in ['select_preset', 'new_preset']:
             if action == 'select_preset':
-                message = f"Selected preset: {os.path.basename(preset_path)}"
+                rel = os.path.relpath(preset_path, base_dir)
+                message = f"Selected preset: {rel}"
         else:
             return self.format_error_response("Unknown action")
 
@@ -223,9 +226,6 @@ class SynthParamEditorHandler(BaseHandler):
             params_html = self.generate_params_html(values['parameters'], mapped_params)
             param_count = len(values['parameters'])
 
-        base_dir = "/data/UserData/UserLibrary/Track Presets"
-        if not os.path.exists(base_dir) and os.path.exists("examples/Track Presets"):
-            base_dir = "examples/Track Presets"
         browser_html = generate_dir_html(
             base_dir,
             "",
@@ -234,12 +234,14 @@ class SynthParamEditorHandler(BaseHandler):
             'select_preset',
             filter_key='drift',
         )
+        rel_preset = os.path.relpath(preset_path, base_dir)
         return {
             'message': message,
             'message_type': 'success',
             'file_browser_html': browser_html,
             'params_html': params_html,
             'selected_preset': preset_path,
+            'selected_preset_rel': rel_preset,
             'param_count': param_count,
             'browser_root': base_dir,
             'browser_filter': 'drift',
