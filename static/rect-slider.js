@@ -15,7 +15,7 @@ function initSlider(el){
     return step;
   }
   const decimals=parseInt(el.dataset.decimals||2,10);
-  const displayDecimals=unit==='%'?0:decimals;
+  const displayDecimalsDefault=unit==='%'?0:decimals;
   const shouldScale=unit==='%' && Math.abs(max)<=1 && Math.abs(min)<=1;
   let value=parseFloat(el.dataset.value||min);
   const centered=el.classList.contains('center')||el.dataset.centered==='true';
@@ -29,6 +29,11 @@ function initSlider(el){
   const label=document.createElement('span');
   label.className='rect-slider-label';
   el.appendChild(label);
+  function getDisplayDecimals(v){
+    if(unit==='%' && Math.abs((shouldScale?v*100:v))<10)
+      return 1;
+    return displayDecimalsDefault;
+  }
   function format(v){
     let displayVal=shouldScale?v*100:v;
     let unitLabel=unit;
@@ -43,9 +48,9 @@ function initSlider(el){
       if(displayVal<1){
         return (displayVal*1000).toFixed(0)+` ms`;
       }
-      return Number(displayVal).toFixed(displayDecimals)+` s`;
+      return Number(displayVal).toFixed(getDisplayDecimals(v))+` s`;
     }
-    return Number(displayVal).toFixed(displayDecimals)+(unit?` ${unitLabel}`:'');
+    return Number(displayVal).toFixed(getDisplayDecimals(v))+(unit?` ${unitLabel}`:'');
   }
   function update(){
     label.textContent=format(value);
