@@ -16,6 +16,7 @@ from core.midi_pattern_generator import (
     generate_pattern_set,
     create_c_major_downbeats,
 )
+from core.synth_param_editor_handler import update_parameter_values
 
 
 def test_reverse_wav_file(tmp_path):
@@ -77,6 +78,18 @@ def test_generate_dir_html(tmp_path):
     assert 'a.wav' in html
     assert 'b.txt' not in html
 
+    # Adding a new file should invalidate the cache automatically
+    (tmp_path / "new.wav").write_text("x")
+    html2 = generate_dir_html(
+        str(tmp_path),
+        "",
+        "/upload",
+        "file",
+        "select",
+        filter_key="wav",
+    )
+    assert 'new.wav' in html2
+
 
 def test_time_stretch_wav(tmp_path, monkeypatch):
     sr = 22050
@@ -99,3 +112,127 @@ def test_time_stretch_wav(tmp_path, monkeypatch):
 def test_get_rubberband_binary_exists():
     path = get_rubberband_binary()
     assert path.exists()
+
+
+def test_update_parameter_values(tmp_path):
+    src = Path("examples/Track Presets/Drift/Analog Shape - Core.json")
+    dest = tmp_path / "out.ablpreset"
+    result = update_parameter_values(str(src), {"Oscillator1_Shape": "0.5"}, str(dest))
+    assert result["success"], result.get("message")
+    with open(dest, "rb") as f:
+        data = f.read()
+    assert data.endswith(b"\n")
+    preset = json.loads(data)
+    val = (
+        preset["chains"][0]
+        ["devices"][0]
+        ["chains"][0]
+        ["devices"][0]
+        ["parameters"]["Oscillator1_Shape"]["value"]
+    )
+    assert abs(val - 0.5) < 1e-6
+
+
+def test_update_macro_values(tmp_path):
+    src = Path("examples/Track Presets/Drift/Analog Shape - Core.json")
+    dest = tmp_path / "out.ablpreset"
+    from core.synth_param_editor_handler import update_macro_values
+    result = update_macro_values(str(src), {0: "64.5"}, str(dest))
+    assert result["success"], result.get("message")
+    with open(dest, "rb") as f:
+        data = f.read()
+    assert data.endswith(b"\n")
+    preset = json.loads(data)
+    # Macro0 occurs in multiple places; ensure top-level updated
+    assert abs(preset["parameters"]["Macro0"] - 64.5) < 1e-6
+
+
+def test_save_preset_no_changes(tmp_path):
+    """Saving a preset without modifying parameters should produce identical output."""
+    src = Path("examples/Track Presets/Drift/Analog Shape - Core.json")
+
+    # Extract existing parameter values
+    from core.synth_preset_inspector_handler import extract_parameter_values
+
+    info = extract_parameter_values(str(src))
+    assert info["success"], info.get("message")
+    # Convert values to strings as the web editor would submit
+    updates = {p["name"]: str(p["value"]) for p in info["parameters"]}
+
+    dest = tmp_path / "saved.ablpreset"
+    result = update_parameter_values(str(src), updates, str(dest))
+    assert result["success"], result.get("message")
+
+    with open(src, "rb") as f:
+        original = f.read()
+    with open(dest, "rb") as f:
+        written = f.read()
+    assert written == original
+
+
+def test_macro_names_remain_default_without_custom_names():
+    """Macros mapped without custom names should keep default labels."""
+    src = Path("examples/Track Presets/Drift/Analog Shape - Core.json")
+    from core.synth_preset_inspector_handler import extract_macro_information
+
+    info = extract_macro_information(str(src))
+    assert info["success"], info.get("message")
+
+    names = {m["index"]: m["name"] for m in info["macros"]}
+
+    # Macros with custom names should be preserved
+    assert names[0] == "Filter Cutoff"
+    assert names[1] == "Shape"
+    assert names[4] == "Attack"
+    assert names[5] == "DSR"
+    assert names[6] == "Shape Decay"
+
+    # Macros lacking a customName should keep their default titles
+    assert names[2] == "Macro 2"
+    assert names[3] == "Macro 3"
+    assert names[7] == "Macro 7"
+
+
+def test_extract_macro_info_adds_missing_macros(tmp_path):
+    preset_path = tmp_path / "empty.ablpreset"
+    preset = {
+        "kind": "instrumentRack",
+        "parameters": {"Enabled": True},
+        "chains": [],
+    }
+    preset_path.write_text(json.dumps(preset))
+
+    from core.synth_preset_inspector_handler import extract_macro_information
+
+    info = extract_macro_information(str(preset_path))
+    assert info["success"], info.get("message")
+    assert len(info["macros"]) == 8
+    # All macros should use default names
+    assert all(m["name"] == f"Macro {m['index']}" for m in info["macros"])
+
+
+def test_remove_macro_name(tmp_path):
+    preset_src = Path("examples/Track Presets/Drift/Analog Shape - Core.json")
+    preset_copy = tmp_path / "copy.ablpreset"
+    preset_copy.write_text(preset_src.read_text())
+
+    from core.synth_preset_inspector_handler import (
+        extract_macro_information,
+        update_preset_macro_names,
+    )
+
+    # Remove the name for Macro0
+    result = update_preset_macro_names(str(preset_copy), {0: ""})
+    assert result["success"], result.get("message")
+
+    info = extract_macro_information(str(preset_copy))
+    assert info["success"], info.get("message")
+
+    names = {m["index"]: m["name"] for m in info["macros"]}
+    assert names[0] == "Macro 0"
+    assert names[1] == "Shape"
+
+    with open(preset_copy) as f:
+        data = json.load(f)
+    assert "customName" not in data["chains"][0]["devices"][0]["parameters"]["Macro0"]
+

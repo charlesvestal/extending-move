@@ -170,7 +170,7 @@ input[type="number"],
 input[type="file"],
 select {
     /* display: block; */
-    width: 100%;
+    /* width: 100%; */
     max-width: 400px;
     padding: 0.625rem;
     /* margin-bottom: 1rem; */
@@ -195,7 +195,7 @@ label {
     color: #444;
 }
 
-button, 
+button,
 input[type="submit"] {
     background-color: #0000ff;
     color: white;
@@ -220,6 +220,13 @@ input[type="submit"] {
 button:hover, 
 input[type="submit"]:hover {
     background-color: #0000cc;
+}
+
+button:disabled,
+input[type="submit"]:disabled {
+    background-color: #ccc;
+    color: #666;
+    cursor: default;
 }
 
 /* Card styling for grid layouts */
@@ -457,3 +464,408 @@ select {
     cursor: pointer;
 }
 
+
+/* Knob interface layout */
+#knob-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.knob-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.5rem;
+}
+
+.knob-group > * {
+    margin: 0.5rem 0;
+}
+
+/* Parameter editor dials */
+.param-dial {
+    margin: -0.25rem;
+    display: inline-block;
+}
+
+.param-dial.filter-knob {
+    width: 48px;
+    height: 48px;
+}
+
+.param-slider {
+    margin: 0.25rem;
+    display: inline-block;
+}
+
+.param-label {
+    font-size: 0.8rem;
+    text-align: center;
+    margin-bottom: 0.25rem;
+}
+
+.param-pair {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.param-pair .param-item {
+    margin-bottom: 0;
+}
+
+.pitch-mod-label {
+    width: 100%;
+    text-align: center;
+    font-weight: bold;
+    margin-top: 0.5rem;
+}
+
+.freq-mod-label {
+    width: 100%;
+    text-align: center;
+    font-weight: bold;
+    margin-top: 0.5rem;
+}
+
+.pitch-mod-row {
+    justify-content: center;
+}
+
+.filter-mod-row {
+    justify-content: center;
+}
+
+.mod-matrix-row {
+    justify-content: center;
+}
+
+.mod-matrix-row .mod-group {
+    flex: 1;
+}
+
+.mod-label {
+    font-weight: bold;
+    margin-bottom: 0.25rem;
+    text-align: center;
+    width: 100%;
+}
+
+.param-toggle {
+    margin: 0.25rem;
+    display: inline-block;
+}
+
+/* Layout for the Drift parameter editor */
+.drift-param-panels {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.drift-param-panels + .drift-param-panels {
+    margin-top: 0.5rem;
+}
+
+.param-panel {
+    border: 1px solid #ccc;
+    padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.param-panel.oscillators,
+.param-panel.envelopes {
+    flex: 2;
+}
+/* .param-list {
+    max-width:975px;
+}
+.param-panel.oscillators{
+    max-width: 280px;
+}
+
+.param-panel.mixer{
+    max-width: 128px;
+}
+
+.param-panel.filter{
+    max-width: 180px;
+}
+
+.param-panel.envelopes{
+    max-width: 290px;
+} */
+
+.param-panel.filter .param-items {
+    flex-direction: column;
+}
+
+.param-row {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.param-columns {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.param-column {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+/* Ensure hidden rows stay hidden despite flex layout */
+
+.param-row.hidden,
+.param-item.hidden {
+    display: none;
+}
+
+
+.param-row-label {
+    width: 80px;
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+}
+
+.param-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.param-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* width: 90px; */
+}
+.param-number {
+    /* margin-left: 0.5rem; */
+    /* min-width: 60px; */
+    min-width: 57px;
+    display: inline-block;
+    text-align: center;
+    font-size: 0.8rem;
+}
+
+.param-input {
+    margin: 0.25rem;
+    width: 80px;
+    text-align: center;
+}
+
+.param-select {
+    margin: 0.25rem;
+    width: 80px;
+    height: 24px;
+    font-size: 0.8rem;
+    line-height: 24px;
+    padding: 0 1.5rem 0 0.5rem;
+    text-align: center;
+}
+
+.filter-type-select {
+    width: 48px;
+}
+  
+.param-item {
+    /* margin-bottom: 0.75rem; */
+  }
+
+.macro-knob-row {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    margin: 0.5rem 0 1rem 0;
+}
+
+.macro-knob {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: default;
+}
+
+.macro-label {
+    font-size: 0.8rem;
+    margin-bottom: 0.25rem;
+    cursor: pointer;
+}
+.macro-label.placeholder {
+    color: #777;
+}
+
+.macro-number {
+    margin-top: 0.25rem;
+    font-size: 0.8rem;
+}
+
+.edit-macros-link {
+    text-align: center;
+    margin: 0 0 1rem;
+}
+
+.return-params-link {
+    text-align: center;
+    margin: 1rem 0;
+}
+
+/* Layout for preset editor controls */
+.preset-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+.preset-controls label {
+    margin-bottom: 0;
+}
+
+/* Highlight parameters and macros by macro index */
+.param-item.macro-0, .macro-knob.macro-0 {
+    border: 2px solid #191970;
+    background-color: rgba(25, 25, 112, 0.05);
+    border-radius: 4px;
+}
+.param-item.macro-1, .macro-knob.macro-1 {
+    border: 2px solid #006400;
+    background-color: rgba(0, 100, 0, 0.05);
+    border-radius: 4px;
+}
+.param-item.macro-2, .macro-knob.macro-2 {
+    border: 2px solid #ff0000;
+    background-color: rgba(255, 0, 0, 0.05);
+    border-radius: 4px;
+}
+.param-item.macro-3, .macro-knob.macro-3 {
+    border: 2px solid #ffd700;
+    background-color: rgba(255, 215, 0, 0.1);
+    border-radius: 4px;
+}
+.param-item.macro-4, .macro-knob.macro-4 {
+    border: 2px solid #00ff00;
+    background-color: rgba(0, 255, 0, 0.05);
+    border-radius: 4px;
+}
+.param-item.macro-5, .macro-knob.macro-5 {
+    border: 2px solid #00ffff;
+    background-color: rgba(0, 255, 255, 0.05);
+    border-radius: 4px;
+}
+.param-item.macro-6, .macro-knob.macro-6 {
+    border: 2px solid #ff00ff;
+    background-color: rgba(255, 0, 255, 0.05);
+    border-radius: 4px;
+}
+.param-item.macro-7, .macro-knob.macro-7 {
+    border: 2px solid #ffb6c1;
+    background-color: rgba(255, 182, 193, 0.1);
+    border-radius: 4px;
+}
+
+/* Parameters controlled by macros */
+.param-item.param-mapped {
+    opacity: 0.6;
+}
+
+
+/* Rectangular slider component */
+.rect-slider-container {
+    position: relative;
+    width: 80px;
+    height: 24px;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+    box-sizing: border-box;
+    cursor: ns-resize;
+    user-select: none;
+    font-size: 0.8rem;
+    text-align: center;
+    line-height: 24px;
+}
+.rect-slider-container.disabled {
+    pointer-events: none;
+    opacity: 0.6;
+}
+.rect-slider-fill {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    background-color: #ff764d;
+    pointer-events: none;
+}
+.rect-slider-container.center .rect-slider-fill {
+    left: 50%;
+    width: 0;
+}
+.rect-slider-label {
+    position: relative;
+    z-index: 1;
+}
+
+/* Macro sidebar */
+.macro-sidebar {
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 575px;
+    height: 100%;
+    background: #fff;
+    box-shadow: -2px 0 5px rgba(0,0,0,0.3);
+    padding: 1rem;
+    overflow-y: auto;
+    z-index: 1001;
+}
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+}
+.sidebar-overlay.hidden, .macro-sidebar.hidden {
+    display: none;
+}
+.macro-assigned-list {
+    margin-top: 1rem;
+}
+.assign-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
+}
+.range-inputs {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+.range-inputs input {
+    width: 60px;
+}
+.macro-add-section {
+    margin-top: 0.5rem;
+    /* display: flex; */
+    gap: 0.25rem;
+}
+
+button#macro-add-param {
+    float:right;
+}
+.macro-add-section select {
+    margin-right: 25px;
+    max-width: 100%;
+}

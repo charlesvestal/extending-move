@@ -24,12 +24,15 @@ Tools for extending the Ableton Move. This project provides a companion webserve
   - Create reversed versions directly in the preset
   - Time stretch samples to a target BPM and length with two different algorithms, for melodic or rhythmic content.
 
-- **Synth Macros**
-  - View and edit macro mappings for Drift presets
-  - Customize macro names for better organization
-  - Add and delete parameter mappings
-  - Assign multiple parameters to a single macro control
-  - Set custom range values for more precise control
+- **Drift Preset Editor**
+  - Modify any Drift parameter value
+  - Manage macro assignments and custom names in the same interface
+  - Set custom range values for macro‑controlled parameters
+  - Save changes as a new preset file
+  - Numeric parameters use sliders with an input field
+  - Slider steps are 0.01 for values near ±1 and adapt to the parameter's default precision
+  - Enum parameters provide a dropdown of options
+  - Create new presets starting from the included Analog Shape example
  
 - **MIDI Import**
   - Upload MIDI files to create new sets
@@ -238,3 +241,8 @@ This project includes a statically linked binary of Rubber Band. The source code
 > * There’s a real risk (though unlikely) of breaking things, including potentially bricking a device. You are accessing the Move in ways it was not designed to do.
 > * Ableton can’t offer individual support if something goes wrong.
 > * If issues do arise, the documented restore procedure is the fallback – you use this at your own risk. Information on this procedure can be found in Center Code under [Documentation](https://ableton.centercode.com/project/article/item.html?cap=ecd3942a1fe3405eb27a806608401a0b&arttypeid={e70be312-f44a-418b-bb74-ed1030e3a49a}&artid={C0A2D9E2-D52F-4DEB-8BEE-356B65C8942E}).
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+

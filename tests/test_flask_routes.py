@@ -78,6 +78,7 @@ def test_synth_macros_get(client, monkeypatch):
             'options': '<option value="p">p</option>',
             'macros_html': '',
             'selected_preset': None,
+            'schema_json': '{}',
         }
     monkeypatch.setattr(move_webserver.synth_handler, 'handle_get', fake_get)
     resp = client.get('/synth-macros')
@@ -94,6 +95,7 @@ def test_synth_macros_post(client, monkeypatch):
             'all_params_html': '<ul></ul>',
             'selected_preset': 'x',
             'browser_root': '/tmp',
+            'schema_json': '{}',
         }
     monkeypatch.setattr(move_webserver.synth_handler, 'handle_post', fake_post)
     resp = client.post('/synth-macros', data={'action': 'select_preset'})
@@ -103,6 +105,92 @@ def test_synth_macros_post(client, monkeypatch):
     assert b'<p>done</p>' in resp.data
     assert b'Currently loaded preset:' in resp.data
     assert b'View All Parameters' in resp.data
+    assert b'Return to Parameter Editor' in resp.data
+
+def test_synth_params_get(client, monkeypatch):
+    from handlers.synth_param_editor_handler_class import DEFAULT_PRESET
+
+    def fake_get():
+        return {
+            'message': 'pick',
+            'message_type': 'info',
+            'file_browser_html': '<ul></ul>',
+            'params_html': '',
+            'selected_preset': None,
+            'param_count': 0,
+            'browser_root': '/tmp',
+            'default_preset_path': DEFAULT_PRESET,
+        }
+    monkeypatch.setattr(move_webserver.synth_param_handler, 'handle_get', fake_get)
+    resp = client.get('/synth-params')
+    assert resp.status_code == 200
+    assert b'pick' in resp.data
+    assert b'Editing:' not in resp.data
+    assert b'Create New Drift Preset' in resp.data
+    assert b'name="new_preset_name"' in resp.data
+    assert b'id="newPresetModal"' in resp.data
+
+def test_synth_params_post(client, monkeypatch):
+    def fake_post(form):
+        return {
+            'message': 'done',
+            'message_type': 'success',
+            'params_html': '<div>p</div>',
+            'browser_root': '/tmp',
+            'selected_preset': 'x',
+            'param_count': 1,
+        }
+    monkeypatch.setattr(move_webserver.synth_param_handler, 'handle_post', fake_post)
+    resp = client.post('/synth-params', data={'action': 'select_preset'})
+    assert resp.status_code == 200
+    assert b'done' in resp.data
+    assert b'Editing:' in resp.data
+    assert b'<div>p</div>' in resp.data
+    assert b'name="rename"' in resp.data
+    assert b'name="new_preset_name"' in resp.data
+    assert b'disabled' in resp.data
+
+def test_synth_params_get_with_preset(client, monkeypatch):
+    def fake_post(form):
+        assert form.getvalue('action') == 'select_preset'
+        assert form.getvalue('preset_select') == 'x'
+        return {
+            'message': 'loaded',
+            'message_type': 'success',
+            'params_html': '<div>p</div>',
+            'browser_root': '/tmp',
+            'selected_preset': 'x',
+            'param_count': 1,
+            'default_preset_path': 'x',
+            'macro_knobs_html': '',
+            'rename_checked': False,
+        }
+    monkeypatch.setattr(move_webserver.synth_param_handler, 'handle_post', fake_post)
+    resp = client.get('/synth-params?preset=x')
+    assert resp.status_code == 200
+    assert b'loaded' in resp.data
+    assert b'Editing:' in resp.data
+
+def test_synth_params_new_preset(client, monkeypatch):
+    from handlers.synth_param_editor_handler_class import DEFAULT_PRESET
+
+    def fake_post(form):
+        return {
+            'message': 'loaded',
+            'message_type': 'success',
+            'params_html': '<div>x</div>',
+            'browser_root': '/tmp',
+            'selected_preset': DEFAULT_PRESET,
+            'param_count': 2,
+            'default_preset_path': DEFAULT_PRESET,
+        }
+    monkeypatch.setattr(move_webserver.synth_param_handler, 'handle_post', fake_post)
+    resp = client.post('/synth-params', data={'action': 'new_preset', 'new_preset_name': 'Test'})
+    assert resp.status_code == 200
+    assert b'loaded' in resp.data
+    assert b'Editing:' in resp.data
+    assert b'name="rename"' in resp.data
+    assert b'name="new_preset_name"' in resp.data
 
 def test_drum_rack_inspector_get(client, monkeypatch):
     def fake_get():
@@ -203,6 +291,13 @@ def test_refresh_post(client, monkeypatch):
     assert resp.status_code == 200
     assert resp.json['message'] == 'refreshed'
 
+
+def test_refresh_get(client, monkeypatch):
+    monkeypatch.setattr(move_webserver, 'refresh_library', lambda: (True, 'done'))
+    resp = client.get('/refresh')
+    assert resp.status_code == 200
+    assert b'done' in resp.data
+
 def test_index_redirect(client):
     resp = client.get('/')
     assert resp.status_code == 302
@@ -300,3 +395,6 @@ def test_pitch_shift_route(client, monkeypatch):
     shifted, sr2 = sf.read(io.BytesIO(resp.data), dtype='float32')
     assert sr2 == sr
     assert len(shifted) == len(data)
+
+
+
