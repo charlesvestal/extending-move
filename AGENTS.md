@@ -29,7 +29,8 @@ extending-move/
 │   ├── time_stretch_handler.py      # Time-stretching (with WSOLA/Phase-vocoder & repitch options)
 │   ├── restore_handler.py       # Move Set restoration
 │   ├── drum_rack_inspector_handler.py   # Preset inspection and modification
-│   ├── synth_preset_inspector_handler.py  # Synth preset macro management
+│   ├── synth_preset_inspector_handler.py  # Legacy macro management
+│   ├── synth_param_editor_handler.py  # Drift parameter and macro editing
 │   ├── set_management_handler.py    # MIDI set generation and management
 │   └── midi_pattern_generator.py    # Custom MIDI pattern creation utilities
 ├── handlers/              # Web request handlers
@@ -39,7 +40,8 @@ extending-move/
 │   ├── reverse_handler_class.py           # WAV reversal interface
 │   ├── restore_handler_class.py           # Move Set restoration interface
 │   ├── drum_rack_inspector_handler_class.py  # Preset inspection interface
-│   ├── synth_preset_inspector_handler_class.py  # Synth macro management interface
+│   ├── synth_preset_inspector_handler_class.py  # Legacy macro management interface
+│   ├── synth_param_editor_handler_class.py  # Drift preset editor interface
 │   ├── set_management_handler_class.py     # MIDI set generation and upload interface
 │   └── file_placer_handler_class.py       # File upload and placement
 ├── templates_jinja/       # Jinja templates used by the Flask app
@@ -50,7 +52,7 @@ extending-move/
 │   ├── reverse.html             # WAV reversal interface
 │   ├── restore.html             # Move Set restoration
 │   ├── drum_rack_inspector.html # Drum rack inspection
-│   ├── synth_macros.html        # Synth macro management
+│   ├── synth_params.html        # Drift preset editor (parameters & macros)
 │   └── midi_upload.html         # MIDI file upload and set creation
 ├── static/               # JavaScript and CSS assets
 ├── examples/              # Example files for testing and development
@@ -444,6 +446,16 @@ This feature demonstrates audio time-stretching:
 
 Dependencies: `audiotsm`, `librosa`, `soundfile`.
 
+### Example: Drift Preset Editor
+
+This feature replaces the old macro editor. It combines macro management and parameter editing for Drift presets in a single workflow:
+
+- Core: `core/synth_param_editor_handler.py`
+- Web Handler: `handlers/synth_param_editor_handler_class.py`
+- Template: `templates_jinja/synth_params.html`
+
+Use the route `/synth-params` and add a link in `base.html` with `active_tab="synth-params"`.
+
 ## Best Practices
 
 1. **Code Organization**
@@ -484,7 +496,7 @@ Dependencies: `audiotsm`, `librosa`, `soundfile`.
 
 7. **Working with Presets**
    - Understand the structure of different preset types (Drift, drumRack, etc.)
-   - Handle macro mappings carefully
+   - Handle macro mappings carefully (use `/synth-params` for editing)
    - Preserve original parameter values when removing mappings
    - Test with various preset types
 
