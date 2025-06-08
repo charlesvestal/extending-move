@@ -8,6 +8,8 @@ function initSlider(el){
   const step=parseFloat(el.dataset.step||1);
   const decimals=parseInt(el.dataset.decimals||2,10);
   const unit=el.dataset.unit||'';
+  const displayDecimals=unit==='%'?0:decimals;
+  const shouldScale=unit==='%' && Math.abs(max)<=1 && Math.abs(min)<=1;
   let value=parseFloat(el.dataset.value||min);
   const centered=el.classList.contains('center')||el.dataset.centered==='true';
   const targetId=el.dataset.target;
@@ -20,7 +22,10 @@ function initSlider(el){
   const label=document.createElement('span');
   label.className='rect-slider-label';
   el.appendChild(label);
-  function format(v){return v.toFixed(decimals)+(unit?` ${unit}`:'');}
+  function format(v){
+    const displayVal=shouldScale?v*100:v;
+    return Number(displayVal).toFixed(displayDecimals)+(unit?` ${unit}`:'');
+  }
   function update(){
     label.textContent=format(value);
     if(target){target.value=value;target.dispatchEvent(new Event('change'));}
