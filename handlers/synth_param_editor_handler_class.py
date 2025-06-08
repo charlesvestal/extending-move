@@ -245,6 +245,15 @@ class SynthParamEditorHandler(BaseHandler):
         "Filter_ModAmount1",
         "Filter_ModAmount2",
         "Global_Envelope2Mode",
+        "ModulationMatrix_Source1",
+        "ModulationMatrix_Amount1",
+        "ModulationMatrix_Target1",
+        "ModulationMatrix_Source2",
+        "ModulationMatrix_Amount2",
+        "ModulationMatrix_Target2",
+        "ModulationMatrix_Source3",
+        "ModulationMatrix_Amount3",
+        "ModulationMatrix_Target3",
     }
 
     # Parameters that use a horizontal slider instead of a dial
@@ -254,6 +263,9 @@ class SynthParamEditorHandler(BaseHandler):
         "PitchModulation_Amount2",
         "Filter_ModAmount1",
         "Filter_ModAmount2",
+        "ModulationMatrix_Amount1",
+        "ModulationMatrix_Amount2",
+        "ModulationMatrix_Amount3",
     }
 
     def _build_param_item(self, idx, name, value, meta, label=None,
@@ -538,21 +550,18 @@ class SynthParamEditorHandler(BaseHandler):
 
         if mod_items:
             ordered = []
-            groups = []
             for idx in range(1, 4):
                 src = mod_items.pop(f"ModulationMatrix_Source{idx}", "")
                 amt = mod_items.pop(f"ModulationMatrix_Amount{idx}", "")
                 dst = mod_items.pop(f"ModulationMatrix_Target{idx}", "")
                 if src or amt or dst:
-                    groups.append(
+                    ordered.append(
+                        f'<div class="param-row mod-matrix-row">'
                         f'<div class="param-pair mod-group">'
                         f'<span class="mod-label">Mod {idx}</span>'
-                        f'{src}{amt}{dst}</div>'
+                        f'{src}{amt}{dst}'
+                        f'</div></div>'
                     )
-            if groups:
-                ordered.append(
-                    f'<div class="param-row mod-matrix-row">{"".join(groups)}</div>'
-                )
             ordered.extend(mod_items.values())
             sections["Modulation"] = ordered
 
