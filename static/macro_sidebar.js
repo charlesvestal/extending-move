@@ -3,6 +3,23 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!macrosInput) return;
   const paramPaths = JSON.parse(document.getElementById('param-paths-input').value || '{}');
   const availableParams = JSON.parse(document.getElementById('available-params-input').value || '[]');
+  const paramDisplay = {};
+  function addSpaces(str) {
+    return str
+      .replace(/([A-Za-z])([0-9])/g, '$1 $2')
+      .replace(/([a-z])([A-Z])/g, '$1 $2');
+  }
+  function friendly(name) {
+    if (!name) return '';
+    const parts = name.split('_');
+    if (parts.length >= 2) {
+      const group = addSpaces(parts[0]);
+      const rest = addSpaces(parts.slice(1).join('_'));
+      return `${group}: ${rest}`;
+    }
+    return addSpaces(name);
+  }
+  availableParams.forEach(p => { paramDisplay[p] = friendly(p); });
   let macros = [];
   try { macros = JSON.parse(macrosInput.value || '[]'); } catch (e) {}
   macros.forEach(m => {
@@ -56,7 +73,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (m.name && !/^(Macro|Knob)\s\d+$/.test(m.name)) {
         text = m.name;
       } else if ((m.parameters || []).length === 1) {
-        text = m.parameters[0].name;
+        const pname = m.parameters[0].name;
+        text = paramDisplay[pname] || pname;
         label.classList.add('placeholder');
       } else {
         text = `Knob ${m.index + 1}`;
@@ -105,7 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const div = document.createElement('div');
       div.className = 'assign-item';
       const span = document.createElement('span');
-      span.textContent = p.name;
+      span.textContent = paramDisplay[p.name] || p.name;
       const rangeDiv = document.createElement('div');
       rangeDiv.className = 'range-inputs';
       const minInput = document.createElement('input');
@@ -160,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!taken.includes(p)) {
         const opt = document.createElement('option');
         opt.value = p;
-        opt.textContent = p;
+        opt.textContent = paramDisplay[p] || p;
         selectEl.appendChild(opt);
       }
     });
