@@ -33,9 +33,10 @@ class SynthPresetInspectorHandler(BaseHandler):
             return f"{category}: {cls._split_words(rest)}"
         return cls._split_words(name)
 
-    @staticmethod
-    def _get_section(name):
-        return name.split("_", 1)[0] if "_" in name else "Other"
+    @classmethod
+    def _get_section(cls, name):
+        section = name.split("_", 1)[0] if "_" in name else "Other"
+        return cls._split_words(section)
     def handle_get(self):
         """Return file browser for synth presets."""
         base_dir = "/data/UserData/UserLibrary/Track Presets"
@@ -421,6 +422,7 @@ class SynthPresetInspectorHandler(BaseHandler):
             return "<p>No parameters found.</p>"
         html = '<ul class="all-params-list">'
         for item in parameters:
-            html += f'<li>{item["name"]}: {item["value"]}</li>'
+            label = self._get_label(item["name"])
+            html += f'<li title="{item["name"]}">{label}: {item["value"]}</li>'
         html += '</ul>'
         return html
