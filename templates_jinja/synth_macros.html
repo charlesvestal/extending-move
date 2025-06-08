@@ -61,14 +61,23 @@
     
     .macros-container {
         margin-top: 20px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
     }
-    
+
     .macro-item {
-        margin-bottom: 20px;
+        flex: 1 1 300px;
         padding: 15px;
         border: 1px solid #ddd;
         border-radius: 5px;
         background-color: #f9f9f9;
+    }
+
+    .macro-top {
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
     
     .macro-header {
@@ -222,6 +231,7 @@
 {% endblock %}
 {% block scripts %}
 <script type="module" src="{{ host_prefix }}/static/file_browser.js"></script>
+<script src="{{ host_prefix }}/static/input-knobs.js"></script>
 <script>
 const driftSchema = {{ schema_json|safe }};
 (function() {
