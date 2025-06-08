@@ -78,7 +78,10 @@
         <button type="submit" id="save-params-btn" disabled>Save Parameters</button>
         <button type="submit" onclick="document.getElementById('action-input').value='reset_preset';">Choose Another Preset</button>
     </div>
-    {{ macro_knobs_html | safe }}
+    <div class="macro-knobs-section">
+        <h3>Macros</h3>
+        {{ macro_knobs_html | safe }}
+    </div>
     <input type="hidden" name="macros_data" id="macros-data-input" value='{{ macros_json }}'>
     <input type="hidden" id="available-params-input" value='{{ available_params_json }}'>
     <input type="hidden" id="param-paths-input" value='{{ param_paths_json }}'>
