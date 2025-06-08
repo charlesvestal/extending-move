@@ -247,9 +247,26 @@ class SynthPresetInspectorHandler(BaseHandler):
                     )
         
         html = '<div class="macros-container">'
-        
+
         for macro in macros:
-            html += f'<div class="macro-item">'
+            value = macro.get("value")
+            try:
+                value = float(value)
+            except Exception:
+                value = 0.0
+            display_val = round(value, 1)
+            html += f'<div class="macro-item macro-{macro["index"]}">'
+            html += '<div class="macro-top">'
+            name_label = macro.get("name", f"Macro {macro['index']}")
+            html += (
+                f'<div class="macro-knob macro-{macro["index"]}">'
+                f'<span class="macro-label">{name_label}</span>'
+                f'<input type="range" class="macro-dial input-knob" '
+                f'value="{display_val}" min="0" max="127" step="0.1" data-decimals="1" disabled>'
+                f'<span class="macro-number">{display_val}</span>'
+                f'</div>'
+            )
+            html += '<div>'
             html += f'<div class="macro-header">'
             html += f'<span>Macro {macro["index"]}:</span> '
             default_label = f"Macro {macro['index']}"
@@ -317,7 +334,7 @@ class SynthPresetInspectorHandler(BaseHandler):
             html += '</div>'  # Close parameter-controls
 
             html += '</div>'
-            
+
             # Display current mappings
             html += '<div class="current-mappings">'
             html += '<h4>Current Mappings:</h4>'
@@ -346,8 +363,10 @@ class SynthPresetInspectorHandler(BaseHandler):
             else:
                 html += '<p>No parameters mapped to this macro.</p>'
             
-            html += '</div>'
-            html += '</div>'
+            html += '</div>'  # close current-mappings
+            html += '</div>'  # close inner container
+            html += '</div>'  # close macro-top
+            html += '</div>'  # close macro-item
             
         html += '</div>'
         return html
