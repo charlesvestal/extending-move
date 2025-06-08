@@ -15,20 +15,20 @@
     {{ file_browser_html | safe }}
 </div>
 {% else %}
-    <form method="post" action="{{ host_prefix }}/synth-params" id="param-form">
-        <input type="hidden" name="action" id="action-input" value="save_params">
-        <input type="hidden" name="preset_select" value="{{ selected_preset }}">
-        <input type="hidden" name="param_count" value="{{ param_count }}">
-        <div class="preset-controls">
-            <label class="preset-name">Preset Name: <input type="text" name="new_preset_name" value="{{ selected_preset.split('/')[-1] }}"></label>
-            <button type="submit">Save Preset</button>
-            <button type="submit" onclick="document.getElementById('action-input').value='reset_preset';">Choose Another Preset</button>
-        </div>
-        <p class="current-preset">Editing: {{ selected_preset.split('/')[-1] }}</p>
-        <div class="param-list">
-            {{ params_html | safe }}
-        </div>
-    </form>
+<form method="post" action="{{ host_prefix }}/synth-params" id="param-form">
+    <input type="hidden" name="action" id="action-input" value="save_params">
+    <input type="hidden" name="preset_select" value="{{ selected_preset }}">
+    <input type="hidden" name="param_count" value="{{ param_count }}">
+    <button type="submit" onclick="document.getElementById('action-input').value='reset_preset';">Choose Another Preset</button>
+    <p class="current-preset">Editing: {{ selected_preset.split('/')[-1] }}</p>
+    {{ macro_knobs_html | safe }}
+    <div class="param-list">
+        {{ params_html | safe }}
+    </div>
+    <label>New Preset Name: <input type="text" name="new_preset_name"></label>
+    <button type="submit">Save Parameters</button>
+</form>
+
 {% endif %}
 {% endblock %}
 {% block scripts %}
