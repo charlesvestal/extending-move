@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const target = el.dataset.target;
         const decimals = parseInt(el.dataset.decimals || '2', 10);
         const unit = el.dataset.unit || '';
+        const displayDecimals = unit === '%' ? 0 : decimals;
         const displayId = el.dataset.display;
         const hidden = document.querySelector(`input[name="${target}"]`);
         const displayEl = displayId ? document.getElementById(displayId) : null;
@@ -11,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const shouldScale = unit === '%' && Math.abs(max) <= 1 && Math.abs(min) <= 1;
         const format = (v) => {
             const displayVal = shouldScale ? v * 100 : v;
-            return Number(displayVal).toFixed(decimals) + (unit ? ' ' + unit : '');
+            return Number(displayVal).toFixed(displayDecimals) + (unit ? ' ' + unit : '');
         };
         if (displayEl) {
             displayEl.textContent = isNaN(el.value) ? 'not set' : format(parseFloat(el.value));
