@@ -171,9 +171,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  document.querySelectorAll('.macro-label, .macro-knob').forEach(el => {
-    el.addEventListener('click', () => {
-      const idx = parseInt(el.dataset.index, 10);
+  // Only open the sidebar when the macro name is clicked so that
+  // the knob itself can be used without interference.
+  document.querySelectorAll('.macro-label').forEach(label => {
+    label.addEventListener('click', () => {
+      const idx = parseInt(label.dataset.index, 10);
       if (!isNaN(idx)) openSidebar(idx);
     });
   });
