@@ -858,6 +858,11 @@ select {
 }
 .macro-add-section {
     margin-top: 0.5rem;
-    display: flex;
+    /* display: flex; */
     gap: 0.25rem;
+}
+
+.macro-add-section select {
+    margin-right: 25px;
+    max-width: 100%;
 }
