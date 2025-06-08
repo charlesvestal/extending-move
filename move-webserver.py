@@ -136,7 +136,9 @@ def warm_up_modules():
     try:
         start = time.perf_counter()
         y = np.zeros(512, dtype=float)
-        librosa.onset.onset_detect(y=y, sr=22050, units="time", delta=0.07)
+        librosa.onset.onset_detect(
+            y=y, sr=22050, units="time", delta=0.07, n_fft=512
+        )
         logger.info(
             "Librosa onset_detect warm-up complete in %.3fs",
             time.perf_counter() - start,
