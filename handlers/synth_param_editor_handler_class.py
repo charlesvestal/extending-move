@@ -254,6 +254,7 @@ class SynthParamEditorHandler(BaseHandler):
         "PitchModulation_Amount2",
         "Filter_ModAmount1",
         "Filter_ModAmount2",
+        "Lfo_ModAmount",
     }
 
     def _build_param_item(self, idx, name, value, meta, label=None,
@@ -344,8 +345,10 @@ class SynthParamEditorHandler(BaseHandler):
         filter_items: dict[str, str] = {}
         osc_items: dict[str, str] = {}
         env_items: dict[str, str] = {}
+        lfo_items: dict[str, str] = {}
         mixer_items: dict[str, str] = {}
         cycling_mode_val = None
+        lfo_mode_val = None
 
         for i, item in enumerate(params):
             name = item['name']
@@ -367,6 +370,14 @@ class SynthParamEditorHandler(BaseHandler):
                 extra = "cycle-rate time-rate"
             elif name == "CyclingEnvelope_SyncedRate":
                 extra = "cycle-rate sync-rate"
+            elif name == "Lfo_Rate":
+                extra = "lfo-rate freq-rate"
+            elif name == "Lfo_Ratio":
+                extra = "lfo-rate ratio-rate"
+            elif name == "Lfo_Time":
+                extra = "lfo-rate time-rate"
+            elif name == "Lfo_SyncedRate":
+                extra = "lfo-rate sync-rate"
 
             html = self._build_param_item(
                 i,
@@ -381,6 +392,8 @@ class SynthParamEditorHandler(BaseHandler):
 
             if name == "CyclingEnvelope_Mode":
                 cycling_mode_val = val
+            if name == "Lfo_Mode":
+                lfo_mode_val = val
 
             section = self._get_section(name)
             if section == "Filter":
@@ -389,6 +402,8 @@ class SynthParamEditorHandler(BaseHandler):
                 osc_items[name] = html
             elif section == "Envelopes":
                 env_items[name] = html
+            elif section == "LFO":
+                lfo_items[name] = html
             elif section == "Mixer":
                 mixer_items[name] = html
             else:
@@ -532,6 +547,42 @@ class SynthParamEditorHandler(BaseHandler):
 
             ordered.extend(env_items.values())
             sections["Envelopes"] = ordered
+
+        if lfo_items:
+            rate = lfo_items.pop("Lfo_Rate", "")
+            ratio = lfo_items.pop("Lfo_Ratio", "")
+            time = lfo_items.pop("Lfo_Time", "")
+            sync = lfo_items.pop("Lfo_SyncedRate", "")
+            mode = lfo_items.pop("Lfo_Mode", "")
+            shape = lfo_items.pop("Lfo_Shape", "")
+            retrig = lfo_items.pop("Lfo_Retrigger", "")
+            amount = lfo_items.pop("Lfo_Amount", "")
+            mod_src = lfo_items.pop("Lfo_ModSource", "")
+            mod_amt = lfo_items.pop("Lfo_ModAmount", "")
+
+            if lfo_mode_val != "Freq" and rate:
+                rate = rate.replace('param-item"', 'param-item hidden"', 1)
+            if lfo_mode_val != "Ratio" and ratio:
+                ratio = ratio.replace('param-item"', 'param-item hidden"', 1)
+            if lfo_mode_val != "Time" and time:
+                time = time.replace('param-item"', 'param-item hidden"', 1)
+            if lfo_mode_val != "Sync" and sync:
+                sync = sync.replace('param-item"', 'param-item hidden"', 1)
+
+            ordered = []
+            row1 = "".join([rate, ratio, time, sync, mode])
+            if row1.strip():
+                ordered.append(f'<div class="param-row lfo-rate-row">{row1}</div>')
+            row2 = "".join([shape, retrig])
+            if row2.strip():
+                ordered.append(f'<div class="param-row">{row2}</div>')
+            pair = f'<div class="param-pair">{mod_src}{mod_amt}</div>' if (mod_src or mod_amt) else ""
+            row3 = "".join([amount, pair])
+            if row3.strip():
+                ordered.append(f'<div class="param-row">{row3}</div>')
+
+            ordered.extend(lfo_items.values())
+            sections["LFO"] = ordered
 
         out_html = '<div class="drift-param-panels">'
         for sec in self.SECTION_ORDER:
