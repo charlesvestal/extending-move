@@ -2,6 +2,7 @@
 import os
 import json
 import logging
+import shutil
 
 from handlers.base_handler import BaseHandler
 from core.file_browser import generate_dir_html
@@ -80,15 +81,28 @@ class SynthParamEditorHandler(BaseHandler):
         if action == 'reset_preset':
             return self.handle_get()
 
+        message = ''
         if action == 'new_preset':
-            preset_path = DEFAULT_PRESET
+            new_name = form.getvalue('new_preset_name')
+            if not new_name:
+                return self.format_error_response("Preset name required")
+            directory = os.path.dirname(DEFAULT_PRESET)
+            if not new_name.endswith('.ablpreset') and not new_name.endswith('.json'):
+                new_name += '.ablpreset'
+            preset_path = os.path.join(directory, new_name)
+            if os.path.exists(preset_path):
+                return self.format_error_response("Preset already exists")
+            try:
+                shutil.copy(DEFAULT_PRESET, preset_path)
+            except Exception as exc:
+                return self.format_error_response(f"Could not create preset: {exc}")
+            message = f"Created new preset {os.path.basename(preset_path)}"
         else:
             preset_path = form.getvalue('preset_select')
 
         if not preset_path:
             return self.format_error_response("No preset selected")
 
-        message = ''
         rename_flag = False
         if action == 'save_params':
             try:
@@ -132,9 +146,7 @@ class SynthParamEditorHandler(BaseHandler):
             else:
                 message += f" Library refresh failed: {refresh_message}"
         elif action in ['select_preset', 'new_preset']:
-            if action == 'new_preset':
-                message = "Loaded default preset"
-            else:
+            if action == 'select_preset':
                 message = f"Selected preset: {os.path.basename(preset_path)}"
         else:
             return self.format_error_response("Unknown action")
