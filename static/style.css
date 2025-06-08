@@ -649,6 +649,11 @@ select {
     margin: 0 0 1rem;
 }
 
+.return-params-link {
+    text-align: center;
+    margin: 1rem 0;
+}
+
 /* Layout for preset editor controls */
 .preset-controls {
     display: flex;
