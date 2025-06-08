@@ -18,6 +18,24 @@ from core.file_browser import generate_dir_html
 logger = logging.getLogger(__name__)
 
 class SynthPresetInspectorHandler(BaseHandler):
+
+    @staticmethod
+    def _split_words(text):
+        """Split CamelCase words and numbers into a human-friendly string."""
+        parts = re.findall(r"[A-Z]+(?=[A-Z][a-z]|\d|$)|[A-Z]?[a-z]+|\d+", text)
+        return " ".join(parts)
+
+    @classmethod
+    def _get_label(cls, name):
+        """Return a user friendly label for a parameter."""
+        if "_" in name:
+            category, rest = name.split("_", 1)
+            return f"{category}: {cls._split_words(rest)}"
+        return cls._split_words(name)
+
+    @staticmethod
+    def _get_section(name):
+        return name.split("_", 1)[0] if "_" in name else "Other"
     def handle_get(self):
         """Return file browser for synth presets."""
         base_dir = "/data/UserData/UserLibrary/Track Presets"
@@ -305,9 +323,15 @@ class SynthPresetInspectorHandler(BaseHandler):
             html += f'<label for="macro_{macro["index"]}_parameter">Map Parameter:</label>'
             html += f'<select name="macro_{macro["index"]}_parameter" id="macro_{macro["index"]}_parameter">'
             html += '<option value="">--Select Parameter--</option>'
-            
-            # Add options for all available parameters
+
+            options_by_sec = {}
+            section_order = []
             for param in available_parameters:
+                section = self._get_section(param)
+                if section not in options_by_sec:
+                    options_by_sec[section] = []
+                    section_order.append(section)
+                label = self._get_label(param)
                 selected = ' selected="selected"' if param == default_param else ''
                 info = self.parameter_info.get(param, {})
                 data_attrs = ''
@@ -320,8 +344,14 @@ class SynthPresetInspectorHandler(BaseHandler):
                 if info.get('options'):
                     opts = ",".join(map(str, info['options']))
                     data_attrs += f' data-options="{opts}"'
-                html += f'<option value="{param}"{selected}{data_attrs}>{param}</option>'
-            
+                opt_html = (
+                    f'<option value="{param}" title="{param}"{selected}{data_attrs}>{label}</option>'
+                )
+                options_by_sec[section].append(opt_html)
+
+            for sec in section_order:
+                html += f'<optgroup label="{sec}">' + ''.join(options_by_sec[sec]) + '</optgroup>'
+
             html += '</select>'
             
             # Range inputs inline with Add button
@@ -351,7 +381,8 @@ class SynthPresetInspectorHandler(BaseHandler):
             if macro["parameters"]:
                 html += '<ul class="parameters-list">'
                 for param in macro["parameters"]:
-                    param_info = f'{param["name"]}'
+                    base_label = self._get_label(param["name"])
+                    param_info = f'{base_label}'
                     info = self.parameter_info.get(param["name"], {})
                     if info.get("options"):
                         opts = ", ".join(map(str, info["options"]))
@@ -361,7 +392,7 @@ class SynthPresetInspectorHandler(BaseHandler):
                     
                     # Add delete button with onclick handler to set action and parameter info
                     html += f'<li class="parameter-item">'
-                    html += f'<span class="parameter-info">{param_info}</span>'
+                    html += f'<span class="parameter-info" title="{param["name"]}">{param_info}</span>'
                     html += f'<button type="submit" class="delete-mapping-btn" '
                     html += f'onclick="document.getElementById(\'action-input\').value=\'delete_mapping\'; '
                     html += f'document.getElementById(\'param-path-input\').value=\'{param["path"]}\'; '
