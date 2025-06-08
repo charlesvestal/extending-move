@@ -639,13 +639,13 @@
     "min": null,
     "max": null,
     "options": [
-      "Pulse",
-      "Rectangle",
+      "Sine",
+      "Triangle",
+      "Shark Tooth",
       "Saturated",
       "Saw",
-      "Shark Tooth",
-      "Sine",
-      "Triangle"
+      "Pulse",
+      "Rectangle"
     ]
   },
   "Oscillator2_Detune": {
@@ -668,11 +668,11 @@
     "min": null,
     "max": null,
     "options": [
-      "Rectangle",
+      "Sine",
+      "Triangle",
       "Saturated",
       "Saw",
-      "Sine",
-      "Triangle"
+      "Rectangle"
     ]
   },
   "PitchModulation_Amount1": {
