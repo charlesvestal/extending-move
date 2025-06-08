@@ -79,6 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
         label.classList.add('placeholder');
       } else {
         text = `Knob ${m.index + 1}`;
+        label.classList.add('placeholder');
       }
       label.textContent = text;
     });
