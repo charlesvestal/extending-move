@@ -51,7 +51,13 @@
     <input type="hidden" name="action" id="action-input" value="save_params">
     <input type="hidden" name="preset_select" value="{{ selected_preset }}">
     <input type="hidden" name="param_count" value="{{ param_count }}">
-    <p class="current-preset">Editing: {{ selected_preset.split('/')[-1] }}</p>
+    {% set _display = selected_preset %}
+    {% if selected_preset.startswith('/data/UserData/UserLibrary/Track Presets') %}
+        {% set _display = '/' + selected_preset.split('/data/UserData/UserLibrary/Track Presets', 1)[1] %}
+    {% elif selected_preset.startswith('examples/Track Presets') %}
+        {% set _display = '/' + selected_preset.split('examples/Track Presets', 1)[1] %}
+    {% endif %}
+    <p class="current-preset">Editing: {{ _display }}</p>
     {% set _basename = selected_preset.split('/')[-1] %}
     {% if _basename.endswith('.json') or _basename.endswith('.ablpreset') %}
         {% set _prefill = _basename.rsplit('.', 1)[0] %}
