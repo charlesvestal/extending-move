@@ -24,14 +24,10 @@ Tools for extending the Ableton Move. This project provides a companion webserve
   - Create reversed versions directly in the preset
   - Time stretch samples to a target BPM and length with two different algorithms, for melodic or rhythmic content.
 
-- **Synth Macros**
-  - View and edit macro mappings for Drift presets
-  - Customize macro names for better organization
-  - Add and delete parameter mappings
-  - Assign multiple parameters to a single macro control
-  - Set custom range values for more precise control
-- **Synth Parameter Editor**
+- **Drift Preset Editor**
   - Modify any Drift parameter value
+  - Manage macro assignments and custom names in the same interface
+  - Set custom range values for macro‑controlled parameters
   - Save changes as a new preset file
   - Numeric parameters use sliders with an input field
   - Slider steps are 0.01 for values near ±1 and adapt to the parameter's default precision
