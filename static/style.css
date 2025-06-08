@@ -530,6 +530,10 @@ select {
     justify-content: center;
 }
 
+.mod-matrix-row .mod-group {
+    flex: 1;
+}
+
 .mod-label {
     font-weight: bold;
     margin-bottom: 0.25rem;
@@ -614,10 +618,9 @@ select {
     /* width: 90px; */
 }
 .param-number {
-    margin-left: 0.5rem;
-    min-width: 60px;
+    min-width: 40px;
     display: inline-block;
-    text-align: right;
+    text-align: center;
     font-size: 0.8rem;
 }
 
@@ -635,6 +638,10 @@ select {
     line-height: 24px;
     padding: 0 1.5rem 0 0.5rem;
     text-align: center;
+}
+
+.filter-type-select {
+    width: 48px;
 }
   
 .param-item {
