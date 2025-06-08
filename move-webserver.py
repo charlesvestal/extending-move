@@ -456,6 +456,9 @@ def synth_params():
     default_preset_path = result.get("default_preset_path")
     macro_knobs_html = result.get("macro_knobs_html", "")
     rename_checked = result.get("rename_checked", False)
+    macros_json = result.get("macros_json", "[]")
+    available_params_json = result.get("available_params_json", "[]")
+    param_paths_json = result.get("param_paths_json", "{}")
     preset_selected = bool(selected_preset)
     return render_template(
         "synth_params.html",
@@ -472,6 +475,9 @@ def synth_params():
         default_preset_path=default_preset_path,
         macro_knobs_html=macro_knobs_html,
         rename_checked=rename_checked,
+        macros_json=macros_json,
+        available_params_json=available_params_json,
+        param_paths_json=param_paths_json,
         active_tab="synth-params",
     )
 
