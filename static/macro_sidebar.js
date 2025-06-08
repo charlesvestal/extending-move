@@ -72,8 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const rangeDiv = document.createElement('div');
       rangeDiv.className = 'range-inputs';
       const minInput = document.createElement('input');
-      minInput.type = 'number';
-      minInput.step = '0.01';
+      minInput.type = 'text';
       minInput.placeholder = 'min';
       if (p.rangeMin !== undefined) {
         const n = parseFloat(p.rangeMin);
@@ -86,8 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const dash = document.createElement('span');
       dash.textContent = '-';
       const maxInput = document.createElement('input');
-      maxInput.type = 'number';
-      maxInput.step = '0.01';
+      maxInput.type = 'text';
       maxInput.placeholder = 'max';
       if (p.rangeMax !== undefined) {
         const n = parseFloat(p.rangeMax);

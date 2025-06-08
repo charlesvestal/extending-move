@@ -834,7 +834,7 @@ select {
     align-items: center;
     gap: 0.25rem;
 }
-.range-inputs input[type="number"] {
+.range-inputs input {
     width: 60px;
 }
 .macro-add-section {
