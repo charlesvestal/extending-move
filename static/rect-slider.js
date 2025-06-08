@@ -6,6 +6,11 @@ function initSlider(el){
   const min=parseFloat(el.dataset.min||0);
   const max=parseFloat(el.dataset.max||1);
   const step=parseFloat(el.dataset.step||1);
+  const fineStep=step/10;
+  const range=max-min;
+  function getStep(v){
+    return (range>0 && v-min<range*0.1)?fineStep:step;
+  }
   const decimals=parseInt(el.dataset.decimals||2,10);
   const unit=el.dataset.unit||'';
   const displayDecimals=unit==='%'?0:decimals;
@@ -70,7 +75,8 @@ function initSlider(el){
       const dy=startY-y;
       const scale=(max-min)/100;
       let v=startVal+dy*scale;
-      v=Math.round(v/step)*step;
+      let st=getStep(v);
+      v=Math.round(v/st)*st;
       value=clamp(v,min,max);
       update();
     }
