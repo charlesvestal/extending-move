@@ -370,7 +370,10 @@ class SynthParamEditorHandler(BaseHandler):
         "Global_Transpose": "Transpose",
         "Global_NotePitchBend": "Note PB",
         "Global_PitchBendRange": "PB Range",
-        "Global_ResetOscillatorPhase": "R",
+        "Global_ResetOscillatorPhase": "Reset Osc Phase",
+        "Global_HiQuality": "HQ",
+        "Global_SerialNumber": "Serial",
+
     }
 
     # Short labels for oscillator waveforms
