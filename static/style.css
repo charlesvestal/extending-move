@@ -173,12 +173,16 @@ select {
     /* width: 100%; */
     max-width: 400px;
     padding: 0.625rem;
-    /* margin-bottom: 1rem; */
+    margin-bottom: 1rem;
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 0.875rem;
     background-color: white;
     /* font-family: 'Ableton Sans', Arial, sans-serif; */
+}
+
+input + small {
+	margin-left: 0.25rem;
 }
 
 label {
@@ -227,6 +231,10 @@ input[type="submit"]:disabled {
     background-color: #ccc;
     color: #666;
     cursor: default;
+}
+
+.color-dropdown {
+	margin-bottom: 1rem;
 }
 
 /* Card styling for grid layouts */
@@ -412,15 +420,16 @@ select {
     overflow-y: auto;
     border: 1px solid #ccc;
     padding: 0.25rem;
+    margin-bottom: 1rem;
 }
 
 /* Pad grid for set management */
 .pad-grid {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
-    gap: 0.25rem;
+    gap: 0.5rem;
     margin-bottom: 1rem;
-    max-width:600px;
+    max-width: 600px;
 }
 
 .pad-cell {
@@ -430,7 +439,7 @@ select {
     text-align: center;
     font-weight: 600;
     box-sizing: border-box;
-    height:45px;
+    aspect-ratio: 4 / 3; 
 }
 
 .pad-cell.free {
@@ -452,6 +461,9 @@ select {
     background: #d0e8ff;
 }
 
+.pad-grid label {
+	margin-bottom: 0;
+}
 
 
 /* Small icon button for reverting samples */
@@ -646,6 +658,7 @@ select {
     flex-direction: column;
     align-items: center;
     /* width: 90px; */
+    padding: 0.375rem;
 }
 .param-number {
     /* margin-left: 0.5rem; */
@@ -654,6 +667,7 @@ select {
     display: inline-block;
     text-align: center;
     font-size: 0.8rem;
+    margin-top: 0.25rem;
 }
 
 .param-input {
@@ -692,6 +706,7 @@ select {
     flex-direction: column;
     align-items: center;
     cursor: default;
+    padding: 0.375rem;
 }
 
 .macro-label {
@@ -699,6 +714,11 @@ select {
     margin-bottom: 0.25rem;
     cursor: pointer;
 }
+
+.macro-label::after {
+  content: " ✏️";
+}
+
 .macro-label.placeholder {
     color: #777;
 }
@@ -734,6 +754,9 @@ select {
     margin-bottom: 1rem;
 }
 .preset-controls label {
+    margin-bottom: 0;
+}
+.preset-controls input {
     margin-bottom: 0;
 }
 .preset-actions {
@@ -865,6 +888,9 @@ select {
     gap: 0.5rem;
     margin-bottom: 0.25rem;
 }
+.assign-item select {
+	margin-bottom: 0;
+}
 .range-inputs {
     display: flex;
     align-items: center;
@@ -872,6 +898,7 @@ select {
 }
 .range-inputs input {
     width: 60px;
+    margin-bottom: 0;
 }
 .macro-add-section {
     margin-top: 0.5rem;
