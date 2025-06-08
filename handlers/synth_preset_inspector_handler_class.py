@@ -62,19 +62,19 @@ class SynthPresetInspectorHandler(BaseHandler):
             if action == 'save_name':
                 macro_index = int(form.getvalue('macro_index'))
                 new_name = form.getvalue(f'macro_{macro_index}_name')
-                
-                if new_name:  # Only update if a name was provided
-                    # Create a single macro update
-                    macro_updates = {macro_index: new_name}
-                    
-                    # Update the preset file with the new macro name
-                    update_result = update_preset_macro_names(preset_path, macro_updates)
-                    if not update_result['success']:
-                        return self.format_error_response(update_result['message'])
-                    
+
+                # Allow blank names to remove customName
+                macro_updates = {macro_index: new_name}
+
+                # Update the preset file with the new macro name (or removal)
+                update_result = update_preset_macro_names(preset_path, macro_updates)
+                if not update_result['success']:
+                    return self.format_error_response(update_result['message'])
+
+                if new_name:
                     message = f"Saved name for Macro {macro_index}: {new_name}"
                 else:
-                    return self.format_error_response("No name provided for the macro")
+                    message = f"Removed custom name for Macro {macro_index}"
             
             # If this is a save names action for all macros, update all macro names
             elif action == 'save_names':
@@ -86,14 +86,11 @@ class SynthPresetInspectorHandler(BaseHandler):
                     if match:
                         macro_index = int(match.group(1))
                         new_name = form.getvalue(field_name)
-                        if new_name:  # Only update if a name was provided
-                            macro_updates[macro_index] = new_name
-                
-                # Update the preset file with the new macro names
-                if macro_updates:
-                    update_result = update_preset_macro_names(preset_path, macro_updates)
-                    if not update_result['success']:
-                        return self.format_error_response(update_result['message'])
+                        macro_updates[macro_index] = new_name
+
+                update_result = update_preset_macro_names(preset_path, macro_updates)
+                if not update_result['success']:
+                    return self.format_error_response(update_result['message'])
                 
                 message = f"Saved macro names for preset: {preset_path.split('/')[-1]}"
             
