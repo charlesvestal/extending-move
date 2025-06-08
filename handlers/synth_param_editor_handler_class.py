@@ -10,7 +10,10 @@ from core.synth_preset_inspector_handler import (
     load_drift_schema,
     extract_macro_information,
 )
-from core.synth_param_editor_handler import update_parameter_values
+from core.synth_param_editor_handler import (
+    update_parameter_values,
+    update_macro_values,
+)
 
 # Path to the preset used when creating a new preset. Prefer the version in the
 # user's library but fall back to the bundled example if it doesn't exist.
@@ -93,7 +96,18 @@ class SynthParamEditorHandler(BaseHandler):
             result = update_parameter_values(preset_path, updates, output_path)
             if not result['success']:
                 return self.format_error_response(result['message'])
-            message = result['message']
+            preset_path = result['path']
+
+            macro_updates = {}
+            for i in range(8):
+                val = form.getvalue(f'macro_{i}_value')
+                if val is not None:
+                    macro_updates[i] = val
+            macro_result = update_macro_values(preset_path, macro_updates, preset_path)
+            if not macro_result['success']:
+                return self.format_error_response(macro_result['message'])
+
+            message = result['message'] + "; " + macro_result['message']
             if output_path:
                 message += f" Saved as {os.path.basename(output_path)}"
         elif action in ['select_preset', 'new_preset']:
@@ -748,9 +762,11 @@ class SynthParamEditorHandler(BaseHandler):
             html.append(
                 f'<div class="macro-knob">'
                 f'<span class="macro-label">{name}</span>'
-                f'<input type="range" class="macro-dial input-knob" '
-                f'value="{display_val}" min="0" max="127" step="0.1" disabled>'
-                f'<span class="macro-number">{display_val}</span>'
+                f'<input id="macro_{i}_dial" type="range" class="macro-dial input-knob" '
+                f'data-target="macro_{i}_value" data-display="macro_{i}_disp" '
+                f'value="{display_val}" min="0" max="127" step="0.1" data-decimals="1">'
+                f'<span id="macro_{i}_disp" class="macro-number"></span>'
+                f'<input type="hidden" name="macro_{i}_value" value="{display_val}">' 
                 f'</div>'
             )
         html.append('</div>')
