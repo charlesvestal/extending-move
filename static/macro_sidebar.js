@@ -46,15 +46,32 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function updateHighlights() {
+    const mapped = {};
+    macros.forEach(m => m.parameters.forEach(p => { mapped[p.name] = m.index; }));
+
     document.querySelectorAll('.param-item').forEach(item => {
       const name = item.dataset.name;
-      item.classList.remove(...Array.from({length:8},(_,i)=>'macro-'+i));
-      for (const m of macros) {
-        if (m.parameters.some(p => p.name === name)) {
-          item.classList.add('macro-'+m.index);
-        }
+      const idx = mapped[name];
+      item.classList.remove('param-mapped', ...Array.from({length:8},(_,i)=>'macro-'+i));
+      const isMapped = idx !== undefined;
+      if (isMapped) {
+        item.classList.add('param-mapped');
+        item.classList.add('macro-' + idx);
       }
+      item.querySelectorAll('input:not([type=hidden]):not(.macro-dial), select').forEach(inp => {
+        inp.disabled = isMapped;
+      });
+      item.querySelectorAll('.rect-slider').forEach(sl => {
+        if (isMapped) {
+          sl.classList.add('disabled');
+          sl.dataset.disabled = 'true';
+        } else {
+          sl.classList.remove('disabled');
+          delete sl.dataset.disabled;
+        }
+      });
     });
+
     document.querySelectorAll('.macro-knob').forEach(knob => {
       const idx = parseInt(knob.dataset.index,10);
       knob.classList.toggle('macro-'+idx, (macros.find(m=>m.index===idx)?.parameters.length||0)>0);
