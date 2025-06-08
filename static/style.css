@@ -569,18 +569,23 @@ select {
 .param-panel.envelopes {
     flex: 2;
 }
-
+.param-list {
+    max-width:975px;
+}
 .param-panel.oscillators{
-    max-width: 285px;
+    max-width: 280px;
+}
+
+.param-panel.mixer{
+    max-width: 128px;
 }
 
 .param-panel.filter{
-    max-width: 202px;
+    max-width: 180px;
 }
 
-
-.param-panel.mixer{
-    max-width: 145px;
+.param-panel.envelopes{
+    max-width: 290px;
 }
 
 .param-panel.filter .param-items {
