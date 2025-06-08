@@ -129,6 +129,10 @@ def log_request_time(response):
 
 def warm_up_modules():
     """Warm-up heavy modules to avoid first-call latency."""
+    if os.environ.get("SKIP_MODULE_WARMUP"):
+        logger.info("SKIP_MODULE_WARMUP set; skipping module warm-up")
+        return
+
     overall_start = time.perf_counter()
     # Warm-up librosa onset detection
     try:
