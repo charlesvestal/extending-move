@@ -395,3 +395,9 @@ def test_pitch_shift_route(client, monkeypatch):
     assert len(shifted) == len(data)
 
 
+def test_slider_demo_get(client):
+    resp = client.get('/slider-demo')
+    assert resp.status_code == 200
+    assert b'Slider Demo' in resp.data
+
+
