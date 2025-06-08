@@ -376,7 +376,7 @@ class SynthParamEditorHandler(BaseHandler):
             )
             html.append(f'<input type="hidden" name="param_{idx}_value" value="{value}">')
         elif p_type == "enum" and meta.get("options"):
-            html.append(f'<select name="param_{idx}_value">')
+            html.append(f'<select class="param-select" name="param_{idx}_value">')
             short_map = {}
             if name in ("Oscillator1_Type", "Oscillator2_Type"):
                 short_map = self.OSC_WAVE_SHORT
@@ -404,32 +404,49 @@ class SynthParamEditorHandler(BaseHandler):
                 f'<input type="number" class="param-input" name="param_{idx}_value" value="{value}"{min_attr}{max_attr}>'
             )
         else:
-            min_attr = f' min="{meta.get("min")}"' if meta.get("min") is not None else ''
-            max_attr = f' max="{meta.get("max")}"' if meta.get("max") is not None else ''
-            step_attr = ''
-            if meta.get("decimals") is not None:
-                step_attr = f' step="{10 ** (-meta["decimals"])}"'
-            else:
-                min_val = meta.get("min")
-                max_val = meta.get("max")
-                if (
-                    min_val is not None
-                    and max_val is not None
-                    and max_val <= 1
-                    and min_val >= -1
-                ):
-                    step_attr = ' step="0.01"'
-            unit_attr = f' data-unit="{meta.get("unit")}"' if meta.get("unit") else ''
-            disp_id = f'param_{idx}_display'
-            klass = "param-dial input-knob"
+            min_val = meta.get("min")
+            max_val = meta.get("max")
+            decimals = meta.get("decimals")
+            step_val = meta.get("step")
+            if decimals is not None and step_val is None:
+                step_val = 10 ** (-decimals)
+            if step_val is None and min_val is not None and max_val is not None and max_val <= 1 and min_val >= -1:
+                step_val = 0.01
+            unit_val = meta.get("unit")
             if slider:
-                klass = "param-slider input-hslider"
-            html.append(
-                f'<input id="param_{idx}_dial" type="range" class="{klass}" data-target="param_{idx}_value" '
-                f'data-display="{disp_id}" value="{value}"{min_attr}{max_attr}{step_attr}{unit_attr}>'
-            )
-            html.append(f'<span id="{disp_id}" class="param-number"></span>')
-            html.append(f'<input type="hidden" name="param_{idx}_value" value="{value}">')
+                classes = ["rect-slider"]
+                if min_val is not None and max_val is not None and min_val < 0 < max_val:
+                    classes.append("center")
+                attrs = []
+                if min_val is not None:
+                    attrs.append(f'data-min="{min_val}"')
+                if max_val is not None:
+                    attrs.append(f'data-max="{max_val}"')
+                if step_val is not None:
+                    attrs.append(f'data-step="{step_val}"')
+                if decimals is not None:
+                    attrs.append(f'data-decimals="{decimals}"')
+                if unit_val:
+                    attrs.append(f'data-unit="{unit_val}"')
+                attrs.append(f'data-target="param_{idx}_value"')
+                attrs.append(f'data-value="{value}"')
+                attr_str = " ".join(attrs)
+                html.append(
+                    f'<div id="param_{idx}_slider" class="{" ".join(classes)}" {attr_str}></div>'
+                )
+                html.append(f'<input type="hidden" name="param_{idx}_value" value="{value}">')
+            else:
+                min_attr = f' min="{min_val}"' if min_val is not None else ''
+                max_attr = f' max="{max_val}"' if max_val is not None else ''
+                step_attr = f' step="{step_val}"' if step_val is not None else ''
+                unit_attr = f' data-unit="{unit_val}"' if unit_val else ''
+                disp_id = f'param_{idx}_display'
+                html.append(
+                    f'<input id="param_{idx}_dial" type="range" class="param-dial input-knob" data-target="param_{idx}_value" '
+                    f'data-display="{disp_id}" value="{value}"{min_attr}{max_attr}{step_attr}{unit_attr}>'
+                )
+                html.append(f'<span id="{disp_id}" class="param-number"></span>')
+                html.append(f'<input type="hidden" name="param_{idx}_value" value="{value}">')
 
         html.append(f'<input type="hidden" name="param_{idx}_name" value="{name}">')
         html.append('</div>')
