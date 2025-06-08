@@ -293,6 +293,17 @@ def extract_macro_information(preset_path):
         # Then find all parameters with macroMapping
         find_macro_mappings(preset_data)
         
+        # If a macro lacks a custom name, derive one from its mapped parameters
+        for idx, info in macros.items():
+            if info.get("name") == f"Macro {idx}" and info.get("parameters"):
+                names = []
+                for p in info["parameters"]:
+                    n = p.get("name")
+                    if n and n not in names:
+                        names.append(n)
+                if names:
+                    info["name"] = ", ".join(names)
+
         # Convert dictionary to sorted list
         macros_list = [macros[i] for i in sorted(macros.keys())]
         

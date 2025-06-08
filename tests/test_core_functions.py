@@ -168,3 +168,14 @@ def test_save_preset_no_changes(tmp_path):
     with open(dest, "rb") as f:
         written = f.read()
     assert written == original
+
+
+def test_macro_names_fall_back_to_parameters():
+    src = Path("examples/Track Presets/Drift/Analog Shape - Core.json")
+    from core.synth_preset_inspector_handler import extract_macro_information
+    info = extract_macro_information(str(src))
+    assert info["success"], info.get("message")
+    names = {m["index"]: m["name"] for m in info["macros"]}
+    assert names[0] == "Filter Cutoff"
+    assert names[2] == "Oscillator1_Type"
+    assert names[3] == "Oscillator2_Type"
