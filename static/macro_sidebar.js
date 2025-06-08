@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!macrosInput) return;
   const paramPaths = JSON.parse(document.getElementById('param-paths-input').value || '{}');
   const availableParams = JSON.parse(document.getElementById('available-params-input').value || '[]');
+  const driftSchema = window.driftSchema || {};
   let macros = [];
   try { macros = JSON.parse(macrosInput.value || '[]'); } catch (e) {}
   macros.forEach(m => {
@@ -106,35 +107,40 @@ document.addEventListener('DOMContentLoaded', () => {
       div.className = 'assign-item';
       const span = document.createElement('span');
       span.textContent = p.name;
-      const rangeDiv = document.createElement('div');
-      rangeDiv.className = 'range-inputs';
-      const minInput = document.createElement('input');
-      minInput.type = 'text';
-      minInput.placeholder = 'min';
-      if (p.rangeMin !== undefined) {
-        const n = parseFloat(p.rangeMin);
-        if (!isNaN(n)) minInput.value = n.toFixed(2);
+      const info = driftSchema[p.name] || {};
+      const isNumber = !info.type || info.type === 'number';
+      let rangeDiv = null;
+      if (isNumber) {
+        rangeDiv = document.createElement('div');
+        rangeDiv.className = 'range-inputs';
+        const minInput = document.createElement('input');
+        minInput.type = 'text';
+        minInput.placeholder = info.min !== undefined && info.min !== null ? info.min : 'min';
+        if (p.rangeMin !== undefined) {
+          const n = parseFloat(p.rangeMin);
+          if (!isNaN(n)) minInput.value = n.toFixed(2);
+        }
+        minInput.addEventListener('change', () => {
+          p.rangeMin = minInput.value === '' ? undefined : parseFloat(minInput.value);
+          saveState();
+        });
+        const dash = document.createElement('span');
+        dash.textContent = '-';
+        const maxInput = document.createElement('input');
+        maxInput.type = 'text';
+        maxInput.placeholder = info.max !== undefined && info.max !== null ? info.max : 'max';
+        if (p.rangeMax !== undefined) {
+          const n = parseFloat(p.rangeMax);
+          if (!isNaN(n)) maxInput.value = n.toFixed(2);
+        }
+        maxInput.addEventListener('change', () => {
+          p.rangeMax = maxInput.value === '' ? undefined : parseFloat(maxInput.value);
+          saveState();
+        });
+        rangeDiv.appendChild(minInput);
+        rangeDiv.appendChild(dash);
+        rangeDiv.appendChild(maxInput);
       }
-      minInput.addEventListener('change', () => {
-        p.rangeMin = minInput.value === '' ? undefined : parseFloat(minInput.value);
-        saveState();
-      });
-      const dash = document.createElement('span');
-      dash.textContent = '-';
-      const maxInput = document.createElement('input');
-      maxInput.type = 'text';
-      maxInput.placeholder = 'max';
-      if (p.rangeMax !== undefined) {
-        const n = parseFloat(p.rangeMax);
-        if (!isNaN(n)) maxInput.value = n.toFixed(2);
-      }
-      maxInput.addEventListener('change', () => {
-        p.rangeMax = maxInput.value === '' ? undefined : parseFloat(maxInput.value);
-        saveState();
-      });
-      rangeDiv.appendChild(minInput);
-      rangeDiv.appendChild(dash);
-      rangeDiv.appendChild(maxInput);
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.textContent = 'Remove';
@@ -145,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
         saveState();
       });
       div.appendChild(span);
-      div.appendChild(rangeDiv);
+      if (rangeDiv) div.appendChild(rangeDiv);
       div.appendChild(btn);
       assignedDiv.appendChild(div);
     });
