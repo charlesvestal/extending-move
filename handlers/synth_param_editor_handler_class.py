@@ -854,6 +854,8 @@ class SynthParamEditorHandler(BaseHandler):
         for i in range(8):
             info = by_index.get(i, {"name": f"Macro {i}", "value": 0.0})
             name = info.get("name", f"Macro {i}")
+            if name == f"Macro {i}":
+                name = f"Knob {i + 1}"
             val = info.get("value", 0.0)
             try:
                 val = float(val)
