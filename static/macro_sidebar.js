@@ -15,6 +15,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const addBtn = document.getElementById('macro-add-param');
   const closeBtn = document.getElementById('macro-sidebar-close');
 
+  function allAssigned() {
+    const arr = [];
+    macros.forEach(m => m.parameters.forEach(p => arr.push(p.name)));
+    return arr;
+  }
+
   let currentIndex = null;
 
   function saveState() {
@@ -59,8 +65,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     selectEl.innerHTML = '';
+    const taken = allAssigned();
     availableParams.forEach(p => {
-      if (!macro.parameters.some(mp => mp.name === p)) {
+      if (!taken.includes(p)) {
         const opt = document.createElement('option');
         opt.value = p;
         opt.textContent = p;
@@ -112,10 +119,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  document.querySelectorAll('.macro-label').forEach(lbl => {
-    lbl.addEventListener('click', () => {
-      const idx = parseInt(lbl.dataset.index, 10);
-      openSidebar(idx);
+  document.querySelectorAll('.macro-label, .macro-knob').forEach(el => {
+    el.addEventListener('click', () => {
+      const idx = parseInt(el.dataset.index, 10);
+      if (!isNaN(idx)) openSidebar(idx);
     });
   });
 
