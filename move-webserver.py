@@ -481,6 +481,12 @@ def chord():
     return render_template("chord.html", active_tab="chord")
 
 
+@app.route("/slider-demo", methods=["GET"])
+def slider_demo_page():
+    """Demo page for the rectangular slider component."""
+    return render_template("slider_demo.html", active_tab="slider-demo")
+
+
 
 
 
