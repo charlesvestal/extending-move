@@ -8,10 +8,12 @@ function initSlider(el){
   const step=parseFloat(el.dataset.step||1);
   const unit=el.dataset.unit||'';
   const fineStep=step/10;
-  const range=max-min;
   function getStep(v){
-    if(unit==='%' && range>0 && v-min<range*0.1)
-      return fineStep;
+    if(unit==='%' ){
+      const disp=shouldScale?v*100:v;
+      if(Math.abs(disp)<10)
+        return fineStep;
+    }
     return step;
   }
   const decimals=parseInt(el.dataset.decimals||2,10);
