@@ -33,7 +33,7 @@
         <label><input type="checkbox" name="rename" id="rename-checkbox" {% if rename_checked %}checked{% endif %}> Save as new</label>
     </div>
     <div class="preset-actions">
-        <button type="submit" id="save-params-btn" disabled>Save Parameters</button>
+        <button type="submit">Save Parameters</button>
         <button type="submit" onclick="document.getElementById('action-input').value='reset_preset';">Choose Another Preset</button>
     </div>
     {{ macro_knobs_html | safe }}
@@ -72,18 +72,9 @@
 document.addEventListener('DOMContentLoaded', () => {
   const cb = document.getElementById('rename-checkbox');
   const nameInput = document.getElementById('new-preset-name');
-  const saveBtn = document.getElementById('save-params-btn');
-  const macrosInput = document.getElementById('macros-data-input');
-  let changed = false;
-
   if (cb && nameInput) {
     cb.addEventListener('change', () => {
       nameInput.disabled = !cb.checked;
-      if (cb.checked) {
-        saveBtn.disabled = false;
-      } else if (!changed) {
-        saveBtn.disabled = true;
-      }
     });
     const form = document.getElementById('param-form');
     const orig = nameInput.dataset.originalName;
@@ -101,22 +92,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
     }
-  }
-
-  function markChanged() {
-    changed = true;
-    saveBtn.disabled = false;
-  }
-
-  document.querySelectorAll('.param-list input[type="hidden"]').forEach(el => {
-    el.addEventListener('change', markChanged);
-  });
-  if (macrosInput) {
-    macrosInput.addEventListener('change', markChanged);
-  }
-
-  if (!cb.checked) {
-    saveBtn.disabled = true;
   }
 
 });
