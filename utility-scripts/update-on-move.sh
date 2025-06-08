@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Check for dev mode
+DEV_MODE=false
+for arg in "$@"; do
+  if [ "$arg" = "--dev" ]; then
+    DEV_MODE=true
+  fi
+done
+
 # --- Figure out where we live ---
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if git rev-parse --show-toplevel > /dev/null 2>&1; then
@@ -49,13 +57,24 @@ chmod -R 755 "${REMOTE_DIR}/static"
 chmod -R 755 "${REMOTE_DIR}/bin"
 EOF
 
-echo "Installing requirements with pip on remote..."
-ssh -T "${REMOTE_USER}@${REMOTE_HOST}" <<EOF
+if [ "$DEV_MODE" = true ]; then
+  echo "Dev mode: skipping pip install"
+else
+  echo "Installing requirements with pip on remote..."
+  ssh -T "${REMOTE_USER}@${REMOTE_HOST}" <<EOF
 export TMPDIR=/data/UserData/tmp
 export PATH="${REMOTE_DIR}/bin/rubberband:\$PATH"
 echo "TMPDIR is set to: \$TMPDIR"
 pip install --no-cache-dir -r "${REMOTE_DIR}/requirements.txt" | grep -v 'already satisfied'
 EOF
+fi
 
 # --- Restart the webserver ---
-"${SCRIPT_DIR}/restart-webserver.sh"
+if [ "$DEV_MODE" = true ]; then
+  echo "Dev mode: skipping module warm-up"
+  SKIP_MODULE_WARMUP=1 "${SCRIPT_DIR}/restart-webserver.sh"
+  echo "Tailing remote log..."
+  ssh -t "${REMOTE_USER}@${REMOTE_HOST}" "tail -f '${REMOTE_DIR}/move-webserver.log'"
+else
+  "${SCRIPT_DIR}/restart-webserver.sh"
+fi
