@@ -754,3 +754,41 @@ select {
     background: #ff5050;
     color: #20232a;
 }
+
+.drift-ui .icon {
+    margin: 0 4px;
+    font-size: 12px;
+}
+
+.drift-ui .envelope-graph {
+    width: 176px;
+    height: 104px;
+    border: 1px solid #555;
+    margin-left: auto;
+}
+
+.drift-ui .pitch-mod {
+    align-items: flex-start;
+}
+.drift-ui .pitch-mod-controls {
+    display: flex;
+}
+.drift-ui .param-pair {
+    text-align: center;
+    margin-right: 8px;
+}
+
+.drift-ui .routing-icon {
+    position: absolute;
+    top: 136px;
+    left: 328px;
+    width: 20px;
+    height: 20px;
+    border: 1px solid #ffc300;
+    color: #ffc300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    background: #20232a;
+}
