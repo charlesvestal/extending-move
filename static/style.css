@@ -642,6 +642,13 @@ select {
 .macro-number {
     margin-top: 0.25rem;
     font-size: 0.8rem;
+}
+
+.edit-macros-link {
+    text-align: center;
+    margin: 0 0 1rem;
+}
+
 /* Layout for preset editor controls */
 .preset-controls {
     display: flex;

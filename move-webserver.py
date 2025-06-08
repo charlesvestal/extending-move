@@ -392,7 +392,14 @@ def synth_macros():
         form = SimpleForm(request.form.to_dict())
         result = synth_handler.handle_post(form)
     else:
-        result = synth_handler.handle_get()
+        if "preset" in request.args:
+            form = SimpleForm({
+                "action": "select_preset",
+                "preset_select": request.args.get("preset"),
+            })
+            result = synth_handler.handle_post(form)
+        else:
+            result = synth_handler.handle_get()
 
     message = result.get("message")
     message_type = result.get("message_type")
