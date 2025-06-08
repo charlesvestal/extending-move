@@ -293,16 +293,19 @@ def extract_macro_information(preset_path):
         # Then find all parameters with macroMapping
         find_macro_mappings(preset_data)
         
-        # If a macro lacks a custom name, derive one from its mapped parameters
-        for idx, info in macros.items():
-            if info.get("name") == f"Macro {idx}" and info.get("parameters"):
-                names = []
-                for p in info["parameters"]:
-                    n = p.get("name")
-                    if n and n not in names:
-                        names.append(n)
-                if names:
-                    info["name"] = ", ".join(names)
+
+        # Leave unnamed macros untouched. The Move system will assign names
+        # when the preset is loaded, so we simply preserve the default
+        # "Macro N" labels here even if parameters are mapped.
+
+        # Ensure all 8 macros are present even if unused
+        for i in range(8):
+            if i not in macros:
+                macros[i] = {
+                    "index": i,
+                    "name": f"Macro {i}",
+                    "parameters": [],
+                }
 
         # Convert dictionary to sorted list
         macros_list = [macros[i] for i in sorted(macros.keys())]
@@ -364,17 +367,22 @@ def update_preset_macro_names(preset_path, macro_updates):
                                 
                                 # For device parameters (not top-level), we can add customName
                                 # If it's already an object with customName
+                                new_name = macro_updates[macro_index]
+
                                 if isinstance(params[key], dict) and "value" in params[key]:
-                                    params[key]["customName"] = macro_updates[macro_index]
+                                    if new_name:
+                                        params[key]["customName"] = new_name
+                                    else:
+                                        params[key].pop("customName", None)
                                     updated_count += 1
-                                # If it's a direct value, convert to object with value and customName
                                 else:
-                                    original_value = params[key]
-                                    params[key] = {
-                                        "value": original_value,
-                                        "customName": macro_updates[macro_index]
-                                    }
-                                    updated_count += 1
+                                    if new_name:
+                                        original_value = params[key]
+                                        params[key] = {
+                                            "value": original_value,
+                                            "customName": new_name
+                                        }
+                                        updated_count += 1
                 
                 # Recursively search in nested structures
                 for key, value in data.items():
