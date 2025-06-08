@@ -350,6 +350,7 @@ class SynthParamEditorHandler(BaseHandler):
         "ModulationMatrix_Amount2",
         "ModulationMatrix_Amount3",
         "Lfo_ModAmount",
+        "Filter_Tracking",
 
     }
 
@@ -576,7 +577,8 @@ class SynthParamEditorHandler(BaseHandler):
 
         if filter_items:
             filter_rows = [
-                ["Filter_Frequency", "Filter_Type", "Filter_Tracking"],
+                ["Filter_Frequency", "Filter_Type"],
+                ["Filter_Tracking"],
                 ["Filter_Resonance", "Filter_HiPassFrequency"],
             ]
             ordered = []

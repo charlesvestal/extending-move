@@ -11,8 +11,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const max = parseFloat(el.max);
         const shouldScale = unit === '%' && Math.abs(max) <= 1 && Math.abs(min) <= 1;
         const format = (v) => {
-            const displayVal = shouldScale ? v * 100 : v;
-            return Number(displayVal).toFixed(displayDecimals) + (unit ? ' ' + unit : '');
+            let displayVal = shouldScale ? v * 100 : v;
+            let unitLabel = unit;
+            if (unit === 'Hz') {
+                displayVal = Number(displayVal);
+                if (displayVal >= 1000) {
+                    displayVal = displayVal / 1000;
+                    unitLabel = 'kHz';
+                }
+                return displayVal.toFixed(1) + ' ' + unitLabel;
+            }
+            return Number(displayVal).toFixed(displayDecimals) + (unit ? ' ' + unitLabel : '');
         };
         if (displayEl) {
             displayEl.textContent = isNaN(el.value) ? 'not set' : format(parseFloat(el.value));
