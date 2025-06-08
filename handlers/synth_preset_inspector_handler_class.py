@@ -255,7 +255,7 @@ class SynthPresetInspectorHandler(BaseHandler):
             except Exception:
                 value = 0.0
             display_val = round(value, 1)
-            html += f'<div class="macro-item macro-{macro["index"]}">'
+            html += f'<div class="macro-item">'
             html += '<div class="macro-top">'
             name_label = macro.get("name", f"Macro {macro['index']}")
             html += (
