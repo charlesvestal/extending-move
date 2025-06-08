@@ -305,7 +305,7 @@
     "max": 1.0,
     "options": [],
     "unit": "%",
-    "decimals": 0
+    "decimals": 2
   },
   "Global_VoiceCount": {
     "type": "enum",
