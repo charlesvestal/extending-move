@@ -65,7 +65,7 @@
         <label><input type="checkbox" name="rename" id="rename-checkbox" {% if rename_checked %}checked{% endif %}> Save as new</label>
     </div>
     <div class="preset-actions">
-        <button type="submit">Save Parameters</button>
+        <button type="submit" id="save-params-btn" disabled>Save Parameters</button>
         <button type="submit" onclick="document.getElementById('action-input').value='reset_preset';">Choose Another Preset</button>
     </div>
     {{ macro_knobs_html | safe }}
@@ -105,13 +105,50 @@
 document.addEventListener('DOMContentLoaded', () => {
   const cb = document.getElementById('rename-checkbox');
   const nameInput = document.getElementById('new-preset-name');
+  const saveBtn = document.getElementById('save-params-btn');
+  const form = document.getElementById('param-form');
+  const macrosInput = document.getElementById('macros-data-input');
+
   if (cb && nameInput) {
     cb.addEventListener('change', () => {
       nameInput.disabled = !cb.checked;
+      updateSaveState();
     });
-    const form = document.getElementById('param-form');
-    const orig = nameInput.dataset.originalName;
-    if (form && orig) {
+  }
+
+  const initialMacros = macrosInput ? macrosInput.value : null;
+  const initialValues = {};
+
+  function recordInitial() {
+    if (!form) return;
+    form.querySelectorAll('input[type="hidden"][name^="param_"], input[type="hidden"][name^="macro_"]').forEach(inp => {
+      initialValues[inp.name] = inp.value;
+      inp.addEventListener('change', updateSaveState);
+    });
+  }
+
+  function hasChanges() {
+    if (cb && cb.checked) return true;
+    if (macrosInput && macrosInput.value !== initialMacros) return true;
+    for (const [name, val] of Object.entries(initialValues)) {
+      const cur = form.querySelector(`[name="${name}"]`);
+      if (cur && cur.value !== val) return true;
+    }
+    return false;
+  }
+
+  function updateSaveState() {
+    if (!saveBtn) return;
+    saveBtn.disabled = !hasChanges();
+  }
+
+  if (form) {
+    recordInitial();
+    if (macrosInput) macrosInput.addEventListener('change', updateSaveState);
+    updateSaveState();
+
+    const orig = nameInput ? nameInput.dataset.originalName : null;
+    if (orig && cb && nameInput) {
       form.addEventListener('submit', (e) => {
         if (!cb.checked) return;
         let newName = nameInput.value.trim();
@@ -126,7 +163,6 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
   }
-
 });
 </script>
 {% endblock %}
