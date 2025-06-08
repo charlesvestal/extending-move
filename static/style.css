@@ -570,6 +570,19 @@ select {
     flex: 2;
 }
 
+.param-panel.oscillators{
+    max-width: 285px;
+}
+
+.param-panel.filter{
+    max-width: 202px;
+}
+
+
+.param-panel.mixer{
+    max-width: 145px;
+}
+
 .param-panel.filter .param-items {
     flex-direction: column;
 }
