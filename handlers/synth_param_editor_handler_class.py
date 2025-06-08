@@ -511,7 +511,9 @@ class SynthParamEditorHandler(BaseHandler):
             val = item['value']
             meta = dict(schema.get(name, {}))
 
-            if name in ("Oscillator1_Transpose", "Oscillator2_Transpose") and meta.get("unit") == "st":
+            if name == "Oscillator1_Transpose":
+                meta.pop("unit", None)
+            elif name == "Oscillator2_Transpose" and meta.get("unit") == "st":
                 meta.pop("unit", None)
 
             hide = name in self.UNLABELED_PARAMS
