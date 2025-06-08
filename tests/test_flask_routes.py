@@ -127,6 +127,8 @@ def test_synth_params_get(client, monkeypatch):
     assert b'pick' in resp.data
     assert b'Editing:' not in resp.data
     assert b'Create New Drift Preset' in resp.data
+    assert b'name="new_preset_name"' in resp.data
+    assert b'id="newPresetModal"' in resp.data
 
 def test_synth_params_post(client, monkeypatch):
     def fake_post(form):
@@ -183,7 +185,7 @@ def test_synth_params_new_preset(client, monkeypatch):
             'default_preset_path': DEFAULT_PRESET,
         }
     monkeypatch.setattr(move_webserver.synth_param_handler, 'handle_post', fake_post)
-    resp = client.post('/synth-params', data={'action': 'new_preset'})
+    resp = client.post('/synth-params', data={'action': 'new_preset', 'new_preset_name': 'Test'})
     assert resp.status_code == 200
     assert b'loaded' in resp.data
     assert b'Editing:' in resp.data
