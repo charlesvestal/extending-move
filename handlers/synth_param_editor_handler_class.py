@@ -251,6 +251,16 @@ class SynthParamEditorHandler(BaseHandler):
         "Filter_ModAmount2",
     }
 
+    OSC_TYPE_LABELS = {
+        "Pulse": "PLS",
+        "Rectangle": "REC",
+        "Saturated": "SAT",
+        "Saw": "SAW",
+        "Shark Tooth": "SRK",
+        "Sine": "SIN",
+        "Triangle": "TRI",
+    }
+
     def _build_param_item(self, idx, name, value, meta, label=None,
                            hide_label=False, slider=False):
         """Create HTML for a single parameter control."""
@@ -262,10 +272,17 @@ class SynthParamEditorHandler(BaseHandler):
             html.append(f'<span class="param-label">{label}</span>')
 
         if p_type == "enum" and meta.get("options"):
-            html.append(f'<select name="param_{idx}_value">')
+            classes = []
+            short_labels = None
+            if name in ("Oscillator1_Type", "Oscillator2_Type"):
+                classes.append("osc-type-select")
+                short_labels = self.OSC_TYPE_LABELS
+            class_attr = f' class="{" ".join(classes)}"' if classes else ''
+            html.append(f'<select name="param_{idx}_value"{class_attr}>')
             for opt in meta["options"]:
                 sel = " selected" if str(value) == str(opt) else ""
-                html.append(f'<option value="{opt}"{sel}>{opt}</option>')
+                label_attr = f' label="{short_labels[opt]}"' if short_labels and opt in short_labels else ''
+                html.append(f'<option value="{opt}"{label_attr}{sel}>{opt}</option>')
             html.append('</select>')
             html.append(f'<input type="hidden" name="param_{idx}_value" value="{value}">')
         elif p_type == "boolean":
