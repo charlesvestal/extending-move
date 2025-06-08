@@ -75,7 +75,8 @@ function initSlider(el){
       const y=e.touches?e.touches[0].clientY:e.clientY;
       const dy=startY-y;
       const isShift = e.shiftKey;
-      const dragSense = isShift ? 1000 : 200;
+      // slower movement when holding Shift
+      const dragSense = isShift ? 2000 : 200;
       const scale=(max-min)/dragSense;
       let v=startVal+dy*scale;
       let st=getStep(v);
