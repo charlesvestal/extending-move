@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function buildSelect(current) {
     const select = document.createElement('select');
-    select.className = 'param-select';
+    select.className = 'sidebar-param-select';
     const placeholder = document.createElement('option');
     placeholder.value = '';
     placeholder.textContent = 'Choose a parameter...';
