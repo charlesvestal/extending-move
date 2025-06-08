@@ -105,6 +105,7 @@ def test_synth_macros_post(client, monkeypatch):
     assert b'<p>done</p>' in resp.data
     assert b'Currently loaded preset:' in resp.data
     assert b'View All Parameters' in resp.data
+    assert b'Return to Parameter Editor' in resp.data
 
 def test_synth_params_get(client, monkeypatch):
     from handlers.synth_param_editor_handler_class import DEFAULT_PRESET
@@ -146,6 +147,27 @@ def test_synth_params_post(client, monkeypatch):
     assert b'name="rename"' in resp.data
     assert b'name="new_preset_name"' in resp.data
     assert b'disabled' in resp.data
+
+def test_synth_params_get_with_preset(client, monkeypatch):
+    def fake_post(form):
+        assert form.getvalue('action') == 'select_preset'
+        assert form.getvalue('preset_select') == 'x'
+        return {
+            'message': 'loaded',
+            'message_type': 'success',
+            'params_html': '<div>p</div>',
+            'browser_root': '/tmp',
+            'selected_preset': 'x',
+            'param_count': 1,
+            'default_preset_path': 'x',
+            'macro_knobs_html': '',
+            'rename_checked': False,
+        }
+    monkeypatch.setattr(move_webserver.synth_param_handler, 'handle_post', fake_post)
+    resp = client.get('/synth-params?preset=x')
+    assert resp.status_code == 200
+    assert b'loaded' in resp.data
+    assert b'Editing:' in resp.data
 
 def test_synth_params_new_preset(client, monkeypatch):
     from handlers.synth_param_editor_handler_class import DEFAULT_PRESET

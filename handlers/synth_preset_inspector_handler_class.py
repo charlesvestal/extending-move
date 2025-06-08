@@ -252,7 +252,13 @@ class SynthPresetInspectorHandler(BaseHandler):
             html += f'<div class="macro-item">'
             html += f'<div class="macro-header">'
             html += f'<span>Macro {macro["index"]}:</span> '
-            html += f'<input type="text" name="macro_{macro["index"]}_name" value="{macro["name"]}" class="macro-name-input">'
+            default_label = f"Macro {macro['index']}"
+            macro_value = macro["name"] if macro["name"] != default_label else ""
+            placeholder = " placeholder=\"Default name chosen by Move..\"" if not macro_value else ""
+            html += (
+                f'<input type="text" name="macro_{macro["index"]}_name" '
+                f'value="{macro_value}"{placeholder} class="macro-name-input">'
+            )
             # Add the "Save Name" button
             html += f'<button type="submit" class="save-name-btn" '
             html += f'onclick="document.getElementById(\'action-input\').value=\'save_name\'; '

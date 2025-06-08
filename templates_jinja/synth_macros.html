@@ -29,6 +29,9 @@
             {{ all_params_html | safe }}
         </div>
     </details>
+    <div class="return-params-link">
+        <a href="{{ host_prefix }}/synth-params?preset={{ selected_preset | urlencode }}">Return to Parameter Editor</a>
+    </div>
 </form>
 {% endif %}
 
