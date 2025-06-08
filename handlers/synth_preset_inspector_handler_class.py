@@ -280,7 +280,7 @@ class SynthPresetInspectorHandler(BaseHandler):
             html += f'<span>Knob {macro["index"] + 1}:</span> '
             default_label = f"Macro {macro['index']}"
             macro_value = macro["name"] if macro["name"] != default_label else ""
-            placeholder = " placeholder=\"Default name chosen by Move..\"" if not macro_value else ""
+            placeholder = " placeholder=\"No name specified\"" if not macro_value else ""
             html += (
                 f'<input type="text" name="macro_{macro["index"]}_name" '
                 f'value="{macro_value}"{placeholder} class="macro-name-input">'
