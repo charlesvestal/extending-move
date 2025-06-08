@@ -9,6 +9,10 @@ from core.synth_preset_inspector_handler import (
     extract_parameter_values,
     load_drift_schema,
     extract_macro_information,
+    update_preset_macro_names,
+    update_preset_parameter_mappings,
+    delete_parameter_mapping,
+    extract_available_parameters,
 )
 from core.synth_param_editor_handler import (
     update_parameter_values,
@@ -73,6 +77,9 @@ class SynthParamEditorHandler(BaseHandler):
             'default_preset_path': DEFAULT_PRESET,
             'macro_knobs_html': '',
             'rename_checked': False,
+            'macros_json': '[]',
+            'available_params_json': '[]',
+            'param_paths_json': '{}',
         }
 
     def handle_post(self, form):
@@ -123,6 +130,41 @@ class SynthParamEditorHandler(BaseHandler):
             if not macro_result['success']:
                 return self.format_error_response(macro_result['message'])
 
+            macros_data_str = form.getvalue('macros_data')
+            if macros_data_str:
+                try:
+                    macros_data = json.loads(macros_data_str)
+                except Exception:
+                    macros_data = []
+            else:
+                macros_data = []
+
+            # Update macro names
+            name_updates = {m.get('index'): m.get('name') for m in macros_data}
+            name_result = update_preset_macro_names(preset_path, name_updates)
+            if not name_result['success']:
+                return self.format_error_response(name_result['message'])
+
+            # Determine existing mappings to remove
+            existing_info = extract_macro_information(preset_path)
+            existing_mapped = existing_info.get('mapped_parameters', {}) if existing_info['success'] else {}
+
+            processed = set()
+            for m in macros_data:
+                idx = m.get('index')
+                for p in m.get('parameters', []):
+                    pname = p.get('name')
+                    param_updates = {idx: {'parameter': pname, 'parameter_path': p.get('path')}}
+                    upd = update_preset_parameter_mappings(preset_path, param_updates)
+                    if not upd['success']:
+                        return self.format_error_response(upd['message'])
+                    processed.add(pname)
+                    existing_mapped.pop(pname, None)
+
+            # Remove mappings not present anymore
+            for pname, info in existing_mapped.items():
+                delete_parameter_mapping(preset_path, info['path'])
+
             message = result['message'] + "; " + macro_result['message']
             if output_path:
                 message += f" Saved as {os.path.basename(output_path)}"
@@ -146,10 +188,19 @@ class SynthParamEditorHandler(BaseHandler):
         macro_knobs_html = ''
         macro_info = extract_macro_information(preset_path)
         mapped_params = {}
+        macros_json = '[]'
+        available_params_json = '[]'
+        param_paths_json = '{}'
         if macro_info['success']:
             macro_knobs_html = self.generate_macro_knobs_html(macro_info['macros'])
             mapped_params = macro_info.get('mapped_parameters', {})
+            macros_json = json.dumps(macro_info['macros'])
 
+        param_info = extract_available_parameters(preset_path)
+        if param_info['success']:
+            available_params_json = json.dumps(param_info['parameters'])
+            param_paths_json = json.dumps(param_info.get('parameter_paths', {}))
+        
         if values['success']:
             params_html = self.generate_params_html(values['parameters'], mapped_params)
             param_count = len(values['parameters'])
@@ -178,6 +229,9 @@ class SynthParamEditorHandler(BaseHandler):
             'default_preset_path': DEFAULT_PRESET,
             'macro_knobs_html': macro_knobs_html,
             'rename_checked': rename_flag if action == 'save_params' else False,
+            'macros_json': macros_json,
+            'available_params_json': available_params_json,
+            'param_paths_json': param_paths_json,
         }
 
     SECTION_ORDER = [
@@ -867,13 +921,13 @@ class SynthParamEditorHandler(BaseHandler):
                 classes.append(f"macro-{i}")
             cls_str = " ".join(classes)
             html.append(
-                f'<div class="{cls_str}">' 
-                f'<span class="macro-label">{name}</span>'
+                f'<div class="{cls_str}" data-index="{i}">'
+                f'<span class="macro-label" data-index="{i}">{name}</span>'
                 f'<input id="macro_{i}_dial" type="range" class="macro-dial input-knob" '
                 f'data-target="macro_{i}_value" data-display="macro_{i}_disp" '
                 f'value="{display_val}" min="0" max="127" step="0.1" data-decimals="1">'
                 f'<span id="macro_{i}_disp" class="macro-number"></span>'
-                f'<input type="hidden" name="macro_{i}_value" value="{display_val}">' 
+                f'<input type="hidden" name="macro_{i}_value" value="{display_val}">'
                 f'</div>'
             )
         html.append('</div>')

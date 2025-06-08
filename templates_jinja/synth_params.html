@@ -33,13 +33,24 @@
         <label><input type="checkbox" name="rename" id="rename-checkbox" {% if rename_checked %}checked{% endif %}> Save as new</label>
     </div>
     <div class="preset-actions">
-        <button type="submit">Save Parameters</button>
+        <button type="submit" id="save-params-btn" disabled>Save Parameters</button>
         <button type="submit" onclick="document.getElementById('action-input').value='reset_preset';">Choose Another Preset</button>
     </div>
     {{ macro_knobs_html | safe }}
-    <div class="edit-macros-link">
-        <a href="{{ host_prefix }}/synth-macros?preset={{ selected_preset | urlencode }}">Edit Macros</a>
+    <input type="hidden" name="macros_data" id="macros-data-input" value='{{ macros_json }}'>
+    <input type="hidden" id="available-params-input" value='{{ available_params_json }}'>
+    <input type="hidden" id="param-paths-input" value='{{ param_paths_json }}'>
+    <div id="macro-sidebar" class="macro-sidebar hidden">
+        <h3 id="macro-sidebar-title"></h3>
+        <label>Custom Name: <input type="text" id="macro-name-input"></label>
+        <div class="macro-assigned-list"></div>
+        <div class="macro-add-section">
+            <select id="macro-param-select"></select>
+            <button type="button" id="macro-add-param">Add</button>
+        </div>
+        <button type="button" id="macro-sidebar-close">Close</button>
     </div>
+    <div id="sidebar-overlay" class="sidebar-overlay hidden"></div>
     <div class="param-list">
         {{ params_html | safe }}
     </div>
@@ -56,13 +67,23 @@
 <script src="{{ host_prefix }}/static/input-knobs.js"></script>
 <script src="{{ host_prefix }}/static/params_knobs.js"></script>
 <script src="{{ host_prefix }}/static/rect-slider.js"></script>
+<script src="{{ host_prefix }}/static/macro_sidebar.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const cb = document.getElementById('rename-checkbox');
   const nameInput = document.getElementById('new-preset-name');
+  const saveBtn = document.getElementById('save-params-btn');
+  const macrosInput = document.getElementById('macros-data-input');
+  let changed = false;
+
   if (cb && nameInput) {
     cb.addEventListener('change', () => {
       nameInput.disabled = !cb.checked;
+      if (cb.checked) {
+        saveBtn.disabled = false;
+      } else if (!changed) {
+        saveBtn.disabled = true;
+      }
     });
     const form = document.getElementById('param-form');
     const orig = nameInput.dataset.originalName;
@@ -80,6 +101,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
     }
+  }
+
+  function markChanged() {
+    changed = true;
+    saveBtn.disabled = false;
+  }
+
+  document.querySelectorAll('.param-list input[type="hidden"]').forEach(el => {
+    el.addEventListener('change', markChanged);
+  });
+  if (macrosInput) {
+    macrosInput.addEventListener('change', markChanged);
+  }
+
+  if (!cb.checked) {
+    saveBtn.disabled = true;
   }
 
 });
