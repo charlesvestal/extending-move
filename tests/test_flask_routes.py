@@ -258,6 +258,13 @@ def test_refresh_post(client, monkeypatch):
     assert resp.status_code == 200
     assert resp.json['message'] == 'refreshed'
 
+
+def test_refresh_get(client, monkeypatch):
+    monkeypatch.setattr(move_webserver, 'refresh_library', lambda: (True, 'done'))
+    resp = client.get('/refresh')
+    assert resp.status_code == 200
+    assert b'done' in resp.data
+
 def test_index_redirect(client):
     resp = client.get('/')
     assert resp.status_code == 302
