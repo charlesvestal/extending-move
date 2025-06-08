@@ -137,7 +137,7 @@ def test_synth_params_post(client, monkeypatch):
             'message_type': 'success',
             'params_html': '<div>p</div>',
             'browser_root': '/tmp',
-            'selected_preset': 'x',
+            'selected_preset': '/data/UserData/UserLibrary/Track Presets/Drift/test.ablpreset',
             'param_count': 1,
         }
     monkeypatch.setattr(move_webserver.synth_param_handler, 'handle_post', fake_post)
@@ -145,6 +145,7 @@ def test_synth_params_post(client, monkeypatch):
     assert resp.status_code == 200
     assert b'done' in resp.data
     assert b'Editing //' in resp.data
+    assert b'/Drift/' in resp.data
     assert b'<div>p</div>' in resp.data
     assert b'name="rename"' in resp.data
     assert b'name="new_preset_name"' in resp.data
@@ -159,7 +160,7 @@ def test_synth_params_get_with_preset(client, monkeypatch):
             'message_type': 'success',
             'params_html': '<div>p</div>',
             'browser_root': '/tmp',
-            'selected_preset': 'x',
+            'selected_preset': '/data/UserData/UserLibrary/Track Presets/Drift/test.ablpreset',
             'param_count': 1,
             'default_preset_path': 'x',
             'macro_knobs_html': '',
@@ -169,6 +170,7 @@ def test_synth_params_get_with_preset(client, monkeypatch):
     resp = client.get('/synth-params?preset=x')
     assert resp.status_code == 200
     assert b'Editing //' in resp.data
+    assert b'/Drift/' in resp.data
 
 def test_synth_params_new_preset(client, monkeypatch):
     from handlers.synth_param_editor_handler_class import DEFAULT_PRESET
@@ -187,6 +189,7 @@ def test_synth_params_new_preset(client, monkeypatch):
     resp = client.post('/synth-params', data={'action': 'new_preset', 'new_preset_name': 'Test'})
     assert resp.status_code == 200
     assert b'Editing //' in resp.data
+    assert b'/Drift/' in resp.data
     assert b'name="rename"' in resp.data
     assert b'name="new_preset_name"' in resp.data
 

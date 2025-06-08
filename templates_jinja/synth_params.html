@@ -57,6 +57,11 @@
     {% elif selected_preset.startswith('examples/Track Presets') %}
         {% set _display = '/' + selected_preset.split('examples/Track Presets', 1)[1] %}
     {% endif %}
+    {% if '/' in _display %}
+        {% set _dir_display = _display.rsplit('/', 1)[0] %}
+    {% else %}
+        {% set _dir_display = '' %}
+    {% endif %}
     {% set _basename = selected_preset.split('/')[-1] %}
     {% if _basename.endswith('.json') or _basename.endswith('.ablpreset') %}
         {% set _prefill = _basename.rsplit('.', 1)[0] %}
@@ -64,7 +69,7 @@
         {% set _prefill = _basename %}
     {% endif %}
     <div class="preset-controls current-preset">
-        <label>Editing //
+        <label>Editing // {% if _dir_display %}{{ _dir_display }}/{% endif %}
             <input type="text" name="new_preset_name" id="new-preset-name" data-original-name="{{ _basename }}" value="{{ _prefill }}" {% if not rename_checked %}disabled{% endif %}>
         </label>
         <label><input type="checkbox" name="rename" id="rename-checkbox" {% if rename_checked %}checked{% endif %}> Save as new</label>
