@@ -181,11 +181,6 @@ select {
     /* font-family: 'Ableton Sans', Arial, sans-serif; */
 }
 
-/* Narrower dropdown for oscillator type */
-.osc-type-select {
-    width: 5rem;
-}
-
 label {
     display: block;
     font-weight: 500;
