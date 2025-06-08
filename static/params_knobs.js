@@ -78,35 +78,57 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const toggles = document.querySelectorAll('.param-toggle');
     toggles.forEach(el => {
-        const val = parseFloat(el.dataset.value);
+        const val = el.dataset.value;
         const target = el.dataset.target;
+        const trueVal = el.dataset.trueValue ?? '1';
+        const falseVal = el.dataset.falseValue ?? '0';
         const toggle = new Nexus.Toggle(el, {
             size: [30,15],
-            state: val > 0,
+            state: val === trueVal,
         });
         const input = document.querySelector(`input[name="${target}"]`);
         if (input) {
             toggle.on('change', v => {
-                input.value = v ? 1 : 0;
+                input.value = v ? trueVal : falseVal;
+                input.dispatchEvent(new Event('change'));
             });
         }
     });
 
-    const env2Select = document.querySelector('.param-item[data-name="Global_Envelope2Mode"] select');
-    const cyclingRows = document.querySelectorAll('.env2-cycling');
+    const env2Input = document.querySelector('.param-item[data-name="Global_Envelope2Mode"] input[type="hidden"]');
+    const cyclingRow = document.querySelector('.env2-cycling');
+    const adsrRow = document.querySelector('.env2-adsr');
     function updateCycling() {
-        if (!env2Select) return;
-        const show = env2Select.value === 'Cyc';
-        cyclingRows.forEach(r => {
-            if (show) {
-                r.classList.remove('hidden');
-            } else {
-                r.classList.add('hidden');
-            }
+        if (!env2Input) return;
+        const show = env2Input.value === 'Cyc';
+        if (cyclingRow) {
+            cyclingRow.classList.toggle('hidden', !show);
+        }
+        if (adsrRow) {
+            adsrRow.classList.toggle('hidden', show);
+        }
+    }
+    if (env2Input) {
+        env2Input.addEventListener('change', updateCycling);
+        updateCycling();
+    }
+
+    const modeSelect = document.querySelector('.param-item[data-name="CyclingEnvelope_Mode"] select');
+    const cycleRateMap = {
+        Freq: document.querySelector('.cycle-rate.freq-rate'),
+        Ratio: document.querySelector('.cycle-rate.ratio-rate'),
+        Time: document.querySelector('.cycle-rate.time-rate'),
+        Sync: document.querySelector('.cycle-rate.sync-rate'),
+    };
+    function updateCycleRateDisplay() {
+        if (!modeSelect) return;
+        const mode = modeSelect.value;
+        Object.entries(cycleRateMap).forEach(([key, el]) => {
+            if (el) el.classList.toggle('hidden', key !== mode);
         });
     }
-    if (env2Select) {
-        env2Select.addEventListener('change', updateCycling);
-        updateCycling();
+    if (modeSelect) {
+        modeSelect.addEventListener('change', updateCycleRateDisplay);
+        updateCycleRateDisplay();
     }
 });

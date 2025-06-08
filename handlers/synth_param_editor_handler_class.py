@@ -186,6 +186,9 @@ class SynthParamEditorHandler(BaseHandler):
         "CyclingEnvelope_Tilt": "Tilt",
         "CyclingEnvelope_Hold": "Hold",
         "CyclingEnvelope_Rate": "Rate",
+        "CyclingEnvelope_Ratio": "1:1",
+        "CyclingEnvelope_Time": "ms",
+        "CyclingEnvelope_SyncedRate": "Sync",
         "CyclingEnvelope_Mode": "Mode",
 
         # LFO
@@ -221,6 +224,7 @@ class SynthParamEditorHandler(BaseHandler):
         "Global_Glide": "Glide",
         "Global_DriftDepth": "Drift",
         "Global_Volume": "Volume",
+        "Global_Envelope2Mode": "Env/Cyc",
         "Global_VolVelMod": "Vel > Vol",
         "Global_Transpose": "Transpose",
         "Global_NotePitchBend": "Note PB",
@@ -240,6 +244,7 @@ class SynthParamEditorHandler(BaseHandler):
         "Filter_ModSource2",
         "Filter_ModAmount1",
         "Filter_ModAmount2",
+        "Global_Envelope2Mode",
     }
 
     # Parameters that use a horizontal slider instead of a dial
@@ -252,16 +257,28 @@ class SynthParamEditorHandler(BaseHandler):
     }
 
     def _build_param_item(self, idx, name, value, meta, label=None,
-                           hide_label=False, slider=False):
+                           hide_label=False, slider=False, extra_classes=""):
         """Create HTML for a single parameter control."""
         p_type = meta.get("type")
         label = label if label is not None else self.LABEL_OVERRIDES.get(name, name)
 
-        html = [f'<div class="param-item" data-name="{name}">']
+        classes = "param-item"
+        if extra_classes:
+            classes += f" {extra_classes}"
+        html = [f'<div class="{classes}" data-name="{name}">']
         if not hide_label:
             html.append(f'<span class="param-label">{label}</span>')
 
-        if p_type == "enum" and meta.get("options"):
+        if name == "Global_Envelope2Mode":
+            true_val = "Cyc"
+            false_val = "Env"
+            html.append(
+                f'<div id="param_{idx}_toggle" class="param-toggle" '
+                f'data-target="param_{idx}_value" data-value="{value}" '
+                f'data-true-value="{true_val}" data-false-value="{false_val}"></div>'
+            )
+            html.append(f'<input type="hidden" name="param_{idx}_value" value="{value}">')
+        elif p_type == "enum" and meta.get("options"):
             html.append(f'<select name="param_{idx}_value">')
             for opt in meta["options"]:
                 sel = " selected" if str(value) == str(opt) else ""
@@ -299,6 +316,8 @@ class SynthParamEditorHandler(BaseHandler):
         return ''.join(html)
 
     def _get_section(self, name):
+        if name == "Global_Envelope2Mode":
+            return "Envelopes"
         if name.startswith(("Oscillator1_", "Oscillator2_", "PitchModulation_")):
             return "Oscillators"
         if name.startswith("Mixer_") or name.startswith("Filter_OscillatorThrough") or name.startswith("Filter_NoiseThrough"):
@@ -326,6 +345,7 @@ class SynthParamEditorHandler(BaseHandler):
         osc_items: dict[str, str] = {}
         env_items: dict[str, str] = {}
         mixer_items: dict[str, str] = {}
+        cycling_mode_val = None
 
         for i, item in enumerate(params):
             name = item['name']
@@ -337,6 +357,17 @@ class SynthParamEditorHandler(BaseHandler):
 
             hide = name in self.UNLABELED_PARAMS
             slider = name in self.SLIDER_PARAMS
+
+            extra = ""
+            if name == "CyclingEnvelope_Rate":
+                extra = "cycle-rate freq-rate"
+            elif name == "CyclingEnvelope_Ratio":
+                extra = "cycle-rate ratio-rate"
+            elif name == "CyclingEnvelope_Time":
+                extra = "cycle-rate time-rate"
+            elif name == "CyclingEnvelope_SyncedRate":
+                extra = "cycle-rate sync-rate"
+
             html = self._build_param_item(
                 i,
                 name,
@@ -345,7 +376,11 @@ class SynthParamEditorHandler(BaseHandler):
                 label=self.LABEL_OVERRIDES.get(name, name),
                 hide_label=hide,
                 slider=slider,
+                extra_classes=extra,
             )
+
+            if name == "CyclingEnvelope_Mode":
+                cycling_mode_val = val
 
             section = self._get_section(name)
             if section == "Filter":
@@ -441,19 +476,20 @@ class SynthParamEditorHandler(BaseHandler):
                 env_items.pop("Envelope1_Sustain", ""),
                 env_items.pop("Envelope1_Release", ""),
             ]
-            env1_adsr = [
+            env2_adsr = [
                 env_items.pop("Envelope2_Attack", ""),
                 env_items.pop("Envelope2_Decay", ""),
                 env_items.pop("Envelope2_Sustain", ""),
                 env_items.pop("Envelope2_Release", ""),
             ]
             cycle_toggle = env_items.pop("Global_Envelope2Mode", "")
-            cycle_extras = [
-                env_items.pop("CyclingEnvelope_MidPoint", ""),
-                env_items.pop("CyclingEnvelope_Hold", ""),
-                env_items.pop("CyclingEnvelope_Rate", ""),
-                env_items.pop("CyclingEnvelope_Mode", ""),
-            ]
+            cycle_mid = env_items.pop("CyclingEnvelope_MidPoint", "")
+            cycle_hold = env_items.pop("CyclingEnvelope_Hold", "")
+            cycle_rate = env_items.pop("CyclingEnvelope_Rate", "")
+            cycle_ratio = env_items.pop("CyclingEnvelope_Ratio", "")
+            cycle_time = env_items.pop("CyclingEnvelope_Time", "")
+            cycle_sync = env_items.pop("CyclingEnvelope_SyncedRate", "")
+            cycle_mode = env_items.pop("CyclingEnvelope_Mode", "")
 
             ordered = []
             row1 = "".join(amp_adsr)
@@ -461,20 +497,37 @@ class SynthParamEditorHandler(BaseHandler):
                 ordered.append(
                     f'<div class="param-row"><span class="param-row-label">Amp envelope</span>{row1}</div>'
                 )
-            row2 = "".join(env1_adsr)
-            if row2:
+            if cycle_toggle:
                 ordered.append(
-                    f'<div class="param-row"><span class="param-row-label">Env 1</span>{row2}</div>'
+                    f'<div class="param-row env2-mode"><span class="param-row-label">Env/Cyc</span>{cycle_toggle}</div>'
                 )
-            row3_main = row2 + cycle_toggle
-            if row3_main.strip():
+            row2_main = "".join(env2_adsr)
+            if row2_main.strip():
                 ordered.append(
-                    f'<div class="param-row env2-main"><span class="param-row-label">Env 2</span>{row3_main}</div>'
+                    f'<div class="param-row env2-adsr"><span class="param-row-label">Env 2</span>{row2_main}</div>'
                 )
-            row3_extra = "".join(cycle_extras)
-            if row3_extra.strip():
+            if any([cycle_mid, cycle_hold, cycle_rate, cycle_ratio, cycle_time, cycle_sync, cycle_mode]):
+                # Hide unselected rate controls based on current mode
+                if cycling_mode_val != "Freq" and cycle_rate:
+                    cycle_rate = cycle_rate.replace('param-item"', 'param-item hidden"', 1)
+                if cycling_mode_val != "Ratio" and cycle_ratio:
+                    cycle_ratio = cycle_ratio.replace('param-item"', 'param-item hidden"', 1)
+                if cycling_mode_val != "Time" and cycle_time:
+                    cycle_time = cycle_time.replace('param-item"', 'param-item hidden"', 1)
+                if cycling_mode_val != "Sync" and cycle_sync:
+                    cycle_sync = cycle_sync.replace('param-item"', 'param-item hidden"', 1)
+
+                row3_extra = "".join([
+                    cycle_mid,
+                    cycle_hold,
+                    cycle_rate,
+                    cycle_ratio,
+                    cycle_time,
+                    cycle_sync,
+                    cycle_mode,
+                ])
                 ordered.append(
-                    f'<div class="param-row env2-cycling hidden">{row3_extra}</div>'
+                    f'<div class="param-row env2-cycling hidden"><span class="param-row-label">Env 2</span>{row3_extra}</div>'
                 )
 
             ordered.extend(env_items.values())
