@@ -478,7 +478,7 @@ select {
 
 /* Parameter editor dials */
 .param-dial {
-    margin: 0.25rem;
+    margin: -0.25rem;
     display: inline-block;
 }
 
@@ -614,10 +614,10 @@ select {
     /* width: 90px; */
 }
 .param-number {
-    margin-left: 0.5rem;
-    min-width: 60px;
+    /* margin-left: 0.5rem; */
+    /* min-width: 60px; */
     display: inline-block;
-    text-align: right;
+    text-align: center;
     font-size: 0.8rem;
 }
 
@@ -638,7 +638,7 @@ select {
 }
   
 .param-item {
-    margin-bottom: 0.75rem;
+    /* margin-bottom: 0.75rem; */
   }
 
 .macro-knob-row {
