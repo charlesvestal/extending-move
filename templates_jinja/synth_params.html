@@ -106,6 +106,9 @@
 <script src="{{ host_prefix }}/static/input-knobs.js"></script>
 <script src="{{ host_prefix }}/static/params_knobs.js"></script>
 <script src="{{ host_prefix }}/static/rect-slider.js"></script>
+<script>
+const driftSchema = {{ schema_json|safe }};
+</script>
 <script src="{{ host_prefix }}/static/macro_sidebar.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
