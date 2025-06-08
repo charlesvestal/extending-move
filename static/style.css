@@ -855,11 +855,11 @@ select {
 }
 .macro-add-section {
     margin-top: 0.5rem;
-    display: flex;
+    /* display: flex; */
     gap: 0.25rem;
 }
 
 .macro-add-section select {
-    padding: 0.25rem 2.5rem 0.25rem 0.5rem;
+    margin-right: 25px;
     max-width: 100%;
 }
