@@ -21,7 +21,13 @@ fi
 
 echo "Restarting the webserver on ${REMOTE_HOST}..."
 
-ssh -T "${REMOTE_USER}@${REMOTE_HOST}" bash <<'EOF'
+if [ -n "${SKIP_MODULE_WARMUP:-}" ]; then
+  SSH_CMD="SKIP_MODULE_WARMUP=${SKIP_MODULE_WARMUP} bash -s"
+else
+  SSH_CMD="bash -s"
+fi
+
+ssh -T "${REMOTE_USER}@${REMOTE_HOST}" "$SSH_CMD" <<'EOF'
 set -euo pipefail
 
 # Load port configuration on the remote machine
