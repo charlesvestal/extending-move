@@ -182,11 +182,14 @@ input[type=checkbox].input-switch:checked,input[type=radio].input-switch:checked
         el.style.backgroundSize=`100% ${(ik.sprites+1)*100}%`;
       }
       ik.valrange={min:+el.min, max:(el.max=="")?100:+el.max, step:(el.step=="")?1:+el.step};
+      const percentUnit=el.getAttribute("data-unit")==="%";
       ik.getStep=(v)=>{
         let s=ik.valrange.step;
-        let r=ik.valrange.max-ik.valrange.min;
-        if(r>0&&v-ik.valrange.min<r*0.1)
-          s/=10;
+        if(percentUnit){
+          let r=ik.valrange.max-ik.valrange.min;
+          if(r>0&&v-ik.valrange.min<r*0.1)
+            s/=10;
+        }
         return s;
       };
       el.redraw(true);
