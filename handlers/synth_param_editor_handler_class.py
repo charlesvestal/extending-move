@@ -141,6 +141,7 @@ class SynthParamEditorHandler(BaseHandler):
         "LFO",
         "Modulation",
         "Global",
+        "Extras",
         "Other",
     ]
 
@@ -293,10 +294,16 @@ class SynthParamEditorHandler(BaseHandler):
         "PitchModulation_Amount2",
         "Filter_ModAmount1",
         "Filter_ModAmount2",
+        "Global_DriftDepth",
+        "Global_Glide",
+        "Global_VolVelMod",
+        "Global_Transpose",
+        "Global_PitchBendRange",
         "ModulationMatrix_Amount1",
         "ModulationMatrix_Amount2",
         "ModulationMatrix_Amount3",
         "Lfo_ModAmount",
+
     }
 
     def _build_param_item(self, idx, name, value, meta, label=None,
@@ -342,6 +349,12 @@ class SynthParamEditorHandler(BaseHandler):
                 f'data-target="param_{idx}_value" data-value="{bool_val}"></div>'
             )
             html.append(f'<input type="hidden" name="param_{idx}_value" value="{bool_val}">')
+        elif name == "Global_SerialNumber":
+            min_attr = f' min="{meta.get("min")}"' if meta.get("min") is not None else ''
+            max_attr = f' max="{meta.get("max")}"' if meta.get("max") is not None else ''
+            html.append(
+                f'<input type="number" class="param-input" name="param_{idx}_value" value="{value}"{min_attr}{max_attr}>'
+            )
         else:
             min_attr = f' data-min="{meta.get("min")}"' if meta.get("min") is not None else ''
             max_attr = f' data-max="{meta.get("max")}"' if meta.get("max") is not None else ''
@@ -381,6 +394,16 @@ class SynthParamEditorHandler(BaseHandler):
         if name.startswith("ModulationMatrix_"):
             return "Modulation"
         if name.startswith("Global_"):
+            if name in {
+                "Global_HiQuality",
+                "Global_MonoVoiceDepth",
+                "Global_PolyVoiceDepth",
+                "Global_ResetOscillatorPhase",
+                "Global_StereoVoiceDepth",
+                "Global_UnisonVoiceDepth",
+                "Global_SerialNumber",
+            }:
+                return "Extras"
             return "Global"
         return "Other"
 
@@ -396,6 +419,8 @@ class SynthParamEditorHandler(BaseHandler):
         env_items: dict[str, str] = {}
         lfo_items: dict[str, str] = {}
         mixer_items: dict[str, str] = {}
+        global_items: dict[str, str] = {}
+        extras_items: dict[str, str] = {}
         mod_items: dict[str, str] = {}
         cycling_mode_val = None
         lfo_mode_val = None
@@ -456,6 +481,10 @@ class SynthParamEditorHandler(BaseHandler):
                 lfo_items[name] = html
             elif section == "Mixer":
                 mixer_items[name] = html
+            elif section == "Global":
+                global_items[name] = html
+            elif section == "Extras":
+                extras_items[name] = html
             elif section == "Modulation":
                 mod_items[name] = html
             else:
@@ -600,6 +629,33 @@ class SynthParamEditorHandler(BaseHandler):
             ordered.extend(env_items.values())
             sections["Envelopes"] = ordered
 
+        if global_items:
+            col1_order = [
+                "Global_VoiceMode",
+                "Global_VoiceCount",
+                "Global_DriftDepth",
+                "Global_Legato",
+                "Global_Glide",
+            ]
+            col2_order = [
+                "Global_Volume",
+                "Global_VolVelMod",
+                "Global_Transpose",
+                "Global_NotePitchBend",
+                "Global_PitchBendRange",
+            ]
+            col1_html = "".join(global_items.pop(n, "") for n in col1_order)
+            col2_html = "".join(global_items.pop(n, "") for n in col2_order)
+            ordered = []
+            if col1_html or col2_html:
+                ordered.append(
+                    f'<div class="param-columns"><div class="param-column">{col1_html}</div><div class="param-column">{col2_html}</div></div>'
+                )
+            ordered.extend(global_items.values())
+            sections["Global"] = ordered
+
+        if extras_items:
+            sections["Extras"] = list(extras_items.values())
         if mod_items:
             ordered = []
             for idx in range(1, 4):
