@@ -69,6 +69,37 @@ document.addEventListener('DOMContentLoaded', () => {
       div.className = 'assign-item';
       const span = document.createElement('span');
       span.textContent = p.name;
+      const rangeDiv = document.createElement('div');
+      rangeDiv.className = 'range-inputs';
+      const minInput = document.createElement('input');
+      minInput.type = 'number';
+      minInput.step = '0.01';
+      minInput.placeholder = 'min';
+      if (p.rangeMin !== undefined) {
+        const n = parseFloat(p.rangeMin);
+        if (!isNaN(n)) minInput.value = n.toFixed(2);
+      }
+      minInput.addEventListener('change', () => {
+        p.rangeMin = minInput.value === '' ? undefined : parseFloat(minInput.value);
+        saveState();
+      });
+      const dash = document.createElement('span');
+      dash.textContent = '-';
+      const maxInput = document.createElement('input');
+      maxInput.type = 'number';
+      maxInput.step = '0.01';
+      maxInput.placeholder = 'max';
+      if (p.rangeMax !== undefined) {
+        const n = parseFloat(p.rangeMax);
+        if (!isNaN(n)) maxInput.value = n.toFixed(2);
+      }
+      maxInput.addEventListener('change', () => {
+        p.rangeMax = maxInput.value === '' ? undefined : parseFloat(maxInput.value);
+        saveState();
+      });
+      rangeDiv.appendChild(minInput);
+      rangeDiv.appendChild(dash);
+      rangeDiv.appendChild(maxInput);
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.textContent = 'Remove';
@@ -79,6 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
         saveState();
       });
       div.appendChild(span);
+      div.appendChild(rangeDiv);
       div.appendChild(btn);
       assignedDiv.appendChild(div);
     });
@@ -133,7 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const macro = macros.find(m => m.index === currentIndex);
     const val = selectEl.value;
     if (val && !macro.parameters.some(p => p.name === val)) {
-      macro.parameters.push({ name: val, path: paramPaths[val] });
+      macro.parameters.push({ name: val, path: paramPaths[val], rangeMin: undefined, rangeMax: undefined });
       rebuildLists(macro);
       updateHighlights();
       saveState();
