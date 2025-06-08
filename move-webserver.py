@@ -440,6 +440,7 @@ def synth_params():
     selected_preset = result.get("selected_preset")
     param_count = result.get("param_count", 0)
     default_preset_path = result.get("default_preset_path")
+    macro_knobs_html = result.get("macro_knobs_html", "")
     preset_selected = bool(selected_preset)
     return render_template(
         "synth_params.html",
@@ -454,6 +455,7 @@ def synth_params():
         selected_preset=selected_preset,
         param_count=param_count,
         default_preset_path=default_preset_path,
+        macro_knobs_html=macro_knobs_html,
         active_tab="synth-params",
     )
 

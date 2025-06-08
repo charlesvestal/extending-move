@@ -8,6 +8,7 @@ from core.file_browser import generate_dir_html
 from core.synth_preset_inspector_handler import (
     extract_parameter_values,
     load_drift_schema,
+    extract_macro_information,
 )
 from core.synth_param_editor_handler import update_parameter_values
 
@@ -54,6 +55,7 @@ class SynthParamEditorHandler(BaseHandler):
             'browser_filter': 'drift',
             'schema_json': json.dumps(schema),
             'default_preset_path': DEFAULT_PRESET,
+            'macro_knobs_html': '',
         }
 
     def handle_post(self, form):
@@ -109,6 +111,11 @@ class SynthParamEditorHandler(BaseHandler):
             params_html = self.generate_params_html(values['parameters'])
             param_count = len(values['parameters'])
 
+        macro_knobs_html = ''
+        macro_info = extract_macro_information(preset_path)
+        if macro_info['success']:
+            macro_knobs_html = self.generate_macro_knobs_html(macro_info['macros'])
+
         base_dir = "/data/UserData/UserLibrary/Track Presets"
         if not os.path.exists(base_dir) and os.path.exists("examples/Track Presets"):
             base_dir = "examples/Track Presets"
@@ -131,6 +138,7 @@ class SynthParamEditorHandler(BaseHandler):
             'browser_filter': 'drift',
             'schema_json': json.dumps(load_drift_schema()),
             'default_preset_path': DEFAULT_PRESET,
+            'macro_knobs_html': macro_knobs_html,
         }
 
     SECTION_ORDER = [
@@ -720,4 +728,31 @@ class SynthParamEditorHandler(BaseHandler):
             out_html += '</div></div>'
         out_html += '</div>'
         return out_html
+
+    def generate_macro_knobs_html(self, macros):
+        """Return HTML for a row of macro value knobs."""
+        if not macros:
+            macros = []
+
+        by_index = {m["index"]: m for m in macros}
+        html = ['<div class="macro-knob-row">']
+        for i in range(8):
+            info = by_index.get(i, {"name": f"Macro {i}", "value": 0.0})
+            name = info.get("name", f"Macro {i}")
+            val = info.get("value", 0.0)
+            try:
+                val = float(val)
+            except Exception:
+                val = 0.0
+            display_val = round(val, 1)
+            html.append(
+                f'<div class="macro-knob">'
+                f'<span class="macro-label">{name}</span>'
+                f'<input type="range" class="macro-dial input-knob" '
+                f'value="{display_val}" min="0" max="127" step="0.1" disabled>'
+                f'<span class="macro-number">{display_val}</span>'
+                f'</div>'
+            )
+        html.append('</div>')
+        return ''.join(html)
 
