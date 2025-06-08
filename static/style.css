@@ -518,6 +518,13 @@ select {
     margin-top: 0.5rem;
 }
 
+.env-section-label {
+    width: 100%;
+    font-weight: bold;
+    margin-top: 0.5rem;
+    margin-bottom: 0.25rem;
+}
+
 .pitch-mod-row {
     justify-content: center;
 }
