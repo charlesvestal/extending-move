@@ -93,7 +93,13 @@ class SynthParamEditorHandler(BaseHandler):
             'selected_preset': None,
             'param_count': 0,
             'browser_root': base_dir,
-            'browser_filter': 'drift',
+        orig_path = preset_path
+            orig_path = preset_path
+                if preset_path.startswith('/data/CoreLibrary/Track Presets'):
+                    directory = NEW_PRESET_DIR
+                else:
+                    directory = os.path.dirname(preset_path)
+                os.makedirs(directory, exist_ok=True)
             'schema_json': json.dumps(schema),
             'default_preset_path': DEFAULT_PRESET,
             'macro_knobs_html': '',
@@ -223,7 +229,11 @@ class SynthParamEditorHandler(BaseHandler):
             if refresh_success:
                 message += " Library refreshed."
             else:
-                message += f" Library refresh failed: {refresh_message}"
+        rename_state = rename_flag if action == 'save_params' else False
+        if action == 'save_params' and orig_path.startswith('/data/CoreLibrary/Track Presets'):
+            rename_state = False
+
+            'rename_checked': rename_state,
         elif action in ['select_preset', 'new_preset']:
             if action == 'select_preset':
                 if is_core:

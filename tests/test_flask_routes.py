@@ -193,6 +193,25 @@ def test_synth_params_new_preset(client, monkeypatch):
     assert b'name="rename"' in resp.data
     assert b'name="new_preset_name"' in resp.data
 
+def test_synth_params_core_library_display(client, monkeypatch):
+    def fake_post(form):
+        return {
+            'message': 'loaded',
+            'message_type': 'success',
+            'params_html': '<div>y</div>',
+            'browser_root': '/tmp',
+            'selected_preset': '/data/CoreLibrary/Track Presets/Drift/core.ablpreset',
+            'param_count': 1,
+            'macro_knobs_html': '',
+            'rename_checked': False,
+        }
+    monkeypatch.setattr(move_webserver.synth_param_handler, 'handle_post', fake_post)
+    resp = client.post('/synth-params', data={'action': 'select_preset'})
+    assert resp.status_code == 200
+    assert b'/data/UserData/UserLibrary/Track Presets/Drift/' in resp.data
+    assert b'id="rename-checkbox"' in resp.data
+    assert b'id="rename-checkbox" checked' not in resp.data
+
 def test_drum_rack_inspector_get(client, monkeypatch):
     def fake_get():
         return {

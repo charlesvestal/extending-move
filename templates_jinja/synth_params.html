@@ -54,6 +54,8 @@
     {% set _display = selected_preset %}
     {% if selected_preset.startswith('/data/UserData/UserLibrary/Track Presets') %}
         {% set _display = '/' + selected_preset.split('/data/UserData/UserLibrary/Track Presets', 1)[1] %}
+    {% elif selected_preset.startswith('/data/CoreLibrary/Track Presets') %}
+        {% set _display = '/data/UserData/UserLibrary/Track Presets/Drift/' + selected_preset.split('/')[-1] %}
     {% elif selected_preset.startswith('examples/Track Presets') %}
         {% set _display = '/' + selected_preset.split('examples/Track Presets', 1)[1] %}
     {% endif %}
