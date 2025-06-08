@@ -44,10 +44,10 @@ NEW_PRESET_DIR = os.path.join(
 )
 
 # Base directory for factory presets that should never be modified
-CORE_LIBRARY_DIR = os.path.join(
-    "/data/CoreLibrary/Track Presets",
-    "Drift",
-)
+# These presets are stored as JSON files under ``/data/CoreLibrary/Track Presets``
+# with subfolders for instrument categories (e.g. "Drift").  We only store the
+# base path here so that presets in any subfolder are detected correctly.
+CORE_LIBRARY_DIR = "/data/CoreLibrary/Track Presets"
 
 logger = logging.getLogger(__name__)
 
@@ -150,12 +150,16 @@ class SynthParamEditorHandler(BaseHandler):
             if rename_flag:
                 if not new_name:
                     new_name = os.path.basename(preset_path)
+                # Convert json factory presets to .ablpreset when copying
+                if new_name.endswith('.json'):
+                    new_name = new_name[:-5]
+                if not new_name.endswith('.ablpreset'):
+                    new_name += '.ablpreset'
                 directory = os.path.dirname(preset_path)
                 if is_core:
                     directory = NEW_PRESET_DIR
-                if not new_name.endswith('.ablpreset'):
-                    new_name += '.ablpreset'
                 output_path = os.path.join(directory, new_name)
+                os.makedirs(os.path.dirname(output_path), exist_ok=True)
             result = update_parameter_values(preset_path, updates, output_path)
             if not result['success']:
                 return self.format_error_response(result['message'])
