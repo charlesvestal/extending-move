@@ -397,4 +397,25 @@ def test_pitch_shift_route(client, monkeypatch):
     assert len(shifted) == len(data)
 
 
+def test_update_get(client, monkeypatch):
+    def fake_get():
+        return {"message": "ok", "message_type": "info", "update_available": False}
+
+    monkeypatch.setattr(move_webserver.update_handler, "handle_get", fake_get)
+    resp = client.get("/update")
+    assert resp.status_code == 200
+    assert b"ok" in resp.data
+
+
+def test_update_post(client, monkeypatch):
+    def fake_post(form):
+        assert form.getvalue("action") == "perform_update"
+        return {"message": "done", "message_type": "success", "update_available": False}
+
+    monkeypatch.setattr(move_webserver.update_handler, "handle_post", fake_post)
+    resp = client.post("/update", data={"action": "perform_update"})
+    assert resp.status_code == 200
+    assert b"done" in resp.data
+
+
 
