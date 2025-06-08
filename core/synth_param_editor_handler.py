@@ -65,7 +65,12 @@ def update_parameter_values(preset_path, param_updates, output_path=None):
             # Determine numeric vs string
             if isinstance(target, dict) and "value" in target:
                 orig_val = target["value"]
-                if isinstance(orig_val, (int, float)):
+                if isinstance(orig_val, int):
+                    try:
+                        target["value"] = int(round(float(val)))
+                    except ValueError:
+                        continue
+                elif isinstance(orig_val, float):
                     try:
                         target["value"] = float(val)
                     except ValueError:
@@ -74,7 +79,12 @@ def update_parameter_values(preset_path, param_updates, output_path=None):
                     target["value"] = val
             else:
                 orig_val = target
-                if isinstance(orig_val, (int, float)):
+                if isinstance(orig_val, int):
+                    try:
+                        parent[key] = int(round(float(val)))
+                    except ValueError:
+                        continue
+                elif isinstance(orig_val, float):
                     try:
                         parent[key] = float(val)
                     except ValueError:
