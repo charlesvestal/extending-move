@@ -8,8 +8,12 @@ from core.file_browser import generate_dir_html
 from core.synth_preset_inspector_handler import (
     extract_parameter_values,
     load_drift_schema,
+    extract_macro_information,
 )
-from core.synth_param_editor_handler import update_parameter_values
+from core.synth_param_editor_handler import (
+    update_parameter_values,
+    update_macro_values,
+)
 
 # Path to the preset used when creating a new preset. Prefer the version in the
 # user's library but fall back to the bundled example if it doesn't exist.
@@ -54,6 +58,7 @@ class SynthParamEditorHandler(BaseHandler):
             'browser_filter': 'drift',
             'schema_json': json.dumps(schema),
             'default_preset_path': DEFAULT_PRESET,
+            'macro_knobs_html': '',
         }
 
     def handle_post(self, form):
@@ -91,7 +96,18 @@ class SynthParamEditorHandler(BaseHandler):
             result = update_parameter_values(preset_path, updates, output_path)
             if not result['success']:
                 return self.format_error_response(result['message'])
-            message = result['message']
+            preset_path = result['path']
+
+            macro_updates = {}
+            for i in range(8):
+                val = form.getvalue(f'macro_{i}_value')
+                if val is not None:
+                    macro_updates[i] = val
+            macro_result = update_macro_values(preset_path, macro_updates, preset_path)
+            if not macro_result['success']:
+                return self.format_error_response(macro_result['message'])
+
+            message = result['message'] + "; " + macro_result['message']
             if output_path:
                 message += f" Saved as {os.path.basename(output_path)}"
         elif action in ['select_preset', 'new_preset']:
@@ -108,6 +124,11 @@ class SynthParamEditorHandler(BaseHandler):
         if values['success']:
             params_html = self.generate_params_html(values['parameters'])
             param_count = len(values['parameters'])
+
+        macro_knobs_html = ''
+        macro_info = extract_macro_information(preset_path)
+        if macro_info['success']:
+            macro_knobs_html = self.generate_macro_knobs_html(macro_info['macros'])
 
         base_dir = "/data/UserData/UserLibrary/Track Presets"
         if not os.path.exists(base_dir) and os.path.exists("examples/Track Presets"):
@@ -131,6 +152,7 @@ class SynthParamEditorHandler(BaseHandler):
             'browser_filter': 'drift',
             'schema_json': json.dumps(load_drift_schema()),
             'default_preset_path': DEFAULT_PRESET,
+            'macro_knobs_html': macro_knobs_html,
         }
 
     SECTION_ORDER = [
@@ -730,4 +752,33 @@ class SynthParamEditorHandler(BaseHandler):
             out_html += '</div></div>'
         out_html += '</div>'
         return out_html
+
+    def generate_macro_knobs_html(self, macros):
+        """Return HTML for a row of macro value knobs."""
+        if not macros:
+            macros = []
+
+        by_index = {m["index"]: m for m in macros}
+        html = ['<div class="macro-knob-row">']
+        for i in range(8):
+            info = by_index.get(i, {"name": f"Macro {i}", "value": 0.0})
+            name = info.get("name", f"Macro {i}")
+            val = info.get("value", 0.0)
+            try:
+                val = float(val)
+            except Exception:
+                val = 0.0
+            display_val = round(val, 1)
+            html.append(
+                f'<div class="macro-knob">'
+                f'<span class="macro-label">{name}</span>'
+                f'<input id="macro_{i}_dial" type="range" class="macro-dial input-knob" '
+                f'data-target="macro_{i}_value" data-display="macro_{i}_disp" '
+                f'value="{display_val}" min="0" max="127" step="0.1" data-decimals="1">'
+                f'<span id="macro_{i}_disp" class="macro-number"></span>'
+                f'<input type="hidden" name="macro_{i}_value" value="{display_val}">' 
+                f'</div>'
+            )
+        html.append('</div>')
+        return ''.join(html)
 
