@@ -72,9 +72,9 @@ class SynthPresetInspectorHandler(BaseHandler):
                     return self.format_error_response(update_result['message'])
 
                 if new_name:
-                    message = f"Saved name for Macro {macro_index}: {new_name}"
+                    message = f"Saved name for Knob {macro_index + 1}: {new_name}"
                 else:
-                    message = f"Removed custom name for Macro {macro_index}"
+                    message = f"Removed custom name for Knob {macro_index + 1}"
             
             # If this is a save names action for all macros, update all macro names
             elif action == 'save_names':
@@ -128,7 +128,9 @@ class SynthPresetInspectorHandler(BaseHandler):
                     if not update_result['success']:
                         return self.format_error_response(update_result['message'])
                     
-                    message = f"Added mapping for parameter {parameter_name} to Macro {macro_index}"
+                    message = (
+                        f"Added mapping for parameter {parameter_name} to Knob {macro_index + 1}"
+                    )
                 else:
                     return self.format_error_response("No parameter selected for mapping")
             
@@ -263,6 +265,8 @@ class SynthPresetInspectorHandler(BaseHandler):
             html += f'<div class="macro-item">'
             html += '<div class="macro-top">'
             name_label = macro.get("name", f"Macro {macro['index']}")
+            if name_label == f"Macro {macro['index']}":
+                name_label = f"Knob {macro['index'] + 1}"
             html += (
                 f'<div class="macro-knob macro-{macro["index"]}">'
                 f'<span class="macro-label">{name_label}</span>'
@@ -273,7 +277,7 @@ class SynthPresetInspectorHandler(BaseHandler):
             )
             html += '<div>'
             html += f'<div class="macro-header">'
-            html += f'<span>Macro {macro["index"]}:</span> '
+            html += f'<span>Knob {macro["index"] + 1}:</span> '
             default_label = f"Macro {macro['index']}"
             macro_value = macro["name"] if macro["name"] != default_label else ""
             placeholder = " placeholder=\"Default name chosen by Move..\"" if not macro_value else ""
