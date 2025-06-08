@@ -32,9 +32,9 @@
         <button type="submit" onclick="document.getElementById('action-input').value='reset_preset';">Choose Another Preset</button>
     </div>
     {{ macro_knobs_html | safe }}
-    <p style="margin-top:0.5em;">
+    <div class="edit-macros-link">
         <a href="{{ host_prefix }}/synth-macros?preset={{ selected_preset | urlencode }}">Edit Macros</a>
-    </p>
+    </div>
     <div class="param-list">
         {{ params_html | safe }}
     </div>
