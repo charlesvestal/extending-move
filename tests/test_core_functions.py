@@ -119,3 +119,26 @@ def test_update_parameter_values(tmp_path):
         ["parameters"]["Oscillator1_Shape"]["value"]
     )
     assert abs(val - 0.5) < 1e-6
+
+
+def test_save_preset_no_changes(tmp_path):
+    """Saving a preset without modifying parameters should produce identical output."""
+    src = Path("examples/Track Presets/Drift/Analog Shape.ablpreset")
+
+    # Extract existing parameter values
+    from core.synth_preset_inspector_handler import extract_parameter_values
+
+    info = extract_parameter_values(str(src))
+    assert info["success"], info.get("message")
+    # Convert values to strings as the web editor would submit
+    updates = {p["name"]: str(p["value"]) for p in info["parameters"]}
+
+    dest = tmp_path / "saved.ablpreset"
+    result = update_parameter_values(str(src), updates, str(dest))
+    assert result["success"], result.get("message")
+
+    with open(src, "rb") as f:
+        original = f.read()
+    with open(dest, "rb") as f:
+        written = f.read()
+    assert written == original

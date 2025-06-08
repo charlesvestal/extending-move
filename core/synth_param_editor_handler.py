@@ -53,6 +53,25 @@ def update_parameter_values(preset_path, param_updates, output_path=None):
                         return None, None
             return current, parts[-1]
 
+        def cast_value(val_str, original):
+            """Cast the string ``val_str`` to the same type as ``original``."""
+            if isinstance(original, bool):
+                try:
+                    return bool(int(val_str))
+                except ValueError:
+                    return original
+            if isinstance(original, int) and not isinstance(original, bool):
+                try:
+                    return int(float(val_str))
+                except ValueError:
+                    return original
+            if isinstance(original, float):
+                try:
+                    return float(val_str)
+                except ValueError:
+                    return original
+            return val_str
+
         updated = 0
         for name, val in param_updates.items():
             path = paths.get(name)
@@ -62,25 +81,13 @@ def update_parameter_values(preset_path, param_updates, output_path=None):
             if parent is None or key not in parent:
                 continue
             target = parent[key]
-            # Determine numeric vs string
+
             if isinstance(target, dict) and "value" in target:
                 orig_val = target["value"]
-                if isinstance(orig_val, (int, float)):
-                    try:
-                        target["value"] = float(val)
-                    except ValueError:
-                        continue
-                else:
-                    target["value"] = val
+                target["value"] = cast_value(val, orig_val)
             else:
                 orig_val = target
-                if isinstance(orig_val, (int, float)):
-                    try:
-                        parent[key] = float(val)
-                    except ValueError:
-                        continue
-                else:
-                    parent[key] = val
+                parent[key] = cast_value(val, orig_val)
             updated += 1
 
         dest = output_path or preset_path
