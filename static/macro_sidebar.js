@@ -36,6 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function saveState() {
     macrosInput.value = JSON.stringify(macros);
+    macrosInput.dispatchEvent(new Event('change'));
   }
 
   function updateKnobLabels() {
