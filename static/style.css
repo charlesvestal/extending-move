@@ -616,6 +616,16 @@ select {
     width: 80px;
     text-align: center;
 }
+
+.param-select {
+    margin: 0.25rem;
+    width: 80px;
+    height: 24px;
+    font-size: 0.8rem;
+    line-height: 24px;
+    padding: 0 1.5rem 0 0.5rem;
+    text-align: center;
+}
   
 .param-item {
     margin-bottom: 0.75rem;
