@@ -441,7 +441,7 @@ class SynthParamEditorHandler(BaseHandler):
                 env_items.pop("Envelope1_Sustain", ""),
                 env_items.pop("Envelope1_Release", ""),
             ]
-            env1_adsr = [
+            env2_adsr = [
                 env_items.pop("Envelope2_Attack", ""),
                 env_items.pop("Envelope2_Decay", ""),
                 env_items.pop("Envelope2_Sustain", ""),
@@ -461,20 +461,15 @@ class SynthParamEditorHandler(BaseHandler):
                 ordered.append(
                     f'<div class="param-row"><span class="param-row-label">Amp envelope</span>{row1}</div>'
                 )
-            row2 = "".join(env1_adsr)
-            if row2:
+            row2 = "".join(env2_adsr) + cycle_toggle
+            if row2.strip():
                 ordered.append(
-                    f'<div class="param-row"><span class="param-row-label">Env 1</span>{row2}</div>'
+                    f'<div class="param-row env2-main env2-adsr"><span class="param-row-label">Env 2</span>{row2}</div>'
                 )
-            row3_main = row2 + cycle_toggle
-            if row3_main.strip():
+            row2_extra = "".join(cycle_extras)
+            if row2_extra.strip():
                 ordered.append(
-                    f'<div class="param-row env2-main"><span class="param-row-label">Env 2</span>{row3_main}</div>'
-                )
-            row3_extra = "".join(cycle_extras)
-            if row3_extra.strip():
-                ordered.append(
-                    f'<div class="param-row env2-cycling hidden">{row3_extra}</div>'
+                    f'<div class="param-row env2-cycling hidden"><span class="param-row-label">Env 2</span>{row2_extra}</div>'
                 )
 
             ordered.extend(env_items.values())
