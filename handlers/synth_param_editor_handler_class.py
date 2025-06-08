@@ -121,9 +121,19 @@ class SynthParamEditorHandler(BaseHandler):
                 return self.format_error_response("Preset already exists")
             try:
                 shutil.copy(DEFAULT_PRESET, preset_path)
+                refresh_success, refresh_message = refresh_library()
+                if refresh_success:
+                    message = (
+                        f"Created new preset {os.path.basename(preset_path)}. "
+                        "Library refreshed."
+                    )
+                else:
+                    message = (
+                        f"Created new preset {os.path.basename(preset_path)}. "
+                        f"Library refresh failed: {refresh_message}"
+                    )
             except Exception as exc:
                 return self.format_error_response(f"Could not create preset: {exc}")
-            message = f"Created new preset {os.path.basename(preset_path)}"
         else:
             preset_path = form.getvalue('preset_select')
 
