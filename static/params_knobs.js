@@ -26,8 +26,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const input = document.querySelector(`input[name="${target}"]`);
         if (input) {
             dial.on('change', v => {
-                input.value = v;
-                if (displayEl) displayEl.textContent = format(v);
+                const m = Math.pow(10, decimals);
+                const q = Math.round(v * m) / m;
+                input.value = q;
+                if (displayEl) displayEl.textContent = format(q);
             });
         }
     });
@@ -62,8 +64,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const input = document.querySelector(`input[name="${target}"]`);
         if (input) {
             slider.on('change', v => {
-                input.value = v;
-                if (displayEl) displayEl.textContent = format(v);
+                const m = Math.pow(10, decimals);
+                const q = Math.round(v * m) / m;
+                input.value = q;
+                if (displayEl) displayEl.textContent = format(q);
             });
         }
     });
