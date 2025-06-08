@@ -345,6 +345,7 @@ class SynthParamEditorHandler(BaseHandler):
         osc_items: dict[str, str] = {}
         env_items: dict[str, str] = {}
         mixer_items: dict[str, str] = {}
+        mod_items: dict[str, str] = {}
         cycling_mode_val = None
 
         for i, item in enumerate(params):
@@ -391,6 +392,8 @@ class SynthParamEditorHandler(BaseHandler):
                 env_items[name] = html
             elif section == "Mixer":
                 mixer_items[name] = html
+            elif section == "Modulation":
+                mod_items[name] = html
             else:
                 sections[section].append(html)
 
@@ -532,6 +535,26 @@ class SynthParamEditorHandler(BaseHandler):
 
             ordered.extend(env_items.values())
             sections["Envelopes"] = ordered
+
+        if mod_items:
+            ordered = []
+            groups = []
+            for idx in range(1, 4):
+                src = mod_items.pop(f"ModulationMatrix_Source{idx}", "")
+                amt = mod_items.pop(f"ModulationMatrix_Amount{idx}", "")
+                dst = mod_items.pop(f"ModulationMatrix_Target{idx}", "")
+                if src or amt or dst:
+                    groups.append(
+                        f'<div class="param-pair mod-group">'
+                        f'<span class="mod-label">Mod {idx}</span>'
+                        f'{src}{amt}{dst}</div>'
+                    )
+            if groups:
+                ordered.append(
+                    f'<div class="param-row mod-matrix-row">{"".join(groups)}</div>'
+                )
+            ordered.extend(mod_items.values())
+            sections["Modulation"] = ordered
 
         out_html = '<div class="drift-param-panels">'
         for sec in self.SECTION_ORDER:
