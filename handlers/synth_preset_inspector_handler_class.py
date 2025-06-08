@@ -357,7 +357,12 @@ class SynthPresetInspectorHandler(BaseHandler):
                         opts = ", ".join(map(str, info["options"]))
                         param_info += f' [Options: {opts}]'
                     elif "rangeMin" in param and "rangeMax" in param:
-                        param_info += f' (Range: {param["rangeMin"]} - {param["rangeMax"]})'
+                        try:
+                            rmin = float(param["rangeMin"])
+                            rmax = float(param["rangeMax"])
+                            param_info += f' (Range: {rmin:.2f} - {rmax:.2f})'
+                        except (ValueError, TypeError):
+                            param_info += f' (Range: {param["rangeMin"]} - {param["rangeMax"]})'
                     
                     # Add delete button with onclick handler to set action and parameter info
                     html += f'<li class="parameter-item">'

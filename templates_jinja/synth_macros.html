@@ -264,8 +264,8 @@ const driftSchema = {{ schema_json|safe }};
     } else {
       minInput.disabled = false;
       maxInput.disabled = false;
-      minInput.placeholder = info.min !== null ? info.min : '';
-      maxInput.placeholder = info.max !== null ? info.max : '';
+      minInput.placeholder = info.min !== null ? info.min.toFixed(2) : '';
+      maxInput.placeholder = info.max !== null ? info.max.toFixed(2) : '';
       if (minWrap) minWrap.style.display = 'inline-block';
       if (maxWrap) maxWrap.style.display = 'inline-block';
     }
