@@ -632,6 +632,10 @@ select {
     padding: 0 1.5rem 0 0.5rem;
     text-align: center;
 }
+
+.filter-type-select {
+    width: 48px;
+}
   
 .param-item {
     margin-bottom: 0.75rem;
@@ -661,6 +665,11 @@ select {
 }
 
 .edit-macros-link {
+    text-align: center;
+    margin: 0 0 1rem;
+}
+
+.extras-toggle {
     text-align: center;
     margin: 0 0 1rem;
 }

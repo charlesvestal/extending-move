@@ -376,7 +376,10 @@ class SynthParamEditorHandler(BaseHandler):
             )
             html.append(f'<input type="hidden" name="param_{idx}_value" value="{value}">')
         elif p_type == "enum" and meta.get("options"):
-            html.append(f'<select class="param-select" name="param_{idx}_value">')
+            select_class = "param-select"
+            if name == "Filter_Type":
+                select_class += " filter-type-select"
+            html.append(f'<select class="{select_class}" name="param_{idx}_value">')
             short_map = {}
             if name in ("Oscillator1_Type", "Oscillator2_Type"):
                 short_map = self.OSC_WAVE_SHORT
@@ -796,7 +799,10 @@ class SynthParamEditorHandler(BaseHandler):
             if not items:
                 continue
             cls = sec.lower().replace(' ', '-').replace('+', '')
-            out_html += f'<div class="param-panel {cls}"><h3>{sec}</h3><div class="param-items">'
+            extra_cls = ' hidden' if sec == 'Extras' else ''
+            out_html += (
+                f'<div class="param-panel {cls}{extra_cls}"><h3>{sec}</h3><div class="param-items">'
+            )
             out_html += ''.join(items)
             out_html += '</div></div>'
         out_html += '</div>'
