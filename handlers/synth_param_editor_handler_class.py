@@ -185,9 +185,7 @@ class SynthParamEditorHandler(BaseHandler):
                 try:
                     macros_data = json.loads(macros_data_str)
                 if preset_path.startswith('/data/CoreLibrary/Track Presets'):
-                    message = (
-                        f"Core Library preset will be saved to {NEW_PRESET_DIR}/"
-                    )
+                    message = f"Core Library preset will be saved to {NEW_PRESET_DIR}/"
                 else:
                     message = ""
                     macros_data = []
