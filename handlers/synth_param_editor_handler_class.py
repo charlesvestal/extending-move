@@ -3,6 +3,7 @@ import os
 import json
 import logging
 import shutil
+import re
 
 from handlers.base_handler import BaseHandler
 from core.file_browser import generate_dir_html
@@ -934,6 +935,20 @@ class SynthParamEditorHandler(BaseHandler):
         if not macros:
             macros = []
 
+        def friendly(name: str) -> str:
+            """Return a human-friendly version of a parameter name."""
+            if not name:
+                return name
+            parts = name.split("_", 1)
+            if len(parts) == 2:
+                group, param = parts
+                group = re.sub(r"([A-Za-z])([0-9])", r"\1 \2", group)
+                group = re.sub(r"([a-z])([A-Z])", r"\1 \2", group)
+                param = re.sub(r"([A-Za-z])([0-9])", r"\1 \2", param)
+                param = re.sub(r"([a-z])([A-Z])", r"\1 \2", param)
+                return f"{group}: {param}"
+            return re.sub(r"([a-z])([A-Z])", r"\1 \2", name)
+
         by_index = {m["index"]: m for m in macros}
         html = ['<div class="macro-knob-row">']
         for i in range(8):
@@ -943,7 +958,8 @@ class SynthParamEditorHandler(BaseHandler):
             if not name or name == f"Macro {i}":
                 params = info.get("parameters") or []
                 if len(params) == 1:
-                    name = params[0].get("name", f"Knob {i + 1}")
+                    pname = params[0].get("name", f"Knob {i + 1}")
+                    name = friendly(pname)
                     label_class = " placeholder"
                 else:
                     name = f"Knob {i + 1}"
