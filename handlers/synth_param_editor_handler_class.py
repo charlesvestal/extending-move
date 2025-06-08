@@ -77,6 +77,7 @@ class SynthParamEditorHandler(BaseHandler):
             'file_browser_html': browser_html,
             'params_html': '',
             'selected_preset': None,
+            'selected_preset_rel': None,
             'param_count': 0,
             'browser_root': base_dir,
             'browser_filter': 'drift',
@@ -195,7 +196,8 @@ class SynthParamEditorHandler(BaseHandler):
                 message += f" Library refresh failed: {refresh_message}"
         elif action in ['select_preset', 'new_preset']:
             if action == 'select_preset':
-                message = f"Selected preset: {os.path.basename(preset_path)}"
+                rel = os.path.relpath(preset_path, base_dir)
+                message = f"Selected preset: {rel}"
         else:
             return self.format_error_response("Unknown action")
 
@@ -234,12 +236,14 @@ class SynthParamEditorHandler(BaseHandler):
             'select_preset',
             filter_key='drift',
         )
+        rel_preset = os.path.relpath(preset_path, base_dir)
         return {
             'message': message,
             'message_type': 'success',
             'file_browser_html': browser_html,
             'params_html': params_html,
             'selected_preset': preset_path,
+            'selected_preset_rel': rel_preset,
             'param_count': param_count,
             'browser_root': base_dir,
             'browser_filter': 'drift',
