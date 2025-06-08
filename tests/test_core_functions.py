@@ -209,3 +209,30 @@ def test_extract_macro_info_adds_missing_macros(tmp_path):
     assert len(info["macros"]) == 8
     # All macros should use default names
     assert all(m["name"] == f"Macro {m['index']}" for m in info["macros"])
+
+
+def test_remove_macro_name(tmp_path):
+    preset_src = Path("examples/Track Presets/Drift/Analog Shape - Core.json")
+    preset_copy = tmp_path / "copy.ablpreset"
+    preset_copy.write_text(preset_src.read_text())
+
+    from core.synth_preset_inspector_handler import (
+        extract_macro_information,
+        update_preset_macro_names,
+    )
+
+    # Remove the name for Macro0
+    result = update_preset_macro_names(str(preset_copy), {0: ""})
+    assert result["success"], result.get("message")
+
+    info = extract_macro_information(str(preset_copy))
+    assert info["success"], info.get("message")
+
+    names = {m["index"]: m["name"] for m in info["macros"]}
+    assert names[0] == "Macro 0"
+    assert names[1] == "Shape"
+
+    with open(preset_copy) as f:
+        data = json.load(f)
+    assert "customName" not in data["chains"][0]["devices"][0]["parameters"]["Macro0"]
+
