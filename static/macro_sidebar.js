@@ -5,6 +5,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const availableParams = JSON.parse(document.getElementById('available-params-input').value || '[]');
   let macros = [];
   try { macros = JSON.parse(macrosInput.value || '[]'); } catch (e) {}
+  macros.forEach(m => {
+    if (/^Macro\s\d+$/.test(m.name)) m.name = '';
+  });
+  macrosInput.value = JSON.stringify(macros);
 
   const overlay = document.getElementById('sidebar-overlay');
   const sidebar = document.getElementById('macro-sidebar');
@@ -23,9 +27,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (currentIndex !== null) {
       const macro = macros.find(m => m.index === currentIndex);
       if (macro) {
-        macro.name = nameInput.value.trim() || `Knob ${currentIndex + 1}`;
+        macro.name = nameInput.value.trim();
         const label = document.querySelector(`.macro-label[data-index="${currentIndex}"]`);
-        if (label) label.textContent = macro.name;
+        if (label) label.textContent = macro.name || `Knob ${currentIndex + 1}`;
       }
     }
   });
@@ -47,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
     macros.forEach(m => {
       const label = document.querySelector(`.macro-label[data-index="${m.index}"]`);
       if (!label) return;
-      if (/^(Macro|Knob)\s\d+$/.test(m.name)) {
+      if (!m.name || /^(Macro|Knob)\s\d+$/.test(m.name)) {
         label.textContent = `Knob ${m.index + 1}`;
       } else {
         label.textContent = m.name;
@@ -162,11 +166,11 @@ document.addEventListener('DOMContentLoaded', () => {
     currentIndex = idx;
     let macro = macros.find(m => m.index === idx);
     if (!macro) {
-      macro = { index: idx, name: `Knob ${idx + 1}`, parameters: [] };
+      macro = { index: idx, name: "", parameters: [] };
       macros.push(macro);
     }
     titleEl.textContent = `Knob ${idx + 1}`;
-    nameInput.value = /^(Macro|Knob)\s/.test(macro.name) ? '' : macro.name;
+    nameInput.value = macro.name || '';
     rebuildLists(macro);
     updateAddBtn();
     overlay.classList.remove('hidden');
@@ -179,7 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const macro = macros.find(m=>m.index===currentIndex);
       if (macro) {
         const name = nameInput.value.trim();
-        macro.name = name || `Knob ${currentIndex + 1}`;
+        macro.name = name;
       }
       saveState();
       updateHighlights();

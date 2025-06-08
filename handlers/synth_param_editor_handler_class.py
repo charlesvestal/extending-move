@@ -219,7 +219,13 @@ class SynthParamEditorHandler(BaseHandler):
         if macro_info['success']:
             macro_knobs_html = self.generate_macro_knobs_html(macro_info['macros'])
             mapped_params = macro_info.get('mapped_parameters', {})
-            macros_json = json.dumps(macro_info['macros'])
+            macros_for_json = []
+            for m in macro_info['macros']:
+                mc = dict(m)
+                if mc.get('name') == f"Macro {mc.get('index')}":
+                    mc['name'] = ""
+                macros_for_json.append(mc)
+            macros_json = json.dumps(macros_for_json)
 
         param_info = extract_available_parameters(preset_path)
         if param_info['success']:
@@ -933,7 +939,7 @@ class SynthParamEditorHandler(BaseHandler):
         for i in range(8):
             info = by_index.get(i, {"name": f"Macro {i}", "value": 0.0})
             name = info.get("name", f"Macro {i}")
-            if name == f"Macro {i}":
+            if not name or name == f"Macro {i}":
                 name = f"Knob {i + 1}"
             val = info.get("value", 0.0)
             try:
