@@ -109,7 +109,6 @@ class SynthParamEditorHandler(BaseHandler):
             'param_paths_json': '{}',
         }
 
-    def handle_post(self, form):
         action = form.getvalue('action')
         if action == 'reset_preset':
             return self.handle_get()
