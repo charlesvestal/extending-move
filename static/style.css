@@ -560,6 +560,9 @@ select {
     flex-direction: column;
     flex: 1;
 }
+.param-panel.hidden {
+    display: none;
+}
 
 .param-panel.oscillators,
 .param-panel.envelopes {
