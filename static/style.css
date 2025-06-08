@@ -862,6 +862,9 @@ select {
     gap: 0.25rem;
 }
 
+button#macro-add-param {
+    float:right;
+}
 .macro-add-section select {
     margin-right: 25px;
     max-width: 100%;
