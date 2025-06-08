@@ -78,6 +78,18 @@ def test_generate_dir_html(tmp_path):
     assert 'a.wav' in html
     assert 'b.txt' not in html
 
+    # Adding a new file should invalidate the cache automatically
+    (tmp_path / "new.wav").write_text("x")
+    html2 = generate_dir_html(
+        str(tmp_path),
+        "",
+        "/upload",
+        "file",
+        "select",
+        filter_key="wav",
+    )
+    assert 'new.wav' in html2
+
 
 def test_time_stretch_wav(tmp_path, monkeypatch):
     sr = 22050
@@ -103,7 +115,7 @@ def test_get_rubberband_binary_exists():
 
 
 def test_update_parameter_values(tmp_path):
-    src = Path("examples/Track Presets/Drift/Analog Shape.ablpreset")
+    src = Path("examples/Track Presets/Drift/Analog Shape - Core.json")
     dest = tmp_path / "out.ablpreset"
     result = update_parameter_values(str(src), {"Oscillator1_Shape": "0.5"}, str(dest))
     assert result["success"], result.get("message")
@@ -123,7 +135,7 @@ def test_update_parameter_values(tmp_path):
 
 def test_save_preset_no_changes(tmp_path):
     """Saving a preset without modifying parameters should produce identical output."""
-    src = Path("examples/Track Presets/Drift/Analog Shape.ablpreset")
+    src = Path("examples/Track Presets/Drift/Analog Shape - Core.json")
 
     # Extract existing parameter values
     from core.synth_preset_inspector_handler import extract_parameter_values

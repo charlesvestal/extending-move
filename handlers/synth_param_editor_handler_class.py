@@ -11,13 +11,20 @@ from core.synth_preset_inspector_handler import (
 )
 from core.synth_param_editor_handler import update_parameter_values
 
-# Path to the example preset used when creating a new preset
+# Path to the preset used when creating a new preset. Prefer the version in the
+# user's library but fall back to the bundled example if it doesn't exist.
 DEFAULT_PRESET = os.path.join(
-    "examples",
-    "Track Presets",
+    "/data/UserData/UserLibrary/Track Presets",
     "Drift",
-    "Analog Shape.ablpreset",
+    "Analog Shape - Core.json",
 )
+if not os.path.exists(DEFAULT_PRESET):
+    DEFAULT_PRESET = os.path.join(
+        "examples",
+        "Track Presets",
+        "Drift",
+        "Analog Shape - Core.json",
+    )
 
 logger = logging.getLogger(__name__)
 
