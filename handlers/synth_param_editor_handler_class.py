@@ -345,6 +345,7 @@ class SynthParamEditorHandler(BaseHandler):
         osc_items: dict[str, str] = {}
         env_items: dict[str, str] = {}
         mixer_items: dict[str, str] = {}
+        global_items: dict[str, str] = {}
         cycling_mode_val = None
 
         for i, item in enumerate(params):
@@ -391,6 +392,8 @@ class SynthParamEditorHandler(BaseHandler):
                 env_items[name] = html
             elif section == "Mixer":
                 mixer_items[name] = html
+            elif section == "Global":
+                global_items[name] = html
             else:
                 sections[section].append(html)
 
@@ -532,6 +535,31 @@ class SynthParamEditorHandler(BaseHandler):
 
             ordered.extend(env_items.values())
             sections["Envelopes"] = ordered
+
+        if global_items:
+            col1_order = [
+                "Global_VoiceMode",
+                "Global_VoiceCount",
+                "Global_DriftDepth",
+                "Global_Legato",
+                "Global_Glide",
+            ]
+            col2_order = [
+                "Global_Volume",
+                "Global_VolVelMod",
+                "Global_Transpose",
+                "Global_NotePitchBend",
+                "Global_PitchBendRange",
+            ]
+            col1_html = "".join(global_items.pop(n, "") for n in col1_order)
+            col2_html = "".join(global_items.pop(n, "") for n in col2_order)
+            ordered = []
+            if col1_html or col2_html:
+                ordered.append(
+                    f'<div class="param-columns"><div class="param-column">{col1_html}</div><div class="param-column">{col2_html}</div></div>'
+                )
+            ordered.extend(global_items.values())
+            sections["Global"] = ordered
 
         out_html = '<div class="drift-param-panels">'
         for sec in self.SECTION_ORDER:
