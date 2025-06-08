@@ -107,7 +107,8 @@
 <script src="{{ host_prefix }}/static/params_knobs.js"></script>
 <script src="{{ host_prefix }}/static/rect-slider.js"></script>
 <script>
-const driftSchema = {{ schema_json|safe }};
+// Expose parameter metadata before loading the macro sidebar script
+window.driftSchema = {{ schema_json|safe }};
 </script>
 <script src="{{ host_prefix }}/static/macro_sidebar.js"></script>
 <script>
