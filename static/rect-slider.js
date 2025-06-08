@@ -68,6 +68,7 @@ function initSlider(el){
     }
   }
   function start(ev){
+    if(el.classList.contains('disabled') || el.dataset.disabled==='true') return;
     ev.preventDefault();
     const startY=ev.touches?ev.touches[0].clientY:ev.clientY;
     const startVal=value;
