@@ -241,6 +241,7 @@ class SynthParamEditorHandler(BaseHandler):
         "Filter_ModSource2",
         "Filter_ModAmount1",
         "Filter_ModAmount2",
+        "Global_Envelope2Mode",
     }
 
     # Parameters that use a horizontal slider instead of a dial
@@ -262,7 +263,16 @@ class SynthParamEditorHandler(BaseHandler):
         if not hide_label:
             html.append(f'<span class="param-label">{label}</span>')
 
-        if p_type == "enum" and meta.get("options"):
+        if name == "Global_Envelope2Mode":
+            true_val = "Cyc"
+            false_val = "Env"
+            html.append(
+                f'<div id="param_{idx}_toggle" class="param-toggle" '
+                f'data-target="param_{idx}_value" data-value="{value}" '
+                f'data-true-value="{true_val}" data-false-value="{false_val}"></div>'
+            )
+            html.append(f'<input type="hidden" name="param_{idx}_value" value="{value}">')
+        elif p_type == "enum" and meta.get("options"):
             html.append(f'<select name="param_{idx}_value">')
             for opt in meta["options"]:
                 sel = " selected" if str(value) == str(opt) else ""
@@ -464,10 +474,14 @@ class SynthParamEditorHandler(BaseHandler):
                 ordered.append(
                     f'<div class="param-row"><span class="param-row-label">Amp envelope</span>{row1}</div>'
                 )
-            row2_main = "".join(env2_adsr) + cycle_toggle
+            if cycle_toggle:
+                ordered.append(
+                    f'<div class="param-row env2-mode"><span class="param-row-label">Env/Cyc</span>{cycle_toggle}</div>'
+                )
+            row2_main = "".join(env2_adsr)
             if row2_main.strip():
                 ordered.append(
-                    f'<div class="param-row env2-main env2-adsr"><span class="param-row-label">Env 2</span>{row2_main}</div>'
+                    f'<div class="param-row env2-adsr"><span class="param-row-label">Env 2</span>{row2_main}</div>'
                 )
             row3_extra = "".join(cycle_extras)
             if row3_extra.strip():

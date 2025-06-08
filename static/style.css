@@ -555,6 +555,11 @@ select {
     gap: 0.5rem;
 }
 
+/* Ensure hidden rows stay hidden despite flex layout */
+.param-row.hidden {
+    display: none;
+}
+
 .param-row-label {
     width: 80px;
     display: flex;
