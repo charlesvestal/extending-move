@@ -560,9 +560,6 @@ select {
     flex-direction: column;
     flex: 1;
 }
-.param-panel.hidden {
-    display: none;
-}
 
 .param-panel.oscillators,
 .param-panel.envelopes {
@@ -671,11 +668,6 @@ select {
 }
 
 .edit-macros-link {
-    text-align: center;
-    margin: 0 0 1rem;
-}
-
-.extras-toggle {
     text-align: center;
     margin: 0 0 1rem;
 }
