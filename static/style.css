@@ -195,7 +195,7 @@ label {
     color: #444;
 }
 
-button, 
+button,
 input[type="submit"] {
     background-color: #0000ff;
     color: white;
@@ -220,6 +220,13 @@ input[type="submit"] {
 button:hover, 
 input[type="submit"]:hover {
     background-color: #0000cc;
+}
+
+button:disabled,
+input[type="submit"]:disabled {
+    background-color: #ccc;
+    color: #666;
+    cursor: default;
 }
 
 /* Card styling for grid layouts */
