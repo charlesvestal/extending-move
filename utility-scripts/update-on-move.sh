@@ -18,6 +18,16 @@ else
 fi
 cd "$PROJECT_ROOT"
 
+# --- Ensure static git binary is present ---
+GIT_BIN="${PROJECT_ROOT}/bin/git"
+if [ ! -f "$GIT_BIN" ]; then
+  echo "Downloading static git binary..."
+  mkdir -p "${PROJECT_ROOT}/bin"
+  curl -L -o "$GIT_BIN" \
+    https://raw.githubusercontent.com/EXALAB/git-static/master/output/amd64/bin/git
+  chmod +x "$GIT_BIN"
+fi
+
 # --- Remote server configuration ---
 REMOTE_USER="ableton"
 REMOTE_HOST="move.local"
@@ -63,7 +73,7 @@ else
   echo "Installing requirements with pip on remote..."
   ssh -T "${REMOTE_USER}@${REMOTE_HOST}" <<EOF
 export TMPDIR=/data/UserData/tmp
-export PATH="${REMOTE_DIR}/bin/rubberband:\$PATH"
+export PATH="${REMOTE_DIR}/bin:${REMOTE_DIR}/bin/rubberband:\$PATH"
 echo "TMPDIR is set to: \$TMPDIR"
 pip install --no-cache-dir -r "${REMOTE_DIR}/requirements.txt" | grep -v 'already satisfied'
 EOF
