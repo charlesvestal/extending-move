@@ -939,8 +939,14 @@ class SynthParamEditorHandler(BaseHandler):
         for i in range(8):
             info = by_index.get(i, {"name": f"Macro {i}", "value": 0.0})
             name = info.get("name", f"Macro {i}")
+            label_class = ""
             if not name or name == f"Macro {i}":
-                name = f"Knob {i + 1}"
+                params = info.get("parameters") or []
+                if len(params) == 1:
+                    name = params[0].get("name", f"Knob {i + 1}")
+                    label_class = " placeholder"
+                else:
+                    name = f"Knob {i + 1}"
             val = info.get("value", 0.0)
             try:
                 val = float(val)
@@ -953,7 +959,7 @@ class SynthParamEditorHandler(BaseHandler):
             cls_str = " ".join(classes)
             html.append(
                 f'<div class="{cls_str}" data-index="{i}">'
-                f'<span class="macro-label" data-index="{i}">{name}</span>'
+                f'<span class="macro-label{label_class}" data-index="{i}">{name}</span>'
                 f'<input id="macro_{i}_dial" type="range" class="macro-dial input-knob" '
                 f'data-target="macro_{i}_value" data-display="macro_{i}_disp" '
                 f'value="{display_val}" min="0" max="127" step="0.1" data-decimals="1">'

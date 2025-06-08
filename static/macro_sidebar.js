@@ -51,11 +51,17 @@ document.addEventListener('DOMContentLoaded', () => {
     macros.forEach(m => {
       const label = document.querySelector(`.macro-label[data-index="${m.index}"]`);
       if (!label) return;
-      if (!m.name || /^(Macro|Knob)\s\d+$/.test(m.name)) {
-        label.textContent = `Knob ${m.index + 1}`;
+      label.classList.remove('placeholder');
+      let text;
+      if (m.name && !/^(Macro|Knob)\s\d+$/.test(m.name)) {
+        text = m.name;
+      } else if ((m.parameters || []).length === 1) {
+        text = m.parameters[0].name;
+        label.classList.add('placeholder');
       } else {
-        label.textContent = m.name;
+        text = `Knob ${m.index + 1}`;
       }
+      label.textContent = text;
     });
   }
 
