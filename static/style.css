@@ -718,6 +718,14 @@ select {
     margin: 1rem 0;
 }
 
+.macro-knobs-section {
+    text-align: center;
+}
+
+.macro-knobs-section h3 {
+    margin-bottom: 0.5rem;
+}
+
 /* Layout for preset editor controls */
 .preset-controls {
     display: flex;
