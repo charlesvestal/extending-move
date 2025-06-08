@@ -43,6 +43,12 @@ NEW_PRESET_DIR = os.path.join(
     "Drift",
 )
 
+# Base directory for factory presets that should never be modified
+# These presets are stored as JSON files under ``/data/CoreLibrary/Track Presets``
+# with subfolders for instrument categories (e.g. "Drift").  We only store the
+# base path here so that presets in any subfolder are detected correctly.
+CORE_LIBRARY_DIR = "/data/CoreLibrary/Track Presets"
+
 logger = logging.getLogger(__name__)
 
 # Colors used to highlight macro-controlled parameters
@@ -71,6 +77,13 @@ class SynthParamEditorHandler(BaseHandler):
             'select_preset',
             filter_key='drift',
         )
+        core_li = (
+            '<li class="dir closed" data-path="Core Library">'
+            '<span>📁 Core Library</span>'
+            '<ul class="hidden"></ul></li>'
+        )
+        if browser_html.endswith('</ul>'):
+            browser_html = browser_html[:-5] + core_li + '</ul>'
         schema = load_drift_schema()
         return {
             'message': 'Select a Drift preset from the list or create a new one',
@@ -117,6 +130,8 @@ class SynthParamEditorHandler(BaseHandler):
         if not preset_path:
             return self.format_error_response("No preset selected")
 
+        is_core = preset_path.startswith(CORE_LIBRARY_DIR)
+
         rename_flag = False
         if action == 'save_params':
             try:
@@ -129,14 +144,22 @@ class SynthParamEditorHandler(BaseHandler):
                 value = form.getvalue(f'param_{i}_value')
                 if name is not None and value is not None:
                     updates[name] = value
-            rename_flag = form.getvalue('rename') in ('on', 'true', '1')
+            rename_flag = form.getvalue('rename') in ('on', 'true', '1') or is_core
             new_name = form.getvalue('new_preset_name')
             output_path = None
-            if rename_flag and new_name:
-                directory = os.path.dirname(preset_path)
+            if rename_flag:
+                if not new_name:
+                    new_name = os.path.basename(preset_path)
+                # Convert json factory presets to .ablpreset when copying
+                if new_name.endswith('.json'):
+                    new_name = new_name[:-5]
                 if not new_name.endswith('.ablpreset'):
                     new_name += '.ablpreset'
+                directory = os.path.dirname(preset_path)
+                if is_core:
+                    directory = NEW_PRESET_DIR
                 output_path = os.path.join(directory, new_name)
+                os.makedirs(os.path.dirname(output_path), exist_ok=True)
             result = update_parameter_values(preset_path, updates, output_path)
             if not result['success']:
                 return self.format_error_response(result['message'])
@@ -195,7 +218,7 @@ class SynthParamEditorHandler(BaseHandler):
 
             message = result['message'] + "; " + macro_result['message']
             if output_path:
-                message += f" Saved as {os.path.basename(output_path)}"
+                message += f" Saved to {output_path}"
             refresh_success, refresh_message = refresh_library()
             if refresh_success:
                 message += " Library refreshed."
@@ -203,7 +226,14 @@ class SynthParamEditorHandler(BaseHandler):
                 message += f" Library refresh failed: {refresh_message}"
         elif action in ['select_preset', 'new_preset']:
             if action == 'select_preset':
-                message = f"Selected preset: {os.path.basename(preset_path)}"
+                if is_core:
+                    dest_name = os.path.basename(preset_path)
+                    if dest_name.endswith('.json'):
+                        dest_name = dest_name[:-5] + '.ablpreset'
+                    save_path = os.path.join(NEW_PRESET_DIR, dest_name)
+                    message = f"Core Library preset will be saved to {save_path}"
+                else:
+                    message = f"Selected preset: {os.path.basename(preset_path)}"
         else:
             return self.format_error_response("Unknown action")
 
@@ -248,6 +278,13 @@ class SynthParamEditorHandler(BaseHandler):
             'select_preset',
             filter_key='drift',
         )
+        core_li = (
+            '<li class="dir closed" data-path="Core Library">'
+            '<span>📁 Core Library</span>'
+            '<ul class="hidden"></ul></li>'
+        )
+        if browser_html.endswith('</ul>'):
+            browser_html = browser_html[:-5] + core_li + '</ul>'
         return {
             'message': message,
             'message_type': 'success',
@@ -260,7 +297,7 @@ class SynthParamEditorHandler(BaseHandler):
             'schema_json': json.dumps(load_drift_schema()),
             'default_preset_path': DEFAULT_PRESET,
             'macro_knobs_html': macro_knobs_html,
-            'rename_checked': rename_flag if action == 'save_params' else False,
+            'rename_checked': rename_flag if action == 'save_params' else is_core,
             'macros_json': macros_json,
             'available_params_json': available_params_json,
             'param_paths_json': param_paths_json,
