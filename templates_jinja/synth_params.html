@@ -26,7 +26,8 @@
     {% else %}
         {% set _prefill = _basename %}
     {% endif %}
-    <label>Preset Name: <input type="text" name="new_preset_name" value="{{ _prefill }}"></label>
+    <label><input type="checkbox" name="rename" id="rename-checkbox" {% if rename_checked %}checked{% endif %}> Rename</label>
+    <label>Preset Name: <input type="text" name="new_preset_name" id="new-preset-name" data-original-name="{{ _basename }}" value="{{ _prefill }}" {% if not rename_checked %}disabled{% endif %}></label>
     <div class="preset-actions">
         <button type="submit">Save Parameters</button>
         <button type="submit" onclick="document.getElementById('action-input').value='reset_preset';">Choose Another Preset</button>
@@ -46,5 +47,32 @@
 <script type="module" src="{{ host_prefix }}/static/file_browser.js"></script>
 <script src="{{ host_prefix }}/static/input-knobs.js"></script>
 <script src="{{ host_prefix }}/static/params_knobs.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const cb = document.getElementById('rename-checkbox');
+  const nameInput = document.getElementById('new-preset-name');
+  if (cb && nameInput) {
+    cb.addEventListener('change', () => {
+      nameInput.disabled = !cb.checked;
+    });
+    const form = document.getElementById('param-form');
+    const orig = nameInput.dataset.originalName;
+    if (form && orig) {
+      form.addEventListener('submit', (e) => {
+        if (!cb.checked) return;
+        let newName = nameInput.value.trim();
+        if (!newName.endsWith('.ablpreset') && !newName.endsWith('.json')) {
+          newName += '.ablpreset';
+        }
+        if (newName === orig) {
+          if (!confirm('This will overwrite the existing preset. Continue?')) {
+            e.preventDefault();
+          }
+        }
+      });
+    }
+  }
+});
+</script>
 {% endblock %}
 
