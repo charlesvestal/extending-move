@@ -621,3 +621,26 @@ select {
     margin-bottom: 0.75rem;
   }
 
+.macro-knob-row {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    margin: 0.5rem 0 1rem 0;
+}
+
+.macro-knob {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.macro-label {
+    font-size: 0.8rem;
+    margin-bottom: 0.25rem;
+}
+
+.macro-number {
+    margin-top: 0.25rem;
+    font-size: 0.8rem;
+}
+
