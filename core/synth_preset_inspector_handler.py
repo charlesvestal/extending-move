@@ -367,17 +367,22 @@ def update_preset_macro_names(preset_path, macro_updates):
                                 
                                 # For device parameters (not top-level), we can add customName
                                 # If it's already an object with customName
+                                new_name = macro_updates[macro_index]
+
                                 if isinstance(params[key], dict) and "value" in params[key]:
-                                    params[key]["customName"] = macro_updates[macro_index]
+                                    if new_name:
+                                        params[key]["customName"] = new_name
+                                    else:
+                                        params[key].pop("customName", None)
                                     updated_count += 1
-                                # If it's a direct value, convert to object with value and customName
                                 else:
-                                    original_value = params[key]
-                                    params[key] = {
-                                        "value": original_value,
-                                        "customName": macro_updates[macro_index]
-                                    }
-                                    updated_count += 1
+                                    if new_name:
+                                        original_value = params[key]
+                                        params[key] = {
+                                            "value": original_value,
+                                            "customName": new_name
+                                        }
+                                        updated_count += 1
                 
                 # Recursively search in nested structures
                 for key, value in data.items():
