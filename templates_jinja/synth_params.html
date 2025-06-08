@@ -19,14 +19,25 @@
     <input type="hidden" name="action" id="action-input" value="save_params">
     <input type="hidden" name="preset_select" value="{{ selected_preset }}">
     <input type="hidden" name="param_count" value="{{ param_count }}">
-    <button type="submit" onclick="document.getElementById('action-input').value='reset_preset';">Choose Another Preset</button>
     <p class="current-preset">Editing: {{ selected_preset.split('/')[-1] }}</p>
+    {% set _basename = selected_preset.split('/')[-1] %}
+    {% if _basename.endswith('.json') or _basename.endswith('.ablpreset') %}
+        {% set _prefill = _basename.rsplit('.', 1)[0] %}
+    {% else %}
+        {% set _prefill = _basename %}
+    {% endif %}
+    <label>Preset Name: <input type="text" name="new_preset_name" value="{{ _prefill }}"></label>
+    <div class="preset-actions">
+        <button type="submit">Save Parameters</button>
+        <button type="submit" onclick="document.getElementById('action-input').value='reset_preset';">Choose Another Preset</button>
+    </div>
     {{ macro_knobs_html | safe }}
+    <div class="edit-macros-link">
+        <a href="{{ host_prefix }}/synth-macros?preset={{ selected_preset | urlencode }}">Edit Macros</a>
+    </div>
     <div class="param-list">
         {{ params_html | safe }}
     </div>
-    <label>New Preset Name: <input type="text" name="new_preset_name"></label>
-    <button type="submit">Save Parameters</button>
 </form>
 
 {% endif %}
