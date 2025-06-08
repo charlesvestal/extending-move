@@ -35,6 +35,7 @@ from handlers.synth_param_editor_handler_class import SynthParamEditorHandler
 from handlers.drum_rack_inspector_handler_class import DrumRackInspectorHandler
 from handlers.file_placer_handler_class import FilePlacerHandler
 from handlers.refresh_handler_class import RefreshHandler
+from core.refresh_handler import refresh_library
 from core.file_browser import generate_dir_html
 
 logging.basicConfig(
@@ -545,6 +546,16 @@ def refresh_route():
     form = SimpleForm(request.form.to_dict())
     result = refresh_handler.handle_post(form)
     return jsonify(result)
+
+
+@app.route("/refresh", methods=["GET"])
+def refresh_get_route():
+    """Refresh the Move library and invalidate caches."""
+    success, message = refresh_library()
+    status_code = 200 if success else 500
+    resp = make_response(message, status_code)
+    resp.mimetype = "text/plain"
+    return resp
 
 
 @app.route("/pitch-shift", methods=["POST"])

@@ -11,13 +11,20 @@ from core.synth_preset_inspector_handler import (
 )
 from core.synth_param_editor_handler import update_parameter_values
 
-# Path to the example preset used when creating a new preset
+# Path to the preset used when creating a new preset. Prefer the version in the
+# user's library but fall back to the bundled example if it doesn't exist.
 DEFAULT_PRESET = os.path.join(
-    "examples",
-    "Track Presets",
+    "/data/UserData/UserLibrary/Track Presets",
     "Drift",
-    "Analog Shape.ablpreset",
+    "Analog Shape - Core.json",
 )
+if not os.path.exists(DEFAULT_PRESET):
+    DEFAULT_PRESET = os.path.join(
+        "examples",
+        "Track Presets",
+        "Drift",
+        "Analog Shape - Core.json",
+    )
 
 logger = logging.getLogger(__name__)
 
@@ -233,6 +240,29 @@ class SynthParamEditorHandler(BaseHandler):
         "Global_ResetOscillatorPhase": "R",
     }
 
+    # Short labels for oscillator waveforms
+    OSC_WAVE_SHORT = {
+        "Pulse": "Pulse",
+        "Rectangle": "Rect",
+        "Saturated": "Sat",
+        "Saw": "Saw",
+        "Shark Tooth": "Shark",
+        "Sine": "Sine",
+        "Triangle": "Tri",
+    }
+
+    # Short labels for LFO shapes
+    LFO_WAVE_SHORT = {
+        "Exponential Env": "Exp Env",
+        "Sample & Hold": "S+H",
+        "Saw Down": "Saw Dn",
+        "Saw Up": "Saw Up",
+        "Sine": "Sine",
+        "Square": "Square",
+        "Triangle": "Tri",
+        "Wander": "Wndr",
+    }
+
     # Parameters that should display without a text label
     UNLABELED_PARAMS = {
         "Oscillator1_ShapeModSource",
@@ -246,6 +276,15 @@ class SynthParamEditorHandler(BaseHandler):
         "Filter_ModAmount1",
         "Filter_ModAmount2",
         "Global_Envelope2Mode",
+        "ModulationMatrix_Source1",
+        "ModulationMatrix_Amount1",
+        "ModulationMatrix_Target1",
+        "ModulationMatrix_Source2",
+        "ModulationMatrix_Amount2",
+        "ModulationMatrix_Target2",
+        "ModulationMatrix_Source3",
+        "ModulationMatrix_Amount3",
+        "ModulationMatrix_Target3",
     }
 
     # Parameters that use a horizontal slider instead of a dial
@@ -255,12 +294,16 @@ class SynthParamEditorHandler(BaseHandler):
         "PitchModulation_Amount2",
         "Filter_ModAmount1",
         "Filter_ModAmount2",
-        # Global sliders
         "Global_DriftDepth",
         "Global_Glide",
         "Global_VolVelMod",
         "Global_Transpose",
         "Global_PitchBendRange",
+        "ModulationMatrix_Amount1",
+        "ModulationMatrix_Amount2",
+        "ModulationMatrix_Amount3",
+        "Lfo_ModAmount",
+
     }
 
     def _build_param_item(self, idx, name, value, meta, label=None,
@@ -287,9 +330,16 @@ class SynthParamEditorHandler(BaseHandler):
             html.append(f'<input type="hidden" name="param_{idx}_value" value="{value}">')
         elif p_type == "enum" and meta.get("options"):
             html.append(f'<select name="param_{idx}_value">')
+            short_map = {}
+            if name in ("Oscillator1_Type", "Oscillator2_Type"):
+                short_map = self.OSC_WAVE_SHORT
+            elif name == "Lfo_Shape":
+                short_map = self.LFO_WAVE_SHORT
             for opt in meta["options"]:
                 sel = " selected" if str(value) == str(opt) else ""
-                html.append(f'<option value="{opt}"{sel}>{opt}</option>')
+                label_opt = short_map.get(opt, opt)
+                title_attr = f' title="{opt}"' if label_opt != opt else ""
+                html.append(f'<option value="{opt}"{title_attr}{sel}>{label_opt}</option>')
             html.append('</select>')
             html.append(f'<input type="hidden" name="param_{idx}_value" value="{value}">')
         elif p_type == "boolean":
@@ -367,10 +417,13 @@ class SynthParamEditorHandler(BaseHandler):
         filter_items: dict[str, str] = {}
         osc_items: dict[str, str] = {}
         env_items: dict[str, str] = {}
+        lfo_items: dict[str, str] = {}
         mixer_items: dict[str, str] = {}
         global_items: dict[str, str] = {}
         extras_items: dict[str, str] = {}
+        mod_items: dict[str, str] = {}
         cycling_mode_val = None
+        lfo_mode_val = None
 
         for i, item in enumerate(params):
             name = item['name']
@@ -392,6 +445,14 @@ class SynthParamEditorHandler(BaseHandler):
                 extra = "cycle-rate time-rate"
             elif name == "CyclingEnvelope_SyncedRate":
                 extra = "cycle-rate sync-rate"
+            elif name == "Lfo_Rate":
+                extra = "lfo-rate freq-rate"
+            elif name == "Lfo_Ratio":
+                extra = "lfo-rate ratio-rate"
+            elif name == "Lfo_Time":
+                extra = "lfo-rate time-rate"
+            elif name == "Lfo_SyncedRate":
+                extra = "lfo-rate sync-rate"
 
             html = self._build_param_item(
                 i,
@@ -406,6 +467,8 @@ class SynthParamEditorHandler(BaseHandler):
 
             if name == "CyclingEnvelope_Mode":
                 cycling_mode_val = val
+            if name == "Lfo_Mode":
+                lfo_mode_val = val
 
             section = self._get_section(name)
             if section == "Filter":
@@ -414,12 +477,16 @@ class SynthParamEditorHandler(BaseHandler):
                 osc_items[name] = html
             elif section == "Envelopes":
                 env_items[name] = html
+            elif section == "LFO":
+                lfo_items[name] = html
             elif section == "Mixer":
                 mixer_items[name] = html
             elif section == "Global":
                 global_items[name] = html
             elif section == "Extras":
                 extras_items[name] = html
+            elif section == "Modulation":
+                mod_items[name] = html
             else:
                 sections[section].append(html)
 
@@ -589,6 +656,58 @@ class SynthParamEditorHandler(BaseHandler):
 
         if extras_items:
             sections["Extras"] = list(extras_items.values())
+        if mod_items:
+            ordered = []
+            for idx in range(1, 4):
+                src = mod_items.pop(f"ModulationMatrix_Source{idx}", "")
+                amt = mod_items.pop(f"ModulationMatrix_Amount{idx}", "")
+                dst = mod_items.pop(f"ModulationMatrix_Target{idx}", "")
+                if src or amt or dst:
+                    ordered.append(
+                        f'<div class="param-row mod-matrix-row">'
+                        f'<div class="param-pair mod-group">'
+                        f'<span class="mod-label">Mod {idx}</span>'
+                        f'{src}{amt}{dst}'
+                        f'</div></div>'
+                    )
+            ordered.extend(mod_items.values())
+            sections["Modulation"] = ordered
+
+        if lfo_items:
+            rate = lfo_items.pop("Lfo_Rate", "")
+            ratio = lfo_items.pop("Lfo_Ratio", "")
+            time = lfo_items.pop("Lfo_Time", "")
+            sync = lfo_items.pop("Lfo_SyncedRate", "")
+            mode = lfo_items.pop("Lfo_Mode", "")
+            shape = lfo_items.pop("Lfo_Shape", "")
+            retrig = lfo_items.pop("Lfo_Retrigger", "")
+            amount = lfo_items.pop("Lfo_Amount", "")
+            mod_src = lfo_items.pop("Lfo_ModSource", "")
+            mod_amt = lfo_items.pop("Lfo_ModAmount", "")
+
+            if lfo_mode_val != "Freq" and rate:
+                rate = rate.replace('param-item"', 'param-item hidden"', 1)
+            if lfo_mode_val != "Ratio" and ratio:
+                ratio = ratio.replace('param-item"', 'param-item hidden"', 1)
+            if lfo_mode_val != "Time" and time:
+                time = time.replace('param-item"', 'param-item hidden"', 1)
+            if lfo_mode_val != "Sync" and sync:
+                sync = sync.replace('param-item"', 'param-item hidden"', 1)
+
+            ordered = []
+            row1 = "".join([rate, ratio, time, sync, mode])
+            if row1.strip():
+                ordered.append(f'<div class="param-row lfo-rate-row">{row1}</div>')
+            row2 = "".join([shape, retrig])
+            if row2.strip():
+                ordered.append(f'<div class="param-row">{row2}</div>')
+            pair = f'<div class="param-pair">{mod_src}{mod_amt}</div>' if (mod_src or mod_amt) else ""
+            row3 = "".join([amount, pair])
+            if row3.strip():
+                ordered.append(f'<div class="param-row">{row3}</div>')
+
+            ordered.extend(lfo_items.values())
+            sections["LFO"] = ordered
 
         out_html = '<div class="drift-param-panels">'
         for sec in self.SECTION_ORDER:
