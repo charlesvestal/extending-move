@@ -183,3 +183,9 @@ function getPercentDecimals(value, unit, defaultDecimals, shouldScale) {
   }
   return defaultDecimals;
 }
+
+// expose helpers for non-module scripts
+if (typeof window !== 'undefined') {
+  window.getPercentStep = getPercentStep;
+  window.getPercentDecimals = getPercentDecimals;
+}
