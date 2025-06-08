@@ -581,7 +581,7 @@ select {
 .param-panel.envelopes {
     flex: 2;
 }
-.param-list {
+/* .param-list {
     max-width:975px;
 }
 .param-panel.oscillators{
@@ -598,7 +598,7 @@ select {
 
 .param-panel.envelopes{
     max-width: 290px;
-}
+} */
 
 .param-panel.filter .param-items {
     flex-direction: column;
@@ -650,7 +650,7 @@ select {
 .param-number {
     /* margin-left: 0.5rem; */
     /* min-width: 60px; */
-    min-width: 40px;
+    min-width: 57px;
     display: inline-block;
     text-align: center;
     font-size: 0.8rem;
