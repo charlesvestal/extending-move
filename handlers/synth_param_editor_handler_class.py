@@ -232,6 +232,29 @@ class SynthParamEditorHandler(BaseHandler):
         "Global_ResetOscillatorPhase": "R",
     }
 
+    # Short labels for oscillator waveforms
+    OSC_WAVE_SHORT = {
+        "Pulse": "Pulse",
+        "Rectangle": "Rect",
+        "Saturated": "Sat",
+        "Saw": "Saw",
+        "Shark Tooth": "Shark",
+        "Sine": "Sine",
+        "Triangle": "Tri",
+    }
+
+    # Short labels for LFO shapes
+    LFO_WAVE_SHORT = {
+        "Exponential Env": "Exp Env",
+        "Sample & Hold": "S+H",
+        "Saw Down": "Saw Dn",
+        "Saw Up": "Saw Up",
+        "Sine": "Sine",
+        "Square": "Square",
+        "Triangle": "Tri",
+        "Wander": "Wndr",
+    }
+
     # Parameters that should display without a text label
     UNLABELED_PARAMS = {
         "Oscillator1_ShapeModSource",
@@ -281,9 +304,16 @@ class SynthParamEditorHandler(BaseHandler):
             html.append(f'<input type="hidden" name="param_{idx}_value" value="{value}">')
         elif p_type == "enum" and meta.get("options"):
             html.append(f'<select name="param_{idx}_value">')
+            short_map = {}
+            if name in ("Oscillator1_Type", "Oscillator2_Type"):
+                short_map = self.OSC_WAVE_SHORT
+            elif name == "Lfo_Shape":
+                short_map = self.LFO_WAVE_SHORT
             for opt in meta["options"]:
                 sel = " selected" if str(value) == str(opt) else ""
-                html.append(f'<option value="{opt}"{sel}>{opt}</option>')
+                label_opt = short_map.get(opt, opt)
+                title_attr = f' title="{opt}"' if label_opt != opt else ""
+                html.append(f'<option value="{opt}"{title_attr}{sel}>{label_opt}</option>')
             html.append('</select>')
             html.append(f'<input type="hidden" name="param_{idx}_value" value="{value}">')
         elif p_type == "boolean":
