@@ -14,7 +14,9 @@ Uploads files to the server and places them at the specified destination paths.
 
 #### Request Modes
 
-Clients can upload a single ZIP file to be extracted into a specified destination directory. Only ZIP mode is supported.
+The handler supports two modes, selected with the `mode` form field:
+1. `zip` &ndash; extract the uploaded ZIP archive into the target directory.
+2. `place` (or omitted) &ndash; move the uploaded file directly to the target directory using its original name.
 
 ##### ZIP Mode
 
@@ -23,6 +25,14 @@ Clients can upload a single ZIP file to be extracted into a specified destinatio
   - `mode`: Must be set to `"zip"`.
   - `file`: The ZIP file to be uploaded. (multipart/form-data file field)
   - `destination`: The directory on the host filesystem where the ZIP file contents should be extracted.
+
+##### Place Mode
+
+- **Purpose:** Move a single uploaded file directly to a given destination directory.
+- **Required Fields:**
+  - `mode`: Optional. If omitted, defaults to `"place"`.
+  - `file`: The file to be uploaded.
+  - `destination`: The directory on the host filesystem where the file should be placed.
 
 #### Responses
 
@@ -35,10 +45,10 @@ Clients can upload a single ZIP file to be extracted into a specified destinatio
 }
 ```
 
-- **Content (Multiple files mode example):**
+- **Content (place mode example):**
 ```json
 {
-  "message": "Files placed successfully.",
+  "message": "File placed successfully.",
   "message_type": "success"
 }
 ```
@@ -61,10 +71,10 @@ curl -X POST http://<server-address>:<port>/place-files \
   -F "destination=/path/to/extract"
 ```
 
-#### Example Usage for placing a file (non-ZIP mode):
+#### Example Usage for placing a file (place mode):
 ```bash
 curl -X POST http://<server-address>:<port>/place-files \
-  -F "mode=place" \
+  -F "mode=place" \  # this line is optional; "place" is the default
   -F "file=@/path/to/file.txt" \
   -F "destination=/path/to/destination"
 ```
