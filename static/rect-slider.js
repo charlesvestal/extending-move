@@ -11,7 +11,7 @@ function initSlider(el){
   let value=parseFloat(el.dataset.value||min);
   const centered=el.classList.contains('center')||el.dataset.centered==='true';
   const targetId=el.dataset.target;
-  const target=targetId?document.querySelector(`input[name="${targetId}"]#${targetId}, #${targetId}`):null;
+  const target=targetId?document.querySelector(`#${targetId}, input[name="${targetId}"]`):null;
   el.innerHTML='';
   el.classList.add('rect-slider-container');
   const fill=document.createElement('div');
