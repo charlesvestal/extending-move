@@ -82,7 +82,9 @@ function initSlider(el){
     function move(e){
       const y=e.touches?e.touches[0].clientY:e.clientY;
       const dy=startY-y;
-      const scale=(max-min)/100;
+      const isShift = e.shiftKey;
+      const dragSense = isShift ? 1000 : 200;
+      const scale=(max-min)/dragSense;
       let v=startVal+dy*scale;
       let st=getStep(v);
       v=Math.round(v/st)*st;
