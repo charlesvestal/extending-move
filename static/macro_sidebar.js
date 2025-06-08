@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (currentIndex !== null) {
       const macro = macros.find(m => m.index === currentIndex);
       if (macro) {
-        macro.name = nameInput.value.trim() || `Macro ${currentIndex}`;
+        macro.name = nameInput.value.trim() || `Knob ${currentIndex + 1}`;
         const label = document.querySelector(`.macro-label[data-index="${currentIndex}"]`);
         if (label) label.textContent = macro.name;
       }
@@ -41,7 +41,12 @@ document.addEventListener('DOMContentLoaded', () => {
   function updateKnobLabels() {
     macros.forEach(m => {
       const label = document.querySelector(`.macro-label[data-index="${m.index}"]`);
-      if (label) label.textContent = m.name;
+      if (!label) return;
+      if (/^(Macro|Knob)\s\d+$/.test(m.name)) {
+        label.textContent = `Knob ${m.index + 1}`;
+      } else {
+        label.textContent = m.name;
+      }
     });
   }
 
@@ -99,11 +104,11 @@ document.addEventListener('DOMContentLoaded', () => {
     currentIndex = idx;
     let macro = macros.find(m => m.index === idx);
     if (!macro) {
-      macro = { index: idx, name: `Macro ${idx}`, parameters: [] };
+      macro = { index: idx, name: `Knob ${idx + 1}`, parameters: [] };
       macros.push(macro);
     }
-    titleEl.textContent = `Macro ${idx}`;
-    nameInput.value = macro.name.startsWith('Macro ') ? '' : macro.name;
+    titleEl.textContent = `Knob ${idx + 1}`;
+    nameInput.value = /^(Macro|Knob)\s/.test(macro.name) ? '' : macro.name;
     rebuildLists(macro);
     overlay.classList.remove('hidden');
     sidebar.classList.remove('hidden');
@@ -115,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const macro = macros.find(m=>m.index===currentIndex);
       if (macro) {
         const name = nameInput.value.trim();
-        macro.name = name || `Macro ${currentIndex}`;
+        macro.name = name || `Knob ${currentIndex + 1}`;
       }
       saveState();
       updateHighlights();
