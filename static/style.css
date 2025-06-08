@@ -736,6 +736,15 @@ select {
 .preset-controls label {
     margin-bottom: 0;
 }
+.preset-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+#randomize-btn {
+    margin-left: auto;
+}
 
 /* Highlight parameters and macros by macro index */
 .param-item.macro-0, .macro-knob.macro-0 {
