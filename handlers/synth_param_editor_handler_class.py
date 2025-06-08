@@ -446,9 +446,14 @@ class SynthParamEditorHandler(BaseHandler):
                 unit_attr = f' data-unit="{unit_val}"' if unit_val else ''
                 dec_attr = f' data-decimals="{decimals}"' if decimals is not None else ''
                 disp_id = f'param_{idx}_display'
+                input_classes = "param-dial input-knob"
+                extra_attrs = ""
+                if name == "Filter_Frequency":
+                    input_classes += " filter-knob"
+                    extra_attrs += ' data-diameter="48"'
                 html.append(
-                    f'<input id="param_{idx}_dial" type="range" class="param-dial input-knob" data-target="param_{idx}_value" '
-                    f'data-display="{disp_id}" value="{value}"{min_attr}{max_attr}{step_attr}{unit_attr}{dec_attr}>'
+                    f'<input id="param_{idx}_dial" type="range" class="{input_classes}" data-target="param_{idx}_value" '
+                    f'data-display="{disp_id}" value="{value}"{min_attr}{max_attr}{step_attr}{unit_attr}{dec_attr}{extra_attrs}>'
                 )
                 html.append(f'<span id="{disp_id}" class="param-number"></span>')
                 html.append(f'<input type="hidden" name="param_{idx}_value" value="{value}">')

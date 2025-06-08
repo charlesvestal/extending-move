@@ -482,6 +482,11 @@ select {
     display: inline-block;
 }
 
+.param-dial.filter-knob {
+    width: 48px;
+    height: 48px;
+}
+
 .param-slider {
     margin: 0.25rem;
     display: inline-block;
