@@ -196,8 +196,8 @@ def test_synth_params_new_preset(client, monkeypatch):
 def test_synth_params_core_library_display(client, monkeypatch):
     def fake_post(form):
         return {
-            'message': 'loaded',
-            'message_type': 'success',
+            'message': 'Core Library preset will be saved to /data/UserData/UserLibrary/Track Presets/Drift/',
+            'message_type': 'info',
             'params_html': '<div>y</div>',
             'browser_root': '/tmp',
             'selected_preset': '/data/CoreLibrary/Track Presets/Drift/core.ablpreset',
@@ -208,7 +208,27 @@ def test_synth_params_core_library_display(client, monkeypatch):
     monkeypatch.setattr(move_webserver.synth_param_handler, 'handle_post', fake_post)
     resp = client.post('/synth-params', data={'action': 'select_preset'})
     assert resp.status_code == 200
+    assert b'Core Library preset will be saved to /data/UserData/UserLibrary/Track Presets/Drift/' in resp.data
     assert b'/data/UserData/UserLibrary/Track Presets/Drift/' in resp.data
+    assert b'id="rename-checkbox"' in resp.data
+    assert b'id="rename-checkbox" checked' not in resp.data
+
+def test_synth_params_core_library_save_unchecked(client, monkeypatch):
+    def fake_post(form):
+        assert form.getvalue('action') == 'save_params'
+        return {
+            'message': 'done',
+            'message_type': 'success',
+            'params_html': '<div>z</div>',
+            'browser_root': '/tmp',
+            'selected_preset': '/data/UserData/UserLibrary/Track Presets/Drift/new.ablpreset',
+            'param_count': 1,
+            'macro_knobs_html': '',
+            'rename_checked': False,
+        }
+    monkeypatch.setattr(move_webserver.synth_param_handler, 'handle_post', fake_post)
+    resp = client.post('/synth-params', data={'action': 'save_params'})
+    assert resp.status_code == 200
     assert b'id="rename-checkbox"' in resp.data
     assert b'id="rename-checkbox" checked' not in resp.data
 
