@@ -817,12 +817,18 @@ select {
 .sidebar-overlay.hidden, .macro-sidebar.hidden {
     display: none;
 }
-.macro-params-list {
+.macro-assigned-list {
     margin-top: 1rem;
 }
-.map-item {
+.assign-item {
     display: flex;
+    justify-content: space-between;
     align-items: center;
     gap: 0.5rem;
     margin-bottom: 0.25rem;
+}
+.macro-add-section {
+    margin-top: 0.5rem;
+    display: flex;
+    gap: 0.25rem;
 }
