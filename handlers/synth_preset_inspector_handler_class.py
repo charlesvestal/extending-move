@@ -197,7 +197,8 @@ class SynthPresetInspectorHandler(BaseHandler):
         if not macros:
             return "<p>No macros found in this preset.</p>"
         
-        # Get the preset path from the first macro's parameters (if any)
+        # Get the preset path from the first macro's parameters (if any).
+        # Fallback to the selected preset if no parameters are mapped yet.
         preset_path = None
         for macro in macros:
             if macro["parameters"]:
@@ -207,6 +208,10 @@ class SynthPresetInspectorHandler(BaseHandler):
                 # We need to extract the preset path from this
                 preset_path = param_path.split(".parameters")[0]
                 break
+
+        # Ensure we have a preset path even when no macros are mapped
+        if not preset_path:
+            preset_path = self.form.getvalue('preset_select') if hasattr(self, 'form') else None
         
         # Get all available parameters for the dropdown
         available_parameters = []
