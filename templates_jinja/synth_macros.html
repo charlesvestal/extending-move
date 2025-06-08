@@ -12,6 +12,10 @@
     {{ file_browser_html | safe }}
 </div>
 {% else %}
+    <div class="return-params-link">
+        <a href="{{ host_prefix }}/synth-params?preset={{ selected_preset | urlencode }}">Return to Parameter Editor</a>
+    </div>
+    
 <form method="post" action="{{ host_prefix }}/synth-macros" id="preset-form">
     <input type="hidden" name="action" id="action-input" value="reset_preset">
     <input type="hidden" name="param_path" id="param-path-input" value="">
@@ -19,7 +23,13 @@
     <input type="hidden" name="macro_index" id="macro-index-input" value="">
     <button type="submit">Choose Another Preset</button>
     <input type="hidden" name="preset_select" value="{{ selected_preset }}">
-    <p class="current-preset">Currently loaded preset: {{ selected_preset.split('/')[-1] }}</p>
+    {% set _display = selected_preset %}
+    {% if selected_preset.startswith('/data/UserData/UserLibrary/Track Presets') %}
+        {% set _display = '/' + selected_preset.split('/data/UserData/UserLibrary/Track Presets', 1)[1] %}
+    {% elif selected_preset.startswith('examples/Track Presets') %}
+        {% set _display = '/' + selected_preset.split('examples/Track Presets', 1)[1] %}
+    {% endif %}
+    <p class="current-preset">Currently loaded preset: {{ _display }}</p>
     <div class="macro-display">
         {{ macros_html | safe }}
     </div>
@@ -29,10 +39,13 @@
             {{ all_params_html | safe }}
         </div>
     </details>
+    <div class="return-params-link">
+        <a href="{{ host_prefix }}/synth-params?preset={{ selected_preset | urlencode }}">Return to Parameter Editor</a>
+    </div>
 </form>
 {% endif %}
 
-<!-- The dropdown change event is handled by main.js using AJAX -->
+<!-- Dropdown changes are handled by the inline script below -->
 
 <style>
     .preset-selection {
@@ -54,14 +67,23 @@
     
     .macros-container {
         margin-top: 20px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
     }
-    
+
     .macro-item {
-        margin-bottom: 20px;
+        flex: 1 1 300px;
         padding: 15px;
         border: 1px solid #ddd;
         border-radius: 5px;
         background-color: #f9f9f9;
+    }
+
+    .macro-top {
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
     
     .macro-header {
@@ -91,39 +113,40 @@
     }
     
     .parameter-mapping select {
-        display: block;
-        width: 100%;
         padding: 8px;
-        margin: 8px 0 15px;
         border: 1px solid #ccc;
         border-radius: 4px;
     }
-    
+
     .parameter-controls {
         display: flex;
         align-items: center;
+        flex-wrap: wrap;
         gap: 15px;
         margin-bottom: 10px;
     }
     
-    .range-inputs-inline {
-        display: flex;
-        gap: 10px;
-    }
-    
-    .range-inputs-inline label {
+    .min-wrapper,
+    .max-wrapper {
         display: flex;
         align-items: center;
         font-size: 0.9em;
         color: #555;
     }
-    
-    .range-inputs-inline input {
+
+    .range-min,
+    .range-max {
         padding: 6px;
         border: 1px solid #ccc;
         border-radius: 3px;
         width: 80px;
         margin-left: 5px;
+    }
+
+    .options-display {
+        font-size: 0.85em;
+        color: #555;
+        margin-left: 10px;
     }
     
     .current-mappings {
@@ -214,4 +237,58 @@
 {% endblock %}
 {% block scripts %}
 <script type="module" src="{{ host_prefix }}/static/file_browser.js"></script>
+<script src="{{ host_prefix }}/static/shared.js"></script>
+<script src="{{ host_prefix }}/static/input-knobs.js"></script>
+<script>
+const driftSchema = {{ schema_json|safe }};
+(function() {
+  function updateControls(sel) {
+    const opt = sel.options[sel.selectedIndex];
+    const info = {
+      type: opt.dataset.type,
+      min: opt.dataset.min ? parseFloat(opt.dataset.min) : null,
+      max: opt.dataset.max ? parseFloat(opt.dataset.max) : null,
+      options: opt.dataset.options ? opt.dataset.options.split(',') : null,
+    };
+
+    const container = sel.closest('.parameter-mapping');
+    const minWrap = container.querySelector('.min-wrapper');
+    const maxWrap = container.querySelector('.max-wrapper');
+    const minInput = container.querySelector('.range-min');
+    const maxInput = container.querySelector('.range-max');
+    const optDiv = container.querySelector('.options-display');
+
+    if (!info.type || info.type === 'enum' || info.type === 'boolean') {
+      minInput.value = '';
+      maxInput.value = '';
+      minInput.placeholder = '';
+      maxInput.placeholder = '';
+      minInput.disabled = true;
+      maxInput.disabled = true;
+      if (minWrap) minWrap.style.display = 'none';
+      if (maxWrap) maxWrap.style.display = 'none';
+    } else {
+      minInput.disabled = false;
+      maxInput.disabled = false;
+      minInput.placeholder = info.min !== null ? info.min : '';
+      maxInput.placeholder = info.max !== null ? info.max : '';
+      if (minWrap) minWrap.style.display = 'inline-block';
+      if (maxWrap) maxWrap.style.display = 'inline-block';
+    }
+
+    if (info.options && Array.isArray(info.options) && info.options.length > 0) {
+      optDiv.textContent = 'Options: ' + info.options.join(', ');
+      optDiv.style.display = 'inline';
+    } else {
+      optDiv.textContent = '';
+      optDiv.style.display = 'none';
+    }
+  }
+
+  document.querySelectorAll('.parameter-mapping select').forEach(sel => {
+    sel.addEventListener('change', () => updateControls(sel));
+    updateControls(sel);
+  });
+})();
+</script>
 {% endblock %}

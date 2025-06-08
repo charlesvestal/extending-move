@@ -6,6 +6,24 @@ from core.cache_manager import get_cache, set_cache
 
 logger = logging.getLogger(__name__)
 
+# Path to the Drift parameter schema relative to the project root
+SCHEMA_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(__file__)),
+    "static",
+    "schemas",
+    "drift_schema.json",
+)
+
+
+def load_drift_schema():
+    """Load parameter metadata for Drift from ``drift_schema.json``."""
+    try:
+        with open(SCHEMA_PATH, "r") as f:
+            return json.load(f)
+    except Exception as exc:
+        logger.warning("Could not load drift schema: %s", exc)
+        return {}
+
 def extract_available_parameters(preset_path):
     """
     Extract available parameters from drift or wavetable devices in a preset file.
@@ -84,12 +102,16 @@ def extract_available_parameters(preset_path):
         
         # Convert set to sorted list
         parameters_list = sorted(list(parameters))
-        
+
+        schema = load_drift_schema()
+        parameter_info = {p: schema.get(p, {}) for p in parameters_list}
+
         return {
             'success': True,
             'message': f"Found {len(parameters_list)} parameters",
             'parameters': parameters_list,
-            'parameter_paths': parameter_paths
+            'parameter_paths': parameter_paths,
+            'parameter_info': parameter_info,
         }
         
     except Exception as e:
@@ -185,25 +207,31 @@ def extract_macro_information(preset_path):
         # Initialize macros dictionary
         macros = {}
         
-        # Find all macros and their custom names
+        # Find all macros, their custom names, and values
         def find_macros(data, path=""):
             if isinstance(data, dict):
                 for key, value in data.items():
                     if key.startswith("Macro") and key[5:].isdigit():
                         macro_index = int(key[5:])
-                        
+
                         # Initialize macro if not exists
                         if macro_index not in macros:
                             macros[macro_index] = {
                                 "index": macro_index,
                                 "name": f"Macro {macro_index}",  # Default name
-                                "parameters": []
+                                "parameters": [],
+                                "value": None,
                             }
-                        
+
                         # Check if it has a custom name
-                        if isinstance(value, dict) and "customName" in value:
-                            macros[macro_index]["name"] = value["customName"]
-                    
+                        if isinstance(value, dict):
+                            if "customName" in value:
+                                macros[macro_index]["name"] = value["customName"]
+                            if "value" in value:
+                                macros[macro_index]["value"] = value["value"]
+                        else:
+                            macros[macro_index]["value"] = value
+
                     # Recursively search in nested dictionaries
                     new_path = f"{path}.{key}" if path else key
                     find_macros(value, new_path)
@@ -265,6 +293,20 @@ def extract_macro_information(preset_path):
         # Then find all parameters with macroMapping
         find_macro_mappings(preset_data)
         
+
+        # Leave unnamed macros untouched. The Move system will assign names
+        # when the preset is loaded, so we simply preserve the default
+        # "Macro N" labels here even if parameters are mapped.
+
+        # Ensure all 8 macros are present even if unused
+        for i in range(8):
+            if i not in macros:
+                macros[i] = {
+                    "index": i,
+                    "name": f"Macro {i}",
+                    "parameters": [],
+                }
+
         # Convert dictionary to sorted list
         macros_list = [macros[i] for i in sorted(macros.keys())]
         
@@ -325,17 +367,22 @@ def update_preset_macro_names(preset_path, macro_updates):
                                 
                                 # For device parameters (not top-level), we can add customName
                                 # If it's already an object with customName
+                                new_name = macro_updates[macro_index]
+
                                 if isinstance(params[key], dict) and "value" in params[key]:
-                                    params[key]["customName"] = macro_updates[macro_index]
+                                    if new_name:
+                                        params[key]["customName"] = new_name
+                                    else:
+                                        params[key].pop("customName", None)
                                     updated_count += 1
-                                # If it's a direct value, convert to object with value and customName
                                 else:
-                                    original_value = params[key]
-                                    params[key] = {
-                                        "value": original_value,
-                                        "customName": macro_updates[macro_index]
-                                    }
-                                    updated_count += 1
+                                    if new_name:
+                                        original_value = params[key]
+                                        params[key] = {
+                                            "value": original_value,
+                                            "customName": new_name
+                                        }
+                                        updated_count += 1
                 
                 # Recursively search in nested structures
                 for key, value in data.items():

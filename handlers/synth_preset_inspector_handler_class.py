@@ -1,6 +1,7 @@
 import re
 import os
 import logging
+import json
 from handlers.base_handler import BaseHandler
 from core.synth_preset_inspector_handler import (
     scan_for_synth_presets, 
@@ -9,7 +10,8 @@ from core.synth_preset_inspector_handler import (
     extract_available_parameters,
     extract_parameter_values,
     update_preset_parameter_mappings,
-    delete_parameter_mapping
+    delete_parameter_mapping,
+    load_drift_schema
 )
 from core.file_browser import generate_dir_html
 
@@ -29,6 +31,7 @@ class SynthPresetInspectorHandler(BaseHandler):
             'select_preset',
             filter_key='drift'
         )
+        schema = load_drift_schema()
         return {
             "message": "Select a Drift preset from the list",
             "message_type": "info",
@@ -38,6 +41,7 @@ class SynthPresetInspectorHandler(BaseHandler):
             "selected_preset": None,
             "browser_root": base_dir,
             "browser_filter": 'drift',
+            "schema_json": json.dumps(schema),
         }
 
     def handle_post(self, form):
@@ -58,19 +62,19 @@ class SynthPresetInspectorHandler(BaseHandler):
             if action == 'save_name':
                 macro_index = int(form.getvalue('macro_index'))
                 new_name = form.getvalue(f'macro_{macro_index}_name')
-                
-                if new_name:  # Only update if a name was provided
-                    # Create a single macro update
-                    macro_updates = {macro_index: new_name}
-                    
-                    # Update the preset file with the new macro name
-                    update_result = update_preset_macro_names(preset_path, macro_updates)
-                    if not update_result['success']:
-                        return self.format_error_response(update_result['message'])
-                    
-                    message = f"Saved name for Macro {macro_index}: {new_name}"
+
+                # Allow blank names to remove customName
+                macro_updates = {macro_index: new_name}
+
+                # Update the preset file with the new macro name (or removal)
+                update_result = update_preset_macro_names(preset_path, macro_updates)
+                if not update_result['success']:
+                    return self.format_error_response(update_result['message'])
+
+                if new_name:
+                    message = f"Saved name for Knob {macro_index + 1}: {new_name}"
                 else:
-                    return self.format_error_response("No name provided for the macro")
+                    message = f"Removed custom name for Knob {macro_index + 1}"
             
             # If this is a save names action for all macros, update all macro names
             elif action == 'save_names':
@@ -82,14 +86,11 @@ class SynthPresetInspectorHandler(BaseHandler):
                     if match:
                         macro_index = int(match.group(1))
                         new_name = form.getvalue(field_name)
-                        if new_name:  # Only update if a name was provided
-                            macro_updates[macro_index] = new_name
-                
-                # Update the preset file with the new macro names
-                if macro_updates:
-                    update_result = update_preset_macro_names(preset_path, macro_updates)
-                    if not update_result['success']:
-                        return self.format_error_response(update_result['message'])
+                        macro_updates[macro_index] = new_name
+
+                update_result = update_preset_macro_names(preset_path, macro_updates)
+                if not update_result['success']:
+                    return self.format_error_response(update_result['message'])
                 
                 message = f"Saved macro names for preset: {preset_path.split('/')[-1]}"
             
@@ -127,7 +128,9 @@ class SynthPresetInspectorHandler(BaseHandler):
                     if not update_result['success']:
                         return self.format_error_response(update_result['message'])
                     
-                    message = f"Added mapping for parameter {parameter_name} to Macro {macro_index}"
+                    message = (
+                        f"Added mapping for parameter {parameter_name} to Knob {macro_index + 1}"
+                    )
                 else:
                     return self.format_error_response("No parameter selected for mapping")
             
@@ -186,6 +189,7 @@ class SynthPresetInspectorHandler(BaseHandler):
                 "selected_preset": preset_path,
                 "browser_root": base_dir,
                 "browser_filter": 'drift',
+                "schema_json": json.dumps(self.parameter_info),
             }
         
         return self.format_info_response("Unknown action")
@@ -195,7 +199,8 @@ class SynthPresetInspectorHandler(BaseHandler):
         if not macros:
             return "<p>No macros found in this preset.</p>"
         
-        # Get the preset path from the first macro's parameters (if any)
+        # Get the preset path from the first macro's parameters (if any).
+        # Fallback to the selected preset if no parameters are mapped yet.
         preset_path = None
         for macro in macros:
             if macro["parameters"]:
@@ -205,11 +210,16 @@ class SynthPresetInspectorHandler(BaseHandler):
                 # We need to extract the preset path from this
                 preset_path = param_path.split(".parameters")[0]
                 break
+
+        # Ensure we have a preset path even when no macros are mapped
+        if not preset_path:
+            preset_path = self.form.getvalue('preset_select') if hasattr(self, 'form') else None
         
         # Get all available parameters for the dropdown
         available_parameters = []
         parameter_paths = {}
         mapped_parameters = {}
+        self.parameter_info = {}
         if preset_path:
             # Extract the preset path from the form value
             preset_select = self.form.getvalue('preset_select') if hasattr(self, 'form') else None
@@ -219,6 +229,7 @@ class SynthPresetInspectorHandler(BaseHandler):
                 if param_result['success']:
                     all_parameters = param_result['parameters']
                     parameter_paths = param_result.get('parameter_paths', {})
+                    self.parameter_info = param_result.get('parameter_info', {})
                     
                     # Store parameter paths in the class for use in handle_post
                     self.parameter_paths = parameter_paths
@@ -243,12 +254,43 @@ class SynthPresetInspectorHandler(BaseHandler):
                     )
         
         html = '<div class="macros-container">'
-        
+
         for macro in macros:
+            value = macro.get("value")
+            try:
+                value = float(value)
+            except Exception:
+                value = 0.0
+            display_val = round(value, 1)
             html += f'<div class="macro-item">'
+            html += '<div class="macro-top">'
+            name_label = macro.get("name", f"Macro {macro['index']}")
+            label_class = ""
+            if not name_label or name_label == f"Macro {macro['index']}":
+                params = macro.get("parameters") or []
+                if len(params) == 1:
+                    name_label = params[0].get("name", f"Knob {macro['index'] + 1}")
+                    label_class = " placeholder"
+                else:
+                    name_label = f"Knob {macro['index'] + 1}"
+            html += (
+                f'<div class="macro-knob macro-{macro["index"]}">'
+                f'<span class="macro-label{label_class}">{name_label}</span>'
+                f'<input type="range" class="macro-dial input-knob" '
+                f'value="{display_val}" min="0" max="127" step="0.1" data-decimals="1" disabled>'
+                f'<span class="macro-number">{display_val}</span>'
+                f'</div>'
+            )
+            html += '<div>'
             html += f'<div class="macro-header">'
-            html += f'<span>Macro {macro["index"]}:</span> '
-            html += f'<input type="text" name="macro_{macro["index"]}_name" value="{macro["name"]}" class="macro-name-input">'
+            html += f'<span>Knob {macro["index"] + 1}:</span> '
+            default_label = f"Macro {macro['index']}"
+            macro_value = macro["name"] if macro["name"] != default_label else ""
+            placeholder = " placeholder=\"No name specified\"" if not macro_value else ""
+            html += (
+                f'<input type="text" name="macro_{macro["index"]}_name" '
+                f'value="{macro_value}"{placeholder} class="macro-name-input">'
+            )
             # Add the "Save Name" button
             html += f'<button type="submit" class="save-name-btn" '
             html += f'onclick="document.getElementById(\'action-input\').value=\'save_name\'; '
@@ -273,26 +315,41 @@ class SynthPresetInspectorHandler(BaseHandler):
             # Add options for all available parameters
             for param in available_parameters:
                 selected = ' selected="selected"' if param == default_param else ''
-                html += f'<option value="{param}"{selected}>{param}</option>'
+                info = self.parameter_info.get(param, {})
+                data_attrs = ''
+                if info.get('type'):
+                    data_attrs += f' data-type="{info["type"]}"'
+                if info.get('min') is not None:
+                    data_attrs += f' data-min="{info["min"]}"'
+                if info.get('max') is not None:
+                    data_attrs += f' data-max="{info["max"]}"'
+                if info.get('options'):
+                    opts = ",".join(map(str, info['options']))
+                    data_attrs += f' data-options="{opts}"'
+                html += f'<option value="{param}"{selected}{data_attrs}>{param}</option>'
             
             html += '</select>'
             
             # Range inputs inline with Add button
-            html += '<div class="range-inputs-inline">'
-            html += f'<label>Min: <input type="number" name="macro_{macro["index"]}_range_min" value="{default_range_min}" step="any"></label>'
-            html += f'<label>Max: <input type="number" name="macro_{macro["index"]}_range_max" value="{default_range_max}" step="any"></label>'
-            
-            # Add the "Add" button inline with range inputs
+            html += (
+                f'<label class="min-wrapper">Min: <input type="number" class="range-min" '
+                f'name="macro_{macro["index"]}_range_min" value="{default_range_min}" step="any"></label>'
+            )
+            html += (
+                f'<label class="max-wrapper">Max: <input type="number" class="range-max" '
+                f'name="macro_{macro["index"]}_range_max" value="{default_range_max}" step="any"></label>'
+            )
+            html += '<div class="options-display"></div>'
+
+            # Add the "Add" button
             html += f'<button type="submit" class="add-mapping-btn" '
             html += f'onclick="document.getElementById(\'action-input\').value=\'add_mapping\'; '
             html += f'document.getElementById(\'macro-index-input\').value=\'{macro["index"]}\';">'
-            html += f'Add</button>'
-            html += '</div>'
-            
+            html += 'Add</button>'
             html += '</div>'  # Close parameter-controls
-            
+
             html += '</div>'
-            
+
             # Display current mappings
             html += '<div class="current-mappings">'
             html += '<h4>Current Mappings:</h4>'
@@ -301,7 +358,11 @@ class SynthPresetInspectorHandler(BaseHandler):
                 html += '<ul class="parameters-list">'
                 for param in macro["parameters"]:
                     param_info = f'{param["name"]}'
-                    if "rangeMin" in param and "rangeMax" in param:
+                    info = self.parameter_info.get(param["name"], {})
+                    if info.get("options"):
+                        opts = ", ".join(map(str, info["options"]))
+                        param_info += f' [Options: {opts}]'
+                    elif "rangeMin" in param and "rangeMax" in param:
                         param_info += f' (Range: {param["rangeMin"]} - {param["rangeMax"]})'
                     
                     # Add delete button with onclick handler to set action and parameter info
@@ -317,8 +378,10 @@ class SynthPresetInspectorHandler(BaseHandler):
             else:
                 html += '<p>No parameters mapped to this macro.</p>'
             
-            html += '</div>'
-            html += '</div>'
+            html += '</div>'  # close current-mappings
+            html += '</div>'  # close inner container
+            html += '</div>'  # close macro-top
+            html += '</div>'  # close macro-item
             
         html += '</div>'
         return html

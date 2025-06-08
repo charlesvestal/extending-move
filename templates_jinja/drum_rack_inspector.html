@@ -14,7 +14,13 @@
     <input type="hidden" name="action" value="reset_preset">
     <button type="submit">Choose Another Preset</button>
   </form>
-  <p class="current-preset">Currently loaded preset: {{ selected_preset.split('/')[-1] }}</p>
+  {% set _display = selected_preset %}
+  {% if selected_preset.startswith('/data/UserData/UserLibrary/Track Presets') %}
+      {% set _display = '/' + selected_preset.split('/data/UserData/UserLibrary/Track Presets', 1)[1] %}
+  {% elif selected_preset.startswith('examples/Track Presets') %}
+      {% set _display = '/' + selected_preset.split('examples/Track Presets', 1)[1] %}
+  {% endif %}
+  <p class="current-preset">Currently loaded preset: {{ _display }}</p>
   <div class="samples-container">
     {{ samples_html | safe }}
   </div>
