@@ -15,10 +15,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const addBtn = document.getElementById('macro-add-param');
   const closeBtn = document.getElementById('macro-sidebar-close');
 
-  function updateAddBtn() {
-    addBtn.disabled = !selectEl.value;
-  }
-
   nameInput.addEventListener('input', () => {
     if (currentIndex !== null) {
       const macro = macros.find(m => m.index === currentIndex);
@@ -40,7 +36,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function saveState() {
     macrosInput.value = JSON.stringify(macros);
-    macrosInput.dispatchEvent(new Event('change'));
   }
 
   function updateKnobLabels() {
@@ -89,10 +84,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     selectEl.innerHTML = '';
-    const placeholder = document.createElement('option');
-    placeholder.value = '';
-    placeholder.textContent = 'Choose a parameter...';
-    selectEl.appendChild(placeholder);
     const taken = allAssigned();
     availableParams.forEach(p => {
       if (!taken.includes(p)) {
@@ -102,7 +93,6 @@ document.addEventListener('DOMContentLoaded', () => {
         selectEl.appendChild(opt);
       }
     });
-    updateAddBtn();
   }
 
   function openSidebar(idx) {
@@ -115,7 +105,6 @@ document.addEventListener('DOMContentLoaded', () => {
     titleEl.textContent = `Macro ${idx}`;
     nameInput.value = macro.name.startsWith('Macro ') ? '' : macro.name;
     rebuildLists(macro);
-    updateAddBtn();
     overlay.classList.remove('hidden');
     sidebar.classList.remove('hidden');
     nameInput.focus();
@@ -139,7 +128,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   closeBtn.addEventListener('click', closeSidebar);
   overlay.addEventListener('click', closeSidebar);
-  selectEl.addEventListener('change', updateAddBtn);
   addBtn.addEventListener('click', () => {
     if (currentIndex === null) return;
     const macro = macros.find(m => m.index === currentIndex);
@@ -149,7 +137,6 @@ document.addEventListener('DOMContentLoaded', () => {
       rebuildLists(macro);
       updateHighlights();
       saveState();
-      updateAddBtn();
     }
   });
 
@@ -161,5 +148,4 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   updateHighlights();
-  updateAddBtn();
 });
