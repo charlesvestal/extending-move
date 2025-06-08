@@ -362,6 +362,16 @@ class SynthParamEditorHandler(BaseHandler):
             step_attr = ''
             if meta.get("decimals") is not None:
                 step_attr = f' step="{10 ** (-meta["decimals"])}"'
+            else:
+                min_val = meta.get("min")
+                max_val = meta.get("max")
+                if (
+                    min_val is not None
+                    and max_val is not None
+                    and max_val <= 1
+                    and min_val >= -1
+                ):
+                    step_attr = ' step="0.01"'
             unit_attr = f' data-unit="{meta.get("unit")}"' if meta.get("unit") else ''
             disp_id = f'param_{idx}_display'
             klass = "param-dial input-knob"
