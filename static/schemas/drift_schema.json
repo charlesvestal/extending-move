@@ -232,8 +232,8 @@
     "min": 0.0,
     "max": 0.336857,
     "options": [],
-    "unit": "%",
-    "decimals": 2
+    "unit": "ms",
+    "decimals": 0
   },
   "Global_HiQuality": {
     "type": "boolean",
@@ -331,7 +331,9 @@
     "type": "number",
     "min": 0.0,
     "max": 0.726562,
-    "options": []
+    "options": [],
+    "unit": "%",
+    "decimals": 0
   },
   "Global_Volume": {
     "type": "number",
@@ -640,7 +642,8 @@
     "type": "number",
     "min": -7.0,
     "max": 7.0,
-    "options": []
+    "options": [],
+    "decimals": 2
   },
   "Oscillator2_Transpose": {
     "type": "number",
