@@ -7,14 +7,8 @@ function initSlider(el){
   const max=parseFloat(el.dataset.max||1);
   const step=parseFloat(el.dataset.step||1);
   const unit=el.dataset.unit||'';
-  const fineStep=step/10;
   function getStep(v){
-    if(unit==='%' ){
-      const disp=shouldScale?v*100:v;
-      if(Math.abs(disp)<10)
-        return fineStep;
-    }
-    return step;
+    return getPercentStep(v, unit, step, shouldScale);
   }
   const decimals=parseInt(el.dataset.decimals||2,10);
   const displayDecimalsDefault=unit==='%'?0:decimals;
@@ -32,9 +26,7 @@ function initSlider(el){
   label.className='rect-slider-label';
   el.appendChild(label);
   function getDisplayDecimals(v){
-    if(unit==='%' && Math.abs((shouldScale?v*100:v))<10)
-      return 1;
-    return displayDecimalsDefault;
+    return getPercentDecimals(v, unit, displayDecimalsDefault, shouldScale);
   }
   function format(v){
     let displayVal=shouldScale?v*100:v;

@@ -12,18 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const min = parseFloat(el.min);
         const max = parseFloat(el.max);
         const shouldScale = unit === '%' && Math.abs(max) <= 1 && Math.abs(min) <= 1;
-        const fineStep = step / 10;
-        const getStep = (v) => {
-            if (percentUnit) {
-                const disp = shouldScale ? v * 100 : v;
-                if (Math.abs(disp) < 10) return fineStep;
-            }
-            return step;
-        };
-        const getDisplayDecimals = (v) => {
-            if (percentUnit && Math.abs((shouldScale ? v * 100 : v)) < 10) return 1;
-            return displayDecimalsDefault;
-        };
+        const getStep = (v) => getPercentStep(v, unit, step, shouldScale);
+        const getDisplayDecimals = (v) => getPercentDecimals(v, unit, displayDecimalsDefault, shouldScale);
         const format = (v) => {
             let displayVal = shouldScale ? v * 100 : v;
             let unitLabel = unit;
