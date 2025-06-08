@@ -15,6 +15,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const addBtn = document.getElementById('macro-add-param');
   const closeBtn = document.getElementById('macro-sidebar-close');
 
+  nameInput.addEventListener('input', () => {
+    if (currentIndex !== null) {
+      const macro = macros.find(m => m.index === currentIndex);
+      if (macro) {
+        macro.name = nameInput.value.trim() || `Macro ${currentIndex}`;
+        const label = document.querySelector(`.macro-label[data-index="${currentIndex}"]`);
+        if (label) label.textContent = macro.name;
+      }
+    }
+  });
+
   function allAssigned() {
     const arr = [];
     macros.forEach(m => m.parameters.forEach(p => arr.push(p.name)));
@@ -25,6 +36,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function saveState() {
     macrosInput.value = JSON.stringify(macros);
+  }
+
+  function updateKnobLabels() {
+    macros.forEach(m => {
+      const label = document.querySelector(`.macro-label[data-index="${m.index}"]`);
+      if (label) label.textContent = m.name;
+    });
   }
 
   function updateHighlights() {
@@ -41,6 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const idx = parseInt(knob.dataset.index,10);
       knob.classList.toggle('macro-'+idx, (macros.find(m=>m.index===idx)?.parameters.length||0)>0);
     });
+    updateKnobLabels();
   }
 
   function rebuildLists(macro) {
@@ -88,6 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
     rebuildLists(macro);
     overlay.classList.remove('hidden');
     sidebar.classList.remove('hidden');
+    nameInput.focus();
   }
 
   function closeSidebar() {
@@ -99,6 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       saveState();
       updateHighlights();
+      updateKnobLabels();
     }
     overlay.classList.add('hidden');
     sidebar.classList.add('hidden');
