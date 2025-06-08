@@ -497,6 +497,11 @@ select {
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.param-pair .param-item {
+    margin-bottom: 0;
 }
 
 .pitch-mod-label {
@@ -616,6 +621,16 @@ select {
     width: 80px;
     text-align: center;
 }
+
+.param-select {
+    margin: 0.25rem;
+    width: 80px;
+    height: 24px;
+    font-size: 0.8rem;
+    line-height: 24px;
+    padding: 0 1.5rem 0 0.5rem;
+    text-align: center;
+}
   
 .param-item {
     margin-bottom: 0.75rem;
@@ -707,3 +722,35 @@ select {
     border-radius: 4px;
 }
 
+
+/* Rectangular slider component */
+.rect-slider-container {
+    position: relative;
+    width: 80px;
+    height: 24px;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+    box-sizing: border-box;
+    cursor: ns-resize;
+    user-select: none;
+    font-size: 0.8rem;
+    text-align: center;
+    line-height: 24px;
+}
+.rect-slider-fill {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    background-color: #ff764d;
+    pointer-events: none;
+}
+.rect-slider-container.center .rect-slider-fill {
+    left: 50%;
+    width: 0;
+}
+.rect-slider-label {
+    position: relative;
+    z-index: 1;
+}
