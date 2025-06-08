@@ -858,3 +858,8 @@ select {
     display: flex;
     gap: 0.25rem;
 }
+
+.macro-add-section select {
+    padding: 0.25rem 2.5rem 0.25rem 0.5rem;
+    max-width: 100%;
+}
