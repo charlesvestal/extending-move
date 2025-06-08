@@ -107,6 +107,8 @@ def test_synth_macros_post(client, monkeypatch):
     assert b'View All Parameters' in resp.data
 
 def test_synth_params_get(client, monkeypatch):
+    from handlers.synth_param_editor_handler_class import DEFAULT_PRESET
+
     def fake_get():
         return {
             'message': 'pick',
@@ -116,7 +118,7 @@ def test_synth_params_get(client, monkeypatch):
             'selected_preset': None,
             'param_count': 0,
             'browser_root': '/tmp',
-            'default_preset_path': '/examples/Analog Shape.ablpreset',
+            'default_preset_path': DEFAULT_PRESET,
         }
     monkeypatch.setattr(move_webserver.synth_param_handler, 'handle_get', fake_get)
     resp = client.get('/synth-params')
@@ -143,15 +145,17 @@ def test_synth_params_post(client, monkeypatch):
     assert b'<div>p</div>' in resp.data
 
 def test_synth_params_new_preset(client, monkeypatch):
+    from handlers.synth_param_editor_handler_class import DEFAULT_PRESET
+
     def fake_post(form):
         return {
             'message': 'loaded',
             'message_type': 'success',
             'params_html': '<div>x</div>',
             'browser_root': '/tmp',
-            'selected_preset': '/examples/Analog Shape.ablpreset',
+            'selected_preset': DEFAULT_PRESET,
             'param_count': 2,
-            'default_preset_path': '/examples/Analog Shape.ablpreset',
+            'default_preset_path': DEFAULT_PRESET,
         }
     monkeypatch.setattr(move_webserver.synth_param_handler, 'handle_post', fake_post)
     resp = client.post('/synth-params', data={'action': 'new_preset'})
