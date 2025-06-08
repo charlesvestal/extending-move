@@ -690,16 +690,16 @@ class SynthParamEditorHandler(BaseHandler):
             row1 = "".join(amp_adsr)
             if row1:
                 ordered.append(
-                    f'<div class="param-row"><span class="param-row-label">Amp envelope</span>{row1}</div>'
-                )
-            if cycle_toggle:
-                ordered.append(
-                    f'<div class="param-row env2-mode"><span class="param-row-label">Env/Cyc</span>{cycle_toggle}</div>'
+                    f'<div class="param-row"><div class="param-row-label">Amp</div>{row1}</div>'
                 )
             row2_main = "".join(env2_adsr)
             if row2_main.strip():
+                label = f'<div class="param-row-label">Env 2'
+                if cycle_toggle:
+                    label += f' Cyc {cycle_toggle}'
+                label += '</div>'
                 ordered.append(
-                    f'<div class="param-row env2-adsr"><span class="param-row-label">Env 2</span>{row2_main}</div>'
+                    f'<div class="param-row env2-adsr">{label}{row2_main}</div>'
                 )
             if any([cycle_mid, cycle_hold, cycle_rate, cycle_ratio, cycle_time, cycle_sync, cycle_mode]):
                 # Hide unselected rate controls based on current mode
@@ -721,8 +721,12 @@ class SynthParamEditorHandler(BaseHandler):
                     cycle_sync,
                     cycle_mode,
                 ])
+                label = f'<div class="param-row-label">Env 2'
+                if cycle_toggle:
+                    label += f' Cyc {cycle_toggle}'
+                label += '</div>'
                 ordered.append(
-                    f'<div class="param-row env2-cycling hidden"><span class="param-row-label">Env 2</span>{row3_extra}</div>'
+                    f'<div class="param-row env2-cycling hidden">{label}{row3_extra}</div>'
                 )
 
             ordered.extend(env_items.values())
