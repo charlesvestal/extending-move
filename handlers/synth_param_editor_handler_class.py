@@ -376,7 +376,10 @@ class SynthParamEditorHandler(BaseHandler):
             )
             html.append(f'<input type="hidden" name="param_{idx}_value" value="{value}">')
         elif p_type == "enum" and meta.get("options"):
-            html.append(f'<select class="param-select" name="param_{idx}_value">')
+            select_class = "param-select"
+            if name == "Filter_Type":
+                select_class += " filter-type-select"
+            html.append(f'<select class="{select_class}" name="param_{idx}_value">')
             short_map = {}
             if name in ("Oscillator1_Type", "Oscillator2_Type"):
                 short_map = self.OSC_WAVE_SHORT
@@ -737,20 +740,33 @@ class SynthParamEditorHandler(BaseHandler):
 
         if extras_items:
             sections["Extras"] = list(extras_items.values())
+
         if mod_items:
-            ordered = []
+            mods = []
             for idx in range(1, 4):
                 src = mod_items.pop(f"ModulationMatrix_Source{idx}", "")
                 amt = mod_items.pop(f"ModulationMatrix_Amount{idx}", "")
                 dst = mod_items.pop(f"ModulationMatrix_Target{idx}", "")
                 if src or amt or dst:
-                    ordered.append(
-                        f'<div class="param-row mod-matrix-row">'
+                    mods.append(
                         f'<div class="param-pair mod-group">'
                         f'<span class="mod-label">Mod {idx}</span>'
                         f'{src}{amt}{dst}'
-                        f'</div></div>'
+                        f'</div>'
                     )
+
+            ordered = []
+            if mods:
+                top = ''.join(mods[:2])
+                if top:
+                    ordered.append(
+                        f'<div class="param-row mod-matrix-row">{top}</div>'
+                    )
+                if len(mods) >= 3:
+                    ordered.append(
+                        f'<div class="param-row mod-matrix-row">{mods[2]}</div>'
+                    )
+
             ordered.extend(mod_items.values())
             sections["Modulation"] = ordered
 
