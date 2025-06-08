@@ -376,7 +376,7 @@ class SynthParamEditorHandler(BaseHandler):
             )
             html.append(f'<input type="hidden" name="param_{idx}_value" value="{value}">')
         elif p_type == "enum" and meta.get("options"):
-            html.append(f'<select name="param_{idx}_value">')
+            html.append(f'<select class="param-select" name="param_{idx}_value">')
             short_map = {}
             if name in ("Oscillator1_Type", "Oscillator2_Type"):
                 short_map = self.OSC_WAVE_SHORT
