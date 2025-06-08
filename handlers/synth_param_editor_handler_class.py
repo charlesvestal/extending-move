@@ -301,7 +301,7 @@ class SynthParamEditorHandler(BaseHandler):
 
     def _get_section(self, name):
         if name == "Global_Envelope2Mode":
-            return "Filter"
+            return "Envelopes"
         if name.startswith(("Oscillator1_", "Oscillator2_", "PitchModulation_")):
             return "Oscillators"
         if name.startswith("Mixer_") or name.startswith("Filter_OscillatorThrough") or name.startswith("Filter_NoiseThrough"):
@@ -364,7 +364,7 @@ class SynthParamEditorHandler(BaseHandler):
 
         if filter_items:
             filter_rows = [
-                ["Filter_Frequency", "Filter_Type", "Filter_Tracking", "Global_Envelope2Mode"],
+                ["Filter_Frequency", "Filter_Type", "Filter_Tracking"],
                 ["Filter_Resonance", "Filter_HiPassFrequency"],
             ]
             ordered = []
@@ -444,12 +444,13 @@ class SynthParamEditorHandler(BaseHandler):
                 env_items.pop("Envelope1_Sustain", ""),
                 env_items.pop("Envelope1_Release", ""),
             ]
-            env_adsr = [
+            env2_adsr = [
                 env_items.pop("Envelope2_Attack", ""),
                 env_items.pop("Envelope2_Decay", ""),
                 env_items.pop("Envelope2_Sustain", ""),
                 env_items.pop("Envelope2_Release", ""),
             ]
+            cycle_toggle = env_items.pop("Global_Envelope2Mode", "")
             cycle_extras = [
                 env_items.pop("CyclingEnvelope_MidPoint", ""),
                 env_items.pop("CyclingEnvelope_Hold", ""),
@@ -463,15 +464,10 @@ class SynthParamEditorHandler(BaseHandler):
                 ordered.append(
                     f'<div class="param-row"><span class="param-row-label">Amp envelope</span>{row1}</div>'
                 )
-            row2 = "".join(env_adsr)
-            if row2:
+            row2_main = "".join(env2_adsr) + cycle_toggle
+            if row2_main.strip():
                 ordered.append(
-                    f'<div class="param-row"><span class="param-row-label">Env 1</span>{row2}</div>'
-                )
-            row3 = "".join(env_adsr)
-            if row3.strip():
-                ordered.append(
-                    f'<div class="param-row env2-main env2-adsr"><span class="param-row-label">Env 2</span>{row3}</div>'
+                    f'<div class="param-row env2-main env2-adsr"><span class="param-row-label">Env 2</span>{row2_main}</div>'
                 )
             row3_extra = "".join(cycle_extras)
             if row3_extra.strip():
