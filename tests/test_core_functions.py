@@ -133,6 +133,20 @@ def test_update_parameter_values(tmp_path):
     assert abs(val - 0.5) < 1e-6
 
 
+def test_update_macro_values(tmp_path):
+    src = Path("examples/Track Presets/Drift/Analog Shape - Core.json")
+    dest = tmp_path / "out.ablpreset"
+    from core.synth_param_editor_handler import update_macro_values
+    result = update_macro_values(str(src), {0: "64.5"}, str(dest))
+    assert result["success"], result.get("message")
+    with open(dest, "rb") as f:
+        data = f.read()
+    assert data.endswith(b"\n")
+    preset = json.loads(data)
+    # Macro0 occurs in multiple places; ensure top-level updated
+    assert abs(preset["parameters"]["Macro0"] - 64.5) < 1e-6
+
+
 def test_save_preset_no_changes(tmp_path):
     """Saving a preset without modifying parameters should produce identical output."""
     src = Path("examples/Track Presets/Drift/Analog Shape - Core.json")

@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.querySelectorAll('input.param-dial').forEach(setupControl);
     document.querySelectorAll('input.param-slider').forEach(setupControl);
+    document.querySelectorAll('input.macro-dial').forEach(setupControl);
 
     document.querySelectorAll('input.param-toggle').forEach(el => {
         const target = el.dataset.target;
