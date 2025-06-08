@@ -37,9 +37,16 @@
         <button type="submit" onclick="document.getElementById('action-input').value='reset_preset';">Choose Another Preset</button>
     </div>
     {{ macro_knobs_html | safe }}
-    <div class="edit-macros-link">
-        <a href="{{ host_prefix }}/synth-macros?preset={{ selected_preset | urlencode }}">Edit Macros</a>
+    <input type="hidden" name="macros_data" id="macros-data-input" value='{{ macros_json|safe }}'>
+    <input type="hidden" id="available-params-input" value='{{ available_params_json|safe }}'>
+    <input type="hidden" id="param-paths-input" value='{{ param_paths_json|safe }}'>
+    <div id="macro-sidebar" class="macro-sidebar hidden">
+        <h3 id="macro-sidebar-title"></h3>
+        <label>Custom Name: <input type="text" id="macro-name-input"></label>
+        <div class="macro-params-list"></div>
+        <button type="button" id="macro-sidebar-close">Close</button>
     </div>
+    <div id="sidebar-overlay" class="sidebar-overlay hidden"></div>
     <div class="param-list">
         {{ params_html | safe }}
     </div>
@@ -55,6 +62,7 @@
 <script src="{{ host_prefix }}/static/input-knobs.js"></script>
 <script src="{{ host_prefix }}/static/params_knobs.js"></script>
 <script src="{{ host_prefix }}/static/rect-slider.js"></script>
+<script src="{{ host_prefix }}/static/macro_sidebar.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const cb = document.getElementById('rename-checkbox');
