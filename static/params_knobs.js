@@ -81,6 +81,19 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('input.param-slider').forEach(setupControl);
     document.querySelectorAll('input.macro-dial').forEach(setupControl);
 
+    // Keep hidden input values in sync with dropdown selections
+    document.querySelectorAll('select.param-select').forEach(sel => {
+        const hidden = sel.parentElement.querySelector(
+            `input[type="hidden"][name="${sel.name}"]`
+        );
+        if (hidden) {
+            sel.addEventListener('change', () => {
+                hidden.value = sel.value;
+                hidden.dispatchEvent(new Event('change'));
+            });
+        }
+    });
+
     document.querySelectorAll('input.param-toggle').forEach(el => {
         const target = el.dataset.target;
         const hidden = document.querySelector(`input[name="${target}"]`);
