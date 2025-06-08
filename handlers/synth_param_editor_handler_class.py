@@ -174,7 +174,14 @@ class SynthParamEditorHandler(BaseHandler):
                 idx = m.get('index')
                 for p in m.get('parameters', []):
                     pname = p.get('name')
-                    param_updates = {idx: {'parameter': pname, 'parameter_path': p.get('path')}}
+                    param_updates = {
+                        idx: {
+                            'parameter': pname,
+                            'parameter_path': p.get('path'),
+                            'rangeMin': p.get('rangeMin'),
+                            'rangeMax': p.get('rangeMax'),
+                        }
+                    }
                     upd = update_preset_parameter_mappings(preset_path, param_updates)
                     if not upd['success']:
                         return self.format_error_response(upd['message'])
