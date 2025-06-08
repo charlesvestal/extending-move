@@ -6,13 +6,15 @@ function initSlider(el){
   const min=parseFloat(el.dataset.min||0);
   const max=parseFloat(el.dataset.max||1);
   const step=parseFloat(el.dataset.step||1);
+  const unit=el.dataset.unit||'';
   const fineStep=step/10;
   const range=max-min;
   function getStep(v){
-    return (range>0 && v-min<range*0.1)?fineStep:step;
+    if(unit==='%' && range>0 && v-min<range*0.1)
+      return fineStep;
+    return step;
   }
   const decimals=parseInt(el.dataset.decimals||2,10);
-  const unit=el.dataset.unit||'';
   const displayDecimals=unit==='%'?0:decimals;
   const shouldScale=unit==='%' && Math.abs(max)<=1 && Math.abs(min)<=1;
   let value=parseFloat(el.dataset.value||min);
