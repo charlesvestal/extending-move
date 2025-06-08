@@ -357,6 +357,17 @@ class SynthParamEditorHandler(BaseHandler):
 
             hide = name in self.UNLABELED_PARAMS
             slider = name in self.SLIDER_PARAMS
+
+            extra = ""
+            if name == "CyclingEnvelope_Rate":
+                extra = "cycle-rate freq-rate"
+            elif name == "CyclingEnvelope_Ratio":
+                extra = "cycle-rate ratio-rate"
+            elif name == "CyclingEnvelope_Time":
+                extra = "cycle-rate time-rate"
+            elif name == "CyclingEnvelope_SyncedRate":
+                extra = "cycle-rate sync-rate"
+
             html = self._build_param_item(
                 i,
                 name,
@@ -365,6 +376,7 @@ class SynthParamEditorHandler(BaseHandler):
                 label=self.LABEL_OVERRIDES.get(name, name),
                 hide_label=hide,
                 slider=slider,
+                extra_classes=extra,
             )
 
             if name == "CyclingEnvelope_Mode":
