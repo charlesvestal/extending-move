@@ -268,6 +268,15 @@ class SynthParamEditorHandler(BaseHandler):
         "Filter_ModAmount1",
         "Filter_ModAmount2",
         "Global_Envelope2Mode",
+        "ModulationMatrix_Source1",
+        "ModulationMatrix_Amount1",
+        "ModulationMatrix_Target1",
+        "ModulationMatrix_Source2",
+        "ModulationMatrix_Amount2",
+        "ModulationMatrix_Target2",
+        "ModulationMatrix_Source3",
+        "ModulationMatrix_Amount3",
+        "ModulationMatrix_Target3",
     }
 
     # Parameters that use a horizontal slider instead of a dial
@@ -277,6 +286,9 @@ class SynthParamEditorHandler(BaseHandler):
         "PitchModulation_Amount2",
         "Filter_ModAmount1",
         "Filter_ModAmount2",
+        "ModulationMatrix_Amount1",
+        "ModulationMatrix_Amount2",
+        "ModulationMatrix_Amount3",
         "Lfo_ModAmount",
     }
 
@@ -377,6 +389,7 @@ class SynthParamEditorHandler(BaseHandler):
         env_items: dict[str, str] = {}
         lfo_items: dict[str, str] = {}
         mixer_items: dict[str, str] = {}
+        mod_items: dict[str, str] = {}
         cycling_mode_val = None
         lfo_mode_val = None
 
@@ -436,6 +449,8 @@ class SynthParamEditorHandler(BaseHandler):
                 lfo_items[name] = html
             elif section == "Mixer":
                 mixer_items[name] = html
+            elif section == "Modulation":
+                mod_items[name] = html
             else:
                 sections[section].append(html)
 
@@ -577,6 +592,23 @@ class SynthParamEditorHandler(BaseHandler):
 
             ordered.extend(env_items.values())
             sections["Envelopes"] = ordered
+
+        if mod_items:
+            ordered = []
+            for idx in range(1, 4):
+                src = mod_items.pop(f"ModulationMatrix_Source{idx}", "")
+                amt = mod_items.pop(f"ModulationMatrix_Amount{idx}", "")
+                dst = mod_items.pop(f"ModulationMatrix_Target{idx}", "")
+                if src or amt or dst:
+                    ordered.append(
+                        f'<div class="param-row mod-matrix-row">'
+                        f'<div class="param-pair mod-group">'
+                        f'<span class="mod-label">Mod {idx}</span>'
+                        f'{src}{amt}{dst}'
+                        f'</div></div>'
+                    )
+            ordered.extend(mod_items.values())
+            sections["Modulation"] = ordered
 
         if lfo_items:
             rate = lfo_items.pop("Lfo_Rate", "")
