@@ -1,5 +1,5 @@
 {
-  "$schema": "http://tech.ableton.com/schema/song/1.4.8/devicePreset.json",
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
   "kind": "instrumentRack",
   "name": "Analog Shape",
   "lockId": 1001,
@@ -36,21 +36,21 @@
               "value": 127.0,
               "customName": "Shape"
             },
-            "Macro2": 84.66666666666666,
-            "Macro3": 95.25,
+            "Macro2": 0.0,
+            "Macro3": 0.0,
             "Macro4": {
               "value": 0.0,
               "customName": "Attack"
             },
             "Macro5": {
-              "value": 64.08258056640625,
+              "value": 65.29655456542969,
               "customName": "DSR"
             },
             "Macro6": {
-              "value": 74.56878662109375,
+              "value": 127.0,
               "customName": "Shape Decay"
             },
-            "Macro7": 77.41073608398438
+            "Macro7": 69.64323425292969
           },
           "chains": [
             {
