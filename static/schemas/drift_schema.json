@@ -333,7 +333,7 @@
     "max": 0.726562,
     "options": [],
     "unit": "%",
-    "decimals": 0
+    "decimals": 2
   },
   "Global_Volume": {
     "type": "number",
