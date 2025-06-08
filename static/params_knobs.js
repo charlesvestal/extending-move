@@ -131,4 +131,23 @@ document.addEventListener('DOMContentLoaded', () => {
         modeSelect.addEventListener('change', updateCycleRateDisplay);
         updateCycleRateDisplay();
     }
+
+    const lfoModeSelect = document.querySelector('.param-item[data-name="Lfo_Mode"] select');
+    const lfoRateMap = {
+        Freq: document.querySelector('.lfo-rate.freq-rate'),
+        Ratio: document.querySelector('.lfo-rate.ratio-rate'),
+        Time: document.querySelector('.lfo-rate.time-rate'),
+        Sync: document.querySelector('.lfo-rate.sync-rate'),
+    };
+    function updateLfoRateDisplay() {
+        if (!lfoModeSelect) return;
+        const mode = lfoModeSelect.value;
+        Object.entries(lfoRateMap).forEach(([key, el]) => {
+            if (el) el.classList.toggle('hidden', key !== mode);
+        });
+    }
+    if (lfoModeSelect) {
+        lfoModeSelect.addEventListener('change', updateLfoRateDisplay);
+        updateLfoRateDisplay();
+    }
 });
