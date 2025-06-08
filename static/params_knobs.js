@@ -14,6 +14,8 @@ document.addEventListener('DOMContentLoaded', () => {
             max: isNaN(max) ? 1 : max,
             value: isNaN(val) ? 0 : val,
         });
+        const step = Math.pow(10, -decimals);
+        dial.step = step;
         const shouldScale = unit === '%' && Math.abs(max) <= 1 && Math.abs(min) <= 1;
         const format = (v) => {
             const displayVal = shouldScale ? v * 100 : v;
@@ -52,6 +54,8 @@ document.addEventListener('DOMContentLoaded', () => {
             value: isNaN(val) ? 0 : val,
             orientation: 'horizontal'
         });
+        const step = Math.pow(10, -decimals);
+        slider.step = step;
         const shouldScale = unit === '%' && Math.abs(max) <= 1 && Math.abs(min) <= 1;
         const format = (v) => {
             const displayVal = shouldScale ? v * 100 : v;
