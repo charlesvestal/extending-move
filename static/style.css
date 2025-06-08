@@ -610,10 +610,9 @@ select {
     /* width: 90px; */
 }
 .param-number {
-    margin-left: 0.5rem;
-    min-width: 60px;
+    min-width: 40px;
     display: inline-block;
-    text-align: right;
+    text-align: center;
     font-size: 0.8rem;
 }
 
