@@ -37,12 +37,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const titleEl = document.getElementById('macro-sidebar-title');
   const nameInput = document.getElementById('macro-name-input');
   const assignedDiv = document.querySelector('.macro-assigned-list');
-  const selectEl = document.getElementById('macro-param-select');
   const addBtn = document.getElementById('macro-add-param');
   const closeBtn = document.getElementById('macro-sidebar-close');
 
+  let openMacro = null;
+  let openMacroNew = false;
+
   function updateAddBtn() {
-    addBtn.disabled = !selectEl.value;
+    if (!openMacro) return;
+    addBtn.disabled = openMacro.parameters.length >= availableParams.length;
   }
 
   nameInput.addEventListener('input', () => {
@@ -124,26 +127,43 @@ document.addEventListener('DOMContentLoaded', () => {
     updateKnobLabels();
   }
 
+  function buildSelect(current) {
+    const select = document.createElement('select');
+    select.className = 'param-select';
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.textContent = 'Choose a parameter...';
+    select.appendChild(placeholder);
+    const taken = allAssigned().filter(n => n !== current);
+    availableParams.forEach(p => {
+      if (!taken.includes(p) || p === current) {
+        const opt = document.createElement('option');
+        opt.value = p;
+        opt.textContent = paramDisplay[p] || p;
+        select.appendChild(opt);
+      }
+    });
+    select.value = current || '';
+    return select;
+  }
+
   function rebuildLists(macro) {
     assignedDiv.innerHTML = '';
-    macro.parameters.forEach(p => {
+    macro.parameters.forEach((p, idx) => {
       const div = document.createElement('div');
       div.className = 'assign-item';
-      const span = document.createElement('span');
-      span.textContent = paramDisplay[p.name] || p.name;
-      const info = paramInfo[p.name] || {};
-      const isNumber = !info.type || info.type === 'number';
-      let rangeDiv = null;
-      if (isNumber) {
-        rangeDiv = document.createElement('div');
-        rangeDiv.className = 'range-inputs';
+      const select = buildSelect(p.name);
+      const rangeDiv = document.createElement('div');
+      rangeDiv.className = 'range-inputs';
+
+      function rebuildRange() {
+        rangeDiv.innerHTML = '';
+        const info = paramInfo[p.name] || {};
+        const isNumber = p.name && (!info.type || info.type === 'number');
+        if (!isNumber) return;
         const minInput = document.createElement('input');
         minInput.type = 'text';
-        if (info.min !== undefined && info.min !== null) {
-          minInput.placeholder = info.min;
-        } else {
-          minInput.placeholder = 'min';
-        }
+        minInput.placeholder = info.min !== undefined && info.min !== null ? info.min : 'min';
         if (p.rangeMin !== undefined) {
           const n = parseFloat(p.rangeMin);
           if (!isNaN(n)) minInput.value = n.toFixed(2);
@@ -156,11 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
         dash.textContent = '-';
         const maxInput = document.createElement('input');
         maxInput.type = 'text';
-        if (info.max !== undefined && info.max !== null) {
-          maxInput.placeholder = info.max;
-        } else {
-          maxInput.placeholder = 'max';
-        }
+        maxInput.placeholder = info.max !== undefined && info.max !== null ? info.max : 'max';
         if (p.rangeMax !== undefined) {
           const n = parseFloat(p.rangeMax);
           if (!isNaN(n)) maxInput.value = n.toFixed(2);
@@ -173,54 +189,53 @@ document.addEventListener('DOMContentLoaded', () => {
         rangeDiv.appendChild(dash);
         rangeDiv.appendChild(maxInput);
       }
+
+      select.addEventListener('change', () => {
+        p.name = select.value;
+        p.path = paramPaths[select.value];
+        p.rangeMin = undefined;
+        p.rangeMax = undefined;
+        rebuildRange();
+        updateAddBtn();
+        updateHighlights();
+        updateKnobLabels();
+        saveState();
+      });
+
+      rebuildRange();
+
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.textContent = 'Remove';
       btn.addEventListener('click', () => {
-        macro.parameters = macro.parameters.filter(mp => mp.name !== p.name);
+        macro.parameters.splice(idx, 1);
         rebuildLists(macro);
         updateHighlights();
         saveState();
       });
-      div.appendChild(span);
-      if (rangeDiv) div.appendChild(rangeDiv);
+
+      div.appendChild(select);
+      if (rangeDiv.childNodes.length) div.appendChild(rangeDiv);
       div.appendChild(btn);
       assignedDiv.appendChild(div);
     });
-
-    selectEl.innerHTML = '';
-    const placeholder = document.createElement('option');
-    placeholder.value = '';
-    placeholder.textContent = 'Choose a parameter...';
-    selectEl.appendChild(placeholder);
-    const taken = allAssigned();
-    availableParams.forEach(p => {
-      if (!taken.includes(p)) {
-        const opt = document.createElement('option');
-        opt.value = p;
-        opt.textContent = paramDisplay[p] || p;
-        const info = paramInfo[p] || {};
-        if (info.type) opt.dataset.type = info.type;
-        if (info.min !== undefined && info.min !== null) opt.dataset.min = info.min;
-        if (info.max !== undefined && info.max !== null) opt.dataset.max = info.max;
-        if (info.options) opt.dataset.options = info.options.join(',');
-        selectEl.appendChild(opt);
-      }
-    });
-    selectEl.selectedIndex = 0;
     updateAddBtn();
   }
 
   function openSidebar(idx) {
     currentIndex = idx;
-    let macro = macros.find(m => m.index === idx);
-    if (!macro) {
-      macro = { index: idx, name: "", parameters: [] };
-      macros.push(macro);
+    openMacro = macros.find(m => m.index === idx);
+    openMacroNew = false;
+    if (!openMacro) {
+      openMacro = { index: idx, name: "", parameters: [] };
+      openMacroNew = true;
+    }
+    if (openMacro.parameters.length === 0) {
+      openMacro.parameters.push({ name: "", path: undefined, rangeMin: undefined, rangeMax: undefined });
     }
     titleEl.textContent = `Knob ${idx + 1}`;
-    nameInput.value = macro.name || '';
-    rebuildLists(macro);
+    nameInput.value = openMacro.name || '';
+    rebuildLists(openMacro);
     updateAddBtn();
     overlay.classList.remove('hidden');
     sidebar.classList.remove('hidden');
@@ -228,11 +243,16 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function closeSidebar() {
-    if (currentIndex !== null) {
-      const macro = macros.find(m=>m.index===currentIndex);
-      if (macro) {
-        const name = nameInput.value.trim();
-        macro.name = name;
+    if (currentIndex !== null && openMacro) {
+      openMacro.name = nameInput.value.trim();
+      openMacro.parameters = openMacro.parameters.filter(p => p.name);
+      const existing = macros.findIndex(m => m.index === openMacro.index);
+      if (openMacro.parameters.length === 0 && !openMacro.name) {
+        if (existing !== -1) macros.splice(existing, 1);
+      } else if (existing === -1) {
+        macros.push(openMacro);
+      } else {
+        macros[existing] = openMacro;
       }
       saveState();
       updateHighlights();
@@ -241,22 +261,17 @@ document.addEventListener('DOMContentLoaded', () => {
     overlay.classList.add('hidden');
     sidebar.classList.add('hidden');
     currentIndex = null;
+    openMacro = null;
+    openMacroNew = false;
   }
 
   closeBtn.addEventListener('click', closeSidebar);
   overlay.addEventListener('click', closeSidebar);
-  selectEl.addEventListener('change', updateAddBtn);
   addBtn.addEventListener('click', () => {
-    if (currentIndex === null) return;
-    const macro = macros.find(m => m.index === currentIndex);
-    const val = selectEl.value;
-    if (val && !macro.parameters.some(p => p.name === val)) {
-      macro.parameters.push({ name: val, path: paramPaths[val], rangeMin: undefined, rangeMax: undefined });
-      rebuildLists(macro);
-      updateHighlights();
-      saveState();
-      updateAddBtn();
-    }
+    if (currentIndex === null || !openMacro) return;
+    openMacro.parameters.push({ name: "", path: undefined, rangeMin: undefined, rangeMax: undefined });
+    rebuildLists(openMacro);
+    updateAddBtn();
   });
 
   // Only open the sidebar when the macro name is clicked so that
