@@ -289,6 +289,7 @@ input[type=checkbox].input-switch:checked,input[type=radio].input-switch:checked
       el.redraw();
     };
     ik.wheel=(ev)=>{
+      if(el.disabled) return;
       let st=ik.getStep(+el.value);
       let delta=ev.deltaY>0?-st:st;
       if(!ev.shiftKey)
