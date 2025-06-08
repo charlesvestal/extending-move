@@ -20,6 +20,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     unitLabel = 'kHz';
                 }
                 return displayVal.toFixed(1) + ' ' + unitLabel;
+            } else if (unit === 's') {
+                if (displayVal < 1) {
+                    return (displayVal * 1000).toFixed(0) + ' ms';
+                }
+                return Number(displayVal).toFixed(displayDecimals) + ' s';
             }
             return Number(displayVal).toFixed(displayDecimals) + (unit ? ' ' + unitLabel : '');
         };
