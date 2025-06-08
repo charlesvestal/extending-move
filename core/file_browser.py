@@ -97,16 +97,27 @@ def generate_dir_html(
     field_name: str,
     action_value: str,
     filter_key: Optional[str] = None,
+    *,
+    path_prefix: str = "",
 ) -> str:
-    """Return HTML listing for the directory."""
+    """Return HTML listing for the directory.
+
+    ``path_prefix`` is prepended to all ``data-path`` attributes so that
+    virtual directory roots can be implemented.
+    """
     filter_func = FILTERS.get(filter_key, lambda p: True)
     dirs, files = _list_directory(base_dir, rel_path)
-    html = f'<ul class="file-tree" data-path="{rel_path}">' \
-        if rel_path else '<ul class="file-tree root" data-path="">'
+    root_path = os.path.join(path_prefix, rel_path) if path_prefix or rel_path else ""
+    html = (
+        f'<ul class="file-tree" data-path="{root_path}">'
+        if path_prefix or rel_path
+        else '<ul class="file-tree root" data-path="">'
+    )
     for d in dirs:
         sub_rel = os.path.join(rel_path, d) if rel_path else d
+        data_path = os.path.join(path_prefix, sub_rel) if path_prefix else sub_rel
         html += (
-            f'<li class="dir closed" data-path="{sub_rel}">'
+            f'<li class="dir closed" data-path="{data_path}">'
             f'<span>📁 {d}</span>'
             '<ul class="hidden"></ul></li>'
         )
@@ -117,8 +128,8 @@ def generate_dir_html(
             html += (
                 '<li class="file">'
                 f'<form method="post" action="{action_url}" class="file-entry">'
-                f'<input type="hidden" name="action" value="{action_value}">' \
-                f'<input type="hidden" name="{field_name}" value="{full}">' \
+                f'<input type="hidden" name="action" value="{action_value}">'\
+                f'<input type="hidden" name="{field_name}" value="{full}">'\
                 f'<button type="submit">📄 {f}</button>'
                 '</form>'
                 '</li>'
