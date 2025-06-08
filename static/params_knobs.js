@@ -29,6 +29,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     return (displayVal * 1000).toFixed(0) + ' ms';
                 }
                 return Number(displayVal).toFixed(getDisplayDecimals(v)) + ' s';
+            } else if (
+                unit === 'dB' &&
+                !isNaN(min) &&
+                !isNaN(max) &&
+                min === 0 &&
+                max === 2
+            ) {
+                if (v <= 0) return '-inf dB';
+                if (v <= 1) {
+                    return (v * 64 - 64).toFixed(1) + ' dB';
+                }
+                return ((v - 1) * 6).toFixed(1) + ' dB';
             }
             return Number(displayVal).toFixed(getDisplayDecimals(v)) + (unit ? ' ' + unitLabel : '');
         };
