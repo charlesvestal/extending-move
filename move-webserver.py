@@ -247,7 +247,21 @@ def browse_dir():
     field_name = request.args.get("field_name", "")
     action_value = request.args.get("action_value", "")
     filter_key = request.args.get("filter")
-    html = generate_dir_html(root, path, action_url, field_name, action_value, filter_key)
+    CORE_LABEL = "Core Library"
+    CORE_ROOT = "/data/CoreLibrary/Track Presets"
+    if path == CORE_LABEL or path.startswith(CORE_LABEL + os.sep):
+        sub = path[len(CORE_LABEL):].lstrip(os.sep)
+        html = generate_dir_html(
+            CORE_ROOT,
+            sub,
+            action_url,
+            field_name,
+            action_value,
+            filter_key,
+            path_prefix=CORE_LABEL if CORE_LABEL else "",
+        )
+    else:
+        html = generate_dir_html(root, path, action_url, field_name, action_value, filter_key)
     return html
 
 
