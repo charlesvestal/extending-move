@@ -12,6 +12,7 @@ from core.synth_preset_inspector_handler import (
     update_preset_macro_names,
     update_preset_parameter_mappings,
     delete_parameter_mapping,
+    extract_available_parameters,
 )
 from core.synth_param_editor_handler import (
     update_parameter_values,
