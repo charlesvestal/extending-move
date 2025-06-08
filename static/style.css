@@ -705,6 +705,15 @@ select {
     align-items: center;
     margin-bottom: 24px;
 }
+.drift-ui .mix-knob {
+    text-align: center;
+    margin: 0 8px;
+}
+.drift-ui .mix-knob .param-number {
+    display: block;
+    margin-top: 4px;
+    font-weight: bold;
+}
 .drift-ui .badge {
     width: 32px;
     height: 48px;
@@ -716,6 +725,12 @@ select {
 }
 .drift-ui .badge.yellow {
     background: #ffc300;
+}
+.drift-ui .badge.blue {
+    background: #00eaff;
+}
+.drift-ui .badge.red {
+    background: #ff5050;
 }
 .drift-ui .mix-knob .knob-dial {
     margin-bottom: 4px;
@@ -729,5 +744,13 @@ select {
 }
 .drift-ui .arrow.yellow {
     background: #ffc300;
+    color: #20232a;
+}
+.drift-ui .arrow.blue {
+    background: #00eaff;
+    color: #20232a;
+}
+.drift-ui .arrow.red {
+    background: #ff5050;
     color: #20232a;
 }

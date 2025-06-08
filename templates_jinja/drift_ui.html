@@ -1,51 +1,128 @@
 {% extends "base.html" %}
 {% block content %}
 <h2>Drift UI Experiment</h2>
+<p><em>Interactive mockup for oscillator and mix controls.</em></p>
+<form id="drift-ui-form">
 <div class="drift-ui">
   <div class="oscillators panel">
+    <!-- Oscillator 1 controls -->
     <div class="row osc1">
       <span class="row-label">Osc 1</span>
       <div class="knob oct">
-        <span class="knob-label">Oct</span>
-        <div class="knob-dial"></div>
-        <span class="knob-value">1</span>
+        <span class="param-label">Oct</span>
+        <div id="osc1-oct" class="param-dial" data-target="Oscillator1_Transpose" data-min="-2" data-max="2" data-value="0" data-display="osc1-oct-val"></div>
+        <span id="osc1-oct-val" class="param-number"></span>
+        <input type="hidden" name="Oscillator1_Transpose" value="0">
       </div>
       <div class="knob shape">
-        <span class="knob-label">Shape</span>
-        <div class="knob-dial"></div>
-        <span class="knob-value">0.00</span>
+        <span class="param-label">Shape</span>
+        <div id="osc1-shape" class="param-dial" data-target="Oscillator1_Shape" data-min="0" data-max="1" data-value="0" data-display="osc1-shape-val"></div>
+        <span id="osc1-shape-val" class="param-number"></span>
+        <input type="hidden" name="Oscillator1_Shape" value="0">
       </div>
       <div class="mod-source">
-        <span class="mod-label">LFO</span>
-        <span class="mod-value">50 %</span>
+        <label for="osc1-mod-source" class="mod-label">Mod</label>
+        <select id="osc1-mod-source" name="Oscillator1_ShapeModSource">
+          <option value="None">None</option>
+          <option value="Env 2">Env 2</option>
+          <option value="LFO">LFO</option>
+        </select>
+        <div class="param-dial" data-target="Oscillator1_ShapeMod" data-min="0" data-max="1" data-value="0" data-display="osc1-mod-val"></div>
+        <span id="osc1-mod-val" class="param-number"></span>
+        <input type="hidden" name="Oscillator1_ShapeMod" value="0">
       </div>
     </div>
     <div class="separator"></div>
+    <!-- Oscillator 2 controls -->
     <div class="row osc2">
       <span class="row-label">Osc 2</span>
       <div class="knob oct blue">
-        <span class="knob-label">Oct</span>
-        <div class="knob-dial"></div>
-        <span class="knob-value">0</span>
+        <span class="param-label">Oct</span>
+        <div id="osc2-oct" class="param-dial" data-target="Oscillator2_Transpose" data-min="-2" data-max="2" data-value="0" data-display="osc2-oct-val"></div>
+        <span id="osc2-oct-val" class="param-number"></span>
+        <input type="hidden" name="Oscillator2_Transpose" value="0">
       </div>
       <div class="knob detune blue">
-        <span class="knob-label">Detune</span>
-        <div class="knob-dial"></div>
-        <span class="knob-value">0.00</span>
+        <span class="param-label">Detune</span>
+        <div id="osc2-detune" class="param-dial" data-target="Oscillator2_Detune" data-min="-50" data-max="50" data-value="0" data-display="osc2-detune-val"></div>
+        <span id="osc2-detune-val" class="param-number"></span>
+        <input type="hidden" name="Oscillator2_Detune" value="0">
+      </div>
+    </div>
+    <div class="separator"></div>
+    <!-- Pitch modulation controls -->
+    <div class="row pitch-mod">
+      <span class="row-label">Pitch Mod</span>
+      <div class="param-pair">
+        <select name="PitchModulation_Source1">
+          <option value="None">None</option>
+          <option value="Env 2">Env 2</option>
+          <option value="LFO">LFO</option>
+        </select>
+        <div class="param-dial" data-target="PitchModulation_Amount1" data-min="0" data-max="1" data-value="0" data-display="pm1-val"></div>
+        <span id="pm1-val" class="param-number"></span>
+        <input type="hidden" name="PitchModulation_Amount1" value="0">
+      </div>
+      <div class="param-pair">
+        <select name="PitchModulation_Source2">
+          <option value="None">None</option>
+          <option value="Env 2">Env 2</option>
+          <option value="LFO">LFO</option>
+        </select>
+        <div class="param-dial" data-target="PitchModulation_Amount2" data-min="0" data-max="1" data-value="0" data-display="pm2-val"></div>
+        <span id="pm2-val" class="param-number"></span>
+        <input type="hidden" name="PitchModulation_Amount2" value="0">
+      </div>
+    </div>
+    <div class="separator"></div>
+    <!-- Noise level control -->
+    <div class="row noise">
+      <span class="row-label">Noise</span>
+      <div class="knob">
+        <span class="param-label">Level</span>
+        <div id="noise-level" class="param-dial" data-target="Mixer_NoiseLevel" data-min="-60" data-max="0" data-value="-6" data-display="noise-val"></div>
+        <span id="noise-val" class="param-number"></span>
+        <input type="hidden" name="Mixer_NoiseLevel" value="-6">
       </div>
     </div>
   </div>
   <div class="osc-mix panel">
     <div class="mix-header">Osc Mix</div>
+    <!-- Oscillator 1 mix -->
     <div class="mix-row">
       <div class="badge yellow">1</div>
-      <div class="mix-knob yellow">
-        <div class="knob-dial"></div>
-        <span class="mix-value">-11 dB</span>
+      <div class="mix-knob">
+        <div class="param-dial" data-target="Mixer_OscillatorGain1" data-min="-60" data-max="0" data-value="-11" data-display="mix-osc1"></div>
+        <span id="mix-osc1" class="param-number"></span>
+        <input type="hidden" name="Mixer_OscillatorGain1" value="-11">
       </div>
       <div class="arrow yellow">&#8250;</div>
     </div>
+    <!-- Oscillator 2 mix -->
+    <div class="mix-row">
+      <div class="badge blue">2</div>
+      <div class="mix-knob">
+        <div class="param-dial" data-target="Mixer_OscillatorGain2" data-min="-60" data-max="0" data-value="-11" data-display="mix-osc2"></div>
+        <span id="mix-osc2" class="param-number"></span>
+        <input type="hidden" name="Mixer_OscillatorGain2" value="-11">
+      </div>
+      <div class="arrow blue">&#8250;</div>
+    </div>
+    <!-- Noise mix -->
+    <div class="mix-row">
+      <div class="badge red">N</div>
+      <div class="mix-knob">
+        <div class="param-dial" data-target="Mixer_NoiseLevel" data-min="-60" data-max="0" data-value="-6" data-display="mix-noise"></div>
+        <span id="mix-noise" class="param-number"></span>
+        <input type="hidden" name="Mixer_NoiseLevel" value="-6">
+      </div>
+      <div class="arrow red">&#8250;</div>
+    </div>
   </div>
 </div>
+</form>
 {% endblock %}
-{% block scripts %}{% endblock %}
+{% block scripts %}
+<script src="https://unpkg.com/nexusui@latest/dist/NexusUI.js"></script>
+<script src="{{ host_prefix }}/static/params_knobs.js"></script>
+{% endblock %}
