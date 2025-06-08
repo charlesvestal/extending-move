@@ -5,3 +5,4 @@ __pycache__
 /uploads
 /midi-env
 *server.log
+.venv/

@@ -390,13 +390,16 @@
     "type": "number",
     "min": 0.17,
     "max": 1700.0,
-    "options": []
+    "options": [],
+    "unit": "Hz",
+    "decimals": 1
   },
   "Lfo_Ratio": {
     "type": "number",
     "min": 0.25,
     "max": 16.0,
-    "options": []
+    "options": [],
+    "decimals": 2
   },
   "Lfo_Retrigger": {
     "type": "boolean",
@@ -429,7 +432,9 @@
     "type": "number",
     "min": 0.1,
     "max": 60.0,
-    "options": []
+    "options": [],
+    "unit": "s",
+    "decimals": 3
   },
   "Mixer_NoiseLevel": {
     "type": "number",
