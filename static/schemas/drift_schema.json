@@ -134,7 +134,7 @@
     "max": 1.0,
     "options": [],
     "unit": "%",
-    "decimals": 0
+    "decimals": 2
   },
   "Filter_ModAmount2": {
     "type": "number",
@@ -142,7 +142,7 @@
     "max": 1.0,
     "options": [],
     "unit": "%",
-    "decimals": 0
+    "decimals": 2
   },
   "Filter_ModSource1": {
     "type": "enum",
@@ -474,7 +474,7 @@
     "max": 1.0,
     "options": [],
     "unit": "%",
-    "decimals": 0
+    "decimals": 2
   },
   "ModulationMatrix_Amount2": {
     "type": "number",
@@ -482,7 +482,7 @@
     "max": 1.0,
     "options": [],
     "unit": "%",
-    "decimals": 0
+    "decimals": 2
   },
   "ModulationMatrix_Amount3": {
     "type": "number",
@@ -490,7 +490,7 @@
     "max": 1.0,
     "options": [],
     "unit": "%",
-    "decimals": 0
+    "decimals": 2
   },
   "ModulationMatrix_Source1": {
     "type": "enum",
