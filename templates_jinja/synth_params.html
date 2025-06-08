@@ -26,8 +26,12 @@
     {% else %}
         {% set _prefill = _basename %}
     {% endif %}
-    <label><input type="checkbox" name="rename" id="rename-checkbox" {% if rename_checked %}checked{% endif %}> Rename</label>
-    <label>Preset Name: <input type="text" name="new_preset_name" id="new-preset-name" data-original-name="{{ _basename }}" value="{{ _prefill }}" {% if not rename_checked %}disabled{% endif %}></label>
+    <div class="preset-controls">
+        <label>Preset Name:
+            <input type="text" name="new_preset_name" id="new-preset-name" data-original-name="{{ _basename }}" value="{{ _prefill }}" {% if not rename_checked %}disabled{% endif %}>
+        </label>
+        <label><input type="checkbox" name="rename" id="rename-checkbox" {% if rename_checked %}checked{% endif %}> Rename</label>
+    </div>
     <div class="preset-actions">
         <button type="submit">Save Parameters</button>
         <button type="submit" onclick="document.getElementById('action-input').value='reset_preset';">Choose Another Preset</button>
