@@ -23,8 +23,17 @@ function initSlider(el){
   label.className='rect-slider-label';
   el.appendChild(label);
   function format(v){
-    const displayVal=shouldScale?v*100:v;
-    return Number(displayVal).toFixed(displayDecimals)+(unit?` ${unit}`:'');
+    let displayVal=shouldScale?v*100:v;
+    let unitLabel=unit;
+    if(unit==='Hz'){
+      displayVal=Number(displayVal);
+      if(displayVal>=1000){
+        displayVal=displayVal/1000;
+        unitLabel='kHz';
+      }
+      return displayVal.toFixed(1)+` ${unitLabel}`;
+    }
+    return Number(displayVal).toFixed(displayDecimals)+(unit?` ${unitLabel}`:'');
   }
   function update(){
     label.textContent=format(value);
