@@ -49,6 +49,9 @@
 {% endblock %}
 {% block scripts %}
 <script type="module" src="{{ host_prefix }}/static/file_browser.js"></script>
+<script>
+  window.inputKnobsOptions = { knobDiameter: 48 };
+</script>
 <script src="{{ host_prefix }}/static/input-knobs.js"></script>
 <script src="{{ host_prefix }}/static/params_knobs.js"></script>
 <script src="{{ host_prefix }}/static/rect-slider.js"></script>
