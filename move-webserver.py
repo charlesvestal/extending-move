@@ -459,6 +459,7 @@ def synth_params():
     macros_json = result.get("macros_json", "[]")
     available_params_json = result.get("available_params_json", "[]")
     param_paths_json = result.get("param_paths_json", "{}")
+    schema_json = result.get("schema_json", "{}")
     preset_selected = bool(selected_preset)
     return render_template(
         "synth_params.html",
@@ -478,6 +479,7 @@ def synth_params():
         macros_json=macros_json,
         available_params_json=available_params_json,
         param_paths_json=param_paths_json,
+        schema_json=schema_json,
         active_tab="synth-params",
     )
 

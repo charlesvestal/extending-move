@@ -3,7 +3,9 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!macrosInput) return;
   const paramPaths = JSON.parse(document.getElementById('param-paths-input').value || '{}');
   const availableParams = JSON.parse(document.getElementById('available-params-input').value || '[]');
+  const schema = window.driftSchema || {};
   const paramDisplay = {};
+  const paramInfo = {};
   function addSpaces(str) {
     return str
       .replace(/([A-Za-z])([0-9])/g, '$1 $2')
@@ -19,7 +21,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     return addSpaces(name);
   }
-  availableParams.forEach(p => { paramDisplay[p] = friendly(p); });
+  availableParams.forEach(p => {
+    paramDisplay[p] = friendly(p);
+    paramInfo[p] = schema[p] || {};
+  });
   let macros = [];
   try { macros = JSON.parse(macrosInput.value || '[]'); } catch (e) {}
   macros.forEach(m => {
@@ -126,35 +131,48 @@ document.addEventListener('DOMContentLoaded', () => {
       div.className = 'assign-item';
       const span = document.createElement('span');
       span.textContent = paramDisplay[p.name] || p.name;
-      const rangeDiv = document.createElement('div');
-      rangeDiv.className = 'range-inputs';
-      const minInput = document.createElement('input');
-      minInput.type = 'text';
-      minInput.placeholder = 'min';
-      if (p.rangeMin !== undefined) {
-        const n = parseFloat(p.rangeMin);
-        if (!isNaN(n)) minInput.value = n.toFixed(2);
+      const info = paramInfo[p.name] || {};
+      const isNumber = !info.type || info.type === 'number';
+      let rangeDiv = null;
+      if (isNumber) {
+        rangeDiv = document.createElement('div');
+        rangeDiv.className = 'range-inputs';
+        const minInput = document.createElement('input');
+        minInput.type = 'text';
+        if (info.min !== undefined && info.min !== null) {
+          minInput.placeholder = info.min;
+        } else {
+          minInput.placeholder = 'min';
+        }
+        if (p.rangeMin !== undefined) {
+          const n = parseFloat(p.rangeMin);
+          if (!isNaN(n)) minInput.value = n.toFixed(2);
+        }
+        minInput.addEventListener('change', () => {
+          p.rangeMin = minInput.value === '' ? undefined : parseFloat(minInput.value);
+          saveState();
+        });
+        const dash = document.createElement('span');
+        dash.textContent = '-';
+        const maxInput = document.createElement('input');
+        maxInput.type = 'text';
+        if (info.max !== undefined && info.max !== null) {
+          maxInput.placeholder = info.max;
+        } else {
+          maxInput.placeholder = 'max';
+        }
+        if (p.rangeMax !== undefined) {
+          const n = parseFloat(p.rangeMax);
+          if (!isNaN(n)) maxInput.value = n.toFixed(2);
+        }
+        maxInput.addEventListener('change', () => {
+          p.rangeMax = maxInput.value === '' ? undefined : parseFloat(maxInput.value);
+          saveState();
+        });
+        rangeDiv.appendChild(minInput);
+        rangeDiv.appendChild(dash);
+        rangeDiv.appendChild(maxInput);
       }
-      minInput.addEventListener('change', () => {
-        p.rangeMin = minInput.value === '' ? undefined : parseFloat(minInput.value);
-        saveState();
-      });
-      const dash = document.createElement('span');
-      dash.textContent = '-';
-      const maxInput = document.createElement('input');
-      maxInput.type = 'text';
-      maxInput.placeholder = 'max';
-      if (p.rangeMax !== undefined) {
-        const n = parseFloat(p.rangeMax);
-        if (!isNaN(n)) maxInput.value = n.toFixed(2);
-      }
-      maxInput.addEventListener('change', () => {
-        p.rangeMax = maxInput.value === '' ? undefined : parseFloat(maxInput.value);
-        saveState();
-      });
-      rangeDiv.appendChild(minInput);
-      rangeDiv.appendChild(dash);
-      rangeDiv.appendChild(maxInput);
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.textContent = 'Remove';
@@ -165,7 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
         saveState();
       });
       div.appendChild(span);
-      div.appendChild(rangeDiv);
+      if (rangeDiv) div.appendChild(rangeDiv);
       div.appendChild(btn);
       assignedDiv.appendChild(div);
     });
@@ -181,6 +199,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const opt = document.createElement('option');
         opt.value = p;
         opt.textContent = paramDisplay[p] || p;
+        const info = paramInfo[p] || {};
+        if (info.type) opt.dataset.type = info.type;
+        if (info.min !== undefined && info.min !== null) opt.dataset.min = info.min;
+        if (info.max !== undefined && info.max !== null) opt.dataset.max = info.max;
+        if (info.options) opt.dataset.options = info.options.join(',');
         selectEl.appendChild(opt);
       }
     });
