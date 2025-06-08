@@ -207,25 +207,31 @@ def extract_macro_information(preset_path):
         # Initialize macros dictionary
         macros = {}
         
-        # Find all macros and their custom names
+        # Find all macros, their custom names, and values
         def find_macros(data, path=""):
             if isinstance(data, dict):
                 for key, value in data.items():
                     if key.startswith("Macro") and key[5:].isdigit():
                         macro_index = int(key[5:])
-                        
+
                         # Initialize macro if not exists
                         if macro_index not in macros:
                             macros[macro_index] = {
                                 "index": macro_index,
                                 "name": f"Macro {macro_index}",  # Default name
-                                "parameters": []
+                                "parameters": [],
+                                "value": None,
                             }
-                        
+
                         # Check if it has a custom name
-                        if isinstance(value, dict) and "customName" in value:
-                            macros[macro_index]["name"] = value["customName"]
-                    
+                        if isinstance(value, dict):
+                            if "customName" in value:
+                                macros[macro_index]["name"] = value["customName"]
+                            if "value" in value:
+                                macros[macro_index]["value"] = value["value"]
+                        else:
+                            macros[macro_index]["value"] = value
+
                     # Recursively search in nested dictionaries
                     new_path = f"{path}.{key}" if path else key
                     find_macros(value, new_path)
