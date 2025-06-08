@@ -33,6 +33,18 @@ if not os.path.exists(DEFAULT_PRESET):
 
 logger = logging.getLogger(__name__)
 
+# Colors used to highlight macro-controlled parameters
+MACRO_HIGHLIGHT_COLORS = {
+    0: "#191970",  # midnightblue
+    1: "#006400",  # darkgreen
+    2: "#ff0000",  # red
+    3: "#ffd700",  # gold
+    4: "#00ff00",  # lime
+    5: "#00ffff",  # aqua
+    6: "#ff00ff",  # fuchsia
+    7: "#ffb6c1",  # lightpink
+}
+
 
 class SynthParamEditorHandler(BaseHandler):
     def handle_get(self):
@@ -130,14 +142,17 @@ class SynthParamEditorHandler(BaseHandler):
         values = extract_parameter_values(preset_path)
         params_html = ''
         param_count = 0
-        if values['success']:
-            params_html = self.generate_params_html(values['parameters'])
-            param_count = len(values['parameters'])
 
         macro_knobs_html = ''
         macro_info = extract_macro_information(preset_path)
+        mapped_params = {}
         if macro_info['success']:
             macro_knobs_html = self.generate_macro_knobs_html(macro_info['macros'])
+            mapped_params = macro_info.get('mapped_parameters', {})
+
+        if values['success']:
+            params_html = self.generate_params_html(values['parameters'], mapped_params)
+            param_count = len(values['parameters'])
 
         base_dir = "/data/UserData/UserLibrary/Track Presets"
         if not os.path.exists(base_dir) and os.path.exists("examples/Track Presets"):
@@ -449,10 +464,13 @@ class SynthParamEditorHandler(BaseHandler):
             return "Global"
         return "Other"
 
-    def generate_params_html(self, params):
+    def generate_params_html(self, params, mapped_parameters=None):
         """Return HTML controls for the given parameter values."""
         if not params:
             return '<p>No parameters found.</p>'
+
+        if mapped_parameters is None:
+            mapped_parameters = {}
 
         schema = load_drift_schema()
         sections = {s: [] for s in self.SECTION_ORDER}
@@ -495,6 +513,10 @@ class SynthParamEditorHandler(BaseHandler):
                 extra = "lfo-rate time-rate"
             elif name == "Lfo_SyncedRate":
                 extra = "lfo-rate sync-rate"
+
+            if name in mapped_parameters:
+                macro_idx = mapped_parameters[name]['macro_index']
+                extra = f"{extra} macro-{macro_idx}".strip()
 
             html = self._build_param_item(
                 i,
@@ -779,8 +801,12 @@ class SynthParamEditorHandler(BaseHandler):
             except Exception:
                 val = 0.0
             display_val = round(val, 1)
+            classes = ["macro-knob"]
+            if info.get("parameters"):
+                classes.append(f"macro-{i}")
+            cls_str = " ".join(classes)
             html.append(
-                f'<div class="macro-knob">'
+                f'<div class="{cls_str}">' 
                 f'<span class="macro-label">{name}</span>'
                 f'<input id="macro_{i}_dial" type="range" class="macro-dial input-knob" '
                 f'data-target="macro_{i}_value" data-display="macro_{i}_disp" '

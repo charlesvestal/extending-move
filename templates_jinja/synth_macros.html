@@ -12,6 +12,10 @@
     {{ file_browser_html | safe }}
 </div>
 {% else %}
+    <div class="return-params-link">
+        <a href="{{ host_prefix }}/synth-params?preset={{ selected_preset | urlencode }}">Return to Parameter Editor</a>
+    </div>
+    
 <form method="post" action="{{ host_prefix }}/synth-macros" id="preset-form">
     <input type="hidden" name="action" id="action-input" value="reset_preset">
     <input type="hidden" name="param_path" id="param-path-input" value="">
