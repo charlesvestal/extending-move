@@ -214,7 +214,7 @@ class SynthParamEditorHandler(BaseHandler):
 
             message = result['message'] + "; " + macro_result['message']
             if output_path:
-                message += f" Saved as {os.path.basename(output_path)}"
+                message += f" Saved to {output_path}"
             refresh_success, refresh_message = refresh_library()
             if refresh_success:
                 message += " Library refreshed."
