@@ -614,6 +614,7 @@ select {
     min-width: 60px;
     display: inline-block;
     text-align: right;
+    font-size: 0.8rem;
 }
 
 .param-input {
