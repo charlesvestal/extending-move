@@ -497,6 +497,11 @@ select {
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.param-pair .param-item {
+    margin-bottom: 0;
 }
 
 .pitch-mod-label {
