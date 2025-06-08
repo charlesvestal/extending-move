@@ -12,10 +12,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const min = parseFloat(el.min);
         const max = parseFloat(el.max);
         const shouldScale = unit === '%' && Math.abs(max) <= 1 && Math.abs(min) <= 1;
-        const range = max - min;
         const fineStep = step / 10;
         const getStep = (v) => {
-            if (percentUnit && range > 0 && v - min < range * 0.1) return fineStep;
+            if (percentUnit) {
+                const disp = shouldScale ? v * 100 : v;
+                if (Math.abs(disp) < 10) return fineStep;
+            }
             return step;
         };
         const getDisplayDecimals = (v) => {

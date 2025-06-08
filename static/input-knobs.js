@@ -186,9 +186,8 @@ input[type=checkbox].input-switch:checked,input[type=radio].input-switch:checked
       ik.getStep=(v)=>{
         let s=ik.valrange.step;
         if(percentUnit){
-          let r=ik.valrange.max-ik.valrange.min;
-          if(r>0&&v-ik.valrange.min<r*0.1)
-            s/=10;
+          let disp=(ik.valrange.max<=1&&ik.valrange.min>=-1)?v*100:v;
+          if(Math.abs(disp)<10) s/=10;
         }
         return s;
       };
