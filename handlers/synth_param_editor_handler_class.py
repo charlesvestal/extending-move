@@ -791,15 +791,26 @@ class SynthParamEditorHandler(BaseHandler):
             sections["LFO"] = ordered
 
         out_html = '<div class="drift-param-panels">'
+        bottom_panels = []
+        second_row = {"LFO", "Modulation", "Global", "Extras"}
         for sec in self.SECTION_ORDER:
             items = sections.get(sec)
             if not items:
                 continue
             cls = sec.lower().replace(' ', '-').replace('+', '')
-            out_html += f'<div class="param-panel {cls}"><h3>{sec}</h3><div class="param-items">'
-            out_html += ''.join(items)
-            out_html += '</div></div>'
+            panel_html = (
+                f'<div class="param-panel {cls}"><h3>{sec}</h3>'
+                f'<div class="param-items">{"".join(items)}</div></div>'
+            )
+            if sec in second_row:
+                bottom_panels.append(panel_html)
+            else:
+                out_html += panel_html
         out_html += '</div>'
+        if bottom_panels:
+            out_html += '<div class="drift-param-panels">'
+            out_html += ''.join(bottom_panels)
+            out_html += '</div>'
         return out_html
 
     def generate_macro_knobs_html(self, macros):

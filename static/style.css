@@ -549,6 +549,10 @@ select {
     margin-top: 1rem;
 }
 
+.drift-param-panels + .drift-param-panels {
+    margin-top: 0.5rem;
+}
+
 .param-panel {
     border: 1px solid #ccc;
     padding: 0.5rem;
