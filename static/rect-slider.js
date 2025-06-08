@@ -67,6 +67,7 @@ function initSlider(el){
       fill.style.width=(pct*100)+'%';
     }
   }
+  el._sliderUpdate = (v)=>{ value = clamp(parseFloat(v),min,max); update(); };
   function start(ev){
     if(el.classList.contains('disabled') || el.dataset.disabled==='true') return;
     ev.preventDefault();
