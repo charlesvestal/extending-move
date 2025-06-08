@@ -45,8 +45,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const macro = macros.find(m => m.index === currentIndex);
       if (macro) {
         macro.name = nameInput.value.trim();
-        const label = document.querySelector(`.macro-label[data-index="${currentIndex}"]`);
-        if (label) label.textContent = macro.name || `Knob ${currentIndex + 1}`;
+        // Update the knob labels immediately so the fallback
+        // parameter name is shown when the input is cleared.
+        updateKnobLabels();
       }
     }
   });
