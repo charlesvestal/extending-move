@@ -203,7 +203,7 @@ class SynthParamEditorHandler(BaseHandler):
                 message += f" Library refresh failed: {refresh_message}"
         elif action in ['select_preset', 'new_preset']:
             if action == 'select_preset':
-                message = f"Selected preset: {os.path.basename(preset_path)}"
+                message = ""
         else:
             return self.format_error_response("Unknown action")
 
