@@ -815,7 +815,7 @@ select {
     position: fixed;
     right: 0;
     top: 0;
-    width: 300px;
+    width: 575px;
     height: 100%;
     background: #fff;
     box-shadow: -2px 0 5px rgba(0,0,0,0.3);
@@ -844,6 +844,14 @@ select {
     align-items: center;
     gap: 0.5rem;
     margin-bottom: 0.25rem;
+}
+.range-inputs {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+.range-inputs input {
+    width: 60px;
 }
 .macro-add-section {
     margin-top: 0.5rem;
