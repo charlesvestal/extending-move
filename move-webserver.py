@@ -467,6 +467,10 @@ def chord():
 def synth_knobs():
     return render_template("synth_knobs.html", active_tab="synth-knobs")
 
+@app.route("/drift-ui", methods=["GET"])
+def drift_ui():
+    return render_template("drift_ui.html", active_tab="drift-ui")
+
 
 
 

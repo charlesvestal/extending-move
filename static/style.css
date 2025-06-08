@@ -621,3 +621,113 @@ select {
     margin-bottom: 0.75rem;
   }
 
+
+/* Drift UI Experiment */
+.drift-ui {
+    width: 512px;
+    height: 352px;
+    display: flex;
+    background: #20232a;
+    color: #b3b3b3;
+    font-size: 11px;
+    position: relative;
+}
+.drift-ui .panel {
+    padding: 16px;
+    box-sizing: border-box;
+}
+.drift-ui .oscillators {
+    width: 272px;
+    border-right: 1px solid #3a3a3a;
+}
+.drift-ui .osc-mix {
+    width: 240px;
+    background: #ececec;
+    color: #20232a;
+}
+.drift-ui .row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+}
+.drift-ui .row-label {
+    width: 40px;
+}
+.drift-ui .knob {
+    margin: 0 8px;
+    text-align: center;
+}
+.drift-ui .knob-dial {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    border: 6px solid #666;
+    position: relative;
+}
+.drift-ui .knob.blue .knob-dial {
+    border-color: #00eaff;
+}
+.drift-ui .knob-label {
+    display: block;
+    margin-bottom: 4px;
+}
+.drift-ui .knob-value {
+    display: block;
+    margin-top: 4px;
+    color: #ffc300;
+    font-weight: bold;
+}
+.drift-ui .knob.blue .knob-value {
+    color: #00eaff;
+}
+.drift-ui .separator {
+    height: 1px;
+    background: #3a3a3a;
+    margin: 8px 0;
+}
+.drift-ui .mod-source {
+    margin-left: auto;
+    text-align: center;
+    border: 1px solid #555;
+    padding: 4px;
+    width: 64px;
+    font-weight: bold;
+    color: #ffc300;
+}
+.drift-ui .mix-header {
+    background: #ccc;
+    padding: 4px;
+    font-weight: bold;
+    margin-bottom: 16px;
+}
+.drift-ui .mix-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 24px;
+}
+.drift-ui .badge {
+    width: 32px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #20232a;
+    font-weight: bold;
+}
+.drift-ui .badge.yellow {
+    background: #ffc300;
+}
+.drift-ui .mix-knob .knob-dial {
+    margin-bottom: 4px;
+}
+.drift-ui .arrow {
+    width: 24px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.drift-ui .arrow.yellow {
+    background: #ffc300;
+    color: #20232a;
+}

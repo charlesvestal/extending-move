@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Drift UI Experiment</h2>
+<div class="drift-ui">
+  <div class="oscillators panel">
+    <div class="row osc1">
+      <span class="row-label">Osc 1</span>
+      <div class="knob oct">
+        <span class="knob-label">Oct</span>
+        <div class="knob-dial"></div>
+        <span class="knob-value">1</span>
+      </div>
+      <div class="knob shape">
+        <span class="knob-label">Shape</span>
+        <div class="knob-dial"></div>
+        <span class="knob-value">0.00</span>
+      </div>
+      <div class="mod-source">
+        <span class="mod-label">LFO</span>
+        <span class="mod-value">50 %</span>
+      </div>
+    </div>
+    <div class="separator"></div>
+    <div class="row osc2">
+      <span class="row-label">Osc 2</span>
+      <div class="knob oct blue">
+        <span class="knob-label">Oct</span>
+        <div class="knob-dial"></div>
+        <span class="knob-value">0</span>
+      </div>
+      <div class="knob detune blue">
+        <span class="knob-label">Detune</span>
+        <div class="knob-dial"></div>
+        <span class="knob-value">0.00</span>
+      </div>
+    </div>
+  </div>
+  <div class="osc-mix panel">
+    <div class="mix-header">Osc Mix</div>
+    <div class="mix-row">
+      <div class="badge yellow">1</div>
+      <div class="mix-knob yellow">
+        <div class="knob-dial"></div>
+        <span class="mix-value">-11 dB</span>
+      </div>
+      <div class="arrow yellow">&#8250;</div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}{% endblock %}
