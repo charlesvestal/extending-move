@@ -812,10 +812,7 @@ class SynthParamEditorHandler(BaseHandler):
             if not items:
                 continue
             cls = sec.lower().replace(' ', '-').replace('+', '')
-            extra_cls = ' hidden' if sec == 'Extras' else ''
-            out_html += (
-                f'<div class="param-panel {cls}{extra_cls}"><h3>{sec}</h3><div class="param-items">'
-            )
+            out_html += f'<div class="param-panel {cls}"><h3>{sec}</h3><div class="param-items">'
             out_html += ''.join(items)
             out_html += '</div></div>'
         out_html += '</div>'

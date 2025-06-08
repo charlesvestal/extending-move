@@ -40,9 +40,6 @@
     <div class="edit-macros-link">
         <a href="{{ host_prefix }}/synth-macros?preset={{ selected_preset | urlencode }}">Edit Macros</a>
     </div>
-    <div class="extras-toggle">
-        <button type="button" id="extras-toggle">Show Extras</button>
-    </div>
     <div class="param-list">
         {{ params_html | safe }}
     </div>
@@ -84,14 +81,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  const extrasPanel = document.querySelector('.param-panel.extras');
-  const extrasToggle = document.getElementById('extras-toggle');
-  if (extrasPanel && extrasToggle) {
-    extrasToggle.addEventListener('click', () => {
-      extrasPanel.classList.toggle('hidden');
-      extrasToggle.textContent = extrasPanel.classList.contains('hidden') ? 'Show Extras' : 'Hide Extras';
-    });
-  }
 });
 </script>
 {% endblock %}
