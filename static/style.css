@@ -556,9 +556,12 @@ select {
 }
 
 /* Ensure hidden rows stay hidden despite flex layout */
-.param-row.hidden {
+
+.param-row.hidden,
+.param-item.hidden {
     display: none;
 }
+
 
 .param-row-label {
     width: 80px;

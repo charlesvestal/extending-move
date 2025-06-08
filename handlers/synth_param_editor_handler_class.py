@@ -183,7 +183,7 @@ class SynthParamEditorHandler(BaseHandler):
         "Envelope2_Decay": "Decay",
         "Envelope2_Sustain": "Sustain",
         "Envelope2_Release": "Release",
-        "CyclingEnvelope_Tilt": "Tilt",
+        "CyclingEnvelope_MidPoint": "Tilt",
         "CyclingEnvelope_Hold": "Hold",
         "CyclingEnvelope_Rate": "Rate",
         "CyclingEnvelope_Ratio": "1:1",
