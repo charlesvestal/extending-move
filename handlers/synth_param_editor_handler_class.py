@@ -740,20 +740,33 @@ class SynthParamEditorHandler(BaseHandler):
 
         if extras_items:
             sections["Extras"] = list(extras_items.values())
+
         if mod_items:
-            ordered = []
+            mods = []
             for idx in range(1, 4):
                 src = mod_items.pop(f"ModulationMatrix_Source{idx}", "")
                 amt = mod_items.pop(f"ModulationMatrix_Amount{idx}", "")
                 dst = mod_items.pop(f"ModulationMatrix_Target{idx}", "")
                 if src or amt or dst:
-                    ordered.append(
-                        f'<div class="param-row mod-matrix-row">'
+                    mods.append(
                         f'<div class="param-pair mod-group">'
                         f'<span class="mod-label">Mod {idx}</span>'
                         f'{src}{amt}{dst}'
-                        f'</div></div>'
+                        f'</div>'
                     )
+
+            ordered = []
+            if mods:
+                top = ''.join(mods[:2])
+                if top:
+                    ordered.append(
+                        f'<div class="param-row mod-matrix-row">{top}</div>'
+                    )
+                if len(mods) >= 3:
+                    ordered.append(
+                        f'<div class="param-row mod-matrix-row">{mods[2]}</div>'
+                    )
+
             ordered.extend(mod_items.values())
             sections["Modulation"] = ordered
 
