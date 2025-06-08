@@ -829,6 +829,14 @@ select {
     gap: 0.5rem;
     margin-bottom: 0.25rem;
 }
+.range-inputs {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+.range-inputs input[type="number"] {
+    width: 60px;
+}
 .macro-add-section {
     margin-top: 0.5rem;
     display: flex;
