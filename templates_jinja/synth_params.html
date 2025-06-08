@@ -6,14 +6,43 @@
   <p class="{{ message_type if message_type else ('success' if success else 'error') }}">{{ message }}</p>
 {% endif %}
 {% if not preset_selected %}
-<form method="post" action="{{ host_prefix }}/synth-params" style="margin-bottom:1em;">
-    <input type="hidden" name="action" value="new_preset">
-    <input type="hidden" name="preset_select" value="{{ default_preset_path }}">
-    <label>Preset Name:
+<button id="create-new-btn" style="margin-bottom:1em;">Create New Drift Preset</button>
+<style>
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  .modal.hidden { display: none; }
+  .modal-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 4px;
+    position: relative;
+    z-index: 1001;
+  }
+  .modal-close { position: absolute; top: 10px; right: 10px; cursor: pointer; }
+</style>
+<div id="newPresetModal" class="modal hidden">
+  <div class="modal-content">
+    <span class="modal-close">&times;</span>
+    <form method="post" action="{{ host_prefix }}/synth-params" id="newPresetForm">
+      <input type="hidden" name="action" value="new_preset">
+      <input type="hidden" name="preset_select" value="{{ default_preset_path }}">
+      <label>Preset Name:
         <input type="text" name="new_preset_name" required>
-    </label>
-    <button type="submit">Create New Drift Preset</button>
-</form>
+      </label>
+      <button type="submit">Create</button>
+    </form>
+  </div>
+</div>
 <div class="file-browser" data-root="{{ browser_root }}" data-action="{{ host_prefix }}/synth-params" data-field="preset_select" data-value="select_preset" data-filter="drift">
     {{ file_browser_html | safe }}
 </div>
@@ -56,6 +85,7 @@
 <script>
   window.inputKnobsOptions = { knobDiameter: 32 };
 </script>
+<script type="module" src="{{ host_prefix }}/static/synth_params.js"></script>
 <script src="{{ host_prefix }}/static/input-knobs.js"></script>
 <script src="{{ host_prefix }}/static/params_knobs.js"></script>
 <script src="{{ host_prefix }}/static/rect-slider.js"></script>

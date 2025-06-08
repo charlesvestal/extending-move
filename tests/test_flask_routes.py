@@ -128,6 +128,7 @@ def test_synth_params_get(client, monkeypatch):
     assert b'Editing:' not in resp.data
     assert b'Create New Drift Preset' in resp.data
     assert b'name="new_preset_name"' in resp.data
+    assert b'id="newPresetModal"' in resp.data
 
 def test_synth_params_post(client, monkeypatch):
     def fake_post(form):

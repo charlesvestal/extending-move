@@ -32,6 +32,12 @@ if not os.path.exists(DEFAULT_PRESET):
         "Analog Shape - Core.json",
     )
 
+# Directory where new presets are saved
+NEW_PRESET_DIR = os.path.join(
+    "/data/UserData/UserLibrary/Track Presets",
+    "Drift",
+)
+
 logger = logging.getLogger(__name__)
 
 # Colors used to highlight macro-controlled parameters
@@ -86,10 +92,10 @@ class SynthParamEditorHandler(BaseHandler):
             new_name = form.getvalue('new_preset_name')
             if not new_name:
                 return self.format_error_response("Preset name required")
-            directory = os.path.dirname(DEFAULT_PRESET)
+            os.makedirs(NEW_PRESET_DIR, exist_ok=True)
             if not new_name.endswith('.ablpreset') and not new_name.endswith('.json'):
                 new_name += '.ablpreset'
-            preset_path = os.path.join(directory, new_name)
+            preset_path = os.path.join(NEW_PRESET_DIR, new_name)
             if os.path.exists(preset_path):
                 return self.format_error_response("Preset already exists")
             try:
