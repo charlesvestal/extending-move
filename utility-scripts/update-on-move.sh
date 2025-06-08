@@ -18,20 +18,31 @@ else
 fi
 cd "$PROJECT_ROOT"
 
-# --- Ensure static git binary is present ---
-GIT_BIN="${PROJECT_ROOT}/bin/git"
-if [ ! -f "$GIT_BIN" ]; then
-  echo "Downloading static git binary..."
-  mkdir -p "${PROJECT_ROOT}/bin"
-  curl -L -o "$GIT_BIN" \
-    https://raw.githubusercontent.com/EXALAB/git-static/master/output/amd64/bin/git
-  chmod +x "$GIT_BIN"
-fi
 
 # --- Remote server configuration ---
 REMOTE_USER="ableton"
 REMOTE_HOST="move.local"
 REMOTE_DIR="/data/UserData/extending-move"
+
+
+# --- Ensure static git binary ---
+STATIC_GIT_VERSION="1.5.0"  # adjust to the version you need
+SSH_BIN_DIR="${REMOTE_DIR}/bin"
+BIN_DIR="${PROJECT_ROOT}/bin"
+GIT_BIN_LOCAL="${BIN_DIR}/git"
+
+# Download the Linux ARM64 binary locally
+mkdir -p "$BIN_DIR"
+echo "Downloading static git binary locally..."
+curl -fL -o "$GIT_BIN_LOCAL" \
+  "https://raw.githubusercontent.com/EXALAB/git-static/master/output/arm64/bin/git"
+chmod +x "$GIT_BIN_LOCAL"
+
+# Copy it over to the remote host via scp
+echo "Uploading static git binary to remote host..."
+ssh "${REMOTE_USER}@${REMOTE_HOST}" "mkdir -p '$SSH_BIN_DIR'"
+scp "$GIT_BIN_LOCAL" "${REMOTE_USER}@${REMOTE_HOST}:${SSH_BIN_DIR}/git"
+ssh "${REMOTE_USER}@${REMOTE_HOST}" "chmod +x '${SSH_BIN_DIR}/git'"
 
 # --- Version check: ensure Move version is within tested range ---
 HIGHEST_TESTED_VERSION="1.5.0"
