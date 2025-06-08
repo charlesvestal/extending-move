@@ -194,7 +194,7 @@ def warm_up_modules():
     try:
         start = time.perf_counter()
         y_long = np.zeros(22050, dtype=float)
-        librosa.onset.onset_detect(y=y, sr=22050, units="time", delta=0.07)
+        librosa.onset.onset_detect(y=y_long, sr=22050, units="time", delta=0.07)
         y_harm, y_perc = librosa.effects.hpss(y_long)
         o_env = librosa.onset.onset_strength(
             y=y_perc,
