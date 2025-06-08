@@ -407,8 +407,20 @@ def synth_macros():
     browser_html = result.get("file_browser_html")
     browser_root = result.get("browser_root")
     browser_filter = result.get("browser_filter")
-    macros_html = result.get("macros_html", "")
-    all_params_html = result.get("all_params_html", "")
+    macros = result.get("macros", [])
+    available_parameters = result.get("available_parameters", [])
+    all_params = result.get("all_params", [])
+    parameter_info = json.loads(result.get("schema_json", "{}"))
+    macros_html = render_template(
+        "_macros_block.html",
+        macros=macros,
+        available_parameters=available_parameters,
+        parameter_info=parameter_info,
+    )
+    all_params_html = render_template(
+        "_params_list.html",
+        parameters=all_params,
+    )
     selected_preset = result.get("selected_preset")
     schema_json = result.get("schema_json", "{}")
     preset_selected = bool(selected_preset)
@@ -424,7 +436,7 @@ def synth_macros():
         all_params_html=all_params_html,
         preset_selected=preset_selected,
         selected_preset=selected_preset,
-        schema_json=schema_json,
+        schema_json=json.dumps(parameter_info),
         active_tab="synth-macros",
     )
 

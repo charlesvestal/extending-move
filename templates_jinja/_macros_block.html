@@ -1,0 +1,62 @@
+<div class="macros-container">
+  {% for macro in macros %}
+  <div class="macro-item">
+    <div class="macro-top">
+      <div class="macro-knob macro-{{ macro.index }}">
+        <span class="macro-label">{{ macro.name }}</span>
+        {% set val = macro.value or 0 %}
+        {% set disp = (val|float)|round(1) %}
+        <input type="range" class="macro-dial input-knob" value="{{ disp }}" min="0" max="127" step="0.1" data-decimals="1" disabled>
+        <span class="macro-number">{{ disp }}</span>
+      </div>
+      <div>
+        <div class="macro-header">
+          <span>Macro {{ macro.index }}:</span>
+          {% set default_label = 'Macro ' ~ macro.index %}
+          {% set macro_value = '' if macro.name == default_label else macro.name %}
+          <input type="text" name="macro_{{ macro.index }}_name" value="{{ macro_value }}"{% if not macro_value %} placeholder="Default name chosen by Move.."{% endif %} class="macro-name-input">
+          <button type="submit" class="save-name-btn" onclick="document.getElementById('action-input').value='save_name'; document.getElementById('macro-index-input').value='{{ macro.index }}';">Save Name</button>
+        </div>
+        <div class="parameter-mapping">
+          <div class="parameter-controls">
+            <label for="macro_{{ macro.index }}_parameter">Map Parameter:</label>
+            <select name="macro_{{ macro.index }}_parameter" id="macro_{{ macro.index }}_parameter">
+              <option value="">--Select Parameter--</option>
+              {% for param in available_parameters %}
+                {% set info = parameter_info.get(param, {}) %}
+                <option value="{{ param }}"{% if info.type %} data-type="{{ info.type }}"{% endif %}{% if info.min is not none %} data-min="{{ info.min }}"{% endif %}{% if info.max is not none %} data-max="{{ info.max }}"{% endif %}{% if info.options %} data-options="{{ info.options|join(',') }}"{% endif %}>{{ param }}</option>
+              {% endfor %}
+            </select>
+            <label class="min-wrapper">Min: <input type="number" class="range-min" name="macro_{{ macro.index }}_range_min" value="" step="any"></label>
+            <label class="max-wrapper">Max: <input type="number" class="range-max" name="macro_{{ macro.index }}_range_max" value="" step="any"></label>
+            <div class="options-display"></div>
+            <button type="submit" class="add-mapping-btn" onclick="document.getElementById('action-input').value='add_mapping'; document.getElementById('macro-index-input').value='{{ macro.index }}';">Add</button>
+          </div>
+        </div>
+        <div class="current-mappings">
+          <h4>Current Mappings:</h4>
+          {% if macro.parameters %}
+          <ul class="parameters-list">
+            {% for param in macro.parameters %}
+              {% set info = parameter_info.get(param.name, {}) %}
+              {% set info_txt = param.name %}
+              {% if info.options %}
+                {% set info_txt = info_txt ~ ' [Options: ' ~ info.options|join(', ') ~ ']' %}
+              {% elif param.rangeMin is not none and param.rangeMax is not none %}
+                {% set info_txt = info_txt ~ ' (Range: ' ~ param.rangeMin ~ ' - ' ~ param.rangeMax ~ ')' %}
+              {% endif %}
+              <li class="parameter-item">
+                <span class="parameter-info">{{ info_txt }}</span>
+                <button type="submit" class="delete-mapping-btn" onclick="document.getElementById('action-input').value='delete_mapping'; document.getElementById('param-path-input').value='{{ param.path }}'; document.getElementById('param-name-input').value='{{ param.name }}';">Delete</button>
+              </li>
+            {% endfor %}
+          </ul>
+          {% else %}
+          <p>No parameters mapped to this macro.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>

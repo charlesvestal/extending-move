@@ -25,12 +25,12 @@
     <input type="hidden" name="preset_select" value="{{ selected_preset }}">
     <p class="current-preset">Currently loaded preset: {{ selected_preset.split('/')[-1] }}</p>
     <div class="macro-display">
-        {{ macros_html | safe }}
+        {% include "_macros_block.html" with context %}
     </div>
     <details class="all-params">
         <summary>View All Parameters</summary>
         <div class="all-params-content">
-            {{ all_params_html | safe }}
+            {% include "_params_list.html" with context %}
         </div>
     </details>
     <div class="return-params-link">

@@ -36,8 +36,8 @@ class SynthPresetInspectorHandler(BaseHandler):
             "message": "Select a Drift preset from the list",
             "message_type": "info",
             "file_browser_html": browser_html,
-            "macros_html": "",
-            "all_params_html": "",
+            "macros": [],
+            "all_params": [],
             "selected_preset": None,
             "browser_root": base_dir,
             "browser_filter": 'drift',
@@ -46,8 +46,6 @@ class SynthPresetInspectorHandler(BaseHandler):
 
     def handle_post(self, form):
         """Handle preset selection and editing"""
-        # Store form for use in generate_macros_html
-        self.form = form
         
         action = form.getvalue('action')
         if action == 'reset_preset':
@@ -151,20 +149,26 @@ class SynthPresetInspectorHandler(BaseHandler):
             elif action == 'select_preset':
                 message = f"Selected preset: {preset_path.split('/')[-1]}"
             
-            # Extract macro information from the selected preset (potentially updated)
             macro_result = extract_macro_information(preset_path)
             if not macro_result['success']:
                 return self.format_error_response(macro_result['message'])
 
-            # Generate HTML for displaying macros
-            macros_html = self.generate_macros_html(macro_result['macros'])
+            macros = macro_result['macros']
 
-            # Get all parameters with their values
             all_params = extract_parameter_values(preset_path)
-            if all_params['success']:
-                all_params_html = self.generate_all_params_html(all_params['parameters'])
-            else:
-                all_params_html = f"<p>{all_params['message']}</p>"
+            all_params_list = all_params['parameters'] if all_params['success'] else []
+
+            # Determine available parameters for mapping
+            param_info = extract_available_parameters(preset_path)
+            available_parameters = []
+            self.parameter_paths = {}
+            self.parameter_info = {}
+            if param_info['success']:
+                all_parameters = param_info['parameters']
+                self.parameter_paths = param_info.get('parameter_paths', {})
+                self.parameter_info = param_info.get('parameter_info', {})
+                mapped = macro_result.get('mapped_parameters', {})
+                available_parameters = [p for p in all_parameters if p not in mapped]
 
             base_dir = "/data/UserData/UserLibrary/Track Presets"
             if not os.path.exists(base_dir) and os.path.exists("examples/Track Presets"):
@@ -182,8 +186,9 @@ class SynthPresetInspectorHandler(BaseHandler):
                 "message": message,
                 "message_type": "success",
                 "file_browser_html": browser_html,
-                "macros_html": macros_html,
-                "all_params_html": all_params_html,
+                "macros": macros,
+                "all_params": all_params_list,
+                "available_parameters": available_parameters,
                 "selected_preset": preset_path,
                 "browser_root": base_dir,
                 "browser_filter": 'drift',
@@ -192,195 +197,3 @@ class SynthPresetInspectorHandler(BaseHandler):
         
         return self.format_info_response("Unknown action")
         
-    def generate_macros_html(self, macros):
-        """Generate HTML for displaying macros"""
-        if not macros:
-            return "<p>No macros found in this preset.</p>"
-        
-        # Get the preset path from the first macro's parameters (if any)
-        preset_path = None
-        for macro in macros:
-            if macro["parameters"]:
-                # Extract the preset path from the first parameter's path
-                param_path = macro["parameters"][0]["path"]
-                # The path will be something like "chains[0].devices[0].parameters.Filter_Frequency"
-                # We need to extract the preset path from this
-                preset_path = param_path.split(".parameters")[0]
-                break
-        
-        # Get all available parameters for the dropdown
-        available_parameters = []
-        parameter_paths = {}
-        mapped_parameters = {}
-        self.parameter_info = {}
-        if preset_path:
-            # Extract the preset path from the form value
-            preset_select = self.form.getvalue('preset_select') if hasattr(self, 'form') else None
-            if preset_select:
-                # Get all parameters
-                param_result = extract_available_parameters(preset_select)
-                if param_result['success']:
-                    all_parameters = param_result['parameters']
-                    parameter_paths = param_result.get('parameter_paths', {})
-                    self.parameter_info = param_result.get('parameter_info', {})
-                    
-                    # Store parameter paths in the class for use in handle_post
-                    self.parameter_paths = parameter_paths
-                    
-                    # Get mapped parameters
-                    macro_result = extract_macro_information(preset_select)
-                    if macro_result['success']:
-                        mapped_parameters = macro_result.get('mapped_parameters', {})
-                        
-                        # Store mapped parameters in the class for use in handle_post
-                        self.mapped_parameters = mapped_parameters
-                        
-                        # Filter out parameters that are already mapped to macros
-                        available_parameters = [p for p in all_parameters if p not in mapped_parameters]
-                    else:
-                        available_parameters = all_parameters
-                    
-                    logger.debug(
-                        "Available parameters: %d, Mapped parameters: %d",
-                        len(available_parameters),
-                        len(mapped_parameters),
-                    )
-        
-        html = '<div class="macros-container">'
-
-        for macro in macros:
-            value = macro.get("value")
-            try:
-                value = float(value)
-            except Exception:
-                value = 0.0
-            display_val = round(value, 1)
-            html += f'<div class="macro-item">'
-            html += '<div class="macro-top">'
-            name_label = macro.get("name", f"Macro {macro['index']}")
-            html += (
-                f'<div class="macro-knob macro-{macro["index"]}">'
-                f'<span class="macro-label">{name_label}</span>'
-                f'<input type="range" class="macro-dial input-knob" '
-                f'value="{display_val}" min="0" max="127" step="0.1" data-decimals="1" disabled>'
-                f'<span class="macro-number">{display_val}</span>'
-                f'</div>'
-            )
-            html += '<div>'
-            html += f'<div class="macro-header">'
-            html += f'<span>Macro {macro["index"]}:</span> '
-            default_label = f"Macro {macro['index']}"
-            macro_value = macro["name"] if macro["name"] != default_label else ""
-            placeholder = " placeholder=\"Default name chosen by Move..\"" if not macro_value else ""
-            html += (
-                f'<input type="text" name="macro_{macro["index"]}_name" '
-                f'value="{macro_value}"{placeholder} class="macro-name-input">'
-            )
-            # Add the "Save Name" button
-            html += f'<button type="submit" class="save-name-btn" '
-            html += f'onclick="document.getElementById(\'action-input\').value=\'save_name\'; '
-            html += f'document.getElementById(\'macro-index-input\').value=\'{macro["index"]}\';">'
-            html += f'Save Name</button>'
-            html += '</div>'
-            
-            # Default values are always blank for new mappings
-            default_param = None
-            default_range_min = ""
-            default_range_max = ""
-            
-            # Add parameter selection dropdown and range inputs
-            html += '<div class="parameter-mapping">'
-            html += '<div class="parameter-controls">'
-            
-            # Parameter dropdown
-            html += f'<label for="macro_{macro["index"]}_parameter">Map Parameter:</label>'
-            html += f'<select name="macro_{macro["index"]}_parameter" id="macro_{macro["index"]}_parameter">'
-            html += '<option value="">--Select Parameter--</option>'
-            
-            # Add options for all available parameters
-            for param in available_parameters:
-                selected = ' selected="selected"' if param == default_param else ''
-                info = self.parameter_info.get(param, {})
-                data_attrs = ''
-                if info.get('type'):
-                    data_attrs += f' data-type="{info["type"]}"'
-                if info.get('min') is not None:
-                    data_attrs += f' data-min="{info["min"]}"'
-                if info.get('max') is not None:
-                    data_attrs += f' data-max="{info["max"]}"'
-                if info.get('options'):
-                    opts = ",".join(map(str, info['options']))
-                    data_attrs += f' data-options="{opts}"'
-                html += f'<option value="{param}"{selected}{data_attrs}>{param}</option>'
-            
-            html += '</select>'
-            
-            # Range inputs inline with Add button
-            html += (
-                f'<label class="min-wrapper">Min: <input type="number" class="range-min" '
-                f'name="macro_{macro["index"]}_range_min" value="{default_range_min}" step="any"></label>'
-            )
-            html += (
-                f'<label class="max-wrapper">Max: <input type="number" class="range-max" '
-                f'name="macro_{macro["index"]}_range_max" value="{default_range_max}" step="any"></label>'
-            )
-            html += '<div class="options-display"></div>'
-
-            # Add the "Add" button
-            html += f'<button type="submit" class="add-mapping-btn" '
-            html += f'onclick="document.getElementById(\'action-input\').value=\'add_mapping\'; '
-            html += f'document.getElementById(\'macro-index-input\').value=\'{macro["index"]}\';">'
-            html += 'Add</button>'
-            html += '</div>'  # Close parameter-controls
-
-            html += '</div>'
-
-            # Display current mappings
-            html += '<div class="current-mappings">'
-            html += '<h4>Current Mappings:</h4>'
-            
-            if macro["parameters"]:
-                html += '<ul class="parameters-list">'
-                for param in macro["parameters"]:
-                    param_info = f'{param["name"]}'
-                    info = self.parameter_info.get(param["name"], {})
-                    if info.get("options"):
-                        opts = ", ".join(map(str, info["options"]))
-                        param_info += f' [Options: {opts}]'
-                    elif "rangeMin" in param and "rangeMax" in param:
-                        param_info += f' (Range: {param["rangeMin"]} - {param["rangeMax"]})'
-                    
-                    # Add delete button with onclick handler to set action and parameter info
-                    html += f'<li class="parameter-item">'
-                    html += f'<span class="parameter-info">{param_info}</span>'
-                    html += f'<button type="submit" class="delete-mapping-btn" '
-                    html += f'onclick="document.getElementById(\'action-input\').value=\'delete_mapping\'; '
-                    html += f'document.getElementById(\'param-path-input\').value=\'{param["path"]}\'; '
-                    html += f'document.getElementById(\'param-name-input\').value=\'{param["name"]}\';">'
-                    html += f'Delete</button>'
-                    html += f'</li>'
-                html += '</ul>'
-            else:
-                html += '<p>No parameters mapped to this macro.</p>'
-            
-            html += '</div>'  # close current-mappings
-            html += '</div>'  # close inner container
-            html += '</div>'  # close macro-top
-            html += '</div>'  # close macro-item
-            
-        html += '</div>'
-        return html
-
-    def get_preset_options(self, selected_preset=None):
-        """Deprecated dropdown helper."""
-        return ''
-
-    def generate_all_params_html(self, parameters):
-        """Return HTML list of all parameters and their values."""
-        if not parameters:
-            return "<p>No parameters found.</p>"
-        html = '<ul class="all-params-list">'
-        for item in parameters:
-            html += f'<li>{item["name"]}: {item["value"]}</li>'
-        html += '</ul>'
-        return html

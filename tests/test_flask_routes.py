@@ -75,9 +75,11 @@ def test_synth_macros_get(client, monkeypatch):
         return {
             'message': 'choose',
             'message_type': 'info',
-            'options': '<option value="p">p</option>',
-            'macros_html': '',
+            'macros': [],
+            'all_params': [],
+            'available_parameters': [],
             'selected_preset': None,
+            'browser_root': '/tmp',
             'schema_json': '{}',
         }
     monkeypatch.setattr(move_webserver.synth_handler, 'handle_get', fake_get)
@@ -91,8 +93,9 @@ def test_synth_macros_post(client, monkeypatch):
         return {
             'message': 'saved',
             'message_type': 'success',
-            'macros_html': '<p>done</p>',
-            'all_params_html': '<ul></ul>',
+            'macros': [{'index':0,'name':'Macro 0','parameters':[], 'value':0}],
+            'all_params': [],
+            'available_parameters': [],
             'selected_preset': 'x',
             'browser_root': '/tmp',
             'schema_json': '{}',
@@ -102,7 +105,7 @@ def test_synth_macros_post(client, monkeypatch):
     assert resp.status_code == 200
     assert b'saved' in resp.data
     assert b'Choose Another Preset' in resp.data
-    assert b'<p>done</p>' in resp.data
+    assert b'macro-item' in resp.data
     assert b'Currently loaded preset:' in resp.data
     assert b'View All Parameters' in resp.data
     assert b'Return to Parameter Editor' in resp.data

@@ -1,0 +1,9 @@
+{% if parameters %}
+<ul class="all-params-list">
+  {% for item in parameters %}
+    <li>{{ item.name }}: {{ item.value }}</li>
+  {% endfor %}
+</ul>
+{% else %}
+<p>No parameters found.</p>
+{% endif %}

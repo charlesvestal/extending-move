@@ -2,7 +2,10 @@
 import os
 import json
 import logging
+from dataclasses import asdict
 from core.cache_manager import get_cache, set_cache
+from core.json_utils import get_object_at_path
+from core.preset_models import Macro, ParameterMapping
 
 logger = logging.getLogger(__name__)
 
@@ -205,7 +208,7 @@ def extract_macro_information(preset_path):
             preset_data = json.load(f)
         
         # Initialize macros dictionary
-        macros = {}
+        macros: dict[int, Macro] = {}
         
         # Find all macros, their custom names, and values
         def find_macros(data, path=""):
@@ -214,25 +217,19 @@ def extract_macro_information(preset_path):
                     if key.startswith("Macro") and key[5:].isdigit():
                         macro_index = int(key[5:])
 
-                        # Initialize macro if not exists
                         if macro_index not in macros:
-                            macros[macro_index] = {
-                                "index": macro_index,
-                                "name": f"Macro {macro_index}",  # Default name
-                                "parameters": [],
-                                "value": None,
-                            }
+                            macros[macro_index] = Macro(index=macro_index, name=f"Macro {macro_index}")
 
-                        # Check if it has a custom name
+                        macro = macros[macro_index]
+
                         if isinstance(value, dict):
                             if "customName" in value:
-                                macros[macro_index]["name"] = value["customName"]
+                                macro.name = value["customName"]
                             if "value" in value:
-                                macros[macro_index]["value"] = value["value"]
+                                macro.value = value["value"]
                         else:
-                            macros[macro_index]["value"] = value
+                            macro.value = value
 
-                    # Recursively search in nested dictionaries
                     new_path = f"{path}.{key}" if path else key
                     find_macros(value, new_path)
             elif isinstance(data, list):
@@ -245,41 +242,26 @@ def extract_macro_information(preset_path):
         # Find all parameters with macroMapping
         def find_macro_mappings(data, path=""):
             if isinstance(data, dict):
-                # Check if this is a parameter with macroMapping
                 if "macroMapping" in data and "macroIndex" in data["macroMapping"]:
                     macro_index = data["macroMapping"]["macroIndex"]
-                    
-                    # Get parameter name from path
+
                     param_name = path.split(".")[-1]
-                    
-                    # Track this parameter as mapped
+
                     mapped_parameters[param_name] = {
                         "macro_index": macro_index,
-                        "path": path
+                        "path": path,
                     }
-                    
-                    # Initialize macro if not exists (shouldn't happen if find_macros is called first)
+
                     if macro_index not in macros:
-                        macros[macro_index] = {
-                            "index": macro_index,
-                            "name": f"Macro {macro_index}",
-                            "parameters": []
-                        }
-                    
-                    # Add parameter info
-                    param_info = {
-                        "name": param_name,
-                        "path": path
-                    }
-                    
-                    # Add range if available
+                        macros[macro_index] = Macro(index=macro_index, name=f"Macro {macro_index}")
+
+                    pm = ParameterMapping(name=param_name, path=path)
                     if "rangeMin" in data["macroMapping"] and "rangeMax" in data["macroMapping"]:
-                        param_info["rangeMin"] = data["macroMapping"]["rangeMin"]
-                        param_info["rangeMax"] = data["macroMapping"]["rangeMax"]
-                    
-                    macros[macro_index]["parameters"].append(param_info)
-                
-                # Recursively search in nested dictionaries
+                        pm.rangeMin = data["macroMapping"]["rangeMin"]
+                        pm.rangeMax = data["macroMapping"]["rangeMax"]
+
+                    macros[macro_index].parameters.append(pm)
+
                 for key, value in data.items():
                     new_path = f"{path}.{key}" if path else key
                     find_macro_mappings(value, new_path)
@@ -301,14 +283,10 @@ def extract_macro_information(preset_path):
         # Ensure all 8 macros are present even if unused
         for i in range(8):
             if i not in macros:
-                macros[i] = {
-                    "index": i,
-                    "name": f"Macro {i}",
-                    "parameters": [],
-                }
+                macros[i] = Macro(index=i, name=f"Macro {i}")
 
-        # Convert dictionary to sorted list
-        macros_list = [macros[i] for i in sorted(macros.keys())]
+        # Convert dictionary to sorted list of plain dicts
+        macros_list = [asdict(macros[i]) for i in sorted(macros.keys())]
         
         return {
             'success': True,
@@ -414,6 +392,43 @@ def update_preset_macro_names(preset_path, macro_updates):
             'message': f"Error updating preset: {e}"
         }
 
+
+def _remove_existing_mapping(preset_data, mapped_parameters, param_name):
+    """Remove an existing macro mapping for a parameter if present."""
+    if param_name in mapped_parameters:
+        info = mapped_parameters[param_name]
+        param_path = info['path']
+        parent_path = param_path.rsplit('.', 1)[0]
+        key = param_path.split('.')[-1]
+        parent = get_object_at_path(preset_data, parent_path)
+        if parent and key in parent and isinstance(parent[key], dict) and 'macroMapping' in parent[key]:
+            del parent[key]['macroMapping']
+            return True
+    return False
+
+
+def _apply_mapping(parent, key, macro_index, update_info):
+    """Apply a macro mapping update to the given parent/key."""
+    if not isinstance(parent[key], dict) or 'value' not in parent[key]:
+        original_value = parent[key]
+        parent[key] = {
+            'value': original_value,
+            'macroMapping': {'macroIndex': macro_index}
+        }
+    else:
+        parent[key].setdefault('macroMapping', {})
+        parent[key]['macroMapping']['macroIndex'] = macro_index
+
+    if update_info.get('rangeMin') not in (None, ''):
+        parent[key]['macroMapping']['rangeMin'] = float(update_info['rangeMin'])
+    elif 'rangeMin' in parent[key].get('macroMapping', {}):
+        del parent[key]['macroMapping']['rangeMin']
+
+    if update_info.get('rangeMax') not in (None, ''):
+        parent[key]['macroMapping']['rangeMax'] = float(update_info['rangeMax'])
+    elif 'rangeMax' in parent[key].get('macroMapping', {}):
+        del parent[key]['macroMapping']['rangeMax']
+
 def update_preset_parameter_mappings(preset_path, parameter_updates):
     """
     Update parameter mappings and range values for macros in a preset file.
@@ -447,35 +462,6 @@ def update_preset_parameter_mappings(preset_path, parameter_updates):
         # Debug: Log parameter updates
         logger.debug("Parameter updates: %s", parameter_updates)
         
-        # Helper function to get the object at a specific path
-        def get_object_at_path(data, path):
-            """Get the object at the specified path."""
-            if not path:
-                return data
-            
-            parts = path.split(".")
-            current = data
-            
-            for part in parts:
-                # Handle array indices
-                if "[" in part and part.endswith("]"):
-                    name, index_str = part.split("[", 1)
-                    index = int(index_str[:-1])  # Remove the closing bracket
-                    
-                    if name:
-                        if name not in current:
-                            return None
-                        current = current[name]
-                    
-                    if not isinstance(current, list) or index >= len(current):
-                        return None
-                    current = current[index]
-                else:
-                    if part not in current:
-                        return None
-                    current = current[part]
-            
-            return current
         
         # First, get information about currently mapped parameters
         macro_info = extract_macro_information(preset_path)
@@ -483,25 +469,6 @@ def update_preset_parameter_mappings(preset_path, parameter_updates):
         if macro_info['success']:
             mapped_parameters = macro_info.get('mapped_parameters', {})
         
-        # Function to remove existing macro mappings for a parameter
-        def remove_existing_mapping(param_name):
-            if param_name in mapped_parameters:
-                mapping_info = mapped_parameters[param_name]
-                param_path = mapping_info['path']
-                parent_path = param_path.rsplit(".", 1)[0]
-                key = param_path.split(".")[-1]
-                
-                parent = get_object_at_path(preset_data, parent_path)
-                if parent and key in parent and isinstance(parent[key], dict) and "macroMapping" in parent[key]:
-                    logger.debug(
-                        "Removing existing mapping for %s from macro %s",
-                        param_name,
-                        mapping_info['macro_index'],
-                    )
-                    # Remove the macroMapping
-                    del parent[key]["macroMapping"]
-                    return True
-            return False
         
         # First, try to update parameters using direct paths
         for macro_index, update_info in parameter_updates.items():
@@ -515,7 +482,7 @@ def update_preset_parameter_mappings(preset_path, parameter_updates):
                 
                 # Remove existing mapping if parameter is already mapped to a different macro
                 if param_name in mapped_parameters and mapped_parameters[param_name]['macro_index'] != macro_index:
-                    remove_existing_mapping(param_name)
+                    _remove_existing_mapping(preset_data, mapped_parameters, param_name)
                 
                 parent = get_object_at_path(preset_data, parent_path)
                 key = param_path.split(".")[-1]
@@ -523,42 +490,9 @@ def update_preset_parameter_mappings(preset_path, parameter_updates):
                 if parent and key in parent:
                     logger.debug("Found parameter using direct path: %s", param_name)
                     logger.debug("Parameter value: %s, Type: %s", parent[key], type(parent[key]))
-                    
-                    # If this is a simple value (not an object with a value property)
-                    if not isinstance(parent[key], dict) or "value" not in parent[key]:
-                        # Store the original value
-                        original_value = parent[key]
-                        
-                        # Replace with an object that has value and macroMapping
-                        parent[key] = {
-                            "value": original_value,
-                            "macroMapping": {
-                                "macroIndex": macro_index
-                            }
-                        }
-                    else:
-                        # It's already an object with a value property
-                        # Create macroMapping if it doesn't exist
-                        if "macroMapping" not in parent[key]:
-                            parent[key]["macroMapping"] = {}
-                        
-                        # Set the macro index
-                        parent[key]["macroMapping"]["macroIndex"] = macro_index
-                    
-                    # Add range values if provided
-                    if update_info.get('rangeMin') is not None and update_info.get('rangeMin') != "":
-                        parent[key]["macroMapping"]["rangeMin"] = float(update_info['rangeMin'])
-                    elif "macroMapping" in parent[key] and "rangeMin" in parent[key]["macroMapping"]:
-                        # Remove rangeMin if it exists and the update value is empty
-                        del parent[key]["macroMapping"]["rangeMin"]
-                        
-                    if update_info.get('rangeMax') is not None and update_info.get('rangeMax') != "":
-                        parent[key]["macroMapping"]["rangeMax"] = float(update_info['rangeMax'])
-                    elif "macroMapping" in parent[key] and "rangeMax" in parent[key]["macroMapping"]:
-                        # Remove rangeMax if it exists and the update value is empty
-                        del parent[key]["macroMapping"]["rangeMax"]
-                    
-                    # Track this parameter as updated
+
+                    _apply_mapping(parent, key, macro_index, update_info)
+
                     updated_params.append(param_name)
         
         # Function to find and update parameter mappings (for parameters without direct paths)
@@ -583,7 +517,7 @@ def update_preset_parameter_mappings(preset_path, parameter_updates):
                         
                         # Remove existing mapping if parameter is already mapped to a different macro
                         if param_name in mapped_parameters and mapped_parameters[param_name]['macro_index'] != macro_index:
-                            remove_existing_mapping(param_name)
+                            _remove_existing_mapping(preset_data, mapped_parameters, param_name)
                         
                         # Get the parent object and key to update the parameter
                         parent_path = path.rsplit(".", 1)[0] if "." in path else ""
@@ -603,41 +537,9 @@ def update_preset_parameter_mappings(preset_path, parameter_updates):
                                 parent[key],
                                 type(parent[key]),
                             )
-                            # If this is a simple value (not an object with a value property)
-                            if not isinstance(parent[key], dict) or "value" not in parent[key]:
-                                # Store the original value
-                                original_value = parent[key]
-                                
-                                # Replace with an object that has value and macroMapping
-                                parent[key] = {
-                                    "value": original_value,
-                                    "macroMapping": {
-                                        "macroIndex": macro_index
-                                    }
-                                }
-                            else:
-                                # It's already an object with a value property
-                                # Create macroMapping if it doesn't exist
-                                if "macroMapping" not in parent[key]:
-                                    parent[key]["macroMapping"] = {}
-                                
-                                # Set the macro index
-                                parent[key]["macroMapping"]["macroIndex"] = macro_index
-                            
-                            # Add range values if provided
-                            if update_info.get('rangeMin') is not None and update_info.get('rangeMin') != "":
-                                parent[key]["macroMapping"]["rangeMin"] = float(update_info['rangeMin'])
-                            elif "macroMapping" in parent[key] and "rangeMin" in parent[key]["macroMapping"]:
-                                # Remove rangeMin if it exists and the update value is empty
-                                del parent[key]["macroMapping"]["rangeMin"]
-                                
-                            if update_info.get('rangeMax') is not None and update_info.get('rangeMax') != "":
-                                parent[key]["macroMapping"]["rangeMax"] = float(update_info['rangeMax'])
-                            elif "macroMapping" in parent[key] and "rangeMax" in parent[key]["macroMapping"]:
-                                # Remove rangeMax if it exists and the update value is empty
-                                del parent[key]["macroMapping"]["rangeMax"]
-                            
-                            # Track this parameter as updated
+
+                            _apply_mapping(parent, key, macro_index, update_info)
+
                             updated_params.append(param_name)
                 
                 # Recursively search in nested dictionaries
@@ -684,35 +586,6 @@ def delete_parameter_mapping(preset_path, param_path):
         with open(preset_path, 'r') as f:
             preset_data = json.load(f)
         
-        # Helper function to get the object at a specific path
-        def get_object_at_path(data, path):
-            """Get the object at the specified path."""
-            if not path:
-                return data
-            
-            parts = path.split(".")
-            current = data
-            
-            for part in parts:
-                # Handle array indices
-                if "[" in part and part.endswith("]"):
-                    name, index_str = part.split("[", 1)
-                    index = int(index_str[:-1])  # Remove the closing bracket
-                    
-                    if name:
-                        if name not in current:
-                            return None
-                        current = current[name]
-                    
-                    if not isinstance(current, list) or index >= len(current):
-                        return None
-                    current = current[index]
-                else:
-                    if part not in current:
-                        return None
-                    current = current[part]
-            
-            return current
         
         # Get the parent path and key
         parent_path = param_path.rsplit(".", 1)[0]
