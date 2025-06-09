@@ -98,27 +98,29 @@
 
     <div id="mod-matrix-section">
         <h3>Modulation Matrix</h3>
-        <input type="hidden" id="mod-matrix-data-input" name="mod_matrix_data" value="[]">
+        <div class="mod-matrix-controls">
+            <input type="text" id="mod-matrix-data-input" name="mod_matrix_data" value="[]">
+            <button type="button" id="mod-matrix-add">Add Row</button>
+        </div>
         <table id="mod-matrix-table">
             <thead>
                 <tr>
                     <th>Destination</th>
-                    <th>Amp Env</th>
+                    <th>Amp</th>
                     <th>Env 2</th>
                     <th>Env 3</th>
                     <th>LFO 1</th>
                     <th>LFO 2</th>
                     <th>Velocity</th>
                     <th>Key</th>
-                    <th>Pitch Bend</th>
+                    <th>PB</th>
                     <th>Pressure</th>
-                    <th>Mod Wheel</th>
+                    <th>Mod</th>
                     <th>Random</th>
                 </tr>
             </thead>
             <tbody></tbody>
         </table>
-        <button type="button" id="mod-matrix-add">Add Row</button>
     </div>
 </form>
 
