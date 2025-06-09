@@ -591,6 +591,38 @@ class WavetableParamEditorHandler(BaseHandler):
                     changed = True
         return name
 
+    def _infer_unit(self, name: str) -> str | None:
+        """Return a sensible unit for the given parameter name."""
+        n = name.lower()
+        if "frequency" in n or n.endswith("_rate"):
+            return "Hz"
+        if "time" in n or n.startswith("times_"):
+            return "s"
+        if "gain" in n:
+            return "dB"
+        if n.endswith("depth") or n.endswith("amount"):
+            return "%"
+        return None
+
+    def _infer_decimals(self, name: str, min_val: float | None, max_val: float | None) -> int | None:
+        """Guess a reasonable number of decimals for display."""
+        n = name.lower()
+        if "frequency" in n or n.endswith("_rate"):
+            return 1
+        if "time" in n or n.startswith("times_"):
+            if max_val is not None and max_val < 1:
+                return 3
+            return 2
+        if "gain" in n:
+            return 1
+        if min_val is not None and max_val is not None:
+            diff = max_val - min_val
+            if diff >= 1000:
+                return 0
+            if diff >= 100:
+                return 1
+        return 2
+
     def _build_param_item(self, idx, name, value, meta, label=None,
                            hide_label=False, slider=False, extra_classes=""):
         """Create HTML for a single parameter control."""
@@ -638,11 +670,13 @@ class WavetableParamEditorHandler(BaseHandler):
             max_val = meta.get("max")
             decimals = meta.get("decimals")
             step_val = meta.get("step")
+            if decimals is None:
+                decimals = self._infer_decimals(name, min_val, max_val)
             if decimals is not None and step_val is None:
                 step_val = 10 ** (-decimals)
             if step_val is None and min_val is not None and max_val is not None and max_val <= 1 and min_val >= -1:
                 step_val = 0.01
-            unit_val = meta.get("unit")
+            unit_val = meta.get("unit") or self._infer_unit(name)
             if slider:
                 classes = ["rect-slider"]
                 if min_val is not None and max_val is not None and min_val < 0 < max_val:
