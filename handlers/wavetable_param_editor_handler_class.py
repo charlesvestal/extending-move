@@ -68,8 +68,9 @@ MACRO_HIGHLIGHT_COLORS = {
     7: "#ffb6c1",  # lightpink
 }
 
-# Mapping of modulation matrix UI column indices to wavetable source indices
-MOD_UI_TO_SRC = [0, 1, 2, 3, 4, 7, 8, 9, 10, 11, 12]
+# Mapping of modulation matrix UI column indices to wavetable source indices.
+# Now expose all 13 modulation sources in order.
+MOD_UI_TO_SRC = list(range(13))
 
 
 class WavetableParamEditorHandler(BaseHandler):
@@ -217,20 +218,13 @@ class WavetableParamEditorHandler(BaseHandler):
                 if not name:
                     continue
                 values = row.get('values', [])
-                extra = row.get('extra', [0, 0])
-                arr = [0.0] * 13
+                arr = [0.0] * len(MOD_UI_TO_SRC)
                 for ui_idx, src_idx in enumerate(MOD_UI_TO_SRC):
                     if ui_idx < len(values):
                         try:
                             arr[src_idx] = float(values[ui_idx])
                         except (ValueError, TypeError):
                             arr[src_idx] = 0.0
-                if len(extra) >= 2:
-                    try:
-                        arr[5] = float(extra[0])
-                        arr[6] = float(extra[1])
-                    except (ValueError, TypeError):
-                        pass
                 mod_dict[name] = arr
 
             mod_res = update_wavetable_modulations(preset_path, mod_dict, preset_path)
@@ -355,8 +349,7 @@ class WavetableParamEditorHandler(BaseHandler):
             for dest, arr in mod_info.get('modulations', {}).items():
                 available_params.add(dest)
                 vals = [arr[i] if i < len(arr) else 0 for i in MOD_UI_TO_SRC]
-                extra = [arr[5] if len(arr) > 5 else 0, arr[6] if len(arr) > 6 else 0]
-                matrix_rows.append({'name': dest, 'values': vals, 'extra': extra})
+                matrix_rows.append({'name': dest, 'values': vals})
             mod_matrix_json = json.dumps(matrix_rows)
 
         available_params_json = json.dumps(sorted(available_params))
