@@ -161,9 +161,11 @@ document.addEventListener('DOMContentLoaded', () => {
     updateSaveState();
 
     const orig = nameInput ? nameInput.dataset.originalName : null;
+    const actionInput = document.getElementById('action-input');
     if (orig && cb && nameInput) {
       form.addEventListener('submit', (e) => {
         if (!cb.checked) return;
+        if (actionInput && actionInput.value !== 'save_params') return;
         let newName = nameInput.value.trim();
         if (!newName.endsWith('.ablpreset') && !newName.endsWith('.json')) {
           newName += '.ablpreset';
