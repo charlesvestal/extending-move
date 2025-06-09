@@ -988,6 +988,24 @@ button#macro-add-param {
     max-width: 100%;
 }
 
+/* Modulation matrix table */
+#mod-matrix-section {
+    margin-top: 1rem;
+}
+#mod-matrix-table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.8rem;
+}
+#mod-matrix-table th,
+#mod-matrix-table td {
+    padding: 0.25rem;
+    text-align: center;
+}
+#mod-matrix-table td:first-child {
+    text-align: left;
+}
+
 
 /* Modulation matrix control radius overrides */
 .param-panel.modulation .mod-matrix-row .param-item:nth-of-type(1) .param-select {
