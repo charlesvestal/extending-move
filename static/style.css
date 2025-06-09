@@ -584,6 +584,7 @@ select {
 
 .mod-matrix-row {
     justify-content: center;
+    width: 100%;
 }
 
 .mod-matrix-row .mod-group {
