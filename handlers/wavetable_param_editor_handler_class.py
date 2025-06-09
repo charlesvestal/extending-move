@@ -809,15 +809,12 @@ class WavetableParamEditorHandler(BaseHandler):
             """Return a human-friendly version of a parameter name."""
             if not name:
                 return name
-            parts = name.split("_", 1)
-            if len(parts) == 2:
-                group, param = parts
-                group = re.sub(r"([A-Za-z])([0-9])", r"\1 \2", group)
-                group = re.sub(r"([a-z])([A-Z])", r"\1 \2", group)
-                param = re.sub(r"([A-Za-z])([0-9])", r"\1 \2", param)
-                param = re.sub(r"([a-z])([A-Z])", r"\1 \2", param)
-                return f"{group}: {param}"
-            return re.sub(r"([a-z])([A-Z])", r"\1 \2", name)
+            parts = [
+                re.sub(r"([a-z])([A-Z])", r"\1 \2",
+                       re.sub(r"([A-Za-z])([0-9])", r"\1 \2", p))
+                for p in name.split("_")
+            ]
+            return ": ".join(parts)
 
         by_index = {m["index"]: m for m in macros}
         html = ['<div class="macro-knob-row">']
