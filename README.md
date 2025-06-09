@@ -93,7 +93,7 @@ Everything that it does can be found in `utility-scripts/install-on-move.sh`
 
 #### Updating
 
-To update, you can use the similar `utility-scripts/update-on-move.command` or `utility-scripts/update-on-move.sh` to copy over the files and restart the webserver.
+To update, you can use the similar `utility-scripts/update-on-move.command` or `utility-scripts/update-on-move.sh` to copy over the files and restart the webserver. The script accepts `--dev` to skip installing dependencies and `--overwrite` to remove the existing directory before copying.
 
 ### Manual Installation
 
@@ -151,7 +151,7 @@ Note: Execute these scripts from your computer, not the Move.
 Located in `utility-scripts/`:
 - `setup-ssh-and-install-on-move.command`: Walks through setting up an ssh key, installing files, and setting auto-start
 - `install-on-move.sh` / `.command`: Content installation
-- `update-on-move.sh` / `.command`: Update with latest files
+- `update-on-move.sh` / `.command`: Update with latest files (use `--overwrite` to delete the target before copying)
 - `restart-webserver.sh`: Restart the webserver
 
 
