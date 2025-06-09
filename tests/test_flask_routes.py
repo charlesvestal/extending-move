@@ -205,6 +205,9 @@ def test_wavetable_params_post(client, monkeypatch):
             'browser_root': '/tmp',
             'selected_preset': 'x',
             'param_count': 1,
+            'sprites_json': '[]',
+            'sprite1': 'A',
+            'sprite2': 'B',
         }
 
     monkeypatch.setattr(move_webserver.wavetable_param_handler, 'handle_post', fake_post)
@@ -212,6 +215,7 @@ def test_wavetable_params_post(client, monkeypatch):
     assert resp.status_code == 200
     assert b'ok' in resp.data
     assert b'<div>p</div>' in resp.data
+    assert b'name="sprite1"' in resp.data
 
 
 def test_wavetable_params_get(client, monkeypatch):
@@ -227,6 +231,9 @@ def test_wavetable_params_get(client, monkeypatch):
             'param_count': 0,
             'browser_root': '/tmp',
             'default_preset_path': WP,
+            'sprites_json': '[]',
+            'sprite1': '',
+            'sprite2': '',
         }
 
     monkeypatch.setattr(move_webserver.wavetable_param_handler, 'handle_get', fake_get)
@@ -234,6 +241,7 @@ def test_wavetable_params_get(client, monkeypatch):
     assert resp.status_code == 200
     assert b'pick' in resp.data
     assert b'Create New Wavetable Preset' in resp.data
+    assert b'name="sprite1"' not in resp.data
 
 def test_drum_rack_inspector_get(client, monkeypatch):
     def fake_get():
