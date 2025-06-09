@@ -93,7 +93,7 @@ Everything that it does can be found in `utility-scripts/install-on-move.sh`
 
 #### Updating
 
-To update, you can use the similar `utility-scripts/update-on-move.command` or `utility-scripts/update-on-move.sh` to copy over the files and restart the webserver.
+To update, you can use the similar `utility-scripts/update-on-move.command` or `utility-scripts/update-on-move.sh` to copy over the files and restart the webserver.  Once installed on the Move, you can also run `python3 update_repo.py` directly on the device to pull the latest version from GitHub and automatically restart the server.
 
 ### Manual Installation
 
