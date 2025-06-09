@@ -82,6 +82,11 @@ FILTERS: dict[str, Callable[[str], bool]] = {
         or p.lower().endswith(".json")
     )
     and _check_json_file(p, "drift"),
+    "wavetable": lambda p: (
+        p.lower().endswith(".ablpreset")
+        or p.lower().endswith(".json")
+    )
+    and _check_json_file(p, "wavetable"),
     "drumrack": lambda p: (
         p.lower().endswith(".ablpreset")
         or p.lower().endswith(".json")
