@@ -49,6 +49,19 @@ function randomizeParams() {
       if (typeof slider._sliderUpdate === 'function') slider._sliderUpdate(val);
     }
   });
+
+  const s1 = document.getElementById('sprite1-select');
+  const s2 = document.getElementById('sprite2-select');
+  if (s1 && s1.options.length > 0) {
+    const opts = Array.from(s1.options).map(o => o.value);
+    s1.value = opts[Math.floor(Math.random() * opts.length)];
+    s1.dispatchEvent(new Event('change'));
+  }
+  if (s2 && s2.options.length > 0) {
+    const opts = Array.from(s2.options).map(o => o.value);
+    s2.value = opts[Math.floor(Math.random() * opts.length)];
+    s2.dispatchEvent(new Event('change'));
+  }
   const saveBtn = document.getElementById('save-params-btn');
   if (saveBtn) saveBtn.disabled = false;
 }
