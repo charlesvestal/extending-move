@@ -13,13 +13,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   function friendly(name) {
     if (!name) return '';
-    const parts = name.split('_');
-    if (parts.length >= 2) {
-      const group = addSpaces(parts[0]);
-      const rest = addSpaces(parts.slice(1).join('_'));
-      return `${group}: ${rest}`;
-    }
-    return addSpaces(name);
+    return name
+      .split('_')
+      .map(p => addSpaces(p))
+      .join(': ');
   }
   availableParams.forEach(p => {
     paramDisplay[p] = friendly(p);
