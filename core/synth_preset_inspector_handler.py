@@ -21,6 +21,12 @@ WAVETABLE_SCHEMA_PATH = os.path.join(
     "wavetable_schema.json",
 )
 
+WAVETABLE_SPRITES_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(__file__)),
+    "static",
+    "wavetable_sprites.json",
+)
+
 
 def load_drift_schema():
     """Load parameter metadata for Drift from ``drift_schema.json``."""
@@ -40,6 +46,16 @@ def load_wavetable_schema():
     except Exception as exc:
         logger.warning("Could not load wavetable schema: %s", exc)
         return {}
+
+
+def load_wavetable_sprites():
+    """Load the list of available wavetable sprite names."""
+    try:
+        with open(WAVETABLE_SPRITES_PATH, "r") as f:
+            return json.load(f)
+    except Exception as exc:
+        logger.warning("Could not load wavetable sprites: %s", exc)
+        return []
 
 def extract_available_parameters(
     preset_path,
@@ -846,3 +862,64 @@ def scan_for_synth_presets(device_types=("drift",)):
             "message": f"Error scanning presets: {e}",
             "presets": [],
         }
+
+
+def extract_wavetable_sprites(preset_path):
+    """Return the sprite URIs from the first Wavetable device in the preset."""
+    try:
+        with open(preset_path, "r") as f:
+            data = json.load(f)
+
+        sprite1 = None
+        sprite2 = None
+
+        def search(obj):
+            nonlocal sprite1, sprite2
+            if isinstance(obj, dict):
+                if sprite1 is None and "spriteUri1" in obj:
+                    sprite1 = obj["spriteUri1"]
+                if sprite2 is None and "spriteUri2" in obj:
+                    sprite2 = obj["spriteUri2"]
+                for v in obj.values():
+                    if isinstance(v, (dict, list)):
+                        search(v)
+            elif isinstance(obj, list):
+                for item in obj:
+                    if isinstance(item, (dict, list)):
+                        search(item)
+
+        search(data)
+
+        return {"success": True, "sprite1": sprite1, "sprite2": sprite2}
+    except Exception as exc:
+        return {"success": False, "message": f"Error extracting sprites: {exc}"}
+
+
+def update_wavetable_sprites(preset_path, sprite1=None, sprite2=None, output_path=None):
+    """Update sprite URIs on all Wavetable devices in the preset."""
+    try:
+        with open(preset_path, "r") as f:
+            data = json.load(f)
+
+        def update(obj):
+            if isinstance(obj, dict):
+                if sprite1 is not None and "spriteUri1" in obj:
+                    obj["spriteUri1"] = sprite1
+                if sprite2 is not None and "spriteUri2" in obj:
+                    obj["spriteUri2"] = sprite2
+                for v in obj.values():
+                    update(v)
+            elif isinstance(obj, list):
+                for item in obj:
+                    update(item)
+
+        update(data)
+
+        dest = output_path or preset_path
+        with open(dest, "w") as f:
+            json.dump(data, f, indent=2)
+            f.write("\n")
+
+        return {"success": True, "path": dest, "message": "Updated sprites"}
+    except Exception as exc:
+        return {"success": False, "message": f"Error updating sprites: {exc}"}
