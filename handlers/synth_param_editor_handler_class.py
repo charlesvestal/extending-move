@@ -145,6 +145,7 @@ class SynthParamEditorHandler(BaseHandler):
         rename_flag = False
         if action == 'save_params':
             updates = {}
+            path_map = {}
             for key in form:
                 if key.startswith('param_') and key.endswith('_name'):
                     idx = key.split('_')[1]
@@ -152,6 +153,9 @@ class SynthParamEditorHandler(BaseHandler):
                     value = form.getvalue(f'param_{idx}_value')
                     if name is not None and value is not None:
                         updates[name] = value
+                        path = form.getvalue(f'param_{idx}_path')
+                        if path:
+                            path_map[name] = path
             rename_flag = form.getvalue('rename') in ('on', 'true', '1') or is_core
             new_name = form.getvalue('new_preset_name')
             output_path = None
@@ -168,7 +172,12 @@ class SynthParamEditorHandler(BaseHandler):
                     directory = NEW_PRESET_DIR
                 output_path = os.path.join(directory, new_name)
                 os.makedirs(os.path.dirname(output_path), exist_ok=True)
-            result = update_parameter_values(preset_path, updates, output_path)
+            result = update_parameter_values(
+                preset_path,
+                updates,
+                output_path,
+                parameter_paths=path_map if path_map else None,
+            )
             if not result['success']:
                 return self.format_error_response(result['message'])
             preset_path = result['path']
@@ -272,7 +281,11 @@ class SynthParamEditorHandler(BaseHandler):
             param_paths_json = json.dumps(param_info.get('parameter_paths', {}))
         
         if values['success']:
-            params_html = self.generate_params_html(values['parameters'], mapped_params)
+            params_html = self.generate_params_html(
+                values['parameters'],
+                mapped_params,
+                param_info.get('parameter_paths', {}) if param_info.get('success') else None,
+            )
             param_count = len(values['parameters'])
 
         base_dir = "/data/UserData/UserLibrary/Track Presets"
@@ -593,6 +606,8 @@ class SynthParamEditorHandler(BaseHandler):
                 html.append(f'<input type="hidden" name="param_{idx}_value" value="{value}">')
 
         html.append(f'<input type="hidden" name="param_{idx}_name" value="{name}">')
+        if 'path' in meta:
+            html.append(f'<input type="hidden" name="param_{idx}_path" value="{meta["path"]}">')
         html.append('</div>')
         return ''.join(html)
 
@@ -625,7 +640,7 @@ class SynthParamEditorHandler(BaseHandler):
             return "Global"
         return "Other"
 
-    def generate_params_html(self, params, mapped_parameters=None):
+    def generate_params_html(self, params, mapped_parameters=None, param_paths=None):
         """Return HTML controls for the given parameter values."""
         if not params:
             return '<p>No parameters found.</p>'
@@ -650,6 +665,8 @@ class SynthParamEditorHandler(BaseHandler):
             name = item['name']
             val = item['value']
             meta = dict(schema.get(name, {}))
+            if param_paths and name in param_paths:
+                meta['path'] = param_paths[name]
 
             if name == "Oscillator1_Transpose":
                 meta.pop("unit", None)

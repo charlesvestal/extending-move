@@ -9,7 +9,13 @@ from .synth_preset_inspector_handler import extract_available_parameters
 logger = logging.getLogger(__name__)
 
 
-def update_parameter_values(preset_path, param_updates, output_path=None, device_kinds=("drift",)):
+def update_parameter_values(
+    preset_path,
+    param_updates,
+    output_path=None,
+    device_kinds=("drift",),
+    parameter_paths=None,
+):
     """Update parameter values in a preset.
 
     Args:
@@ -18,6 +24,8 @@ def update_parameter_values(preset_path, param_updates, output_path=None, device
         output_path: Optional path for the modified preset. If omitted, the
             source preset is overwritten.
         device_kinds: Tuple of device types to update (e.g. ("drift",))
+        parameter_paths: Optional mapping of parameter names to JSON paths. If
+            provided, this avoids re-parsing the preset file for paths.
 
     Returns:
         dict with keys:
@@ -29,10 +37,13 @@ def update_parameter_values(preset_path, param_updates, output_path=None, device
         with open(preset_path, "r") as f:
             preset_data = json.load(f)
 
-        info = extract_available_parameters(preset_path, device_kinds)
-        if not info["success"]:
-            return info
-        paths = info.get("parameter_paths", {})
+        if parameter_paths is None:
+            info = extract_available_parameters(preset_path, device_kinds)
+            if not info["success"]:
+                return info
+            paths = info.get("parameter_paths", {})
+        else:
+            paths = parameter_paths
 
         def get_parent_and_key(data, path):
             parts = path.split(".")

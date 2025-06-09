@@ -145,6 +145,7 @@ class WavetableParamEditorHandler(BaseHandler):
         rename_flag = False
         if action == 'save_params':
             updates = {}
+            path_map = {}
             for key in form:
                 if key.startswith('param_') and key.endswith('_name'):
                     idx = key.split('_')[1]
@@ -152,6 +153,9 @@ class WavetableParamEditorHandler(BaseHandler):
                     value = form.getvalue(f'param_{idx}_value')
                     if name is not None and value is not None:
                         updates[name] = value
+                        path = form.getvalue(f'param_{idx}_path')
+                        if path:
+                            path_map[name] = path
             rename_flag = form.getvalue('rename') in ('on', 'true', '1') or is_core
             new_name = form.getvalue('new_preset_name')
             output_path = None
@@ -173,6 +177,7 @@ class WavetableParamEditorHandler(BaseHandler):
                 updates,
                 output_path,
                 ("wavetable",),
+                parameter_paths=path_map if path_map else None,
             )
             if not result['success']:
                 return self.format_error_response(result['message'])
@@ -277,7 +282,11 @@ class WavetableParamEditorHandler(BaseHandler):
             param_paths_json = json.dumps(param_info.get('parameter_paths', {}))
         
         if values['success']:
-            params_html = self.generate_params_html(values['parameters'], mapped_params)
+            params_html = self.generate_params_html(
+                values['parameters'],
+                mapped_params,
+                param_info.get('parameter_paths', {}) if param_info.get('success') else None,
+            )
             param_count = len(values['parameters'])
 
         base_dir = "/data/UserData/UserLibrary/Track Presets"
@@ -598,6 +607,8 @@ class WavetableParamEditorHandler(BaseHandler):
                 html.append(f'<input type="hidden" name="param_{idx}_value" value="{value}">')
 
         html.append(f'<input type="hidden" name="param_{idx}_name" value="{name}">')
+        if 'path' in meta:
+            html.append(f'<input type="hidden" name="param_{idx}_path" value="{meta["path"]}">')
         html.append('</div>')
         return ''.join(html)
 
@@ -630,7 +641,7 @@ class WavetableParamEditorHandler(BaseHandler):
             return "Global"
         return "Other"
 
-    def generate_params_html(self, params, mapped_parameters=None):
+    def generate_params_html(self, params, mapped_parameters=None, param_paths=None):
         """Return HTML controls for the given parameter values."""
         if not params:
             return '<p>No parameters found.</p>'
@@ -655,6 +666,8 @@ class WavetableParamEditorHandler(BaseHandler):
             name = item['name']
             val = item['value']
             meta = dict(schema.get(name, {}))
+            if param_paths and name in param_paths:
+                meta['path'] = param_paths[name]
 
             if name == "Oscillator1_Transpose":
                 meta.pop("unit", None)
