@@ -551,8 +551,6 @@ class WavetableParamEditorHandler(BaseHandler):
 
     # Parameters that use a horizontal slider instead of a dial.
     SLIDER_PARAMS = {
-        "Voice_Filter1_Drive",
-        "Voice_Filter2_Drive",
         "Voice_Modulators_TimeScale",
         "Voice_Modulators_Lfo1_Time_Rate",
         "Voice_Modulators_Lfo2_Time_Rate",
@@ -604,6 +602,8 @@ class WavetableParamEditorHandler(BaseHandler):
 
         if p_type == "enum" and meta.get("options"):
             select_class = "param-select"
+            if re.match(r"Voice_Filter[12]_Type", name):
+                select_class += " filter-type-select"
             html.append(f'<select class="{select_class}" name="param_{idx}_value">')
             for opt in meta["options"]:
                 sel = " selected" if str(value) == str(opt) else ""
@@ -702,34 +702,34 @@ class WavetableParamEditorHandler(BaseHandler):
     def _arrange_filter_panel(self, items: dict) -> list:
         """Return filter panel HTML arranged into sensible rows."""
         ordered = []
+        sample = next(iter(items.values()), "")
+        match = re.search(r"Voice_Filter(\d)_", sample)
+        idx = match.group(1) if match else "1"
+
         row1 = "".join([
             items.pop("On", ""),
-            items.pop("Frequency", ""),
-            items.pop("Resonance", ""),
+            items.pop("Type", ""),
+            items.pop("Slope", ""),
         ])
         if row1:
             ordered.append(f'<div class="param-row">{row1}</div>')
 
         row2 = "".join([
+            items.pop("Frequency", ""),
+            items.pop("Resonance", ""),
             items.pop("Drive", ""),
-            items.pop("Morph", ""),
         ])
         if row2:
             ordered.append(f'<div class="param-row">{row2}</div>')
 
-        row3 = "".join([
-            items.pop("Type", ""),
-            items.pop("Slope", ""),
-        ])
-        if row3:
-            ordered.append(f'<div class="param-row">{row3}</div>')
+        morph = items.pop("Morph", "")
+        if morph:
+            ordered.append(
+                f'<div class="param-row filter-morph-row filter{idx}-morph-row hidden">{morph}</div>'
+            )
 
-        row4 = "".join([
-            items.pop("CircuitBpNoMo", ""),
-            items.pop("CircuitLpHp", ""),
-        ])
-        if row4:
-            ordered.append(f'<div class="param-row">{row4}</div>')
+        items.pop("CircuitBpNoMo", None)
+        items.pop("CircuitLpHp", None)
 
         if items:
             ordered.extend(items.values())
