@@ -991,6 +991,7 @@ button#macro-add-param {
 /* Modulation matrix table */
 #mod-matrix-section {
     margin-top: 1rem;
+    width: 918px;
 }
 #mod-matrix-table {
     border-collapse: collapse;
@@ -1014,11 +1015,12 @@ button#macro-add-param {
     width: 48px;
 }
 .mod-dest-select {
-    width: 120px;
+    width: 320px;
 }
 #mod-matrix-table td:first-child {
     text-align: left;
 }
+
 
 
 /* Modulation matrix control radius overrides */
