@@ -656,6 +656,14 @@ select {
 } 
 */
 
+.param-panel.fx {
+    min-width: 258px; 
+}
+
+.wavetable-param-panels.param-panel.mixer {
+    min-width: 211px;
+}
+
 .param-panel.lfo {
     max-width: 181px;
 }
