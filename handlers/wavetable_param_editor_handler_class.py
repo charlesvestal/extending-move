@@ -144,16 +144,14 @@ class WavetableParamEditorHandler(BaseHandler):
 
         rename_flag = False
         if action == 'save_params':
-            try:
-                count = int(form.getvalue('param_count', '0'))
-            except ValueError:
-                count = 0
             updates = {}
-            for i in range(count):
-                name = form.getvalue(f'param_{i}_name')
-                value = form.getvalue(f'param_{i}_value')
-                if name is not None and value is not None:
-                    updates[name] = value
+            for key in form:
+                if key.startswith('param_') and key.endswith('_name'):
+                    idx = key.split('_')[1]
+                    name = form.getvalue(key)
+                    value = form.getvalue(f'param_{idx}_value')
+                    if name is not None and value is not None:
+                        updates[name] = value
             rename_flag = form.getvalue('rename') in ('on', 'true', '1') or is_core
             new_name = form.getvalue('new_preset_name')
             output_path = None
