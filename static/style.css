@@ -690,6 +690,11 @@ select {
     text-align: center;
 }
 
+.param-subpanel .param-items {
+    display: flex;
+    flex-direction: column;
+}
+
 .param-row {
     display: flex;
     gap: 0.5rem;
