@@ -953,3 +953,65 @@ def update_wavetable_sprites(preset_path, sprite1=None, sprite2=None, output_pat
         return {"success": True, "path": dest, "message": "Updated sprites"}
     except Exception as exc:
         return {"success": False, "message": f"Error updating sprites: {exc}"}
+
+
+
+def extract_wavetable_modulations(preset_path):
+    """Extract modulation matrix data from the first Wavetable device."""
+    try:
+        with open(preset_path, 'r') as f:
+            data = json.load(f)
+
+        mods = None
+
+        def find(obj):
+            nonlocal mods
+            if mods is not None:
+                return
+            if isinstance(obj, dict):
+                if obj.get('kind') == 'wavetable':
+                    dd = obj.get('deviceData', {})
+                    if 'modulations' in dd and isinstance(dd['modulations'], dict):
+                        mods = dd['modulations']
+                        return
+                for v in obj.values():
+                    find(v)
+            elif isinstance(obj, list):
+                for item in obj:
+                    find(item)
+
+        find(data)
+
+        return {'success': True, 'modulations': mods or {}}
+    except Exception as exc:
+        return {'success': False, 'message': f'Error extracting modulations: {exc}'}
+
+
+def update_wavetable_modulations(preset_path, modulations, output_path=None):
+    """Update modulation matrix data on all Wavetable devices."""
+    try:
+        with open(preset_path, 'r') as f:
+            data = json.load(f)
+
+        def update(obj):
+            if isinstance(obj, dict):
+                if obj.get('kind') == 'wavetable':
+                    dd = obj.setdefault('deviceData', {})
+                    dd['modulations'] = modulations
+                for v in obj.values():
+                    update(v)
+            elif isinstance(obj, list):
+                for item in obj:
+                    update(item)
+
+        update(data)
+
+        dest = output_path or preset_path
+        with open(dest, 'w') as f:
+            json.dump(data, f, indent=2)
+            f.write('\n')
+
+        return {'success': True, 'path': dest, 'message': 'Updated modulations'}
+    except Exception as exc:
+        return {'success': False, 'message': f'Error updating modulations: {exc}'}
+
