@@ -5,7 +5,7 @@ function initModMatrix() {
   const tableBody = document.querySelector('#mod-matrix-table tbody');
   const paramList = JSON.parse(document.getElementById('available-params-input')?.value || '[]');
   const headers = [
-    'Amp Env','Env 2','Env 3','LFO 1','LFO 2','Velocity','Key','Pitch Bend','Pressure','Mod Wheel','Random'
+    'Amp','Env 2','Env 3','LFO 1','LFO 2','Velocity','Key','PB','Press','Mod','Rand'
   ];
   if (!matrixInput || !tableBody) return;
   let matrix = [];
@@ -13,6 +13,7 @@ function initModMatrix() {
 
   function buildSelect(name) {
     const sel = document.createElement('select');
+    sel.className = 'mod-dest-select';
     const opt = document.createElement('option');
     opt.value = '';
     opt.textContent = 'Choose…';
@@ -34,7 +35,7 @@ function initModMatrix() {
     tdSel.appendChild(sel);
     const removeBtn = document.createElement('button');
     removeBtn.type = 'button';
-    removeBtn.textContent = 'Remove';
+    removeBtn.textContent = 'X';
     removeBtn.addEventListener('click', () => {
       matrix.splice(idx, 1);
       save();
@@ -46,6 +47,7 @@ function initModMatrix() {
     row.values = row.values || Array(headers.length).fill(0);
     row.values.forEach((v, col) => {
       const td = document.createElement('td');
+      td.className = 'mod-source-cell';
       const slider = document.createElement('div');
       slider.className = 'rect-slider center';
       slider.dataset.min = '-1';
