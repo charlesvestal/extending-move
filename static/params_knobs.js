@@ -168,10 +168,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const match = sel.parentElement.dataset.name.match(/Voice_Filter(\d)_/);
         if (!match) return;
         const idx = match[1];
-        const morphRow = sel.closest('.param-items').querySelector(`.filter${idx}-morph-row`);
+        const morphEl = sel.closest('.param-items').querySelector(`.filter${idx}-morph`);
         function updateMorph() {
-            if (!morphRow) return;
-            morphRow.classList.toggle('hidden', sel.value !== 'Morph');
+            if (!morphEl) return;
+            morphEl.classList.toggle('hidden', sel.value !== 'Morph');
         }
         sel.addEventListener('change', updateMorph);
         updateMorph();
