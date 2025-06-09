@@ -1016,20 +1016,6 @@ button#macro-add-param {
 .mod-dest-select {
     width: 120px;
 }
-#mod-matrix-data-input {
-    width: 340px;
-}
-.mod-matrix-controls {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
-}
-.mod-remove-btn {
-    padding: 0 0.25rem;
-    font-size: 0.75rem;
-    margin-right: 0.25rem;
-}
 #mod-matrix-table td:first-child {
     text-align: left;
 }
