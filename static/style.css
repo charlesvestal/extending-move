@@ -524,20 +524,52 @@ select {
     margin-bottom: 0.75rem;
 }
 
-.param-pair .param-item {
+.param-pair .param-item, .param-pair .param-select {
     margin-bottom: 0;
+    padding-bottom:0;
+    padding-top:0;
+    padding-top: 0;
+
+    margin-top:-1px;
 }
+
+.param-panel.oscillators .param-pair .param-select, 
+.filter-mod-row .param-select,
+.param-panel.lfo .param-pair .param-select
+{
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0; 
+    border-bottom: 0px;
+}
+
+.param-panel.oscillators .param-pair .rect-slider-container, 
+.filter-mod-row .param-pair .rect-slider-container,
+.param-panel.lfo.param-pair .param-pair .rect-slider-container
+{
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.param-pair .param-item {
+    border-radius:0px;
+}
+.param-panel.modulation .param-select {
+    margin-top:0px;
+}
+
 
 .pitch-mod-label {
     width: 100%;
-    text-align: center;
+    text-align: left;
+    margin-left:10px;
     font-weight: bold;
     margin-top: 0.5rem;
 }
 
 .freq-mod-label {
     width: 100%;
-    text-align: center;
+    ext-align: left;
+    margin-left:10px;
     font-weight: bold;
     margin-top: 0.5rem;
 }
@@ -611,6 +643,10 @@ select {
 .param-panel.envelopes{
     max-width: 290px;
 } */
+
+.param-panel.modulation {
+    max-width: 110px;
+}
 
 .param-panel.filter .param-items {
     flex-direction: column;
@@ -715,8 +751,8 @@ select {
     cursor: pointer;
 }
 
-.macro-label::after {
-  content: " ✏️";
+.macro-label:hover {
+  text-decoration: underline;
 }
 
 .macro-label.placeholder {
@@ -822,7 +858,7 @@ select {
     position: relative;
     width: 80px;
     height: 24px;
-    border: 1px solid #aaa;
+    border: 1px solid #dedede;
     border-radius: 4px;
     box-sizing: border-box;
     cursor: ns-resize;
@@ -912,4 +948,20 @@ button#macro-add-param {
 .macro-add-section select {
     margin-right: 25px;
     max-width: 100%;
+}
+
+
+/* Modulation matrix control radius overrides */
+.param-panel.modulation .mod-matrix-row .param-item:nth-of-type(1) .param-select {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.param-panel.modulation .mod-matrix-row .param-item:nth-of-type(2) .rect-slider-container {
+    border-radius: 0;
+}
+
+.param-panel.modulation .mod-matrix-row .param-item:nth-of-type(3) .param-select {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
 }

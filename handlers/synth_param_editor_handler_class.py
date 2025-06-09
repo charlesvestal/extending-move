@@ -330,7 +330,7 @@ class SynthParamEditorHandler(BaseHandler):
         "Oscillator1_Type": "Osc 1",
         "Oscillator1_Transpose": "Oct",
         "Oscillator1_Shape": "Shape",
-        "Oscillator1_ShapeModSource": "Shape Mod Source",
+        "Oscillator1_ShapeModSource": "Shape Mod",
         "Oscillator1_ShapeMod": "Shape Mod Amount",
         "Oscillator2_Type": "Osc 2",
         "Oscillator2_Transpose": "Oct",
@@ -387,7 +387,7 @@ class SynthParamEditorHandler(BaseHandler):
         "Lfo_SyncedRate": "Rate",
         "Lfo_Retrigger": "R",
         "Lfo_Amount": "Amount",
-        "Lfo_ModSource": "Mod Source",
+        "Lfo_ModSource": "LFO Mod",
         "Lfo_ModAmount": "Mod Amount",
 
         # Modulation Matrix
@@ -448,7 +448,6 @@ class SynthParamEditorHandler(BaseHandler):
 
     # Parameters that should display without a text label
     UNLABELED_PARAMS = {
-        "Oscillator1_ShapeModSource",
         "Oscillator1_ShapeMod",
         "PitchModulation_Source1",
         "PitchModulation_Source2",
@@ -468,6 +467,7 @@ class SynthParamEditorHandler(BaseHandler):
         "ModulationMatrix_Source3",
         "ModulationMatrix_Amount3",
         "ModulationMatrix_Target3",
+        "Lfo_ModAmount",
     }
 
     # Parameters that use a horizontal slider instead of a dial
@@ -908,14 +908,9 @@ class SynthParamEditorHandler(BaseHandler):
 
             ordered = []
             if mods:
-                top = ''.join(mods[:2])
-                if top:
+                for mod in mods:
                     ordered.append(
-                        f'<div class="param-row mod-matrix-row">{top}</div>'
-                    )
-                if len(mods) >= 3:
-                    ordered.append(
-                        f'<div class="param-row mod-matrix-row">{mods[2]}</div>'
+                        f'<div class="param-row mod-matrix-row">{mod}</div>'
                     )
 
             ordered.extend(mod_items.values())
