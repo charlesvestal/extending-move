@@ -5,11 +5,11 @@ The script checks the last seen commit SHA in ``last_sha.txt`` and compares it
 with the latest commit on ``main`` fetched via the GitHub API. If a newer
 commit is available, the corresponding ZIP archive is downloaded and unpacked
 over the current project directory. The new SHA is then stored in
-``last_sha.txt``.
+``last_sha.txt`` and the local webserver is restarted.
 
-Set the environment variable ``GITHUB_REPO`` to ``owner/repo`` (e.g.
-``charlesvestal/extending-move``) before running, otherwise edit the ``REPO``
-constant below.
+Set the environment variable ``GITHUB_REPO`` to ``owner/repo`` (defaults to
+``charlesvestal/extending-move``) before running if you need to override the
+repository.
 """
 
 from __future__ import annotations
@@ -23,8 +23,11 @@ import zipfile
 from pathlib import Path
 
 import requests
+import subprocess
+import signal
+import time
 
-REPO = os.environ.get("GITHUB_REPO", "owner/repo")
+REPO = os.environ.get("GITHUB_REPO", "charlesvestal/extending-move")
 ROOT_DIR = Path(__file__).resolve().parents[1]
 SHA_FILE = ROOT_DIR / "last_sha.txt"
 
@@ -70,6 +73,57 @@ def overlay_from_zip(content: bytes, root: Path) -> None:
         shutil.copytree(extracted_root, root, dirs_exist_ok=True)
 
 
+def restart_webserver() -> None:
+    pid_file = ROOT_DIR / "move-webserver.pid"
+    log_file = ROOT_DIR / "move-webserver.log"
+    port_file = ROOT_DIR / "port.conf"
+
+    pid = None
+    if pid_file.exists():
+        try:
+            pid = int(pid_file.read_text().strip())
+            os.kill(pid, signal.SIGTERM)
+        except Exception:
+            pass
+
+        for _ in range(10):
+            try:
+                os.kill(pid, 0)
+                time.sleep(1)
+            except Exception:
+                break
+        try:
+            pid_file.unlink()
+        except Exception:
+            pass
+    else:
+        subprocess.run(["pkill", "-f", "move-webserver.py"], check=False)
+
+    if log_file.exists():
+        log_file.unlink()
+
+    env = os.environ.copy()
+    env.setdefault("PYTHONPATH", str(ROOT_DIR))
+    port = 909
+    try:
+        if port_file.exists():
+            value = int(port_file.read_text().strip())
+            if 0 < value < 65536:
+                port = value
+    except Exception:
+        pass
+
+    with open(log_file, "wb") as log:
+        subprocess.Popen(
+            ["python3", "-u", str(ROOT_DIR / "move-webserver.py")],
+            cwd=ROOT_DIR,
+            stdout=log,
+            stderr=log,
+            env=env,
+        )
+    print(f"Webserver restarted on port {port}")
+
+
 def update() -> int:
     last_sha = read_last_sha()
     latest_sha = fetch_latest_sha(REPO)
@@ -92,6 +146,7 @@ def update() -> int:
 
     write_last_sha(latest_sha)
     print(f"Updated to {latest_sha}")
+    restart_webserver()
     return 0
 
 
