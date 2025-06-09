@@ -606,6 +606,9 @@ class WavetableParamEditorHandler(BaseHandler):
 
         schema = load_wavetable_schema()
         sections = {s: [] for s in self.SECTION_ORDER}
+        filter1_items = []
+        filter2_items = []
+        filter_other = []
 
         for i, item in enumerate(params):
             name = item["name"]
@@ -619,18 +622,56 @@ class WavetableParamEditorHandler(BaseHandler):
                 macro_idx = mapped_parameters[name]["macro_index"]
                 extra = f"macro-{macro_idx}"
 
+            sec = self._get_section(name)
+
+            label_override = None
+            if sec == "Filter":
+                if name.startswith("Voice_Filter1_"):
+                    base = name[len("Voice_Filter1_") :]
+                    label_override = self.LABEL_OVERRIDES.get(
+                        f"Filter_{base}", self._friendly_label(base)
+                    )
+                elif name.startswith("Voice_Filter2_"):
+                    base = name[len("Voice_Filter2_") :]
+                    label_override = self.LABEL_OVERRIDES.get(
+                        f"Filter_{base}", self._friendly_label(base)
+                    )
+
             html = self._build_param_item(
                 i,
                 name,
                 val,
                 meta,
+                label=label_override,
                 hide_label=hide,
                 slider=slider,
                 extra_classes=extra,
             )
 
-            sec = self._get_section(name)
-            sections.setdefault(sec, []).append(html)
+            if sec == "Filter":
+                if name.startswith("Voice_Filter1_"):
+                    filter1_items.append(html)
+                elif name.startswith("Voice_Filter2_"):
+                    filter2_items.append(html)
+                else:
+                    filter_other.append(html)
+            else:
+                sections.setdefault(sec, []).append(html)
+
+        if filter1_items or filter2_items or filter_other:
+            filter_section = []
+            if filter1_items:
+                filter_section.append(
+                    '<div class="param-subpanel filter1"><h4>Voice Filter 1</h4>'
+                    f'<div class="param-items">{"".join(filter1_items)}</div></div>'
+                )
+            if filter2_items:
+                filter_section.append(
+                    '<div class="param-subpanel filter2"><h4>Voice Filter 2</h4>'
+                    f'<div class="param-items">{"".join(filter2_items)}</div></div>'
+                )
+            filter_section.extend(filter_other)
+            sections["Filter"] = filter_section
 
         out_html = '<div class="wavetable-param-panels">'
         bottom_panels = []
