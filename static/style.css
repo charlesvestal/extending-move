@@ -862,6 +862,7 @@ select {
     border-radius: 4px;
     box-sizing: border-box;
     cursor: ns-resize;
+    cursor: ew-resize;
     user-select: none;
     font-size: 0.8rem;
     text-align: center;
