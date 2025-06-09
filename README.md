@@ -102,6 +102,7 @@ To update, you can use the similar `utility-scripts/update-on-move.command` or `
 ssh ableton@move.local
 cd /data/UserData
 wget -q -O get-pip.py https://bootstrap.pypa.io/get-pip.py
+python3 get-pip.py
 
 # Ensure that ~/.bash_profile sources ~/.bashrc so that Bash settings persist on login.
 if ! grep -q "\.bashrc" ~/.bash_profile; then
