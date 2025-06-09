@@ -16,7 +16,11 @@ from core.midi_pattern_generator import (
     generate_pattern_set,
     create_c_major_downbeats,
 )
-from core.synth_param_editor_handler import update_parameter_values
+from core.synth_param_editor_handler import (
+    update_parameter_values,
+    update_wavetable_sprites,
+    get_wavetable_sprites,
+)
 
 
 def test_reverse_wav_file(tmp_path):
@@ -235,4 +239,21 @@ def test_remove_macro_name(tmp_path):
     with open(preset_copy) as f:
         data = json.load(f)
     assert "customName" not in data["chains"][0]["devices"][0]["parameters"]["Macro0"]
+
+
+def test_update_wavetable_sprites(tmp_path):
+    src = Path("examples/Track Presets/Wavetable/E-Piano Classic.ablpreset")
+    dest = tmp_path / "out.ablpreset"
+    result = update_wavetable_sprites(
+        str(src),
+        {
+            "spriteUri1": "ableton:/device-resources/wavetable-sprites/Miniwaves",
+            "spriteUri2": "ableton:/device-resources/wavetable-sprites/Sub%201",
+        },
+        str(dest),
+    )
+    assert result["success"], result.get("message")
+    info = get_wavetable_sprites(str(dest))
+    assert info["spriteUri1"].endswith("Miniwaves")
+    assert info["spriteUri2"].endswith("Sub%201")
 

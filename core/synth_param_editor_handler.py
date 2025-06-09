@@ -183,3 +183,68 @@ def update_macro_values(preset_path, macro_updates, output_path=None):
         logger.error("Macro value update failed: %s", exc)
         return {"success": False, "message": f"Error updating macro values: {exc}"}
 
+
+def get_wavetable_sprites(preset_path):
+    """Return spriteUri1 and spriteUri2 values from a wavetable preset."""
+    try:
+        with open(preset_path, "r") as f:
+            data = json.load(f)
+
+        result = {"spriteUri1": None, "spriteUri2": None}
+
+        def find(obj):
+            if isinstance(obj, dict):
+                if "spriteUri1" in obj and result["spriteUri1"] is None:
+                    result["spriteUri1"] = obj["spriteUri1"]
+                if "spriteUri2" in obj and result["spriteUri2"] is None:
+                    result["spriteUri2"] = obj["spriteUri2"]
+                for v in obj.values():
+                    if result["spriteUri1"] is not None and result["spriteUri2"] is not None:
+                        break
+                    find(v)
+            elif isinstance(obj, list):
+                for item in obj:
+                    if result["spriteUri1"] is not None and result["spriteUri2"] is not None:
+                        break
+                    find(item)
+
+        find(data)
+        return {"success": True, **result}
+    except Exception as exc:
+        logger.error("Failed to read sprites: %s", exc)
+        return {"success": False, "message": f"Error reading preset: {exc}", "spriteUri1": None, "spriteUri2": None}
+
+
+def update_wavetable_sprites(preset_path, sprite_updates, output_path=None):
+    """Update spriteUri1 and spriteUri2 in a wavetable preset."""
+    try:
+        with open(preset_path, "r") as f:
+            data = json.load(f)
+
+        updated = 0
+
+        def update(obj):
+            nonlocal updated
+            if isinstance(obj, dict):
+                for key in ("spriteUri1", "spriteUri2"):
+                    if key in obj and key in sprite_updates and sprite_updates[key] is not None:
+                        obj[key] = sprite_updates[key]
+                        updated += 1
+                for v in obj.values():
+                    update(v)
+            elif isinstance(obj, list):
+                for item in obj:
+                    update(item)
+
+        update(data)
+
+        dest = output_path or preset_path
+        with open(dest, "w") as f:
+            json.dump(data, f, indent=2)
+            f.write("\n")
+
+        return {"success": True, "message": f"Updated {updated} sprites", "path": dest}
+    except Exception as exc:
+        logger.error("Sprite update failed: %s", exc)
+        return {"success": False, "message": f"Error updating sprites: {exc}"}
+

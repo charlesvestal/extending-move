@@ -533,6 +533,9 @@ def wavetable_params():
     available_params_json = result.get("available_params_json", "[]")
     param_paths_json = result.get("param_paths_json", "{}")
     schema_json = result.get("schema_json", "{}")
+    sprite_options = result.get("sprite_options", [])
+    sprite1_val = result.get("sprite1")
+    sprite2_val = result.get("sprite2")
     preset_selected = bool(selected_preset)
     return render_template(
         "wavetable_params.html",
@@ -553,6 +556,9 @@ def wavetable_params():
         available_params_json=available_params_json,
         param_paths_json=param_paths_json,
         schema_json=schema_json,
+        sprite_options=sprite_options,
+        sprite1=sprite1_val,
+        sprite2=sprite2_val,
         active_tab="wavetable-params",
     )
 

@@ -19,6 +19,8 @@ from core.synth_preset_inspector_handler import (
 from core.synth_param_editor_handler import (
     update_parameter_values,
     update_macro_values,
+    update_wavetable_sprites,
+    get_wavetable_sprites,
 )
 from core.refresh_handler import refresh_library
 
@@ -63,6 +65,16 @@ MACRO_HIGHLIGHT_COLORS = {
     7: "#ffb6c1",  # lightpink
 }
 
+# Limited set of wavetable sprite URIs for selection
+SPRITES = [
+    ("Basic Shapes", "ableton:/device-resources/wavetable-sprites/Basic%20Shapes"),
+    ("Sines 1", "ableton:/device-resources/wavetable-sprites/Sines%201"),
+    ("Miniwaves", "ableton:/device-resources/wavetable-sprites/Miniwaves"),
+    ("Organ", "ableton:/device-resources/wavetable-sprites/Organ"),
+    ("Saw Dual 1", "ableton:/device-resources/wavetable-sprites/Saw%20Dual%201"),
+    ("Sub 1", "ableton:/device-resources/wavetable-sprites/Sub%201"),
+]
+
 
 class WavetableParamEditorHandler(BaseHandler):
     def handle_get(self):
@@ -101,6 +113,9 @@ class WavetableParamEditorHandler(BaseHandler):
             'macros_json': '[]',
             'available_params_json': '[]',
             'param_paths_json': '{}',
+            'sprite_options': SPRITES,
+            'sprite1': None,
+            'sprite2': None,
         }
 
     def handle_post(self, form):
@@ -189,6 +204,14 @@ class WavetableParamEditorHandler(BaseHandler):
             if not macro_result['success']:
                 return self.format_error_response(macro_result['message'])
 
+            sprite_updates = {
+                'spriteUri1': form.getvalue('sprite1'),
+                'spriteUri2': form.getvalue('sprite2'),
+            }
+            sprite_result = update_wavetable_sprites(preset_path, sprite_updates, preset_path)
+            if not sprite_result['success']:
+                return self.format_error_response(sprite_result['message'])
+
             macros_data_str = form.getvalue('macros_data')
             if macros_data_str:
                 try:
@@ -232,6 +255,7 @@ class WavetableParamEditorHandler(BaseHandler):
                 delete_parameter_mapping(preset_path, info['path'])
 
             message = result['message'] + "; " + macro_result['message']
+            message += "; " + sprite_result['message']
             if output_path:
                 message += f" Saved to {output_path}"
             refresh_success, refresh_message = refresh_library()
@@ -281,10 +305,14 @@ class WavetableParamEditorHandler(BaseHandler):
         if param_info['success']:
             available_params_json = json.dumps(param_info['parameters'])
             param_paths_json = json.dumps(param_info.get('parameter_paths', {}))
-        
+
         if values['success']:
             params_html = self.generate_params_html(values['parameters'], mapped_params)
             param_count = len(values['parameters'])
+
+        sprite_info = get_wavetable_sprites(preset_path)
+        sprite1_val = sprite_info.get('spriteUri1') if sprite_info.get('success', True) else None
+        sprite2_val = sprite_info.get('spriteUri2') if sprite_info.get('success', True) else None
 
         base_dir = "/data/UserData/UserLibrary/Track Presets"
         if not os.path.exists(base_dir) and os.path.exists("examples/Track Presets"):
@@ -320,6 +348,9 @@ class WavetableParamEditorHandler(BaseHandler):
             'macros_json': macros_json,
             'available_params_json': available_params_json,
             'param_paths_json': param_paths_json,
+            'sprite_options': SPRITES,
+            'sprite1': sprite1_val,
+            'sprite2': sprite2_val,
         }
 
     SECTION_ORDER = [

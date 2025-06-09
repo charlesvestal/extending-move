@@ -75,6 +75,22 @@
         <button type="submit" onclick="document.getElementById('action-input').value='reset_preset';">Choose Another Preset</button>
         <button type="button" id="randomize-btn">Randomize</button>
     </div>
+    <div class="sprite-selects">
+        <label>Osc 1 Sprite:
+            <select name="sprite1" id="sprite1-select">
+            {% for name, uri in sprite_options %}
+                <option value="{{ uri }}" {% if sprite1 == uri %}selected{% endif %}>{{ name }}</option>
+            {% endfor %}
+            </select>
+        </label>
+        <label>Osc 2 Sprite:
+            <select name="sprite2" id="sprite2-select">
+            {% for name, uri in sprite_options %}
+                <option value="{{ uri }}" {% if sprite2 == uri %}selected{% endif %}>{{ name }}</option>
+            {% endfor %}
+            </select>
+        </label>
+    </div>
     <div class="macro-knobs-section">
         <h3>Macros</h3>
         {{ macro_knobs_html | safe }}
@@ -137,6 +153,14 @@ document.addEventListener('DOMContentLoaded', () => {
     form.querySelectorAll('input[type="hidden"][name^="param_"], input[type="hidden"][name^="macro_"]').forEach(inp => {
       initialValues[inp.name] = inp.value;
       inp.addEventListener('change', updateSaveState);
+    });
+    const s1 = document.getElementById('sprite1-select');
+    const s2 = document.getElementById('sprite2-select');
+    [s1, s2].forEach(sel => {
+      if (sel) {
+        initialValues[sel.name] = sel.value;
+        sel.addEventListener('change', updateSaveState);
+      }
     });
   }
 
