@@ -613,6 +613,17 @@ select {
     margin-top: 0.5rem;
 }
 
+/* Layout for the Wavetable parameter editor */
+.wavetable-param-panels {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.wavetable-param-panels + .wavetable-param-panels {
+    margin-top: 0.5rem;
+}
+
 .param-panel {
     border: 1px solid #ccc;
     padding: 0.5rem;
