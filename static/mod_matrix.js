@@ -5,7 +5,7 @@ function initModMatrix() {
   const tableBody = document.querySelector('#mod-matrix-table tbody');
   const paramList = JSON.parse(document.getElementById('available-params-input')?.value || '[]');
   const headers = [
-    'Amp Env','Env 2','Env 3','LFO 1','LFO 2','Velocity','Key','Pitch Bend','Pressure','Mod Wheel','Random'
+    'Amp','Env 2','Env 3','LFO 1','LFO 2','Velocity','Key','PB','Press','Mod','Rand'
   ];
   if (!matrixInput || !tableBody) return;
   let matrix = [];
