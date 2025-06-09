@@ -643,10 +643,19 @@ select {
 .param-panel.envelopes{
     max-width: 290px;
 } 
+*/
+
+.param-panel.lfo {
+    max-width: 181px;
+}
 
 .param-panel.modulation {
     max-width: 110px;
-} */
+} 
+
+.param-panel.global {
+    max-width: 200px;
+}
 
 .param-panel.filter .param-items {
     flex-direction: column;
