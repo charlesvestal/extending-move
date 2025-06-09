@@ -538,15 +538,6 @@ class WavetableParamEditorHandler(BaseHandler):
     # Parameters that should display without a text label.  This keeps the
     # interface compact for groups of related controls.
     UNLABELED_PARAMS = {
-        "Voice_Modulators_AmpEnvelope_Times_Attack",
-        "Voice_Modulators_AmpEnvelope_Times_Decay",
-        "Voice_Modulators_AmpEnvelope_Times_Release",
-        "Voice_Modulators_Envelope2_Times_Attack",
-        "Voice_Modulators_Envelope2_Times_Decay",
-        "Voice_Modulators_Envelope2_Times_Release",
-        "Voice_Modulators_Envelope3_Times_Attack",
-        "Voice_Modulators_Envelope3_Times_Decay",
-        "Voice_Modulators_Envelope3_Times_Release",
         "Voice_Filter1_On",
         "Voice_Filter1_Type",
         "Voice_Filter1_Slope",
@@ -802,6 +793,41 @@ class WavetableParamEditorHandler(BaseHandler):
             ordered.extend(items.values())
         return ordered
 
+    def _arrange_envelope_panel(self, items: dict) -> list:
+        """Return envelope panel rows with ADSR ordering."""
+        ordered = []
+
+        row = "".join(
+            [
+                items.pop("Attack", ""),
+                items.pop("Sustain", ""),
+                items.pop("Decay", ""),
+                items.pop("Release", ""),
+            ]
+        )
+        if row.strip():
+            ordered.append(f'<div class="param-row">{row}</div>')
+
+        loop = items.pop("LoopMode", "")
+        if loop:
+            ordered.append(f'<div class="param-row">{loop}</div>')
+
+        final_val = items.pop("Final", "")
+        if final_val:
+            ordered.append(f'<div class="param-row">{final_val}</div>')
+
+        initial_val = items.pop("Initial", "")
+        if initial_val:
+            ordered.append(f'<div class="param-row">{initial_val}</div>')
+
+        peak_val = items.pop("Peak", "")
+        if peak_val:
+            ordered.append(f'<div class="param-row">{peak_val}</div>')
+
+        if items:
+            ordered.extend(items.values())
+        return ordered
+
     def generate_params_html(self, params, mapped_parameters=None):
         """Return HTML controls for the given parameter values."""
         if not params:
@@ -896,6 +922,8 @@ class WavetableParamEditorHandler(BaseHandler):
                     elif sec == "Mixer":
                         include_pan = label != "Sub Oscillator"
                         group_items.extend(self._arrange_mixer_panel(items, include_pan))
+                    elif sec == "Envelopes":
+                        group_items.extend(self._arrange_envelope_panel(items))
                     else:
                         group_items.extend(items.values())
             if sections.get(sec):
