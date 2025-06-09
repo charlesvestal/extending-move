@@ -18,6 +18,8 @@ from core.synth_preset_inspector_handler import (
     load_wavetable_sprites,
     extract_wavetable_sprites,
     update_wavetable_sprites,
+    extract_wavetable_modulations,
+    update_wavetable_modulations,
 )
 from core.synth_param_editor_handler import (
     update_parameter_values,
@@ -66,6 +68,9 @@ MACRO_HIGHLIGHT_COLORS = {
     7: "#ffb6c1",  # lightpink
 }
 
+# Mapping of modulation matrix UI column indices to wavetable source indices
+MOD_UI_TO_SRC = [0, 1, 2, 3, 4, 7, 8, 9, 10, 11, 12]
+
 
 class WavetableParamEditorHandler(BaseHandler):
     def handle_get(self):
@@ -105,6 +110,7 @@ class WavetableParamEditorHandler(BaseHandler):
             'macros_json': '[]',
             'available_params_json': '[]',
             'param_paths_json': '{}',
+            'mod_matrix_json': '[]',
             'sprites_json': json.dumps(sprites),
             'sprite1': '',
             'sprite2': '',
@@ -196,6 +202,41 @@ class WavetableParamEditorHandler(BaseHandler):
             if not macro_result['success']:
                 return self.format_error_response(macro_result['message'])
 
+            matrix_data_str = form.getvalue('mod_matrix_data')
+            if matrix_data_str:
+                try:
+                    matrix_rows = json.loads(matrix_data_str)
+                except Exception:
+                    matrix_rows = []
+            else:
+                matrix_rows = []
+
+            mod_dict = {}
+            for row in matrix_rows:
+                name = row.get('name')
+                if not name:
+                    continue
+                values = row.get('values', [])
+                extra = row.get('extra', [0, 0])
+                arr = [0.0] * 13
+                for ui_idx, src_idx in enumerate(MOD_UI_TO_SRC):
+                    if ui_idx < len(values):
+                        try:
+                            arr[src_idx] = float(values[ui_idx])
+                        except (ValueError, TypeError):
+                            arr[src_idx] = 0.0
+                if len(extra) >= 2:
+                    try:
+                        arr[5] = float(extra[0])
+                        arr[6] = float(extra[1])
+                    except (ValueError, TypeError):
+                        pass
+                mod_dict[name] = arr
+
+            mod_res = update_wavetable_modulations(preset_path, mod_dict, preset_path)
+            if not mod_res['success']:
+                return self.format_error_response(mod_res['message'])
+
             macros_data_str = form.getvalue('macros_data')
             if macros_data_str:
                 try:
@@ -250,6 +291,8 @@ class WavetableParamEditorHandler(BaseHandler):
                 return self.format_error_response(sprite_res['message'])
 
             message = result['message'] + "; " + macro_result['message']
+            if mod_res['message']:
+                message += "; " + mod_res['message']
             if output_path:
                 message += f" Saved to {output_path}"
             refresh_success, refresh_message = refresh_library()
@@ -326,6 +369,15 @@ class WavetableParamEditorHandler(BaseHandler):
         sprite_info = extract_wavetable_sprites(preset_path)
         sprite1 = sprite_info.get('sprite1') if sprite_info.get('success', True) else None
         sprite2 = sprite_info.get('sprite2') if sprite_info.get('success', True) else None
+        mod_matrix_json = '[]'
+        mod_info = extract_wavetable_modulations(preset_path)
+        if mod_info.get('success'):
+            matrix_rows = []
+            for dest, arr in mod_info.get('modulations', {}).items():
+                vals = [arr[i] if i < len(arr) else 0 for i in MOD_UI_TO_SRC]
+                extra = [arr[5] if len(arr) > 5 else 0, arr[6] if len(arr) > 6 else 0]
+                matrix_rows.append({'name': dest, 'values': vals, 'extra': extra})
+            mod_matrix_json = json.dumps(matrix_rows)
         return {
             'message': message,
             'message_type': 'success',
@@ -342,6 +394,7 @@ class WavetableParamEditorHandler(BaseHandler):
             'macros_json': macros_json,
             'available_params_json': available_params_json,
             'param_paths_json': param_paths_json,
+            'mod_matrix_json': mod_matrix_json,
             'sprites_json': sprites_json,
             'sprite1': sprite1 or '',
             'sprite2': sprite2 or '',

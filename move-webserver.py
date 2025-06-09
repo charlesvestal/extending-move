@@ -477,6 +477,7 @@ def synth_params():
     macros_json = result.get("macros_json", "[]")
     available_params_json = result.get("available_params_json", "[]")
     param_paths_json = result.get("param_paths_json", "{}")
+    mod_matrix_json = result.get("mod_matrix_json", "[]")
     schema_json = result.get("schema_json", "{}")
     sprites_json = result.get("sprites_json", "[]")
     sprite1 = result.get("sprite1", "")
@@ -535,6 +536,7 @@ def wavetable_params():
     macros_json = result.get("macros_json", "[]")
     available_params_json = result.get("available_params_json", "[]")
     param_paths_json = result.get("param_paths_json", "{}")
+    mod_matrix_json = result.get("mod_matrix_json", "[]")
     schema_json = result.get("schema_json", "{}")
     sprites_json = result.get("sprites_json", "[]")
     sprite1 = result.get("sprite1", "")
@@ -558,6 +560,7 @@ def wavetable_params():
         macros_json=macros_json,
         available_params_json=available_params_json,
         param_paths_json=param_paths_json,
+        mod_matrix_json=mod_matrix_json,
         schema_json=schema_json,
         sprites_json=sprites_json,
         sprite1=sprite1,
