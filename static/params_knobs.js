@@ -163,4 +163,17 @@ document.addEventListener('DOMContentLoaded', () => {
         lfoModeSelect.addEventListener('change', updateLfoRateDisplay);
         updateLfoRateDisplay();
     }
+
+    document.querySelectorAll('.param-item[data-name^="Voice_Filter"][data-name$="_Type"] select').forEach(sel => {
+        const match = sel.parentElement.dataset.name.match(/Voice_Filter(\d)_/);
+        if (!match) return;
+        const idx = match[1];
+        const morphRow = sel.closest('.param-items').querySelector(`.filter${idx}-morph-row`);
+        function updateMorph() {
+            if (!morphRow) return;
+            morphRow.classList.toggle('hidden', sel.value !== 'Morph');
+        }
+        sel.addEventListener('change', updateMorph);
+        updateMorph();
+    });
 });

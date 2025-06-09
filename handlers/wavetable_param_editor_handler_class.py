@@ -349,18 +349,27 @@ class WavetableParamEditorHandler(BaseHandler):
 
     SECTION_ORDER = [
         "Oscillators",
+        "FX",
         "Mixer",
         "Filter",
-        "Envelopes",
-        "LFO",
         "Modulation",
         "Global",
+        "Envelopes",
         "Extras",
         "Other",
     ]
 
     SECTION_SUBPANELS = {
         "Oscillators": [
+            ("Voice_Oscillator1_", "Oscillator 1", "Oscillator1"),
+            ("Voice_Oscillator2_", "Oscillator 2", "Oscillator2"),
+            ("Voice_SubOscillator_", "Sub Oscillator", "SubOscillator"),
+        ],
+        "FX": [
+            ("Voice_Oscillator1_Effects_", "Oscillator 1", "Oscillator1_Effects"),
+            ("Voice_Oscillator2_Effects_", "Oscillator 2", "Oscillator2_Effects"),
+        ],
+        "Mixer": [
             ("Voice_Oscillator1_", "Oscillator 1", "Oscillator1"),
             ("Voice_Oscillator2_", "Oscillator 2", "Oscillator2"),
             ("Voice_SubOscillator_", "Sub Oscillator", "SubOscillator"),
@@ -374,7 +383,7 @@ class WavetableParamEditorHandler(BaseHandler):
             ("Voice_Modulators_Envelope2_", "Envelope 2", "Envelope2"),
             ("Voice_Modulators_Envelope3_", "Envelope 3", "Envelope3"),
         ],
-        "LFO": [
+        "Modulation": [
             ("Voice_Modulators_Lfo1_", "LFO 1", "Lfo"),
             ("Voice_Modulators_Lfo2_", "LFO 2", "Lfo"),
         ],
@@ -390,10 +399,36 @@ class WavetableParamEditorHandler(BaseHandler):
         "Oscillator2_Type": "Osc 2",
         "Oscillator2_Transpose": "Oct",
         "Oscillator2_Detune": "Detune",
+        "Oscillator1_Pitch_Detune": "Detune",
+        "Oscillator1_Pitch_Transpose": "Transpose",
+        "Oscillator1_Wavetables_WavePosition": "WT Pos",
+        "Oscillator2_Pitch_Detune": "Detune",
+        "Oscillator2_Pitch_Transpose": "Transpose",
+        "Oscillator2_Wavetables_WavePosition": "WT Pos",
+        "SubOscillator_Tone": "Tone",
+        "SubOscillator_Transpose": "Transpose",
         "PitchModulation_Source1": "Source",
         "PitchModulation_Amount1": "Amount",
         "PitchModulation_Source2": "Source",
         "PitchModulation_Amount2": "Amount",
+
+        # FX
+        "Oscillator1_Effects_EffectMode": "Effects Mode",
+        "Oscillator1_Effects_Effect1": "FX1",
+        "Oscillator1_Effects_Effect2": "FX2",
+        "Oscillator2_Effects_EffectMode": "Effects Mode",
+        "Oscillator2_Effects_Effect1": "FX1",
+        "Oscillator2_Effects_Effect2": "FX2",
+
+        # Mixer
+        "Oscillator1_On": "On/Off",
+        "Oscillator1_Gain": "Gain",
+        "Oscillator1_Pan": "Pan",
+        "Oscillator2_On": "On/Off",
+        "Oscillator2_Gain": "Gain",
+        "Oscillator2_Pan": "Pan",
+        "SubOscillator_On": "On/Off",
+        "SubOscillator_Gain": "Gain",
 
         # Mixer
         "Mixer_OscillatorOn1": "On/Off",
@@ -512,12 +547,16 @@ class WavetableParamEditorHandler(BaseHandler):
         "Voice_Modulators_Envelope3_Times_Attack",
         "Voice_Modulators_Envelope3_Times_Decay",
         "Voice_Modulators_Envelope3_Times_Release",
+        "Voice_Filter1_On",
+        "Voice_Filter1_Type",
+        "Voice_Filter1_Slope",
+        "Voice_Filter2_On",
+        "Voice_Filter2_Type",
+        "Voice_Filter2_Slope",
     }
 
     # Parameters that use a horizontal slider instead of a dial.
     SLIDER_PARAMS = {
-        "Voice_Filter1_Drive",
-        "Voice_Filter2_Drive",
         "Voice_Modulators_TimeScale",
         "Voice_Modulators_Lfo1_Time_Rate",
         "Voice_Modulators_Lfo2_Time_Rate",
@@ -569,10 +608,15 @@ class WavetableParamEditorHandler(BaseHandler):
 
         if p_type == "enum" and meta.get("options"):
             select_class = "param-select"
+            if re.match(r"Voice_Filter[12]_Type", name):
+                select_class += " filter-type-select"
             html.append(f'<select class="{select_class}" name="param_{idx}_value">')
             for opt in meta["options"]:
                 sel = " selected" if str(value) == str(opt) else ""
-                html.append(f'<option value="{opt}"{sel}>{opt}</option>')
+                disp = opt
+                if name.endswith("_Slope"):
+                    disp = f"{opt}-pole"
+                html.append(f'<option value="{opt}"{sel}>{disp}</option>')
             html.append('</select>')
             html.append(f'<input type="hidden" name="param_{idx}_value" value="{value}">')
         elif p_type == "boolean":
@@ -646,6 +690,10 @@ class WavetableParamEditorHandler(BaseHandler):
 
     def _get_section(self, name):
         """Return the panel section for a raw Wavetable parameter name."""
+        if name.startswith(("Voice_Oscillator1_Effects_", "Voice_Oscillator2_Effects_")):
+            return "FX"
+        if re.search(r"Voice_(?:Oscillator[12]|SubOscillator)_(?:On|Gain|Pan)$", name):
+            return "Mixer"
         if name.startswith(("Voice_Oscillator", "Voice_SubOscillator")):
             return "Oscillators"
         if name.startswith("Voice_Filter"):
@@ -653,7 +701,7 @@ class WavetableParamEditorHandler(BaseHandler):
         if name.startswith("Voice_Modulators_AmpEnvelope") or name.startswith("Voice_Modulators_Envelope"):
             return "Envelopes"
         if name.startswith("Voice_Modulators_Lfo"):
-            return "LFO"
+            return "Modulation"
         if name.startswith("Voice_Modulators"):
             return "Modulation"
         if name.startswith(("Voice_Global_", "Voice_Unison_")) or name in {"HiQ", "MonoPoly", "PolyVoices", "Volume"}:
@@ -663,35 +711,97 @@ class WavetableParamEditorHandler(BaseHandler):
     def _arrange_filter_panel(self, items: dict) -> list:
         """Return filter panel HTML arranged into sensible rows."""
         ordered = []
-        row1 = "".join([
-            items.pop("On", ""),
+        sample = next(iter(items.values()), "")
+        match = re.search(r"Voice_Filter(\d)_", sample)
+        idx = match.group(1) if match else "1"
+
+        row_on = items.pop("On", "")
+        if row_on:
+            ordered.append(f'<div class="param-row">{row_on}</div>')
+
+        row_type = items.pop("Type", "")
+        if row_type:
+            ordered.append(f'<div class="param-row">{row_type}</div>')
+
+        row_slope = items.pop("Slope", "")
+        if row_slope:
+            ordered.append(f'<div class="param-row">{row_slope}</div>')
+
+        row_fr = "".join([
             items.pop("Frequency", ""),
             items.pop("Resonance", ""),
-        ])
-        if row1:
-            ordered.append(f'<div class="param-row">{row1}</div>')
-
-        row2 = "".join([
             items.pop("Drive", ""),
-            items.pop("Morph", ""),
         ])
-        if row2:
-            ordered.append(f'<div class="param-row">{row2}</div>')
+        if row_fr:
+            ordered.append(f'<div class="param-row">{row_fr}</div>')
 
-        row3 = "".join([
-            items.pop("Type", ""),
-            items.pop("Slope", ""),
+        morph = items.pop("Morph", "")
+        if morph:
+            ordered.append(
+                f'<div class="param-row filter-morph-row filter{idx}-morph-row hidden">{morph}</div>'
+            )
+
+        items.pop("CircuitBpNoMo", None)
+        items.pop("CircuitLpHp", None)
+
+        if items:
+            ordered.extend(items.values())
+        return ordered
+
+    def _arrange_osc_panel(self, items: dict, sprite_html: str) -> list:
+        """Return oscillator panel rows including sprite selection."""
+        ordered = []
+        row = "".join([
+            sprite_html,
+            items.pop("Pitch_Detune", ""),
+            items.pop("Pitch_Transpose", ""),
+            items.pop("Wavetables_WavePosition", ""),
         ])
-        if row3:
-            ordered.append(f'<div class="param-row">{row3}</div>')
+        if row.strip():
+            ordered.append(f'<div class="param-row">{row}</div>')
+        if items:
+            ordered.extend(items.values())
+        return ordered
 
-        row4 = "".join([
-            items.pop("CircuitBpNoMo", ""),
-            items.pop("CircuitLpHp", ""),
+    def _arrange_sub_panel(self, items: dict) -> list:
+        """Return sub oscillator panel rows."""
+        ordered = []
+        row = "".join([
+            items.pop("Tone", ""),
+            items.pop("Transpose", ""),
         ])
-        if row4:
-            ordered.append(f'<div class="param-row">{row4}</div>')
+        if row.strip():
+            ordered.append(f'<div class="param-row">{row}</div>')
+        if items:
+            ordered.extend(items.values())
+        return ordered
 
+    def _arrange_fx_panel(self, items: dict) -> list:
+        """Return FX panel rows for an oscillator."""
+        ordered = []
+        row = "".join([
+            items.pop("Effects_EffectMode", ""),
+            items.pop("Effects_Effect1", ""),
+            items.pop("Effects_Effect2", ""),
+        ])
+        if row.strip():
+            ordered.append(f'<div class="param-row">{row}</div>')
+        if items:
+            ordered.extend(items.values())
+        return ordered
+
+    def _arrange_mixer_panel(self, items: dict, include_pan: bool = True) -> list:
+        """Return mixer panel rows for an oscillator."""
+        ordered = []
+        parts = [
+            items.pop("On", ""),
+            items.pop("Gain", ""),
+        ]
+        if include_pan:
+            parts.append(items.pop("Pan", ""))
+        row = "".join(parts)
+        if row.strip():
+            ordered.append(f'<div class="param-row">{row}</div>')
         if items:
             ordered.extend(items.values())
         return ordered
@@ -770,6 +880,26 @@ class WavetableParamEditorHandler(BaseHandler):
                     )
                     if sec == "Filter":
                         group_items.extend(self._arrange_filter_panel(items))
+                    elif sec == "Oscillators":
+                        if label == "Oscillator 1":
+                            sprite = (
+                                '<div class="param-item"><span class="param-label">Osc 1</span>'
+                                '<select name="sprite1" id="sprite1-select"></select></div>'
+                            )
+                            group_items.extend(self._arrange_osc_panel(items, sprite))
+                        elif label == "Oscillator 2":
+                            sprite = (
+                                '<div class="param-item"><span class="param-label">Osc 2</span>'
+                                '<select name="sprite2" id="sprite2-select"></select></div>'
+                            )
+                            group_items.extend(self._arrange_osc_panel(items, sprite))
+                        else:
+                            group_items.extend(self._arrange_sub_panel(items))
+                    elif sec == "FX":
+                        group_items.extend(self._arrange_fx_panel(items))
+                    elif sec == "Mixer":
+                        include_pan = label != "Sub Oscillator"
+                        group_items.extend(self._arrange_mixer_panel(items, include_pan))
                     else:
                         group_items.extend(items.values())
             if sections.get(sec):
@@ -777,9 +907,9 @@ class WavetableParamEditorHandler(BaseHandler):
             if group_items:
                 sections[sec] = group_items
 
-        out_html = '<div class="wavetable-param-panels">'
+        first_row = {"Oscillators", "FX", "Mixer"}
+        top_panels = []
         bottom_panels = []
-        second_row = {"LFO", "Modulation", "Global", "Extras"}
         for sec in self.SECTION_ORDER:
             items = sections.get(sec)
             if not items:
@@ -789,10 +919,13 @@ class WavetableParamEditorHandler(BaseHandler):
                 f'<div class="param-panel {cls}"><h3>{sec}</h3>'
                 f'<div class="param-items">{"".join(items)}</div></div>'
             )
-            if sec in second_row:
-                bottom_panels.append(panel_html)
+            if sec in first_row:
+                top_panels.append(panel_html)
             else:
-                out_html += panel_html
+                bottom_panels.append(panel_html)
+
+        out_html = '<div class="wavetable-param-panels">'
+        out_html += ''.join(top_panels)
         out_html += '</div>'
         if bottom_panels:
             out_html += '<div class="wavetable-param-panels">'
