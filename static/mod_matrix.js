@@ -7,6 +7,7 @@ function initModMatrix() {
   const headers = [
     'Amp Env','Env 2','Env 3','LFO 1','LFO 2','Velocity','Key','Pitch Bend','Pressure','Mod Wheel','Random'
   ];
+  if (!matrixInput || !tableBody) return;
   let matrix = [];
   try { matrix = JSON.parse(matrixInput.value || '[]'); } catch (e) {}
 
