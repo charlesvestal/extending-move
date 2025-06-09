@@ -709,37 +709,33 @@ class WavetableParamEditorHandler(BaseHandler):
         return "Other"
 
     def _arrange_filter_panel(self, items: dict) -> list:
-        """Return filter panel HTML arranged into sensible rows."""
+        """Return filter panel HTML arranged into a single row."""
         ordered = []
         sample = next(iter(items.values()), "")
         match = re.search(r"Voice_Filter(\d)_", sample)
         idx = match.group(1) if match else "1"
 
-        row_on = items.pop("On", "")
-        if row_on:
-            ordered.append(f'<div class="param-row">{row_on}</div>')
-
-        row_type = items.pop("Type", "")
-        if row_type:
-            ordered.append(f'<div class="param-row">{row_type}</div>')
-
-        row_slope = items.pop("Slope", "")
-        if row_slope:
-            ordered.append(f'<div class="param-row">{row_slope}</div>')
-
-        row_fr = "".join([
-            items.pop("Frequency", ""),
-            items.pop("Resonance", ""),
-            items.pop("Drive", ""),
-        ])
-        if row_fr:
-            ordered.append(f'<div class="param-row">{row_fr}</div>')
-
+        on = items.pop("On", "")
+        f_type = items.pop("Type", "")
+        slope = items.pop("Slope", "")
+        freq = items.pop("Frequency", "")
+        res = items.pop("Resonance", "")
+        drive = items.pop("Drive", "")
         morph = items.pop("Morph", "")
+
+        stack = "".join([on, f_type, slope])
+        column = f'<div class="param-column">{stack}</div>' if stack.strip() else ""
+
         if morph:
-            ordered.append(
-                f'<div class="param-row filter-morph-row filter{idx}-morph-row hidden">{morph}</div>'
+            morph = morph.replace(
+                'param-item"',
+                f'param-item filter-morph filter{idx}-morph hidden"',
+                1,
             )
+
+        row = f"{column}{freq}{res}{drive}{morph}"
+        if row.strip():
+            ordered.append(f'<div class="param-row">{row}</div>')
 
         items.pop("CircuitBpNoMo", None)
         items.pop("CircuitLpHp", None)
