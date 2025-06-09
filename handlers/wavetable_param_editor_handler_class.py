@@ -547,6 +547,12 @@ class WavetableParamEditorHandler(BaseHandler):
         "Voice_Modulators_Envelope3_Times_Attack",
         "Voice_Modulators_Envelope3_Times_Decay",
         "Voice_Modulators_Envelope3_Times_Release",
+        "Voice_Filter1_On",
+        "Voice_Filter1_Type",
+        "Voice_Filter1_Slope",
+        "Voice_Filter2_On",
+        "Voice_Filter2_Type",
+        "Voice_Filter2_Slope",
     }
 
     # Parameters that use a horizontal slider instead of a dial.
@@ -607,7 +613,10 @@ class WavetableParamEditorHandler(BaseHandler):
             html.append(f'<select class="{select_class}" name="param_{idx}_value">')
             for opt in meta["options"]:
                 sel = " selected" if str(value) == str(opt) else ""
-                html.append(f'<option value="{opt}"{sel}>{opt}</option>')
+                disp = opt
+                if name.endswith("_Slope"):
+                    disp = f"{opt}-pole"
+                html.append(f'<option value="{opt}"{sel}>{disp}</option>')
             html.append('</select>')
             html.append(f'<input type="hidden" name="param_{idx}_value" value="{value}">')
         elif p_type == "boolean":
@@ -706,21 +715,24 @@ class WavetableParamEditorHandler(BaseHandler):
         match = re.search(r"Voice_Filter(\d)_", sample)
         idx = match.group(1) if match else "1"
 
-        row1 = "".join([
-            items.pop("On", ""),
+        row_on = items.pop("On", "")
+        if row_on:
+            ordered.append(f'<div class="param-row">{row_on}</div>')
+
+        row_type = "".join([
             items.pop("Type", ""),
             items.pop("Slope", ""),
         ])
-        if row1:
-            ordered.append(f'<div class="param-row">{row1}</div>')
+        if row_type:
+            ordered.append(f'<div class="param-row">{row_type}</div>')
 
-        row2 = "".join([
+        row_fr = "".join([
             items.pop("Frequency", ""),
             items.pop("Resonance", ""),
             items.pop("Drive", ""),
         ])
-        if row2:
-            ordered.append(f'<div class="param-row">{row2}</div>')
+        if row_fr:
+            ordered.append(f'<div class="param-row">{row_fr}</div>')
 
         morph = items.pop("Morph", "")
         if morph:
