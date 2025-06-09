@@ -681,7 +681,7 @@ class WavetableParamEditorHandler(BaseHandler):
 
         schema = load_wavetable_schema()
         sections = {s: [] for s in self.SECTION_ORDER}
-        subpanels = {
+        subgroups = {
             sec: {lbl: {} for _, lbl, _ in self.SECTION_SUBPANELS.get(sec, [])}
             for sec in self.SECTION_SUBPANELS
         }
@@ -719,7 +719,7 @@ class WavetableParamEditorHandler(BaseHandler):
                             slider=slider,
                             extra_classes=extra,
                         )
-                        subpanels[sec][panel_lbl][base] = html
+                        subgroups[sec][panel_lbl][base] = html
                         assigned = True
                         break
 
@@ -736,24 +736,21 @@ class WavetableParamEditorHandler(BaseHandler):
                 sections.setdefault(sec, []).append(html)
 
         for sec, groups in self.SECTION_SUBPANELS.items():
-            panel_items = []
+            group_items = []
             for _prefix, label, _ in groups:
-                items = subpanels.get(sec, {}).get(label)
+                items = subgroups.get(sec, {}).get(label)
                 if items:
-                    cls = label.lower().replace(" ", "-")
-                    content = []
-                    if sec == "Filter":
-                        content = self._arrange_filter_panel(items)
-                    else:
-                        content = list(items.values())
-                    panel_items.append(
-                        f'<div class="param-subpanel {cls}"><h4>{label}</h4>'
-                        f'<div class="param-items">{"".join(content)}</div></div>'
+                    group_items.append(
+                        f'<div class="param-group-label">{label}</div>'
                     )
+                    if sec == "Filter":
+                        group_items.extend(self._arrange_filter_panel(items))
+                    else:
+                        group_items.extend(items.values())
             if sections.get(sec):
-                panel_items.extend(sections[sec])
-            if panel_items:
-                sections[sec] = panel_items
+                group_items.extend(sections[sec])
+            if group_items:
+                sections[sec] = group_items
 
         out_html = '<div class="wavetable-param-panels">'
         bottom_panels = []
