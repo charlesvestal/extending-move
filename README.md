@@ -157,6 +157,10 @@ Located in `utility-scripts/`:
 - `update-on-move.sh` / `.command`: Update with latest files
 - `restart-webserver.sh`: Restart the webserver
 
+The update script checks whether `/data/UserData/extending-move` on the device
+is a Git repository. If not, it prompts to delete the existing storefront so it
+can clone a clean copy of this project.
+
 
 ## How to Auto-start on Boot
 

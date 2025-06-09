@@ -62,6 +62,18 @@ if ! ssh -o BatchMode=yes -o ConnectTimeout=5 "${REMOTE_USER}@${REMOTE_HOST}" "[
   ssh "${REMOTE_USER}@${REMOTE_HOST}" "chmod +x '${REMOTE_GIT_BIN}'"
 fi
 
+# --- Ensure destination is a git repository ---
+if ! ssh -o BatchMode=yes -o ConnectTimeout=5 "${REMOTE_USER}@${REMOTE_HOST}" "[ -d '${REMOTE_DIR}/.git' ]" 2>/dev/null; then
+  read -p "${REMOTE_DIR} is not a git repo. Remove existing files and clone fresh? [y/N] " confirm
+  if [[ $confirm =~ ^[Yy]$ ]]; then
+    echo "Removing existing files on device..."
+    ssh -T "${REMOTE_USER}@${REMOTE_HOST}" "rm -rf '${REMOTE_DIR}'"
+  else
+    echo "Aborting."
+    exit 1
+  fi
+fi
+
 # --- Clone or update repository on the device ---
 ssh -T "${REMOTE_USER}@${REMOTE_HOST}" <<'EOF'
 set -euo pipefail
