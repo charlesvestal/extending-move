@@ -83,9 +83,32 @@ if ! grep -q "$HOME/bin" ~/.bashrc; then
 fi
 export PATH="$HOME/bin:$PATH"
 if [ -d ~/extending-move/.git ]; then
-  ~/bin/git -C ~/extending-move pull --ff-only
+  if ! ~/bin/git -C ~/extending-move pull --ff-only; then
+    GIT_FAILED=true
+  fi
 else
-  ~/bin/git clone https://github.com/charlesvestal/extending-move.git ~/extending-move
+  if ! ~/bin/git clone https://github.com/charlesvestal/extending-move.git ~/extending-move; then
+    GIT_FAILED=true
+  fi
+fi
+
+if [ "${GIT_FAILED:-}" = true ]; then
+  echo "Git failed, falling back to tarball..."
+  TMPDIR=$(mktemp -d)
+  TARFILE="$TMPDIR/repo.tar.gz"
+  if command -v curl >/dev/null 2>&1; then
+    curl -L -o "$TARFILE" https://codeload.github.com/charlesvestal/extending-move/tar.gz/refs/heads/main
+  elif command -v wget >/dev/null 2>&1; then
+    wget -O "$TARFILE" https://codeload.github.com/charlesvestal/extending-move/tar.gz/refs/heads/main
+  else
+    echo "Neither curl nor wget found on device"
+    exit 1
+  fi
+  rm -rf ~/extending-move
+  mkdir -p ~/extending-move
+  tar -xzf "$TARFILE" -C "$TMPDIR"
+  mv "$TMPDIR"/extending-move-main/* ~/extending-move/
+  rm -rf "$TMPDIR"
 fi
 cp -r /opt/move/HttpRoot/fonts ~/extending-move/static/
 chmod +x ~/extending-move/move-webserver.py
