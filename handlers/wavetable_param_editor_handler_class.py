@@ -800,14 +800,34 @@ class WavetableParamEditorHandler(BaseHandler):
     def _arrange_envelope_panel(self, items: dict) -> list:
         """Return envelope panel rows with ADSR ordering."""
         ordered = []
-        row = "".join([
-            items.pop("Attack", ""),
-            items.pop("Sustain", ""),
-            items.pop("Decay", ""),
-            items.pop("Release", ""),
-        ])
+
+        row = "".join(
+            [
+                items.pop("Attack", ""),
+                items.pop("Sustain", ""),
+                items.pop("Decay", ""),
+                items.pop("Release", ""),
+            ]
+        )
         if row.strip():
             ordered.append(f'<div class="param-row">{row}</div>')
+
+        loop = items.pop("LoopMode", "")
+        if loop:
+            ordered.append(f'<div class="param-row">{loop}</div>')
+
+        final_val = items.pop("Final", "")
+        if final_val:
+            ordered.append(f'<div class="param-row">{final_val}</div>')
+
+        initial_val = items.pop("Initial", "")
+        if initial_val:
+            ordered.append(f'<div class="param-row">{initial_val}</div>')
+
+        peak_val = items.pop("Peak", "")
+        if peak_val:
+            ordered.append(f'<div class="param-row">{peak_val}</div>')
+
         if items:
             ordered.extend(items.values())
         return ordered
