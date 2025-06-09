@@ -1,12 +1,18 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Check for dev mode
+# Check for flags
 DEV_MODE=false
+OVERWRITE=false
 for arg in "$@"; do
-  if [ "$arg" = "--dev" ]; then
-    DEV_MODE=true
-  fi
+  case "$arg" in
+    --dev)
+      DEV_MODE=true
+      ;;
+    --overwrite)
+      OVERWRITE=true
+      ;;
+  esac
 done
 
 # --- Figure out where we live ---
@@ -35,6 +41,10 @@ if ! printf "%s\n%s\n" "$HIGHEST_TESTED_VERSION" "$INSTALLED_VERSION" | sort -V 
 fi
 
 # --- Ensure remote directory exists ---
+if [ "$OVERWRITE" = true ]; then
+  echo "Overwrite enabled: deleting ${REMOTE_DIR} on ${REMOTE_HOST}…"
+  ssh -T "${REMOTE_USER}@${REMOTE_HOST}" "rm -rf '${REMOTE_DIR}'"
+fi
 echo "Creating ${REMOTE_DIR} on ${REMOTE_HOST}…"
 ssh -T "${REMOTE_USER}@${REMOTE_HOST}" "mkdir -p '${REMOTE_DIR}'"
 
