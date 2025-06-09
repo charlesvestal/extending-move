@@ -32,6 +32,9 @@ from handlers.synth_preset_inspector_handler_class import (
     SynthPresetInspectorHandler,
 )
 from handlers.synth_param_editor_handler_class import SynthParamEditorHandler
+from handlers.wavetable_param_editor_handler_class import (
+    WavetableParamEditorHandler,
+)
 from handlers.drum_rack_inspector_handler_class import DrumRackInspectorHandler
 from handlers.file_placer_handler_class import FilePlacerHandler
 from handlers.refresh_handler_class import RefreshHandler
@@ -109,6 +112,7 @@ slice_handler = SliceHandler()
 set_management_handler = SetManagementHandler()
 synth_handler = SynthPresetInspectorHandler()
 synth_param_handler = SynthParamEditorHandler()
+wavetable_param_handler = WavetableParamEditorHandler()
 file_placer_handler = FilePlacerHandler()
 refresh_handler = RefreshHandler()
 drum_rack_handler = DrumRackInspectorHandler()
@@ -495,6 +499,61 @@ def synth_params():
         param_paths_json=param_paths_json,
         schema_json=schema_json,
         active_tab="synth-params",
+    )
+
+
+@app.route("/wavetable-params", methods=["GET", "POST"])
+def wavetable_params():
+    if request.method == "POST":
+        form = SimpleForm(request.form.to_dict())
+        result = wavetable_param_handler.handle_post(form)
+    else:
+        if "preset" in request.args:
+            form = SimpleForm({
+                "action": "select_preset",
+                "preset_select": request.args.get("preset"),
+            })
+            result = wavetable_param_handler.handle_post(form)
+        else:
+            result = wavetable_param_handler.handle_get()
+
+    message = result.get("message")
+    message_type = result.get("message_type")
+    success = message_type != "error" if message_type else False
+    browser_html = result.get("file_browser_html")
+    browser_root = result.get("browser_root")
+    browser_filter = result.get("browser_filter")
+    params_html = result.get("params_html", "")
+    selected_preset = result.get("selected_preset")
+    param_count = result.get("param_count", 0)
+    default_preset_path = result.get("default_preset_path")
+    macro_knobs_html = result.get("macro_knobs_html", "")
+    rename_checked = result.get("rename_checked", False)
+    macros_json = result.get("macros_json", "[]")
+    available_params_json = result.get("available_params_json", "[]")
+    param_paths_json = result.get("param_paths_json", "{}")
+    schema_json = result.get("schema_json", "{}")
+    preset_selected = bool(selected_preset)
+    return render_template(
+        "wavetable_params.html",
+        message=message,
+        success=success,
+        message_type=message_type,
+        file_browser_html=browser_html,
+        browser_root=browser_root,
+        browser_filter=browser_filter,
+        params_html=params_html,
+        preset_selected=preset_selected,
+        selected_preset=selected_preset,
+        param_count=param_count,
+        default_preset_path=default_preset_path,
+        macro_knobs_html=macro_knobs_html,
+        rename_checked=rename_checked,
+        macros_json=macros_json,
+        available_params_json=available_params_json,
+        param_paths_json=param_paths_json,
+        schema_json=schema_json,
+        active_tab="wavetable-params",
     )
 
 
