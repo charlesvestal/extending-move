@@ -19,6 +19,8 @@ else
   PORT=909
 fi
 
+
+
 echo "Restarting the webserver on ${REMOTE_HOST}..."
 
 if [ -n "${SKIP_MODULE_WARMUP:-}" ]; then
@@ -37,6 +39,10 @@ if [ -f "$CONFIG_FILE" ]; then
 else
   PORT=909
 fi
+
+# Ensure webserver can access bundled binaries
+EXT_DIR="/data/UserData/extending-move/bin"
+export PATH="/data/UserData/bin:$EXT_DIR:$EXT_DIR/rubberband:$PATH"
 
 # Use the absolute paths
 PID_FILE="/data/UserData/extending-move/move-webserver.pid"

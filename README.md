@@ -61,6 +61,9 @@ Tools for extending the Ableton Move. This project provides a companion webserve
   - Uses Move's D-Bus interface
   - Clears cached preset and sample lists used by the web tools
   - File lists are cached for faster loading between scans
+- **In-Place Update**
+  - Visit ``move.local:<port>/update`` to check for new versions
+  - If available, download and install updates directly on the device
     
 ## Installation
 
@@ -236,6 +239,7 @@ Interested in chatting about more Move hacking? Come talk to us on [Discord](htt
 This project is not affiliated with, authorized by, or endorsed by Ableton. Use at your own risk. The authors cannot be held responsible for any damage or issues that may occur. Always refer to official documentation when modifying hardware.
 
 This project includes a statically linked binary of Rubber Band. The source code for Rubber Band is available under GPLv2 at [https://breakfastquay.com/rubberband/](https://breakfastquay.com/rubberband/).
+It also fetches a statically linked Git executable from the [EXALAB/git-static](https://github.com/EXALAB/git-static) project for use on devices without Git. The `update-on-move` script installs this binary to `~/bin/git` on your Move if it isn’t already present.
 
 > These tools are third-party and require SSH access. That means:
 > * There’s a real risk (though unlikely) of breaking things, including potentially bricking a device. You are accessing the Move in ways it was not designed to do.

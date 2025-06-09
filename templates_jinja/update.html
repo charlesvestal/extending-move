@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Update</h2>
+<p>{{ message }}</p>
+{% if update_available %}
+<form method="post">
+  <input type="hidden" name="action" value="perform_update">
+  <button type="submit">Update Now</button>
+</form>
+{% endif %}
+{% endblock %}
