@@ -352,10 +352,9 @@ class WavetableParamEditorHandler(BaseHandler):
         "FX",
         "Mixer",
         "Filter",
-        "Envelopes",
-        "LFO",
         "Modulation",
         "Global",
+        "Envelopes",
         "Extras",
         "Other",
     ]
@@ -384,7 +383,7 @@ class WavetableParamEditorHandler(BaseHandler):
             ("Voice_Modulators_Envelope2_", "Envelope 2", "Envelope2"),
             ("Voice_Modulators_Envelope3_", "Envelope 3", "Envelope3"),
         ],
-        "LFO": [
+        "Modulation": [
             ("Voice_Modulators_Lfo1_", "LFO 1", "Lfo"),
             ("Voice_Modulators_Lfo2_", "LFO 2", "Lfo"),
         ],
@@ -693,7 +692,7 @@ class WavetableParamEditorHandler(BaseHandler):
         if name.startswith("Voice_Modulators_AmpEnvelope") or name.startswith("Voice_Modulators_Envelope"):
             return "Envelopes"
         if name.startswith("Voice_Modulators_Lfo"):
-            return "LFO"
+            return "Modulation"
         if name.startswith("Voice_Modulators"):
             return "Modulation"
         if name.startswith(("Voice_Global_", "Voice_Unison_")) or name in {"HiQ", "MonoPoly", "PolyVoices", "Volume"}:
@@ -895,9 +894,9 @@ class WavetableParamEditorHandler(BaseHandler):
             if group_items:
                 sections[sec] = group_items
 
-        out_html = '<div class="wavetable-param-panels">'
+        first_row = {"Oscillators", "FX", "Mixer"}
+        top_panels = []
         bottom_panels = []
-        second_row = {"LFO", "Modulation", "Global", "Extras"}
         for sec in self.SECTION_ORDER:
             items = sections.get(sec)
             if not items:
@@ -907,10 +906,13 @@ class WavetableParamEditorHandler(BaseHandler):
                 f'<div class="param-panel {cls}"><h3>{sec}</h3>'
                 f'<div class="param-items">{"".join(items)}</div></div>'
             )
-            if sec in second_row:
-                bottom_panels.append(panel_html)
+            if sec in first_row:
+                top_panels.append(panel_html)
             else:
-                out_html += panel_html
+                bottom_panels.append(panel_html)
+
+        out_html = '<div class="wavetable-param-panels">'
+        out_html += ''.join(top_panels)
         out_html += '</div>'
         if bottom_panels:
             out_html += '<div class="wavetable-param-panels">'
