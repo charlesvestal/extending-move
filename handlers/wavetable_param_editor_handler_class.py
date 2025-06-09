@@ -421,7 +421,6 @@ class WavetableParamEditorHandler(BaseHandler):
         "Global_Glide": "Glide",
         "Global_DriftDepth": "Drift",
         "Global_Volume": "Volume",
-        "Global_Envelope2Mode": "Env/Cyc",
         "Global_VolVelMod": "Vel > Vol",
         "Global_Transpose": "Transpose",
         "Global_NotePitchBend": "Note PB",
@@ -455,55 +454,32 @@ class WavetableParamEditorHandler(BaseHandler):
         "Wander": "Wndr",
     }
 
-    # Parameters that should display without a text label
-    UNLABELED_PARAMS = {
-        "Oscillator1_ShapeMod",
-        "PitchModulation_Source1",
-        "PitchModulation_Source2",
-        "PitchModulation_Amount1",
-        "PitchModulation_Amount2",
-        "Filter_ModSource1",
-        "Filter_ModSource2",
-        "Filter_ModAmount1",
-        "Filter_ModAmount2",
-        "Global_Envelope2Mode",
-        "ModulationMatrix_Source1",
-        "ModulationMatrix_Amount1",
-        "ModulationMatrix_Target1",
-        "ModulationMatrix_Source2",
-        "ModulationMatrix_Amount2",
-        "ModulationMatrix_Target2",
-        "ModulationMatrix_Source3",
-        "ModulationMatrix_Amount3",
-        "ModulationMatrix_Target3",
-        "Lfo_ModAmount",
-    }
+    # Parameters that should display without a text label. The raw Wavetable
+    # parameter names use a much longer naming scheme (e.g. ``Voice_Modulators_*``).
+    # For now we rely on automatic label generation so this set is empty.
+    UNLABELED_PARAMS = set()
 
-    # Parameters that use a horizontal slider instead of a dial
-    SLIDER_PARAMS = {
-        "Oscillator1_ShapeMod",
-        "PitchModulation_Amount1",
-        "PitchModulation_Amount2",
-        "Filter_ModAmount1",
-        "Filter_ModAmount2",
-        "Global_DriftDepth",
-        "Global_Glide",
-        "Global_VolVelMod",
-        "Global_Transpose",
-        "Global_PitchBendRange",
-        "ModulationMatrix_Amount1",
-        "ModulationMatrix_Amount2",
-        "ModulationMatrix_Amount3",
-        "Lfo_ModAmount",
-        "Filter_Tracking",
+    # Parameters that use a horizontal slider instead of a dial.  The current
+    # schema doesn't provide an easy way to detect these automatically, so no
+    # parameters are forced to sliders yet.
+    SLIDER_PARAMS = set()
 
-    }
+    def _friendly_label(self, name: str) -> str:
+        """Return a friendlier version of a parameter name."""
+        if not name:
+            return name
+        label = name.replace("_", " ")
+        label = re.sub(r"([A-Za-z])([0-9])", r"\1 \2", label)
+        label = re.sub(r"([a-z])([A-Z])", r"\1 \2", label)
+        return label
 
     def _build_param_item(self, idx, name, value, meta, label=None,
                            hide_label=False, slider=False, extra_classes=""):
         """Create HTML for a single parameter control."""
         p_type = meta.get("type")
-        label = label if label is not None else self.LABEL_OVERRIDES.get(name, name)
+        label = label if label is not None else self.LABEL_OVERRIDES.get(
+            name, self._friendly_label(name)
+        )
 
         classes = "param-item"
         if extra_classes:
@@ -512,30 +488,12 @@ class WavetableParamEditorHandler(BaseHandler):
         if not hide_label:
             html.append(f'<span class="param-label">{label}</span>')
 
-        if name == "Global_Envelope2Mode":
-            true_val = "Cyc"
-            false_val = "Env"
-            checked = "checked" if value == true_val else ""
-            html.append(
-                f'<input type="checkbox" id="param_{idx}_toggle" class="param-toggle input-switch" '
-                f'data-target="param_{idx}_value" data-true-value="{true_val}" data-false-value="{false_val}" {checked}>'
-            )
-            html.append(f'<input type="hidden" name="param_{idx}_value" value="{value}">')
-        elif p_type == "enum" and meta.get("options"):
+        if p_type == "enum" and meta.get("options"):
             select_class = "param-select"
-            if name == "Filter_Type":
-                select_class += " filter-type-select"
             html.append(f'<select class="{select_class}" name="param_{idx}_value">')
-            short_map = {}
-            if name in ("Oscillator1_Type", "Oscillator2_Type"):
-                short_map = self.OSC_WAVE_SHORT
-            elif name == "Lfo_Shape":
-                short_map = self.LFO_WAVE_SHORT
             for opt in meta["options"]:
                 sel = " selected" if str(value) == str(opt) else ""
-                label_opt = short_map.get(opt, opt)
-                title_attr = f' title="{opt}"' if label_opt != opt else ""
-                html.append(f'<option value="{opt}"{title_attr}{sel}>{label_opt}</option>')
+                html.append(f'<option value="{opt}"{sel}>{opt}</option>')
             html.append('</select>')
             html.append(f'<input type="hidden" name="param_{idx}_value" value="{value}">')
         elif p_type == "boolean":
@@ -608,31 +566,18 @@ class WavetableParamEditorHandler(BaseHandler):
         return ''.join(html)
 
     def _get_section(self, name):
-        if name == "Global_Envelope2Mode":
-            return "Envelopes"
-        if name.startswith(("Oscillator1_", "Oscillator2_", "PitchModulation_")):
+        """Return the panel section for a raw Wavetable parameter name."""
+        if name.startswith(("Voice_Oscillator", "Voice_SubOscillator")):
             return "Oscillators"
-        if name.startswith("Mixer_") or name.startswith("Filter_OscillatorThrough") or name.startswith("Filter_NoiseThrough"):
-            return "Mixer"
-        if name.startswith("Filter_"):
+        if name.startswith("Voice_Filter"):
             return "Filter"
-        if name.startswith(("Envelope1_", "Envelope2_", "CyclingEnvelope_")):
+        if name.startswith("Voice_Modulators_AmpEnvelope") or name.startswith("Voice_Modulators_Envelope"):
             return "Envelopes"
-        if name.startswith("Lfo_"):
+        if name.startswith("Voice_Modulators_Lfo"):
             return "LFO"
-        if name.startswith("ModulationMatrix_"):
+        if name.startswith("Voice_Modulators"):
             return "Modulation"
-        if name.startswith("Global_"):
-            if name in {
-                "Global_HiQuality",
-                "Global_MonoVoiceDepth",
-                "Global_PolyVoiceDepth",
-                "Global_ResetOscillatorPhase",
-                "Global_StereoVoiceDepth",
-                "Global_UnisonVoiceDepth",
-                "Global_SerialNumber",
-            }:
-                return "Extras"
+        if name.startswith(("Voice_Global_", "Voice_Unison_")) or name in {"HiQ", "MonoPoly", "PolyVoices", "Volume"}:
             return "Global"
         return "Other"
 
@@ -646,320 +591,31 @@ class WavetableParamEditorHandler(BaseHandler):
 
         schema = load_wavetable_schema()
         sections = {s: [] for s in self.SECTION_ORDER}
-        filter_items: dict[str, str] = {}
-        osc_items: dict[str, str] = {}
-        env_items: dict[str, str] = {}
-        lfo_items: dict[str, str] = {}
-        mixer_items: dict[str, str] = {}
-        global_items: dict[str, str] = {}
-        extras_items: dict[str, str] = {}
-        mod_items: dict[str, str] = {}
-        cycling_mode_val = None
-        lfo_mode_val = None
 
         for i, item in enumerate(params):
-            name = item['name']
-            val = item['value']
+            name = item["name"]
+            val = item["value"]
             meta = dict(schema.get(name, {}))
-
-            if name == "Oscillator1_Transpose":
-                meta.pop("unit", None)
-            elif name == "Oscillator2_Transpose" and meta.get("unit") == "st":
-                meta.pop("unit", None)
 
             hide = name in self.UNLABELED_PARAMS
             slider = name in self.SLIDER_PARAMS
-
             extra = ""
-            if name == "CyclingEnvelope_Rate":
-                extra = "cycle-rate freq-rate"
-            elif name == "CyclingEnvelope_Ratio":
-                extra = "cycle-rate ratio-rate"
-            elif name == "CyclingEnvelope_Time":
-                extra = "cycle-rate time-rate"
-            elif name == "CyclingEnvelope_SyncedRate":
-                extra = "cycle-rate sync-rate"
-            elif name == "Lfo_Rate":
-                extra = "lfo-rate freq-rate"
-            elif name == "Lfo_Ratio":
-                extra = "lfo-rate ratio-rate"
-            elif name == "Lfo_Time":
-                extra = "lfo-rate time-rate"
-            elif name == "Lfo_SyncedRate":
-                extra = "lfo-rate sync-rate"
-
             if name in mapped_parameters:
-                macro_idx = mapped_parameters[name]['macro_index']
-                extra = f"{extra} macro-{macro_idx}".strip()
+                macro_idx = mapped_parameters[name]["macro_index"]
+                extra = f"macro-{macro_idx}"
 
             html = self._build_param_item(
                 i,
                 name,
                 val,
                 meta,
-                label=self.LABEL_OVERRIDES.get(name, name),
                 hide_label=hide,
                 slider=slider,
                 extra_classes=extra,
             )
 
-            if name == "CyclingEnvelope_Mode":
-                cycling_mode_val = val
-            if name == "Lfo_Mode":
-                lfo_mode_val = val
-
-            section = self._get_section(name)
-            if section == "Filter":
-                filter_items[name] = html
-            elif section == "Oscillators":
-                osc_items[name] = html
-            elif section == "Envelopes":
-                env_items[name] = html
-            elif section == "LFO":
-                lfo_items[name] = html
-            elif section == "Mixer":
-                mixer_items[name] = html
-            elif section == "Global":
-                global_items[name] = html
-            elif section == "Extras":
-                extras_items[name] = html
-            elif section == "Modulation":
-                mod_items[name] = html
-            else:
-                sections[section].append(html)
-
-        if filter_items:
-            ordered = []
-
-            freq = filter_items.pop("Filter_Frequency", "")
-            f_type = filter_items.pop("Filter_Type", "")
-            tracking = filter_items.pop("Filter_Tracking", "")
-            pair = ""
-            if f_type or tracking:
-                pair = f'<div class="param-pair">{f_type}{tracking}</div>'
-            row1_html = f"{freq}{pair}"
-            if row1_html.strip():
-                ordered.append(f'<div class="param-row">{row1_html}</div>')
-
-            row2_html = "".join(filter_items.pop(p, "") for p in ["Filter_Resonance", "Filter_HiPassFrequency"] if p in filter_items)
-            if row2_html:
-                ordered.append(f'<div class="param-row">{row2_html}</div>')
-
-            src1 = filter_items.pop("Filter_ModSource1", "")
-            amt1 = filter_items.pop("Filter_ModAmount1", "")
-            src2 = filter_items.pop("Filter_ModSource2", "")
-            amt2 = filter_items.pop("Filter_ModAmount2", "")
-            pair1 = f'<div class="param-pair">{src1}{amt1}</div>' if (src1 or amt1) else ""
-            pair2 = f'<div class="param-pair">{src2}{amt2}</div>' if (src2 or amt2) else ""
-            if pair1.strip() or pair2.strip():
-                ordered.append('<div class="freq-mod-label">Freq Mod</div>')
-                ordered.append(f'<div class="param-row filter-mod-row">{pair1}{pair2}</div>')
-
-            ordered.extend(filter_items.values())
-            sections["Filter"] = ordered
-
-        if mixer_items:
-            mixer_rows = [
-                ["Mixer_OscillatorOn1", "Mixer_OscillatorGain1", "Filter_OscillatorThrough1"],
-                ["Mixer_OscillatorOn2", "Mixer_OscillatorGain2", "Filter_OscillatorThrough2"],
-                ["Mixer_NoiseOn", "Mixer_NoiseLevel", "Filter_NoiseThrough"],
-            ]
-            ordered = []
-            for row in mixer_rows:
-                row_html = "".join(mixer_items.pop(p, "") for p in row if p in mixer_items)
-                if row_html:
-                    ordered.append(f'<div class="param-row">{row_html}</div>')
-            ordered.extend(mixer_items.values())
-            sections["Mixer"] = ordered
-
-        if osc_items:
-            ordered = []
-            row1_parts = [
-                osc_items.pop("Oscillator1_Type", ""),
-                osc_items.pop("Oscillator1_Transpose", ""),
-                osc_items.pop("Oscillator1_Shape", ""),
-            ]
-            shape_src = osc_items.pop("Oscillator1_ShapeModSource", "")
-            shape_amt = osc_items.pop("Oscillator1_ShapeMod", "")
-            shape_pair = f'<div class="param-pair">{shape_src}{shape_amt}</div>' if (shape_src or shape_amt) else ""
-            row1 = "".join(row1_parts) + shape_pair
-            if row1:
-                ordered.append(f'<div class="param-row">{row1}</div>')
-
-            row2 = "".join([
-                osc_items.pop("Oscillator2_Type", ""),
-                osc_items.pop("Oscillator2_Transpose", ""),
-                osc_items.pop("Oscillator2_Detune", ""),
-            ])
-            if row2:
-                ordered.append(f'<div class="param-row">{row2}</div>')
-
-            pm_pair1 = (
-                f'<div class="param-pair">{osc_items.pop("PitchModulation_Source1", "")}'
-                f'{osc_items.pop("PitchModulation_Amount1", "")}</div>'
-            )
-            pm_pair2 = (
-                f'<div class="param-pair">{osc_items.pop("PitchModulation_Source2", "")}'
-                f'{osc_items.pop("PitchModulation_Amount2", "")}</div>'
-            )
-            if pm_pair1.strip() or pm_pair2.strip():
-                ordered.append('<div class="pitch-mod-label">Pitch Mod</div>')
-                ordered.append(f'<div class="param-row pitch-mod-row">{pm_pair1}{pm_pair2}</div>')
-
-            ordered.extend(osc_items.values())
-            sections["Oscillators"] = ordered
-
-        if env_items:
-            amp_adsr = [
-                env_items.pop("Envelope1_Attack", ""),
-                env_items.pop("Envelope1_Decay", ""),
-                env_items.pop("Envelope1_Sustain", ""),
-                env_items.pop("Envelope1_Release", ""),
-            ]
-            env2_adsr = [
-                env_items.pop("Envelope2_Attack", ""),
-                env_items.pop("Envelope2_Decay", ""),
-                env_items.pop("Envelope2_Sustain", ""),
-                env_items.pop("Envelope2_Release", ""),
-            ]
-            cycle_toggle = env_items.pop("Global_Envelope2Mode", "")
-            cycle_mid = env_items.pop("CyclingEnvelope_MidPoint", "")
-            cycle_hold = env_items.pop("CyclingEnvelope_Hold", "")
-            cycle_rate = env_items.pop("CyclingEnvelope_Rate", "")
-            cycle_ratio = env_items.pop("CyclingEnvelope_Ratio", "")
-            cycle_time = env_items.pop("CyclingEnvelope_Time", "")
-            cycle_sync = env_items.pop("CyclingEnvelope_SyncedRate", "")
-            cycle_mode = env_items.pop("CyclingEnvelope_Mode", "")
-
-            ordered = []
-            row1 = "".join(amp_adsr)
-            if row1:
-                ordered.append(
-                    f'<div class="param-row"><span class="param-row-label">Amp envelope</span>{row1}</div>'
-                )
-            if cycle_toggle:
-                ordered.append(
-                    f'<div class="param-row env2-mode"><span class="param-row-label">Env/Cyc</span>{cycle_toggle}</div>'
-                )
-            row2_main = "".join(env2_adsr)
-            if row2_main.strip():
-                ordered.append(
-                    f'<div class="param-row env2-adsr"><span class="param-row-label">Env 2</span>{row2_main}</div>'
-                )
-            if any([cycle_mid, cycle_hold, cycle_rate, cycle_ratio, cycle_time, cycle_sync, cycle_mode]):
-                # Hide unselected rate controls based on current mode
-                if cycling_mode_val != "Freq" and cycle_rate:
-                    cycle_rate = cycle_rate.replace('param-item"', 'param-item hidden"', 1)
-                if cycling_mode_val != "Ratio" and cycle_ratio:
-                    cycle_ratio = cycle_ratio.replace('param-item"', 'param-item hidden"', 1)
-                if cycling_mode_val != "Time" and cycle_time:
-                    cycle_time = cycle_time.replace('param-item"', 'param-item hidden"', 1)
-                if cycling_mode_val != "Sync" and cycle_sync:
-                    cycle_sync = cycle_sync.replace('param-item"', 'param-item hidden"', 1)
-
-                row3_extra = "".join([
-                    cycle_mid,
-                    cycle_hold,
-                    cycle_rate,
-                    cycle_ratio,
-                    cycle_time,
-                    cycle_sync,
-                    cycle_mode,
-                ])
-                ordered.append(
-                    f'<div class="param-row env2-cycling hidden"><span class="param-row-label">Env 2</span>{row3_extra}</div>'
-                )
-
-            ordered.extend(env_items.values())
-            sections["Envelopes"] = ordered
-
-        if global_items:
-            col1_order = [
-                "Global_VoiceMode",
-                "Global_VoiceCount",
-                "Global_DriftDepth",
-                "Global_Legato",
-                "Global_Glide",
-            ]
-            col2_order = [
-                "Global_Volume",
-                "Global_VolVelMod",
-                "Global_Transpose",
-                "Global_NotePitchBend",
-                "Global_PitchBendRange",
-            ]
-            col1_html = "".join(global_items.pop(n, "") for n in col1_order)
-            col2_html = "".join(global_items.pop(n, "") for n in col2_order)
-            ordered = []
-            if col1_html or col2_html:
-                ordered.append(
-                    f'<div class="param-columns"><div class="param-column">{col1_html}</div><div class="param-column">{col2_html}</div></div>'
-                )
-            ordered.extend(global_items.values())
-            sections["Global"] = ordered
-
-        if extras_items:
-            sections["Extras"] = list(extras_items.values())
-
-        if mod_items:
-            mods = []
-            for idx in range(1, 4):
-                src = mod_items.pop(f"ModulationMatrix_Source{idx}", "")
-                amt = mod_items.pop(f"ModulationMatrix_Amount{idx}", "")
-                dst = mod_items.pop(f"ModulationMatrix_Target{idx}", "")
-                if src or amt or dst:
-                    mods.append(
-                        f'<div class="param-pair mod-group">'
-                        f'<span class="mod-label">Mod {idx}</span>'
-                        f'{src}{amt}{dst}'
-                        f'</div>'
-                    )
-
-            ordered = []
-            if mods:
-                for mod in mods:
-                    ordered.append(
-                        f'<div class="param-row mod-matrix-row">{mod}</div>'
-                    )
-
-            ordered.extend(mod_items.values())
-            sections["Modulation"] = ordered
-
-        if lfo_items:
-            rate = lfo_items.pop("Lfo_Rate", "")
-            ratio = lfo_items.pop("Lfo_Ratio", "")
-            time = lfo_items.pop("Lfo_Time", "")
-            sync = lfo_items.pop("Lfo_SyncedRate", "")
-            mode = lfo_items.pop("Lfo_Mode", "")
-            shape = lfo_items.pop("Lfo_Shape", "")
-            retrig = lfo_items.pop("Lfo_Retrigger", "")
-            amount = lfo_items.pop("Lfo_Amount", "")
-            mod_src = lfo_items.pop("Lfo_ModSource", "")
-            mod_amt = lfo_items.pop("Lfo_ModAmount", "")
-
-            if lfo_mode_val != "Freq" and rate:
-                rate = rate.replace('param-item"', 'param-item hidden"', 1)
-            if lfo_mode_val != "Ratio" and ratio:
-                ratio = ratio.replace('param-item"', 'param-item hidden"', 1)
-            if lfo_mode_val != "Time" and time:
-                time = time.replace('param-item"', 'param-item hidden"', 1)
-            if lfo_mode_val != "Sync" and sync:
-                sync = sync.replace('param-item"', 'param-item hidden"', 1)
-
-            ordered = []
-            row1 = "".join([rate, ratio, time, sync, mode])
-            if row1.strip():
-                ordered.append(f'<div class="param-row lfo-rate-row">{row1}</div>')
-            row2 = "".join([shape, retrig])
-            if row2.strip():
-                ordered.append(f'<div class="param-row">{row2}</div>')
-            pair = f'<div class="param-pair">{mod_src}{mod_amt}</div>' if (mod_src or mod_amt) else ""
-            row3 = "".join([amount, pair])
-            if row3.strip():
-                ordered.append(f'<div class="param-row">{row3}</div>')
-
-            ordered.extend(lfo_items.values())
-            sections["LFO"] = ordered
+            sec = self._get_section(name)
+            sections.setdefault(sec, []).append(html)
 
         out_html = '<div class="wavetable-param-panels">'
         bottom_panels = []
