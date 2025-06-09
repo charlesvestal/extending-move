@@ -6,30 +6,48 @@ from core.cache_manager import get_cache, set_cache
 
 logger = logging.getLogger(__name__)
 
-# Path to the Drift parameter schema relative to the project root
-SCHEMA_PATH = os.path.join(
+# Paths to parameter schemas
+DRIFT_SCHEMA_PATH = os.path.join(
     os.path.dirname(os.path.dirname(__file__)),
     "static",
     "schemas",
     "drift_schema.json",
 )
 
+WAVETABLE_SCHEMA_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(__file__)),
+    "static",
+    "schemas",
+    "wavetable_schema.json",
+)
+
 
 def load_drift_schema():
     """Load parameter metadata for Drift from ``drift_schema.json``."""
     try:
-        with open(SCHEMA_PATH, "r") as f:
+        with open(DRIFT_SCHEMA_PATH, "r") as f:
             return json.load(f)
     except Exception as exc:
         logger.warning("Could not load drift schema: %s", exc)
         return {}
 
-def extract_available_parameters(preset_path):
+
+def load_wavetable_schema():
+    """Load parameter metadata for Wavetable from ``wavetable_schema.json``."""
+    try:
+        with open(WAVETABLE_SCHEMA_PATH, "r") as f:
+            return json.load(f)
+    except Exception as exc:
+        logger.warning("Could not load wavetable schema: %s", exc)
+        return {}
+
+def extract_available_parameters(preset_path, device_kinds=("drift",)):
     """
-    Extract available parameters from drift or wavetable devices in a preset file.
+    Extract available parameters from specified synth devices in a preset file.
     
     Args:
         preset_path: Path to the .ablpreset file
+        device_kinds: Tuple of device kinds to search for (e.g. ("drift",))
         
     Returns:
         dict: Result with keys:
@@ -50,11 +68,10 @@ def extract_available_parameters(preset_path):
         # Dictionary to store synth device paths
         synth_device_paths = set()
         
-        # First, find all drift and wavetable devices
+        # First, find all requested synth devices
         def find_synth_devices(data, path=""):
             if isinstance(data, dict):
-                # Check if this is a drift device
-                if data.get('kind') == 'drift':  # Only look for drift devices
+                if data.get('kind') in device_kinds:
                     synth_device_paths.add(path)
                     logger.debug("Found %s device at path: %s", data.get('kind'), path)
                 
@@ -103,7 +120,10 @@ def extract_available_parameters(preset_path):
         # Convert set to sorted list
         parameters_list = sorted(list(parameters))
 
-        schema = load_drift_schema()
+        if device_kinds == ("wavetable",):
+            schema = load_wavetable_schema()
+        else:
+            schema = load_drift_schema()
         parameter_info = {p: schema.get(p, {}) for p in parameters_list}
 
         return {
@@ -122,8 +142,8 @@ def extract_available_parameters(preset_path):
         }
 
 
-def extract_parameter_values(preset_path):
-    """Return all parameter names and their values from drift presets."""
+def extract_parameter_values(preset_path, device_kinds=("drift",)):
+    """Return all parameter names and their values from synth presets."""
     try:
         with open(preset_path, "r") as f:
             preset_data = json.load(f)
@@ -133,7 +153,7 @@ def extract_parameter_values(preset_path):
 
         def find_synth_devices(data, path=""):
             if isinstance(data, dict):
-                if data.get("kind") == "drift":
+                if data.get("kind") in device_kinds:
                     synth_device_paths.add(path)
                 for key, value in data.items():
                     new_path = f"{path}.{key}" if path else key
@@ -755,9 +775,9 @@ def delete_parameter_mapping(preset_path, param_path):
             'message': f"Error deleting parameter mapping: {e}"
         }
 
-def scan_for_synth_presets():
+def scan_for_synth_presets(device_kinds=("drift",)):
     """Scan ``Track Presets`` for synth presets using a cache."""
-    cache_key = "synth_presets"
+    cache_key = "synth_presets:" + ",".join(sorted(device_kinds))
     cached = get_cache(cache_key)
     if cached is not None:
         return {
@@ -798,8 +818,7 @@ def scan_for_synth_presets():
                         with open(filepath, 'r') as f:
                             preset_data = json.load(f)
 
-                        # Check if preset contains a drift device
-                        device_type = has_device_type(preset_data, ['drift'])  # Only look for drift devices
+                        device_type = has_device_type(preset_data, device_kinds)
                         if device_type:
                             preset_name = os.path.splitext(filename)[0]
                             rel = os.path.relpath(filepath, presets_dir)

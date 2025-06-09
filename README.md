@@ -33,6 +33,11 @@ Tools for extending the Ableton Move. This project provides a companion webserve
   - Slider steps are 0.01 for values near ±1 and adapt to the parameter's default precision
   - Enum parameters provide a dropdown of options
   - Create new presets starting from the included Analog Shape example
+
+- **Wavetable Preset Editor**
+  - Modify any Wavetable parameter value
+  - Manage macros with the same interface as the Drift editor
+  - Save changes as new presets starting from the included E-Piano example
  
 - **MIDI Import**
   - Upload MIDI files to create new sets

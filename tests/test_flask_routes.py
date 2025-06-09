@@ -195,6 +195,63 @@ def test_synth_params_new_preset(client, monkeypatch):
     assert b'name="new_preset_name"' in resp.data
     assert b'id="randomize-btn"' in resp.data
 
+def test_wavetable_params_get(client, monkeypatch):
+    from handlers.wavetable_param_editor_handler_class import DEFAULT_PRESET as WP
+
+    def fake_get():
+        return {
+            'message': 'pick',
+            'message_type': 'info',
+            'file_browser_html': '<ul></ul>',
+            'params_html': '',
+            'selected_preset': None,
+            'param_count': 0,
+            'browser_root': '/tmp',
+            'default_preset_path': WP,
+        }
+    monkeypatch.setattr(move_webserver.wavetable_param_handler, 'handle_get', fake_get)
+    resp = client.get('/wavetable-params')
+    assert resp.status_code == 200
+    assert b'pick' in resp.data
+    assert b'Create New Wavetable Preset' in resp.data
+
+def test_wavetable_params_post(client, monkeypatch):
+    def fake_post(form):
+        return {
+            'message': 'done',
+            'message_type': 'success',
+            'params_html': '<div>p</div>',
+            'browser_root': '/tmp',
+            'selected_preset': 'x',
+            'param_count': 1,
+        }
+    monkeypatch.setattr(move_webserver.wavetable_param_handler, 'handle_post', fake_post)
+    resp = client.post('/wavetable-params', data={'action': 'select_preset'})
+    assert resp.status_code == 200
+    assert b'done' in resp.data
+    assert b'Editing:' in resp.data
+    assert b'id="randomize-btn"' in resp.data
+
+def test_wavetable_params_new_preset(client, monkeypatch):
+    from handlers.wavetable_param_editor_handler_class import DEFAULT_PRESET as WP
+
+    def fake_post(form):
+        return {
+            'message': 'loaded',
+            'message_type': 'success',
+            'params_html': '<div>x</div>',
+            'browser_root': '/tmp',
+            'selected_preset': WP,
+            'param_count': 2,
+            'default_preset_path': WP,
+        }
+    monkeypatch.setattr(move_webserver.wavetable_param_handler, 'handle_post', fake_post)
+    resp = client.post('/wavetable-params', data={'action': 'new_preset', 'new_preset_name': 'Test'})
+    assert resp.status_code == 200
+    assert b'loaded' in resp.data
+    assert b'Editing:' in resp.data
+    assert b'name="rename"' in resp.data
+
 def test_drum_rack_inspector_get(client, monkeypatch):
     def fake_get():
         return {
