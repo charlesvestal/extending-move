@@ -95,6 +95,31 @@
     <div class="param-list">
         {{ params_html | safe }}
     </div>
+
+    <div id="mod-matrix-section">
+        <h3>Modulation Matrix</h3>
+        <input type="hidden" id="mod-matrix-data-input" name="mod_matrix_data" value="[]">
+        <table id="mod-matrix-table">
+            <thead>
+                <tr>
+                    <th>Destination</th>
+                    <th>Amp Env</th>
+                    <th>Env 2</th>
+                    <th>Env 3</th>
+                    <th>LFO 1</th>
+                    <th>LFO 2</th>
+                    <th>Velocity</th>
+                    <th>Key</th>
+                    <th>Pitch Bend</th>
+                    <th>Pressure</th>
+                    <th>Mod Wheel</th>
+                    <th>Random</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <button type="button" id="mod-matrix-add">Add Row</button>
+    </div>
 </form>
 
 {% endif %}
@@ -114,6 +139,7 @@
 window.driftSchema = {{ schema_json|safe }};
 </script>
 <script src="{{ host_prefix }}/static/macro_sidebar.js"></script>
+<script src="{{ host_prefix }}/static/mod_matrix.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const cb = document.getElementById('rename-checkbox');
