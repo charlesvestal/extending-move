@@ -44,6 +44,7 @@ function initModMatrix() {
     tr.appendChild(tdSel);
 
     row.values = row.values || Array(headers.length).fill(0);
+    row.extra = row.extra || [0, 0];
     row.values.forEach((v, col) => {
       const td = document.createElement('td');
       const slider = document.createElement('div');
@@ -83,7 +84,7 @@ function initModMatrix() {
 
   if (addBtn) {
     addBtn.addEventListener('click', () => {
-      matrix.push({ name: '', values: Array(headers.length).fill(0) });
+      matrix.push({ name: '', values: Array(headers.length).fill(0), extra: [0, 0] });
       save();
       rebuild();
     });
