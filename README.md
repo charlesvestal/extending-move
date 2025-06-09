@@ -94,7 +94,7 @@ Everything that it does can be found in `utility-scripts/install-on-move.sh`
 #### Updating
 
 To update, you can use the similar `utility-scripts/update-on-move.command` or `utility-scripts/update-on-move.sh` to copy over the files and restart the webserver.
-Alternatively, run `python utility-scripts/github_update.py` to fetch the latest main branch ZIP if a new commit is available. The script also restarts the local webserver after updating. It defaults to this repository but you can override the source with the `GITHUB_REPO` environment variable.
+Alternatively, run `python utility-scripts/github_update.py` to fetch the latest main branch ZIP if a new commit is available. The script also restarts the local webserver after updating. It defaults to this repository but you can override the source with the `GITHUB_REPO` environment variable. Set `UPDATE_TMPDIR` if your system has limited space in `/tmp` to control where the ZIP is extracted.
 
 ### Manual Installation
 

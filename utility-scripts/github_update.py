@@ -30,6 +30,11 @@ import time
 REPO = os.environ.get("GITHUB_REPO", "charlesvestal/extending-move")
 ROOT_DIR = Path(__file__).resolve().parents[1]
 SHA_FILE = ROOT_DIR / "last_sha.txt"
+# Directory for temporary extraction; defaults to repo root if not provided
+TMP_DIR_PATH = Path(
+    os.environ.get("UPDATE_TMPDIR")
+    or os.environ.get("TMPDIR", str(ROOT_DIR))
+)
 
 
 def read_last_sha() -> str:
@@ -66,7 +71,7 @@ def download_zip(repo: str) -> bytes | None:
 
 
 def overlay_from_zip(content: bytes, root: Path) -> None:
-    with tempfile.TemporaryDirectory() as tmpdir:
+    with tempfile.TemporaryDirectory(dir=str(TMP_DIR_PATH)) as tmpdir:
         with zipfile.ZipFile(io.BytesIO(content)) as zf:
             zf.extractall(tmpdir)
         extracted_root = next(Path(tmpdir).iterdir())
