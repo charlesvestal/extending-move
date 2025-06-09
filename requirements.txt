@@ -5,3 +5,4 @@ Flask>=2.3.3
 pyrubberband>=0.3.0
 audiotsm>=0.1.2
 librosa>=0.10.2.post1
+requests>=2.31.0
