@@ -64,7 +64,9 @@ Tools for extending the Ableton Move. This project provides a companion webserve
 - **In-Place Update**
   - Visit ``move.local:<port>/update`` to check for new versions
   - If available, download and install updates directly on the device
-  - If Git cannot fetch updates, a tarball is downloaded with ``curl`` or ``wget``
+  - If Git cannot fetch updates, a tarball is downloaded with ``curl`` or ``wget``.
+    If the device cannot download the tarball directly, the host script fetches
+    it and transfers the archive over SSH.
     
 ## Installation
 
@@ -244,7 +246,7 @@ Interested in chatting about more Move hacking? Come talk to us on [Discord](htt
 This project is not affiliated with, authorized by, or endorsed by Ableton. Use at your own risk. The authors cannot be held responsible for any damage or issues that may occur. Always refer to official documentation when modifying hardware.
 
 This project includes a statically linked binary of Rubber Band. The source code for Rubber Band is available under GPLv2 at [https://breakfastquay.com/rubberband/](https://breakfastquay.com/rubberband/).
-It also fetches a statically linked Git executable from the [EXALAB/git-static](https://github.com/EXALAB/git-static) project for use on devices without Git. The `update-on-move` script installs this binary to `~/bin/git` on your Move if it isn’t already present. If Git operations fail (for example, lacking HTTPS support), the script automatically downloads the project tarball with `curl` or `wget` and extracts it in place.
+It also fetches a statically linked Git executable from the [EXALAB/git-static](https://github.com/EXALAB/git-static) project for use on devices without Git. The `update-on-move` script installs this binary to `~/bin/git` on your Move if it isn’t already present. If Git operations fail (for example, lacking HTTPS support), the script attempts to download the project tarball with `curl` or `wget`. If that download fails on the device, the script downloads the archive on the host and copies it over SSH before extracting it in place.
 
 > These tools are third-party and require SSH access. That means:
 > * There’s a real risk (though unlikely) of breaking things, including potentially bricking a device. You are accessing the Move in ways it was not designed to do.

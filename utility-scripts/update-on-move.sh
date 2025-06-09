@@ -96,18 +96,27 @@ if [ "${GIT_FAILED:-}" = true ]; then
   echo "Git failed, falling back to tarball..."
   TMPDIR=$(mktemp -d)
   TARFILE="$TMPDIR/repo.tar.gz"
+  DOWNLOAD_SUCCESS=0
   if command -v curl >/dev/null 2>&1; then
+    set +e
     curl -L -o "$TARFILE" https://codeload.github.com/charlesvestal/extending-move/tar.gz/refs/heads/main
+    DOWNLOAD_SUCCESS=$?
+    set -e
   elif command -v wget >/dev/null 2>&1; then
+    set +e
     wget -O "$TARFILE" https://codeload.github.com/charlesvestal/extending-move/tar.gz/refs/heads/main
+    DOWNLOAD_SUCCESS=$?
+    set -e
   else
-    echo "Neither curl nor wget found on device"
-    exit 1
+    DOWNLOAD_SUCCESS=1
+  fi
+  if [ "$DOWNLOAD_SUCCESS" -ne 0 ]; then
+    echo "DOWNLOAD_FAILED"
+    exit 2
   fi
   rm -rf ~/extending-move
   mkdir -p ~/extending-move
-  tar -xzf "$TARFILE" -C "$TMPDIR"
-  mv "$TMPDIR"/extending-move-main/* ~/extending-move/
+  tar -xzf "$TARFILE" -C ~/extending-move --strip-components=1
   rm -rf "$TMPDIR"
 fi
 cp -r /opt/move/HttpRoot/fonts ~/extending-move/static/
@@ -115,6 +124,35 @@ chmod +x ~/extending-move/move-webserver.py
 chmod -R 755 ~/extending-move/static
 chmod -R 755 ~/extending-move/bin
 EOF
+
+REMOTE_EXIT=$?
+
+if [ $REMOTE_EXIT -eq 2 ]; then
+  echo "Remote download failed, using host fallback..."
+  TMPDIR=$(mktemp -d)
+  TARFILE="$TMPDIR/repo.tar.gz"
+  if command -v curl >/dev/null 2>&1; then
+    curl -L -o "$TARFILE" https://codeload.github.com/charlesvestal/extending-move/tar.gz/refs/heads/main
+  elif command -v wget >/dev/null 2>&1; then
+    wget -O "$TARFILE" https://codeload.github.com/charlesvestal/extending-move/tar.gz/refs/heads/main
+  else
+    echo "Neither curl nor wget found on host"
+    exit 1
+  fi
+  scp "$TARFILE" "${REMOTE_USER}@${REMOTE_HOST}:/tmp/extending-move.tar.gz" >/dev/null
+  ssh -T "${REMOTE_USER}@${REMOTE_HOST}" <<'EOU'
+set -euo pipefail
+rm -rf ~/extending-move
+mkdir -p ~/extending-move
+tar -xzf /tmp/extending-move.tar.gz -C ~/extending-move --strip-components=1
+rm -f /tmp/extending-move.tar.gz
+cp -r /opt/move/HttpRoot/fonts ~/extending-move/static/
+chmod +x ~/extending-move/move-webserver.py
+chmod -R 755 ~/extending-move/static
+chmod -R 755 ~/extending-move/bin
+EOU
+  rm -rf "$TMPDIR"
+fi
 
 # --- Fix permissions remotely (now with proper path expansion) ---
 echo "Setting permissions on remote…"
