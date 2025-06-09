@@ -672,6 +672,24 @@ select {
     flex-direction: column;
 }
 
+.param-subpanel {
+    border: 1px solid #ccc;
+    padding: 0.25rem;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 0.5rem;
+}
+
+.param-subpanel:last-child {
+    margin-bottom: 0;
+}
+
+.param-subpanel h4 {
+    margin: 0 0 0.25rem 0;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
 .param-row {
     display: flex;
     gap: 0.5rem;
