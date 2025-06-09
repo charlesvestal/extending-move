@@ -19,6 +19,8 @@ function initSlider(el){
   const target=targetId?document.querySelector(`#${targetId}, input[name="${targetId}"]`):null;
   el.innerHTML='';
   el.classList.add('rect-slider-container');
+  // Make focusable so keyboard interaction works
+  if(!el.hasAttribute('tabindex')) el.tabIndex = 0;
   const fill=document.createElement('div');
   fill.className='rect-slider-fill';
   el.appendChild(fill);
@@ -72,15 +74,19 @@ function initSlider(el){
     if(el.classList.contains('disabled') || el.dataset.disabled==='true') return;
     ev.preventDefault();
     const startY=ev.touches?ev.touches[0].clientY:ev.clientY;
+    const startX=ev.touches?ev.touches[0].clientX:ev.clientX;
     const startVal=value;
     function move(e){
       const y=e.touches?e.touches[0].clientY:e.clientY;
+      const x=e.touches?e.touches[0].clientX:e.clientX;
       const dy=startY-y;
+      const dx=x-startX;
       const isShift = e.shiftKey;
       // slower movement when holding Shift
       const dragSense = isShift ? 2000 : 200;
       const scale=(max-min)/dragSense;
-      let v=startVal+dy*scale;
+      const drag=Math.abs(dy)>Math.abs(dx)?dy:dx;
+      let v=startVal+drag*scale;
       let st=getStep(v);
       v=Math.round(v/st)*st;
       value=clamp(v,min,max);
@@ -99,6 +105,19 @@ function initSlider(el){
   }
   el.addEventListener('mousedown',start);
   el.addEventListener('touchstart',start);
+  el.addEventListener('keydown',(e)=>{
+    if(['ArrowUp','ArrowRight'].includes(e.key)){
+      let st=getStep(value);
+      value=clamp(value+st,min,max);
+      update();
+      e.preventDefault();
+    }else if(['ArrowDown','ArrowLeft'].includes(e.key)){
+      let st=getStep(value);
+      value=clamp(value-st,min,max);
+      update();
+      e.preventDefault();
+    }
+  });
   update();
 }
 
