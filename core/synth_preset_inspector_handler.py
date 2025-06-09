@@ -57,6 +57,29 @@ def load_wavetable_sprites():
         logger.warning("Could not load wavetable sprites: %s", exc)
         return []
 
+# ---------------------------------------------------------------------------
+# Wavetable sprite URI helpers
+# ---------------------------------------------------------------------------
+from urllib.parse import quote, unquote
+
+WAVETABLE_SPRITE_PREFIX = "ableton:/device-resources/wavetable-sprites/"
+
+
+def sprite_name_to_uri(name):
+    """Return the full sprite URI for a given sprite name."""
+    if name is None:
+        return None
+    if name.startswith(WAVETABLE_SPRITE_PREFIX):
+        return name
+    return WAVETABLE_SPRITE_PREFIX + quote(name)
+
+
+def sprite_uri_to_name(uri):
+    """Extract the sprite name from a sprite URI."""
+    if not uri or not uri.startswith(WAVETABLE_SPRITE_PREFIX):
+        return uri
+    return unquote(uri[len(WAVETABLE_SPRITE_PREFIX) :])
+
 def extract_available_parameters(
     preset_path,
     device_types=("drift",),
@@ -890,7 +913,11 @@ def extract_wavetable_sprites(preset_path):
 
         search(data)
 
-        return {"success": True, "sprite1": sprite1, "sprite2": sprite2}
+        return {
+            "success": True,
+            "sprite1": sprite_uri_to_name(sprite1) if sprite1 else None,
+            "sprite2": sprite_uri_to_name(sprite2) if sprite2 else None,
+        }
     except Exception as exc:
         return {"success": False, "message": f"Error extracting sprites: {exc}"}
 
@@ -901,12 +928,15 @@ def update_wavetable_sprites(preset_path, sprite1=None, sprite2=None, output_pat
         with open(preset_path, "r") as f:
             data = json.load(f)
 
+        sprite1_uri = sprite_name_to_uri(sprite1) if sprite1 is not None else None
+        sprite2_uri = sprite_name_to_uri(sprite2) if sprite2 is not None else None
+
         def update(obj):
             if isinstance(obj, dict):
-                if sprite1 is not None and "spriteUri1" in obj:
-                    obj["spriteUri1"] = sprite1
-                if sprite2 is not None and "spriteUri2" in obj:
-                    obj["spriteUri2"] = sprite2
+                if sprite1_uri is not None and "spriteUri1" in obj:
+                    obj["spriteUri1"] = sprite1_uri
+                if sprite2_uri is not None and "spriteUri2" in obj:
+                    obj["spriteUri2"] = sprite2_uri
                 for v in obj.values():
                     update(v)
             elif isinstance(obj, list):
