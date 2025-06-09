@@ -454,15 +454,30 @@ class WavetableParamEditorHandler(BaseHandler):
         "Wander": "Wndr",
     }
 
-    # Parameters that should display without a text label. The raw Wavetable
-    # parameter names use a much longer naming scheme (e.g. ``Voice_Modulators_*``).
-    # For now we rely on automatic label generation so this set is empty.
-    UNLABELED_PARAMS = set()
+    # Parameters that should display without a text label.  This keeps the
+    # interface compact for groups of related controls.
+    UNLABELED_PARAMS = {
+        "Voice_Modulators_AmpEnvelope_Times_Attack",
+        "Voice_Modulators_AmpEnvelope_Times_Decay",
+        "Voice_Modulators_AmpEnvelope_Times_Release",
+        "Voice_Modulators_Envelope2_Times_Attack",
+        "Voice_Modulators_Envelope2_Times_Decay",
+        "Voice_Modulators_Envelope2_Times_Release",
+        "Voice_Modulators_Envelope3_Times_Attack",
+        "Voice_Modulators_Envelope3_Times_Decay",
+        "Voice_Modulators_Envelope3_Times_Release",
+    }
 
-    # Parameters that use a horizontal slider instead of a dial.  The current
-    # schema doesn't provide an easy way to detect these automatically, so no
-    # parameters are forced to sliders yet.
-    SLIDER_PARAMS = set()
+    # Parameters that use a horizontal slider instead of a dial.
+    SLIDER_PARAMS = {
+        "Voice_Filter1_Drive",
+        "Voice_Filter2_Drive",
+        "Voice_Modulators_TimeScale",
+        "Voice_Modulators_Lfo1_Time_Rate",
+        "Voice_Modulators_Lfo2_Time_Rate",
+        "Voice_Global_Glide",
+        "Voice_Global_Transpose",
+    }
 
     def _friendly_label(self, name: str) -> str:
         """Return a friendlier version of a parameter name."""
