@@ -5,7 +5,19 @@ function initModMatrix() {
   const tableBody = document.querySelector('#mod-matrix-table tbody');
   const paramList = JSON.parse(document.getElementById('available-params-input')?.value || '[]');
   const headers = [
-    'Amp Env','Env 2','Env 3','LFO 1','LFO 2','Velocity','Key','Pitch Bend','Pressure','Mod Wheel','Random'
+    'Amp Env',
+    'Env 2',
+    'Env 3',
+    'LFO 1',
+    'LFO 2',
+    'Time',
+    'Amount',
+    'Velocity',
+    'Key',
+    'Pitch Bend',
+    'Pressure',
+    'Mod Wheel',
+    'Random',
   ];
   if (!matrixInput || !tableBody) return;
   let matrix = [];
@@ -50,7 +62,6 @@ function initModMatrix() {
     tr.appendChild(tdSel);
 
     row.values = row.values || Array(headers.length).fill(0);
-    row.extra = row.extra || [0, 0];
     row.values.forEach((v, col) => {
       const td = document.createElement('td');
       const slider = document.createElement('div');
@@ -90,7 +101,7 @@ function initModMatrix() {
 
   if (addBtn) {
     addBtn.addEventListener('click', () => {
-      matrix.push({ name: '', values: Array(headers.length).fill(0), extra: [0, 0] });
+      matrix.push({ name: '', values: Array(headers.length).fill(0) });
       save();
       rebuild();
     });
