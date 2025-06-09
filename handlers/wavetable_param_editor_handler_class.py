@@ -340,8 +340,26 @@ class WavetableParamEditorHandler(BaseHandler):
             schema_loader=load_wavetable_schema,
         )
         if param_info['success']:
-            available_params_json = json.dumps(param_info['parameters'])
+            available_params = set(param_info['parameters'])
             param_paths_json = json.dumps(param_info.get('parameter_paths', {}))
+        else:
+            available_params = set()
+            param_paths_json = '{}'
+
+        # Load modulation data before generating JSON so that unknown
+        # destinations can be included in the parameter list.
+        mod_info = extract_wavetable_modulations(preset_path)
+        mod_matrix_json = '[]'
+        if mod_info.get('success'):
+            matrix_rows = []
+            for dest, arr in mod_info.get('modulations', {}).items():
+                available_params.add(dest)
+                vals = [arr[i] if i < len(arr) else 0 for i in MOD_UI_TO_SRC]
+                extra = [arr[5] if len(arr) > 5 else 0, arr[6] if len(arr) > 6 else 0]
+                matrix_rows.append({'name': dest, 'values': vals, 'extra': extra})
+            mod_matrix_json = json.dumps(matrix_rows)
+
+        available_params_json = json.dumps(sorted(available_params))
         
         if values['success']:
             params_html = self.generate_params_html(values['parameters'], mapped_params)
@@ -369,15 +387,6 @@ class WavetableParamEditorHandler(BaseHandler):
         sprite_info = extract_wavetable_sprites(preset_path)
         sprite1 = sprite_info.get('sprite1') if sprite_info.get('success', True) else None
         sprite2 = sprite_info.get('sprite2') if sprite_info.get('success', True) else None
-        mod_matrix_json = '[]'
-        mod_info = extract_wavetable_modulations(preset_path)
-        if mod_info.get('success'):
-            matrix_rows = []
-            for dest, arr in mod_info.get('modulations', {}).items():
-                vals = [arr[i] if i < len(arr) else 0 for i in MOD_UI_TO_SRC]
-                extra = [arr[5] if len(arr) > 5 else 0, arr[6] if len(arr) > 6 else 0]
-                matrix_rows.append({'name': dest, 'values': vals, 'extra': extra})
-            mod_matrix_json = json.dumps(matrix_rows)
         return {
             'message': message,
             'message_type': 'success',

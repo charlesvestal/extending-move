@@ -23,6 +23,12 @@ function initModMatrix() {
       o.textContent = p;
       sel.appendChild(o);
     });
+    if (name && !paramList.includes(name)) {
+      const o = document.createElement('option');
+      o.value = name;
+      o.textContent = name + ' (unknown)';
+      sel.appendChild(o);
+    }
     sel.value = name || '';
     return sel;
   }
