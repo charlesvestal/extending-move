@@ -635,6 +635,42 @@ class WavetableParamEditorHandler(BaseHandler):
             return "Global"
         return "Other"
 
+    def _arrange_filter_panel(self, items: dict) -> list:
+        """Return filter panel HTML arranged into sensible rows."""
+        ordered = []
+        row1 = "".join([
+            items.pop("On", ""),
+            items.pop("Frequency", ""),
+            items.pop("Resonance", ""),
+        ])
+        if row1:
+            ordered.append(f'<div class="param-row">{row1}</div>')
+
+        row2 = "".join([
+            items.pop("Drive", ""),
+            items.pop("Morph", ""),
+        ])
+        if row2:
+            ordered.append(f'<div class="param-row">{row2}</div>')
+
+        row3 = "".join([
+            items.pop("Type", ""),
+            items.pop("Slope", ""),
+        ])
+        if row3:
+            ordered.append(f'<div class="param-row">{row3}</div>')
+
+        row4 = "".join([
+            items.pop("CircuitBpNoMo", ""),
+            items.pop("CircuitLpHp", ""),
+        ])
+        if row4:
+            ordered.append(f'<div class="param-row">{row4}</div>')
+
+        if items:
+            ordered.extend(items.values())
+        return ordered
+
     def generate_params_html(self, params, mapped_parameters=None):
         """Return HTML controls for the given parameter values."""
         if not params:
@@ -646,7 +682,7 @@ class WavetableParamEditorHandler(BaseHandler):
         schema = load_wavetable_schema()
         sections = {s: [] for s in self.SECTION_ORDER}
         subpanels = {
-            sec: {lbl: [] for _, lbl, _ in self.SECTION_SUBPANELS.get(sec, [])}
+            sec: {lbl: {} for _, lbl, _ in self.SECTION_SUBPANELS.get(sec, [])}
             for sec in self.SECTION_SUBPANELS
         }
 
@@ -683,7 +719,7 @@ class WavetableParamEditorHandler(BaseHandler):
                             slider=slider,
                             extra_classes=extra,
                         )
-                        subpanels[sec][panel_lbl].append(html)
+                        subpanels[sec][panel_lbl][base] = html
                         assigned = True
                         break
 
@@ -705,9 +741,14 @@ class WavetableParamEditorHandler(BaseHandler):
                 items = subpanels.get(sec, {}).get(label)
                 if items:
                     cls = label.lower().replace(" ", "-")
+                    content = []
+                    if sec == "Filter":
+                        content = self._arrange_filter_panel(items)
+                    else:
+                        content = list(items.values())
                     panel_items.append(
                         f'<div class="param-subpanel {cls}"><h4>{label}</h4>'
-                        f'<div class="param-items">{"".join(items)}</div></div>'
+                        f'<div class="param-items">{"".join(content)}</div></div>'
                     )
             if sections.get(sec):
                 panel_items.extend(sections[sec])
