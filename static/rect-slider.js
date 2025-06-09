@@ -1,4 +1,4 @@
-(function(){
+(function(global){
 function clamp(v,min,max){return v<min?min:v>max?max:v;}
 function initSlider(el){
   if(el._sliderInit)return;
@@ -126,7 +126,10 @@ function initSlider(el){
   update();
 }
 
-document.addEventListener('DOMContentLoaded',()=>{
+function initAll(){
   document.querySelectorAll('.rect-slider').forEach(initSlider);
-});
-})();
+}
+global.initRectSlider = initSlider;
+global.initRectSliders = initAll;
+document.addEventListener('DOMContentLoaded', initAll);
+})(window);
