@@ -15,6 +15,9 @@ from core.synth_preset_inspector_handler import (
     update_preset_parameter_mappings,
     delete_parameter_mapping,
     extract_available_parameters,
+    load_wavetable_sprites,
+    extract_wavetable_sprites,
+    update_wavetable_sprites,
 )
 from core.synth_param_editor_handler import (
     update_parameter_values,
@@ -85,6 +88,7 @@ class WavetableParamEditorHandler(BaseHandler):
         if browser_html.endswith('</ul>'):
             browser_html = browser_html[:-5] + core_li + '</ul>'
         schema = load_wavetable_schema()
+        sprites = load_wavetable_sprites()
         return {
             'message': 'Select a Wavetable preset from the list or create a new one',
             'message_type': 'info',
@@ -101,6 +105,9 @@ class WavetableParamEditorHandler(BaseHandler):
             'macros_json': '[]',
             'available_params_json': '[]',
             'param_paths_json': '{}',
+            'sprites_json': json.dumps(sprites),
+            'sprite1': '',
+            'sprite2': '',
         }
 
     def handle_post(self, form):
@@ -231,6 +238,17 @@ class WavetableParamEditorHandler(BaseHandler):
             for pname, info in existing_mapped.items():
                 delete_parameter_mapping(preset_path, info['path'])
 
+            sprite1 = form.getvalue('sprite1')
+            sprite2 = form.getvalue('sprite2')
+            sprite_res = update_wavetable_sprites(
+                preset_path,
+                sprite1 if sprite1 is not None else None,
+                sprite2 if sprite2 is not None else None,
+                preset_path,
+            )
+            if not sprite_res['success']:
+                return self.format_error_response(sprite_res['message'])
+
             message = result['message'] + "; " + macro_result['message']
             if output_path:
                 message += f" Saved to {output_path}"
@@ -304,6 +322,10 @@ class WavetableParamEditorHandler(BaseHandler):
         )
         if browser_html.endswith('</ul>'):
             browser_html = browser_html[:-5] + core_li + '</ul>'
+        sprites_json = json.dumps(load_wavetable_sprites())
+        sprite_info = extract_wavetable_sprites(preset_path)
+        sprite1 = sprite_info.get('sprite1') if sprite_info.get('success', True) else None
+        sprite2 = sprite_info.get('sprite2') if sprite_info.get('success', True) else None
         return {
             'message': message,
             'message_type': 'success',
@@ -320,6 +342,9 @@ class WavetableParamEditorHandler(BaseHandler):
             'macros_json': macros_json,
             'available_params_json': available_params_json,
             'param_paths_json': param_paths_json,
+            'sprites_json': sprites_json,
+            'sprite1': sprite1 or '',
+            'sprite2': sprite2 or '',
         }
 
     SECTION_ORDER = [
