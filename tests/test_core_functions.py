@@ -133,6 +133,28 @@ def test_update_parameter_values(tmp_path):
     assert abs(val - 0.5) < 1e-6
 
 
+def test_update_parameter_values_wavetable(tmp_path):
+    src = Path("examples/Track Presets/Wavetable/E-Piano Classic.ablpreset")
+    dest = tmp_path / "wavetable.ablpreset"
+    result = update_parameter_values(
+        str(src),
+        {"Voice_Oscillator1_Gain": "0.5"},
+        str(dest),
+        ("wavetable",),
+    )
+    assert result["success"], result.get("message")
+    with open(dest, "rb") as f:
+        data = json.load(f)
+    val = (
+        data["chains"][0]
+        ["devices"][0]
+        ["chains"][0]
+        ["devices"][0]
+        ["parameters"]["Voice_Oscillator1_Gain"]
+    )
+    assert abs(val - 0.5) < 1e-6
+
+
 def test_update_macro_values(tmp_path):
     src = Path("examples/Track Presets/Drift/Analog Shape - Core.json")
     dest = tmp_path / "out.ablpreset"

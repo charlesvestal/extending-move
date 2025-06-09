@@ -9,7 +9,7 @@ from .synth_preset_inspector_handler import extract_available_parameters
 logger = logging.getLogger(__name__)
 
 
-def update_parameter_values(preset_path, param_updates, output_path=None):
+def update_parameter_values(preset_path, param_updates, output_path=None, device_kinds=("drift",)):
     """Update parameter values in a preset.
 
     Args:
@@ -17,6 +17,7 @@ def update_parameter_values(preset_path, param_updates, output_path=None):
         param_updates: Mapping of parameter name to new value (as strings).
         output_path: Optional path for the modified preset. If omitted, the
             source preset is overwritten.
+        device_kinds: Tuple of device types to update (e.g. ("drift",))
 
     Returns:
         dict with keys:
@@ -28,7 +29,7 @@ def update_parameter_values(preset_path, param_updates, output_path=None):
         with open(preset_path, "r") as f:
             preset_data = json.load(f)
 
-        info = extract_available_parameters(preset_path)
+        info = extract_available_parameters(preset_path, device_kinds)
         if not info["success"]:
             return info
         paths = info.get("parameter_paths", {})

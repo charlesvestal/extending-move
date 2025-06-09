@@ -170,7 +170,12 @@ class WavetableParamEditorHandler(BaseHandler):
                     directory = NEW_PRESET_DIR
                 output_path = os.path.join(directory, new_name)
                 os.makedirs(os.path.dirname(output_path), exist_ok=True)
-            result = update_parameter_values(preset_path, updates, output_path)
+            result = update_parameter_values(
+                preset_path,
+                updates,
+                output_path,
+                ("wavetable",),
+            )
             if not result['success']:
                 return self.format_error_response(result['message'])
             preset_path = result['path']
