@@ -5,7 +5,7 @@ function initModMatrix() {
   const tableBody = document.querySelector('#mod-matrix-table tbody');
   const paramList = JSON.parse(document.getElementById('available-params-input')?.value || '[]');
   const headers = [
-    'Amp','Env 2','Env 3','LFO 1','LFO 2','Velocity','Key','PB','Pressure','Mod','Random'
+    'Amp Env','Env 2','Env 3','LFO 1','LFO 2','Velocity','Key','Pitch Bend','Pressure','Mod Wheel','Random'
   ];
   if (!matrixInput || !tableBody) return;
   let matrix = [];
@@ -31,13 +31,11 @@ function initModMatrix() {
   function buildRow(row, idx) {
     const tr = document.createElement('tr');
     const tdSel = document.createElement('td');
+    const sel = buildSelect(row.name);
+    tdSel.appendChild(sel);
     const removeBtn = document.createElement('button');
     removeBtn.type = 'button';
     removeBtn.textContent = 'X';
-    removeBtn.className = 'mod-remove-btn';
-    const sel = buildSelect(row.name);
-    tdSel.appendChild(removeBtn);
-    tdSel.appendChild(sel);
     removeBtn.addEventListener('click', () => {
       matrix.splice(idx, 1);
       save();
