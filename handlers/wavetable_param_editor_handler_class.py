@@ -359,6 +359,27 @@ class WavetableParamEditorHandler(BaseHandler):
         "Other",
     ]
 
+    SECTION_SUBPANELS = {
+        "Oscillators": [
+            ("Voice_Oscillator1_", "Oscillator 1", "Oscillator1"),
+            ("Voice_Oscillator2_", "Oscillator 2", "Oscillator2"),
+            ("Voice_SubOscillator_", "Sub Oscillator", "SubOscillator"),
+        ],
+        "Filter": [
+            ("Voice_Filter1_", "Voice Filter 1", "Filter"),
+            ("Voice_Filter2_", "Voice Filter 2", "Filter"),
+        ],
+        "Envelopes": [
+            ("Voice_Modulators_AmpEnvelope_", "Amp Envelope", "Envelope1"),
+            ("Voice_Modulators_Envelope2_", "Envelope 2", "Envelope2"),
+            ("Voice_Modulators_Envelope3_", "Envelope 3", "Envelope3"),
+        ],
+        "LFO": [
+            ("Voice_Modulators_Lfo1_", "LFO 1", "Lfo"),
+            ("Voice_Modulators_Lfo2_", "LFO 2", "Lfo"),
+        ],
+    }
+
     LABEL_OVERRIDES = {
         # Oscillators
         "Oscillator1_Type": "Osc 1",
@@ -513,6 +534,24 @@ class WavetableParamEditorHandler(BaseHandler):
         label = re.sub(r"([a-z])([A-Z])", r"\1 \2", label)
         return label
 
+    def _strip_qualifiers(self, name: str) -> str:
+        """Remove common qualifier prefixes from a parameter name."""
+        prefixes = [
+            "Times_",
+            "Values_",
+            "Slopes_",
+            "Time_",
+            "Shape_",
+        ]
+        changed = True
+        while changed:
+            changed = False
+            for p in prefixes:
+                if name.startswith(p):
+                    name = name[len(p) :]
+                    changed = True
+        return name
+
     def _build_param_item(self, idx, name, value, meta, label=None,
                            hide_label=False, slider=False, extra_classes=""):
         """Create HTML for a single parameter control."""
@@ -621,6 +660,42 @@ class WavetableParamEditorHandler(BaseHandler):
             return "Global"
         return "Other"
 
+    def _arrange_filter_panel(self, items: dict) -> list:
+        """Return filter panel HTML arranged into sensible rows."""
+        ordered = []
+        row1 = "".join([
+            items.pop("On", ""),
+            items.pop("Frequency", ""),
+            items.pop("Resonance", ""),
+        ])
+        if row1:
+            ordered.append(f'<div class="param-row">{row1}</div>')
+
+        row2 = "".join([
+            items.pop("Drive", ""),
+            items.pop("Morph", ""),
+        ])
+        if row2:
+            ordered.append(f'<div class="param-row">{row2}</div>')
+
+        row3 = "".join([
+            items.pop("Type", ""),
+            items.pop("Slope", ""),
+        ])
+        if row3:
+            ordered.append(f'<div class="param-row">{row3}</div>')
+
+        row4 = "".join([
+            items.pop("CircuitBpNoMo", ""),
+            items.pop("CircuitLpHp", ""),
+        ])
+        if row4:
+            ordered.append(f'<div class="param-row">{row4}</div>')
+
+        if items:
+            ordered.extend(items.values())
+        return ordered
+
     def generate_params_html(self, params, mapped_parameters=None):
         """Return HTML controls for the given parameter values."""
         if not params:
@@ -631,6 +706,10 @@ class WavetableParamEditorHandler(BaseHandler):
 
         schema = load_wavetable_schema()
         sections = {s: [] for s in self.SECTION_ORDER}
+        subgroups = {
+            sec: {lbl: {} for _, lbl, _ in self.SECTION_SUBPANELS.get(sec, [])}
+            for sec in self.SECTION_SUBPANELS
+        }
 
         for i, item in enumerate(params):
             name = item["name"]
@@ -644,18 +723,59 @@ class WavetableParamEditorHandler(BaseHandler):
                 macro_idx = mapped_parameters[name]["macro_index"]
                 extra = f"macro-{macro_idx}"
 
-            html = self._build_param_item(
-                i,
-                name,
-                val,
-                meta,
-                hide_label=hide,
-                slider=slider,
-                extra_classes=extra,
-            )
-
             sec = self._get_section(name)
-            sections.setdefault(sec, []).append(html)
+
+            assigned = False
+            if sec in self.SECTION_SUBPANELS:
+                for prefix, panel_lbl, ov_prefix in self.SECTION_SUBPANELS[sec]:
+                    if name.startswith(prefix):
+                        base = name[len(prefix) :]
+                        base = self._strip_qualifiers(base)
+                        label_override = self.LABEL_OVERRIDES.get(
+                            f"{ov_prefix}_{base}", self._friendly_label(base)
+                        )
+                        html = self._build_param_item(
+                            i,
+                            name,
+                            val,
+                            meta,
+                            label=label_override,
+                            hide_label=hide,
+                            slider=slider,
+                            extra_classes=extra,
+                        )
+                        subgroups[sec][panel_lbl][base] = html
+                        assigned = True
+                        break
+
+            if not assigned:
+                html = self._build_param_item(
+                    i,
+                    name,
+                    val,
+                    meta,
+                    hide_label=hide,
+                    slider=slider,
+                    extra_classes=extra,
+                )
+                sections.setdefault(sec, []).append(html)
+
+        for sec, groups in self.SECTION_SUBPANELS.items():
+            group_items = []
+            for _prefix, label, _ in groups:
+                items = subgroups.get(sec, {}).get(label)
+                if items:
+                    group_items.append(
+                        f'<div class="param-group-label">{label}</div>'
+                    )
+                    if sec == "Filter":
+                        group_items.extend(self._arrange_filter_panel(items))
+                    else:
+                        group_items.extend(items.values())
+            if sections.get(sec):
+                group_items.extend(sections[sec])
+            if group_items:
+                sections[sec] = group_items
 
         out_html = '<div class="wavetable-param-panels">'
         bottom_panels = []

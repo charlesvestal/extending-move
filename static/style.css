@@ -672,6 +672,15 @@ select {
     flex-direction: column;
 }
 
+
+.param-group-label {
+    width: 100%;
+    text-align: left;
+    margin-left: 10px;
+    font-weight: bold;
+    margin-top: 0.5rem;
+}
+
 .param-row {
     display: flex;
     gap: 0.5rem;
