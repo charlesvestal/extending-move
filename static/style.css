@@ -642,11 +642,11 @@ select {
 
 .param-panel.envelopes{
     max-width: 290px;
-} */
+} 
 
 .param-panel.modulation {
     max-width: 110px;
-}
+} */
 
 .param-panel.filter .param-items {
     flex-direction: column;
