@@ -173,12 +173,16 @@ select {
     /* width: 100%; */
     max-width: 400px;
     padding: 0.625rem;
-    /* margin-bottom: 1rem; */
+    margin-bottom: 1rem;
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 0.875rem;
     background-color: white;
     /* font-family: 'Ableton Sans', Arial, sans-serif; */
+}
+
+input + small {
+	margin-left: 0.25rem;
 }
 
 label {
@@ -227,6 +231,10 @@ input[type="submit"]:disabled {
     background-color: #ccc;
     color: #666;
     cursor: default;
+}
+
+.color-dropdown {
+	margin-bottom: 1rem;
 }
 
 /* Card styling for grid layouts */
@@ -412,15 +420,16 @@ select {
     overflow-y: auto;
     border: 1px solid #ccc;
     padding: 0.25rem;
+    margin-bottom: 1rem;
 }
 
 /* Pad grid for set management */
 .pad-grid {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
-    gap: 0.25rem;
+    gap: 0.5rem;
     margin-bottom: 1rem;
-    max-width:600px;
+    max-width: 600px;
 }
 
 .pad-cell {
@@ -430,7 +439,7 @@ select {
     text-align: center;
     font-weight: 600;
     box-sizing: border-box;
-    height:45px;
+    aspect-ratio: 4 / 3; 
 }
 
 .pad-cell.free {
@@ -452,6 +461,9 @@ select {
     background: #d0e8ff;
 }
 
+.pad-grid label {
+	margin-bottom: 0;
+}
 
 
 /* Small icon button for reverting samples */
@@ -512,20 +524,52 @@ select {
     margin-bottom: 0.75rem;
 }
 
-.param-pair .param-item {
+.param-pair .param-item, .param-pair .param-select {
     margin-bottom: 0;
+    padding-bottom:0;
+    padding-top:0;
+    padding-top: 0;
+
+    margin-top:-1px;
 }
+
+.param-panel.oscillators .param-pair .param-select, 
+.filter-mod-row .param-select,
+.param-panel.lfo .param-pair .param-select
+{
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0; 
+    border-bottom: 0px;
+}
+
+.param-panel.oscillators .param-pair .rect-slider-container, 
+.filter-mod-row .param-pair .rect-slider-container,
+.param-panel.lfo.param-pair .param-pair .rect-slider-container
+{
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.param-pair .param-item {
+    border-radius:0px;
+}
+.param-panel.modulation .param-select {
+    margin-top:0px;
+}
+
 
 .pitch-mod-label {
     width: 100%;
-    text-align: center;
+    text-align: left;
+    margin-left:10px;
     font-weight: bold;
     margin-top: 0.5rem;
 }
 
 .freq-mod-label {
     width: 100%;
-    text-align: center;
+    ext-align: left;
+    margin-left:10px;
     font-weight: bold;
     margin-top: 0.5rem;
 }
@@ -600,6 +644,10 @@ select {
     max-width: 290px;
 } */
 
+.param-panel.modulation {
+    max-width: 110px;
+}
+
 .param-panel.filter .param-items {
     flex-direction: column;
 }
@@ -646,6 +694,7 @@ select {
     flex-direction: column;
     align-items: center;
     /* width: 90px; */
+    padding: 0.375rem;
 }
 .param-number {
     /* margin-left: 0.5rem; */
@@ -654,6 +703,7 @@ select {
     display: inline-block;
     text-align: center;
     font-size: 0.8rem;
+    margin-top: 0.25rem;
 }
 
 .param-input {
@@ -692,6 +742,7 @@ select {
     flex-direction: column;
     align-items: center;
     cursor: default;
+    padding: 0.375rem;
 }
 
 .macro-label {
@@ -699,6 +750,11 @@ select {
     margin-bottom: 0.25rem;
     cursor: pointer;
 }
+
+.macro-label:hover {
+  text-decoration: underline;
+}
+
 .macro-label.placeholder {
     color: #777;
 }
@@ -734,6 +790,9 @@ select {
     margin-bottom: 1rem;
 }
 .preset-controls label {
+    margin-bottom: 0;
+}
+.preset-controls input {
     margin-bottom: 0;
 }
 .preset-actions {
@@ -799,7 +858,7 @@ select {
     position: relative;
     width: 80px;
     height: 24px;
-    border: 1px solid #aaa;
+    border: 1px solid #dedede;
     border-radius: 4px;
     box-sizing: border-box;
     cursor: ns-resize;
@@ -865,6 +924,9 @@ select {
     gap: 0.5rem;
     margin-bottom: 0.25rem;
 }
+.assign-item select {
+	margin-bottom: 0;
+}
 .range-inputs {
     display: flex;
     align-items: center;
@@ -872,6 +934,7 @@ select {
 }
 .range-inputs input {
     width: 60px;
+    margin-bottom: 0;
 }
 .macro-add-section {
     margin-top: 0.5rem;
@@ -885,4 +948,20 @@ button#macro-add-param {
 .macro-add-section select {
     margin-right: 25px;
     max-width: 100%;
+}
+
+
+/* Modulation matrix control radius overrides */
+.param-panel.modulation .mod-matrix-row .param-item:nth-of-type(1) .param-select {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.param-panel.modulation .mod-matrix-row .param-item:nth-of-type(2) .rect-slider-container {
+    border-radius: 0;
+}
+
+.param-panel.modulation .mod-matrix-row .param-item:nth-of-type(3) .param-select {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
 }

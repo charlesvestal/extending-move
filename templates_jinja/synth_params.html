@@ -6,6 +6,9 @@
   <p class="{{ message_type if message_type else ('success' if success else 'error') }}">{{ message }}</p>
 {% endif %}
 {% if not preset_selected %}
+<div class="file-browser" data-root="{{ browser_root }}" data-action="{{ host_prefix }}/synth-params" data-field="preset_select" data-value="select_preset" data-filter="drift">
+    {{ file_browser_html | safe }}
+</div>
 <button id="create-new-btn" style="margin-bottom:1em;">Create New Drift Preset</button>
 <style>
   .modal {
@@ -42,9 +45,6 @@
       <button type="submit">Create</button>
     </form>
   </div>
-</div>
-<div class="file-browser" data-root="{{ browser_root }}" data-action="{{ host_prefix }}/synth-params" data-field="preset_select" data-value="select_preset" data-filter="drift">
-    {{ file_browser_html | safe }}
 </div>
 {% else %}
 <form method="post" action="{{ host_prefix }}/synth-params" id="param-form">
