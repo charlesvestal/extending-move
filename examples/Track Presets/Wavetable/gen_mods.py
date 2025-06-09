@@ -11,14 +11,14 @@ SOURCE_NAMES = [
     "Envelope 3",
     "LFO 1",
     "LFO 2",
-    "Time",
-    "Amount",
     "Velocity",
     "Key",
-    "Pitch Bend",
     "Aftertouch",
+    "Pitch Bend",
     "Mod Wheel",
-    "Random"
+    "Random",
+    "Time",
+    "Amount"
 ]
 
 def find_wavetable_devices(obj):
