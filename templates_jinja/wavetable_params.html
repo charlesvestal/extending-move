@@ -75,14 +75,6 @@
         <button type="submit" onclick="document.getElementById('action-input').value='reset_preset';">Choose Another Preset</button>
         <button type="button" id="randomize-btn">Randomize</button>
     </div>
-    <div class="sprite-select-section">
-        <label>Sprite 1:
-            <select name="sprite1" id="sprite1-select"></select>
-        </label>
-        <label>Sprite 2:
-            <select name="sprite2" id="sprite2-select"></select>
-        </label>
-    </div>
     <div class="macro-knobs-section">
         <h3>Macros</h3>
         {{ macro_knobs_html | safe }}

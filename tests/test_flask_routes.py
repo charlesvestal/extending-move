@@ -215,7 +215,7 @@ def test_wavetable_params_post(client, monkeypatch):
     assert resp.status_code == 200
     assert b'ok' in resp.data
     assert b'<div>p</div>' in resp.data
-    assert b'name="sprite1"' in resp.data
+    assert b'name="sprite1"' not in resp.data
 
 
 def test_wavetable_params_get(client, monkeypatch):
