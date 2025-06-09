@@ -6,3 +6,4 @@ __pycache__
 /midi-env
 *server.log
 .venv/
+bin/git
