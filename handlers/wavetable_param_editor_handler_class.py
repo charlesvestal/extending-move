@@ -719,12 +719,13 @@ class WavetableParamEditorHandler(BaseHandler):
         if row_on:
             ordered.append(f'<div class="param-row">{row_on}</div>')
 
-        row_type = "".join([
-            items.pop("Type", ""),
-            items.pop("Slope", ""),
-        ])
+        row_type = items.pop("Type", "")
         if row_type:
             ordered.append(f'<div class="param-row">{row_type}</div>')
+
+        row_slope = items.pop("Slope", "")
+        if row_slope:
+            ordered.append(f'<div class="param-row">{row_slope}</div>')
 
         row_fr = "".join([
             items.pop("Frequency", ""),
