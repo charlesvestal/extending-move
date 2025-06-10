@@ -914,6 +914,10 @@ class WavetableParamEditorHandler(BaseHandler):
         )
         if row.strip():
             ordered.append(f'<div class="param-row">{row}</div>')
+        if mixer_items:
+            ordered.extend(mixer_items.values())
+        if osc_items:
+            ordered.extend(osc_items.values())
         row = "".join(
             [
                 fx_items.pop("Effects_EffectMode", ""),
@@ -923,12 +927,8 @@ class WavetableParamEditorHandler(BaseHandler):
         )
         if row.strip():
             ordered.append(f'<div class="param-row">{row}</div>')
-        if mixer_items:
-            ordered.extend(mixer_items.values())
         if fx_items:
             ordered.extend(fx_items.values())
-        if osc_items:
-            ordered.extend(osc_items.values())
         return ordered
 
     def generate_params_html(self, params, mapped_parameters=None):
