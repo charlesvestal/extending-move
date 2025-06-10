@@ -48,12 +48,15 @@ export function initParamAdsr() {
       el.addEventListener('input', draw);
     });
     if (set.modeInput) {
-      // Envelope 2 may switch between ADSR and Cycling modes. Previously the
-      // canvas was hidden when cycling was selected, but with both envelopes
-      // visible at all times, we continue to render the graph so users can see
-      // the ADSR values regardless of the mode. Cycling rows are toggled
-      // elsewhere.
-      set.modeInput.addEventListener('change', draw);
+      function updateVisibility() {
+        const show = set.modeInput.value !== 'Cyc';
+        set.canvas.classList.toggle('hidden', !show);
+      }
+      set.modeInput.addEventListener('change', () => {
+        updateVisibility();
+        draw();
+      });
+      updateVisibility();
     }
     draw();
   });
