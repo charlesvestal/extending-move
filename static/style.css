@@ -1001,7 +1001,7 @@ button#macro-add-param {
 /* Modulation matrix table */
 #mod-matrix-section {
     margin-top: 1rem;
-    width: 920px;
+    width: 840px;
     margin-left: auto;
     margin-right: auto;
     text-align:center;
@@ -1046,8 +1046,8 @@ button#macro-add-param {
 /* Nested dropdown for modulation matrix */
 .nested-dropdown {
     position: relative;
-    width: 320px;
-    font-size: 0.875rem;
+    width: 240px;
+    font-size: 0.6rem;
 }
 .nested-dropdown .dropdown-toggle {
     border: 1px solid #ddd;
