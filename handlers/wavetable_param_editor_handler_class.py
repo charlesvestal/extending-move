@@ -1081,13 +1081,24 @@ class WavetableParamEditorHandler(BaseHandler):
         osc2_panel = ''.join(
             self._arrange_osc_column(osc2_items, osc2_mixer, osc2_fx, osc2_sprite)
         )
-        custom_top = (
-            '<div class="wavetable-param-panels">'
-            f'<div class="param-panel sub"><h3>Sub</h3><div class="param-items">{sub_panel}</div></div>'
-            f'<div class="param-panel oscillator-1"><h3>Oscillator 1</h3><div class="param-items">{osc1_panel}</div></div>'
-            f'<div class="param-panel oscillator-2"><h3>Oscillator 2</h3><div class="param-items">{osc2_panel}</div></div>'
-            '</div>'
-        )
+
+        filter_panel = ''
+        filter_items = sections.pop("Filter", None)
+        if filter_items:
+            filter_panel = (
+                f'<div class="param-panel filter"><h3>Filter</h3>'
+                f'<div class="param-items">{"".join(filter_items)}</div></div>'
+            )
+
+        top_panels = [
+            f'<div class="param-panel sub"><h3>Sub</h3><div class="param-items">{sub_panel}</div></div>',
+            f'<div class="param-panel oscillator-1"><h3>Oscillator 1</h3><div class="param-items">{osc1_panel}</div></div>',
+            f'<div class="param-panel oscillator-2"><h3>Oscillator 2</h3><div class="param-items">{osc2_panel}</div></div>',
+        ]
+        if filter_panel:
+            top_panels.append(filter_panel)
+
+        custom_top = '<div class="wavetable-param-panels">' + ''.join(top_panels) + '</div>'
 
         bottom_panels = []
         for sec in self.SECTION_ORDER:
