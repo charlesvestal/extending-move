@@ -519,10 +519,6 @@ class WavetableParamEditorHandler(BaseHandler):
         "Lfo_Amount": "Amount",
         "Lfo_ModSource": "LFO Mod",
         "Lfo_ModAmount": "Mod Amount",
-        "Lfo_AttackTime": "Attack",
-        "Lfo_PhaseOffset": "Offset",
-        "Lfo_Shaping": "Shape",
-        "Lfo_Sync": "Sync Type",
 
         # Modulation Matrix
         "ModulationMatrix_Source1": "Source",
@@ -597,12 +593,6 @@ class WavetableParamEditorHandler(BaseHandler):
         "Voice_Modulators_Lfo2_Time_Rate",
         "Voice_Global_Glide",
         "Voice_Global_Transpose",
-    }
-
-    # Parameters that should not be displayed in the UI.
-    HIDDEN_PARAMS = {
-        "Voice_Modulators_Amount",
-        "Voice_Modulators_TimeScale",
     }
 
     def _friendly_label(self, name: str) -> str:
@@ -913,35 +903,6 @@ class WavetableParamEditorHandler(BaseHandler):
             ordered.extend(items.values())
         return ordered
 
-    def _arrange_lfo_panel(self, items: dict) -> list:
-        """Return LFO panel rows in a specific layout."""
-        ordered = []
-        row1 = "".join([
-            items.pop("Type", ""),
-            items.pop("Sync", ""),
-            items.pop("AttackTime", ""),
-            items.pop("Retrigger", ""),
-        ])
-        if row1.strip():
-            ordered.append(f'<div class="param-row">{row1}</div>')
-
-        row2 = "".join([
-            items.pop("Rate", ""),
-            items.pop("Amount", ""),
-            items.pop("Shaping", ""),
-            items.pop("PhaseOffset", ""),
-        ])
-        if row2.strip():
-            ordered.append(f'<div class="param-row">{row2}</div>')
-
-        # Discard advanced parameters that shouldn't show in the UI
-        items.pop("SyncedRate", None)
-        items.pop("UnifiedRateModulation", None)
-
-        if items:
-            ordered.extend(items.values())
-        return ordered
-
     def _arrange_sub_column(self, osc_items: dict, mixer_items: dict) -> list:
         """Return stacked rows for the Sub oscillator."""
         ordered = []
@@ -1031,8 +992,6 @@ class WavetableParamEditorHandler(BaseHandler):
             name = item["name"]
             val = item["value"]
             meta = dict(schema.get(name, {}))
-            if name in self.HIDDEN_PARAMS:
-                continue
             if name in {
                 "Voice_Oscillator1_Effects_Effect1",
                 "Voice_Oscillator1_Effects_Effect2",
@@ -1109,9 +1068,7 @@ class WavetableParamEditorHandler(BaseHandler):
                     if sec == "Filter":
                         group_items.extend(self._arrange_filter_panel(items))
                     elif sec == "Envelopes":
-                        group_items.extend(self._arrange_envelope_panel(items))
-                    elif sec == "Modulation" and label.startswith("LFO"):
-                        group_items.extend(self._arrange_lfo_panel(items))
+                        group_items.extend(self._arrange_envelope_panel(items, label))
                     else:
                         group_items.extend(items.values())
             if sections.get(sec):
