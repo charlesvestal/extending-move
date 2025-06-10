@@ -39,18 +39,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const points = [];
     const holdVal = parseFloat(hold.value);
+
     for (let i = 0; i < cycleCount; i++) {
       const startX = (i / cycleCount) * w;
       const endX = ((i + 1) / cycleCount) * w;
       const peak = startX + peakX;
+
       points.push([startX, hgt]);
       points.push([peak, 0]);
+
+      const holdEnd = peak + (endX - startX) * holdVal;
       if (holdVal > 0) {
-        const holdEnd = peak + (endX - startX) * holdVal;
         points.push([holdEnd, 0]);
       }
-      points.push([endX, hgt]);
+
+      if (t >= 0.2) {
+        // Tilt at or above 0.2 keeps the level flat after the peak
+        points.push([endX, 0]);
+        points.push([endX, hgt]);
+      } else {
+        // Below 0.2 curve down using a simple 1/x style curve
+        const curveStart = holdVal > 0 ? holdEnd : peak;
+        const segs = 10;
+        for (let s = 1; s <= segs; s++) {
+          const frac = s / segs;
+          const x = curveStart + frac * (endX - curveStart);
+          const yFrac = 1 / (1 + frac * segs); // values ~1 -> ~0
+          points.push([x, (1 - yFrac) * hgt]);
+        }
+        points.push([endX, hgt]);
+      }
     }
+
     ctx.moveTo(points[0][0], points[0][1]);
     for (let i = 1; i < points.length; i++) {
       ctx.lineTo(points[i][0], points[i][1]);
