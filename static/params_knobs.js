@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const decimals = parseInt(el.dataset.decimals || '2', 10);
         const unit = el.dataset.unit || '';
         const step = parseFloat(el.step || el.dataset.step || '1');
-        const percentUnit = unit === '%';
+        const percentUnit = unit === '%' || unit === 'ct';
         const displayDecimalsDefault = percentUnit ? 0 : decimals;
         const displayId = el.dataset.display;
         const hidden = document.querySelector(`input[name="${target}"]`);
@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // allow smooth input; actual rounding happens in handler
             el.step = '0.001';
         }
-        const shouldScale = unit === '%' && Math.abs(max) <= 1 && Math.abs(min) <= 1;
+        const shouldScale = (unit === '%' || unit === 'ct') && Math.abs(max) <= 1 && Math.abs(min) <= 1;
         const getStep = (v) => getPercentStep(v, unit, step, shouldScale);
         const getDisplayDecimals = (v) => getPercentDecimals(v, unit, displayDecimalsDefault, shouldScale);
         const oscValToDb = (val) => {
