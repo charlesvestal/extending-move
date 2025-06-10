@@ -38,7 +38,18 @@ def test_reverse_post(client, monkeypatch):
 def test_adsr_get(client, monkeypatch):
     def fake_get():
         return {
-            'defaults': {'attack': 0.1, 'decay': 0.2, 'sustain': 0.5, 'release': 0.3},
+            'defaults': {
+                'attack': 0.1,
+                'decay': 0.2,
+                'sustain': 0.5,
+                'release': 0.3,
+                'attack_slope': 0,
+                'decay_slope': 0,
+                'release_slope': 0,
+                'initial': 0,
+                'peak': 1,
+                'final': 0,
+            },
             'message': 'hello',
             'message_type': 'info'
         }
