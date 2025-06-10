@@ -94,7 +94,7 @@ Everything that it does can be found in `utility-scripts/install-on-move.sh`
 #### Updating
 
 To update, you can use the similar `utility-scripts/update-on-move.command` or `utility-scripts/update-on-move.sh` to copy over the files and restart the webserver.
-Alternatively, run `python utility-scripts/github_update.py` to fetch the latest main branch ZIP if a new commit is available. The script restarts the local webserver and will automatically run `pip install -r requirements.txt` if the requirements file changed. It defaults to this repository but you can override the source with the `GITHUB_REPO` environment variable. Set `UPDATE_TMPDIR` if your system has limited space in `/tmp` to control where the ZIP is extracted.
+Alternatively, run `python utility-scripts/github_update.py` to fetch the latest main branch ZIP if a new commit is available. The script restarts the local webserver and will automatically run `pip install --no-cache-dir -r requirements.txt` if the requirements file changed. It defaults to this repository but you can override the source with the `GITHUB_REPO` environment variable. Set `UPDATE_TMPDIR` if your system has limited space in `/tmp` to control where the ZIP is extracted. When installing dependencies the updater sets `TMPDIR=/data/UserData/tmp` so pip has enough space.
 
 ### Manual Installation
 
@@ -120,8 +120,9 @@ fi
 
 2. Configure temporary directory:
 ```bash
-mkdir -p ~/tmp
-export TMPDIR=~/tmp
+mkdir -p /data/UserData/tmp
+export TMPDIR=/data/UserData/tmp
+echo "TMPDIR is set to: $TMPDIR"
 ```
 
 3. Install dependencies:

@@ -6,8 +6,8 @@ with the latest commit on ``main`` fetched via the GitHub API. If a newer
 commit is available, the corresponding ZIP archive is downloaded and unpacked
 over the current project directory. The new SHA is then stored in
 ``last_sha.txt`` and the local webserver is restarted. If ``requirements.txt``
-changed, the script runs ``pip install -r requirements.txt`` before restarting
-the server.
+changed, the script runs ``pip install --no-cache-dir -r requirements.txt``
+after setting ``TMPDIR=/data/UserData/tmp`` before restarting the server.
 
 Set the environment variable ``GITHUB_REPO`` to ``owner/repo`` (defaults to
 ``charlesvestal/extending-move``) before running if you need to override the
@@ -99,10 +99,14 @@ def install_requirements(root: Path) -> None:
     req = root / "requirements.txt"
     if not req.exists():
         return
+    env = os.environ.copy()
+    env.setdefault("TMPDIR", "/data/UserData/tmp")
+    print(f"TMPDIR is set to: {env['TMPDIR']}")
     try:
         subprocess.run(
             [sys.executable, "-m", "pip", "install", "--no-cache-dir", "-r", str(req)],
             check=True,
+            env=env,
         )
     except Exception as exc:  # noqa: BLE001
         print(f"Error installing requirements: {exc}", file=sys.stderr)
