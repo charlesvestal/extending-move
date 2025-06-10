@@ -34,6 +34,8 @@ REPO = github_update.REPO
 ROOT_DIR = github_update.ROOT_DIR
 read_last_sha = github_update.read_last_sha
 write_last_sha = github_update.write_last_sha
+read_last_branch = github_update.read_last_branch
+write_last_branch = github_update.write_last_branch
 fetch_latest_sha = github_update.fetch_latest_sha
 download_zip = github_update.download_zip
 overlay_from_zip = github_update.overlay_from_zip
@@ -44,14 +46,14 @@ logger = logging.getLogger(__name__)
 
 
 def fetch_commits_since(
-    repo: str, since_sha: str, limit: int = 50
+    repo: str, branch: str, since_sha: str, limit: int = 50
 ) -> Tuple[List[Dict[str, Any]], bool, str | None]:
-    """Return commits on main after ``since_sha`` limited to ``limit`` commits.
+    """Return commits on ``branch`` after ``since_sha`` limited to ``limit`` commits.
 
     Returns ``(commits, truncated, error_message)`` where ``truncated`` indicates
     more commits are available and ``error_message`` is set if the request fails.
     """
-    url = f"https://api.github.com/repos/{repo}/commits?sha=main"
+    url = f"https://api.github.com/repos/{repo}/commits?sha={branch}"
     commits: List[Dict[str, Any]] = []
     truncated = False
     error_message: str | None = None
@@ -97,11 +99,13 @@ class UpdateHandler(BaseHandler):
 
     def check_for_update(self) -> Dict[str, Any]:
         now = time.time()
-        if self._cached_info and now - self._last_check < self.CACHE_DURATION:
+        use_cache = GITHUB_TOKEN is None
+        if use_cache and self._cached_info and now - self._last_check < self.CACHE_DURATION:
             return self._cached_info
 
+        branch = read_last_branch()
         last_sha = read_last_sha()
-        latest_sha = fetch_latest_sha(REPO)
+        latest_sha = fetch_latest_sha(REPO, branch)
         if not latest_sha:
             info = {
                 "has_update": False,
@@ -121,7 +125,7 @@ class UpdateHandler(BaseHandler):
         commit_error: str | None = None
         if has_update:
             commits, truncated, commit_error = fetch_commits_since(
-                REPO, last_sha, limit=50
+                REPO, branch, last_sha, limit=50
             )
         else:
             commits, truncated, commit_error = [], False, None
@@ -129,8 +133,10 @@ class UpdateHandler(BaseHandler):
             "has_update": has_update,
             "commits": commits,
             "truncated": truncated,
+            "branch": branch,
             "last_sha": last_sha,
             "latest_sha": latest_sha,
+            "has_token": GITHUB_TOKEN is not None,
         }
         if commit_error:
             info["message"] = commit_error
@@ -179,7 +185,7 @@ class UpdateHandler(BaseHandler):
             resp = self.format_success_response(
                 "Restarting server...",
                 progress=["restarting server"],
-                restart_countdown=20,
+                restart_countdown=10,
             )
             resp.update(info)
             return resp
@@ -203,7 +209,8 @@ class UpdateHandler(BaseHandler):
             log.write("downloading update\n")
             log.flush()
 
-            content = download_zip(REPO)
+            branch = info.get("branch")
+            content = download_zip(REPO, branch)
             if not content:
                 log.write("Error downloading update\n")
                 log.flush()
@@ -226,6 +233,7 @@ class UpdateHandler(BaseHandler):
                 return resp
 
             write_last_sha(latest_sha)
+            write_last_branch(branch)
 
             if changed:
                 progress.append("installing requirements")
@@ -264,7 +272,7 @@ class UpdateHandler(BaseHandler):
                 "progress": progress,
                 "has_update": False,
                 "commits": [],
-                "restart_countdown": 20,
+                "restart_countdown": 10,
             }
         )
         return resp
