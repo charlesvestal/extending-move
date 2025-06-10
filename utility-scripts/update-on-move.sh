@@ -27,8 +27,10 @@ cd "$PROJECT_ROOT"
 # Record the current commit SHA on the remote so the web based updater knows
 # which version is installed. If git is not available this step is skipped.
 CURRENT_SHA=""
+CURRENT_BRANCH="main"
 if git rev-parse HEAD > /dev/null 2>&1; then
   CURRENT_SHA=$(git rev-parse HEAD)
+  CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 fi
 
 # --- Remote server configuration ---
@@ -66,6 +68,9 @@ ssh -T "${REMOTE_USER}@${REMOTE_HOST}" "cd '${REMOTE_DIR}' && tar xzf - && cp -r
 echo "Files copied."
 
 if [ -n "$CURRENT_SHA" ]; then
+  echo "Recording current version ${CURRENT_SHA} (${CURRENT_BRANCH}) on remote..."
+  ssh -T "${REMOTE_USER}@${REMOTE_HOST}" "echo '${CURRENT_SHA}' > '${REMOTE_DIR}/last_sha.txt' && echo '${CURRENT_BRANCH}' > '${REMOTE_DIR}/last_branch.txt'"
+
   echo "Recording current version ${CURRENT_SHA} on remote..."
   ssh -T "${REMOTE_USER}@${REMOTE_HOST}" "echo '${CURRENT_SHA}' > '${REMOTE_DIR}/last_sha.txt'"
 fi

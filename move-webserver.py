@@ -733,6 +733,10 @@ def update_route():
         truncated=result.get("truncated", False),
         repo=REPO,
         has_update=result.get("has_update", False),
+        branch=result.get("branch"),
+        last_sha=result.get("last_sha"),
+        latest_sha=result.get("latest_sha"),
+        has_token=result.get("has_token", False),
         progress=result.get("progress", []),
         restart_countdown=result.get("restart_countdown"),
     )
