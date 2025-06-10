@@ -833,10 +833,11 @@ class SynthParamEditorHandler(BaseHandler):
             row1 = "".join(amp_adsr)
             if row1:
                 ordered.append(
-                    '<canvas id="amp-env-canvas" class="adsr-canvas env1-section" width="380" height="100"></canvas>'
+                    '<canvas id="amp-env-canvas" class="adsr-canvas env1-section" width="300" height="88"></canvas>'
                 )
                 ordered.append(
                     f'<div class="param-row env1-row env1-section"><span class="param-row-label">Amp envelope</span>{row1}</div>'
+
                 )
             if cycle_toggle:
                 ordered.append(
@@ -851,6 +852,7 @@ class SynthParamEditorHandler(BaseHandler):
                 )
                 ordered.append(
                     f'<div class="param-row env2-adsr env2-section hidden"><span class="param-row-label">Env 2</span>{row2_main}</div>'
+
                 )
             if any([cycle_mid, cycle_hold, cycle_rate, cycle_ratio, cycle_time, cycle_sync, cycle_mode]):
                 # Hide unselected rate controls based on current mode
