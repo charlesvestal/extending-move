@@ -747,7 +747,6 @@ class SynthParamEditorHandler(BaseHandler):
                 ordered.append(f'<div class="param-row filter-mod-row">{pair1}{pair2}</div>')
 
             ordered.extend(filter_items.values())
-            ordered.append('<canvas id="driftFilterChart" width="400" height="200" style="margin-top:1em;border:1px solid #ccc;"></canvas>')
             sections["Filter"] = ordered
 
         if mixer_items:
