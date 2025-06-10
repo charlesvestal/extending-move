@@ -532,13 +532,15 @@
     "type": "number",
     "min": -1.0,
     "max": 1.0,
-    "options": []
+    "options": [],
+    "unit": "%"
   },
   "Voice_Oscillator1_Effects_Effect2": {
     "type": "number",
     "min": 0.0,
     "max": 1.0,
-    "options": []
+    "options": [],
+    "unit": "%"
   },
   "Voice_Oscillator1_Effects_EffectMode": {
     "type": "enum",
@@ -597,13 +599,15 @@
     "type": "number",
     "min": -1.0,
     "max": 1.0,
-    "options": []
+    "options": [],
+    "unit": "%"
   },
   "Voice_Oscillator2_Effects_Effect2": {
     "type": "number",
     "min": 0.0,
     "max": 1.0,
-    "options": []
+    "options": [],
+    "unit": "%"
   },
   "Voice_Oscillator2_Effects_EffectMode": {
     "type": "enum",
