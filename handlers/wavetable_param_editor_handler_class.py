@@ -553,6 +553,11 @@ class WavetableParamEditorHandler(BaseHandler):
         "Global_ResetOscillatorPhase": "Reset Osc Phase",
         "Global_HiQuality": "HQ",
         "Global_SerialNumber": "Serial",
+        "Voice_Global_Glide": "Glide",
+        "Voice_Global_Transpose": "Transpose",
+        "Voice_Unison_Mode": "Unison",
+        "Voice_Unison_Amount": "Amount",
+        "Voice_Unison_VoiceCount": "Voices",
 
     }
 
@@ -983,6 +988,38 @@ class WavetableParamEditorHandler(BaseHandler):
             ordered.append(f'<div class="param-row">{fx_row}</div>')
         return ordered
 
+    def _arrange_global_panel(self, items: dict) -> list:
+        """Return ordered rows for the Global panel."""
+        ordered = []
+        row = "".join([
+            items.pop("HiQ", ""),
+            items.pop("Volume", ""),
+        ])
+        if row.strip():
+            ordered.append(f'<div class="param-row">{row}</div>')
+        row = "".join([
+            items.pop("Glide", ""),
+            items.pop("Transpose", ""),
+        ])
+        if row.strip():
+            ordered.append(f'<div class="param-row">{row}</div>')
+        row = "".join([
+            items.pop("MonoPoly", ""),
+            items.pop("PolyVoices", ""),
+        ])
+        if row.strip():
+            ordered.append(f'<div class="param-row">{row}</div>')
+        row = "".join([
+            items.pop("Mode", ""),
+            items.pop("Amount", ""),
+            items.pop("VoiceCount", ""),
+        ])
+        if row.strip():
+            ordered.append(f'<div class="param-row">{row}</div>')
+        if items:
+            ordered.extend(items.values())
+        return ordered
+
     def generate_params_html(self, params, mapped_parameters=None):
         """Return HTML controls for the given parameter values."""
         if not params:
@@ -1004,6 +1041,7 @@ class WavetableParamEditorHandler(BaseHandler):
             sec: {lbl: {} for _, lbl, _ in self.SECTION_SUBPANELS.get(sec, [])}
             for sec in self.SECTION_SUBPANELS
         }
+        global_items = {}
 
         for i, item in enumerate(params):
             name = item["name"]
@@ -1072,7 +1110,18 @@ class WavetableParamEditorHandler(BaseHandler):
                     slider=slider,
                     extra_classes=extra,
                 )
-                sections.setdefault(sec, []).append(html)
+                if sec == "Global":
+                    base = name
+                    if base.startswith("Voice_Global_"):
+                        base = base[len("Voice_Global_") :]
+                    elif base.startswith("Voice_Unison_"):
+                        base = base[len("Voice_Unison_") :]
+                    elif base.startswith("Global_"):
+                        base = base[len("Global_") :]
+                    base = self._strip_qualifiers(base)
+                    global_items[base] = html
+                else:
+                    sections.setdefault(sec, []).append(html)
 
         for sec, groups in self.SECTION_SUBPANELS.items():
             if sec in {"Oscillators", "FX", "Mixer"}:
@@ -1096,6 +1145,8 @@ class WavetableParamEditorHandler(BaseHandler):
                 group_items.extend(sections[sec])
             if group_items:
                 sections[sec] = group_items
+
+        sections["Global"] = self._arrange_global_panel(global_items)
 
         # Custom top panels for Sub and Oscillators
         sub_items = subgroups.get("Oscillators", {}).get("Sub Oscillator", {})
