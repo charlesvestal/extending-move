@@ -1065,6 +1065,15 @@ button#macro-add-param {
 }
 #mod-matrix-table td:first-child {
     text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+#mod-matrix-table td:first-child .nested-dropdown {
+    flex-grow: 1;
+}
+#mod-matrix-table td:first-child .mod-matrix-remove {
+    margin-left: 0.25rem;
 }
 
 
