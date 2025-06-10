@@ -823,25 +823,30 @@ class SynthParamEditorHandler(BaseHandler):
             cycle_mode = env_items.pop("CyclingEnvelope_Mode", "")
 
             ordered = []
+            ordered.append(
+                '<div class="param-row env-switch-row"><span class="param-row-label">View</span>'
+                '<label><input type="radio" name="env_select" value="env1" checked> Env 1</label>'
+                ' <label><input type="radio" name="env_select" value="env2"> Env 2</label></div>'
+            )
             row1 = "".join(amp_adsr)
             if row1:
                 ordered.append(
-                    f'<div class="param-row"><span class="param-row-label">Amp envelope</span>{row1}</div>'
+                    f'<div class="param-row env1-row env1-section"><span class="param-row-label">Amp envelope</span>{row1}</div>'
                 )
                 ordered.append(
-                    '<canvas id="amp-env-canvas" class="adsr-canvas" width="380" height="100"></canvas>'
+                    '<canvas id="amp-env-canvas" class="adsr-canvas env1-section" width="380" height="100"></canvas>'
                 )
             if cycle_toggle:
                 ordered.append(
-                    f'<div class="param-row env2-mode"><span class="param-row-label">Env/Cyc</span>{cycle_toggle}</div>'
+                    f'<div class="param-row env2-mode env2-section"><span class="param-row-label">Env/Cyc</span>{cycle_toggle}</div>'
                 )
             row2_main = "".join(env2_adsr)
             if row2_main.strip():
                 ordered.append(
-                    f'<div class="param-row env2-adsr"><span class="param-row-label">Env 2</span>{row2_main}</div>'
+                    f'<div class="param-row env2-adsr env2-section"><span class="param-row-label">Env 2</span>{row2_main}</div>'
                 )
                 ordered.append(
-                    '<canvas id="env2-canvas" class="adsr-canvas" width="380" height="100"></canvas>'
+                    '<canvas id="env2-canvas" class="adsr-canvas env2-section" width="380" height="100"></canvas>'
                 )
             if any([cycle_mid, cycle_hold, cycle_rate, cycle_ratio, cycle_time, cycle_sync, cycle_mode]):
                 # Hide unselected rate controls based on current mode
@@ -864,7 +869,7 @@ class SynthParamEditorHandler(BaseHandler):
                     cycle_mode,
                 ])
                 ordered.append(
-                    f'<div class="param-row env2-cycling hidden"><span class="param-row-label">Env 2</span>{row3_extra}</div>'
+                    f'<div class="param-row env2-cycling hidden env2-section"><span class="param-row-label">Env 2</span>{row3_extra}</div>'
                 )
 
             ordered.extend(env_items.values())
