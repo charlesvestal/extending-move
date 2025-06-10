@@ -41,7 +41,6 @@
       <input type="hidden" name="preset_select" value="{{ default_preset_path }}">
       <label>Preset Name:
         <input type="text" name="new_preset_name" required>
-        <button type="button" id="modal-generate-name-btn">Random Name</button>
       </label>
       <button type="submit">Create</button>
     </form>
@@ -68,7 +67,6 @@
     <div class="preset-controls">
         <label>Preset Name:
             <input type="text" name="new_preset_name" id="new-preset-name" data-original-name="{{ _basename }}" data-original-base="{{ _prefill }}" value="{{ _prefill }}" {% if not rename_checked %}disabled{% endif %}>
-            <button type="button" id="generate-name-btn">Random Name</button>
         </label>
         <label><input type="checkbox" name="rename" id="rename-checkbox" {% if rename_checked %}checked{% endif %}> Save as new</label>
     </div>
@@ -124,20 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const saveBtn = document.getElementById('save-params-btn');
   const form = document.getElementById('param-form');
   const macrosInput = document.getElementById('macros-data-input');
-
-  if (cb && nameInput) {
-    cb.addEventListener('change', () => {
-      nameInput.disabled = !cb.checked;
-      if (!cb.checked) {
-        const origBase = nameInput.dataset.originalBase || nameInput.dataset.originalName.replace(/\.[^.]+$/, '');
-        if (nameInput.value !== origBase) {
-          nameInput.value = origBase;
-          nameInput.dispatchEvent(new Event('input'));
-        }
-      }
-      updateSaveState();
-    });
-  }
+  if (cb) cb.addEventListener('change', updateSaveState);
 
   const initialMacros = macrosInput ? macrosInput.value : null;
   const initialValues = {};
