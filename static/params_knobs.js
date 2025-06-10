@@ -198,6 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
             driveEl.classList.toggle('hidden', !['Lowpass','Highpass'].includes(sel.value));
         }
         sel.addEventListener('change', updateDrive);
+        updateMorph();
         updateDrive();
     });
 
