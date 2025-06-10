@@ -27,6 +27,18 @@ function randomizeParams() {
     if (param === 'Filter_Frequency') refs.cutoff = dial || slider;
     if (param === 'Global_Volume') refs.volume = dial || slider;
 
+    if (param === 'Global_Volume') {
+      const vol = 1.0;
+      if (dial) {
+        dial.value = vol;
+        dial.dispatchEvent(new Event('input'));
+      } else if (slider) {
+        slider.dataset.value = vol;
+        if (typeof slider._sliderUpdate === 'function') slider._sliderUpdate(vol);
+      }
+      return;
+    }
+
     if (dial) {
       const min = parseFloat(dial.min || '0');
       const max = parseFloat(dial.max || '1');
@@ -35,7 +47,6 @@ function randomizeParams() {
       const shouldScale = unit === '%' && Math.abs(max) <= 1 && Math.abs(min) <= 1;
       let lo = min;
       if (param === 'Mixer_OscillatorGain1' || param === 'Mixer_OscillatorGain2') lo = Math.max(min, 0.3);
-      if (param === 'Global_Volume') lo = Math.max(min, 0.4);
       if (param === 'Filter_Frequency') lo = Math.max(min, 100);
       let val = Math.random() * (max - lo) + lo;
       const st = getPercentStep(val, unit, step, shouldScale);
@@ -57,7 +68,6 @@ function randomizeParams() {
       const shouldScale = unit === '%' && Math.abs(max) <= 1 && Math.abs(min) <= 1;
       let lo = min;
       if (param === 'Mixer_OscillatorGain1' || param === 'Mixer_OscillatorGain2') lo = Math.max(min, 0.3);
-      if (param === 'Global_Volume') lo = Math.max(min, 0.4);
       if (param === 'Filter_Frequency') lo = Math.max(min, 100);
       let val = Math.random() * (max - lo) + lo;
       const st = getPercentStep(val, unit, step, shouldScale);
@@ -71,6 +81,36 @@ function randomizeParams() {
     const pick = Math.random() < 0.5 ? refs.oscOn1 : refs.oscOn2;
     pick.checked = true;
     pick.dispatchEvent(new Event('change'));
+  }
+
+  function getVal(ctrl) {
+    if (!ctrl) return 0;
+    if (ctrl.classList && ctrl.classList.contains('rect-slider')) {
+      return parseFloat(ctrl.dataset.value || '0');
+    }
+    return parseFloat(ctrl.value || '0');
+  }
+
+  function setVal(ctrl, v) {
+    if (!ctrl) return;
+    if (ctrl.classList && ctrl.classList.contains('rect-slider')) {
+      ctrl.dataset.value = v;
+      if (typeof ctrl._sliderUpdate === 'function') ctrl._sliderUpdate(v);
+    } else {
+      ctrl.value = v;
+      ctrl.dispatchEvent(new Event('input'));
+    }
+  }
+
+  if (refs.gain1 || refs.gain2) {
+    const g1 = getVal(refs.gain1);
+    const g2 = getVal(refs.gain2);
+    const maxG = Math.max(g1, g2);
+    if (maxG > 0 && maxG !== 1) {
+      const factor = 1 / maxG;
+      if (refs.gain1) setVal(refs.gain1, Math.min(g1 * factor, 1));
+      if (refs.gain2) setVal(refs.gain2, Math.min(g2 * factor, 1));
+    }
   }
 
   const saveBtn = document.getElementById('save-params-btn');
