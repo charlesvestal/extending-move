@@ -1,0 +1,33 @@
+#drift-canvas {
+  width: 1024px;
+  height: 300px;
+  background-color: #292929;
+  font-family: "Akzidenz-Grotesk", sans-serif;
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #CCCCCC;
+  padding: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+#drift-canvas .param-panel h3 {
+  font-size: 9px;
+  color: #999999;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+#drift-canvas .param-panel {
+  border: none;
+  padding: 0;
+  background: transparent;
+  gap: 8px;
+}
+#drift-canvas .param-panel.osc-mix { width: 140px; height: 120px; }
+#drift-canvas .param-panel.filter { width: 200px; height: 120px; }
+#drift-canvas .param-panel.envelopes { width: 360px; height: 120px; }
+#drift-canvas .param-panel.lfo,
+#drift-canvas .param-panel.mod { width: 240px; height: 120px; }
+#drift-canvas .param-panel.global { width: 968px; height: 120px; }

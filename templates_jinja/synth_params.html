@@ -1,4 +1,7 @@
 {% extends "base.html" %}
+{% block extra_head %}
+<link rel="stylesheet" href="{{ host_prefix }}/static/drift_device.css">
+{% endblock %}
 {% block content %}
 <h2>Drift Preset Editor</h2>
 <p><em>Edit parameter values and assign macros. Note that Macro assignments override other values.</em></p>
@@ -92,8 +95,10 @@
         <button type="button" id="macro-sidebar-close">Close</button>
     </div>
     <div id="sidebar-overlay" class="sidebar-overlay hidden"></div>
-    <div class="param-list">
-        {{ params_html | safe }}
+    <div id="drift-canvas" class="drift-canvas">
+        <div class="param-list">
+            {{ params_html | safe }}
+        </div>
     </div>
 
 </form>

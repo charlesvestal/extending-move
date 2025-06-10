@@ -315,11 +315,11 @@ class SynthParamEditorHandler(BaseHandler):
 
     SECTION_ORDER = [
         "Oscillators",
-        "Mixer",
+        "Osc Mix",
         "Filter",
         "Envelopes",
         "LFO",
-        "Modulation",
+        "Mod",
         "Global",
         "Extras",
         "Other",
@@ -604,7 +604,7 @@ class SynthParamEditorHandler(BaseHandler):
         if name.startswith(("Oscillator1_", "Oscillator2_", "PitchModulation_")):
             return "Oscillators"
         if name.startswith("Mixer_") or name.startswith("Filter_OscillatorThrough") or name.startswith("Filter_NoiseThrough"):
-            return "Mixer"
+            return "Osc Mix"
         if name.startswith("Filter_"):
             return "Filter"
         if name.startswith(("Envelope1_", "Envelope2_", "CyclingEnvelope_")):
@@ -612,7 +612,7 @@ class SynthParamEditorHandler(BaseHandler):
         if name.startswith("Lfo_"):
             return "LFO"
         if name.startswith("ModulationMatrix_"):
-            return "Modulation"
+            return "Mod"
         if name.startswith("Global_"):
             if name in {
                 "Global_HiQuality",
@@ -708,13 +708,13 @@ class SynthParamEditorHandler(BaseHandler):
                 env_items[name] = html
             elif section == "LFO":
                 lfo_items[name] = html
-            elif section == "Mixer":
+            elif section == "Osc Mix":
                 mixer_items[name] = html
             elif section == "Global":
                 global_items[name] = html
             elif section == "Extras":
                 extras_items[name] = html
-            elif section == "Modulation":
+            elif section == "Mod":
                 mod_items[name] = html
             else:
                 sections[section].append(html)
@@ -761,7 +761,7 @@ class SynthParamEditorHandler(BaseHandler):
                 if row_html:
                     ordered.append(f'<div class="param-row">{row_html}</div>')
             ordered.extend(mixer_items.values())
-            sections["Mixer"] = ordered
+            sections["Osc Mix"] = ordered
 
         if osc_items:
             ordered = []
@@ -920,7 +920,7 @@ class SynthParamEditorHandler(BaseHandler):
                     )
 
             ordered.extend(mod_items.values())
-            sections["Modulation"] = ordered
+            sections["Mod"] = ordered
 
         if lfo_items:
             rate = lfo_items.pop("Lfo_Rate", "")
@@ -960,7 +960,7 @@ class SynthParamEditorHandler(BaseHandler):
 
         out_html = '<div class="drift-param-panels">'
         bottom_panels = []
-        second_row = {"LFO", "Modulation", "Global", "Extras"}
+        second_row = {"LFO", "Mod", "Global", "Extras"}
         for sec in self.SECTION_ORDER:
             items = sections.get(sec)
             if not items:
