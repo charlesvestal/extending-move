@@ -30,6 +30,14 @@ import subprocess
 import signal
 import time
 
+GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
+
+
+def _headers() -> dict | None:
+    if GITHUB_TOKEN:
+        return {"Authorization": f"token {GITHUB_TOKEN}"}
+    return None
+
 REPO = os.environ.get("GITHUB_REPO", "charlesvestal/extending-move")
 ROOT_DIR = Path(__file__).resolve().parents[1]
 SHA_FILE = ROOT_DIR / "last_sha.txt"
@@ -53,8 +61,9 @@ def write_last_sha(sha: str) -> None:
 
 def fetch_latest_sha(repo: str) -> str | None:
     url = f"https://api.github.com/repos/{repo}/commits/main"
+    headers = _headers()
     try:
-        resp = requests.get(url, timeout=10)
+        resp = requests.get(url, headers=headers, timeout=10)
         resp.raise_for_status()
         return resp.json().get("sha")
     except Exception as exc:  # noqa: BLE001
@@ -64,8 +73,9 @@ def fetch_latest_sha(repo: str) -> str | None:
 
 def download_zip(repo: str) -> bytes | None:
     url = f"https://github.com/{repo}/archive/refs/heads/main.zip"
+    headers = _headers()
     try:
-        resp = requests.get(url, timeout=20)
+        resp = requests.get(url, headers=headers, timeout=20)
         resp.raise_for_status()
         return resp.content
     except Exception as exc:  # noqa: BLE001

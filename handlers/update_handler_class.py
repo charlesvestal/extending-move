@@ -2,6 +2,7 @@
 """Handler for checking and applying repository updates."""
 
 import logging
+import os
 import time
 from typing import List, Dict, Any, Tuple
 
@@ -10,6 +11,14 @@ import importlib.util
 from pathlib import Path
 
 from handlers.base_handler import BaseHandler
+
+GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
+
+
+def _headers() -> dict | None:
+    if GITHUB_TOKEN:
+        return {"Authorization": f"token {GITHUB_TOKEN}"}
+    return None
 
 _util_path = (
     Path(__file__).resolve().parents[1] / "utility-scripts" / "github_update.py"
@@ -44,9 +53,10 @@ def fetch_commits_since(
     commits: List[Dict[str, Any]] = []
     truncated = False
     error_message: str | None = None
+    headers = _headers()
     while url and len(commits) < limit:
         try:
-            resp = requests.get(url, timeout=10)
+            resp = requests.get(url, headers=headers, timeout=10)
             resp.raise_for_status()
         except Exception as exc:  # noqa: BLE001
             logger.error("Error fetching commits: %s", exc)

@@ -156,7 +156,13 @@ Located in `utility-scripts/`:
 - `install-on-move.sh` / `.command`: Content installation
 - `update-on-move.sh` / `.command`: Update with latest files (use `--overwrite` to delete the target before copying)
 - `restart-webserver.sh`: Restart the webserver
-- `github_update.py`: Self-update using GitHub ZIPs, install updated requirements, and restart the webserver
+- `github_update.py`: Self-update using GitHub ZIPs, install updated requirements, and restart the webserver. Set `GITHUB_TOKEN` in the environment to authenticate GitHub API requests and avoid rate limits
+
+Example on Linux/macOS:
+
+```bash
+export GITHUB_TOKEN=your_token_here
+```
 
 
 ## How to Auto-start on Boot
