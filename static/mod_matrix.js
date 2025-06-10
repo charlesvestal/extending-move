@@ -160,11 +160,21 @@ function initModMatrix() {
       slider.dataset.max = '1';
       slider.dataset.step = '0.01';
       slider.dataset.value = v;
-      slider.addEventListener('change', () => {
-        row.values[col] = parseFloat(slider.querySelector('input')?.value || 0);
+
+      const hidden = document.createElement('input');
+      hidden.type = 'hidden';
+      hidden.value = v;
+      const hidId = `mod-mtx-${idx}-${col}`;
+      hidden.id = hidId;
+      slider.dataset.target = hidId;
+
+      hidden.addEventListener('change', () => {
+        row.values[col] = parseFloat(hidden.value || 0);
         save();
       });
+
       td.appendChild(slider);
+      td.appendChild(hidden);
       tr.appendChild(td);
     });
 
