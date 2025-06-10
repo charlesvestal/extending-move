@@ -159,11 +159,14 @@ def extract_available_parameters(
         # Find all parameters
         find_parameters(preset_data)
         
-        # Convert set to sorted list
-        parameters_list = sorted(list(parameters))
-
         schema = schema_loader()
-        parameter_info = {p: schema.get(p, {}) for p in parameters_list}
+        if schema:
+            parameters.update(schema.keys())
+
+        # Convert set to sorted list
+        parameters_list = sorted(parameters)
+
+        parameter_info = {p: schema.get(p, {}) if schema else {} for p in parameters_list}
 
         return {
             'success': True,

@@ -159,6 +159,12 @@
       "Notch"
     ]
   },
+  "Voice_Global_AmpModulation": {
+    "type": "number",
+    "min": 0.0,
+    "max": 1.0,
+    "options": []
+  },
   "Voice_Global_FilterRouting": {
     "type": "enum",
     "min": null,
@@ -173,6 +179,12 @@
     "type": "number",
     "min": 0.0,
     "max": 3.149017,
+    "options": []
+  },
+  "Voice_Global_PitchModulation": {
+    "type": "number",
+    "min": 0.0,
+    "max": 1.0,
     "options": []
   },
   "Voice_Global_Transpose": {
@@ -442,6 +454,12 @@
     "max": 19,
     "options": []
   },
+  "Voice_Modulators_Lfo1_Time_UnifiedRateModulation": {
+    "type": "number",
+    "min": -1.0,
+    "max": 1.0,
+    "options": []
+  },
   "Voice_Modulators_Lfo2_Retrigger": {
     "type": "boolean",
     "min": null,
@@ -557,6 +575,12 @@
     "max": 0.48,
     "options": []
   },
+  "Voice_Oscillator1_Pitch_PitchModulation": {
+    "type": "number",
+    "min": 0.0,
+    "max": 1.0,
+    "options": []
+  },
   "Voice_Oscillator1_Pitch_Transpose": {
     "type": "number",
     "min": -24,
@@ -614,6 +638,12 @@
     "type": "number",
     "min": -0.226562,
     "max": 0.351562,
+    "options": []
+  },
+  "Voice_Oscillator2_Pitch_PitchModulation": {
+    "type": "number",
+    "min": 0.0,
+    "max": 1.0,
     "options": []
   },
   "Voice_Oscillator2_Pitch_Transpose": {
