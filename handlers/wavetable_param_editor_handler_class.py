@@ -908,17 +908,17 @@ class WavetableParamEditorHandler(BaseHandler):
             ordered.append(f'<div class="param-row">{row}</div>')
         row = "".join(
             [
-                fx_items.pop("Effects_EffectMode", ""),
-                fx_items.pop("Effects_Effect1", ""),
-                fx_items.pop("Effects_Effect2", ""),
+                osc_items.pop("Pitch_Detune", ""),
+                osc_items.pop("Pitch_Transpose", ""),
             ]
         )
         if row.strip():
             ordered.append(f'<div class="param-row">{row}</div>')
         row = "".join(
             [
-                osc_items.pop("Pitch_Detune", ""),
-                osc_items.pop("Pitch_Transpose", ""),
+                fx_items.pop("Effects_EffectMode", ""),
+                fx_items.pop("Effects_Effect1", ""),
+                fx_items.pop("Effects_Effect2", ""),
             ]
         )
         if row.strip():
