@@ -786,8 +786,19 @@ class WavetableParamEditorHandler(BaseHandler):
         ])
         if row.strip():
             ordered.append(f'<div class="param-row">{row}</div>')
+
+        fx_row = "".join([
+            items.pop("EffectMode", ""),
+            items.pop("Effect1", ""),
+            items.pop("Effect2", ""),
+        ])
+
         if items:
             ordered.extend(items.values())
+
+        if fx_row.strip():
+            ordered.append(f'<div class="param-row">{fx_row}</div>')
+
         return ordered
 
     def _arrange_sub_panel(self, items: dict) -> list:
@@ -807,9 +818,9 @@ class WavetableParamEditorHandler(BaseHandler):
         """Return FX panel rows for an oscillator."""
         ordered = []
         row = "".join([
-            items.pop("Effects_EffectMode", ""),
-            items.pop("Effects_Effect1", ""),
-            items.pop("Effects_Effect2", ""),
+            items.pop("EffectMode", ""),
+            items.pop("Effect1", ""),
+            items.pop("Effect2", ""),
         ])
         if row.strip():
             ordered.append(f'<div class="param-row">{row}</div>')
@@ -914,21 +925,21 @@ class WavetableParamEditorHandler(BaseHandler):
         )
         if row.strip():
             ordered.append(f'<div class="param-row">{row}</div>')
-        row = "".join(
+        fx_row = "".join(
             [
-                fx_items.pop("Effects_EffectMode", ""),
-                fx_items.pop("Effects_Effect1", ""),
-                fx_items.pop("Effects_Effect2", ""),
+                fx_items.pop("EffectMode", ""),
+                fx_items.pop("Effect1", ""),
+                fx_items.pop("Effect2", ""),
             ]
         )
-        if row.strip():
-            ordered.append(f'<div class="param-row">{row}</div>')
         if mixer_items:
             ordered.extend(mixer_items.values())
         if fx_items:
             ordered.extend(fx_items.values())
         if osc_items:
             ordered.extend(osc_items.values())
+        if fx_row.strip():
+            ordered.append(f'<div class="param-row">{fx_row}</div>')
         return ordered
 
     def generate_params_html(self, params, mapped_parameters=None):
