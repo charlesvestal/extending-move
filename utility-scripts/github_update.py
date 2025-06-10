@@ -12,6 +12,9 @@ after setting ``TMPDIR=/data/UserData/tmp`` before restarting the server.
 Set the environment variable ``GITHUB_REPO`` to ``owner/repo`` (defaults to
 ``charlesvestal/extending-move``) before running if you need to override the
 repository.
+
+If ``last_sha.txt`` is missing, the updater treats it as an empty string and
+always fetches the latest commit.
 """
 
 from __future__ import annotations
@@ -49,6 +52,7 @@ TMP_DIR_PATH = Path(
 
 
 def read_last_sha() -> str:
+    """Return the last updated SHA or ``""`` if the file is missing."""
     try:
         return SHA_FILE.read_text().strip()
     except FileNotFoundError:
