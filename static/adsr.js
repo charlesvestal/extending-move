@@ -14,7 +14,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function applySlope(t, slope) {
     const s = parseFloat(slope) / 100;
-    const exp = 1 - 2 * s; // 0 -> 1, 100 -> -1 (approx 1/x)
+    // slope -100 => exp=3 (convex), 0 => exp=1 (linear), 100 => exp=-1 (concave)
+    const exp = 1 - 2 * s;
     const clamped = Math.max(parseFloat(t), 0.001);
     return Math.pow(clamped, exp);
   }
