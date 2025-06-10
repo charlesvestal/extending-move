@@ -5,6 +5,7 @@ import logging
 import os
 import time
 from typing import List, Dict, Any, Tuple
+from contextlib import redirect_stdout, redirect_stderr
 
 import requests
 import importlib.util
@@ -198,7 +199,17 @@ class UpdateHandler(BaseHandler):
             progress.append("restarting server")
             log.write("restarting server\n")
             log.flush()
-            restart_webserver()
+            try:
+                with redirect_stdout(log), redirect_stderr(log):
+                    restart_webserver(log)
+            except Exception as exc:  # noqa: BLE001
+                log.write(f"Error restarting server: {exc}\n")
+                log.flush()
+                resp = self.format_error_response(
+                    f"Error restarting server: {exc}"
+                )
+                resp.update(info)
+                return resp
             log.write("done\n")
 
         resp = self.format_success_response(f"Updated to {latest_sha}")
