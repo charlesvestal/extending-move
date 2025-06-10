@@ -867,25 +867,41 @@ class WavetableParamEditorHandler(BaseHandler):
         """Return envelope panel rows with ADSR ordering."""
         ordered = []
 
-        row = "".join(
-            [
-                items.pop("Attack", ""),
-                items.pop("Sustain", ""),
-                items.pop("Decay", ""),
-                items.pop("Release", ""),
-            ]
-        )
-        if row.strip():
-            ordered.append(f'<div class="param-row">{row}</div>')
+        row1 = "".join([
+            items.pop("Attack", ""),
+            items.pop("Sustain", ""),
+            items.pop("Decay", ""),
+            items.pop("Release", ""),
+        ])
 
         loop = items.pop("LoopMode", "")
         final_val = items.pop("Final", "")
         initial_val = items.pop("Initial", "")
         peak_val = items.pop("Peak", "")
 
-        second_row = "".join([loop, final_val, initial_val, peak_val])
-        if second_row.strip():
-            ordered.append(f'<div class="param-row">{second_row}</div>')
+        row2 = "".join([loop, final_val, initial_val, peak_val])
+
+        sample = next(iter([row1, row2] + list(items.values())), "")
+        match = re.search(r"Envelope(\d)", sample)
+        idx = match.group(1) if match else "1"
+
+        rows_html = []
+        if row1.strip():
+            rows_html.append(f'<div class="param-row">{row1}</div>')
+        if row2.strip():
+            rows_html.append(f'<div class="param-row">{row2}</div>')
+
+        if rows_html:
+            canvas = (
+                f'<canvas id="env{idx}-canvas" '
+                f'class="adsr-canvas env-canvas env{idx}-section" '
+                f'width="200" height="88"></canvas>'
+            )
+            wrapper = (
+                f'<div class="env-wrapper">'
+                f'<div class="env-controls">{"".join(rows_html)}</div>{canvas}</div>'
+            )
+            ordered.append(wrapper)
 
         if items:
             ordered.extend(items.values())

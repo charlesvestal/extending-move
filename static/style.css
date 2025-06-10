@@ -1117,5 +1117,21 @@ button#macro-add-param {
     display: block;
     margin: 0.5rem 0;
     border: 1px solid #dedede;
-    width:100%
+    width: 100%;
+}
+
+.env-wrapper {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.env-wrapper .env-controls {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.env-canvas {
+    width: 200px;
+    height: 88px;
 }
