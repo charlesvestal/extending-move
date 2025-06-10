@@ -1026,6 +1026,11 @@ button#macro-add-param {
 .mod-dest-select {
     width: 320px;
 }
+#mod-matrix-table .mod-dest-value.rect-slider-container {
+    width: 60px;
+    display: inline-block;
+    margin-left: 4px;
+}
 #mod-matrix-table .close-x {
     color: blue;
     height: 20px;

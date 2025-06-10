@@ -40,6 +40,43 @@ function initModMatrix() {
 
   const paramTree = buildParamTree();
 
+  function buildValueSlider(paramName) {
+    if (!paramName) return null;
+    const item = document.querySelector(`.param-item[data-name="${paramName}"]`);
+    const hidden = item?.querySelector('input[type="hidden"][name^="param_"][name$="_value"]');
+    const srcSlider = item?.querySelector('.rect-slider');
+    const dial = item?.querySelector('input.param-dial');
+    const slider = document.createElement('div');
+    slider.className = 'rect-slider center mod-dest-value';
+    slider.dataset.disabled = 'true';
+    slider.classList.add('disabled');
+    if (srcSlider) {
+      if (srcSlider.dataset.min) slider.dataset.min = srcSlider.dataset.min;
+      if (srcSlider.dataset.max) slider.dataset.max = srcSlider.dataset.max;
+      if (srcSlider.dataset.step) slider.dataset.step = srcSlider.dataset.step;
+      if (srcSlider.dataset.decimals) slider.dataset.decimals = srcSlider.dataset.decimals;
+      if (srcSlider.dataset.unit) slider.dataset.unit = srcSlider.dataset.unit;
+      if (srcSlider.classList.contains('center')) slider.classList.add('center');
+    } else if (dial) {
+      if (dial.min) slider.dataset.min = dial.min;
+      if (dial.max) slider.dataset.max = dial.max;
+      if (dial.step) slider.dataset.step = dial.step;
+      if (dial.dataset.decimals) slider.dataset.decimals = dial.dataset.decimals;
+      if (dial.dataset.unit) slider.dataset.unit = dial.dataset.unit;
+    }
+    slider.dataset.value = hidden ? hidden.value : '0';
+    if (window.initRectSlider) window.initRectSlider(slider);
+    if (hidden) {
+      const update = () => {
+        if (typeof slider._sliderUpdate === 'function') {
+          slider._sliderUpdate(hidden.value);
+        }
+      };
+      hidden.addEventListener('change', update);
+    }
+    return slider;
+  }
+
   function buildDropdown(name, onChange) {
     const container = document.createElement('div');
     container.className = 'nested-dropdown';
@@ -135,9 +172,18 @@ function initModMatrix() {
   function buildRow(row, idx) {
     const tr = document.createElement('tr');
     const tdSel = document.createElement('td');
+    let valueSlider = null;
+    function attachValueSlider(name) {
+      if (valueSlider && valueSlider.parentElement) {
+        valueSlider.parentElement.removeChild(valueSlider);
+      }
+      valueSlider = buildValueSlider(name);
+      if (valueSlider) tdSel.appendChild(valueSlider);
+    }
     const dropdown = buildDropdown(row.name, val => {
       row.name = val;
       save();
+      attachValueSlider(val);
     });
     const removeBtn = document.createElement('button');
     removeBtn.type = 'button';
@@ -150,6 +196,7 @@ function initModMatrix() {
     });
     tdSel.appendChild(removeBtn);
     tdSel.appendChild(dropdown);
+    attachValueSlider(row.name);
     tr.appendChild(tdSel);
 
     row.values = row.values || Array(headers.length).fill(0);
