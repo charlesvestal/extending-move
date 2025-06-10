@@ -721,6 +721,8 @@ class WavetableParamEditorHandler(BaseHandler):
 
     def _get_section(self, name):
         """Return the panel section for a raw Wavetable parameter name."""
+        if name == "Voice_Global_FilterRouting":
+            return "Filter"
         if name.startswith(("Voice_Oscillator1_Effects_", "Voice_Oscillator2_Effects_")):
             return "FX"
         if re.search(r"Voice_(?:Oscillator[12]|SubOscillator)_(?:On|Gain|Pan)$", name):
