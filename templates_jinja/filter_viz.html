@@ -5,6 +5,7 @@
 {% if message %}
   <p class="{{ message_type if message_type else ('success' if success else 'error') }}">{{ message }}</p>
 {% endif %}
+<canvas id="filterChart" width="600" height="300" style="margin-top:1em;border:1px solid #ccc;"></canvas>
 <form id="filter-form" action="{{ host_prefix }}/filter-viz" method="post">
   <fieldset>
     <legend>Filter 1</legend>
@@ -63,7 +64,6 @@
     </select>
   </label>
 </form>
-<canvas id="filterChart" width="600" height="300" style="margin-top:1em;border:1px solid #ccc;"></canvas>
 {% endblock %}
 {% block scripts %}
 <script type="module" src="{{ host_prefix }}/static/filter_viz.js"></script>
