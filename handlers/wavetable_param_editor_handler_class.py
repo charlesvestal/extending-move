@@ -788,9 +788,9 @@ class WavetableParamEditorHandler(BaseHandler):
             ordered.append(f'<div class="param-row">{row}</div>')
 
         fx_row = "".join([
-            items.pop("Effects_EffectMode", ""),
-            items.pop("Effects_Effect1", ""),
-            items.pop("Effects_Effect2", ""),
+            items.pop("EffectMode", ""),
+            items.pop("Effect1", ""),
+            items.pop("Effect2", ""),
         ])
 
         if items:
@@ -818,9 +818,9 @@ class WavetableParamEditorHandler(BaseHandler):
         """Return FX panel rows for an oscillator."""
         ordered = []
         row = "".join([
-            items.pop("Effects_EffectMode", ""),
-            items.pop("Effects_Effect1", ""),
-            items.pop("Effects_Effect2", ""),
+            items.pop("EffectMode", ""),
+            items.pop("Effect1", ""),
+            items.pop("Effect2", ""),
         ])
         if row.strip():
             ordered.append(f'<div class="param-row">{row}</div>')
@@ -927,9 +927,9 @@ class WavetableParamEditorHandler(BaseHandler):
             ordered.append(f'<div class="param-row">{row}</div>')
         fx_row = "".join(
             [
-                fx_items.pop("Effects_EffectMode", ""),
-                fx_items.pop("Effects_Effect1", ""),
-                fx_items.pop("Effects_Effect2", ""),
+                fx_items.pop("EffectMode", ""),
+                fx_items.pop("Effect1", ""),
+                fx_items.pop("Effect2", ""),
             ]
         )
         if mixer_items:
