@@ -578,11 +578,11 @@ select {
 }
 
 .pitch-mod-row {
-    justify-content: center;
+    /* justify-content: center; */
 }
 
 .filter-mod-row {
-    justify-content: center;
+    /* justify-content: center; */
 }
 
 .mod-matrix-row {
@@ -736,15 +736,15 @@ select {
     flex-direction: column;
     align-items: center;
     /* width: 90px; */
-    padding: 0.375rem;
+    padding: 0.15rem;
 }
 .param-number {
     /* margin-left: 0.5rem; */
     /* min-width: 60px; */
-    min-width: 57px;
+    min-width: 38px;
     display: inline-block;
     text-align: center;
-    font-size: 0.8rem;
+    font-size: 0.6rem;
     margin-top: 0.25rem;
 }
 
@@ -756,16 +756,16 @@ select {
 
 .param-select {
     margin: 0.25rem;
-    width: 80px;
-    height: 24px;
-    font-size: 0.8rem;
-    line-height: 24px;
+    width: 60px;
+    height: 20px;
+    font-size: 0.6rem;
+    line-height: 20px;
     padding: 0 1.5rem 0 0.5rem;
     text-align: center;
 }
 
 .filter-type-select {
-    width: 80px;
+    /* width: 80px; */
 }
   
 .param-item {
@@ -906,9 +906,11 @@ select {
     cursor: ns-resize;
     cursor: ew-resize;
     user-select: none;
-    font-size: 0.8rem;
+    font-size: 0.6rem;
     text-align: center;
-    line-height: 24px;
+    line-height: 20px;
+    width: 60px;
+    height:19px
 }
 .rect-slider-container.disabled {
     pointer-events: none;
