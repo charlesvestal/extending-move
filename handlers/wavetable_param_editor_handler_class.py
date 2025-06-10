@@ -757,6 +757,13 @@ class WavetableParamEditorHandler(BaseHandler):
         stack = "".join([on, f_type, slope])
         column = f'<div class="param-column">{stack}</div>' if stack.strip() else ""
 
+        if drive:
+            drive = drive.replace(
+                'param-item"',
+                f'param-item filter-drive filter{idx}-drive hidden"',
+                1,
+            )
+
         if morph:
             morph = morph.replace(
                 'param-item"',

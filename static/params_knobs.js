@@ -175,12 +175,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!match) return;
         const idx = match[1];
         const morphEl = sel.closest('.param-items').querySelector(`.filter${idx}-morph`);
-        function updateMorph() {
-            if (!morphEl) return;
-            morphEl.classList.toggle('hidden', sel.value !== 'Morph');
+        const driveEl = sel.closest('.param-items').querySelector(`.filter${idx}-drive`);
+        function updateExtras() {
+            if (morphEl) {
+                morphEl.classList.toggle('hidden', sel.value !== 'Morph');
+            }
+            if (driveEl) {
+                const showDrive = sel.value === 'Lowpass' || sel.value === 'Highpass';
+                driveEl.classList.toggle('hidden', !showDrive);
+            }
         }
-        sel.addEventListener('change', updateMorph);
-        updateMorph();
+        sel.addEventListener('change', updateExtras);
+        updateExtras();
     });
 
     // Update oscillator FX knob labels when the effect mode changes
