@@ -1,0 +1,112 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "instrumentRack",
+  "name": "E-Piano Motion CMaj9",
+  "lockId": 1001,
+  "lockSeal": 1593126310,
+  "parameters": {
+    "Enabled": true,
+    "Macro0": 0.0,
+    "Macro1": 0.0,
+    "Macro2": 0.0,
+    "Macro3": 0.0,
+    "Macro4": 0.0,
+    "Macro5": 0.0,
+    "Macro6": 0.0,
+    "Macro7": 0.0
+  },
+  "chains": [
+    {
+      "name": "",
+      "color": 0,
+      "devices": [
+        {
+          "presetUri": null,
+          "kind": "melodicSampler",
+          "name": "",
+          "parameters": {
+            "Enabled": true,
+            "Voice_AmplitudeEnvelope_Attack": 0.00010000000149011613,
+            "Voice_AmplitudeEnvelope_Decay": 4.7688969726562505,
+            "Voice_AmplitudeEnvelope_Release": 1.825063232421875,
+            "Voice_AmplitudeEnvelope_Sustain": 0.251188725233078,
+            "Voice_AmplitudeEnvelope_SustainMode": "Gate",
+            "Voice_Detune": 0.0,
+            "Voice_FilterEnvelope_Attack": 0.00010000000149011613,
+            "Voice_FilterEnvelope_Decay": 0.6,
+            "Voice_FilterEnvelope_On": true,
+            "Voice_FilterEnvelope_Release": 0.05,
+            "Voice_FilterEnvelope_Sustain": 0.0,
+            "Voice_Filter_Frequency": 5350.9326171875,
+            "Voice_Filter_FrequencyModulationAmounts_EnvelopeAmount": 0,
+            "Voice_Filter_FrequencyModulationAmounts_LfoAmount": 0.0,
+            "Voice_Filter_On": true,
+            "Voice_Filter_Resonance": 0.4563491940498352,
+            "Voice_Filter_Slope": "24",
+            "Voice_Filter_Type": "Lowpass",
+            "Voice_Gain": 1.0,
+            "Voice_Lfo_On": true,
+            "Voice_Lfo_Rate": 1.0,
+            "Voice_Lfo_Type": "Sine",
+            "Voice_PlaybackLength": 1.0,
+            "Voice_PlaybackStart": 0.0,
+            "Voice_Transpose": 12,
+            "Voice_VelocityToVolume": 0.3499999940395355,
+            "Volume": -12.0
+          },
+          "deviceData": {
+            "sampleUri": "ableton:/packs/abl-core-library/Samples/Notes/E-Piano%20Motion%20CMaj9.wav"
+          }
+        },
+        {
+          "presetUri": null,
+          "kind": "chorus",
+          "name": "",
+          "parameters": {
+            "Amount": 0.5,
+            "DryWet": 0.2936508059501648,
+            "Enabled": true,
+            "Feedback": 0.0,
+            "HighpassEnabled": true,
+            "HighpassFrequency": 20.0,
+            "InvertFeedback": false,
+            "Mode": "Classic",
+            "OutputGain": 0.9999999403953552,
+            "Rate": 0.9000000357627869,
+            "Shaping": 0.0,
+            "VibratoOffset": 0.0,
+            "Warmth": 1.0,
+            "Width": 1.0
+          },
+          "deviceData": {}
+        },
+        {
+          "presetUri": null,
+          "kind": "redux2",
+          "name": "",
+          "parameters": {
+            "BitDepth": 12,
+            "DryWet": 0.8125,
+            "EcoProcessing": true,
+            "EnablePostFilter": true,
+            "EnablePreFilter": false,
+            "Enabled": true,
+            "Jitter": 0.10588309913873672,
+            "PostFilterValue": -1.9375,
+            "QuantizerDcShift": false,
+            "QuantizerShape": 0.0,
+            "SampleRate": 29505.041015625
+          },
+          "deviceData": {}
+        }
+      ],
+      "mixer": {
+        "pan": 0.0,
+        "solo-cue": false,
+        "speakerOn": true,
+        "volume": 0.0,
+        "sends": []
+      }
+    }
+  ]
+}

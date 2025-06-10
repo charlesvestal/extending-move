@@ -1,0 +1,127 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "instrumentRack",
+  "name": "Ac Strings Ens",
+  "lockId": 1001,
+  "lockSeal": 2077242674,
+  "parameters": {
+    "Enabled": true,
+    "Macro0": 0.0,
+    "Macro1": 0.0,
+    "Macro2": 0.0,
+    "Macro3": 0.0,
+    "Macro4": 0.0,
+    "Macro5": 0.0,
+    "Macro6": 0.0,
+    "Macro7": 0.0
+  },
+  "chains": [
+    {
+      "name": "",
+      "color": 0,
+      "devices": [
+        {
+          "presetUri": null,
+          "kind": "melodicSampler",
+          "name": "Ac Strings Ens",
+          "parameters": {
+            "Enabled": true,
+            "Voice_AmplitudeEnvelope_Attack": 0.15449017333984374,
+            "Voice_AmplitudeEnvelope_Decay": 60.0,
+            "Voice_AmplitudeEnvelope_Release": 1.1,
+            "Voice_AmplitudeEnvelope_Sustain": 0.0003162277571391314,
+            "Voice_AmplitudeEnvelope_SustainMode": "Gate",
+            "Voice_Detune": 0.0,
+            "Voice_FilterEnvelope_Attack": 0.00010000000149011613,
+            "Voice_FilterEnvelope_Decay": 0.6,
+            "Voice_FilterEnvelope_On": true,
+            "Voice_FilterEnvelope_Release": 0.05,
+            "Voice_FilterEnvelope_Sustain": 0.0,
+            "Voice_Filter_Frequency": 22000.0,
+            "Voice_Filter_FrequencyModulationAmounts_EnvelopeAmount": 0,
+            "Voice_Filter_FrequencyModulationAmounts_LfoAmount": 0.0,
+            "Voice_Filter_On": true,
+            "Voice_Filter_Resonance": 0.0,
+            "Voice_Filter_Slope": "12",
+            "Voice_Filter_Type": "Lowpass",
+            "Voice_Gain": 1.0,
+            "Voice_Lfo_On": true,
+            "Voice_Lfo_Rate": 8.065959930419922,
+            "Voice_Lfo_Type": "Sine",
+            "Voice_PlaybackLength": 1.0,
+            "Voice_PlaybackStart": 0.015625,
+            "Voice_Transpose": -12,
+            "Voice_VelocityToVolume": 0.3499999940395355,
+            "Volume": -12.5
+          },
+          "deviceData": {
+            "sampleUri": "ableton:/packs/abl-core-library/Samples/Notes/Strings%20Ens%20C4.wav"
+          }
+        },
+        {
+          "presetUri": null,
+          "kind": "channelEq",
+          "name": "",
+          "parameters": {
+            "Enabled": true,
+            "Gain": 1.0,
+            "HighShelfGain": 1.2152622938156128,
+            "HighpassOn": true,
+            "LowShelfGain": 0.9999999403953552,
+            "MidFrequency": 1500.0001220703125,
+            "MidGain": 1.0
+          },
+          "deviceData": {}
+        },
+        {
+          "presetUri": null,
+          "kind": "reverb",
+          "name": "",
+          "parameters": {
+            "AllPassGain": 0.6000000238418579,
+            "AllPassSize": 0.4000000059604645,
+            "BandFreq": 829.999755859375,
+            "BandHighOn": false,
+            "BandLowOn": true,
+            "BandWidth": 5.849999904632568,
+            "ChorusOn": true,
+            "CutOn": true,
+            "DecayTime": 1500.0001220703125,
+            "DiffuseDelay": 0.5,
+            "EarlyReflectModDepth": 17.5,
+            "EarlyReflectModFreq": 0.29770001769065857,
+            "Enabled": true,
+            "FlatOn": true,
+            "FreezeOn": false,
+            "HighFilterType": "Shelf",
+            "MixDiffuse": 1.0,
+            "MixDirect": 0.15000000596046448,
+            "MixReflect": 1.0,
+            "PreDelay": 2.5,
+            "RoomSize": 99.99999237060547,
+            "RoomType": "SuperEco",
+            "ShelfHiFreq": 3511.0390625,
+            "ShelfHiGain": 0.5809524059295654,
+            "ShelfHighOn": true,
+            "ShelfLoFreq": 90.0,
+            "ShelfLoGain": 1.0,
+            "ShelfLowOn": true,
+            "SizeModDepth": 0.019999999552965164,
+            "SizeModFreq": 0.020000001415610313,
+            "SizeSmoothing": "Fast",
+            "SpinOn": true,
+            "StereoSeparation": 100.0
+          },
+          "deviceData": {}
+        }
+      ],
+      "mixer": {
+        "pan": 0.0,
+        "solo-cue": false,
+        "speakerOn": true,
+        "volume": 0.0,
+        "sends": []
+      }
+    }
+  ]
+}
