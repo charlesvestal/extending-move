@@ -31,6 +31,7 @@ Tools for extending the Ableton Move. This project provides a companion webserve
   - Save changes as a new preset file
   - Numeric parameters use sliders with an input field
   - Slider steps are 0.01 for values near ±1 and adapt to the parameter's default precision
+  - Double-click a slider or knob to reset it to its default value (0 if unspecified)
   - Enum parameters provide a dropdown of options
   - Create new presets starting from the included Analog Shape example
  
@@ -93,8 +94,7 @@ Everything that it does can be found in `utility-scripts/install-on-move.sh`
 
 #### Updating
 
-To update, you can use the similar `utility-scripts/update-on-move.command` or `utility-scripts/update-on-move.sh` to copy over the files and restart the webserver.
-Alternatively, run `python utility-scripts/github_update.py` to fetch the latest main branch ZIP if a new commit is available. The script restarts the local webserver and will automatically run `pip install --no-cache-dir -r requirements.txt` if the requirements file changed. It defaults to this repository but you can override the source with the `GITHUB_REPO` environment variable. Set `UPDATE_TMPDIR` if your system has limited space in `/tmp` to control where the ZIP is extracted. When installing dependencies the updater sets `TMPDIR=/data/UserData/tmp` so pip has enough space.
+To update, you can use the similar `utility-scripts/update-on-move.command` or `utility-scripts/update-on-move.sh` to copy over the files and restart the webserver. The script accepts `--dev` to skip installing dependencies and `--overwrite` to remove the existing directory before copying.
 
 ### Manual Installation
 
@@ -103,6 +103,7 @@ Alternatively, run `python utility-scripts/github_update.py` to fetch the latest
 ssh ableton@move.local
 cd /data/UserData
 wget -q -O get-pip.py https://bootstrap.pypa.io/get-pip.py
+python3 get-pip.py
 
 # Ensure that ~/.bash_profile sources ~/.bashrc so that Bash settings persist on login.
 if ! grep -q "\.bashrc" ~/.bash_profile; then
@@ -153,7 +154,7 @@ Note: Execute these scripts from your computer, not the Move.
 Located in `utility-scripts/`:
 - `setup-ssh-and-install-on-move.command`: Walks through setting up an ssh key, installing files, and setting auto-start
 - `install-on-move.sh` / `.command`: Content installation
-- `update-on-move.sh` / `.command`: Update with latest files
+- `update-on-move.sh` / `.command`: Update with latest files (use `--overwrite` to delete the target before copying)
 - `restart-webserver.sh`: Restart the webserver
 - `github_update.py`: Self-update using GitHub ZIPs, install updated requirements, and restart the webserver
 

@@ -613,6 +613,17 @@ select {
     margin-top: 0.5rem;
 }
 
+/* Layout for the Wavetable parameter editor */
+.wavetable-param-panels {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.wavetable-param-panels + .wavetable-param-panels {
+    margin-top: 0.5rem;
+}
+
 .param-panel {
     border: 1px solid #ccc;
     padding: 0.5rem;
@@ -645,6 +656,14 @@ select {
 } 
 */
 
+.param-panel.fx {
+    min-width: 258px; 
+}
+
+.wavetable-param-panels.param-panel.mixer {
+    min-width: 211px;
+}
+
 .param-panel.lfo {
     max-width: 181px;
 }
@@ -659,6 +678,15 @@ select {
 
 .param-panel.filter .param-items {
     flex-direction: column;
+}
+
+
+.param-group-label {
+    width: 100%;
+    text-align: left;
+    margin-left: 10px;
+    font-weight: bold;
+    margin-top: 0.5rem;
 }
 
 .param-row {
@@ -732,7 +760,7 @@ select {
 }
 
 .filter-type-select {
-    width: 48px;
+    width: 80px;
 }
   
 .param-item {
@@ -935,7 +963,10 @@ select {
     margin-bottom: 0.25rem;
 }
 .assign-item select {
-	margin-bottom: 0;
+        margin-bottom: 0;
+}
+.assign-item .nested-dropdown {
+    margin-bottom: 0;
 }
 .range-inputs {
     display: flex;
@@ -959,6 +990,100 @@ button#macro-add-param {
     margin-right: 25px;
     max-width: 100%;
 }
+
+/* Modulation matrix table */
+#mod-matrix-section {
+    margin-top: 1rem;
+    width: 920px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align:center;
+}
+#mod-matrix-table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.8rem;
+}
+#mod-matrix-table th,
+#mod-matrix-table td {
+    padding: 0.25rem;
+    text-align: center;
+}
+#mod-matrix-table th:not(:first-child),
+#mod-matrix-table td.mod-source-cell {
+    padding-left: 0;
+    padding-right: 0;
+}
+#mod-matrix-table th:not(:first-child) {
+    width: 48px;
+}
+#mod-matrix-table td.mod-source-cell .rect-slider-container {
+    width: 48px;
+}
+.mod-dest-select {
+    width: 320px;
+}
+#mod-matrix-table .close-x {
+    color: blue;
+    height: 20px;
+    width: 20px;
+    padding: 0;
+    font-size: 10px;
+    background-color: transparent;
+}
+/* Nested dropdown for modulation matrix */
+.nested-dropdown {
+    position: relative;
+    width: 320px;
+    font-size: 0.875rem;
+}
+.nested-dropdown .dropdown-toggle {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 0.25rem 0.5rem;
+    background: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+.nested-dropdown .arrow {
+    margin-left: auto;
+}
+.nested-dropdown .dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+}
+.nested-dropdown .file-tree {
+    margin: 0;
+    padding-left: 0;
+    list-style: none;
+}
+.nested-dropdown .file-tree ul {
+    list-style: none;
+    margin-left: 1rem;
+    padding-left: 0;
+}
+.nested-dropdown .file-tree .file-entry button {
+    padding: 0.25rem;
+    padding: 0.25rem;
+    font-size: 0.75rem;
+    line-height: 0.5rem;
+}
+#mod-matrix-table td:first-child {
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
 
 
 /* Modulation matrix control radius overrides */

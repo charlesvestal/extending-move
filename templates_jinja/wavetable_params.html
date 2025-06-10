@@ -1,15 +1,15 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>Drift Preset Editor</h2>
+<h2>Wavetable Preset Editor</h2>
 <p><em>Edit parameter values and assign macros. Note that Macro assignments override other values.</em></p>
 {% if message %}
   <p class="{{ message_type if message_type else ('success' if success else 'error') }}">{{ message }}</p>
 {% endif %}
 {% if not preset_selected %}
-<div class="file-browser" data-root="{{ browser_root }}" data-action="{{ host_prefix }}/synth-params" data-field="preset_select" data-value="select_preset" data-filter="drift">
+<div class="file-browser" data-root="{{ browser_root }}" data-action="{{ host_prefix }}/wavetable-params" data-field="preset_select" data-value="select_preset" data-filter="wavetable">
     {{ file_browser_html | safe }}
 </div>
-<button id="create-new-btn" style="margin-bottom:1em;">Create New Drift Preset</button>
+<button id="create-new-btn" style="margin-bottom:1em;">Create New Wavetable Preset</button>
 <style>
   .modal {
     position: fixed;
@@ -36,7 +36,7 @@
 <div id="newPresetModal" class="modal hidden">
   <div class="modal-content">
     <span class="modal-close">&times;</span>
-    <form method="post" action="{{ host_prefix }}/synth-params" id="newPresetForm">
+    <form method="post" action="{{ host_prefix }}/wavetable-params" id="newPresetForm">
       <input type="hidden" name="action" value="new_preset">
       <input type="hidden" name="preset_select" value="{{ default_preset_path }}">
       <label>Preset Name:
@@ -47,7 +47,7 @@
   </div>
 </div>
 {% else %}
-<form method="post" action="{{ host_prefix }}/synth-params" id="param-form">
+<form method="post" action="{{ host_prefix }}/wavetable-params" id="param-form">
     <input type="hidden" name="action" id="action-input" value="save_params">
     <input type="hidden" name="preset_select" value="{{ selected_preset }}">
     <input type="hidden" name="param_count" value="{{ param_count }}">
@@ -82,6 +82,30 @@
     <input type="hidden" name="macros_data" id="macros-data-input" value='{{ macros_json }}'>
     <input type="hidden" id="available-params-input" value='{{ available_params_json }}'>
     <input type="hidden" id="param-paths-input" value='{{ param_paths_json }}'>
+    <div id="mod-matrix-section">
+        <h3>Modulation Matrix</h3>
+        <input type="hidden" id="mod-matrix-data-input" name="mod_matrix_data" value='{{ mod_matrix_json }}'>
+        <table id="mod-matrix-table">
+            <thead>
+                <tr>
+                    <th>Destination</th>
+                    <th>Amp</th>
+                    <th>Env 2</th>
+                    <th>Env 3</th>
+                    <th>LFO 1</th>
+                    <th>LFO 2</th>
+                    <th>Velocity</th>
+                    <th>Key</th>
+                    <th>PB</th>
+                    <th>Press</th>
+                    <th>Mod</th>
+                    <th>Rand</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <button type="button" id="mod-matrix-add">Add Row</button>
+    </div>
     <div id="macro-sidebar" class="macro-sidebar hidden">
         <h3 id="macro-sidebar-title"></h3>
         <label>Custom Name: <input type="text" id="macro-name-input" placeholder="No name specified"></label>
@@ -115,6 +139,7 @@
 window.driftSchema = {{ schema_json|safe }};
 </script>
 <script src="{{ host_prefix }}/static/macro_sidebar.js"></script>
+<script src="{{ host_prefix }}/static/mod_matrix.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const cb = document.getElementById('rename-checkbox');
@@ -122,6 +147,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const saveBtn = document.getElementById('save-params-btn');
   const form = document.getElementById('param-form');
   const macrosInput = document.getElementById('macros-data-input');
+  const modMatrixInput = document.getElementById('mod-matrix-data-input');
+  const sprite1Sel = document.getElementById('sprite1-select');
+  const sprite2Sel = document.getElementById('sprite2-select');
+  const spriteNames = {{ sprites_json|safe }};
+  if (sprite1Sel && sprite2Sel) {
+    spriteNames.forEach(n => {
+      const o1 = document.createElement('option');
+      o1.value = n; o1.textContent = n; if (n === {{ sprite1|tojson }} ) o1.selected = true; sprite1Sel.appendChild(o1);
+      const o2 = document.createElement('option');
+      o2.value = n; o2.textContent = n; if (n === {{ sprite2|tojson }} ) o2.selected = true; sprite2Sel.appendChild(o2);
+    });
+  }
 
   if (cb && nameInput) {
     cb.addEventListener('change', () => {
@@ -131,6 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const initialMacros = macrosInput ? macrosInput.value : null;
+  let initialMatrix = modMatrixInput ? modMatrixInput.value : null;
   const initialValues = {};
 
   function recordInitial() {
@@ -139,11 +177,15 @@ document.addEventListener('DOMContentLoaded', () => {
       initialValues[inp.name] = inp.value;
       inp.addEventListener('change', updateSaveState);
     });
+    if (sprite1Sel) { initialValues['sprite1'] = sprite1Sel.value; sprite1Sel.addEventListener('change', updateSaveState); }
+    if (sprite2Sel) { initialValues['sprite2'] = sprite2Sel.value; sprite2Sel.addEventListener('change', updateSaveState); }
+    if (modMatrixInput) modMatrixInput.addEventListener('change', updateSaveState);
   }
 
   function hasChanges() {
     if (cb && cb.checked) return true;
     if (macrosInput && macrosInput.value !== initialMacros) return true;
+    if (modMatrixInput && modMatrixInput.value !== initialMatrix) return true;
     for (const [name, val] of Object.entries(initialValues)) {
       const cur = form.querySelector(`[name="${name}"]`);
       if (cur && cur.value !== val) return true;

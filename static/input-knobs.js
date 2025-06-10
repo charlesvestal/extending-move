@@ -123,6 +123,7 @@ input[type=checkbox].input-switch:checked,input[type=radio].input-switch:checked
   };
   let initKnobs=(el)=>{
     let w,h,d,fg,bg;
+    const defaultValue = el.dataset.default !== undefined ? parseFloat(el.dataset.default) : 0;
     if(el.inputKnobs){
       el.redraw();
       return;
@@ -322,10 +323,15 @@ input[type=checkbox].input-switch:checked,input[type=radio].input-switch:checked
     el.refresh();
     el.redraw(true);
     el.addEventListener("keydown",ik.keydown);
-    el.addEventListener("mousedown",ik.pointerdown);
-    el.addEventListener("touchstart",ik.pointerdown);
-    el.addEventListener("wheel",ik.wheel);
-  }
+      el.addEventListener("mousedown",ik.pointerdown);
+      el.addEventListener("touchstart",ik.pointerdown);
+      el.addEventListener("wheel",ik.wheel);
+      el.addEventListener("dblclick", () => {
+        const clamped = Math.max(ik.valrange.min, Math.min(ik.valrange.max, defaultValue));
+        el.setValue(clamped);
+        el.dispatchEvent(new Event("change"));
+      });
+    }
   let refreshque=()=>{
     let elem=document.querySelectorAll("input.input-knob,input.input-slider");
     for(let i=0;i<elem.length;++i)
