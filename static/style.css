@@ -991,7 +991,9 @@ button#macro-add-param {
 /* Modulation matrix table */
 #mod-matrix-section {
     margin-top: 1rem;
-    width: 918px;
+    width: 920px;
+    margin-left: auto;
+    margin-right: auto;
 }
 #mod-matrix-table {
     border-collapse: collapse;
