@@ -14,12 +14,12 @@ document.addEventListener('DOMContentLoaded', () => {
   function draw() {
     const r = parseFloat(rate.value);
     const t = parseFloat(tilt.value);
-    const h = parseFloat(hold.value);
     const mode = getTimeMode();
 
     let cycleLen = 1 / r; // default Hz -> seconds per cycle
     if (mode === 'ms') {
-      cycleLen = parseFloat(rate.value) / 1000;
+      // map knob range 0.1-10 to roughly 10-1000 ms
+      cycleLen = r / 10; // seconds per cycle
     } else if (mode === 'ratio') {
       cycleLen = 1 / r; // treat same as Hz for prototype
     } else if (mode === 'sync') {
@@ -38,14 +38,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const peakX = vertPos * (w / cycleCount);
 
     const points = [];
+    const holdVal = parseFloat(hold.value);
     for (let i = 0; i < cycleCount; i++) {
       const startX = (i / cycleCount) * w;
       const endX = ((i + 1) / cycleCount) * w;
       const peak = startX + peakX;
       points.push([startX, hgt]);
       points.push([peak, 0]);
-      if (hold.value > 0) {
-        const holdEnd = peak + (endX - startX) * hold.value;
+      if (holdVal > 0) {
+        const holdEnd = peak + (endX - startX) * holdVal;
         points.push([holdEnd, 0]);
       }
       points.push([endX, hgt]);
