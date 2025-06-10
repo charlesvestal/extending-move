@@ -161,7 +161,7 @@ function createDrumCellChain(receivingNote, name, params, sampleUri) {
  * @returns {number} - The adjusted step size.
  */
 function getPercentStep(value, unit, baseStep, shouldScale) {
-  if (unit === '%' || unit === 'ct') {
+  if ((unit === '%' || unit === 'ct') && baseStep >= 1) {
     const disp = shouldScale ? value * 100 : value;
     if (Math.abs(disp) < 10) return baseStep / 10;
   }
