@@ -571,9 +571,11 @@
   },
   "Voice_Oscillator1_Pitch_Detune": {
     "type": "number",
-    "min": -0.13,
-    "max": 0.48,
-    "options": []
+    "min": -0.5,
+    "max": 0.5,
+    "options": [],
+    "unit": "ct",
+    "decimals": 0
   },
   "Voice_Oscillator1_Pitch_PitchModulation": {
     "type": "number",
@@ -585,13 +587,17 @@
     "type": "number",
     "min": -24,
     "max": 24,
-    "options": []
+    "options": [],
+    "unit": "st",
+    "decimals": 0
   },
   "Voice_Oscillator1_Wavetables_WavePosition": {
     "type": "number",
     "min": 0.0,
     "max": 1.0,
-    "options": []
+    "options": [],
+    "unit": "%",
+    "decimals": 0
   },
   "Voice_Oscillator2_Effects_Effect1": {
     "type": "number",
@@ -636,9 +642,11 @@
   },
   "Voice_Oscillator2_Pitch_Detune": {
     "type": "number",
-    "min": -0.226562,
-    "max": 0.351562,
-    "options": []
+    "min": -0.5,
+    "max": 0.5,
+    "options": [],
+    "unit": "ct",
+    "decimals": 0
   },
   "Voice_Oscillator2_Pitch_PitchModulation": {
     "type": "number",
@@ -650,13 +658,17 @@
     "type": "number",
     "min": -24,
     "max": 24,
-    "options": []
+    "options": [],
+    "unit": "st",
+    "decimals": 0
   },
   "Voice_Oscillator2_Wavetables_WavePosition": {
     "type": "number",
     "min": 0.0,
     "max": 1.0,
-    "options": []
+    "options": [],
+    "unit": "%",
+    "decimals": 0
   },
   "Voice_SubOscillator_Gain": {
     "type": "number",
@@ -674,7 +686,9 @@
     "type": "number",
     "min": 0.0,
     "max": 1.0,
-    "options": []
+    "options": [],
+    "unit": "%",
+    "decimals": 0
   },
   "Voice_SubOscillator_Transpose": {
     "type": "enum",
