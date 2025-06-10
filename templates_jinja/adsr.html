@@ -4,6 +4,7 @@
 {% if message %}
   <p class="{{ message_type }}">{{ message }}</p>
 {% endif %}
+<canvas id="adsr-canvas" width="300" height="150"></canvas>
 <div id="adsr-controls">
   <label>Attack
     <input type="range" id="attack" class="input-knob" min="0" max="2" step="0.01" value="{{ defaults.attack }}">
@@ -18,7 +19,6 @@
     <input type="range" id="release" class="input-knob" min="0" max="2" step="0.01" value="{{ defaults.release }}">
   </label>
 </div>
-<canvas id="adsr-canvas" width="300" height="150"></canvas>
 {% endblock %}
 {% block scripts %}
 <script src="{{ host_prefix }}/static/shared.js"></script>

@@ -7,7 +7,12 @@ export function initDriftFilterViz() {
   canvas.height = 88;
   canvas.style.marginTop = '1em';
   canvas.style.border = '1px solid #ccc';
-  filterPanel.appendChild(canvas);
+  const paramItems = filterPanel.querySelector('.param-items');
+  if (paramItems) {
+    filterPanel.insertBefore(canvas, paramItems);
+  } else {
+    filterPanel.appendChild(canvas);
+  }
   const ctx = canvas.getContext('2d');
 
   const freqInput = document.querySelector('.param-item[data-name="Filter_Frequency"] input[type="hidden"]');
