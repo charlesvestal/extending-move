@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Update</h2>
+{% if progress %}
+  <ul>
+  {% for step in progress %}
+    <li>{{ step }}</li>
+  {% endfor %}
+  </ul>
+{% endif %}
+{% if message %}
+  <p class="{{ message_type if message_type else ('success' if success else 'error') }}">{{ message }}</p>
+{% endif %}
+{% if has_update %}
+  {% if commits %}
+  <ul>
+    {% for c in commits %}
+      <li>{% if c.is_merge %}<strong>{{ c.message }}</strong>{% else %}{{ c.message }}{% endif %} ({{ c.sha[:7] }})</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  <form method="post" action="{{ host_prefix }}/update">
+    <input type="hidden" name="action" value="update_repo">
+    <button type="submit">Update</button>
+  </form>
+{% else %}
+  <p>You have the latest version.</p>
+{% endif %}
+{% endblock %}

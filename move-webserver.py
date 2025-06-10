@@ -38,6 +38,7 @@ from handlers.wavetable_param_editor_handler_class import (
 from handlers.drum_rack_inspector_handler_class import DrumRackInspectorHandler
 from handlers.file_placer_handler_class import FilePlacerHandler
 from handlers.refresh_handler_class import RefreshHandler
+from handlers.update_handler_class import UpdateHandler
 from core.refresh_handler import refresh_library
 from core.file_browser import generate_dir_html
 
@@ -116,6 +117,7 @@ wavetable_param_handler = WavetableParamEditorHandler()
 file_placer_handler = FilePlacerHandler()
 refresh_handler = RefreshHandler()
 drum_rack_handler = DrumRackInspectorHandler()
+update_handler = UpdateHandler()
 
 
 @app.before_request
@@ -703,7 +705,29 @@ def detect_transients_route():
     return (
         resp["content"],
         resp.get("status", 200),
-        resp.get("headers", [("Content-Type", "application/json")]),
+    resp.get("headers", [("Content-Type", "application/json")]),
+    )
+
+
+@app.route("/update", methods=["GET", "POST"])
+def update_route():
+    if request.method == "POST":
+        form = SimpleForm(request.form.to_dict())
+        result = update_handler.handle_post(form)
+    else:
+        result = update_handler.handle_get()
+    message = result.get("message")
+    message_type = result.get("message_type")
+    success = message_type != "error" if message_type else True
+    return render_template(
+        "update.html",
+        active_tab="update",
+        message=message,
+        message_type=message_type,
+        success=success,
+        commits=result.get("commits", []),
+        has_update=result.get("has_update", False),
+        progress=result.get("progress", []),
     )
 
 

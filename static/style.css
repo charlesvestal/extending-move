@@ -153,6 +153,9 @@ h3 {
     border-bottom: none;
     border-radius: 0;
 }
+.tab a.right {
+    margin-left: auto;
+}
 
 /* Main content area */
 .tabcontent {
