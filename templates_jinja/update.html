@@ -1,6 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
 <h2>Update</h2>
+<p class="info">
+  {% if has_token %}
+    GitHub token detected
+  {% else %}
+    No GitHub token found
+  {% endif %}<br>
+  Branch: {{ branch }}<br>
+  Current version: {{ last_sha if last_sha else 'unknown' }}<br>
+  Latest remote version: {{ latest_sha if latest_sha else 'unknown' }}
+</p>
 {% if progress %}
   <ul>
   {% for step in progress %}
@@ -35,7 +45,7 @@
     {% endfor %}
   </ul>
   {% if truncated %}
-    <p><a href="https://github.com/{{ repo }}/commits/main">View more...</a></p>
+    <p><a href="https://github.com/{{ repo }}/commits/{{ branch }}">View more...</a></p>
   {% endif %}
   {% endif %}
   <form method="post" action="{{ host_prefix }}/update">
