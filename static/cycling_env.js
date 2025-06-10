@@ -54,8 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       if (t >= 0.2) {
-        // Tilt at or above 0.2 keeps the level flat after the peak
-        points.push([endX, 0]);
+        // Tilt at or above 0.2 draws a straight slope back to baseline
         points.push([endX, hgt]);
       } else {
         // Below 0.2 curve down using a simple 1/x style curve
