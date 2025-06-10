@@ -38,13 +38,13 @@ def _headers() -> dict | None:
         return {"Authorization": f"token {GITHUB_TOKEN}"}
     return None
 
+
 REPO = os.environ.get("GITHUB_REPO", "charlesvestal/extending-move")
 ROOT_DIR = Path(__file__).resolve().parents[1]
 SHA_FILE = ROOT_DIR / "last_sha.txt"
 # Directory for temporary extraction; defaults to repo root if not provided
 TMP_DIR_PATH = Path(
-    os.environ.get("UPDATE_TMPDIR")
-    or os.environ.get("TMPDIR", str(ROOT_DIR))
+    os.environ.get("UPDATE_TMPDIR") or os.environ.get("TMPDIR", str(ROOT_DIR))
 )
 
 
@@ -139,6 +139,13 @@ def restart_webserver(log: io.TextIOBase | None = None) -> None:
     if pid_file.exists():
         try:
             pid = int(pid_file.read_text().strip())
+        except Exception:
+            pid = None
+
+    same_process = pid == os.getpid()
+
+    if pid and not same_process:
+        try:
             os.kill(pid, signal.SIGTERM)
         except Exception:
             pass
@@ -153,7 +160,7 @@ def restart_webserver(log: io.TextIOBase | None = None) -> None:
             pid_file.unlink()
         except Exception:
             pass
-    else:
+    elif not pid:
         subprocess.run(["pkill", "-f", "move-webserver.py"], check=False)
 
     if log_file.exists():
@@ -170,43 +177,55 @@ def restart_webserver(log: io.TextIOBase | None = None) -> None:
     except Exception:
         pass
 
-    with open(log_file, "wb") as log_f:
-        subprocess.Popen(
-            ["python3", "-u", str(ROOT_DIR / "move-webserver.py")],
-            cwd=ROOT_DIR,
-            stdout=log_f,
-            stderr=log_f,
-            env=env,
-        )
-    log_msg("Starting the webserver...")
+    if same_process:
+        log_msg("Starting the webserver (exec)...")
+        with open(log_file, "wb") as log_f:
+            os.dup2(log_f.fileno(), sys.stdout.fileno())
+            os.dup2(log_f.fileno(), sys.stderr.fileno())
+            os.execvpe(
+                "python3",
+                ["python3", "-u", str(ROOT_DIR / "move-webserver.py")],
+                env,
+            )
+        return
+    else:
+        with open(log_file, "wb") as log_f:
+            subprocess.Popen(
+                ["python3", "-u", str(ROOT_DIR / "move-webserver.py")],
+                cwd=ROOT_DIR,
+                stdout=log_f,
+                stderr=log_f,
+                env=env,
+            )
+        log_msg("Starting the webserver...")
 
-    new_pid = None
-    for _ in range(10):
-        if pid_file.exists():
-            try:
-                new_pid = int(pid_file.read_text().strip())
-                break
-            except Exception:
-                pass
-        time.sleep(1)
+        new_pid = None
+        for _ in range(10):
+            if pid_file.exists():
+                try:
+                    new_pid = int(pid_file.read_text().strip())
+                    break
+                except Exception:
+                    pass
+            time.sleep(1)
 
-    if not new_pid:
-        log_msg("Error: PID file not created. Check logs:")
-        if log_file.exists():
-            with open(log_file, "r", encoding="utf-8") as lf:
-                log_msg(lf.read())
-        raise RuntimeError("Server failed to start")
+        if not new_pid:
+            log_msg("Error: PID file not created. Check logs:")
+            if log_file.exists():
+                with open(log_file, "r", encoding="utf-8") as lf:
+                    log_msg(lf.read())
+            raise RuntimeError("Server failed to start")
 
-    try:
-        os.kill(new_pid, 0)
-    except Exception:
-        log_msg("Error: Server failed to start. Check logs:")
-        if log_file.exists():
-            with open(log_file, "r", encoding="utf-8") as lf:
-                log_msg(lf.read())
-        raise RuntimeError("Server failed to start")
+        try:
+            os.kill(new_pid, 0)
+        except Exception:
+            log_msg("Error: Server failed to start. Check logs:")
+            if log_file.exists():
+                with open(log_file, "r", encoding="utf-8") as lf:
+                    log_msg(lf.read())
+            raise RuntimeError("Server failed to start")
 
-    log_msg(f"Webserver restarted on port {port} with PID {new_pid}")
+        log_msg(f"Webserver restarted on port {port} with PID {new_pid}")
 
 
 def update() -> int:
