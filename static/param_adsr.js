@@ -48,17 +48,15 @@ export function initParamAdsr() {
       el.addEventListener('input', draw);
     });
     if (set.modeInput) {
-      function toggle() {
-        const envSel = document.querySelector('input[name="env_select"]:checked');
-        const env2View = envSel && envSel.value === 'env2';
-        const show = env2View && set.modeInput.value !== 'Cyc';
+      function updateVisibility() {
+        const show = set.modeInput.value !== 'Cyc';
         set.canvas.classList.toggle('hidden', !show);
       }
-      set.modeInput.addEventListener('change', toggle);
-      document.querySelectorAll('input[name="env_select"]').forEach(r =>
-        r.addEventListener('change', toggle)
-      );
-      toggle();
+      set.modeInput.addEventListener('change', () => {
+        updateVisibility();
+        draw();
+      });
+      updateVisibility();
     }
     draw();
   });
