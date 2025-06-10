@@ -845,7 +845,7 @@ class SynthParamEditorHandler(BaseHandler):
             row2_main = "".join(env2_adsr)
             if row2_main.strip():
                 ordered.append(
-                    '<canvas id="env2-canvas" class="adsr-canvas env2-section" width="380" height="100"></canvas>'
+                    '<canvas id="env2-canvas" class="adsr-canvas env2-section" width="300" height="88"></canvas>'
                 )
                 ordered.append(
                     f'<div class="param-row env2-adsr env2-section"><span class="param-row-label">Env 2</span>{row2_main}</div>'
