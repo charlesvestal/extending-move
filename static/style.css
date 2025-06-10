@@ -1079,6 +1079,9 @@ button#macro-add-param {
 }
 #mod-matrix-table td:first-child {
     text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
 }
 
 
