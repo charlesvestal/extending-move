@@ -121,8 +121,9 @@ fi
 
 2. Configure temporary directory:
 ```bash
-mkdir -p ~/tmp
-export TMPDIR=~/tmp
+mkdir -p /data/UserData/tmp
+export TMPDIR=/data/UserData/tmp
+echo "TMPDIR is set to: $TMPDIR"
 ```
 
 3. Install dependencies:
@@ -155,6 +156,7 @@ Located in `utility-scripts/`:
 - `install-on-move.sh` / `.command`: Content installation
 - `update-on-move.sh` / `.command`: Update with latest files (use `--overwrite` to delete the target before copying)
 - `restart-webserver.sh`: Restart the webserver
+- `github_update.py`: Self-update using GitHub ZIPs, install updated requirements, and restart the webserver
 
 
 ## How to Auto-start on Boot
