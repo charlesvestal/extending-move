@@ -454,11 +454,11 @@ class WavetableParamEditorHandler(BaseHandler):
 
         # FX
         "Oscillator1_Effects_EffectMode": "Effects Mode",
-        "Oscillator1_Effects_Effect1": "FX1",
-        "Oscillator1_Effects_Effect2": "FX2",
+        "Oscillator1_Effects_Effect1": "FX 1",
+        "Oscillator1_Effects_Effect2": "FX 2",
         "Oscillator2_Effects_EffectMode": "Effects Mode",
-        "Oscillator2_Effects_Effect1": "FX1",
-        "Oscillator2_Effects_Effect2": "FX2",
+        "Oscillator2_Effects_Effect1": "FX 1",
+        "Oscillator2_Effects_Effect2": "FX 2",
 
         # Mixer
         "Oscillator1_On": "On/Off",
@@ -877,6 +877,13 @@ class WavetableParamEditorHandler(BaseHandler):
             mapped_parameters = {}
 
         schema = load_wavetable_schema()
+        fx_modes = {1: 'None', 2: 'None'}
+        for item in params:
+            n = item.get('name')
+            if n == 'Voice_Oscillator1_Effects_EffectMode':
+                fx_modes[1] = item.get('value')
+            elif n == 'Voice_Oscillator2_Effects_EffectMode':
+                fx_modes[2] = item.get('value')
         sections = {s: [] for s in self.SECTION_ORDER}
         subgroups = {
             sec: {lbl: {} for _, lbl, _ in self.SECTION_SUBPANELS.get(sec, [])}
@@ -887,6 +894,13 @@ class WavetableParamEditorHandler(BaseHandler):
             name = item["name"]
             val = item["value"]
             meta = dict(schema.get(name, {}))
+            if name in {
+                "Voice_Oscillator1_Effects_Effect1",
+                "Voice_Oscillator1_Effects_Effect2",
+                "Voice_Oscillator2_Effects_Effect1",
+                "Voice_Oscillator2_Effects_Effect2",
+            }:
+                meta.setdefault("unit", "%")
 
             hide = name in self.UNLABELED_PARAMS
             slider = name in self.SLIDER_PARAMS
@@ -906,6 +920,17 @@ class WavetableParamEditorHandler(BaseHandler):
                         label_override = self.LABEL_OVERRIDES.get(
                             f"{ov_prefix}_{base}", self._friendly_label(base)
                         )
+                        if ov_prefix.startswith("Oscillator") and base in {"Effect1", "Effect2"}:
+                            idx = 1 if ov_prefix.startswith("Oscillator1") else 2
+                            labels = {
+                                "None": ("FX 1", "FX 2"),
+                                None: ("FX 1", "FX 2"),
+                                "Fm": ("Tune", "Amt"),
+                                "Classic": ("PW", "Sync"),
+                                "Modern": ("Warp", "Fold"),
+                            }
+                            mode = fx_modes.get(idx, "None")
+                            label_override = labels.get(mode, labels["None"])[0 if base == "Effect1" else 1]
                         html = self._build_param_item(
                             i,
                             name,
