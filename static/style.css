@@ -1017,6 +1017,49 @@ button#macro-add-param {
 .mod-dest-select {
     width: 320px;
 }
+/* Nested dropdown for modulation matrix */
+.nested-dropdown {
+    position: relative;
+    width: 320px;
+    font-size: 0.875rem;
+}
+.nested-dropdown .dropdown-toggle {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 0.25rem 0.5rem;
+    background: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+.nested-dropdown .arrow {
+    margin-left: auto;
+}
+.nested-dropdown .dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+}
+.nested-dropdown .file-tree {
+    margin: 0;
+    padding-left: 0;
+    list-style: none;
+}
+.nested-dropdown .file-tree ul {
+    list-style: none;
+    margin-left: 1rem;
+    padding-left: 0;
+}
+.nested-dropdown .file-tree .file-entry button {
+    padding: 0.25rem;
+}
 #mod-matrix-table td:first-child {
     text-align: left;
 }
