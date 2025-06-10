@@ -70,6 +70,9 @@ echo "Files copied."
 if [ -n "$CURRENT_SHA" ]; then
   echo "Recording current version ${CURRENT_SHA} (${CURRENT_BRANCH}) on remote..."
   ssh -T "${REMOTE_USER}@${REMOTE_HOST}" "echo '${CURRENT_SHA}' > '${REMOTE_DIR}/last_sha.txt' && echo '${CURRENT_BRANCH}' > '${REMOTE_DIR}/last_branch.txt'"
+
+  echo "Recording current version ${CURRENT_SHA} on remote..."
+  ssh -T "${REMOTE_USER}@${REMOTE_HOST}" "echo '${CURRENT_SHA}' > '${REMOTE_DIR}/last_sha.txt'"
 fi
 
 # --- Fix permissions remotely (now with proper path expansion) ---
