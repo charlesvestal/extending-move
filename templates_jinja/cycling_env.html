@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Cycling Envelope Visualizer</h2>
+{% if message %}
+  <p class="{{ message_type }}">{{ message }}</p>
+{% endif %}
+<canvas id="cycle-canvas" width="400" height="150"></canvas>
+<div id="cycle-controls">
+  <label>Rate
+    <input type="range" id="rate" class="input-knob" min="0.1" max="10" step="0.1" value="{{ defaults.rate }}">
+  </label>
+  <label>Tilt
+    <input type="range" id="tilt" class="input-knob" min="-1" max="1" step="0.01" value="{{ defaults.tilt }}">
+  </label>
+  <label>Hold
+    <input type="range" id="hold" class="input-knob" min="0" max="1" step="0.01" value="{{ defaults.hold }}">
+  </label>
+  <div>
+    <label><input type="radio" name="time_mode" value="Hz" {% if defaults.time_mode=='Hz' %}checked{% endif %}>Hz</label>
+    <label><input type="radio" name="time_mode" value="ratio" {% if defaults.time_mode=='ratio' %}checked{% endif %}>Ratio</label>
+    <label><input type="radio" name="time_mode" value="ms" {% if defaults.time_mode=='ms' %}checked{% endif %}>ms</label>
+    <label><input type="radio" name="time_mode" value="sync" {% if defaults.time_mode=='sync' %}checked{% endif %}>Sync</label>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ host_prefix }}/static/shared.js"></script>
+<script src="{{ host_prefix }}/static/input-knobs.js"></script>
+<script src="{{ host_prefix }}/static/cycling_env.js"></script>
+{% endblock %}
