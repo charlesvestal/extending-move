@@ -1112,10 +1112,29 @@ button#macro-add-param {
 .param-panel.modulation .mod-matrix-row .param-item:nth-of-type(3) .param-select {
     border-top-left-radius: 0;
     border-top-right-radius: 0;
+}
 
 .adsr-canvas {
     display: block;
     margin: 0.5rem 0;
     border: 1px solid #dedede;
     width:100%
+}
+
+.env-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.env-container .env-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+}
+
+.env-visualization {
+    width: 200px;
+    height: 88px;
 }

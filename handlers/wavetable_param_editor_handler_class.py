@@ -868,8 +868,8 @@ class WavetableParamEditorHandler(BaseHandler):
             ordered.extend(items.values())
         return ordered
 
-    def _arrange_envelope_panel(self, items: dict) -> list:
-        """Return envelope panel rows with ADSR ordering."""
+    def _arrange_envelope_panel(self, items: dict, canvas_id: str = None) -> list:
+        """Return envelope panel rows with ADSR ordering and optional canvas."""
         ordered = []
 
         row = "".join(
@@ -880,8 +880,6 @@ class WavetableParamEditorHandler(BaseHandler):
                 items.pop("Release", ""),
             ]
         )
-        if row.strip():
-            ordered.append(f'<div class="param-row">{row}</div>')
 
         loop = items.pop("LoopMode", "")
         final_val = items.pop("Final", "")
@@ -889,8 +887,23 @@ class WavetableParamEditorHandler(BaseHandler):
         peak_val = items.pop("Peak", "")
 
         second_row = "".join([loop, final_val, initial_val, peak_val])
+
+        rows = []
+        if row.strip():
+            rows.append(f'<div class="param-row">{row}</div>')
         if second_row.strip():
-            ordered.append(f'<div class="param-row">{second_row}</div>')
+            rows.append(f'<div class="param-row">{second_row}</div>')
+
+        if canvas_id:
+            canvas = (
+                f'<canvas id="{canvas_id}" '
+                f'class="adsr-canvas env-visualization" width="200" height="88"></canvas>'
+            )
+            ordered.append(
+                f'<div class="env-container"><div class="env-controls">{"".join(rows)}</div>{canvas}</div>'
+            )
+        else:
+            ordered.extend(rows)
 
         if items:
             ordered.extend(items.values())
@@ -1136,7 +1149,13 @@ class WavetableParamEditorHandler(BaseHandler):
                     if sec == "Filter":
                         group_items.extend(self._arrange_filter_panel(items))
                     elif sec == "Envelopes":
-                        group_items.extend(self._arrange_envelope_panel(items))
+                        canvas_map = {
+                            "Amp Envelope": "amp-env-canvas",
+                            "Envelope 2": "env2-canvas",
+                            "Envelope 3": "env3-canvas",
+                        }
+                        cid = canvas_map.get(label)
+                        group_items.extend(self._arrange_envelope_panel(items, cid))
                     elif sec == "Modulation" and label.startswith("LFO"):
                         group_items.extend(self._arrange_lfo_panel(items))
                     else:
