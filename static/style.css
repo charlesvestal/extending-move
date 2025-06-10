@@ -1119,3 +1119,21 @@ button#macro-add-param {
     border: 1px solid #dedede;
     width:100%
 }
+
+.env-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.env-container .env-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+}
+
+.env-visualization {
+    width: 200px;
+    height: 88px;
+}
