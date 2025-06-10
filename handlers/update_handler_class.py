@@ -4,8 +4,9 @@
 import logging
 import os
 import time
+import subprocess
+import sys
 from typing import List, Dict, Any, Tuple
-from contextlib import redirect_stdout, redirect_stderr
 
 import requests
 import importlib.util
@@ -142,12 +143,48 @@ class UpdateHandler(BaseHandler):
         return self.check_for_update()
 
     def handle_post(self, form) -> Dict[str, Any]:
-        valid, error_response = self.validate_action(form, "update_repo")
+        action = form.getvalue("action")
         info = self.check_for_update()
-        if not valid:
-            error_response.update(info)
-            return error_response
+        if action not in {"update_repo", "restart_server"}:
+            return self.format_error_response(
+                f"Bad Request: Invalid action '{action}'",
+                **info,
+            )
 
+        if action == "restart_server":
+            log_path = ROOT_DIR / "last-update.log"
+            with open(log_path, "a", encoding="utf-8") as log:
+                log.write(
+                    f"Restart requested {time.strftime('%Y-%m-%d %H:%M:%S')}\n"
+                )
+                log.flush()
+                try:
+                    subprocess.Popen(
+                        [
+                            sys.executable,
+                            str(_util_path),
+                            "--restart-only",
+                            "--log",
+                            str(log_path),
+                        ],
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL,
+                    )
+                except Exception as exc:  # noqa: BLE001
+                    log.write(f"Error restarting server: {exc}\n")
+                    log.flush()
+                    return self.format_error_response(
+                        f"Error restarting server: {exc}", **info
+                    )
+            resp = self.format_success_response(
+                "Restarting server...",
+                progress=["restarting server"],
+                restart_countdown=20,
+            )
+            resp.update(info)
+            return resp
+
+        # action == "update_repo"
         last_sha = info.get("last_sha")
         latest_sha = info.get("latest_sha")
         if not latest_sha or last_sha == latest_sha:
@@ -200,8 +237,17 @@ class UpdateHandler(BaseHandler):
             log.write("restarting server\n")
             log.flush()
             try:
-                with redirect_stdout(log), redirect_stderr(log):
-                    restart_webserver(log)
+                subprocess.Popen(
+                    [
+                        sys.executable,
+                        str(_util_path),
+                        "--restart-only",
+                        "--log",
+                        str(log_path),
+                    ],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
             except Exception as exc:  # noqa: BLE001
                 log.write(f"Error restarting server: {exc}\n")
                 log.flush()
