@@ -1,78 +1,54 @@
-/* Nested dropdown for wavetable sprites */
-function initSpriteDropdown(containerId, hiddenId, spriteMap, selected) {
-  const container = document.getElementById(containerId);
+/* Initialize category + waveform dropdowns for wavetable sprites */
+function initSpriteDropdown(catId, waveId, hiddenId, spriteMap, selected) {
+  const catSel = document.getElementById(catId);
+  const waveSel = document.getElementById(waveId);
   const hidden = document.getElementById(hiddenId);
-  if (!container || !hidden) return null;
+  if (!catSel || !waveSel || !hidden) return null;
 
+  const categories = Object.keys(spriteMap);
   const allNames = [];
-  Object.values(spriteMap).forEach(arr => { allNames.push(...arr); });
+  categories.forEach(c => { allNames.push(...spriteMap[c]); });
 
-  container.classList.add('nested-dropdown');
-  const toggle = document.createElement('div');
-  toggle.className = 'dropdown-toggle';
-  const label = document.createElement('span');
-  label.className = 'selected-label';
-  const arrow = document.createElement('span');
-  arrow.className = 'arrow';
-  arrow.innerHTML = '&#9662;';
-  toggle.appendChild(label);
-  toggle.appendChild(arrow);
-  container.appendChild(toggle);
-  const menu = document.createElement('div');
-  menu.className = 'dropdown-menu';
-  menu.style.display = 'none';
-  const ulRoot = document.createElement('ul');
-  ulRoot.className = 'file-tree root';
-  menu.appendChild(ulRoot);
-  container.appendChild(menu);
+  function fillCategories() {
+    catSel.innerHTML = '';
+    categories.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c;
+      opt.textContent = c;
+      catSel.appendChild(opt);
+    });
+  }
 
-  function buildMenu() {
-    Object.keys(spriteMap).forEach(cat => {
-      const li = document.createElement('li');
-      li.className = 'dir closed';
-      const span = document.createElement('span');
-      span.textContent = cat;
-      const child = document.createElement('ul');
-      child.classList.add('hidden');
-      spriteMap[cat].forEach(name => {
-        const li2 = document.createElement('li');
-        li2.className = 'file-entry';
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.textContent = name;
-        btn.addEventListener('click', () => {
-          setValue(name);
-          close();
-        });
-        li2.appendChild(btn);
-        child.appendChild(li2);
-      });
-      span.addEventListener('click', e => {
-        e.stopPropagation();
-        child.classList.toggle('hidden');
-        li.classList.toggle('open');
-        li.classList.toggle('closed');
-      });
-      li.appendChild(span);
-      li.appendChild(child);
-      ulRoot.appendChild(li);
+  function fillWaves(cat) {
+    waveSel.innerHTML = '';
+    (spriteMap[cat] || []).forEach(w => {
+      const opt = document.createElement('option');
+      opt.value = w;
+      opt.textContent = w;
+      waveSel.appendChild(opt);
     });
   }
 
   function setValue(val) {
+    let cat = categories.find(c => (spriteMap[c] || []).includes(val));
+    if (!cat) cat = categories[0];
+    if (catSel.value !== cat) {
+      catSel.value = cat;
+      fillWaves(cat);
+    }
+    waveSel.value = val;
     hidden.value = val;
-    label.textContent = val || 'Choose…';
     hidden.dispatchEvent(new Event('change'));
   }
 
-  buildMenu();
-  setValue(selected || hidden.value || '');
+  fillCategories();
+  setValue(selected || hidden.value || (spriteMap[categories[0]] || [])[0] || '');
 
-  let open = false;
-  function openMenu() { menu.style.display = 'block'; open = true; }
-  function close() { menu.style.display = 'none'; open = false; }
-  toggle.addEventListener('click', e => { e.stopPropagation(); open ? close() : openMenu(); });
-  document.addEventListener('click', e => { if (open && !container.contains(e.target)) close(); });
+  catSel.addEventListener('change', () => {
+    fillWaves(catSel.value);
+    setValue(waveSel.value);
+  });
+  waveSel.addEventListener('change', () => setValue(waveSel.value));
 
   return { setValue, options: allNames };
 }

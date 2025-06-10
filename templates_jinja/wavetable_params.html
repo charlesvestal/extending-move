@@ -153,9 +153,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const sprite2Input = document.getElementById('sprite2-input');
   const spriteMap = {{ sprites_json|safe }};
   const spriteDropdowns = {};
-  const s1 = initSpriteDropdown('sprite1-select', 'sprite1-input', spriteMap, {{ sprite1|tojson }});
+  const s1 = initSpriteDropdown('sprite1-cat', 'sprite1-select', 'sprite1-input', spriteMap, {{ sprite1|tojson }});
   if (s1) spriteDropdowns.sprite1 = s1;
-  const s2 = initSpriteDropdown('sprite2-select', 'sprite2-input', spriteMap, {{ sprite2|tojson }});
+  const s2 = initSpriteDropdown('sprite2-cat', 'sprite2-select', 'sprite2-input', spriteMap, {{ sprite2|tojson }});
   if (s2) spriteDropdowns.sprite2 = s2;
   window.spriteDropdowns = spriteDropdowns;
 
