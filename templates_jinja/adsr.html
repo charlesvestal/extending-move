@@ -18,6 +18,15 @@
   <label>Release
     <input type="range" id="release" class="input-knob" min="0" max="2" step="0.01" value="{{ defaults.release }}">
   </label>
+  <label>Initial
+    <input type="range" id="initial" class="input-knob" min="0" max="1" step="0.01" value="{{ defaults.initial }}">
+  </label>
+  <label>Peak
+    <input type="range" id="peak" class="input-knob" min="0" max="1" step="0.01" value="{{ defaults.peak }}">
+  </label>
+  <label>Final
+    <input type="range" id="final" class="input-knob" min="0" max="1" step="0.01" value="{{ defaults.final }}">
+  </label>
 </div>
 {% endblock %}
 {% block scripts %}

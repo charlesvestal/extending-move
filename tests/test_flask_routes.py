@@ -38,7 +38,15 @@ def test_reverse_post(client, monkeypatch):
 def test_adsr_get(client, monkeypatch):
     def fake_get():
         return {
-            'defaults': {'attack': 0.1, 'decay': 0.2, 'sustain': 0.5, 'release': 0.3},
+            'defaults': {
+                'attack': 0.1,
+                'decay': 0.2,
+                'sustain': 0.5,
+                'release': 0.3,
+                'initial': 0.0,
+                'peak': 1.0,
+                'final': 0.0,
+            },
             'message': 'hello',
             'message_type': 'info'
         }
@@ -46,6 +54,9 @@ def test_adsr_get(client, monkeypatch):
     resp = client.get('/adsr')
     assert resp.status_code == 200
     assert b'ADSR Envelope Visualizer' in resp.data
+    assert b'id="initial"' in resp.data
+    assert b'id="peak"' in resp.data
+    assert b'id="final"' in resp.data
 
 def test_restore_get(client, monkeypatch):
     def fake_get():
