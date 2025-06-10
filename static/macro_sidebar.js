@@ -157,6 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
     container.appendChild(toggle);
     const menu = document.createElement('div');
     menu.className = 'dropdown-menu';
+    menu.style.display = 'none';
     const ulRoot = document.createElement('ul');
     ulRoot.className = 'file-tree root';
     menu.appendChild(ulRoot);
