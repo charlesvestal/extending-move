@@ -18,6 +18,8 @@ from core.synth_preset_inspector_handler import (
     load_wavetable_sprites,
     extract_wavetable_sprites,
     update_wavetable_sprites,
+    extract_wavetable_mod_matrix,
+    update_wavetable_mod_matrix,
 )
 from core.synth_param_editor_handler import (
     update_parameter_values,
@@ -108,6 +110,7 @@ class WavetableParamEditorHandler(BaseHandler):
             'sprites_json': json.dumps(sprites),
             'sprite1': '',
             'sprite2': '',
+            'mod_matrix_json': '[]',
         }
 
     def handle_post(self, form):
@@ -249,6 +252,18 @@ class WavetableParamEditorHandler(BaseHandler):
             if not sprite_res['success']:
                 return self.format_error_response(sprite_res['message'])
 
+            matrix_str = form.getvalue('mod_matrix_data')
+            if matrix_str:
+                try:
+                    matrix_data = json.loads(matrix_str)
+                except Exception:
+                    matrix_data = []
+            else:
+                matrix_data = []
+            matrix_res = update_wavetable_mod_matrix(preset_path, matrix_data, preset_path)
+            if not matrix_res['success']:
+                return self.format_error_response(matrix_res['message'])
+
             message = result['message'] + "; " + macro_result['message']
             if output_path:
                 message += f" Saved to {output_path}"
@@ -326,6 +341,8 @@ class WavetableParamEditorHandler(BaseHandler):
         sprite_info = extract_wavetable_sprites(preset_path)
         sprite1 = sprite_info.get('sprite1') if sprite_info.get('success', True) else None
         sprite2 = sprite_info.get('sprite2') if sprite_info.get('success', True) else None
+        matrix_info = extract_wavetable_mod_matrix(preset_path)
+        mod_matrix_json = json.dumps(matrix_info.get('matrix', [])) if matrix_info.get('success', False) else '[]'
         return {
             'message': message,
             'message_type': 'success',
@@ -343,6 +360,7 @@ class WavetableParamEditorHandler(BaseHandler):
             'available_params_json': available_params_json,
             'param_paths_json': param_paths_json,
             'sprites_json': sprites_json,
+            'mod_matrix_json': mod_matrix_json,
             'sprite1': sprite1 or '',
             'sprite2': sprite2 or '',
         }

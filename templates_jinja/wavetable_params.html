@@ -98,7 +98,7 @@
 
     <div id="mod-matrix-section">
         <h3>Modulation Matrix</h3>
-        <input type="hidden" id="mod-matrix-data-input" name="mod_matrix_data" value="[]">
+        <input type="hidden" id="mod-matrix-data-input" name="mod_matrix_data" value='{{ mod_matrix_json }}'>
         <table id="mod-matrix-table">
             <thead>
                 <tr>
@@ -147,6 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const saveBtn = document.getElementById('save-params-btn');
   const form = document.getElementById('param-form');
   const macrosInput = document.getElementById('macros-data-input');
+  const modMatrixInput = document.getElementById('mod-matrix-data-input');
   const sprite1Sel = document.getElementById('sprite1-select');
   const sprite2Sel = document.getElementById('sprite2-select');
   const spriteNames = {{ sprites_json|safe }};
@@ -167,6 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const initialMacros = macrosInput ? macrosInput.value : null;
+  let initialMatrix = modMatrixInput ? modMatrixInput.value : null;
   const initialValues = {};
 
   function recordInitial() {
@@ -177,11 +179,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     if (sprite1Sel) { initialValues['sprite1'] = sprite1Sel.value; sprite1Sel.addEventListener('change', updateSaveState); }
     if (sprite2Sel) { initialValues['sprite2'] = sprite2Sel.value; sprite2Sel.addEventListener('change', updateSaveState); }
+    if (modMatrixInput) modMatrixInput.addEventListener('change', updateSaveState);
   }
 
   function hasChanges() {
     if (cb && cb.checked) return true;
     if (macrosInput && macrosInput.value !== initialMacros) return true;
+    if (modMatrixInput && modMatrixInput.value !== initialMatrix) return true;
     for (const [name, val] of Object.entries(initialValues)) {
       const cur = form.querySelector(`[name="${name}"]`);
       if (cur && cur.value !== val) return true;
