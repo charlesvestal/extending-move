@@ -168,13 +168,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const match = sel.parentElement.dataset.name.match(/Voice_Filter(\d)_/);
         if (!match) return;
         const idx = match[1];
-        const morphEl = sel.closest('.param-items').querySelector(`.filter${idx}-morph`);
-        function updateMorph() {
-            if (!morphEl) return;
-            morphEl.classList.toggle('hidden', sel.value !== 'Morph');
+        const root = sel.closest('.param-items');
+        const morphEl = root.querySelector(`.filter${idx}-morph`);
+        const driveEl = root.querySelector(`.filter${idx}-drive`);
+        function updateFilterDisplays() {
+            if (morphEl) morphEl.classList.toggle('hidden', sel.value !== 'Morph');
+            if (driveEl) driveEl.classList.toggle('hidden', !['Highpass','Lowpass'].includes(sel.value));
         }
-        sel.addEventListener('change', updateMorph);
-        updateMorph();
+        sel.addEventListener('change', updateFilterDisplays);
+        updateFilterDisplays();
     });
 
     // Update oscillator FX knob labels when the effect mode changes

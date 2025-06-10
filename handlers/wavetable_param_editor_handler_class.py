@@ -593,6 +593,10 @@ class WavetableParamEditorHandler(BaseHandler):
         "Voice_Modulators_Lfo2_Time_Rate",
         "Voice_Global_Glide",
         "Voice_Global_Transpose",
+        "Voice_Filter1_Morph",
+        "Voice_Filter2_Morph",
+        "Voice_Filter1_Drive",
+        "Voice_Filter2_Drive",
     }
 
     def _friendly_label(self, name: str) -> str:
@@ -705,7 +709,11 @@ class WavetableParamEditorHandler(BaseHandler):
                 disp_id = f'param_{idx}_display'
                 input_classes = "param-dial input-knob"
                 extra_attrs = ""
-                if name == "Filter_Frequency":
+                if name in {
+                    "Filter_Frequency",
+                    "Voice_Filter1_Frequency",
+                    "Voice_Filter2_Frequency",
+                }:
                     input_classes += " filter-knob"
                     extra_attrs += ' data-diameter="48"'
                 html.append(
@@ -735,6 +743,8 @@ class WavetableParamEditorHandler(BaseHandler):
             return "Modulation"
         if name.startswith("Voice_Modulators"):
             return "Modulation"
+        if name == "Voice_Global_FilterRouting":
+            return "Filter"
         if name.startswith(("Voice_Global_", "Voice_Unison_")) or name in {"HiQ", "MonoPoly", "PolyVoices", "Volume"}:
             return "Global"
         return "Other"
@@ -773,6 +783,72 @@ class WavetableParamEditorHandler(BaseHandler):
 
         if items:
             ordered.extend(items.values())
+        return ordered
+
+    def _arrange_filters_section(self, f1: dict, f2: dict, routing: list[str]) -> list:
+        """Return combined filter section rows for both filters."""
+        ordered = []
+        row1 = "".join([
+            f1.pop("On", ""),
+            f1.pop("Type", ""),
+            f1.pop("Slope", ""),
+            f2.pop("On", ""),
+            f2.pop("Type", ""),
+            f2.pop("Slope", ""),
+            "".join(routing),
+        ])
+        if row1.strip():
+            ordered.append(f'<div class="param-row">{row1}</div>')
+
+        row2 = "".join([
+            f1.pop("Resonance", ""),
+            f1.pop("Frequency", ""),
+            f2.pop("Frequency", ""),
+            f2.pop("Resonance", ""),
+        ])
+        if row2.strip():
+            ordered.append(f'<div class="param-row">{row2}</div>')
+
+        m1 = f1.pop("Morph", "")
+        d1 = f1.pop("Drive", "")
+        m2 = f2.pop("Morph", "")
+        d2 = f2.pop("Drive", "")
+
+        if m1:
+            m1 = m1.replace(
+                'param-item"',
+                'param-item filter-morph filter1-morph hidden"',
+                1,
+            )
+        if d1:
+            d1 = d1.replace(
+                'rect-slider"',
+                'rect-slider filter-drive filter1-drive hidden"',
+                1,
+            )
+        if m2:
+            m2 = m2.replace(
+                'param-item"',
+                'param-item filter-morph filter2-morph hidden"',
+                1,
+            )
+        if d2:
+            d2 = d2.replace(
+                'rect-slider"',
+                'rect-slider filter-drive filter2-drive hidden"',
+                1,
+            )
+
+        row3 = "".join([m1 or d1, m2 or d2])
+        if row3.strip():
+            ordered.append(f'<div class="param-row">{row3}</div>')
+
+        for items in (f1, f2):
+            items.pop("CircuitBpNoMo", None)
+            items.pop("CircuitLpHp", None)
+            if items:
+                ordered.extend(items.values())
+
         return ordered
 
     def _arrange_osc_panel(self, items: dict, sprite_html: str) -> list:
@@ -1023,6 +1099,12 @@ class WavetableParamEditorHandler(BaseHandler):
         for sec, groups in self.SECTION_SUBPANELS.items():
             if sec in {"Oscillators", "FX", "Mixer"}:
                 continue
+            if sec == "Filter":
+                f1 = subgroups.get(sec, {}).get("Voice Filter 1", {})
+                f2 = subgroups.get(sec, {}).get("Voice Filter 2", {})
+                routing = sections.get(sec, [])
+                sections[sec] = self._arrange_filters_section(f1, f2, routing)
+                continue
             group_items = []
             for _prefix, label, _ in groups:
                 items = subgroups.get(sec, {}).get(label)
@@ -1030,9 +1112,7 @@ class WavetableParamEditorHandler(BaseHandler):
                     group_items.append(
                         f'<div class="param-group-label">{label}</div>'
                     )
-                    if sec == "Filter":
-                        group_items.extend(self._arrange_filter_panel(items))
-                    elif sec == "Envelopes":
+                    if sec == "Envelopes":
                         group_items.extend(self._arrange_envelope_panel(items))
                     else:
                         group_items.extend(items.values())
