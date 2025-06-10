@@ -9,9 +9,12 @@ over the current project directory. The new SHA is then stored in
 changed, the script runs ``pip install --no-cache-dir -r requirements.txt``
 after setting ``TMPDIR=/data/UserData/tmp`` before restarting the server.
 
+
 Set the environment variable ``GITHUB_REPO`` to ``owner/repo`` (defaults to
 ``charlesvestal/extending-move``) before running if you need to override the
-repository.
+repository. The functions in this module are imported by the Update tab,
+so restart output is appended to ``last-update.log`` as well as
+``move-webserver.log``.
 
 If ``last_sha.txt`` is missing, the updater treats it as an empty string and
 always fetches the latest commit.
@@ -32,6 +35,7 @@ import requests
 import subprocess
 import signal
 import time
+import shlex
 
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
 
@@ -183,7 +187,12 @@ def restart_webserver(log: io.TextIOBase | None = None) -> None:
 
     update_log = ROOT_DIR / "last-update.log"
 
-    cmd = f"python3 -u {ROOT_DIR / 'move-webserver.py'} 2>&1 | tee -a {update_log} > {log_file}"
+    cmd = (
+        "python3 -u "
+        f"{shlex.quote(str(ROOT_DIR / 'move-webserver.py'))} "
+        "2>&1 | tee -a "
+        f"{shlex.quote(str(update_log))} > {shlex.quote(str(log_file))}"
+    )
 
     if same_process:
         log_msg("Starting the webserver (exec)...")
