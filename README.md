@@ -10,7 +10,7 @@ Tools for extending the Ableton Move. This project provides a companion webserve
 ## Short installation instructions
 
 - Clone or download the repository.
-- Run utility-scripts/setup-autostart-on-move.command
+- Run utility-scripts/setup-ssh-and-install-on-move.command
 - Follow the instructions!
   
 ## Features
