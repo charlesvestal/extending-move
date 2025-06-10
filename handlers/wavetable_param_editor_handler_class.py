@@ -593,6 +593,10 @@ class WavetableParamEditorHandler(BaseHandler):
         "Voice_Modulators_Lfo2_Time_Rate",
         "Voice_Global_Glide",
         "Voice_Global_Transpose",
+        "Voice_Filter1_Drive",
+        "Voice_Filter2_Drive",
+        "Voice_Filter1_Morph",
+        "Voice_Filter2_Morph",
     }
 
     def _friendly_label(self, name: str) -> str:
@@ -752,6 +756,8 @@ class WavetableParamEditorHandler(BaseHandler):
         freq = items.pop("Frequency", "")
         res = items.pop("Resonance", "")
         drive = items.pop("Drive", "")
+        if drive:
+            drive = drive.replace('param-item"', f'param-item filter-drive filter{idx}-drive hidden"', 1)
         morph = items.pop("Morph", "")
 
         stack = "".join([on, f_type, slope])

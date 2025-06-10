@@ -192,7 +192,13 @@ document.addEventListener('DOMContentLoaded', () => {
             morphEl.classList.toggle('hidden', sel.value !== 'Morph');
         }
         sel.addEventListener('change', updateMorph);
-        updateMorph();
+                const driveEl = sel.closest('.param-items').querySelector(`.filter${idx}-drive`);
+        function updateDrive() {
+            if (!driveEl) return;
+            driveEl.classList.toggle('hidden', !['Lowpass','Highpass'].includes(sel.value));
+        }
+        sel.addEventListener('change', updateDrive);
+        updateDrive();
     });
 
     // Update oscillator FX knob labels when the effect mode changes
