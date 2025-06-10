@@ -460,4 +460,38 @@ def test_pitch_shift_route(client, monkeypatch):
     assert len(shifted) == len(data)
 
 
+def test_filter_viz_get(client):
+    resp = client.get('/filter-viz')
+    assert resp.status_code == 200
+    assert b'id="filterChart"' in resp.data
+
+
+def test_filter_viz_post(client, monkeypatch):
+    def fake_post(form):
+        return {
+            'status': 200,
+            'headers': [('Content-Type', 'application/json')],
+            'content': '{"freq": [0, 1], "mag": [0, -3]}'
+        }
+
+    monkeypatch.setattr(move_webserver.filter_viz_handler, 'handle_post', fake_post)
+    resp = client.post('/filter-viz', data={'filter1_type': 'Lowpass'})
+    assert resp.status_code == 200
+    assert resp.json['freq'] == [0, 1]
+
+
+def test_filter_viz_parallel_post(client, monkeypatch):
+    def fake_post(form):
+        return {
+            'status': 200,
+            'headers': [('Content-Type', 'application/json')],
+            'content': '{"freq": [0, 1], "mag1": [0, -3], "mag2": [0, -6]}'
+        }
+
+    monkeypatch.setattr(move_webserver.filter_viz_handler, 'handle_post', fake_post)
+    resp = client.post('/filter-viz', data={'routing': 'Parallel'})
+    assert resp.status_code == 200
+    assert resp.json['mag2'] == [0, -6]
+
+
 

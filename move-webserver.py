@@ -38,6 +38,7 @@ from handlers.wavetable_param_editor_handler_class import (
 from handlers.drum_rack_inspector_handler_class import DrumRackInspectorHandler
 from handlers.file_placer_handler_class import FilePlacerHandler
 from handlers.refresh_handler_class import RefreshHandler
+from handlers.filter_viz_handler_class import FilterVizHandler
 from handlers.update_handler_class import UpdateHandler, REPO
 from handlers.adsr_handler_class import AdsrHandler
 from core.refresh_handler import refresh_library
@@ -123,6 +124,7 @@ wavetable_param_handler = WavetableParamEditorHandler()
 file_placer_handler = FilePlacerHandler()
 refresh_handler = RefreshHandler()
 drum_rack_handler = DrumRackInspectorHandler()
+filter_viz_handler = FilterVizHandler()
 update_handler = UpdateHandler()
 adsr_handler = AdsrHandler()
 
@@ -306,6 +308,29 @@ def reverse():
     )
 
 
+@app.route("/filter-viz", methods=["GET", "POST"])
+def filter_viz_route():
+    if request.method == "POST":
+        form = SimpleForm(request.form.to_dict())
+        resp = filter_viz_handler.handle_post(form)
+        return (
+            resp["content"],
+            resp.get("status", 200),
+            resp.get("headers", [("Content-Type", "application/json")]),
+        )
+    else:
+        result = filter_viz_handler.handle_get()
+        message = result.get("message")
+        message_type = result.get("message_type")
+        success = message_type != "error" if message_type else False
+        return render_template(
+            "filter_viz.html",
+            message=message,
+            message_type=message_type,
+            success=success,
+            active_tab="filter-viz",
+        )
+
 @app.route("/adsr", methods=["GET"])
 def adsr_route():
     result = adsr_handler.handle_get()
@@ -319,6 +344,7 @@ def adsr_route():
         defaults=defaults,
         active_tab="adsr",
     )
+
 
 
 @app.route("/restore", methods=["GET", "POST"])

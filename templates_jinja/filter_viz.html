@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Wavetable Filter Visualizer</h2>
+<p><em>Use the controls to view the filter cutoff slope and resonance. When routing is Parallel or Split the individual filters are shown in different colors.</em></p>
+{% if message %}
+  <p class="{{ message_type if message_type else ('success' if success else 'error') }}">{{ message }}</p>
+{% endif %}
+<form id="filter-form" action="{{ host_prefix }}/filter-viz" method="post">
+  <fieldset>
+    <legend>Filter 1</legend>
+    <label>Type:
+      <select name="filter1_type">
+        <option>Lowpass</option>
+        <option>Highpass</option>
+        <option>Bandpass</option>
+        <option>Notch</option>
+        <option>Morph</option>
+      </select>
+    </label>
+    <label>Freq:
+      <input type="number" name="filter1_freq" value="1000" step="1" min="20" max="20000">
+    </label>
+    <label>Resonance:
+      <input type="range" name="filter1_res" value="0.0" min="0" max="1" step="0.01">
+    </label>
+    <label>Slope:
+      <select name="filter1_slope">
+        <option value="12">12</option>
+        <option value="24">24</option>
+      </select>
+    </label>
+  </fieldset>
+  <fieldset>
+    <legend>Filter 2</legend>
+    <label><input type="checkbox" name="use_filter2"> Enable</label>
+    <label>Type:
+      <select name="filter2_type">
+        <option>Lowpass</option>
+        <option>Highpass</option>
+        <option>Bandpass</option>
+        <option>Notch</option>
+        <option>Morph</option>
+      </select>
+    </label>
+    <label>Freq:
+      <input type="number" name="filter2_freq" value="1000" step="1" min="20" max="20000">
+    </label>
+    <label>Resonance:
+      <input type="range" name="filter2_res" value="0.0" min="0" max="1" step="0.01">
+    </label>
+    <label>Slope:
+      <select name="filter2_slope">
+        <option value="12">12</option>
+        <option value="24">24</option>
+      </select>
+    </label>
+  </fieldset>
+  <label>Routing:
+    <select name="routing">
+      <option value="Serial">Serial</option>
+      <option value="Parallel">Parallel</option>
+      <option value="Split">Split</option>
+    </select>
+  </label>
+</form>
+<canvas id="filterChart" width="600" height="300" style="margin-top:1em;border:1px solid #ccc;"></canvas>
+{% endblock %}
+{% block scripts %}
+<script type="module" src="{{ host_prefix }}/static/filter_viz.js"></script>
+{% endblock %}
