@@ -38,7 +38,7 @@ from handlers.wavetable_param_editor_handler_class import (
 from handlers.drum_rack_inspector_handler_class import DrumRackInspectorHandler
 from handlers.file_placer_handler_class import FilePlacerHandler
 from handlers.refresh_handler_class import RefreshHandler
-from handlers.update_handler_class import UpdateHandler
+from handlers.update_handler_class import UpdateHandler, REPO
 from core.refresh_handler import refresh_library
 from core.file_browser import generate_dir_html
 
@@ -726,6 +726,8 @@ def update_route():
         message_type=message_type,
         success=success,
         commits=result.get("commits", []),
+        truncated=result.get("truncated", False),
+        repo=REPO,
         has_update=result.get("has_update", False),
         progress=result.get("progress", []),
     )
