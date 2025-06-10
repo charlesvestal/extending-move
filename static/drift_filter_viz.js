@@ -3,8 +3,8 @@ export function initDriftFilterViz() {
   if (!filterPanel) return;
   const canvas = document.createElement('canvas');
   canvas.id = 'driftFilterChart';
-  canvas.width = 400;
-  canvas.height = 200;
+  canvas.width = 175;
+  canvas.height = 88;
   canvas.style.marginTop = '1em';
   canvas.style.border = '1px solid #ccc';
   filterPanel.appendChild(canvas);
