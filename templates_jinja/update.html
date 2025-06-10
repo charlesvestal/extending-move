@@ -45,4 +45,8 @@
 {% else %}
   <p>You have the latest version.</p>
 {% endif %}
+<form method="post" action="{{ host_prefix }}/update">
+  <input type="hidden" name="action" value="restart_server">
+  <button type="submit">Restart Only</button>
+</form>
 {% endblock %}
