@@ -65,7 +65,7 @@ def fetch_commits_since(
         data = resp.json()
         for entry in data:
             if entry.get("sha") == since_sha:
-                return commits, truncated
+                return commits, truncated, error_message
             msg = entry.get("commit", {}).get("message", "").split("\n", 1)[0]
             commits.append(
                 {
