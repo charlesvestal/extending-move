@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Update Server</h2>
+{% if message %}
+<p class="{{ message_type }}">{{ message }}</p>
+{% endif %}
+{% if update_available %}
+  <p>New update available.</p>
+  {% if commits %}
+  <ul>
+    {% for c in commits %}
+      <li>{% if c.is_merge %}<b>{{ c.message }}</b>{% else %}{{ c.message }}{% endif %}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  <form method="post" action="{{ host_prefix }}/update">
+    <input type="hidden" name="action" value="do_update">
+    <button type="submit">Update</button>
+  </form>
+{% else %}
+  <p>Your installation is up-to-date.</p>
+{% endif %}
+{% if progress %}
+<pre>
+{% for line in progress %}{{ line }}
+{% endfor %}
+</pre>
+{% endif %}
+{% endblock %}

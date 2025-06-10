@@ -126,6 +126,9 @@ h3 {
     background-color: transparent;
     overflow: visible;
 }
+.tab-right {
+    margin-left: auto;
+}
 
 .tab button,
 .tab a {
