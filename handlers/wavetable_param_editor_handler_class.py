@@ -868,6 +868,69 @@ class WavetableParamEditorHandler(BaseHandler):
             ordered.extend(items.values())
         return ordered
 
+    def _arrange_sub_column(self, osc_items: dict, mixer_items: dict) -> list:
+        """Return stacked rows for the Sub oscillator."""
+        ordered = []
+        for key in ("On", "Gain"):
+            val = mixer_items.pop(key, "")
+            if val.strip():
+                ordered.append(f'<div class="param-row">{val}</div>')
+        for key in ("Tone", "Transpose"):
+            val = osc_items.pop(key, "")
+            if val.strip():
+                ordered.append(f'<div class="param-row">{val}</div>')
+        if mixer_items:
+            ordered.extend(mixer_items.values())
+        if osc_items:
+            ordered.extend(osc_items.values())
+        return ordered
+
+    def _arrange_osc_column(
+        self,
+        osc_items: dict,
+        mixer_items: dict,
+        fx_items: dict,
+        sprite_html: str,
+    ) -> list:
+        """Return ordered rows for an oscillator column."""
+        ordered = []
+        row = "".join([mixer_items.pop("On", ""), sprite_html])
+        if row.strip():
+            ordered.append(f'<div class="param-row">{row}</div>')
+        row = "".join(
+            [
+                mixer_items.pop("Pan", ""),
+                mixer_items.pop("Gain", ""),
+                osc_items.pop("Wavetables_WavePosition", ""),
+            ]
+        )
+        if row.strip():
+            ordered.append(f'<div class="param-row">{row}</div>')
+        row = "".join(
+            [
+                fx_items.pop("Effects_EffectMode", ""),
+                fx_items.pop("Effects_Effect1", ""),
+                fx_items.pop("Effects_Effect2", ""),
+            ]
+        )
+        if row.strip():
+            ordered.append(f'<div class="param-row">{row}</div>')
+        row = "".join(
+            [
+                osc_items.pop("Pitch_Detune", ""),
+                osc_items.pop("Pitch_Transpose", ""),
+            ]
+        )
+        if row.strip():
+            ordered.append(f'<div class="param-row">{row}</div>')
+        if mixer_items:
+            ordered.extend(mixer_items.values())
+        if fx_items:
+            ordered.extend(fx_items.values())
+        if osc_items:
+            ordered.extend(osc_items.values())
+        return ordered
+
     def generate_params_html(self, params, mapped_parameters=None):
         """Return HTML controls for the given parameter values."""
         if not params:
@@ -958,6 +1021,8 @@ class WavetableParamEditorHandler(BaseHandler):
                 sections.setdefault(sec, []).append(html)
 
         for sec, groups in self.SECTION_SUBPANELS.items():
+            if sec in {"Oscillators", "FX", "Mixer"}:
+                continue
             group_items = []
             for _prefix, label, _ in groups:
                 items = subgroups.get(sec, {}).get(label)
@@ -967,30 +1032,6 @@ class WavetableParamEditorHandler(BaseHandler):
                     )
                     if sec == "Filter":
                         group_items.extend(self._arrange_filter_panel(items))
-                    elif sec == "Oscillators":
-                        if label == "Oscillator 1":
-                            sprite = (
-                                '<div class="param-item"><span class="param-label">Osc 1</span>'
-                                '<select id="sprite1-cat" class="param-select"></select>'
-                                '<select id="sprite1-select" class="param-select"></select>'
-                                '<input type="hidden" name="sprite1" id="sprite1-input"></div>'
-                            )
-                            group_items.extend(self._arrange_osc_panel(items, sprite))
-                        elif label == "Oscillator 2":
-                            sprite = (
-                                '<div class="param-item"><span class="param-label">Osc 2</span>'
-                                '<select id="sprite2-cat" class="param-select"></select>'
-                                '<select id="sprite2-select" class="param-select"></select>'
-                                '<input type="hidden" name="sprite2" id="sprite2-input"></div>'
-                            )
-                            group_items.extend(self._arrange_osc_panel(items, sprite))
-                        else:
-                            group_items.extend(self._arrange_sub_panel(items))
-                    elif sec == "FX":
-                        group_items.extend(self._arrange_fx_panel(items))
-                    elif sec == "Mixer":
-                        include_pan = label != "Sub Oscillator"
-                        group_items.extend(self._arrange_mixer_panel(items, include_pan))
                     elif sec == "Envelopes":
                         group_items.extend(self._arrange_envelope_panel(items))
                     else:
@@ -1000,10 +1041,47 @@ class WavetableParamEditorHandler(BaseHandler):
             if group_items:
                 sections[sec] = group_items
 
-        first_row = {"Oscillators", "FX", "Mixer"}
-        top_panels = []
+        # Custom top panels for Sub and Oscillators
+        sub_items = subgroups.get("Oscillators", {}).get("Sub Oscillator", {})
+        sub_mixer = subgroups.get("Mixer", {}).get("Sub Oscillator", {})
+        osc1_items = subgroups.get("Oscillators", {}).get("Oscillator 1", {})
+        osc1_mixer = subgroups.get("Mixer", {}).get("Oscillator 1", {})
+        osc1_fx = subgroups.get("FX", {}).get("Oscillator 1", {})
+        osc2_items = subgroups.get("Oscillators", {}).get("Oscillator 2", {})
+        osc2_mixer = subgroups.get("Mixer", {}).get("Oscillator 2", {})
+        osc2_fx = subgroups.get("FX", {}).get("Oscillator 2", {})
+
+        sub_panel = ''.join(self._arrange_sub_column(sub_items, sub_mixer))
+        osc1_sprite = (
+            '<div class="param-item"><span class="param-label">Osc 1</span>'
+            '<select id="sprite1-cat" class="param-select"></select>'
+            '<select id="sprite1-select" class="param-select"></select>'
+            '<input type="hidden" name="sprite1" id="sprite1-input"></div>'
+        )
+        osc1_panel = ''.join(
+            self._arrange_osc_column(osc1_items, osc1_mixer, osc1_fx, osc1_sprite)
+        )
+        osc2_sprite = (
+            '<div class="param-item"><span class="param-label">Osc 2</span>'
+            '<select id="sprite2-cat" class="param-select"></select>'
+            '<select id="sprite2-select" class="param-select"></select>'
+            '<input type="hidden" name="sprite2" id="sprite2-input"></div>'
+        )
+        osc2_panel = ''.join(
+            self._arrange_osc_column(osc2_items, osc2_mixer, osc2_fx, osc2_sprite)
+        )
+        custom_top = (
+            '<div class="wavetable-param-panels">'
+            f'<div class="param-panel sub"><h3>Sub</h3><div class="param-items">{sub_panel}</div></div>'
+            f'<div class="param-panel oscillator-1"><h3>Oscillator 1</h3><div class="param-items">{osc1_panel}</div></div>'
+            f'<div class="param-panel oscillator-2"><h3>Oscillator 2</h3><div class="param-items">{osc2_panel}</div></div>'
+            '</div>'
+        )
+
         bottom_panels = []
         for sec in self.SECTION_ORDER:
+            if sec in {"Oscillators", "FX", "Mixer"}:
+                continue
             items = sections.get(sec)
             if not items:
                 continue
@@ -1012,14 +1090,9 @@ class WavetableParamEditorHandler(BaseHandler):
                 f'<div class="param-panel {cls}"><h3>{sec}</h3>'
                 f'<div class="param-items">{"".join(items)}</div></div>'
             )
-            if sec in first_row:
-                top_panels.append(panel_html)
-            else:
-                bottom_panels.append(panel_html)
+            bottom_panels.append(panel_html)
 
-        out_html = '<div class="wavetable-param-panels">'
-        out_html += ''.join(top_panels)
-        out_html += '</div>'
+        out_html = custom_top
         if bottom_panels:
             out_html += '<div class="wavetable-param-panels">'
             out_html += ''.join(bottom_panels)
