@@ -74,9 +74,48 @@ function initRandomizeButton() {
   });
 }
 
+function generateRandomName() {
+  const adjectives = [
+    'Fluffy', 'Spicy', 'Zesty', 'Creamy', 'Crunchy', 'Savory', 'Sweet',
+    'Tangy', 'Juicy', 'Smoky', 'Fiery', 'Buttery', 'Tender', 'Crispy',
+    'Silky', 'Gooey', 'Fruity', 'Saucy', 'Glazed', 'Wholesome'
+  ];
+  const foods = [
+    'Cheeseburger', 'Pizza', 'Tiramisu', 'Sushi', 'Pancake', 'Brownie',
+    'Curry', 'Taco', 'Donut', 'Risotto', 'Ramen', 'Gnocchi', 'Quiche',
+    'Falafel', 'Burrito', 'Lasagna', 'Muffin', 'Chowder', 'Waffle', 'Scone'
+  ];
+  const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
+  const food = foods[Math.floor(Math.random() * foods.length)];
+  return `${adj} ${food}`;
+}
+
+function initRandomNameButtons() {
+  const mainBtn = document.getElementById('generate-name-btn');
+  const modalBtn = document.getElementById('modal-generate-name-btn');
+  const nameInput = document.getElementById('new-preset-name');
+  const modalInput = document.querySelector('#newPresetModal input[name="new_preset_name"]');
+
+  if (mainBtn && nameInput) {
+    mainBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      nameInput.value = generateRandomName();
+      nameInput.dispatchEvent(new Event('input'));
+    });
+  }
+
+  if (modalBtn && modalInput) {
+    modalBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      modalInput.value = generateRandomName();
+    });
+  }
+}
+
 function initSynthParams() {
   initNewPresetModal();
   initRandomizeButton();
+  initRandomNameButtons();
 }
 
 document.addEventListener('DOMContentLoaded', initSynthParams);
