@@ -111,6 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const env2Input = document.querySelector('.param-item[data-name="Global_Envelope2Mode"] input[type="hidden"]');
     const cyclingRow = document.querySelector('.env2-cycling');
     const adsrRow = document.querySelector('.env2-adsr');
+    const env2Canvas = document.getElementById('env2-canvas');
     function updateCycling() {
         if (!env2Input) return;
         const show = env2Input.value === 'Cyc';
@@ -119,6 +120,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (adsrRow) {
             adsrRow.classList.toggle('hidden', show);
+        }
+        if (env2Canvas) {
+            env2Canvas.classList.toggle('hidden', show);
         }
     }
     if (env2Input) {
