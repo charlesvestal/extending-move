@@ -12,7 +12,7 @@ Tools for extending the Ableton Move. This project provides a companion webserve
 
 - **MIDI Upload**
   - Upload and restore Move Sets (.ablbundle)
-  - Choose target pad and color
+  - Choose target pad and colors
 
 - **Sample Reversal**
   - Create reversed versions of any WAV file
