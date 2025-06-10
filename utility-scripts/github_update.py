@@ -181,26 +181,16 @@ def restart_webserver(log: io.TextIOBase | None = None) -> None:
     except Exception:
         pass
 
+    update_log = ROOT_DIR / "last-update.log"
+
+    cmd = f"python3 -u {ROOT_DIR / 'move-webserver.py'} 2>&1 | tee -a {update_log} > {log_file}"
+
     if same_process:
         log_msg("Starting the webserver (exec)...")
-        with open(log_file, "wb") as log_f:
-            os.dup2(log_f.fileno(), sys.stdout.fileno())
-            os.dup2(log_f.fileno(), sys.stderr.fileno())
-            os.execvpe(
-                "python3",
-                ["python3", "-u", str(ROOT_DIR / "move-webserver.py")],
-                env,
-            )
+        os.execvpe("/bin/sh", ["/bin/sh", "-c", cmd], env)
         return
     else:
-        with open(log_file, "wb") as log_f:
-            subprocess.Popen(
-                ["python3", "-u", str(ROOT_DIR / "move-webserver.py")],
-                cwd=ROOT_DIR,
-                stdout=log_f,
-                stderr=log_f,
-                env=env,
-            )
+        subprocess.Popen(["/bin/sh", "-c", cmd], cwd=ROOT_DIR, env=env)
         log_msg("Starting the webserver...")
 
         new_pid = None
