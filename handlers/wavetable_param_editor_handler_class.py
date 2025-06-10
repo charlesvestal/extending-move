@@ -453,10 +453,10 @@ class WavetableParamEditorHandler(BaseHandler):
         "PitchModulation_Amount2": "Amount",
 
         # FX
-        "Oscillator1_Effects_EffectMode": "Effects Mode",
+        "Oscillator1_Effects_EffectMode": "FX Type",
         "Oscillator1_Effects_Effect1": "FX 1",
         "Oscillator1_Effects_Effect2": "FX 2",
-        "Oscillator2_Effects_EffectMode": "Effects Mode",
+        "Oscillator2_Effects_EffectMode": "FX Type",
         "Oscillator2_Effects_Effect1": "FX 1",
         "Oscillator2_Effects_Effect2": "FX 2",
 
