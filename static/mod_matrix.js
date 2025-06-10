@@ -55,6 +55,7 @@ function initModMatrix() {
     container.appendChild(toggle);
     const menu = document.createElement('div');
     menu.className = 'dropdown-menu';
+    menu.style.display = 'none';
     const ulRoot = document.createElement('ul');
     ulRoot.className = 'file-tree root';
     menu.appendChild(ulRoot);
@@ -127,6 +128,7 @@ function initModMatrix() {
       if (open && !container.contains(e.target)) close();
     });
 
+    container._close = close;
     return container;
   }
 
@@ -171,12 +173,19 @@ function initModMatrix() {
     return tr;
   }
 
+  function collapseAllDropdowns() {
+    tableBody.querySelectorAll('.nested-dropdown').forEach(dd => {
+      if (typeof dd._close === 'function') dd._close();
+    });
+  }
+
   function rebuild() {
     tableBody.innerHTML = '';
     matrix.forEach((row, idx) => {
       tableBody.appendChild(buildRow(row, idx));
     });
     if (window.initRectSliders) window.initRectSliders();
+    collapseAllDropdowns();
   }
 
   function save() {
