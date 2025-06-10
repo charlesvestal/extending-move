@@ -24,6 +24,7 @@ import tempfile
 import zipfile
 from pathlib import Path
 import hashlib
+import argparse
 
 import requests
 import subprocess
@@ -237,5 +238,34 @@ def update() -> int:
     return 0
 
 
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Repository update utilities")
+    parser.add_argument(
+        "--restart-only",
+        action="store_true",
+        help="Only restart the webserver",
+    )
+    parser.add_argument(
+        "--log",
+        type=str,
+        default=None,
+        help="Path to log file for restart output",
+    )
+    args = parser.parse_args()
+
+    log: io.TextIOBase | None = None
+    if args.log:
+        log = open(args.log, "a", encoding="utf-8")
+
+    try:
+        if args.restart_only:
+            restart_webserver(log)
+            return 0
+        return update()
+    finally:
+        if log:
+            log.close()
+
+
 if __name__ == "__main__":
-    sys.exit(update())
+    sys.exit(main())
