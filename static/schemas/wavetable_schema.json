@@ -575,7 +575,8 @@
     "max": 0.5,
     "options": [],
     "unit": "ct",
-    "decimals": 0
+    "decimals": 0,
+    "step": 0.01
   },
   "Voice_Oscillator1_Pitch_PitchModulation": {
     "type": "number",
@@ -597,7 +598,8 @@
     "max": 1.0,
     "options": [],
     "unit": "%",
-    "decimals": 0
+    "decimals": 0,
+    "step": 0.01
   },
   "Voice_Oscillator2_Effects_Effect1": {
     "type": "number",
@@ -646,7 +648,8 @@
     "max": 0.5,
     "options": [],
     "unit": "ct",
-    "decimals": 0
+    "decimals": 0,
+    "step": 0.01
   },
   "Voice_Oscillator2_Pitch_PitchModulation": {
     "type": "number",
@@ -668,7 +671,8 @@
     "max": 1.0,
     "options": [],
     "unit": "%",
-    "decimals": 0
+    "decimals": 0,
+    "step": 0.01
   },
   "Voice_SubOscillator_Gain": {
     "type": "number",
@@ -688,7 +692,8 @@
     "max": 1.0,
     "options": [],
     "unit": "%",
-    "decimals": 0
+    "decimals": 0,
+    "step": 0.01
   },
   "Voice_SubOscillator_Transpose": {
     "type": "enum",
