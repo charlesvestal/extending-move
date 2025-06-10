@@ -32,6 +32,8 @@ function initSpriteDropdown(catId, waveId, hiddenId, spriteMap, selected) {
     });
   }
 
+  const changeListeners = [];
+
   function setValue(val) {
     let cat = categories.find(c => (spriteMap[c] || []).includes(val));
     if (!cat) cat = categories[0];
@@ -42,6 +44,9 @@ function initSpriteDropdown(catId, waveId, hiddenId, spriteMap, selected) {
     waveSel.value = val;
     hidden.value = val;
     hidden.dispatchEvent(new Event('change'));
+    changeListeners.forEach(fn => {
+      try { fn(val); } catch (_) { /* ignore */ }
+    });
   }
 
   fillCategories();
@@ -53,7 +58,11 @@ function initSpriteDropdown(catId, waveId, hiddenId, spriteMap, selected) {
   });
   waveSel.addEventListener('change', () => setValue(waveSel.value));
 
-  return { setValue, options: allNames };
+  function onChange(fn) {
+    if (typeof fn === 'function') changeListeners.push(fn);
+  }
+
+  return { setValue, onChange, options: allNames };
 }
 if (typeof window !== 'undefined') {
   window.initSpriteDropdown = initSpriteDropdown;
