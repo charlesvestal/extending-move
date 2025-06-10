@@ -176,4 +176,28 @@ document.addEventListener('DOMContentLoaded', () => {
         sel.addEventListener('change', updateMorph);
         updateMorph();
     });
+
+    // Update oscillator FX knob labels when the effect mode changes
+    document.querySelectorAll('.param-item[data-name$="Effects_EffectMode"] select').forEach(sel => {
+        const match = sel.parentElement.dataset.name.match(/Voice_Oscillator(\d)_/);
+        if (!match) return;
+        const idx = match[1];
+        const item = sel.closest('.param-items');
+        const knob1 = item.querySelector(`.param-item[data-name="Voice_Oscillator${idx}_Effects_Effect1"] .param-label`);
+        const knob2 = item.querySelector(`.param-item[data-name="Voice_Oscillator${idx}_Effects_Effect2"] .param-label`);
+        const labelMap = {
+            'None': ['FX 1', 'FX 2'],
+            'Fm': ['Tune', 'Amt'],
+            'Classic': ['PW', 'Sync'],
+            'Modern': ['Warp', 'Fold'],
+        };
+        function updateFxLabels() {
+            const mode = sel.value;
+            const labels = labelMap[mode] || labelMap['None'];
+            if (knob1) knob1.textContent = labels[0];
+            if (knob2) knob2.textContent = labels[1];
+        }
+        sel.addEventListener('change', updateFxLabels);
+        updateFxLabels();
+    });
 });
