@@ -18,6 +18,9 @@
       <li>{% if c.is_merge %}<strong>{{ c.message }}</strong>{% else %}{{ c.message }}{% endif %} ({{ c.sha[:7] }})</li>
     {% endfor %}
   </ul>
+  {% if truncated %}
+    <p><a href="https://github.com/{{ repo }}/commits/main">View more...</a></p>
+  {% endif %}
   {% endif %}
   <form method="post" action="{{ host_prefix }}/update">
     <input type="hidden" name="action" value="update_repo">

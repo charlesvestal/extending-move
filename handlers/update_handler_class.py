@@ -2,7 +2,8 @@
 """Handler for checking and applying repository updates."""
 
 import logging
-from typing import List, Dict, Any
+import time
+from typing import List, Dict, Any, Tuple
 
 import requests
 import importlib.util
@@ -29,11 +30,16 @@ restart_webserver = github_update.restart_webserver
 logger = logging.getLogger(__name__)
 
 
-def fetch_commits_since(repo: str, since_sha: str) -> List[Dict[str, Any]]:
-    """Return commits on main after ``since_sha``."""
+def fetch_commits_since(repo: str, since_sha: str, limit: int = 50) -> Tuple[List[Dict[str, Any]], bool]:
+    """Return commits on main after ``since_sha`` limited to ``limit`` commits.
+
+    Returns a tuple ``(commits, truncated)`` where ``truncated`` indicates that
+    more commits are available.
+    """
     url = f"https://api.github.com/repos/{repo}/commits?sha=main"
     commits: List[Dict[str, Any]] = []
-    while url:
+    truncated = False
+    while url and len(commits) < limit:
         try:
             resp = requests.get(url, timeout=10)
             resp.raise_for_status()
@@ -43,34 +49,69 @@ def fetch_commits_since(repo: str, since_sha: str) -> List[Dict[str, Any]]:
         data = resp.json()
         for entry in data:
             if entry.get("sha") == since_sha:
-                return commits
+                return commits, truncated
             msg = entry.get("commit", {}).get("message", "").split("\n", 1)[0]
             commits.append({
                 "sha": entry.get("sha"),
                 "message": msg,
                 "is_merge": msg.lower().startswith("merge"),
             })
-        if "next" in resp.links:
-            url = resp.links["next"]["url"]
-        else:
+            if len(commits) >= limit:
+                truncated = True
+                break
+        if len(commits) >= limit or "next" not in resp.links:
             break
-    return commits
+        url = resp.links["next"]["url"]
+    return commits, truncated
 
 
 class UpdateHandler(BaseHandler):
     """Provide update information and apply updates."""
 
+    CACHE_DURATION = 60  # seconds
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._last_check = 0.0
+        self._cached_info: Dict[str, Any] | None = None
+
     def check_for_update(self) -> Dict[str, Any]:
+        now = time.time()
+        if self._cached_info and now - self._last_check < self.CACHE_DURATION:
+            return self._cached_info
+
         last_sha = read_last_sha()
         latest_sha = fetch_latest_sha(REPO)
-        has_update = bool(latest_sha and last_sha != latest_sha)
-        commits = fetch_commits_since(REPO, last_sha) if has_update else []
-        return {
+        if not latest_sha:
+            info = {
+                "has_update": False,
+                "commits": [],
+                "last_sha": last_sha,
+                "latest_sha": None,
+                "message": "Error checking for updates. Please try again later.",
+                "message_type": "error",
+            }
+            self._cached_info = info
+            self._last_check = now
+            return info
+
+        has_update = last_sha != latest_sha
+        commits: List[Dict[str, Any]]
+        truncated: bool
+        if has_update:
+            commits, truncated = fetch_commits_since(REPO, last_sha, limit=50)
+        else:
+            commits, truncated = [], False
+        info = {
             "has_update": has_update,
             "commits": commits,
+            "truncated": truncated,
             "last_sha": last_sha,
             "latest_sha": latest_sha,
         }
+        self._cached_info = info
+        self._last_check = now
+        return info
 
     def handle_get(self) -> Dict[str, Any]:
         return self.check_for_update()
