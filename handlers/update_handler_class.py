@@ -4,8 +4,9 @@
 import logging
 import os
 import time
+import subprocess
+import sys
 from typing import List, Dict, Any, Tuple
-from contextlib import redirect_stdout, redirect_stderr
 
 import requests
 import importlib.util
@@ -200,8 +201,17 @@ class UpdateHandler(BaseHandler):
             log.write("restarting server\n")
             log.flush()
             try:
-                with redirect_stdout(log), redirect_stderr(log):
-                    restart_webserver(log)
+                subprocess.Popen(
+                    [
+                        sys.executable,
+                        str(_util_path),
+                        "--restart-only",
+                        "--log",
+                        str(log_path),
+                    ],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
             except Exception as exc:  # noqa: BLE001
                 log.write(f"Error restarting server: {exc}\n")
                 log.flush()
