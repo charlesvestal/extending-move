@@ -946,13 +946,15 @@ class WavetableParamEditorHandler(BaseHandler):
                         if label == "Oscillator 1":
                             sprite = (
                                 '<div class="param-item"><span class="param-label">Osc 1</span>'
-                                '<select name="sprite1" id="sprite1-select"></select></div>'
+                                '<div id="sprite1-select"></div>'
+                                '<input type="hidden" name="sprite1" id="sprite1-input"></div>'
                             )
                             group_items.extend(self._arrange_osc_panel(items, sprite))
                         elif label == "Oscillator 2":
                             sprite = (
                                 '<div class="param-item"><span class="param-label">Osc 2</span>'
-                                '<select name="sprite2" id="sprite2-select"></select></div>'
+                                '<div id="sprite2-select"></div>'
+                                '<input type="hidden" name="sprite2" id="sprite2-input"></div>'
                             )
                             group_items.extend(self._arrange_osc_panel(items, sprite))
                         else:

@@ -140,6 +140,7 @@ window.driftSchema = {{ schema_json|safe }};
 </script>
 <script src="{{ host_prefix }}/static/macro_sidebar.js"></script>
 <script src="{{ host_prefix }}/static/mod_matrix.js"></script>
+<script src="{{ host_prefix }}/static/sprite_dropdown.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const cb = document.getElementById('rename-checkbox');
@@ -148,29 +149,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('param-form');
   const macrosInput = document.getElementById('macros-data-input');
   const modMatrixInput = document.getElementById('mod-matrix-data-input');
-  const sprite1Sel = document.getElementById('sprite1-select');
-  const sprite2Sel = document.getElementById('sprite2-select');
+  const sprite1Input = document.getElementById('sprite1-input');
+  const sprite2Input = document.getElementById('sprite2-input');
   const spriteMap = {{ sprites_json|safe }};
-
-  function populateSpriteSelect(selectEl, selectedName) {
-    Object.entries(spriteMap).forEach(([cat, names]) => {
-      const group = document.createElement('optgroup');
-      group.label = cat;
-      names.forEach(n => {
-        const opt = document.createElement('option');
-        opt.value = n;
-        opt.textContent = n;
-        if (n === selectedName) opt.selected = true;
-        group.appendChild(opt);
-      });
-      selectEl.appendChild(group);
-    });
-  }
-
-  if (sprite1Sel && sprite2Sel) {
-    populateSpriteSelect(sprite1Sel, {{ sprite1|tojson }});
-    populateSpriteSelect(sprite2Sel, {{ sprite2|tojson }});
-  }
+  const spriteDropdowns = {};
+  const s1 = initSpriteDropdown('sprite1-select', 'sprite1-input', spriteMap, {{ sprite1|tojson }});
+  if (s1) spriteDropdowns.sprite1 = s1;
+  const s2 = initSpriteDropdown('sprite2-select', 'sprite2-input', spriteMap, {{ sprite2|tojson }});
+  if (s2) spriteDropdowns.sprite2 = s2;
+  window.spriteDropdowns = spriteDropdowns;
 
   if (cb) cb.addEventListener('change', updateSaveState);
 
@@ -184,8 +171,8 @@ document.addEventListener('DOMContentLoaded', () => {
       initialValues[inp.name] = inp.value;
       inp.addEventListener('change', updateSaveState);
     });
-    if (sprite1Sel) { initialValues['sprite1'] = sprite1Sel.value; sprite1Sel.addEventListener('change', updateSaveState); }
-    if (sprite2Sel) { initialValues['sprite2'] = sprite2Sel.value; sprite2Sel.addEventListener('change', updateSaveState); }
+    if (sprite1Input) { initialValues['sprite1'] = sprite1Input.value; sprite1Input.addEventListener('change', updateSaveState); }
+    if (sprite2Input) { initialValues['sprite2'] = sprite2Input.value; sprite2Input.addEventListener('change', updateSaveState); }
     if (modMatrixInput) modMatrixInput.addEventListener('change', updateSaveState);
   }
 
