@@ -759,15 +759,15 @@ class WavetableParamEditorHandler(BaseHandler):
 
         if drive:
             drive = drive.replace(
-                'param-item"',
-                f'param-item filter-drive filter{idx}-drive hidden"',
+                'param-item',
+                f'param-item filter-drive filter{idx}-drive hidden',
                 1,
             )
 
         if morph:
             morph = morph.replace(
-                'param-item"',
-                f'param-item filter-morph filter{idx}-morph hidden"',
+                'param-item',
+                f'param-item filter-morph filter{idx}-morph hidden',
                 1,
             )
 
