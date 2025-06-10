@@ -695,6 +695,7 @@ select {
 .param-row {
     display: flex;
     gap: 0.5rem;
+    width:100%;
 }
 
 .param-columns {
@@ -714,6 +715,7 @@ select {
 .param-item.hidden {
     display: none;
 }
+
 
 
 .param-row-label {
