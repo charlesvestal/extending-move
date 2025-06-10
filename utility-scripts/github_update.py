@@ -24,15 +24,28 @@ import tempfile
 import zipfile
 from pathlib import Path
 import hashlib
+import argparse
 
 import requests
 import subprocess
 import signal
 import time
 
+GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
+
+
+def _headers() -> dict | None:
+    if GITHUB_TOKEN:
+        return {"Authorization": f"token {GITHUB_TOKEN}"}
+    return None
+
+# Allow overrides for repository and default branch via environment
 REPO = os.environ.get("GITHUB_REPO", "charlesvestal/extending-move")
 ROOT_DIR = Path(__file__).resolve().parents[1]
+DEFAULT_BRANCH = os.environ.get("GITHUB_BRANCH", "main")
+
 SHA_FILE = ROOT_DIR / "last_sha.txt"
+BRANCH_FILE = ROOT_DIR / "last_branch.txt"
 # Directory for temporary extraction; defaults to repo root if not provided
 TMP_DIR_PATH = Path(
     os.environ.get("UPDATE_TMPDIR")
@@ -51,10 +64,22 @@ def write_last_sha(sha: str) -> None:
     SHA_FILE.write_text(f"{sha}\n")
 
 
-def fetch_latest_sha(repo: str) -> str | None:
-    url = f"https://api.github.com/repos/{repo}/commits/main"
+def read_last_branch() -> str:
     try:
-        resp = requests.get(url, timeout=10)
+        return BRANCH_FILE.read_text().strip()
+    except FileNotFoundError:
+        return DEFAULT_BRANCH
+
+
+def write_last_branch(branch: str) -> None:
+    BRANCH_FILE.write_text(f"{branch}\n")
+
+
+def fetch_latest_sha(repo: str, branch: str = DEFAULT_BRANCH) -> str | None:
+    url = f"https://api.github.com/repos/{repo}/commits/{branch}"
+    headers = _headers()
+    try:
+        resp = requests.get(url, headers=headers, timeout=10)
         resp.raise_for_status()
         return resp.json().get("sha")
     except Exception as exc:  # noqa: BLE001
@@ -62,10 +87,11 @@ def fetch_latest_sha(repo: str) -> str | None:
         return None
 
 
-def download_zip(repo: str) -> bytes | None:
-    url = f"https://github.com/{repo}/archive/refs/heads/main.zip"
+def download_zip(repo: str, branch: str = DEFAULT_BRANCH) -> bytes | None:
+    url = f"https://github.com/{repo}/archive/refs/heads/{branch}.zip"
+    headers = _headers()
     try:
-        resp = requests.get(url, timeout=20)
+        resp = requests.get(url, headers=headers, timeout=20)
         resp.raise_for_status()
         return resp.content
     except Exception as exc:  # noqa: BLE001
@@ -112,11 +138,19 @@ def install_requirements(root: Path) -> None:
         print(f"Error installing requirements: {exc}", file=sys.stderr)
 
 
-def restart_webserver() -> None:
+def restart_webserver(log: io.TextIOBase | None = None) -> None:
     pid_file = ROOT_DIR / "move-webserver.pid"
     log_file = ROOT_DIR / "move-webserver.log"
     port_file = ROOT_DIR / "port.conf"
 
+    def log_msg(msg: str) -> None:
+        if log is not None:
+            log.write(msg + "\n")
+            log.flush()
+        else:
+            print(msg)
+
+    log_msg("Restarting the webserver...")
     pid = None
     if pid_file.exists():
         try:
@@ -152,20 +186,49 @@ def restart_webserver() -> None:
     except Exception:
         pass
 
-    with open(log_file, "wb") as log:
+    with open(log_file, "wb") as log_f:
         subprocess.Popen(
             ["python3", "-u", str(ROOT_DIR / "move-webserver.py")],
             cwd=ROOT_DIR,
-            stdout=log,
-            stderr=log,
+            stdout=log_f,
+            stderr=log_f,
             env=env,
         )
-    print(f"Webserver restarted on port {port}")
+    log_msg("Starting the webserver...")
+
+    new_pid = None
+    for _ in range(10):
+        if pid_file.exists():
+            try:
+                new_pid = int(pid_file.read_text().strip())
+                break
+            except Exception:
+                pass
+        time.sleep(1)
+
+    if not new_pid:
+        log_msg("Error: PID file not created. Check logs:")
+        if log_file.exists():
+            with open(log_file, "r", encoding="utf-8") as lf:
+                log_msg(lf.read())
+        raise RuntimeError("Server failed to start")
+
+    try:
+        os.kill(new_pid, 0)
+    except Exception:
+        log_msg("Error: Server failed to start. Check logs:")
+        if log_file.exists():
+            with open(log_file, "r", encoding="utf-8") as lf:
+                log_msg(lf.read())
+        raise RuntimeError("Server failed to start")
+
+    log_msg(f"Webserver restarted on port {port} with PID {new_pid}")
 
 
 def update() -> int:
+    branch = read_last_branch()
     last_sha = read_last_sha()
-    latest_sha = fetch_latest_sha(REPO)
+    latest_sha = fetch_latest_sha(REPO, branch)
     if not latest_sha:
         return 1
 
@@ -173,7 +236,7 @@ def update() -> int:
         print("Already up-to-date.")
         return 0
 
-    content = download_zip(REPO)
+    content = download_zip(REPO, branch)
     if not content:
         return 1
 
@@ -184,6 +247,7 @@ def update() -> int:
         return 1
 
     write_last_sha(latest_sha)
+    write_last_branch(branch)
     print(f"Updated to {latest_sha}")
     if changed:
         install_requirements(ROOT_DIR)
@@ -191,5 +255,34 @@ def update() -> int:
     return 0
 
 
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Repository update utilities")
+    parser.add_argument(
+        "--restart-only",
+        action="store_true",
+        help="Only restart the webserver",
+    )
+    parser.add_argument(
+        "--log",
+        type=str,
+        default=None,
+        help="Path to log file for restart output",
+    )
+    args = parser.parse_args()
+
+    log: io.TextIOBase | None = None
+    if args.log:
+        log = open(args.log, "a", encoding="utf-8")
+
+    try:
+        if args.restart_only:
+            restart_webserver(log)
+            return 0
+        return update()
+    finally:
+        if log:
+            log.close()
+
+
 if __name__ == "__main__":
-    sys.exit(update())
+    sys.exit(main())

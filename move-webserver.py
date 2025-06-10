@@ -38,17 +38,23 @@ from handlers.wavetable_param_editor_handler_class import (
 from handlers.drum_rack_inspector_handler_class import DrumRackInspectorHandler
 from handlers.file_placer_handler_class import FilePlacerHandler
 from handlers.refresh_handler_class import RefreshHandler
+from handlers.update_handler_class import UpdateHandler, REPO
 from core.refresh_handler import refresh_library
 from core.file_browser import generate_dir_html
 
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-    handlers=[logging.FileHandler("move-webserver.log"), logging.StreamHandler(sys.stdout)],
+    handlers=[
+        logging.FileHandler("move-webserver.log"),
+        logging.StreamHandler(sys.stdout),
+    ],
 )
 logger = logging.getLogger(__name__)
 
-PID_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "move-webserver.pid")
+PID_FILE = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "move-webserver.pid"
+)
 
 
 class SimpleForm(dict):
@@ -116,6 +122,7 @@ wavetable_param_handler = WavetableParamEditorHandler()
 file_placer_handler = FilePlacerHandler()
 refresh_handler = RefreshHandler()
 drum_rack_handler = DrumRackInspectorHandler()
+update_handler = UpdateHandler()
 
 
 @app.before_request
@@ -145,9 +152,7 @@ def warm_up_modules():
     try:
         start = time.perf_counter()
         y = np.zeros(512, dtype=float)
-        librosa.onset.onset_detect(
-            y=y, sr=22050, units="time", delta=0.07, n_fft=512
-        )
+        librosa.onset.onset_detect(y=y, sr=22050, units="time", delta=0.07, n_fft=512)
         logger.info(
             "Librosa onset_detect warm-up complete in %.3fs",
             time.perf_counter() - start,
@@ -233,9 +238,7 @@ def warm_up_modules():
     except Exception as exc:
         logger.error("Error during Librosa warm-up: %s", exc)
 
-    logger.info(
-        "Module warm-up finished in %.3fs", time.perf_counter() - overall_start
-    )
+    logger.info("Module warm-up finished in %.3fs", time.perf_counter() - overall_start)
 
 
 @app.route("/")
@@ -254,7 +257,7 @@ def browse_dir():
     CORE_LABEL = "Core Library"
     CORE_ROOT = "/data/CoreLibrary/Track Presets"
     if path == CORE_LABEL or path.startswith(CORE_LABEL + os.sep):
-        sub = path[len(CORE_LABEL):].lstrip(os.sep)
+        sub = path[len(CORE_LABEL) :].lstrip(os.sep)
         html = generate_dir_html(
             CORE_ROOT,
             sub,
@@ -265,7 +268,9 @@ def browse_dir():
             path_prefix=CORE_LABEL if CORE_LABEL else "",
         )
     else:
-        html = generate_dir_html(root, path, action_url, field_name, action_value, filter_key)
+        html = generate_dir_html(
+            root, path, action_url, field_name, action_value, filter_key
+        )
     return html
 
 
@@ -411,10 +416,12 @@ def synth_macros():
         result = synth_handler.handle_post(form)
     else:
         if "preset" in request.args:
-            form = SimpleForm({
-                "action": "select_preset",
-                "preset_select": request.args.get("preset"),
-            })
+            form = SimpleForm(
+                {
+                    "action": "select_preset",
+                    "preset_select": request.args.get("preset"),
+                }
+            )
             result = synth_handler.handle_post(form)
         else:
             result = synth_handler.handle_get()
@@ -454,10 +461,12 @@ def synth_params():
         result = synth_param_handler.handle_post(form)
     else:
         if "preset" in request.args:
-            form = SimpleForm({
-                "action": "select_preset",
-                "preset_select": request.args.get("preset"),
-            })
+            form = SimpleForm(
+                {
+                    "action": "select_preset",
+                    "preset_select": request.args.get("preset"),
+                }
+            )
             result = synth_param_handler.handle_post(form)
         else:
             result = synth_param_handler.handle_get()
@@ -512,10 +521,12 @@ def wavetable_params():
         result = wavetable_param_handler.handle_post(form)
     else:
         if "preset" in request.args:
-            form = SimpleForm({
-                "action": "select_preset",
-                "preset_select": request.args.get("preset"),
-            })
+            form = SimpleForm(
+                {
+                    "action": "select_preset",
+                    "preset_select": request.args.get("preset"),
+                }
+            )
             result = wavetable_param_handler.handle_post(form)
         else:
             result = wavetable_param_handler.handle_get()
@@ -571,11 +582,6 @@ def wavetable_params():
 @app.route("/chord", methods=["GET"])
 def chord():
     return render_template("chord.html", active_tab="chord")
-
-
-
-
-
 
 
 @app.route("/samples/<path:sample_path>", methods=["GET", "OPTIONS"])
@@ -704,6 +710,35 @@ def detect_transients_route():
         resp["content"],
         resp.get("status", 200),
         resp.get("headers", [("Content-Type", "application/json")]),
+    )
+
+
+@app.route("/update", methods=["GET", "POST"])
+def update_route():
+    if request.method == "POST":
+        form = SimpleForm(request.form.to_dict())
+        result = update_handler.handle_post(form)
+    else:
+        result = update_handler.handle_get()
+    message = result.get("message")
+    message_type = result.get("message_type")
+    success = message_type != "error" if message_type else True
+    return render_template(
+        "update.html",
+        active_tab="update",
+        message=message,
+        message_type=message_type,
+        success=success,
+        commits=result.get("commits", []),
+        truncated=result.get("truncated", False),
+        repo=REPO,
+        has_update=result.get("has_update", False),
+        branch=result.get("branch"),
+        last_sha=result.get("last_sha"),
+        latest_sha=result.get("latest_sha"),
+        has_token=result.get("has_token", False),
+        progress=result.get("progress", []),
+        restart_countdown=result.get("restart_countdown"),
     )
 
 
