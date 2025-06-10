@@ -869,20 +869,13 @@ class WavetableParamEditorHandler(BaseHandler):
             ordered.append(f'<div class="param-row">{row}</div>')
 
         loop = items.pop("LoopMode", "")
-        if loop:
-            ordered.append(f'<div class="param-row">{loop}</div>')
-
         final_val = items.pop("Final", "")
-        if final_val:
-            ordered.append(f'<div class="param-row">{final_val}</div>')
-
         initial_val = items.pop("Initial", "")
-        if initial_val:
-            ordered.append(f'<div class="param-row">{initial_val}</div>')
-
         peak_val = items.pop("Peak", "")
-        if peak_val:
-            ordered.append(f'<div class="param-row">{peak_val}</div>')
+
+        second_row = "".join([loop, final_val, initial_val, peak_val])
+        if second_row.strip():
+            ordered.append(f'<div class="param-row">{second_row}</div>')
 
         if items:
             ordered.extend(items.values())
