@@ -853,11 +853,11 @@ class WavetableParamEditorHandler(BaseHandler):
             ordered.extend(items.values())
         return ordered
 
-    def _arrange_envelope_panel(self, items: dict) -> list:
-        """Return envelope panel rows with ADSR ordering."""
+    def _arrange_envelope_panel(self, items: dict, label: str) -> list:
+        """Return envelope panel rows with ADSR ordering and a canvas."""
         ordered = []
 
-        row = "".join(
+        row1 = "".join(
             [
                 items.pop("Attack", ""),
                 items.pop("Sustain", ""),
@@ -865,17 +865,39 @@ class WavetableParamEditorHandler(BaseHandler):
                 items.pop("Release", ""),
             ]
         )
-        if row.strip():
-            ordered.append(f'<div class="param-row">{row}</div>')
 
         loop = items.pop("LoopMode", "")
         final_val = items.pop("Final", "")
         initial_val = items.pop("Initial", "")
         peak_val = items.pop("Peak", "")
 
-        second_row = "".join([loop, final_val, initial_val, peak_val])
-        if second_row.strip():
-            ordered.append(f'<div class="param-row">{second_row}</div>')
+        row2 = "".join([loop, final_val, initial_val, peak_val])
+
+        rows = []
+        if row1.strip():
+            rows.append(f'<div class="param-row">{row1}</div>')
+        if row2.strip():
+            rows.append(f'<div class="param-row">{row2}</div>')
+
+        idx = 1
+        if "2" in label:
+            idx = 2
+        elif "3" in label:
+            idx = 3
+
+        canvas_id = "amp-env-canvas" if idx == 1 else f"env{idx}-canvas"
+        canvas = (
+            f'<canvas id="{canvas_id}" class="adsr-canvas" '
+            f'width="200" height="88" style="width:200px;height:88px"></canvas>'
+        )
+
+        if rows:
+            wrapper = (
+                '<div class="param-columns envelope-viz">'
+                f'{canvas}<div class="param-column">{"".join(rows)}</div>'
+                '</div>'
+            )
+            ordered.append(wrapper)
 
         if items:
             ordered.extend(items.values())
@@ -1046,7 +1068,7 @@ class WavetableParamEditorHandler(BaseHandler):
                     if sec == "Filter":
                         group_items.extend(self._arrange_filter_panel(items))
                     elif sec == "Envelopes":
-                        group_items.extend(self._arrange_envelope_panel(items))
+                        group_items.extend(self._arrange_envelope_panel(items, label))
                     else:
                         group_items.extend(items.values())
             if sections.get(sec):
