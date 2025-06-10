@@ -43,6 +43,12 @@ def test_extract_available_and_values(tmp_path):
     info = extract_available_parameters(str(p))
     assert info["success"]
     assert "Volume" in info["parameters"]
+    # Parameters from the schema should also be included even if absent
+    assert "CyclingEnvelope_Hold" in info["parameters"]
+    # Schema data should be provided for known parameters
+    assert info["parameter_info"]["CyclingEnvelope_Hold"]["type"] == "number"
+    # Unknown parameters should have empty info
+    assert info["parameter_info"]["Volume"] == {}
     vals = extract_parameter_values(str(p))
     assert vals["success"]
     param = {p["name"]: p["value"] for p in vals["parameters"]}
