@@ -5,6 +5,9 @@ function initSpriteDropdown(catId, waveId, hiddenId, spriteMap, selected) {
   const hidden = document.getElementById(hiddenId);
   if (!catSel || !waveSel || !hidden) return null;
 
+  catSel.classList.add('param-select');
+  waveSel.classList.add('param-select');
+
   const categories = Object.keys(spriteMap);
   const allNames = [];
   categories.forEach(c => { allNames.push(...spriteMap[c]); });
