@@ -7,7 +7,12 @@ Tools for extending the Ableton Move. This project provides a companion webserve
 
 [Demo on YouTube](https://www.youtube.com/watch?v=MCmaCifzgbg)
 
+## Short installation instructions
 
+- Clone or download the repository.
+- Run utility-scripts/setup-autostart-on-move.command
+- Follow the instructions!
+  
 ## Features
 
 - **MIDI Upload**
