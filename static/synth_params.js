@@ -78,12 +78,18 @@ function generateRandomName() {
   const adjectives = [
     'Fluffy', 'Spicy', 'Zesty', 'Creamy', 'Crunchy', 'Savory', 'Sweet',
     'Tangy', 'Juicy', 'Smoky', 'Fiery', 'Buttery', 'Tender', 'Crispy',
-    'Silky', 'Gooey', 'Fruity', 'Saucy', 'Glazed', 'Wholesome'
+    'Silky', 'Gooey', 'Fruity', 'Saucy', 'Glazed', 'Wholesome',
+    'Bouncy', 'Chilled', 'Crumbly', 'Delightful', 'Earthy', 'Fizzy',
+    'Garlicky', 'Hearty', 'Icy', 'Jumbo', 'Luscious', 'Minty', 'Nutty',
+    'Peppy', 'Quirky', 'Roasted', 'Sugary', 'Toasty', 'Velvety', 'Zingy'
   ];
   const foods = [
     'Cheeseburger', 'Pizza', 'Tiramisu', 'Sushi', 'Pancake', 'Brownie',
     'Curry', 'Taco', 'Donut', 'Risotto', 'Ramen', 'Gnocchi', 'Quiche',
-    'Falafel', 'Burrito', 'Lasagna', 'Muffin', 'Chowder', 'Waffle', 'Scone'
+    'Falafel', 'Burrito', 'Lasagna', 'Muffin', 'Chowder', 'Waffle', 'Scone',
+    'Omelette', 'Pasta', 'Cupcake', 'Cookie', 'Gelato', 'Bagel', 'Samosa',
+    'Dumpling', 'Paella', 'Kebab', 'Steak', 'Salad', 'Stew', 'Poutine',
+    'Croissant', 'Baguette', 'Frittata', 'Pudding', 'Sandwich', 'Chili'
   ];
   const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
   const food = foods[Math.floor(Math.random() * foods.length)];
@@ -95,12 +101,25 @@ function initRandomNameButtons() {
   const modalBtn = document.getElementById('modal-generate-name-btn');
   const nameInput = document.getElementById('new-preset-name');
   const modalInput = document.querySelector('#newPresetModal input[name="new_preset_name"]');
+  const renameCb = document.getElementById('rename-checkbox');
+
+  function ensureRenameChecked() {
+    if (renameCb && nameInput) {
+      const orig = nameInput.dataset.originalName;
+      const changed = nameInput.value.trim() !== orig;
+      if (changed !== renameCb.checked) {
+        renameCb.checked = changed;
+        renameCb.dispatchEvent(new Event('change'));
+      }
+    }
+  }
 
   if (mainBtn && nameInput) {
     mainBtn.addEventListener('click', (e) => {
       e.preventDefault();
       nameInput.value = generateRandomName();
       nameInput.dispatchEvent(new Event('input'));
+      ensureRenameChecked();
     });
   }
 
@@ -109,6 +128,10 @@ function initRandomNameButtons() {
       e.preventDefault();
       modalInput.value = generateRandomName();
     });
+  }
+
+  if (nameInput) {
+    nameInput.addEventListener('input', ensureRenameChecked);
   }
 }
 
