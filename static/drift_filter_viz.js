@@ -5,7 +5,6 @@ export function initDriftFilterViz() {
   canvas.id = 'driftFilterChart';
   canvas.width = 175;
   canvas.height = 88;
-  canvas.style.marginTop = '1em';
   canvas.style.border = '1px solid #ccc';
   const paramItems = filterPanel.querySelector('.param-items');
   if (paramItems) {
