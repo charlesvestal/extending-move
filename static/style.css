@@ -1107,4 +1107,8 @@ button#macro-add-param {
 .param-panel.modulation .mod-matrix-row .param-item:nth-of-type(3) .param-select {
     border-top-left-radius: 0;
     border-top-right-radius: 0;
+.adsr-canvas {
+    display: block;
+    margin: 0.5rem 0;
+    border: 1px solid #ccc;
 }
