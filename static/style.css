@@ -1039,7 +1039,8 @@ button#macro-add-param {
     color: blue;
     height: 20px;
     width: 20px;
-    padding: 0;
+    padding: 0px;
+    margin: 0px;
     font-size: 10px;
     background-color: transparent;
 }
