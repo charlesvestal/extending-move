@@ -12,8 +12,8 @@ function initSlider(el){
     return getPercentStep(v, unit, step, shouldScale);
   }
   const decimals=parseInt(el.dataset.decimals||2,10);
-  const displayDecimalsDefault=unit==='%'?0:decimals;
-  const shouldScale=unit==='%' && Math.abs(max)<=1 && Math.abs(min)<=1;
+  const displayDecimalsDefault=(unit==='%'||unit==='ct')?0:decimals;
+  const shouldScale=(unit==='%'||unit==='ct') && Math.abs(max)<=1 && Math.abs(min)<=1;
   let value=parseFloat(el.dataset.value||min);
   const centered=el.classList.contains('center')||el.dataset.centered==='true';
   const targetId=el.dataset.target;
