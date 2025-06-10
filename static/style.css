@@ -1119,3 +1119,9 @@ button#macro-add-param {
     border: 1px solid #dedede;
     width:100%
 }
+
+.envelope-viz {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
