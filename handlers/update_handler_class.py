@@ -11,7 +11,9 @@ from pathlib import Path
 
 from handlers.base_handler import BaseHandler
 
-_util_path = Path(__file__).resolve().parents[1] / "utility-scripts" / "github_update.py"
+_util_path = (
+    Path(__file__).resolve().parents[1] / "utility-scripts" / "github_update.py"
+)
 _spec = importlib.util.spec_from_file_location("github_update", _util_path)
 github_update = importlib.util.module_from_spec(_spec)
 assert _spec.loader
@@ -30,39 +32,45 @@ restart_webserver = github_update.restart_webserver
 logger = logging.getLogger(__name__)
 
 
-def fetch_commits_since(repo: str, since_sha: str, limit: int = 50) -> Tuple[List[Dict[str, Any]], bool]:
+def fetch_commits_since(
+    repo: str, since_sha: str, limit: int = 50
+) -> Tuple[List[Dict[str, Any]], bool, str | None]:
     """Return commits on main after ``since_sha`` limited to ``limit`` commits.
 
-    Returns a tuple ``(commits, truncated)`` where ``truncated`` indicates that
-    more commits are available.
+    Returns ``(commits, truncated, error_message)`` where ``truncated`` indicates
+    more commits are available and ``error_message`` is set if the request fails.
     """
     url = f"https://api.github.com/repos/{repo}/commits?sha=main"
     commits: List[Dict[str, Any]] = []
     truncated = False
+    error_message: str | None = None
     while url and len(commits) < limit:
         try:
             resp = requests.get(url, timeout=10)
             resp.raise_for_status()
         except Exception as exc:  # noqa: BLE001
             logger.error("Error fetching commits: %s", exc)
+            error_message = "Error fetching commit history"
             break
         data = resp.json()
         for entry in data:
             if entry.get("sha") == since_sha:
                 return commits, truncated
             msg = entry.get("commit", {}).get("message", "").split("\n", 1)[0]
-            commits.append({
-                "sha": entry.get("sha"),
-                "message": msg,
-                "is_merge": msg.lower().startswith("merge"),
-            })
+            commits.append(
+                {
+                    "sha": entry.get("sha"),
+                    "message": msg,
+                    "is_merge": msg.lower().startswith("merge"),
+                }
+            )
             if len(commits) >= limit:
                 truncated = True
                 break
         if len(commits) >= limit or "next" not in resp.links:
             break
         url = resp.links["next"]["url"]
-    return commits, truncated
+    return commits, truncated, error_message
 
 
 class UpdateHandler(BaseHandler):
@@ -98,10 +106,13 @@ class UpdateHandler(BaseHandler):
         has_update = last_sha != latest_sha
         commits: List[Dict[str, Any]]
         truncated: bool
+        commit_error: str | None = None
         if has_update:
-            commits, truncated = fetch_commits_since(REPO, last_sha, limit=50)
+            commits, truncated, commit_error = fetch_commits_since(
+                REPO, last_sha, limit=50
+            )
         else:
-            commits, truncated = [], False
+            commits, truncated, commit_error = [], False, None
         info = {
             "has_update": has_update,
             "commits": commits,
@@ -109,6 +120,9 @@ class UpdateHandler(BaseHandler):
             "last_sha": last_sha,
             "latest_sha": latest_sha,
         }
+        if commit_error:
+            info["message"] = commit_error
+            info["message_type"] = "error"
         self._cached_info = info
         self._last_check = now
         return info
@@ -156,5 +170,12 @@ class UpdateHandler(BaseHandler):
         restart_webserver()
 
         resp = self.format_success_response(f"Updated to {latest_sha}")
-        resp.update({"progress": progress, "has_update": False, "commits": []})
+        resp.update(
+            {
+                "progress": progress,
+                "has_update": False,
+                "commits": [],
+                "restart_countdown": 20,
+            }
+        )
         return resp

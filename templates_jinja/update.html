@@ -11,6 +11,22 @@
 {% if message %}
   <p class="{{ message_type if message_type else ('success' if success else 'error') }}">{{ message }}</p>
 {% endif %}
+{% if restart_countdown %}
+  <p>Refreshing in <span id="countdown">{{ restart_countdown }}</span> seconds...</p>
+  <script>
+    let count = {{ restart_countdown }};
+    const el = document.getElementById('countdown');
+    const timer = setInterval(() => {
+      count -= 1;
+      if (count <= 0) {
+        clearInterval(timer);
+        window.location.reload();
+        return;
+      }
+      el.textContent = count;
+    }, 1000);
+  </script>
+{% endif %}
 {% if has_update %}
   {% if commits %}
   <ul>
