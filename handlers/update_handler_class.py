@@ -155,29 +155,51 @@ class UpdateHandler(BaseHandler):
             return resp
 
         progress = []
-        progress.append("downloading update")
-        content = download_zip(REPO)
-        if not content:
-            resp = self.format_error_response("Error downloading update")
-            resp.update(info)
-            return resp
+        log_path = ROOT_DIR / "last-update.log"
+        with open(log_path, "a", encoding="utf-8") as log:
+            log.write(
+                f"Update started {time.strftime('%Y-%m-%d %H:%M:%S')}\n"
+            )
 
-        progress.append("extracting update")
-        try:
-            changed = overlay_from_zip(content, ROOT_DIR)
-        except Exception as exc:  # noqa: BLE001
-            resp = self.format_error_response(f"Error extracting update: {exc}")
-            resp.update(info)
-            return resp
+            progress.append("downloading update")
+            log.write("downloading update\n")
+            log.flush()
 
-        write_last_sha(latest_sha)
+            content = download_zip(REPO)
+            if not content:
+                log.write("Error downloading update\n")
+                log.flush()
+                resp = self.format_error_response("Error downloading update")
+                resp.update(info)
+                return resp
 
-        if changed:
-            progress.append("installing requirements")
-            install_requirements(ROOT_DIR)
+            progress.append("extracting update")
+            log.write("extracting update\n")
+            log.flush()
+            try:
+                changed = overlay_from_zip(content, ROOT_DIR)
+            except Exception as exc:  # noqa: BLE001
+                log.write(f"Error extracting update: {exc}\n")
+                log.flush()
+                resp = self.format_error_response(
+                    f"Error extracting update: {exc}"
+                )
+                resp.update(info)
+                return resp
 
-        progress.append("restarting server")
-        restart_webserver()
+            write_last_sha(latest_sha)
+
+            if changed:
+                progress.append("installing requirements")
+                log.write("installing requirements\n")
+                log.flush()
+                install_requirements(ROOT_DIR)
+
+            progress.append("restarting server")
+            log.write("restarting server\n")
+            log.flush()
+            restart_webserver()
+            log.write("done\n")
 
         resp = self.format_success_response(f"Updated to {latest_sha}")
         resp.update(
