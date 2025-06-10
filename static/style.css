@@ -606,8 +606,11 @@ select {
 }
 
 /* Layout for the Drift parameter editor */
+
+/* Use grid layout for a more compact plugin style */
 .drift-param-panels {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 0.5rem;
     margin-top: 1rem;
 }
@@ -617,8 +620,10 @@ select {
 }
 
 /* Layout for the Wavetable parameter editor */
+
 .wavetable-param-panels {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 0.5rem;
     margin-top: 1rem;
 }
@@ -628,11 +633,18 @@ select {
 }
 
 .param-panel {
-    border: 1px solid #ccc;
+    border: 1px solid #ddd;
+    background-color: #fafafa;
     padding: 0.5rem;
     display: flex;
     flex-direction: column;
     flex: 1;
+    border-radius: 4px;
+}
+
+.param-panel h3 {
+    font-size: 1rem;
+    margin: 0 0 0.25rem 0;
 }
 
 .param-panel.oscillators,
@@ -680,6 +692,7 @@ select {
 }
 
 .param-panel.filter .param-items {
+    display: flex;
     flex-direction: column;
 }
 
@@ -724,8 +737,8 @@ select {
 }
 
 .param-items {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
     gap: 0.5rem;
 }
 
