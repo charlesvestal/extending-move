@@ -139,7 +139,6 @@ function initModMatrix() {
       row.name = val;
       save();
     });
-    tdSel.appendChild(dropdown);
     const removeBtn = document.createElement('button');
     removeBtn.type = 'button';
     removeBtn.textContent = 'X';
@@ -150,6 +149,7 @@ function initModMatrix() {
       rebuild();
     });
     tdSel.appendChild(removeBtn);
+    tdSel.appendChild(dropdown);
     tr.appendChild(tdSel);
 
     row.values = row.values || Array(headers.length).fill(0);
