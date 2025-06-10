@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>ADSR Envelope Visualizer</h2>
+{% if message %}
+  <p class="{{ message_type }}">{{ message }}</p>
+{% endif %}
+<div id="adsr-controls">
+  <label>Attack
+    <input type="range" id="attack" class="input-knob" min="0" max="2" step="0.01" value="{{ defaults.attack }}">
+  </label>
+  <label>Decay
+    <input type="range" id="decay" class="input-knob" min="0" max="2" step="0.01" value="{{ defaults.decay }}">
+  </label>
+  <label>Sustain
+    <input type="range" id="sustain" class="input-knob" min="0" max="1" step="0.01" value="{{ defaults.sustain }}">
+  </label>
+  <label>Release
+    <input type="range" id="release" class="input-knob" min="0" max="2" step="0.01" value="{{ defaults.release }}">
+  </label>
+</div>
+<canvas id="adsr-canvas" width="300" height="150"></canvas>
+{% endblock %}
+{% block scripts %}
+<script src="{{ host_prefix }}/static/input-knobs.js"></script>
+<script src="{{ host_prefix }}/static/adsr.js"></script>
+{% endblock %}
