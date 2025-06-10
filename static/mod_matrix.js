@@ -141,6 +141,7 @@ function initModMatrix() {
     const removeBtn = document.createElement('button');
     removeBtn.type = 'button';
     removeBtn.textContent = 'X';
+    removeBtn.className = 'close-x'; // Add this line
     removeBtn.addEventListener('click', () => {
       matrix.splice(idx, 1);
       save();
