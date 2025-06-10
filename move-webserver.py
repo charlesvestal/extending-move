@@ -45,11 +45,16 @@ from core.file_browser import generate_dir_html
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-    handlers=[logging.FileHandler("move-webserver.log"), logging.StreamHandler(sys.stdout)],
+    handlers=[
+        logging.FileHandler("move-webserver.log"),
+        logging.StreamHandler(sys.stdout),
+    ],
 )
 logger = logging.getLogger(__name__)
 
-PID_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "move-webserver.pid")
+PID_FILE = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "move-webserver.pid"
+)
 
 
 class SimpleForm(dict):
@@ -147,9 +152,7 @@ def warm_up_modules():
     try:
         start = time.perf_counter()
         y = np.zeros(512, dtype=float)
-        librosa.onset.onset_detect(
-            y=y, sr=22050, units="time", delta=0.07, n_fft=512
-        )
+        librosa.onset.onset_detect(y=y, sr=22050, units="time", delta=0.07, n_fft=512)
         logger.info(
             "Librosa onset_detect warm-up complete in %.3fs",
             time.perf_counter() - start,
@@ -235,9 +238,7 @@ def warm_up_modules():
     except Exception as exc:
         logger.error("Error during Librosa warm-up: %s", exc)
 
-    logger.info(
-        "Module warm-up finished in %.3fs", time.perf_counter() - overall_start
-    )
+    logger.info("Module warm-up finished in %.3fs", time.perf_counter() - overall_start)
 
 
 @app.route("/")
@@ -256,7 +257,7 @@ def browse_dir():
     CORE_LABEL = "Core Library"
     CORE_ROOT = "/data/CoreLibrary/Track Presets"
     if path == CORE_LABEL or path.startswith(CORE_LABEL + os.sep):
-        sub = path[len(CORE_LABEL):].lstrip(os.sep)
+        sub = path[len(CORE_LABEL) :].lstrip(os.sep)
         html = generate_dir_html(
             CORE_ROOT,
             sub,
@@ -267,7 +268,9 @@ def browse_dir():
             path_prefix=CORE_LABEL if CORE_LABEL else "",
         )
     else:
-        html = generate_dir_html(root, path, action_url, field_name, action_value, filter_key)
+        html = generate_dir_html(
+            root, path, action_url, field_name, action_value, filter_key
+        )
     return html
 
 
@@ -413,10 +416,12 @@ def synth_macros():
         result = synth_handler.handle_post(form)
     else:
         if "preset" in request.args:
-            form = SimpleForm({
-                "action": "select_preset",
-                "preset_select": request.args.get("preset"),
-            })
+            form = SimpleForm(
+                {
+                    "action": "select_preset",
+                    "preset_select": request.args.get("preset"),
+                }
+            )
             result = synth_handler.handle_post(form)
         else:
             result = synth_handler.handle_get()
@@ -456,10 +461,12 @@ def synth_params():
         result = synth_param_handler.handle_post(form)
     else:
         if "preset" in request.args:
-            form = SimpleForm({
-                "action": "select_preset",
-                "preset_select": request.args.get("preset"),
-            })
+            form = SimpleForm(
+                {
+                    "action": "select_preset",
+                    "preset_select": request.args.get("preset"),
+                }
+            )
             result = synth_param_handler.handle_post(form)
         else:
             result = synth_param_handler.handle_get()
@@ -514,10 +521,12 @@ def wavetable_params():
         result = wavetable_param_handler.handle_post(form)
     else:
         if "preset" in request.args:
-            form = SimpleForm({
-                "action": "select_preset",
-                "preset_select": request.args.get("preset"),
-            })
+            form = SimpleForm(
+                {
+                    "action": "select_preset",
+                    "preset_select": request.args.get("preset"),
+                }
+            )
             result = wavetable_param_handler.handle_post(form)
         else:
             result = wavetable_param_handler.handle_get()
@@ -573,11 +582,6 @@ def wavetable_params():
 @app.route("/chord", methods=["GET"])
 def chord():
     return render_template("chord.html", active_tab="chord")
-
-
-
-
-
 
 
 @app.route("/samples/<path:sample_path>", methods=["GET", "OPTIONS"])
@@ -705,7 +709,7 @@ def detect_transients_route():
     return (
         resp["content"],
         resp.get("status", 200),
-    resp.get("headers", [("Content-Type", "application/json")]),
+        resp.get("headers", [("Content-Type", "application/json")]),
     )
 
 
@@ -730,6 +734,7 @@ def update_route():
         repo=REPO,
         has_update=result.get("has_update", False),
         progress=result.get("progress", []),
+        restart_countdown=result.get("restart_countdown"),
     )
 
 
