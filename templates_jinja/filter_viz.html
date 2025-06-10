@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <h2>Wavetable Filter Visualizer</h2>
-<p><em>Use the controls to view the filter cutoff slope and resonance.</em></p>
+<p><em>Use the controls to view the filter cutoff slope and resonance. When routing is Parallel or Split the individual filters are shown in different colors.</em></p>
 {% if message %}
   <p class="{{ message_type if message_type else ('success' if success else 'error') }}">{{ message }}</p>
 {% endif %}
