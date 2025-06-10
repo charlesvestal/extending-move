@@ -121,9 +121,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (adsrRow) {
             adsrRow.classList.toggle('hidden', show);
         }
-        if (env2Canvas) {
-            env2Canvas.classList.toggle('hidden', show);
-        }
+        // The ADSR canvases are now always visible; only parameter rows are
+        // toggled based on the envelope mode.
     }
     if (env2Input) {
         env2Input.addEventListener('change', updateCycling);
