@@ -39,9 +39,13 @@ def _headers() -> dict | None:
         return {"Authorization": f"token {GITHUB_TOKEN}"}
     return None
 
+# Allow overrides for repository and default branch via environment
 REPO = os.environ.get("GITHUB_REPO", "charlesvestal/extending-move")
 ROOT_DIR = Path(__file__).resolve().parents[1]
+DEFAULT_BRANCH = os.environ.get("GITHUB_BRANCH", "main")
+
 SHA_FILE = ROOT_DIR / "last_sha.txt"
+BRANCH_FILE = ROOT_DIR / "last_branch.txt"
 # Directory for temporary extraction; defaults to repo root if not provided
 TMP_DIR_PATH = Path(
     os.environ.get("UPDATE_TMPDIR")
@@ -60,8 +64,19 @@ def write_last_sha(sha: str) -> None:
     SHA_FILE.write_text(f"{sha}\n")
 
 
-def fetch_latest_sha(repo: str) -> str | None:
-    url = f"https://api.github.com/repos/{repo}/commits/main"
+def read_last_branch() -> str:
+    try:
+        return BRANCH_FILE.read_text().strip()
+    except FileNotFoundError:
+        return DEFAULT_BRANCH
+
+
+def write_last_branch(branch: str) -> None:
+    BRANCH_FILE.write_text(f"{branch}\n")
+
+
+def fetch_latest_sha(repo: str, branch: str = DEFAULT_BRANCH) -> str | None:
+    url = f"https://api.github.com/repos/{repo}/commits/{branch}"
     headers = _headers()
     try:
         resp = requests.get(url, headers=headers, timeout=10)
@@ -72,8 +87,8 @@ def fetch_latest_sha(repo: str) -> str | None:
         return None
 
 
-def download_zip(repo: str) -> bytes | None:
-    url = f"https://github.com/{repo}/archive/refs/heads/main.zip"
+def download_zip(repo: str, branch: str = DEFAULT_BRANCH) -> bytes | None:
+    url = f"https://github.com/{repo}/archive/refs/heads/{branch}.zip"
     headers = _headers()
     try:
         resp = requests.get(url, headers=headers, timeout=20)
@@ -211,8 +226,9 @@ def restart_webserver(log: io.TextIOBase | None = None) -> None:
 
 
 def update() -> int:
+    branch = read_last_branch()
     last_sha = read_last_sha()
-    latest_sha = fetch_latest_sha(REPO)
+    latest_sha = fetch_latest_sha(REPO, branch)
     if not latest_sha:
         return 1
 
@@ -220,7 +236,7 @@ def update() -> int:
         print("Already up-to-date.")
         return 0
 
-    content = download_zip(REPO)
+    content = download_zip(REPO, branch)
     if not content:
         return 1
 
@@ -231,6 +247,7 @@ def update() -> int:
         return 1
 
     write_last_sha(latest_sha)
+    write_last_branch(branch)
     print(f"Updated to {latest_sha}")
     if changed:
         install_requirements(ROOT_DIR)
