@@ -260,78 +260,6 @@ function generateChordPreset(presetName, sampleFilenames) {
   return preset;
 }
 
-function toWav(buffer, opt) {
-  opt = opt || {};
-  var numChannels = buffer.numberOfChannels;
-  var sampleRate = buffer.sampleRate;
-  var format = opt.float32 ? 3 : 1;
-  var bitDepth = format === 3 ? 32 : 16;
-  var result;
-  if (numChannels === 2) {
-    result = interleave(buffer.getChannelData(0), buffer.getChannelData(1));
-  } else {
-    result = buffer.getChannelData(0);
-  }
-  return encodeWAV(result, numChannels, sampleRate, format, bitDepth);
-}
-
-function interleave(inputL, inputR) {
-  var length = inputL.length + inputR.length;
-  var result = new Float32Array(length);
-  var index = 0, inputIndex = 0;
-  while (index < length) {
-    result[index++] = inputL[inputIndex];
-    result[index++] = inputR[inputIndex];
-    inputIndex++;
-  }
-  return result;
-}
-
-function encodeWAV(samples, numChannels, sampleRate, format, bitDepth) {
-  var bytesPerSample = bitDepth / 8;
-  var blockAlign = numChannels * bytesPerSample;
-  var buffer = new ArrayBuffer(44 + samples.length * bytesPerSample);
-  var view = new DataView(buffer);
-  writeString(view, 0, 'RIFF');
-  view.setUint32(4, 36 + samples.length * bytesPerSample, true);
-  writeString(view, 8, 'WAVE');
-  writeString(view, 12, 'fmt ');
-  view.setUint32(16, 16, true);
-  view.setUint16(20, format, true);
-  view.setUint16(22, numChannels, true);
-  view.setUint32(24, sampleRate, true);
-  view.setUint32(28, sampleRate * blockAlign, true);
-  view.setUint16(32, blockAlign, true);
-  view.setUint16(34, bitDepth, true);
-  writeString(view, 36, 'data');
-  view.setUint32(40, samples.length * bytesPerSample, true);
-  if (format === 1) {
-    floatTo16BitPCM(view, 44, samples);
-  } else {
-    writeFloat32(view, 44, samples);
-  }
-  return buffer;
-}
-
-function floatTo16BitPCM(output, offset, input) {
-  for (var i = 0; i < input.length; i++, offset += 2) {
-    var s = Math.max(-1, Math.min(1, input[i]));
-    output.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
-  }
-}
-
-function writeFloat32(output, offset, input) {
-  for (var i = 0; i < input.length; i++, offset += 4) {
-    output.setFloat32(offset, input[i], true);
-  }
-}
-
-function writeString(view, offset, string) {
-  for (var i = 0; i < string.length; i++) {
-    view.setUint8(offset + i, string.charCodeAt(i));
-  }
-}
-
 
 async function pitchShiftOffline(buffer, semitoneShift) {
   const factor = Math.pow(2, semitoneShift / 12);
@@ -361,47 +289,6 @@ async function pitchShiftRubberBand(buffer, semitoneShift) {
 }
 
 
-function mixAudioBuffers(buffers) {
-  if (buffers.length === 0) return null;
-  const numChannels = buffers[0].numberOfChannels;
-  const sampleRate = buffers[0].sampleRate;
-  const maxLength = Math.max(...buffers.map(b => b.length));
-  const tempCtx = new (window.AudioContext || window.webkitAudioContext)();
-  const mixedBuffer = tempCtx.createBuffer(numChannels, maxLength, sampleRate);
-  for (let channel = 0; channel < numChannels; channel++) {
-    const mixedData = mixedBuffer.getChannelData(channel);
-    for (let i = 0; i < maxLength; i++) {
-      let sum = 0;
-      buffers.forEach(buffer => {
-        const data = buffer.getChannelData(channel);
-        if (i < data.length) {
-          sum += data[i];
-        }
-      });
-      mixedData[i] = sum;
-    }
-  }
-  return mixedBuffer;
-}
-
-function normalizeAudioBuffer(buffer, targetPeak = 0.9) {
-  const numChannels = buffer.numberOfChannels;
-  let maxVal = 0;
-  for (let channel = 0; channel < numChannels; channel++) {
-    const data = buffer.getChannelData(channel);
-    for (let i = 0; i < data.length; i++) {
-      maxVal = Math.max(maxVal, Math.abs(data[i]));
-    }
-  }
-  const gain = maxVal > 0 ? targetPeak / maxVal : 1;
-  for (let channel = 0; channel < numChannels; channel++) {
-    const data = buffer.getChannelData(channel);
-    for (let i = 0; i < data.length; i++) {
-      data[i] *= gain;
-    }
-  }
-  return buffer;
-}
 
 async function processChordSample(buffer, intervals) {
   const pitchedBuffers = [];
