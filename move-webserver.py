@@ -40,6 +40,7 @@ from handlers.file_placer_handler_class import FilePlacerHandler
 from handlers.refresh_handler_class import RefreshHandler
 from handlers.filter_viz_handler_class import FilterVizHandler
 from handlers.update_handler_class import UpdateHandler, REPO
+from handlers.adsr_handler_class import AdsrHandler
 from core.refresh_handler import refresh_library
 from core.file_browser import generate_dir_html
 
@@ -125,6 +126,7 @@ refresh_handler = RefreshHandler()
 drum_rack_handler = DrumRackInspectorHandler()
 filter_viz_handler = FilterVizHandler()
 update_handler = UpdateHandler()
+adsr_handler = AdsrHandler()
 
 
 @app.before_request
@@ -328,6 +330,21 @@ def filter_viz_route():
             success=success,
             active_tab="filter-viz",
         )
+
+@app.route("/adsr", methods=["GET"])
+def adsr_route():
+    result = adsr_handler.handle_get()
+    message = result.get("message")
+    message_type = result.get("message_type")
+    defaults = result.get("defaults", {})
+    return render_template(
+        "adsr.html",
+        message=message,
+        message_type=message_type,
+        defaults=defaults,
+        active_tab="adsr",
+    )
+
 
 
 @app.route("/restore", methods=["GET", "POST"])
