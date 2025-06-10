@@ -106,7 +106,8 @@ function initRandomNameButtons() {
   function ensureRenameChecked() {
     if (renameCb && nameInput) {
       const orig = nameInput.dataset.originalName;
-      const changed = nameInput.value.trim() !== orig;
+      const origBase = orig.replace(/\.[^.]+$/, '');
+      const changed = nameInput.value.trim() !== origBase;
       if (changed !== renameCb.checked) {
         renameCb.checked = changed;
         renameCb.dispatchEvent(new Event('change'));
