@@ -6,12 +6,25 @@ from core.cache_manager import get_cache, set_cache
 
 logger = logging.getLogger(__name__)
 
-# Path to the Drift parameter schema relative to the project root
+# Paths to the instrument parameter schemas relative to the project root
 SCHEMA_PATH = os.path.join(
     os.path.dirname(os.path.dirname(__file__)),
     "static",
     "schemas",
     "drift_schema.json",
+)
+
+WAVETABLE_SCHEMA_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(__file__)),
+    "static",
+    "schemas",
+    "wavetable_schema.json",
+)
+
+WAVETABLE_SPRITES_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(__file__)),
+    "static",
+    "wavetable_sprites.json",
 )
 
 
@@ -24,7 +37,54 @@ def load_drift_schema():
         logger.warning("Could not load drift schema: %s", exc)
         return {}
 
-def extract_available_parameters(preset_path):
+
+def load_wavetable_schema():
+    """Load parameter metadata for Wavetable from ``wavetable_schema.json``."""
+    try:
+        with open(WAVETABLE_SCHEMA_PATH, "r") as f:
+            return json.load(f)
+    except Exception as exc:
+        logger.warning("Could not load wavetable schema: %s", exc)
+        return {}
+
+
+def load_wavetable_sprites():
+    """Load the list of available wavetable sprite names."""
+    try:
+        with open(WAVETABLE_SPRITES_PATH, "r") as f:
+            return json.load(f)
+    except Exception as exc:
+        logger.warning("Could not load wavetable sprites: %s", exc)
+        return []
+
+# ---------------------------------------------------------------------------
+# Wavetable sprite URI helpers
+# ---------------------------------------------------------------------------
+from urllib.parse import quote, unquote
+
+WAVETABLE_SPRITE_PREFIX = "ableton:/device-resources/wavetable-sprites/"
+
+
+def sprite_name_to_uri(name):
+    """Return the full sprite URI for a given sprite name."""
+    if name is None:
+        return None
+    if name.startswith(WAVETABLE_SPRITE_PREFIX):
+        return name
+    return WAVETABLE_SPRITE_PREFIX + quote(name)
+
+
+def sprite_uri_to_name(uri):
+    """Extract the sprite name from a sprite URI."""
+    if not uri or not uri.startswith(WAVETABLE_SPRITE_PREFIX):
+        return uri
+    return unquote(uri[len(WAVETABLE_SPRITE_PREFIX) :])
+
+def extract_available_parameters(
+    preset_path,
+    device_types=("drift",),
+    schema_loader=load_drift_schema,
+):
     """
     Extract available parameters from drift or wavetable devices in a preset file.
     
@@ -50,11 +110,10 @@ def extract_available_parameters(preset_path):
         # Dictionary to store synth device paths
         synth_device_paths = set()
         
-        # First, find all drift and wavetable devices
+        # First, find all requested synth devices
         def find_synth_devices(data, path=""):
             if isinstance(data, dict):
-                # Check if this is a drift device
-                if data.get('kind') == 'drift':  # Only look for drift devices
+                if data.get('kind') in device_types:
                     synth_device_paths.add(path)
                     logger.debug("Found %s device at path: %s", data.get('kind'), path)
                 
@@ -100,11 +159,14 @@ def extract_available_parameters(preset_path):
         # Find all parameters
         find_parameters(preset_data)
         
-        # Convert set to sorted list
-        parameters_list = sorted(list(parameters))
+        schema = schema_loader()
+        if schema:
+            parameters.update(schema.keys())
 
-        schema = load_drift_schema()
-        parameter_info = {p: schema.get(p, {}) for p in parameters_list}
+        # Convert set to sorted list
+        parameters_list = sorted(parameters)
+
+        parameter_info = {p: schema.get(p, {}) if schema else {} for p in parameters_list}
 
         return {
             'success': True,
@@ -122,8 +184,8 @@ def extract_available_parameters(preset_path):
         }
 
 
-def extract_parameter_values(preset_path):
-    """Return all parameter names and their values from drift presets."""
+def extract_parameter_values(preset_path, device_types=("drift",)):
+    """Return all parameter names and their values from synth presets."""
     try:
         with open(preset_path, "r") as f:
             preset_data = json.load(f)
@@ -133,7 +195,7 @@ def extract_parameter_values(preset_path):
 
         def find_synth_devices(data, path=""):
             if isinstance(data, dict):
-                if data.get("kind") == "drift":
+                if data.get("kind") in device_types:
                     synth_device_paths.add(path)
                 for key, value in data.items():
                     new_path = f"{path}.{key}" if path else key
@@ -755,7 +817,7 @@ def delete_parameter_mapping(preset_path, param_path):
             'message': f"Error deleting parameter mapping: {e}"
         }
 
-def scan_for_synth_presets():
+def scan_for_synth_presets(device_types=("drift",)):
     """Scan ``Track Presets`` for synth presets using a cache."""
     cache_key = "synth_presets"
     cached = get_cache(cache_key)
@@ -798,8 +860,8 @@ def scan_for_synth_presets():
                         with open(filepath, 'r') as f:
                             preset_data = json.load(f)
 
-                        # Check if preset contains a drift device
-                        device_type = has_device_type(preset_data, ['drift'])  # Only look for drift devices
+                        # Check if preset contains one of the requested devices
+                        device_type = has_device_type(preset_data, device_types)
                         if device_type:
                             preset_name = os.path.splitext(filename)[0]
                             rel = os.path.relpath(filepath, presets_dir)
@@ -826,3 +888,152 @@ def scan_for_synth_presets():
             "message": f"Error scanning presets: {e}",
             "presets": [],
         }
+
+
+def extract_wavetable_sprites(preset_path):
+    """Return the sprite URIs from the first Wavetable device in the preset."""
+    try:
+        with open(preset_path, "r") as f:
+            data = json.load(f)
+
+        sprite1 = None
+        sprite2 = None
+
+        def search(obj):
+            nonlocal sprite1, sprite2
+            if isinstance(obj, dict):
+                if sprite1 is None and "spriteUri1" in obj:
+                    sprite1 = obj["spriteUri1"]
+                if sprite2 is None and "spriteUri2" in obj:
+                    sprite2 = obj["spriteUri2"]
+                for v in obj.values():
+                    if isinstance(v, (dict, list)):
+                        search(v)
+            elif isinstance(obj, list):
+                for item in obj:
+                    if isinstance(item, (dict, list)):
+                        search(item)
+
+        search(data)
+
+        return {
+            "success": True,
+            "sprite1": sprite_uri_to_name(sprite1) if sprite1 else None,
+            "sprite2": sprite_uri_to_name(sprite2) if sprite2 else None,
+        }
+    except Exception as exc:
+        return {"success": False, "message": f"Error extracting sprites: {exc}"}
+
+
+def update_wavetable_sprites(preset_path, sprite1=None, sprite2=None, output_path=None):
+    """Update sprite URIs on all Wavetable devices in the preset."""
+    try:
+        with open(preset_path, "r") as f:
+            data = json.load(f)
+
+        sprite1_uri = sprite_name_to_uri(sprite1) if sprite1 is not None else None
+        sprite2_uri = sprite_name_to_uri(sprite2) if sprite2 is not None else None
+
+        def update(obj):
+            if isinstance(obj, dict):
+                if sprite1_uri is not None and "spriteUri1" in obj:
+                    obj["spriteUri1"] = sprite1_uri
+                if sprite2_uri is not None and "spriteUri2" in obj:
+                    obj["spriteUri2"] = sprite2_uri
+                for v in obj.values():
+                    update(v)
+            elif isinstance(obj, list):
+                for item in obj:
+                    update(item)
+
+        update(data)
+
+        dest = output_path or preset_path
+        with open(dest, "w") as f:
+            json.dump(data, f, indent=2)
+            f.write("\n")
+
+        return {"success": True, "path": dest, "message": "Updated sprites"}
+    except Exception as exc:
+        return {"success": False, "message": f"Error updating sprites: {exc}"}
+
+
+def extract_wavetable_mod_matrix(preset_path):
+    """Return modulation matrix information from all Wavetable devices."""
+    try:
+        with open(preset_path, "r") as f:
+            data = json.load(f)
+
+        matrix = []
+
+        def search(obj):
+            if isinstance(obj, dict):
+                if obj.get("kind") == "wavetable":
+                    mods = obj.get("deviceData", {}).get("modulations", {})
+                    for dest, vals in mods.items():
+                        row = {
+                            "name": dest,
+                            "values": vals[:11],
+                        }
+                        if len(vals) > 11:
+                            row["extra"] = vals[11:]
+                        matrix.append(row)
+                for v in obj.values():
+                    if isinstance(v, (dict, list)):
+                        search(v)
+            elif isinstance(obj, list):
+                for item in obj:
+                    if isinstance(item, (dict, list)):
+                        search(item)
+
+        search(data)
+
+        return {
+            "success": True,
+            "matrix": matrix,
+            "message": f"Found {len(matrix)} modulation rows",
+        }
+    except Exception as exc:
+        return {
+            "success": False,
+            "message": f"Error extracting modulation matrix: {exc}",
+            "matrix": [],
+        }
+
+
+def update_wavetable_mod_matrix(preset_path, matrix, output_path=None):
+    """Update modulation matrix data on all Wavetable devices."""
+    try:
+        with open(preset_path, "r") as f:
+            data = json.load(f)
+
+        mods_dict = {}
+        for row in matrix:
+            name = row.get("name")
+            if not name:
+                continue
+            values = row.get("values", [])
+            extras = row.get("extra", [])
+            mods_dict[name] = values + extras
+
+        def update(obj):
+            if isinstance(obj, dict):
+                if obj.get("kind") == "wavetable":
+                    dd = obj.setdefault("deviceData", {})
+                    dd["modulations"] = mods_dict
+                for v in obj.values():
+                    update(v)
+            elif isinstance(obj, list):
+                for item in obj:
+                    update(item)
+
+        update(data)
+
+        dest = output_path or preset_path
+        with open(dest, "w") as f:
+            json.dump(data, f, indent=2)
+            f.write("\n")
+
+        return {"success": True, "path": dest, "message": "Updated modulation matrix"}
+    except Exception as exc:
+        return {"success": False, "message": f"Error updating modulation matrix: {exc}"}

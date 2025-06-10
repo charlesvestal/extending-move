@@ -1,4 +1,4 @@
-(function(){
+(function(global){
 function clamp(v,min,max){return v<min?min:v>max?max:v;}
 function initSlider(el){
   if(el._sliderInit)return;
@@ -7,6 +7,7 @@ function initSlider(el){
   const max=parseFloat(el.dataset.max||1);
   const step=parseFloat(el.dataset.step||1);
   const unit=el.dataset.unit||'';
+  const defaultValue=el.dataset.default!==undefined?parseFloat(el.dataset.default):0;
   function getStep(v){
     return getPercentStep(v, unit, step, shouldScale);
   }
@@ -105,6 +106,10 @@ function initSlider(el){
   }
   el.addEventListener('mousedown',start);
   el.addEventListener('touchstart',start);
+  el.addEventListener('dblclick',()=>{
+    value=clamp(defaultValue,min,max);
+    update();
+  });
   el.addEventListener('keydown',(e)=>{
     if(['ArrowUp','ArrowRight'].includes(e.key)){
       let st=getStep(value);
@@ -121,7 +126,10 @@ function initSlider(el){
   update();
 }
 
-document.addEventListener('DOMContentLoaded',()=>{
+function initAll(){
   document.querySelectorAll('.rect-slider').forEach(initSlider);
-});
-})();
+}
+global.initRectSlider = initSlider;
+global.initRectSliders = initAll;
+document.addEventListener('DOMContentLoaded', initAll);
+})(window);
