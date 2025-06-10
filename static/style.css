@@ -672,7 +672,7 @@ select {
 }
 
 .param-panel.modulation {
-    max-width: 110px;
+    /* max-width: 110px; */
 } 
 
 .param-panel.global {
