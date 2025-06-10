@@ -68,6 +68,20 @@ MACRO_HIGHLIGHT_COLORS = {
     7: "#ffb6c1",  # lightpink
 }
 
+# Parameters that should not be assignable to macros. These cause issues
+# with the wavetable editor, so they are removed from the dropdown list
+# when editing presets.
+EXCLUDED_MACRO_PARAMS = {
+    "HiQ",
+    "MonoPoly",
+    "PolyVoices",
+    "Voice_Global_FilterRouting",
+    "Voice_Oscillator1_Effects_EffectMode",
+    "Voice_Oscillator2_Effects_EffectMode",
+    "Voice_Unison_Mode",
+    "Voice_Unison_VoiceCount",
+}
+
 
 class WavetableParamEditorHandler(BaseHandler):
     def handle_get(self):
@@ -312,8 +326,16 @@ class WavetableParamEditorHandler(BaseHandler):
             schema_loader=load_wavetable_schema,
         )
         if param_info['success']:
-            available_params_json = json.dumps(param_info['parameters'])
-            param_paths_json = json.dumps(param_info.get('parameter_paths', {}))
+            params = [
+                p for p in param_info['parameters'] if p not in EXCLUDED_MACRO_PARAMS
+            ]
+            paths = {
+                k: v
+                for k, v in param_info.get('parameter_paths', {}).items()
+                if k not in EXCLUDED_MACRO_PARAMS
+            }
+            available_params_json = json.dumps(params)
+            param_paths_json = json.dumps(paths)
         
         if values['success']:
             params_html = self.generate_params_html(values['parameters'], mapped_params)
