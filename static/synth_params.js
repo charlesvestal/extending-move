@@ -3,8 +3,10 @@ function initNewPresetModal() {
   const openBtn = document.getElementById('create-new-btn');
   if (!modal || !openBtn) return;
   const closeBtn = modal.querySelector('.modal-close');
+  const modalInput = modal.querySelector('input[name="new_preset_name"]');
   openBtn.addEventListener('click', (e) => {
     e.preventDefault();
+    if (modalInput) modalInput.value = generateRandomName();
     modal.classList.remove('hidden');
   });
   if (closeBtn) closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
@@ -96,17 +98,13 @@ function generateRandomName() {
   return `${adj} ${food}`;
 }
 
-function initRandomNameButtons() {
-  const mainBtn = document.getElementById('generate-name-btn');
-  const modalBtn = document.getElementById('modal-generate-name-btn');
+function initRandomNameFields() {
   const nameInput = document.getElementById('new-preset-name');
-  const modalInput = document.querySelector('#newPresetModal input[name="new_preset_name"]');
   const renameCb = document.getElementById('rename-checkbox');
 
   function ensureRenameChecked() {
     if (renameCb && nameInput) {
-      const orig = nameInput.dataset.originalName;
-      const origBase = orig.replace(/\.[^.]+$/, '');
+      const origBase = nameInput.dataset.originalBase || nameInput.dataset.originalName.replace(/\.[^.]+$/, '');
       const changed = nameInput.value.trim() !== origBase;
       if (changed !== renameCb.checked) {
         renameCb.checked = changed;
@@ -115,23 +113,23 @@ function initRandomNameButtons() {
     }
   }
 
-  if (mainBtn && nameInput) {
-    mainBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      nameInput.value = generateRandomName();
-      nameInput.dispatchEvent(new Event('input'));
-      ensureRenameChecked();
+  if (renameCb && nameInput) {
+    renameCb.addEventListener('change', () => {
+      nameInput.disabled = !renameCb.checked;
+      if (renameCb.checked) {
+        const origBase = nameInput.dataset.originalBase || nameInput.dataset.originalName.replace(/\.[^.]+$/, '');
+        if (nameInput.value.trim() === origBase) {
+          nameInput.value = generateRandomName();
+          nameInput.dispatchEvent(new Event('input'));
+        }
+      } else {
+        const origBase = nameInput.dataset.originalBase || nameInput.dataset.originalName.replace(/\.[^.]+$/, '');
+        if (nameInput.value !== origBase) {
+          nameInput.value = origBase;
+          nameInput.dispatchEvent(new Event('input'));
+        }
+      }
     });
-  }
-
-  if (modalBtn && modalInput) {
-    modalBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      modalInput.value = generateRandomName();
-    });
-  }
-
-  if (nameInput) {
     nameInput.addEventListener('input', ensureRenameChecked);
   }
 }
@@ -139,7 +137,7 @@ function initRandomNameButtons() {
 function initSynthParams() {
   initNewPresetModal();
   initRandomizeButton();
-  initRandomNameButtons();
+  initRandomNameFields();
 }
 
 document.addEventListener('DOMContentLoaded', initSynthParams);
