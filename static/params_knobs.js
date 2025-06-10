@@ -168,19 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateLfoRateDisplay();
     }
 
-    const envRadios = document.querySelectorAll('input[name="env_select"]');
-    const env1Els = document.querySelectorAll('.env1-section');
-    const env2Els = document.querySelectorAll('.env2-section');
-    function updateEnvDisplay() {
-        const sel = document.querySelector('input[name="env_select"]:checked');
-        const showEnv1 = !sel || sel.value === 'env1';
-        env1Els.forEach(el => el.classList.toggle('hidden', !showEnv1));
-        env2Els.forEach(el => el.classList.toggle('hidden', showEnv1));
-        if (showEnv1) return;
-        updateCycling();
-    }
-    envRadios.forEach(r => r.addEventListener('change', updateEnvDisplay));
-    updateEnvDisplay();
+
 
     document.querySelectorAll('.param-item[data-name^="Voice_Filter"][data-name$="_Type"] select').forEach(sel => {
         const match = sel.parentElement.dataset.name.match(/Voice_Filter(\d)_/);
