@@ -5,6 +5,10 @@ function initNewPresetModal() {
   const closeBtn = modal.querySelector('.modal-close');
   openBtn.addEventListener('click', (e) => {
     e.preventDefault();
+    const nameInput = modal.querySelector('input[name="new_preset_name"]');
+    if (nameInput && typeof generateRandomName === 'function') {
+      nameInput.value = generateRandomName();
+    }
     modal.classList.remove('hidden');
   });
   if (closeBtn) closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
