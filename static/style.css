@@ -963,7 +963,10 @@ select {
     margin-bottom: 0.25rem;
 }
 .assign-item select {
-	margin-bottom: 0;
+        margin-bottom: 0;
+}
+.assign-item .nested-dropdown {
+    margin-bottom: 0;
 }
 .range-inputs {
     display: flex;
