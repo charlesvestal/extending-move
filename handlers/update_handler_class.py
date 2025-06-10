@@ -99,7 +99,8 @@ class UpdateHandler(BaseHandler):
 
     def check_for_update(self) -> Dict[str, Any]:
         now = time.time()
-        if self._cached_info and now - self._last_check < self.CACHE_DURATION:
+        use_cache = GITHUB_TOKEN is None
+        if use_cache and self._cached_info and now - self._last_check < self.CACHE_DURATION:
             return self._cached_info
 
         branch = read_last_branch()
@@ -135,6 +136,7 @@ class UpdateHandler(BaseHandler):
             "branch": branch,
             "last_sha": last_sha,
             "latest_sha": latest_sha,
+            "has_token": GITHUB_TOKEN is not None,
         }
         if commit_error:
             info["message"] = commit_error
