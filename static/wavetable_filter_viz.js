@@ -85,8 +85,25 @@ export function initWavetableFilterViz() {
 
   function computeChain(f1, f2, routing) {
     const r = (routing || 'Serial').toLowerCase();
+    const has1 = !!f1;
+    const has2 = !!f2;
+
+    if (!has1 && !has2) {
+      const resp = computeResponse('lowpass', 22050, 0, '12');
+      return { freq: resp.freq, mag1: resp.mag };
+    }
+
+    if (has1 && !has2) {
+      const resp1 = computeResponse(f1.type, f1.freq, f1.res, f1.slope);
+      return { freq: resp1.freq, mag1: resp1.mag };
+    }
+
+    if (!has1 && has2) {
+      const resp2 = computeResponse(f2.type, f2.freq, f2.res, f2.slope);
+      return { freq: resp2.freq, mag1: resp2.mag };
+    }
+
     const resp1 = computeResponse(f1.type, f1.freq, f1.res, f1.slope);
-    if (!f2) return { freq: resp1.freq, mag1: resp1.mag };
     const resp2 = computeResponse(f2.type, f2.freq, f2.res, f2.slope);
     if (r === 'serial') {
       const mag = resp1.mag.map((m, i) => {
@@ -120,14 +137,17 @@ export function initWavetableFilterViz() {
   }
 
   function getFilterValues() {
-    const f1 = {
-      type: inputs.type1 ? inputs.type1.value : 'Lowpass',
-      freq: parseFloat(inputs.freq1?.value || '1000'),
-      res: parseFloat(inputs.res1?.value || '0'),
-      slope: inputs.slope1 ? inputs.slope1.value : '12'
-    };
+    let f1 = null;
+    if (!inputs.on1 || parseFloat(inputs.on1.value) !== 0) {
+      f1 = {
+        type: inputs.type1 ? inputs.type1.value : 'Lowpass',
+        freq: parseFloat(inputs.freq1?.value || '1000'),
+        res: parseFloat(inputs.res1?.value || '0'),
+        slope: inputs.slope1 ? inputs.slope1.value : '12'
+      };
+    }
     let f2 = null;
-    if (inputs.on2 && parseFloat(inputs.on2.value) !== 0) {
+    if (!inputs.on2 || parseFloat(inputs.on2.value) !== 0) {
       f2 = {
         type: inputs.type2 ? inputs.type2.value : 'Lowpass',
         freq: parseFloat(inputs.freq2?.value || '1000'),
