@@ -62,17 +62,26 @@ def compute_filter_response(filter_type: str, cutoff: float, resonance: float, s
     return w.tolist(), mag.tolist()
 
 
-def compute_chain_response(filter1: dict, filter2: dict | None = None, routing: str = "Serial", sr: int = 44100, n: int = 512):
-    """Compute frequency response for two filters combined."""
+def compute_chain_response(
+    filter1: dict,
+    filter2: dict | None = None,
+    routing: str = "Serial",
+    sr: int = 44100,
+    n: int = 512,
+):
+    """Compute frequency response for one or two filters."""
     f1_w, f1_mag = compute_filter_response(**filter1, sr=sr, n=n)
     if not filter2:
         return f1_w, f1_mag
-    f2_w, f2_mag = compute_filter_response(**filter2, sr=sr, n=n)
-    h1 = 10 ** (np.array(f1_mag) / 20)
-    h2 = 10 ** (np.array(f2_mag) / 20)
+
+    _, f2_mag = compute_filter_response(**filter2, sr=sr, n=n)
+
     if routing.lower() == "serial":
+        h1 = 10 ** (np.array(f1_mag) / 20)
+        h2 = 10 ** (np.array(f2_mag) / 20)
         h = h1 * h2
-    else:  # parallel or split
-        h = 0.5 * (h1 + h2)
-    mag = 20 * np.log10(np.abs(h) + 1e-9)
-    return f1_w, mag.tolist()
+        mag = 20 * np.log10(np.abs(h) + 1e-9)
+        return f1_w, mag.tolist()
+
+    # For parallel or split, return both magnitudes separately
+    return f1_w, f1_mag, f2_mag

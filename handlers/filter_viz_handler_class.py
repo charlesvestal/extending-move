@@ -40,6 +40,12 @@ class FilterVizHandler(BaseHandler):
             filter2 = None
 
         routing = form.getvalue("routing", "Serial")
-        freq, mag = compute_chain_response(filter1, filter2, routing)
-        data = {"freq": freq, "mag": mag}
+        result = compute_chain_response(filter1, filter2, routing)
+        if len(result) == 2:
+            freq, mag = result
+            data = {"freq": freq, "mag": mag}
+        else:
+            freq, mag1, mag2 = result
+            data = {"freq": freq, "mag1": mag1, "mag2": mag2}
+
         return self.format_json_response(data)
