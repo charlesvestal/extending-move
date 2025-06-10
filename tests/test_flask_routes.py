@@ -494,4 +494,18 @@ def test_filter_viz_parallel_post(client, monkeypatch):
     assert resp.json['mag2'] == [0, -6]
 
 
+def test_cycling_env_get(client, monkeypatch):
+    def fake_get():
+        return {
+            'defaults': {'rate': 2.0, 'tilt': 0.0, 'hold': 0.0, 'time_mode': 'Hz'},
+            'message': 'hello',
+            'message_type': 'info'
+        }
+
+    monkeypatch.setattr(move_webserver.cycling_env_handler, 'handle_get', fake_get)
+    resp = client.get('/cycling-env')
+    assert resp.status_code == 200
+    assert b'Cycling Envelope Visualizer' in resp.data
+
+
 
