@@ -124,24 +124,112 @@ document.addEventListener('DOMContentLoaded', () => {
     updateKnobLabels();
   }
 
-  function buildSelect(current) {
-    const select = document.createElement('select');
-    select.className = 'sidebar-param-select';
-    const placeholder = document.createElement('option');
-    placeholder.value = '';
-    placeholder.textContent = 'Choose a parameter...';
-    select.appendChild(placeholder);
-    const taken = allAssigned().filter(n => n !== current);
+  function buildParamTree() {
+    const tree = {};
     availableParams.forEach(p => {
-      if (!taken.includes(p) || p === current) {
-        const opt = document.createElement('option');
-        opt.value = p;
-        opt.textContent = paramDisplay[p] || p;
-        select.appendChild(opt);
+      const parts = friendly(p).split(':').map(s => s.trim());
+      let node = tree;
+      for (let i = 0; i < parts.length - 1; i++) {
+        const part = parts[i];
+        if (!node[part]) node[part] = {};
+        node = node[part];
       }
+      if (!node._items) node._items = [];
+      node._items.push({ value: p, text: parts[parts.length - 1] });
     });
-    select.value = current || '';
-    return select;
+    return tree;
+  }
+
+  const paramTree = buildParamTree();
+
+  function buildDropdown(current, onChange) {
+    const container = document.createElement('div');
+    container.className = 'nested-dropdown';
+    const toggle = document.createElement('div');
+    toggle.className = 'dropdown-toggle';
+    const label = document.createElement('span');
+    label.className = 'selected-label';
+    const arrow = document.createElement('span');
+    arrow.className = 'arrow';
+    arrow.innerHTML = '&#9662;';
+    toggle.appendChild(label);
+    toggle.appendChild(arrow);
+    container.appendChild(toggle);
+    const menu = document.createElement('div');
+    menu.className = 'dropdown-menu';
+    const ulRoot = document.createElement('ul');
+    ulRoot.className = 'file-tree root';
+    menu.appendChild(ulRoot);
+    container.appendChild(menu);
+    const hidden = document.createElement('input');
+    hidden.type = 'hidden';
+    hidden.value = current || '';
+    container.appendChild(hidden);
+
+    function buildMenu(node, ul) {
+      Object.keys(node)
+        .filter(k => k !== '_items')
+        .sort()
+        .forEach(k => {
+          const li = document.createElement('li');
+          li.className = 'dir closed';
+          const span = document.createElement('span');
+          span.textContent = k;
+          const child = document.createElement('ul');
+          child.classList.add('hidden');
+          buildMenu(node[k], child);
+          span.addEventListener('click', e => {
+            e.stopPropagation();
+            child.classList.toggle('hidden');
+            li.classList.toggle('open');
+            li.classList.toggle('closed');
+          });
+          li.appendChild(span);
+          li.appendChild(child);
+          ul.appendChild(li);
+        });
+      (node._items || []).forEach(it => {
+        const li = document.createElement('li');
+        li.className = 'file-entry';
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = it.text;
+        btn.addEventListener('click', () => {
+          hidden.value = it.value;
+          label.textContent = friendly(it.value);
+          if (onChange) onChange(it.value);
+          close();
+        });
+        li.appendChild(btn);
+        ul.appendChild(li);
+      });
+    }
+
+    buildMenu(paramTree, ulRoot);
+
+    function updateLabel() {
+      label.textContent = hidden.value ? friendly(hidden.value) : 'Choose…';
+    }
+    updateLabel();
+
+    let open = false;
+    function openMenu() {
+      menu.style.display = 'block';
+      open = true;
+    }
+    function close() {
+      menu.style.display = 'none';
+      open = false;
+    }
+    toggle.addEventListener('click', e => {
+      e.stopPropagation();
+      open ? close() : openMenu();
+    });
+    document.addEventListener('click', e => {
+      if (open && !container.contains(e.target)) close();
+    });
+
+    return container;
   }
 
   function rebuildLists(macro) {
@@ -149,7 +237,17 @@ document.addEventListener('DOMContentLoaded', () => {
     macro.parameters.forEach((p, idx) => {
       const div = document.createElement('div');
       div.className = 'assign-item';
-      const select = buildSelect(p.name);
+      const dropdown = buildDropdown(p.name, val => {
+        p.name = val;
+        p.path = paramPaths[val];
+        p.rangeMin = undefined;
+        p.rangeMax = undefined;
+        rebuildRange();
+        updateAddBtn();
+        updateHighlights();
+        updateKnobLabels();
+        saveState();
+      });
       const rangeDiv = document.createElement('div');
       rangeDiv.className = 'range-inputs';
 
@@ -187,18 +285,6 @@ document.addEventListener('DOMContentLoaded', () => {
         rangeDiv.appendChild(maxInput);
       }
 
-      select.addEventListener('change', () => {
-        p.name = select.value;
-        p.path = paramPaths[select.value];
-        p.rangeMin = undefined;
-        p.rangeMax = undefined;
-        rebuildRange();
-        updateAddBtn();
-        updateHighlights();
-        updateKnobLabels();
-        saveState();
-      });
-
       rebuildRange();
 
       const btn = document.createElement('button');
@@ -211,7 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
         saveState();
       });
 
-      div.appendChild(select);
+      div.appendChild(dropdown);
       if (rangeDiv.childNodes.length) div.appendChild(rangeDiv);
       div.appendChild(btn);
       assignedDiv.appendChild(div);
