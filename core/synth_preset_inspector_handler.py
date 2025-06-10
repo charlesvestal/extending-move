@@ -953,3 +953,84 @@ def update_wavetable_sprites(preset_path, sprite1=None, sprite2=None, output_pat
         return {"success": True, "path": dest, "message": "Updated sprites"}
     except Exception as exc:
         return {"success": False, "message": f"Error updating sprites: {exc}"}
+
+
+def extract_wavetable_mod_matrix(preset_path):
+    """Return modulation matrix information from all Wavetable devices."""
+    try:
+        with open(preset_path, "r") as f:
+            data = json.load(f)
+
+        matrix = []
+
+        def search(obj):
+            if isinstance(obj, dict):
+                if obj.get("kind") == "wavetable":
+                    mods = obj.get("deviceData", {}).get("modulations", {})
+                    for dest, vals in mods.items():
+                        row = {
+                            "name": dest,
+                            "values": vals[:11],
+                        }
+                        if len(vals) > 11:
+                            row["extra"] = vals[11:]
+                        matrix.append(row)
+                for v in obj.values():
+                    if isinstance(v, (dict, list)):
+                        search(v)
+            elif isinstance(obj, list):
+                for item in obj:
+                    if isinstance(item, (dict, list)):
+                        search(item)
+
+        search(data)
+
+        return {
+            "success": True,
+            "matrix": matrix,
+            "message": f"Found {len(matrix)} modulation rows",
+        }
+    except Exception as exc:
+        return {
+            "success": False,
+            "message": f"Error extracting modulation matrix: {exc}",
+            "matrix": [],
+        }
+
+
+def update_wavetable_mod_matrix(preset_path, matrix, output_path=None):
+    """Update modulation matrix data on all Wavetable devices."""
+    try:
+        with open(preset_path, "r") as f:
+            data = json.load(f)
+
+        mods_dict = {}
+        for row in matrix:
+            name = row.get("name")
+            if not name:
+                continue
+            values = row.get("values", [])
+            extras = row.get("extra", [])
+            mods_dict[name] = values + extras
+
+        def update(obj):
+            if isinstance(obj, dict):
+                if obj.get("kind") == "wavetable":
+                    dd = obj.setdefault("deviceData", {})
+                    dd["modulations"] = mods_dict
+                for v in obj.values():
+                    update(v)
+            elif isinstance(obj, list):
+                for item in obj:
+                    update(item)
+
+        update(data)
+
+        dest = output_path or preset_path
+        with open(dest, "w") as f:
+            json.dump(data, f, indent=2)
+            f.write("\n")
+
+        return {"success": True, "path": dest, "message": "Updated modulation matrix"}
+    except Exception as exc:
+        return {"success": False, "message": f"Error updating modulation matrix: {exc}"}

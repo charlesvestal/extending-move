@@ -539,6 +539,7 @@ def wavetable_params():
     sprites_json = result.get("sprites_json", "[]")
     sprite1 = result.get("sprite1", "")
     sprite2 = result.get("sprite2", "")
+    mod_matrix_json = result.get("mod_matrix_json", "[]")
     preset_selected = bool(selected_preset)
     return render_template(
         "wavetable_params.html",
@@ -560,6 +561,7 @@ def wavetable_params():
         param_paths_json=param_paths_json,
         schema_json=schema_json,
         sprites_json=sprites_json,
+        mod_matrix_json=mod_matrix_json,
         sprite1=sprite1,
         sprite2=sprite2,
         active_tab="wavetable-params",
