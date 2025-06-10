@@ -55,6 +55,7 @@ function initModMatrix() {
     container.appendChild(toggle);
     const menu = document.createElement('div');
     menu.className = 'dropdown-menu';
+    menu.style.display = 'none';
     const ulRoot = document.createElement('ul');
     ulRoot.className = 'file-tree root';
     menu.appendChild(ulRoot);
@@ -127,6 +128,7 @@ function initModMatrix() {
       if (open && !container.contains(e.target)) close();
     });
 
+    container._close = close;
     return container;
   }
 
@@ -137,7 +139,6 @@ function initModMatrix() {
       row.name = val;
       save();
     });
-    tdSel.appendChild(dropdown);
     const removeBtn = document.createElement('button');
     removeBtn.type = 'button';
     removeBtn.textContent = 'X';
@@ -148,6 +149,7 @@ function initModMatrix() {
       rebuild();
     });
     tdSel.appendChild(removeBtn);
+    tdSel.appendChild(dropdown);
     tr.appendChild(tdSel);
 
     row.values = row.values || Array(headers.length).fill(0);
@@ -182,12 +184,19 @@ function initModMatrix() {
     return tr;
   }
 
+  function collapseAllDropdowns() {
+    tableBody.querySelectorAll('.nested-dropdown').forEach(dd => {
+      if (typeof dd._close === 'function') dd._close();
+    });
+  }
+
   function rebuild() {
     tableBody.innerHTML = '';
     matrix.forEach((row, idx) => {
       tableBody.appendChild(buildRow(row, idx));
     });
     if (window.initRectSliders) window.initRectSliders();
+    collapseAllDropdowns();
   }
 
   function save() {
