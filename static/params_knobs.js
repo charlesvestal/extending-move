@@ -171,10 +171,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const morphEl = sel.closest('.param-items').querySelector(`.filter${idx}-morph`);
         function updateMorph() {
             if (!morphEl) return;
-            morphEl.classList.toggle('hidden', sel.value !== 'Morph');
+            const disable = sel.value !== 'Morph';
+            const slider = morphEl.querySelector('.rect-slider-container');
+            if (slider) {
+                slider.classList.toggle('disabled', disable);
+                slider.dataset.disabled = disable ? 'true' : 'false';
+            }
         }
         sel.addEventListener('change', updateMorph);
-        updateMorph();
+        setTimeout(updateMorph, 0);
     });
 
     // Update oscillator FX knob labels when the effect mode changes
