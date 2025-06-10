@@ -49,10 +49,15 @@ export function initParamAdsr() {
     });
     if (set.modeInput) {
       function toggle() {
-        const show = set.modeInput.value !== 'Cyc';
+        const envSel = document.querySelector('input[name="env_select"]:checked');
+        const env2View = envSel && envSel.value === 'env2';
+        const show = env2View && set.modeInput.value !== 'Cyc';
         set.canvas.classList.toggle('hidden', !show);
       }
       set.modeInput.addEventListener('change', toggle);
+      document.querySelectorAll('input[name="env_select"]').forEach(r =>
+        r.addEventListener('change', toggle)
+      );
       toggle();
     }
     draw();
