@@ -11,4 +11,7 @@ def get_adsr_defaults() -> Dict[str, float]:
         "decay": 0.2,
         "sustain": 0.7,
         "release": 0.3,
+        "initial": 0.0,
+        "peak": 1.0,
+        "final": 0.0,
     }
