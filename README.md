@@ -156,8 +156,8 @@ Located in `utility-scripts/`:
 - `install-on-move.sh` / `.command`: Content installation
 - `update-on-move.sh` / `.command`: Update with latest files (use `--overwrite` to delete the target before copying)
 - `restart-webserver.sh`: Restart the webserver
-- `github_update.py`: Self-update using GitHub ZIPs, install updated requirements, and restart the webserver. Set `GITHUB_TOKEN` in the environment to authenticate GitHub API requests and avoid rate limits
-  (progress is logged to `last-update.log` in the repository root)
+- `github_update.py`: Self-update using GitHub ZIPs, install updated requirements, and restart the webserver. Set `GITHUB_TOKEN` in the environment to authenticate GitHub API requests and avoid rate limits.
+  Progress, including restart output, is logged to `last-update.log` in the repository root.
 
 Example on Linux/macOS:
 

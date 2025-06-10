@@ -122,11 +122,19 @@ def install_requirements(root: Path) -> None:
         print(f"Error installing requirements: {exc}", file=sys.stderr)
 
 
-def restart_webserver() -> None:
+def restart_webserver(log: io.TextIOBase | None = None) -> None:
     pid_file = ROOT_DIR / "move-webserver.pid"
     log_file = ROOT_DIR / "move-webserver.log"
     port_file = ROOT_DIR / "port.conf"
 
+    def log_msg(msg: str) -> None:
+        if log is not None:
+            log.write(msg + "\n")
+            log.flush()
+        else:
+            print(msg)
+
+    log_msg("Restarting the webserver...")
     pid = None
     if pid_file.exists():
         try:
@@ -162,15 +170,43 @@ def restart_webserver() -> None:
     except Exception:
         pass
 
-    with open(log_file, "wb") as log:
+    with open(log_file, "wb") as log_f:
         subprocess.Popen(
             ["python3", "-u", str(ROOT_DIR / "move-webserver.py")],
             cwd=ROOT_DIR,
-            stdout=log,
-            stderr=log,
+            stdout=log_f,
+            stderr=log_f,
             env=env,
         )
-    print(f"Webserver restarted on port {port}")
+    log_msg("Starting the webserver...")
+
+    new_pid = None
+    for _ in range(10):
+        if pid_file.exists():
+            try:
+                new_pid = int(pid_file.read_text().strip())
+                break
+            except Exception:
+                pass
+        time.sleep(1)
+
+    if not new_pid:
+        log_msg("Error: PID file not created. Check logs:")
+        if log_file.exists():
+            with open(log_file, "r", encoding="utf-8") as lf:
+                log_msg(lf.read())
+        raise RuntimeError("Server failed to start")
+
+    try:
+        os.kill(new_pid, 0)
+    except Exception:
+        log_msg("Error: Server failed to start. Check logs:")
+        if log_file.exists():
+            with open(log_file, "r", encoding="utf-8") as lf:
+                log_msg(lf.read())
+        raise RuntimeError("Server failed to start")
+
+    log_msg(f"Webserver restarted on port {port} with PID {new_pid}")
 
 
 def update() -> int:
