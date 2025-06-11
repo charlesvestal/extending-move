@@ -920,24 +920,34 @@ class WavetableParamEditorHandler(BaseHandler):
             ordered.extend(items.values())
         return ordered
 
-    def _arrange_lfo_panel(self, items: dict) -> list:
-        """Return LFO panel rows in a specific layout."""
+    def _arrange_lfo_panel(self, items: dict, canvas_id: str | None = None) -> list:
+        """Return LFO panel rows with an optional canvas for visualization."""
         ordered = []
-        row1 = "".join([
-            items.pop("Type", ""),
-            items.pop("Sync", ""),
-            items.pop("AttackTime", ""),
-            items.pop("Retrigger", ""),
-        ])
+
+        if canvas_id:
+            ordered.append(
+                f'<canvas id="{canvas_id}" class="lfo-canvas" width="200" height="88"></canvas>'
+            )
+
+        row1 = "".join(
+            [
+                items.pop("Type", ""),
+                items.pop("Sync", ""),
+                items.pop("AttackTime", ""),
+                items.pop("Retrigger", ""),
+            ]
+        )
         if row1.strip():
             ordered.append(f'<div class="param-row">{row1}</div>')
 
-        row2 = "".join([
-            items.pop("Rate", ""),
-            items.pop("Amount", ""),
-            items.pop("Shaping", ""),
-            items.pop("PhaseOffset", ""),
-        ])
+        row2 = "".join(
+            [
+                items.pop("Rate", ""),
+                items.pop("Amount", ""),
+                items.pop("Shaping", ""),
+                items.pop("PhaseOffset", ""),
+            ]
+        )
         if row2.strip():
             ordered.append(f'<div class="param-row">{row2}</div>')
 
@@ -1168,7 +1178,8 @@ class WavetableParamEditorHandler(BaseHandler):
                         cid = canvas_map.get(label)
                         group_items.extend(self._arrange_envelope_panel(items, cid))
                     elif sec == "Modulation" and label.startswith("LFO"):
-                        group_items.extend(self._arrange_lfo_panel(items))
+                        cid = "lfo1-canvas" if "1" in label else "lfo2-canvas"
+                        group_items.extend(self._arrange_lfo_panel(items, cid))
                     else:
                         group_items.extend(items.values())
             if sections.get(sec):
