@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
-"""Generate Drift presets to test LFO sync rates.
+"""Generate Drift presets for testing LFO sync rates.
 
-Each output preset sets PitchModulation_Source2 to LFO with
-PitchModulation_Amount2 at 100% and assigns Macro0 to control
-Lfo_SyncedRate. Files are named with the rate integer for easy
-reference.
+Each preset routes LFO1 to pitch at full amount, removes all macro mappings, and sets both envelope releases to maximum so the modulation can be heard. Files are named by the LFO sync rate.
 """
 
 import json
@@ -53,11 +50,10 @@ def main(template_path="Analog Shape - Core.json", out_dir="lfo_sync_test"):
             params["PitchModulation_Amount2"] = 1.0
             # Set LFO to sync mode and desired rate
             params["Lfo_Mode"] = "Sync"
-            params["Lfo_SyncedRate"] = {
-                "value": rate,
-                "macroMapping": {"macroIndex": 0}
-            }
-
+            params["Lfo_SyncedRate"] = rate
+            # Max out envelope releases so the modulation is audible
+            params["Envelope1_Release"] = 20.0
+            params["Envelope2_Release"] = 20.0
         preset["name"] = f"LFO Sync Rate {rate}"
         filename = os.path.join(out_dir, f"lfo_rate_{rate:02d}.ablpreset")
         with open(filename, "w", encoding="utf-8") as out:
