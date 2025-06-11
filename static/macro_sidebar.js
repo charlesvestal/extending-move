@@ -382,10 +382,42 @@ document.addEventListener('DOMContentLoaded', () => {
     if (name && !isNaN(val)) baseParamValues[name] = val;
   });
 
-  function simpleFormat(v, dec) {
+  function formatDialValue(dial, v) {
     if (isNaN(v)) return 'not set';
-    const d = dec === undefined ? 2 : dec;
-    return Number(v).toFixed(d);
+    const unit = dial.dataset.unit || '';
+    const decimals = parseInt(dial.dataset.decimals || '2', 10);
+    const min = parseFloat(dial.min || '0');
+    const max = parseFloat(dial.max || '0');
+    const oscGain = unit === 'dB' && !isNaN(min) && !isNaN(max) && min === 0 && max <= 2;
+    const shouldScale = (unit === '%' || unit === 'ct') && Math.abs(max) <= 1 && Math.abs(min) <= 1;
+    const displayDecimalsDefault = (unit === '%' || unit === 'ct') ? 0 : decimals;
+    const getDisplayDecimals = (val) => window.getPercentDecimals(val, unit, displayDecimalsDefault, shouldScale);
+
+    let displayVal = shouldScale ? v * 100 : v;
+    let unitLabel = unit;
+    if (unit === 'Hz') {
+      displayVal = Number(displayVal);
+      if (displayVal >= 1000) {
+        displayVal = displayVal / 1000;
+        unitLabel = 'kHz';
+      }
+      return displayVal.toFixed(1) + ' ' + unitLabel;
+    } else if (unit === 's') {
+      if (displayVal < 1) {
+        return (displayVal * 1000).toFixed(0) + ' ms';
+      }
+      return Number(displayVal).toFixed(getDisplayDecimals(v)) + ' s';
+    } else if (oscGain) {
+      if (v <= 0) return '-inf dB';
+      const oscValToDb = (val) => {
+        if (val <= 0) return -Infinity;
+        if (val <= 1) return val * 64 - 64;
+        return (val - 1) * 6;
+      };
+      const db = oscValToDb(v);
+      return db.toFixed(1) + ' dB';
+    }
+    return Number(displayVal).toFixed(getDisplayDecimals(v)) + (unit ? ' ' + unitLabel : '');
   }
 
   function updateParamVisual(name, value) {
@@ -399,38 +431,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const dispId = dial.dataset.display;
       if (dispId) {
         const dispEl = document.getElementById(dispId);
-        if (dispEl) dispEl.textContent = simpleFormat(value);
+        if (dispEl) dispEl.textContent = formatDialValue(dial, value);
       }
       return;
     }
     const slider = item.querySelector('.rect-slider');
     if (slider) {
-      const label = slider.querySelector('.rect-slider-label');
-      const fill = slider.querySelector('.rect-slider-fill');
-      const min = parseFloat(slider.dataset.min || '0');
-      const max = parseFloat(slider.dataset.max || '1');
-      const centered = slider.classList.contains('center') || slider.dataset.centered === 'true';
-      const range = max - min;
-      let v = Math.min(Math.max(value, min), max);
-      slider.dataset.value = v;
-      if (label) label.textContent = simpleFormat(v);
-      if (fill) {
-        if (centered) {
-          const mid = (max + min) / 2;
-          if (v >= mid) {
-            const pct = (v - mid) / (max - mid);
-            fill.style.left = '50%';
-            fill.style.width = pct * 50 + '%';
-          } else {
-            const pct = (mid - v) / (mid - min);
-            fill.style.left = 50 - pct * 50 + '%';
-            fill.style.width = pct * 50 + '%';
-          }
-        } else {
-          const pct = (v - min) / range;
-          fill.style.left = '0%';
-          fill.style.width = pct * 100 + '%';
-        }
+      if (typeof slider._sliderUpdate === 'function') {
+        slider._sliderUpdate(value);
       }
     }
   }
