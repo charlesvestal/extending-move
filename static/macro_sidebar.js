@@ -504,7 +504,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!item) return;
     const dial = item.querySelector('input.param-dial');
     if (dial) {
-      if (parseFloat(dial.value) === parseFloat(value)) return;
       dial.value = value;
       dial.setAttribute('value', value);
       if (dial.inputKnobs && typeof dial.redraw === 'function') dial.redraw(true);
@@ -526,7 +525,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     const select = item.querySelector('select.param-select');
     if (select) {
-      if (select.value === String(value)) return;
       select.value = value;
       const hid = item.querySelector('input[type="hidden"][name$="_value"]');
       if (hid) hid.value = value;
@@ -539,31 +537,24 @@ document.addEventListener('DOMContentLoaded', () => {
       const trueVal = toggle.dataset.trueValue ?? '1';
       const falseVal = toggle.dataset.falseValue ?? '0';
       const isOn = String(value) === trueVal || (!isNaN(value) && parseFloat(value) >= 1);
-      if (toggle.checked !== isOn) {
-        toggle.checked = isOn;
-        if (hid) {
-          hid.value = isOn ? trueVal : falseVal;
-          hid.dispatchEvent(new Event('change'));
-        }
-        toggle.dispatchEvent(new Event('change'));
+      toggle.checked = isOn;
+      if (hid) {
+        hid.value = isOn ? trueVal : falseVal;
+        hid.dispatchEvent(new Event('change'));
       }
+      toggle.dispatchEvent(new Event('change'));
       return;
     }
     const slider = item.querySelector('.rect-slider');
     if (slider) {
-      const targetId = slider.dataset.target;
-      const target = targetId ? document.querySelector(`#${targetId}, input[name="${targetId}"]`) : null;
-      const curVal = target ? parseFloat(target.value) : NaN;
-      if (isNaN(curVal) || curVal !== parseFloat(value)) {
-        if (typeof slider._sliderUpdate === 'function') {
-          slider._sliderUpdate(value);
-        }
-        slider.dispatchEvent(new Event('input'));
+      if (typeof slider._sliderUpdate === 'function') {
+        slider._sliderUpdate(value);
       }
+      slider.dispatchEvent(new Event('input'));
     }
   }
 
-  function applyMacroVisuals(changedIdx = null) {
+  function applyMacroVisuals() {
     const macroValues = {};
     document.querySelectorAll('input[name^="macro_"][name$="_value"]').forEach(h => {
       const m = h.name.match(/macro_(\d+)_value/);
@@ -574,24 +565,25 @@ document.addEventListener('DOMContentLoaded', () => {
     macros.forEach(m => {
       const mval = macroValues[m.index] ?? 0;
       (m.parameters || []).forEach(p => {
-        mappedNow.add(p.name);
-        if (changedIdx !== null && m.index !== changedIdx) return;
         const info = paramInfo[p.name] || {};
         if (info.type === 'enum' && Array.isArray(info.options)) {
           const opts = info.options;
           const idx = Math.min(Math.floor((mval / 127) * opts.length), opts.length - 1);
           const val = opts[idx];
           updateParamVisual(p.name, val);
+          mappedNow.add(p.name);
           return;
         } else if (info.type === 'boolean') {
           const val = mval >= 64 ? 1 : 0;
           updateParamVisual(p.name, val);
+          mappedNow.add(p.name);
           return;
         }
         let min = p.rangeMin !== undefined ? parseFloat(p.rangeMin) : (info.min !== undefined ? parseFloat(info.min) : 0);
         let max = p.rangeMax !== undefined ? parseFloat(p.rangeMax) : (info.max !== undefined ? parseFloat(info.max) : 127);
         const val = min + (max - min) * (mval / 127);
         updateParamVisual(p.name, val);
+        mappedNow.add(p.name);
       });
     });
 
@@ -618,10 +610,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (macro) {
         const sections = macroSections(macro);
         activateViz(sections);
-        applyMacroVisuals(idx);
-      } else {
-        applyMacroVisuals();
       }
+      applyMacroVisuals();
     });
   });
 
