@@ -712,9 +712,11 @@
   },
   "Voice_SubOscillator_Gain": {
     "type": "number",
-    "min": 0.0,
-    "max": 1.0,
-    "options": []
+    "min": 0,
+    "max": 2,
+    "options": [],
+    "unit": "dB",
+    "decimals": 1
   },
   "Voice_SubOscillator_On": {
     "type": "boolean",

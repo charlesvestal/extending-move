@@ -627,6 +627,10 @@ select {
     margin-top: 0.5rem;
 }
 
+.wavetable-param-panels .param-select {
+    width:auto;
+}
+
 .param-panel {
     border: 1px solid #ccc;
     padding: 0.5rem;
