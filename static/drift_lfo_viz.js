@@ -107,13 +107,20 @@ export function initDriftLfoViz() {
       duration = rate > 0 ? cycles / rate : 1;
     }
     let steps = Math.max(2, Math.round(rate * 6));
-    if ((shape === 'Sample & Hold' || shape === 'Wander') &&
-        (stepCache.shape !== shape || stepCache.count !== steps)) {
-      stepCache = {
-        shape: shape,
-        count: steps,
-        values: randomValues(shape === 'Wander' ? steps + 1 : steps)
-      };
+    if (shape === 'Sample & Hold' || shape === 'Wander') {
+      let ratio = 0;
+      if (mode === 'Freq') ratio = knobRatio(rateEl);
+      else if (mode === 'Ratio') ratio = knobRatio(ratioEl);
+      else if (mode === 'Time') ratio = knobRatio(timeEl);
+      else if (mode === 'Sync') ratio = knobRatio(syncEl, SYNC_RATES.length - 1);
+      steps = Math.round(2 + ratio * 10);
+      if (stepCache.shape !== shape || stepCache.count !== steps) {
+        stepCache = {
+          shape: shape,
+          count: steps,
+          values: randomValues(shape === 'Wander' ? steps + 1 : steps)
+        };
+      }
     }
 
     for (let i = 0; i <= w; i++) {
