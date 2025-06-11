@@ -33,6 +33,7 @@ Tools for extending the Ableton Move. This project provides a companion webserve
   - Modify any Drift parameter value
   - Manage macro assignments and custom names in the same interface
   - Set custom range values for macro‑controlled parameters
+  - Macro knobs preview their effect on mapped parameters in real time
   - Save changes as a new preset file
   - Numeric parameters use sliders with an input field
   - Slider steps are 0.01 for values near ±1 and adapt to the parameter's default precision
