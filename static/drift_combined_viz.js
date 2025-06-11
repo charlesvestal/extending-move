@@ -1,14 +1,15 @@
 export function initDriftCombinedViz() {
   const filterPanel = document.querySelector('.param-panel.filter');
-  if (!filterPanel) return;
+  const env2Canvas = document.getElementById('env2-canvas');
+  const envPanelItems = env2Canvas ? env2Canvas.parentElement : null;
+  if (!filterPanel || !envPanelItems) return;
 
   const canvas = document.createElement('canvas');
   canvas.id = 'driftVizCanvas';
   canvas.width = 300;
   canvas.height = 88;
   canvas.style.border = '1px solid #ccc';
-  const paramItems = filterPanel.querySelector('.param-items');
-  if (paramItems) filterPanel.insertBefore(canvas, paramItems); else filterPanel.appendChild(canvas);
+  envPanelItems.insertBefore(canvas, env2Canvas);
 
   ['driftFilterChart', 'amp-env-canvas', 'env2-canvas'].forEach(id => {
     const el = document.getElementById(id);
