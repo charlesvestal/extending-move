@@ -3,7 +3,6 @@ import os
 import json
 import logging
 import shutil
-import re
 
 from handlers.base_handler import BaseHandler
 from core.file_browser import generate_dir_html
@@ -11,7 +10,6 @@ from core.synth_preset_inspector_handler import (
     extract_parameter_values,
     load_melodic_sampler_schema,
     extract_macro_information,
-    get_melodic_sampler_sample,
     update_preset_macro_names,
     update_preset_parameter_mappings,
     delete_parameter_mapping,
@@ -68,8 +66,6 @@ class MelodicSamplerParamEditorHandler(BaseHandler):
         if browser_html.endswith('</ul>'):
             browser_html = browser_html[:-5] + core_li + '</ul>'
         schema = load_melodic_sampler_schema()
-        sample_info = get_melodic_sampler_sample(DEFAULT_PRESET)
-        sample_name = sample_info.get('sample_name', '') if sample_info.get('success') else ''
         return {
             'message': 'Select a Melodic Sampler preset from the list or create a new one',
             'message_type': 'info',
@@ -86,7 +82,6 @@ class MelodicSamplerParamEditorHandler(BaseHandler):
             'macros_json': '[]',
             'available_params_json': '[]',
             'param_paths_json': '{}',
-            'sample_name': sample_name,
         }
 
     def handle_post(self, form):
@@ -270,9 +265,6 @@ class MelodicSamplerParamEditorHandler(BaseHandler):
             params_html = self.generate_params_html(values['parameters'], mapped_params)
             param_count = len(values['parameters'])
 
-        sample_info = get_melodic_sampler_sample(preset_path)
-        sample_name = sample_info.get('sample_name', '') if sample_info.get('success') else ''
-
         base_dir = "/data/UserData/UserLibrary/Track Presets"
         if not os.path.exists(base_dir) and os.path.exists("examples/Track Presets"):
             base_dir = "examples/Track Presets"
@@ -307,7 +299,6 @@ class MelodicSamplerParamEditorHandler(BaseHandler):
             'macros_json': macros_json,
             'available_params_json': available_params_json,
             'param_paths_json': param_paths_json,
-            'sample_name': sample_name,
         }
 
     def _build_param_item(self, idx, name, value, meta, label=None, hide_label=False, slider=False, extra_classes=""):
@@ -367,45 +358,7 @@ class MelodicSamplerParamEditorHandler(BaseHandler):
         if mapped_parameters is None:
             mapped_parameters = {}
         schema = load_melodic_sampler_schema()
-
-        def friendly(name: str) -> str:
-            if not name:
-                return name
-            parts = name.split('_', 1)
-            if len(parts) == 2:
-                group, param = parts
-                group = re.sub(r'([A-Za-z])([0-9])', r'\1 \2', group)
-                group = re.sub(r'([a-z])([A-Z])', r'\1 \2', group)
-                param = re.sub(r'([A-Za-z])([0-9])', r'\1 \2', param)
-                param = re.sub(r'([a-z])([A-Z])', r'\1 \2', param)
-                return f"{group}: {param}"
-            return re.sub(r'([a-z])([A-Z])', r'\1 \2', name)
-
-        def section(name: str) -> str:
-            if name.startswith('Voice_Filter_Frequency') or name.startswith('Voice_Filter_Resonance') or name.startswith('Voice_Filter_Slope') or name.startswith('Voice_Filter_Type') or name.startswith('Voice_Filter_On') or name.startswith('Voice_Filter_FrequencyModulationAmounts'):
-                return 'Filter'
-            if name.startswith('Voice_FilterEnvelope_'):
-                return 'Filter Envelope'
-            if name.startswith('Voice_AmplitudeEnvelope_'):
-                return 'Amp Envelope'
-            if name.startswith('Voice_Lfo_'):
-                return 'LFO'
-            if name in {'Voice_PlaybackStart','Voice_PlaybackLength','Voice_Transpose','Voice_Detune'}:
-                return 'Playback'
-            if name in {'Voice_Gain','Voice_VelocityToVolume','Volume'}:
-                return 'Global'
-            return 'Other'
-
-        sections = {
-            'Playback': [],
-            'Filter': [],
-            'Filter Envelope': [],
-            'Amp Envelope': [],
-            'LFO': [],
-            'Global': [],
-            'Other': [],
-        }
-
+        items = []
         for i, item in enumerate(params):
             name = item['name']
             val = item['value']
@@ -414,26 +367,8 @@ class MelodicSamplerParamEditorHandler(BaseHandler):
             if name in mapped_parameters:
                 macro_idx = mapped_parameters[name]['macro_index']
                 extra = f'macro-{macro_idx}'
-            html = self._build_param_item(i, name, val, meta, label=friendly(name), extra_classes=extra)
-            sec = section(name)
-            sections.setdefault(sec, []).append(html)
-
-        out_html = '<div class="melodic-param-panels">'
-        order = ['Playback','Filter','Filter Envelope','Amp Envelope','LFO','Global','Other']
-        for sec in order:
-            items = sections.get(sec)
-            if not items:
-                continue
-            canvas = ''
-            if sec == 'LFO':
-                canvas = '<canvas id="melodic-lfo-canvas" class="lfo-canvas" width="300" height="88"></canvas>'
-            panel_html = (
-                f'<div class="param-panel {sec.lower().replace(" ", "-")}"><h3>{sec}</h3>'
-                f'<div class="param-items">{canvas}{"".join(items)}</div></div>'
-            )
-            out_html += panel_html
-        out_html += '</div>'
-        return out_html
+            items.append(self._build_param_item(i, name, val, meta, extra_classes=extra))
+        return '<div class="param-panel"><div class="param-items">' + ''.join(items) + '</div></div>'
 
     def generate_macro_knobs_html(self, macros):
         if not macros:
