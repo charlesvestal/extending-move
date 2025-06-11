@@ -436,7 +436,7 @@
   "Voice_Modulators_Lfo1_Shape_PhaseOffset": {
     "type": "number",
     "min": 0.0,
-    "max": 270.0,
+    "max": 360.0,
     "options": [],
     "unit": "\u00ba"
   },
