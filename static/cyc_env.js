@@ -5,10 +5,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const canvas = document.getElementById('cyc-env-canvas');
   const ctx = canvas.getContext('2d');
 
-  function mix(a, b, t) {
-    return a * (1 - t) + b * t;
-  }
-
   function draw() {
     const time = parseFloat(timeEl.value);
     const tilt = parseFloat(tiltEl.value);
@@ -18,48 +14,35 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.clearRect(0, 0, w, h);
     ctx.beginPath();
     const steps = 100;
+    const peakPos = Math.min(Math.max((tilt - 0.2) / 0.8, 0), 1);
+    const riseEnd = peakPos * (1 - hold);
+    const fallStart = riseEnd + hold;
     for (let i = 0; i <= steps; i++) {
       const phase = i / steps;
-      const rise_frac = 0.5 * (1 - hold);
-      const fall_start = rise_frac + hold;
-      let y0;
-      if (rise_frac <= 0) {
-        y0 = 1;
-      } else if (phase < rise_frac) {
-        y0 = phase / rise_frac;
-      } else if (phase < fall_start) {
-        y0 = 1;
-      } else {
-        y0 = (1 - phase) / rise_frac;
-      }
-      let y1;
-      if (tilt < 0.2) {
-        const curve_amount = 1 - tilt / 0.2;
-        const sp = Math.min(Math.max((phase - 0.25) * 2, 0), 1);
-        const sinVal = Math.sin(Math.PI * sp);
-        y1 = mix(y0, sinVal, curve_amount);
-      } else {
-        const skew = (tilt - 0.2) / 0.8;
-        const attack = mix(0.5, 0.1, skew);
-        const decay = 1 - attack;
-        const localPhase = phase < rise_frac
-          ? (phase / rise_frac) * attack
-          : phase < fall_start
-            ? attack
-            : attack + ((phase - fall_start) / rise_frac) * decay;
-        if (localPhase < attack) {
-          y1 = localPhase / attack;
+      let y = 0;
+      if (hold >= 1) {
+        y = 1;
+      } else if (hold <= 0 && phase !== peakPos) {
+        if (phase < peakPos) {
+          y = peakPos === 0 ? 1 : phase / peakPos;
         } else {
-          y1 = 1 - (localPhase - attack) / decay;
+          y = peakPos === 1 ? 1 : (1 - phase) / (1 - peakPos);
         }
+      } else if (phase < riseEnd) {
+        y = riseEnd === 0 ? 1 : phase / riseEnd;
+      } else if (phase < fallStart) {
+        y = 1;
+      } else {
+        const denom = 1 - fallStart;
+        y = denom === 0 ? 1 : (1 - phase) / denom;
       }
       const maxTime = parseFloat(timeEl.max) || 1;
       const x = (phase * time / maxTime) * w;
-      const y = h - y1 * h;
+      const yPix = h - y * h;
       if (i === 0) {
-        ctx.moveTo(x, y);
+        ctx.moveTo(x, yPix);
       } else {
-        ctx.lineTo(x, y);
+        ctx.lineTo(x, yPix);
       }
     }
     ctx.strokeStyle = '#f00';
