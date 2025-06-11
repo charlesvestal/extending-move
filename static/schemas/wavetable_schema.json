@@ -761,7 +761,9 @@
     "type": "number",
     "min": 0.0,
     "max": 1.0,
-    "options": []
+    "options": [],
+    "unit": "%",
+    "decimals": 2
   },
   "Voice_Unison_Mode": {
     "type": "enum",
@@ -776,8 +778,9 @@
   "Voice_Unison_VoiceCount": {
     "type": "number",
     "min": 2,
-    "max": 6,
-    "options": []
+    "max": 8,
+    "options": [],
+    "decimals": 0
   },
   "Volume": {
     "type": "number",
