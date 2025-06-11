@@ -14,6 +14,15 @@ export function initDriftFilterViz() {
   }
   const ctx = canvas.getContext('2d');
 
+  function setupCanvas() {
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+  }
+  setupCanvas();
+
   const freqInput = document.querySelector('.param-item[data-name="Filter_Frequency"] input[type="hidden"]');
   const typeInput = document.querySelector('.param-item[data-name="Filter_Type"] input[type="hidden"]');
   const resInput = document.querySelector('.param-item[data-name="Filter_Resonance"] input[type="hidden"]');
