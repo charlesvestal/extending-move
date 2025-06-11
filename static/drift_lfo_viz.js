@@ -40,13 +40,8 @@ export function initDriftLfoViz() {
         return 2 * p - 1;
       case 'Saw Down':
         return 1 - 2 * p;
-      case 'Sample & Hold':
-        return (Math.floor(p * 8) % 2) * 2 - 1;
       case 'Exponential Env':
         return 1 - Math.exp(-5 * Math.min(p, 1));
-      case 'Wander':
-        return 0.5 * Math.sin(2 * Math.PI * p * 0.5) +
-               0.5 * Math.sin(2 * Math.PI * p * 0.25);
       default:
         return 0;
     }
@@ -68,6 +63,14 @@ export function initDriftLfoViz() {
       return sec > 0 ? 1 / sec : 0;
     }
     return 0;
+  }
+
+  let stepCache = { shape: '', count: 0, values: [] };
+
+  function randomValues(count) {
+    const arr = [];
+    for (let i = 0; i < count; i++) arr.push(Math.random() * 2 - 1);
+    return arr;
   }
 
   function draw() {
@@ -93,10 +96,35 @@ export function initDriftLfoViz() {
         duration = t * cycles;
       }
     }
+    let steps = Math.max(2, Math.round(rate * 6));
+    if ((shape === 'Sample & Hold' || shape === 'Wander') &&
+        (stepCache.shape !== shape || stepCache.count !== steps)) {
+      stepCache = {
+        shape: shape,
+        count: steps,
+        values: randomValues(shape === 'Wander' ? steps + 1 : steps)
+      };
+    }
+
     for (let i = 0; i <= w; i++) {
       const t = (i / w) * duration;
       const ph = rate * t;
-      const val = wave(shape, ph) * amount * 0.5 + 0.5;
+      let val;
+      if (shape === 'Sample & Hold') {
+        const pos = (t / duration) * steps;
+        const idx = Math.floor(pos);
+        val = stepCache.values[idx] || 0;
+      } else if (shape === 'Wander') {
+        const pos = (t / duration) * steps;
+        const idx = Math.floor(pos);
+        const frac = pos - idx;
+        const v1 = stepCache.values[idx] || 0;
+        const v2 = stepCache.values[idx + 1] || v1;
+        val = v1 + (v2 - v1) * frac;
+      } else {
+        val = wave(shape, ph);
+      }
+      val = val * amount * 0.5 + 0.5;
       const y = h - val * h;
       if (i === 0) ctx.moveTo(i, y); else ctx.lineTo(i, y);
     }
