@@ -245,7 +245,14 @@ export function initDriftCombinedViz() {
       } else {
         const denom = 1 - fallStart;
         const p = denom === 0 ? 0 : (phase - fallStart) / denom;
-        y = denom === 0 ? 1 : 1 - p;
+        let linear = denom === 0 ? 1 : 1 - p;
+        if (mid < 0.2 && denom !== 0) {
+          const t = (0.2 - mid) / 0.2;
+          const k = 5;
+          const curve = (1 / (1 + (k - 1) * p) - 1 / k) / (1 - 1 / k);
+          linear = linear * (1 - t) + curve * t;
+        }
+        y = linear;
       }
       const x = progress * w;
       const yPix = h - y * h;
