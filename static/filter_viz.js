@@ -22,7 +22,7 @@ export function initFilterViz() {
   function drawLine(freq, mag, color) {
     ctx.beginPath();
     const minDb = -60;
-    const maxDb = 0;
+    const maxDb = 60;
     const logMin = Math.log10(10);
     const logMax = Math.log10(20000);
     for (let i = 0; i < freq.length; i++) {
