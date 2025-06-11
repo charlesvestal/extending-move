@@ -314,8 +314,8 @@ document.addEventListener('DOMContentLoaded', () => {
       rebuildRange();
 
       div.appendChild(dropdown);
-      if (rangeDiv.childNodes.length) div.insertBefore(rangeDiv, btn);
       div.appendChild(btn);
+      if (rangeDiv.childNodes.length) div.insertBefore(rangeDiv, btn);
       assignedDiv.appendChild(div);
     });
     updateAddBtn();
