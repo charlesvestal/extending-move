@@ -9,6 +9,7 @@ Tools for extending the Ableton Move. This project provides a companion webserve
 
 ## Short installation instructions
 
+[Installation video](https://youtu.be/gPiR7Zyu3lc)
 - Clone or download the repository.
 - Run utility-scripts/setup-ssh-and-install-on-move.command
 - Follow the instructions!
