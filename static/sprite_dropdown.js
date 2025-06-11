@@ -50,7 +50,11 @@ function initSpriteDropdown(catId, waveId, hiddenId, spriteMap, selected) {
   }
 
   fillCategories();
-  setValue(selected || hidden.value || (spriteMap[categories[0]] || [])[0] || '');
+  const initial = selected || hidden.value || (spriteMap[categories[0]] || [])[0] || '';
+  let initCat = categories.find(c => (spriteMap[c] || []).includes(initial));
+  if (!initCat) initCat = categories[0];
+  fillWaves(initCat);
+  setValue(initial);
 
   catSel.addEventListener('change', () => {
     fillWaves(catSel.value);
