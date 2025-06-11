@@ -19,22 +19,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const fallStart = riseEnd + hold;
     for (let i = 0; i <= steps; i++) {
       const phase = i / steps;
-      let y = 0;
-      if (hold >= 1) {
-        y = 1;
-      } else if (hold <= 0 && phase !== peakPos) {
-        if (phase < peakPos) {
-          y = peakPos === 0 ? 1 : phase / peakPos;
-        } else {
-          y = peakPos === 1 ? 1 : (1 - phase) / (1 - peakPos);
-        }
-      } else if (phase < riseEnd) {
+      let y;
+      if (phase < riseEnd) {
         y = riseEnd === 0 ? 1 : phase / riseEnd;
       } else if (phase < fallStart) {
         y = 1;
       } else {
         const denom = 1 - fallStart;
-        y = denom === 0 ? 1 : (1 - phase) / denom;
+        const p = denom === 0 ? 0 : (phase - fallStart) / denom;
+        let linear = denom === 0 ? 1 : 1 - p;
+        if (tilt < 0.2 && denom !== 0) {
+          const t = (0.2 - tilt) / 0.2;
+          const k = 5;
+          const curve = (1 / (1 + (k - 1) * p) - 1 / k) / (1 - 1 / k);
+          linear = linear * (1 - t) + curve * t;
+        }
+        y = linear;
       }
       const maxTime = parseFloat(timeEl.max) || 1;
       const x = (phase * time / maxTime) * w;
