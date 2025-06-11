@@ -504,6 +504,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!item) return;
     const dial = item.querySelector('input.param-dial');
     if (dial) {
+      if (parseFloat(dial.value) === parseFloat(value)) return;
       dial.value = value;
       dial.setAttribute('value', value);
       if (dial.inputKnobs && typeof dial.redraw === 'function') dial.redraw(true);
@@ -525,6 +526,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     const select = item.querySelector('select.param-select');
     if (select) {
+      if (select.value === String(value)) return;
       select.value = value;
       const hid = item.querySelector('input[type="hidden"][name$="_value"]');
       if (hid) hid.value = value;
@@ -537,20 +539,27 @@ document.addEventListener('DOMContentLoaded', () => {
       const trueVal = toggle.dataset.trueValue ?? '1';
       const falseVal = toggle.dataset.falseValue ?? '0';
       const isOn = String(value) === trueVal || (!isNaN(value) && parseFloat(value) >= 1);
-      toggle.checked = isOn;
-      if (hid) {
-        hid.value = isOn ? trueVal : falseVal;
-        hid.dispatchEvent(new Event('change'));
+      if (toggle.checked !== isOn) {
+        toggle.checked = isOn;
+        if (hid) {
+          hid.value = isOn ? trueVal : falseVal;
+          hid.dispatchEvent(new Event('change'));
+        }
+        toggle.dispatchEvent(new Event('change'));
       }
-      toggle.dispatchEvent(new Event('change'));
       return;
     }
     const slider = item.querySelector('.rect-slider');
     if (slider) {
-      if (typeof slider._sliderUpdate === 'function') {
-        slider._sliderUpdate(value);
+      const targetId = slider.dataset.target;
+      const target = targetId ? document.querySelector(`#${targetId}, input[name="${targetId}"]`) : null;
+      const curVal = target ? parseFloat(target.value) : NaN;
+      if (isNaN(curVal) || curVal !== parseFloat(value)) {
+        if (typeof slider._sliderUpdate === 'function') {
+          slider._sliderUpdate(value);
+        }
+        slider.dispatchEvent(new Event('input'));
       }
-      slider.dispatchEvent(new Event('input'));
     }
   }
 
