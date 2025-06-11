@@ -433,6 +433,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function formatDialValue(dial, v) {
     if (isNaN(v)) return 'not set';
+    const valueLabels = dial.dataset.values ? dial.dataset.values.split(',') : null;
+    if (valueLabels) {
+      const idx = Math.round(v);
+      if (idx >= 0 && idx < valueLabels.length) {
+        return valueLabels[idx];
+      }
+    }
     const unit = dial.dataset.unit || '';
     const decimals = parseInt(dial.dataset.decimals || '2', 10);
     const min = parseFloat(dial.min || '0');
