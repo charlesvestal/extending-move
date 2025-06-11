@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const displayEl = displayId ? document.getElementById(displayId) : null;
         const min = parseFloat(el.min);
         const max = parseFloat(el.max);
-        const oscGain = unit === 'dB' && !isNaN(min) && !isNaN(max) && min === 0 && max === 2;
+        const oscGain = unit === 'dB' && !isNaN(min) && !isNaN(max) && min === 0 && max <= 2;
         if (oscGain) {
             // allow smooth input; actual rounding happens in handler
             el.step = '0.001';

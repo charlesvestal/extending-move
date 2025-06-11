@@ -231,18 +231,10 @@
     "max": 1.0,
     "options": []
   },
-  "Voice_Modulators_AmpEnvelope_Sustain": {
-    "type": "number",
-    "min": 0.0,
-    "max": 1.0,
-    "options": [],
-    "unit": "%",
-    "decimals": 2
-  },
   "Voice_Modulators_AmpEnvelope_Times_Attack": {
     "type": "number",
     "min": 0,
-    "max": 60,
+    "max": 20,
     "options": [],
     "unit": "s",
     "decimals": 3
@@ -250,15 +242,23 @@
   "Voice_Modulators_AmpEnvelope_Times_Decay": {
     "type": "number",
     "min": 0,
-    "max": 60,
+    "max": 20,
     "options": [],
     "unit": "s",
     "decimals": 3
   },
+  "Voice_Modulators_AmpEnvelope_Sustain": {
+    "type": "number",
+    "min": 0.0,
+    "max": 1.0,
+    "options": [],
+    "unit": "dB",
+    "decimals": 1
+  },
   "Voice_Modulators_AmpEnvelope_Times_Release": {
     "type": "number",
     "min": 0,
-    "max": 60,
+    "max": 20,
     "options": [],
     "unit": "s",
     "decimals": 3
@@ -294,7 +294,7 @@
   "Voice_Modulators_Envelope2_Times_Attack": {
     "type": "number",
     "min": 0,
-    "max": 60,
+    "max": 20,
     "options": [],
     "unit": "s",
     "decimals": 3
@@ -302,15 +302,23 @@
   "Voice_Modulators_Envelope2_Times_Decay": {
     "type": "number",
     "min": 0,
-    "max": 60,
+    "max": 20,
     "options": [],
     "unit": "s",
     "decimals": 3
   },
+  "Voice_Modulators_Envelope2_Values_Sustain": {
+    "type": "number",
+    "min": 0.0,
+    "max": 1.0,
+    "options": [],
+    "unit": "%",
+    "decimals": 2
+  },
   "Voice_Modulators_Envelope2_Times_Release": {
     "type": "number",
     "min": 0,
-    "max": 60,
+    "max": 20,
     "options": [],
     "unit": "s",
     "decimals": 3
@@ -332,14 +340,6 @@
     "min": 0.0,
     "max": 1.0,
     "options": []
-  },
-  "Voice_Modulators_Envelope2_Values_Sustain": {
-    "type": "number",
-    "min": 0.0,
-    "max": 1.0,
-    "options": [],
-    "unit": "%",
-    "decimals": 2
   },
   "Voice_Modulators_Envelope3_LoopMode": {
     "type": "enum",
@@ -372,7 +372,7 @@
   "Voice_Modulators_Envelope3_Times_Attack": {
     "type": "number",
     "min": 0,
-    "max": 60,
+    "max": 20,
     "options": [],
     "unit": "s",
     "decimals": 3
@@ -380,15 +380,23 @@
   "Voice_Modulators_Envelope3_Times_Decay": {
     "type": "number",
     "min": 0,
-    "max": 60,
+    "max": 20,
     "options": [],
     "unit": "s",
     "decimals": 3
   },
+  "Voice_Modulators_Envelope3_Values_Sustain": {
+    "type": "number",
+    "min": 0.0,
+    "max": 1.0,
+    "options": [],
+    "unit": "%",
+    "decimals": 2
+  },
   "Voice_Modulators_Envelope3_Times_Release": {
     "type": "number",
     "min": 0,
-    "max": 60,
+    "max": 20,
     "options": [],
     "unit": "s",
     "decimals": 3
@@ -410,14 +418,6 @@
     "min": 0.0,
     "max": 1.0,
     "options": []
-  },
-  "Voice_Modulators_Envelope3_Values_Sustain": {
-    "type": "number",
-    "min": 0.0,
-    "max": 1.0,
-    "options": [],
-    "unit": "%",
-    "decimals": 2
   },
   "Voice_Modulators_Lfo1_Retrigger": {
     "type": "boolean",
