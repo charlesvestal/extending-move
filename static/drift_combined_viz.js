@@ -47,7 +47,10 @@ export function initDriftCombinedViz() {
     decay: qenv('Envelope2_Decay'),
     sustain: qenv('Envelope2_Sustain'),
     release: qenv('Envelope2_Release'),
-    mode: qsel('Global_Envelope2Mode')
+    mode: qsel('Global_Envelope2Mode'),
+    mid: qenv('CyclingEnvelope_MidPoint'),
+    hold: qenv('CyclingEnvelope_Hold'),
+    time: qenv('CyclingEnvelope_Time')
   };
 
   function biquadCoeffs(type, freq, q, sr) {
@@ -148,6 +151,51 @@ export function initDriftCombinedViz() {
     drawLabel(label);
   }
 
+  function drawCycEnv(inputs, label) {
+    if (!inputs.time || !inputs.mid || !inputs.hold) return;
+    const cycle = parseFloat(inputs.time.value);
+    const tilt = parseFloat(inputs.mid.value);
+    const hold = parseFloat(inputs.hold.value);
+    const DISPLAY = 2.5;
+    const steps = 100;
+    const w = canvas.width;
+    const h = canvas.height;
+    const cycles = Math.max(1, Math.ceil(DISPLAY / cycle));
+    for (let c = 0; c < cycles; c++) {
+      ctx.beginPath();
+      const offset = (c * cycle / DISPLAY) * w;
+      const peakPos = Math.min(Math.max((tilt - 0.2) / 0.8, 0), 1);
+      const riseEnd = peakPos * (1 - hold);
+      const fallStart = riseEnd + hold;
+      for (let i = 0; i <= steps; i++) {
+        const phase = i / steps;
+        let y;
+        if (phase < riseEnd) {
+          y = riseEnd === 0 ? 1 : phase / riseEnd;
+        } else if (phase < fallStart) {
+          y = 1;
+        } else {
+          const denom = 1 - fallStart;
+          const p = denom === 0 ? 0 : (phase - fallStart) / denom;
+          let linear = denom === 0 ? 1 : 1 - p;
+          if (tilt < 0.2 && denom !== 0) {
+            const t = (0.2 - tilt) / 0.2;
+            const k = 5;
+            const curve = (1 / (1 + (k - 1) * p) - 1 / k) / (1 - 1 / k);
+            linear = linear * (1 - t) + curve * t;
+          }
+          y = linear;
+        }
+        const x = offset + (phase * cycle / DISPLAY) * w;
+        const yPix = h - y * h;
+        if (i === 0) ctx.moveTo(x, yPix); else ctx.lineTo(x, yPix);
+      }
+      ctx.strokeStyle = '#f00';
+      ctx.stroke();
+    }
+    drawLabel(label);
+  }
+
   function drawLine(freq, mag, color) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.beginPath();
@@ -177,8 +225,12 @@ export function initDriftCombinedViz() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     if (active === 'env1') {
       drawEnv(env1, 'Amp');
-    } else if (active === 'env2' && (!env2.mode || env2.mode.value !== 'Cyc')) {
-      drawEnv(env2, 'Env2');
+    } else if (active === 'env2') {
+      if (env2.mode && env2.mode.value === 'Cyc') {
+        drawCycEnv(env2, 'Env2');
+      } else {
+        drawEnv(env2, 'Env2');
+      }
     } else {
       drawFilter();
     }
@@ -194,7 +246,7 @@ export function initDriftCombinedViz() {
     el.addEventListener('input', setFilter);
   });
   [env1.attack, env1.decay, env1.sustain, env1.release].forEach(el => el && el.addEventListener('input', setEnv1));
-  [env2.attack, env2.decay, env2.sustain, env2.release].forEach(el => el && el.addEventListener('input', setEnv2));
+  [env2.attack, env2.decay, env2.sustain, env2.release, env2.mid, env2.hold, env2.time].forEach(el => el && el.addEventListener('input', setEnv2));
   if (env2.mode) env2.mode.addEventListener('change', () => { if (active === 'env2') update(); });
 
   update();
