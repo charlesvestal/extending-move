@@ -192,8 +192,41 @@ export function initDriftCombinedViz() {
   function drawCyc() {
     const mid = env2Cyc.mid ? parseFloat(env2Cyc.mid.value) : 0.5;
     const hold = env2Cyc.hold ? parseFloat(env2Cyc.hold.value) : 0;
-    const duration = getCycleSeconds() || 1;
-    const maxTime = env2Cyc.time ? parseFloat(env2Cyc.time.max || '1') : duration;
+
+    const cycleSec = getCycleSeconds() || 1;
+
+    function rateRatio() {
+      const mode = env2Cyc.modeSel ? env2Cyc.modeSel.value : 'Freq';
+      if (mode === 'Freq' && env2Cyc.rate) {
+        const v = parseFloat(env2Cyc.rate.value || '0');
+        const min = parseFloat(env2Cyc.rate.min || '0');
+        const max = parseFloat(env2Cyc.rate.max || '1');
+        return Math.min(Math.max((v - min) / (max - min), 0), 1);
+      }
+      if (mode === 'Ratio' && env2Cyc.ratio) {
+        const v = parseFloat(env2Cyc.ratio.value || '0');
+        const min = parseFloat(env2Cyc.ratio.min || '0');
+        const max = parseFloat(env2Cyc.ratio.max || '1');
+        return Math.min(Math.max((v - min) / (max - min), 0), 1);
+      }
+      if (mode === 'Time' && env2Cyc.time) {
+        const v = parseFloat(env2Cyc.time.value || '0');
+        const min = parseFloat(env2Cyc.time.min || '0');
+        const max = parseFloat(env2Cyc.time.max || '1');
+        return Math.min(Math.max((max - v) / (max - min), 0), 1);
+      }
+      if (mode === 'Sync' && env2Cyc.sync) {
+        const v = parseFloat(env2Cyc.sync.value || '0');
+        const min = parseFloat(env2Cyc.sync.min || '0');
+        const max = parseFloat(env2Cyc.sync.max || '1');
+        return Math.min(Math.max((v - min) / (max - min), 0), 1);
+      }
+      return 0;
+    }
+
+    const cycles = 2 + rateRatio() * 8;
+    const totalTime = cycles * cycleSec;
+
     const w = canvas.width;
     const h = canvas.height;
     ctx.beginPath();
@@ -201,8 +234,9 @@ export function initDriftCombinedViz() {
     const peakPos = Math.min(Math.max((mid - 0.2) / 0.8, 0), 1);
     const riseEnd = peakPos * (1 - hold);
     const fallStart = riseEnd + hold;
-    for (let i = 0; i <= steps; i++) {
-      const phase = i / steps;
+    for (let i = 0; i <= steps * cycles; i++) {
+      const progress = i / (steps * cycles);
+      const phase = (progress * cycles) % 1;
       let y;
       if (phase < riseEnd) {
         y = riseEnd === 0 ? 1 : phase / riseEnd;
@@ -213,7 +247,7 @@ export function initDriftCombinedViz() {
         const p = denom === 0 ? 0 : (phase - fallStart) / denom;
         y = denom === 0 ? 1 : 1 - p;
       }
-      const x = (phase * duration / maxTime) * w;
+      const x = progress * w;
       const yPix = h - y * h;
       if (i === 0) {
         ctx.moveTo(x, yPix);
