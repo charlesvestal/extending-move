@@ -1,17 +1,36 @@
+:root {
+  --color-background: #f8f8f8;
+  --color-surface: #ffffff;
+  --color-text: #262626;
+  --color-border: #ddd;
+  --color-primary: #0000ff;
+  --color-primary-hover: #0000cc;
+  --px: 0.0625rem;
+}
+
+:root.dark {
+  --color-background: #262626;
+  --color-surface: #111111;
+  --color-text: #f8f8f8;
+  --color-border: #444;
+  --color-primary: #6a8dff;
+  --color-primary-hover: #4056c8;
+}
+
 /* Shared styles matching Ableton Move aesthetic */
 body {
   font-family: 'Ableton Sans', Arial, sans-serif;
   margin: 0;
-  padding: 20px;
-  background-color: #f8f8f8;
-  color: #262626;
+  padding: calc(var(--px)*20);
+  background-color: var(--color-background);
+  color: var(--color-text);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 .container {
-  max-width: 800px;
+  max-width: calc(var(--px)*800);
   margin: 0 auto;
   padding: 1.5rem;
 }
@@ -20,7 +39,7 @@ h2 {
   font-family: 'Ableton Sans', Arial, sans-serif;
   font-weight: 500;
   font-size: 1.5rem;
-  color: #262626;
+  color: var(--color-text);
   margin-bottom: 1rem;
   margin-top: 0;
   letter-spacing: normal;
@@ -29,17 +48,17 @@ h2 {
 input, button, select {
   display: block;
   width: 100%;
-  max-width: 400px;
+  max-width: calc(var(--px)*400);
   padding: 0.625rem;
   margin-bottom: 1rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: calc(var(--px)*1) solid var(--color-border);
+  border-radius: calc(var(--px)*4);
   font-size: 0.875rem;
   font-family: 'Ableton Sans', Arial, sans-serif;
 }
 
 button {
-  background-color: #0000ff;
+  background-color: var(--color-primary);
   color: white;
   border: none;
   cursor: pointer;
@@ -48,7 +67,7 @@ button {
 }
 
 button:hover {
-  background-color: #0000cc;
+  background-color: var(--color-primary-hover);
 }
 
 .chord-label {
@@ -58,11 +77,11 @@ button:hover {
 }
 
 .chord-preview {
-  background-color: #f5f5f5;
-  border-radius: 4px;
-  min-height: 50px;
+  background-color: var(--color-surface-alt);
+  border-radius: calc(var(--px)*4);
+  min-height: calc(var(--px)*50);
   cursor: pointer;
-  border: 1px solid #ddd;
+  border: calc(var(--px)*1) solid var(--color-border);
   overflow: hidden;
 }
 
@@ -71,21 +90,21 @@ button:hover {
   list-style: none;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(calc(var(--px)*160), 1fr));
   gap: 1rem;
 }
 
 .chord-list li {
   padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  background-color: #f5f5f5;
+  border: calc(var(--px)*1) solid var(--color-border);
+  border-radius: calc(var(--px)*4);
+  background-color: var(--color-surface-alt);
 }
 
 #waveform {
   background-color: white;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: calc(var(--px)*1) solid var(--color-border);
+  border-radius: calc(var(--px)*4);
   margin-bottom: 1rem;
 }
 
@@ -97,7 +116,7 @@ small {
 }
 
 small a {
-  color: #0000ff;
+  color: var(--color-primary);
   text-decoration: none;
 }
 
@@ -110,12 +129,12 @@ h1 {
   font-family: 'Ableton Sans', Arial, sans-serif;
   font-weight: 500;
   font-size: 2rem;
-  color: #262626;
+  color: var(--color-text);
   margin: 1.5rem 0;
   letter-spacing: normal;
 }
 
-@media (min-width: 768px) {
+@media (min-width: calc(var(--px)*768)) {
   h1 {
     font-size: 2.375rem;
     line-height: 3.125rem;
@@ -129,18 +148,18 @@ select, input {
   -moz-appearance: none;
   appearance: none;
   background-color: white;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: calc(var(--px)*1) solid var(--color-border);
+  border-radius: calc(var(--px)*4);
   padding: 0.75rem;
   font-family: 'Ableton Sans', Arial, sans-serif;
-  color: #262626;
+  color: var(--color-text);
 }
 
 select {
   background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23262626' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 0.75rem center;
-  background-size: 16px;
+  background-size: calc(var(--px)*16);
   padding-right: 2.5rem;
 }
 
@@ -148,7 +167,7 @@ select {
   font-weight: 500;
 }
 
-@media (min-width: 768px) {
+@media (min-width: calc(var(--px)*768)) {
   .md\:text-xl {
     font-size: 2.375rem;
     line-height: 3.125rem;

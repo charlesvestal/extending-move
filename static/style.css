@@ -47,23 +47,63 @@
     font-style: italic;
 }
 
+:root {
+    --color-background: #f8f8f8;
+    --color-surface: #ffffff;
+    --color-surface-alt: #f5f5f5;
+    --color-text: #262626;
+    --color-primary: #0000ff;
+    --color-primary-hover: #0000cc;
+    --color-accent: #ff764d;
+    --color-muted: #444444;
+    --color-success: #00a550;
+    --color-success-bg: #e6f7ef;
+    --color-error: #d73a49;
+    --color-error-bg: #ffeef0;
+    --color-info-bg: #e9f7fc;
+    --color-border: #ddd;
+    --grid-columns: 16;
+    --gutter: 1rem;
+    --px: 0.0625rem;
+}
+
+:root.dark {
+    --color-background: #262626;
+    --color-surface: #111111;
+    --color-surface-alt: #222222;
+    --color-text: #f8f8f8;
+    --color-primary: #6a8dff;
+    --color-primary-hover: #4056c8;
+    --color-accent: #ff764d;
+    --color-muted: #aaaaaa;
+    --color-success: #3ddf73;
+    --color-success-bg: #0d4024;
+    --color-error: #ff6b6b;
+    --color-error-bg: #402020;
+    --color-info-bg: #113340;
+    --color-border: #444;
+}
+
 /* Base styles */
 body {
     font-family: 'Ableton Sans', Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f8f8f8;
-    color: #262626;
+    background-color: var(--color-background);
+    color: var(--color-text);
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    display: grid;
+    grid-template-columns: repeat(var(--grid-columns), 1fr);
+    grid-gap: var(--gutter);
 }
 
 .text-lg {
     font-size: 1.125rem;
 }
 
-@media (min-width: 768px) {
+@media (min-width: calc(var(--px)*768)) {
   .md\:text-xl {
     font-size: 2.375rem;
     line-height: 3.125rem;
@@ -90,19 +130,18 @@ body {
 h1, h2, h3, h4 {
     font-family: 'Ableton Sans', Arial, sans-serif;
     font-weight: 500;
-    color: #262626;
+    color: var(--color-text);
     margin-top: 0;
 }
 
-#header, #footer
-{
-    margin-left:10px;
+#header, #footer {
+    grid-column: 2 / span 14;
 }
 
 h1 {
     font-size: 2.375rem;
     font-weight: 500;
-    color: #262626;
+    color: var(--color-text);
     line-height: 3.125rem;
     margin: 1.5rem 0;
     padding-bottom: 0.5rem;
@@ -122,6 +161,7 @@ h3 {
 
 /* Header/Navigation */
 .tab {
+    grid-column: 2 / span 14;
     display: flex;
     background-color: transparent;
     overflow: visible;
@@ -132,7 +172,7 @@ h3 {
     background: transparent;
     border: none;
     padding: 0.75rem 1.25rem;
-    color: #262626;
+    color: var(--color-text);
     font-size: 1rem;
     font-weight: 400;
     margin-right: 0.25rem;
@@ -142,13 +182,13 @@ h3 {
 
 .tab button:hover,
 .tab a:hover {
-    color: #262626;
+    color: var(--color-text);
     background-color: transparent;
 }
 
 .tab button.active,
 .tab a.active {
-    color: #ff764d;
+    color: var(--color-accent);
     background-color: transparent;
     border-bottom: none;
     border-radius: 0;
@@ -159,12 +199,13 @@ h3 {
 
 /* Main content area */
 .tabcontent {
-    background-color: white;
-    border-radius: 4px;
+    grid-column: 2 / span 14;
+    background-color: var(--color-surface);
+    border-radius: calc(var(--px)*4);
     border: none;
     margin: 0;
     padding: 2rem;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    box-shadow: 0 calc(var(--px)*1) calc(var(--px)*3) rgba(0,0,0,0.05);
 }
 
 /* Form elements */
@@ -174,13 +215,13 @@ input[type="file"],
 select {
     /* display: block; */
     /* width: 100%; */
-    max-width: 400px;
+    max-width: calc(var(--px)*400);
     padding: 0.625rem;
     margin-bottom: 1rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    border: calc(var(--px)*1) solid var(--color-border);
+    border-radius: calc(var(--px)*4);
     font-size: 0.875rem;
-    background-color: white;
+    background-color: var(--color-surface);
     /* font-family: 'Ableton Sans', Arial, sans-serif; */
 }
 
@@ -192,22 +233,22 @@ label {
     display: block;
     font-weight: 500;
     margin-bottom: 0.5rem;
-    color: #444;
+    color: var(--color-muted);
 }
 
 .slice-even-group label, .slice-transient-group label {   
     display: inline;
     margin-bottom: 0;
     font-weight: 500;
-    color: #444;
+    color: var(--color-muted);
 }
 
 button,
 input[type="submit"] {
-    background-color: #0000ff;
-    color: white;
+    background-color: var(--color-primary);
+    color: var(--color-surface);
     border: none;
-    border-radius: 0px;
+    border-radius: calc(var(--px)*0);
     padding: 0.625rem 1.25rem;
     font-size: 1rem;
     line-height: 1.5rem;
@@ -226,13 +267,13 @@ input[type="submit"] {
 
 button:hover, 
 input[type="submit"]:hover {
-    background-color: #0000cc;
+    background-color: var(--color-primary-hover);
 }
 
 button:disabled,
 input[type="submit"]:disabled {
-    background-color: #ccc;
-    color: #666;
+    background-color: var(--color-border);
+    color: var(--color-muted);
     cursor: default;
 }
 
@@ -259,9 +300,9 @@ input[type="submit"]:disabled {
 }
 
 .drum-cell {
-    background-color: #f5f5f5;
-    border-radius: 4px;
-    border: 1px solid #ddd;
+    background-color: var(--color-surface-alt);
+    border-radius: calc(var(--px)*4);
+    border: calc(var(--px)*1) solid var(--color-border);
     padding: 1rem;
     display: flex;
     flex-direction: column;
@@ -274,46 +315,46 @@ input[type="submit"]:disabled {
 }
 
 .drum-cell:hover {
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 calc(var(--px)*2) calc(var(--px)*8) rgba(0,0,0,0.1);
 }
 
 .pad-number {
     font-weight: 600;
-    color: #555;
+    color: var(--color-muted);
 }
 
 /* Waveform styling */
 .waveform-container {
-    background-color: white;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    background-color: var(--color-surface);
+    border: calc(var(--px)*1) solid var(--color-border);
+    border-radius: calc(var(--px)*4);
     margin: 0.5rem 0;
     padding: 0.5rem;
-    min-height: 64px;
+    min-height: calc(var(--px)*64);
     cursor: pointer;
 }
 
 #waveform {
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background-color: #f5f5f5;
+    border: calc(var(--px)*1) solid var(--color-border);
+    border-radius: calc(var(--px)*4);
+    background-color: var(--color-surface-alt);
     margin-bottom: 1rem;
 }
 
 /* Success/Error messages */
 .success {
-    color: #00a550;
+    color: var(--color-success);
     padding: 0.75rem;
-    background-color: #e6f7ef;
-    border-radius: 4px;
+    background-color: var(--color-success-bg);
+    border-radius: calc(var(--px)*4);
     margin-bottom: 1rem;
 }
 
 .error {
-    color: #d73a49;
+    color: var(--color-error);
     padding: 0.75rem;
-    background-color: #ffeef0;
-    border-radius: 4px;
+    background-color: var(--color-error-bg);
+    border-radius: calc(var(--px)*4);
     margin-bottom: 1rem;
 }
 
@@ -321,8 +362,8 @@ input[type="submit"]:disabled {
 .info {
     color: #155724;
     padding: 0.75rem;
-    background-color: #e9f7fc;
-    border-radius: 4px;
+    background-color: var(--color-info-bg);
+    border-radius: calc(var(--px)*4);
     margin-bottom: 1rem;
 }
 
@@ -337,8 +378,8 @@ input[type="submit"]:disabled {
 }
 
 .chord-preview {
-    background-color: #f5f5f5;
-    border-radius: 4px;
+    background-color: var(--color-surface-alt);
+    border-radius: calc(var(--px)*4);
     overflow: hidden;
 }
 
@@ -350,9 +391,9 @@ select {
     background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23262626' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 0.75rem center;
-    background-size: 16px;
+    background-size: calc(var(--px)*16);
     padding-right: 2.5rem;
-    border: 1px solid #ddd;
+    border: calc(var(--px)*1) solid var(--color-border);
 }
 
 /* Section titles */
@@ -370,7 +411,7 @@ select {
 } */
 
 /* Responsive adjustments */
-@media (max-width: 768px) {
+@media (max-width: calc(var(--px)*768)) {
     .tab {
         flex-wrap: wrap;
     }
@@ -417,11 +458,11 @@ select {
 .file-tree .dir.closed > span::before { content: "\25B6"; display: inline-block; width: 1em; }
 .file-tree .dir.open > span::before { content: "\25BC"; display: inline-block; width: 1em; }
 .hidden { display: none; }
-.file-tree .dir, .file-tree .file-entry {margin-left: 10px;}
+.file-tree .dir, .file-tree .file-entry {margin-left: calc(var(--px)*10);}
 .file-browser {
-    max-height: 240px;
+    max-height: calc(var(--px)*240);
     overflow-y: auto;
-    border: 1px solid #ccc;
+    border: calc(var(--px)*1) solid var(--color-border);
     padding: 0.25rem;
     margin-bottom: 1rem;
 }
@@ -432,12 +473,12 @@ select {
     grid-template-columns: repeat(8, 1fr);
     gap: 0.5rem;
     margin-bottom: 1rem;
-    max-width: 600px;
+    max-width: calc(var(--px)*600);
 }
 
 .pad-cell {
-    box-shadow: inset 0 0 0 2px transparent;
-    border-radius: 4px;
+    box-shadow: inset 0 0 0 calc(var(--px)*2) transparent;
+    border-radius: calc(var(--px)*4);
     padding: 0.5rem;
     text-align: center;
     font-weight: 600;
@@ -452,7 +493,7 @@ select {
 
 .pad-cell.occupied {
     cursor: default;
-    background: #ffeef0;
+    background: var(--color-error-bg);
 }
 
 .pad-grid input[type="radio"] {
@@ -460,7 +501,7 @@ select {
 }
 
 .pad-grid input[type="radio"]:checked + label {
-    box-shadow: inset 0 0 0 2px #333;
+    box-shadow: inset 0 0 0 calc(var(--px)*2) #333;
     background: #d0e8ff;
 }
 
@@ -474,7 +515,7 @@ select {
     background: none;
     border: none;
     padding: 0;
-    font-size: 18px;
+    font-size: calc(var(--px)*18);
     line-height: 1;
     cursor: pointer;
 }
@@ -505,8 +546,8 @@ select {
 }
 
 .param-dial.filter-knob {
-    width: 48px;
-    height: 48px;
+    width: calc(var(--px)*48);
+    height: calc(var(--px)*48);
 }
 
 .param-slider {
@@ -533,7 +574,7 @@ select {
     padding-top:0;
     padding-top: 0;
 
-    margin-top:-1px;
+    margin-top:-calc(var(--px)*1);
 }
 
 .param-panel.oscillators .param-pair .param-select, 
@@ -542,7 +583,7 @@ select {
 {
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0; 
-    border-bottom: 0px;
+    border-bottom: calc(var(--px)*0);
 }
 
 .param-panel.oscillators .param-pair .rect-slider-container, 
@@ -554,17 +595,17 @@ select {
 }
 
 .param-pair .param-item {
-    border-radius:0px;
+    border-radius:calc(var(--px)*0);
 }
 .param-panel.modulation .param-select {
-    margin-top:0px;
+    margin-top:calc(var(--px)*0);
 }
 
 
 .pitch-mod-label {
     width: 100%;
     text-align: left;
-    margin-left:10px;
+    margin-left:calc(var(--px)*10);
     font-weight: bold;
     margin-top: 0.5rem;
 }
@@ -572,7 +613,7 @@ select {
 .freq-mod-label {
     width: 100%;
     ext-align: left;
-    margin-left:10px;
+    margin-left:calc(var(--px)*10);
     font-weight: bold;
     margin-top: 0.5rem;
 }
@@ -632,7 +673,7 @@ select {
 }
 
 .param-panel {
-    border: 1px solid #ccc;
+    border: calc(var(--px)*1) solid var(--color-border);
     padding: 0.5rem;
     display: flex;
     flex-direction: column;
@@ -644,43 +685,43 @@ select {
     flex: 2;
 }
 /* .param-list {
-    max-width:975px;
+    max-width:calc(var(--px)*975);
 }
 .param-panel.oscillators{
-    max-width: 280px;
+    max-width: calc(var(--px)*280);
 }
 
 .param-panel.mixer{
-    max-width: 128px;
+    max-width: calc(var(--px)*128);
 }
 
 .param-panel.filter{
-    max-width: 180px;
+    max-width: calc(var(--px)*180);
 }
 
 .param-panel.envelopes{
-    max-width: 290px;
+    max-width: calc(var(--px)*290);
 } 
 */
 
 .param-panel.fx {
-    min-width: 258px; 
+    min-width: calc(var(--px)*258); 
 }
 
 .wavetable-param-panels.param-panel.mixer {
-    min-width: 211px;
+    min-width: calc(var(--px)*211);
 }
 
 .param-panel.lfo {
-    max-width: 181px;
+    max-width: calc(var(--px)*181);
 }
 
 .param-panel.modulation {
-    /* max-width: 110px; */
+    /* max-width: calc(var(--px)*110); */
 } 
 
 .param-panel.global {
-    max-width: 200px;
+    max-width: calc(var(--px)*200);
 }
 
 .param-panel.filter .param-items {
@@ -691,7 +732,7 @@ select {
 .param-group-label {
     width: 100%;
     text-align: left;
-    margin-left: 10px;
+    margin-left: calc(var(--px)*10);
     font-weight: bold;
     margin-top: 0.5rem;
 }
@@ -723,7 +764,7 @@ select {
 
 
 .param-row-label {
-    width: 80px;
+    width: calc(var(--px)*80);
     display: flex;
     align-items: center;
     font-weight: bold;
@@ -739,13 +780,13 @@ select {
     display: flex;
     flex-direction: column;
     align-items: center;
-    /* width: 90px; */
+    /* width: calc(var(--px)*90); */
     padding: 0.15rem;
 }
 .param-number {
     /* margin-left: 0.5rem; */
-    /* min-width: 60px; */
-    min-width: 38px;
+    /* min-width: calc(var(--px)*60); */
+    min-width: calc(var(--px)*38);
     display: inline-block;
     text-align: center;
     font-size: 0.6rem;
@@ -754,22 +795,22 @@ select {
 
 .param-input {
     margin: 0.25rem;
-    width: 80px;
+    width: calc(var(--px)*80);
     text-align: center;
 }
 
 .param-select {
     margin: 0.25rem;
-    width: 60px;
-    height: 20px;
+    width: calc(var(--px)*60);
+    height: calc(var(--px)*20);
     font-size: 0.6rem;
-    line-height: 20px;
+    line-height: calc(var(--px)*20);
     padding: 0 1.5rem 0 0.5rem;
     text-align: center;
 }
 
 .filter-type-select {
-    /* width: 80px; */
+    /* width: calc(var(--px)*80); */
 }
   
 .param-item {
@@ -824,7 +865,7 @@ select {
     text-align: center;
     position: sticky;
     top: 0;
-    background: #fff;
+    background: var(--color-surface);
     z-index: 10;
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
@@ -859,44 +900,44 @@ select {
 
 /* Highlight parameters and macros by macro index */
 .param-item.macro-0, .macro-knob.macro-0 {
-    border: 2px solid #191970;
+    border: calc(var(--px)*2) solid #191970;
     background-color: rgba(25, 25, 112, 0.05);
-    border-radius: 4px;
+    border-radius: calc(var(--px)*4);
 }
 .param-item.macro-1, .macro-knob.macro-1 {
-    border: 2px solid #006400;
+    border: calc(var(--px)*2) solid #006400;
     background-color: rgba(0, 100, 0, 0.05);
-    border-radius: 4px;
+    border-radius: calc(var(--px)*4);
 }
 .param-item.macro-2, .macro-knob.macro-2 {
-    border: 2px solid #ff0000;
+    border: calc(var(--px)*2) solid #ff0000;
     background-color: rgba(255, 0, 0, 0.05);
-    border-radius: 4px;
+    border-radius: calc(var(--px)*4);
 }
 .param-item.macro-3, .macro-knob.macro-3 {
-    border: 2px solid #ffd700;
+    border: calc(var(--px)*2) solid #ffd700;
     background-color: rgba(255, 215, 0, 0.1);
-    border-radius: 4px;
+    border-radius: calc(var(--px)*4);
 }
 .param-item.macro-4, .macro-knob.macro-4 {
-    border: 2px solid #00ff00;
+    border: calc(var(--px)*2) solid #00ff00;
     background-color: rgba(0, 255, 0, 0.05);
-    border-radius: 4px;
+    border-radius: calc(var(--px)*4);
 }
 .param-item.macro-5, .macro-knob.macro-5 {
-    border: 2px solid #00ffff;
+    border: calc(var(--px)*2) solid #00ffff;
     background-color: rgba(0, 255, 255, 0.05);
-    border-radius: 4px;
+    border-radius: calc(var(--px)*4);
 }
 .param-item.macro-6, .macro-knob.macro-6 {
-    border: 2px solid #ff00ff;
+    border: calc(var(--px)*2) solid #ff00ff;
     background-color: rgba(255, 0, 255, 0.05);
-    border-radius: 4px;
+    border-radius: calc(var(--px)*4);
 }
 .param-item.macro-7, .macro-knob.macro-7 {
-    border: 2px solid #ffb6c1;
+    border: calc(var(--px)*2) solid #ffb6c1;
     background-color: rgba(255, 182, 193, 0.1);
-    border-radius: 4px;
+    border-radius: calc(var(--px)*4);
 }
 
 /* Parameters controlled by macros */
@@ -908,19 +949,19 @@ select {
 /* Rectangular slider component */
 .rect-slider-container {
     position: relative;
-    width: 80px;
-    height: 24px;
-    border: 1px solid #dedede;
-    border-radius: 4px;
+    width: calc(var(--px)*80);
+    height: calc(var(--px)*24);
+    border: calc(var(--px)*1) solid #dedede;
+    border-radius: calc(var(--px)*4);
     box-sizing: border-box;
     cursor: ns-resize;
     cursor: ew-resize;
     user-select: none;
     font-size: 0.6rem;
     text-align: center;
-    line-height: 20px;
-    width: 60px;
-    height:19px
+    line-height: calc(var(--px)*20);
+    width: calc(var(--px)*60);
+    height:calc(var(--px)*19)
 }
 .rect-slider-container.disabled {
     pointer-events: none;
@@ -932,7 +973,7 @@ select {
     bottom: 0;
     left: 0;
     width: 0;
-    background-color: #ff764d;
+    background-color: var(--color-accent);
     pointer-events: none;
 }
 .rect-slider-container.center .rect-slider-fill {
@@ -949,10 +990,10 @@ select {
     position: fixed;
     right: 0;
     top: 0;
-    width: 575px;
+    width: calc(var(--px)*575);
     height: 100%;
-    background: #fff;
-    box-shadow: -2px 0 5px rgba(0,0,0,0.3);
+    background: var(--color-surface);
+    box-shadow: -calc(var(--px)*2) 0 calc(var(--px)*5) rgba(0,0,0,0.3);
     padding: 1rem;
     overflow-y: auto;
     z-index: 1001;
@@ -991,7 +1032,7 @@ select {
     gap: 0.25rem;
 }
 .range-inputs input {
-    width: 60px;
+    width: calc(var(--px)*60);
     margin-bottom: 0;
 }
 .macro-add-section {
@@ -1004,14 +1045,14 @@ button#macro-add-param {
     float:right;
 }
 .macro-add-section select {
-    margin-right: 25px;
+    margin-right: calc(var(--px)*25);
     max-width: 100%;
 }
 
 /* Modulation matrix table */
 #mod-matrix-section {
     margin-top: 1rem;
-    width: 840px;
+    width: calc(var(--px)*840);
     margin-left: auto;
     margin-right: auto;
     text-align:center;
@@ -1032,45 +1073,45 @@ button#macro-add-param {
     padding-right: 0;
 }
 #mod-matrix-table th:not(:first-child) {
-    width: 48px;
+    width: calc(var(--px)*48);
 }
 #mod-matrix-table td.mod-source-cell .rect-slider-container {
-    width: 48px;
+    width: calc(var(--px)*48);
 }
 .mod-dest-select {
-    width: 320px;
+    width: calc(var(--px)*320);
 }
 #mod-matrix-table .mod-dest-value.rect-slider-container {
-    width: 60px;
+    width: calc(var(--px)*60);
     display: inline-block;
-    margin-left: 4px;
+    margin-left: calc(var(--px)*4);
 }
 #mod-matrix-table .close-x {
     color: blue;
-    height: 20px;
-    width: 20px;
-    padding: 0px;
-    margin: 0px;
-    font-size: 10px;
+    height: calc(var(--px)*20);
+    width: calc(var(--px)*20);
+    padding: calc(var(--px)*0);
+    margin: calc(var(--px)*0);
+    font-size: calc(var(--px)*10);
     background-color: transparent;
 }
 /* Nested dropdown for modulation matrix */
 .nested-dropdown {
     position: relative;
-    width: 300px;
+    width: calc(var(--px)*300);
 }
 
 .nested-dropdown .dropdown-toggle {
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    border: calc(var(--px)*1) solid var(--color-border);
+    border-radius: calc(var(--px)*4);
     padding: 0.25rem 0.5rem;
-    background: #fff;
+    background: var(--color-surface);
     cursor: pointer;
     display: flex;
     align-items: center;
 }
 #mod-matrix-table .nested-dropdown {
-    width: 240px;
+    width: calc(var(--px)*240);
     font-size: 0.6rem;
 }
 
@@ -1091,10 +1132,10 @@ button#macro-add-param {
     top: 100%;
     left: 0;
     right: 0;
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    max-height: 200px;
+    background: var(--color-surface);
+    border: calc(var(--px)*1) solid var(--color-border);
+    border-radius: calc(var(--px)*4);
+    max-height: calc(var(--px)*200);
     overflow-y: auto;
     z-index: 1000;
 }
@@ -1141,14 +1182,14 @@ button#macro-add-param {
 .adsr-canvas {
     display: block;
     margin: 0.5rem 0;
-    border: 1px solid #dedede;
+    border: calc(var(--px)*1) solid #dedede;
     width:100%
 }
 
 .lfo-canvas {
     display: block;
     margin: 0.5rem 0;
-    border: 1px solid #dedede;
+    border: calc(var(--px)*1) solid #dedede;
     width:100%
 }
 
@@ -1159,7 +1200,7 @@ button#macro-add-param {
 }
 
 .env-container .param-row {
-    width:235px;
+    width:calc(var(--px)*235);
 }
 
 .env-container .env-controls {
@@ -1170,6 +1211,6 @@ button#macro-add-param {
 }
 
 .env-visualization {
-    width: 200px;
-    height: 88px;
+    width: calc(var(--px)*200);
+    height: calc(var(--px)*88);
 }
