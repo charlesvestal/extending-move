@@ -920,29 +920,37 @@ class WavetableParamEditorHandler(BaseHandler):
             ordered.extend(items.values())
         return ordered
 
-    def _arrange_lfo_panel(self, items: dict) -> list:
-        """Return LFO panel rows in a specific layout."""
+    def _arrange_lfo_panel(self, items: dict, idx: int | None = None) -> list:
+        """Return LFO panel rows with a visualization canvas."""
         ordered = []
-        row1 = "".join([
-            items.pop("Type", ""),
-            items.pop("Sync", ""),
-            items.pop("AttackTime", ""),
-            items.pop("Retrigger", ""),
-        ])
+        canvas_id = f"lfo{idx}-canvas" if idx else "lfo-canvas"
+        ordered.append(
+            f'<canvas id="{canvas_id}" class="lfo-canvas" width="300" height="88"></canvas>'
+        )
+
+        rate = items.pop("Rate", "")
+        sync_rate = items.pop("SyncedRate", "")
+        sync = items.pop("Sync", "")
+        row1 = "".join([rate, sync_rate, sync])
         if row1.strip():
-            ordered.append(f'<div class="param-row">{row1}</div>')
+            ordered.append(f'<div class="param-row lfo-rate-row">{row1}</div>')
 
         row2 = "".join([
-            items.pop("Rate", ""),
-            items.pop("Amount", ""),
-            items.pop("Shaping", ""),
-            items.pop("PhaseOffset", ""),
+            items.pop("Type", ""),
+            items.pop("AttackTime", ""),
+            items.pop("Retrigger", ""),
         ])
         if row2.strip():
             ordered.append(f'<div class="param-row">{row2}</div>')
 
-        # Discard advanced parameters that shouldn't show in the UI
-        items.pop("SyncedRate", None)
+        row3 = "".join([
+            items.pop("Amount", ""),
+            items.pop("Shaping", ""),
+            items.pop("PhaseOffset", ""),
+        ])
+        if row3.strip():
+            ordered.append(f'<div class="param-row">{row3}</div>')
+
         items.pop("UnifiedRateModulation", None)
 
         if items:
@@ -1168,7 +1176,9 @@ class WavetableParamEditorHandler(BaseHandler):
                         cid = canvas_map.get(label)
                         group_items.extend(self._arrange_envelope_panel(items, cid))
                     elif sec == "Modulation" and label.startswith("LFO"):
-                        group_items.extend(self._arrange_lfo_panel(items))
+                        m = re.search(r"LFO\s*(\d)", label)
+                        idx = int(m.group(1)) if m else None
+                        group_items.extend(self._arrange_lfo_panel(items, idx))
                     else:
                         group_items.extend(items.values())
             if sections.get(sec):
