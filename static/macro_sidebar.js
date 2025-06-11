@@ -15,6 +15,28 @@ document.addEventListener('DOMContentLoaded', () => {
     if (n.startsWith('lfo_')) return 'lfo';
     return null;
   }
+
+  function macroSections(macro) {
+    const sections = new Set();
+    (macro.parameters || []).forEach(p => {
+      const sec = paramSection(p.name);
+      if (sec) sections.add(sec);
+    });
+    return sections;
+  }
+
+  function activateViz(sections) {
+    if (window.driftVizSetMode) {
+      let mode = null;
+      if (sections.has('filter')) mode = 'filter';
+      else if (sections.has('amp')) mode = 'env1';
+      else if (sections.has('env')) mode = 'env2';
+      if (mode) window.driftVizSetMode(mode);
+    }
+    if (sections.has('lfo') && window.driftLfoVizUpdate) {
+      window.driftLfoVizUpdate();
+    }
+  }
   function addSpaces(str) {
     return str
       .replace(/([A-Za-z])([0-9])/g, '$1 $2')
@@ -572,28 +594,22 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  macrosInput.addEventListener('change', applyMacroVisuals);
+  macrosInput.addEventListener('change', () => {
+    applyMacroVisuals();
+    const sections = new Set();
+    macros.forEach(m => {
+      macroSections(m).forEach(s => sections.add(s));
+    });
+    activateViz(sections);
+  });
   document.querySelectorAll('.macro-dial').forEach(d => {
     d.addEventListener('input', () => {
       const m = d.dataset.target.match(/macro_(\d+)_value/);
       const idx = m ? parseInt(m[1], 10) : NaN;
       const macro = macros.find(mc => mc.index === idx);
       if (macro) {
-        const sections = new Set();
-        (macro.parameters || []).forEach(p => {
-          const sec = paramSection(p.name);
-          if (sec) sections.add(sec);
-        });
-        if (window.driftVizSetMode) {
-          let mode = null;
-          if (sections.has('filter')) mode = 'filter';
-          else if (sections.has('amp')) mode = 'env1';
-          else if (sections.has('env')) mode = 'env2';
-          if (mode) window.driftVizSetMode(mode);
-        }
-        if (sections.has('lfo') && window.driftLfoVizUpdate) {
-          window.driftLfoVizUpdate();
-        }
+        const sections = macroSections(macro);
+        activateViz(sections);
       }
       applyMacroVisuals();
     });
