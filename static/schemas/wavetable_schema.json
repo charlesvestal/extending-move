@@ -431,7 +431,7 @@
     "max": 1.0,
     "options": [],
     "unit": "%",
-    "decimals": 0
+    "decimals": 2
   },
   "Voice_Modulators_Lfo1_Shape_PhaseOffset": {
     "type": "number",
@@ -446,7 +446,7 @@
     "max": 1.0,
     "options": [],
     "unit": "%",
-    "decimals": 0
+    "decimals": 2
   },
   "Voice_Modulators_Lfo1_Shape_Type": {
     "type": "enum",
@@ -507,7 +507,7 @@
     "max": 1.0,
     "options": [],
     "unit": "%",
-    "decimals": 0
+    "decimals": 2
   },
   "Voice_Modulators_Lfo2_Shape_PhaseOffset": {
     "type": "number",
@@ -522,7 +522,7 @@
     "max": 1.0,
     "options": [],
     "unit": "%",
-    "decimals": 0
+    "decimals": 2
   },
   "Voice_Modulators_Lfo2_Shape_Type": {
     "type": "enum",
