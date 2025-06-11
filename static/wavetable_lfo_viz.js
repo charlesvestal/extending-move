@@ -1,5 +1,5 @@
-export function initWavetableLfoViz() {
-  const canvas = document.getElementById('lfo1-canvas');
+export function initWavetableLfoViz(idx = 1) {
+  const canvas = document.getElementById(`lfo${idx}-canvas`);
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
 
@@ -13,16 +13,18 @@ export function initWavetableLfoViz() {
     return item ? item.querySelector('select') : null;
   };
 
-  const rateEl = qRange('Voice_Modulators_Lfo1_Time_Rate');
-  const syncRateEl = qRange('Voice_Modulators_Lfo1_Time_SyncedRate');
-  const syncSel = qSelect('Voice_Modulators_Lfo1_Time_Sync');
-  const shapeSel = qSelect('Voice_Modulators_Lfo1_Shape_Type');
-  const amountEl = qRange('Voice_Modulators_Lfo1_Shape_Amount');
-  const attackEl = qRange('Voice_Modulators_Lfo1_Time_AttackTime');
-  const offsetEl = qRange('Voice_Modulators_Lfo1_Shape_PhaseOffset');
+  const prefix = `Voice_Modulators_Lfo${idx}_`;
 
-  const rateItem = document.querySelector('.param-item[data-name="Voice_Modulators_Lfo1_Time_Rate"]');
-  const syncRateItem = document.querySelector('.param-item[data-name="Voice_Modulators_Lfo1_Time_SyncedRate"]');
+  const rateEl = qRange(`${prefix}Time_Rate`);
+  const syncRateEl = qRange(`${prefix}Time_SyncedRate`);
+  const syncSel = qSelect(`${prefix}Time_Sync`);
+  const shapeSel = qSelect(`${prefix}Shape_Type`);
+  const amountEl = qRange(`${prefix}Shape_Amount`);
+  const attackEl = qRange(`${prefix}Time_AttackTime`);
+  const offsetEl = qRange(`${prefix}Shape_PhaseOffset`);
+
+  const rateItem = document.querySelector(`.param-item[data-name="${prefix}Time_Rate"]`);
+  const syncRateItem = document.querySelector(`.param-item[data-name="${prefix}Time_SyncedRate"]`);
 
   const SYNC_RATES = [
     8, 6, 4, 3, 2, 1.5, 1, 0.75, 0.5, 0.375, 1/3, 5/16,
@@ -117,4 +119,7 @@ export function initWavetableLfoViz() {
   draw();
 }
 
-document.addEventListener('DOMContentLoaded', initWavetableLfoViz);
+document.addEventListener('DOMContentLoaded', () => {
+  initWavetableLfoViz(1);
+  initWavetableLfoViz(2);
+});
