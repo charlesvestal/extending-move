@@ -25,6 +25,8 @@ export function initDriftCombinedViz() {
   const ctx = canvas.getContext('2d');
 
   const qsel = name => document.querySelector(`.param-item[data-name="${name}"] input[type="hidden"]`);
+  const qrange = name => document.querySelector(`.param-item[data-name="${name}"] input[type="range"]`);
+  const qselect = name => document.querySelector(`.param-item[data-name="${name}"] select`);
 
   const filterInputs = {
     freq: qsel('Filter_Frequency'),
@@ -48,6 +50,16 @@ export function initDriftCombinedViz() {
     sustain: qenv('Envelope2_Sustain'),
     release: qenv('Envelope2_Release'),
     mode: qsel('Global_Envelope2Mode')
+  };
+
+  const env2Cyc = {
+    mid: qrange('CyclingEnvelope_MidPoint'),
+    hold: qrange('CyclingEnvelope_Hold'),
+    rate: qrange('CyclingEnvelope_Rate'),
+    ratio: qrange('CyclingEnvelope_Ratio'),
+    time: qrange('CyclingEnvelope_Time'),
+    sync: qrange('CyclingEnvelope_SyncedRate'),
+    modeSel: qselect('CyclingEnvelope_Mode')
   };
 
   function biquadCoeffs(type, freq, q, sr) {
@@ -148,6 +160,16 @@ export function initDriftCombinedViz() {
     drawLabel(label);
   }
 
+  function drawPlaceholder(text) {
+    ctx.save();
+    ctx.font = '16px sans-serif';
+    ctx.fillStyle = '#666';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+    ctx.restore();
+  }
+
   function drawLine(freq, mag, color) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.beginPath();
@@ -177,8 +199,12 @@ export function initDriftCombinedViz() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     if (active === 'env1') {
       drawEnv(env1, 'Amp');
-    } else if (active === 'env2' && (!env2.mode || env2.mode.value !== 'Cyc')) {
-      drawEnv(env2, 'Env2');
+    } else if (active === 'env2') {
+      if (env2.mode && env2.mode.value === 'Cyc') {
+        drawPlaceholder('cyc');
+      } else {
+        drawEnv(env2, 'Env2');
+      }
     } else {
       drawFilter();
     }
@@ -195,7 +221,13 @@ export function initDriftCombinedViz() {
   });
   [env1.attack, env1.decay, env1.sustain, env1.release].forEach(el => el && el.addEventListener('input', setEnv1));
   [env2.attack, env2.decay, env2.sustain, env2.release].forEach(el => el && el.addEventListener('input', setEnv2));
-  if (env2.mode) env2.mode.addEventListener('change', () => { if (active === 'env2') update(); });
+  if (env2.mode) env2.mode.addEventListener('change', setEnv2);
+
+  [env2Cyc.mid, env2Cyc.hold, env2Cyc.rate, env2Cyc.ratio, env2Cyc.time, env2Cyc.sync, env2Cyc.modeSel].forEach(el => {
+    if (!el) return;
+    const evt = el.tagName === 'SELECT' ? 'change' : 'input';
+    el.addEventListener(evt, setEnv2);
+  });
 
   update();
 }
