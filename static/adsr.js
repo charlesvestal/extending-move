@@ -9,6 +9,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const canvas = document.getElementById('adsr-canvas');
   const ctx = canvas.getContext('2d');
 
+  function setupCanvas() {
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+  }
+  setupCanvas();
+
   function draw() {
     const a = parseFloat(attack.value);
     const d = parseFloat(decay.value);
