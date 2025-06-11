@@ -41,7 +41,8 @@
     "type": "number",
     "min": 15,
     "max": 17,
-    "options": []
+    "options": [],
+    "decimals": 0
   },
   "CyclingEnvelope_Time": {
     "type": "number",
@@ -427,7 +428,8 @@
     "type": "number",
     "min": 9,
     "max": 21,
-    "options": []
+    "options": [],
+    "decimals": 0
   },
   "Lfo_Time": {
     "type": "number",
