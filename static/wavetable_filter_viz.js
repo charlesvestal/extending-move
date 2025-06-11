@@ -120,8 +120,19 @@ export function initWavetableFilterViz() {
     ctx.beginPath();
     const minDb = -60;
     const maxDb = 12;
+    const minFreq = 1;
+    let fMin = Infinity;
+    let fMax = 0;
     for (let i = 0; i < freq.length; i++) {
-      const x = (i / (freq.length - 1)) * canvas.width;
+      const f = Math.max(minFreq, freq[i]);
+      if (f < fMin) fMin = f;
+      if (f > fMax) fMax = f;
+    }
+    const logMin = Math.log10(fMin);
+    const logMax = Math.log10(fMax);
+    for (let i = 0; i < freq.length; i++) {
+      const f = Math.max(minFreq, freq[i]);
+      const x = (Math.log10(f) - logMin) / (logMax - logMin) * canvas.width;
       const db = Math.max(minDb, Math.min(maxDb, mag[i]));
       const y = canvas.height - ((db - minDb) / (maxDb - minDb)) * canvas.height;
       if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
