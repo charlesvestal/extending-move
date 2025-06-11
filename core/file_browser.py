@@ -92,6 +92,11 @@ FILTERS: dict[str, Callable[[str], bool]] = {
         or p.lower().endswith(".json")
     )
     and _check_json_file(p, "drumRack"),
+    "melodicsampler": lambda p: (
+        p.lower().endswith(".ablpreset")
+        or p.lower().endswith(".json")
+    )
+    and _check_json_file(p, "melodicSampler"),
 }
 
 

@@ -309,6 +309,46 @@ def test_wavetable_params_get(client, monkeypatch):
     assert b'Create New Wavetable Preset' in resp.data
     assert b'name="sprite1"' not in resp.data
 
+
+def test_melodic_sampler_params_post(client, monkeypatch):
+    def fake_post(form):
+        return {
+            'message': 'ok',
+            'message_type': 'success',
+            'params_html': '<div>p</div>',
+            'browser_root': '/tmp',
+            'selected_preset': 'x',
+            'param_count': 1,
+        }
+
+    monkeypatch.setattr(move_webserver.melodic_sampler_param_handler, 'handle_post', fake_post)
+    resp = client.post('/melodic-sampler', data={'action': 'select_preset'})
+    assert resp.status_code == 200
+    assert b'ok' in resp.data
+    assert b'<div>p</div>' in resp.data
+
+
+def test_melodic_sampler_params_get(client, monkeypatch):
+    from handlers.melodic_sampler_param_editor_handler_class import DEFAULT_PRESET as MP
+
+    def fake_get():
+        return {
+            'message': 'pick',
+            'message_type': 'info',
+            'file_browser_html': '<ul></ul>',
+            'params_html': '',
+            'selected_preset': None,
+            'param_count': 0,
+            'browser_root': '/tmp',
+            'default_preset_path': MP,
+        }
+
+    monkeypatch.setattr(move_webserver.melodic_sampler_param_handler, 'handle_get', fake_get)
+    resp = client.get('/melodic-sampler')
+    assert resp.status_code == 200
+    assert b'pick' in resp.data
+    assert b'Create New Melodic Sampler Preset' in resp.data
+
 def test_drum_rack_inspector_get(client, monkeypatch):
     def fake_get():
         return {
