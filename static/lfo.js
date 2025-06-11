@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const minRate = parseFloat(rateEl.min || '0');
     const maxRate = parseFloat(rateEl.max || '1');
     const ratio = Math.min(Math.max((rate - minRate) / (maxRate - minRate), 0), 1);
-    const cycles = 1 + ratio * 9;
+    const cycles = 2 + ratio * 8;
     const duration = cycles / (rate || 1); // seconds shown
     for (let i = 0; i <= w; i++) {
       const t = (i / w) * duration;
