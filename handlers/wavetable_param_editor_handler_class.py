@@ -68,6 +68,13 @@ MACRO_HIGHLIGHT_COLORS = {
     7: "#ffb6c1",  # lightpink
 }
 
+# Display labels for synced rate values
+SYNC_RATE_LABELS = [
+    "8", "6", "4", "3", "2", "1.5", "1", "3/4", "1/2", "3/8", "1/3", "5/16",
+    "1/4", "3/16", "1/6", "1/8", "1/12", "1/16", "1/24", "1/32", "1/48",
+    "1/64",
+]
+
 # Parameters that should not be assignable to macros. These cause issues
 # with the wavetable editor, so they are removed from the dropdown list
 # when editing presets.
@@ -723,6 +730,10 @@ class WavetableParamEditorHandler(BaseHandler):
                 if name == "Filter_Frequency":
                     input_classes += " filter-knob"
                     extra_attrs += ' data-diameter="48"'
+                if "SyncedRate" in name:
+                    step_attr = ' step="1"'
+                    dec_attr = ' data-decimals="0"'
+                    extra_attrs += f' data-values="{",".join(SYNC_RATE_LABELS)}"'
                 html.append(
                     f'<input id="param_{idx}_dial" type="range" class="{input_classes}" data-target="param_{idx}_value" '
                     f'data-display="{disp_id}" value="{value}"{min_attr}{max_attr}{step_attr}{unit_attr}{dec_attr}{extra_attrs}>'
