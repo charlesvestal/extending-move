@@ -736,10 +736,13 @@
     "type": "boolean",
     "min": null,
     "max": null,
-    "options": []
+    "options": [],
+    "unit": "%",
+    "decimals": 0
   },
-  "Voice_SubOscillator_Tone": {
-    "type": "number",
+    "max": 8,
+    "options": [],
+    "decimals": 0
     "min": 0.0,
     "max": 1.0,
     "options": [],
