@@ -374,12 +374,18 @@ document.addEventListener('DOMContentLoaded', () => {
     let val = null;
     const hid = item.querySelector('input[type="hidden"][name$="_value"]');
     if (hid) {
-      val = parseFloat(hid.value);
+      const num = parseFloat(hid.value);
+      val = isNaN(num) ? hid.value : num;
     } else {
       const sl = item.querySelector('.rect-slider');
-      if (sl) val = parseFloat(sl.dataset.value || '0');
+      if (sl) {
+        val = parseFloat(sl.dataset.value || '0');
+      } else {
+        const sel = item.querySelector('select.param-select');
+        if (sel) val = sel.value;
+      }
     }
-    if (name && !isNaN(val)) baseParamValues[name] = val;
+    if (name && val !== null) baseParamValues[name] = val;
   });
 
   function simpleFormat(v, dec) {
@@ -401,6 +407,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const dispEl = document.getElementById(dispId);
         if (dispEl) dispEl.textContent = simpleFormat(value);
       }
+      return;
+    }
+    const select = item.querySelector('select.param-select');
+    if (select) {
+      select.value = value;
+      const hid = item.querySelector('input[type="hidden"][name$="_value"]');
+      if (hid) hid.value = value;
       return;
     }
     const slider = item.querySelector('.rect-slider');
@@ -447,6 +460,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const mval = macroValues[m.index] ?? 0;
       (m.parameters || []).forEach(p => {
         const info = paramInfo[p.name] || {};
+        if (info.type === 'enum' && Array.isArray(info.options)) {
+          const opts = info.options;
+          const idx = Math.min(Math.floor((mval / 127) * opts.length), opts.length - 1);
+          const val = opts[idx];
+          updateParamVisual(p.name, val);
+          mappedNow.add(p.name);
+          return;
+        }
         let min = p.rangeMin !== undefined ? parseFloat(p.rangeMin) : (info.min !== undefined ? parseFloat(info.min) : 0);
         let max = p.rangeMax !== undefined ? parseFloat(p.rangeMax) : (info.max !== undefined ? parseFloat(info.max) : 127);
         const val = min + (max - min) * (mval / 127);
