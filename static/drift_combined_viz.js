@@ -17,7 +17,7 @@ export function initDriftCombinedViz() {
     envPanelItems.insertBefore(canvas, env2Canvas);
   }
 
-  ['driftFilterChart', 'amp-env-canvas', 'env2-canvas'].forEach(id => {
+  ['driftFilterChart', 'amp-env-canvas'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.display = 'none';
   });
@@ -52,9 +52,39 @@ export function initDriftCombinedViz() {
 
   const cycEnv = {
     time: qenv('CyclingEnvelope_Time'),
+    rate: qenv('CyclingEnvelope_Rate'),
+    ratio: qenv('CyclingEnvelope_Ratio'),
+    sync: qenv('CyclingEnvelope_SyncedRate'),
+    modeSel: document.querySelector('.param-item[data-name="CyclingEnvelope_Mode"] select'),
     tilt: qenv('CyclingEnvelope_MidPoint'),
     hold: qenv('CyclingEnvelope_Hold')
   };
+
+  function updateCanvasVisibility() {
+    if (!env2.mode) return;
+    const show = env2.mode.value === 'Cyc';
+    canvas.classList.toggle('hidden', !show);
+  }
+
+  updateCanvasVisibility();
+
+  function getCycleTime() {
+    if (!cycEnv.modeSel) return parseFloat(cycEnv.time ? cycEnv.time.value : '1');
+    const mode = cycEnv.modeSel.value;
+    if (mode === 'Freq' && cycEnv.rate) {
+      const r = parseFloat(cycEnv.rate.value);
+      return r ? 1 / r : 1;
+    }
+    if (mode === 'Ratio' && cycEnv.ratio) {
+      const rt = parseFloat(cycEnv.ratio.value);
+      return rt ? 1 / rt : 1;
+    }
+    if (mode === 'Sync' && cycEnv.sync) {
+      const mapping = { 15: 0.25, 16: 0.5, 17: 1 };
+      return mapping[cycEnv.sync.value] || 1;
+    }
+    return parseFloat(cycEnv.time ? cycEnv.time.value : '1');
+  }
 
   function biquadCoeffs(type, freq, q, sr) {
     const w0 = 2 * Math.PI * freq / sr;
@@ -155,8 +185,8 @@ export function initDriftCombinedViz() {
   }
 
   function drawCycEnv() {
-    if (!cycEnv.time || !cycEnv.tilt || !cycEnv.hold) return;
-    const time = parseFloat(cycEnv.time.value);
+    if (!cycEnv.tilt || !cycEnv.hold) return;
+    const time = getCycleTime();
     const tilt = parseFloat(cycEnv.tilt.value);
     const hold = parseFloat(cycEnv.hold.value);
     const windowTime = 2.5;
@@ -248,8 +278,14 @@ export function initDriftCombinedViz() {
   });
   [env1.attack, env1.decay, env1.sustain, env1.release].forEach(el => el && el.addEventListener('input', setEnv1));
   [env2.attack, env2.decay, env2.sustain, env2.release].forEach(el => el && el.addEventListener('input', setEnv2));
-  [cycEnv.time, cycEnv.tilt, cycEnv.hold].forEach(el => el && el.addEventListener('input', setEnv2));
-  if (env2.mode) env2.mode.addEventListener('change', () => { if (active === 'env2') update(); });
+  [cycEnv.time, cycEnv.rate, cycEnv.ratio, cycEnv.sync, cycEnv.tilt, cycEnv.hold].forEach(el => {
+    if (el) el.addEventListener('input', setEnv2);
+  });
+  if (cycEnv.modeSel) cycEnv.modeSel.addEventListener('change', setEnv2);
+  if (env2.mode) env2.mode.addEventListener('change', () => {
+    updateCanvasVisibility();
+    setEnv2();
+  });
 
   update();
 }

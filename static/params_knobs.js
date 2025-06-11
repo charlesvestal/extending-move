@@ -115,6 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateCycling() {
         if (!env2Input) return;
         const show = env2Input.value === 'Cyc';
+        const cycCanvas = document.getElementById('driftVizCanvas');
         if (cyclingRow) {
             cyclingRow.classList.toggle('hidden', !show);
         }
@@ -123,6 +124,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (env2Canvas) {
             env2Canvas.classList.toggle('hidden', show);
+        }
+        if (cycCanvas) {
+            cycCanvas.classList.toggle('hidden', !show);
         }
     }
     if (env2Input) {
