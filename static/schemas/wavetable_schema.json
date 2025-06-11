@@ -486,7 +486,7 @@
   "Voice_Modulators_Lfo1_Time_SyncedRate": {
     "type": "number",
     "min": 0,
-    "max": 19,
+    "max": 21,
     "options": []
   },
   "Voice_Modulators_Lfo1_Time_UnifiedRateModulation": {
@@ -561,7 +561,7 @@
   "Voice_Modulators_Lfo2_Time_SyncedRate": {
     "type": "number",
     "min": 0,
-    "max": 18,
+    "max": 21,
     "options": []
   },
   "Voice_Modulators_TimeScale": {
