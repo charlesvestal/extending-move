@@ -163,6 +163,13 @@ export function initDriftCombinedViz() {
   }
 
   let active = 'filter';
+
+  window.driftVizSetMode = (mode) => {
+    if (['filter', 'env1', 'env2'].includes(mode)) {
+      active = mode;
+      update();
+    }
+  };
   function update() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     if (active === 'env1') {
