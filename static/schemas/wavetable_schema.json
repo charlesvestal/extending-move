@@ -49,7 +49,9 @@
     "type": "number",
     "min": 20.0,
     "max": 20480.0,
-    "options": []
+    "options": [],
+    "unit": "Hz",
+    "decimals": 0
   },
   "Voice_Filter1_Morph": {
     "type": "number",
@@ -66,7 +68,7 @@
   "Voice_Filter1_Resonance": {
     "type": "number",
     "min": 0.0,
-    "max": 0.694444,
+    "max": 0.75,
     "options": []
   },
   "Voice_Filter1_Slope": {
@@ -118,7 +120,9 @@
     "type": "number",
     "min": 20.0,
     "max": 20480.0,
-    "options": []
+    "options": [],
+    "unit": "Hz",
+    "decimals": 0
   },
   "Voice_Filter2_Morph": {
     "type": "number",
@@ -135,7 +139,7 @@
   "Voice_Filter2_Resonance": {
     "type": "number",
     "min": 0.0,
-    "max": 0.813492,
+    "max": 0.75,
     "options": []
   },
   "Voice_Filter2_Slope": {
@@ -227,29 +231,37 @@
     "max": 1.0,
     "options": []
   },
+  "Voice_Modulators_AmpEnvelope_Times_Attack": {
+    "type": "number",
+    "min": 0,
+    "max": 20,
+    "options": [],
+    "unit": "s",
+    "decimals": 3
+  },
+  "Voice_Modulators_AmpEnvelope_Times_Decay": {
+    "type": "number",
+    "min": 0,
+    "max": 20,
+    "options": [],
+    "unit": "s",
+    "decimals": 3
+  },
   "Voice_Modulators_AmpEnvelope_Sustain": {
     "type": "number",
     "min": 0.0,
     "max": 1.0,
-    "options": []
-  },
-  "Voice_Modulators_AmpEnvelope_Times_Attack": {
-    "type": "number",
-    "min": 0.0,
-    "max": 0.0,
-    "options": []
-  },
-  "Voice_Modulators_AmpEnvelope_Times_Decay": {
-    "type": "number",
-    "min": 0.0,
-    "max": 20.0,
-    "options": []
+    "options": [],
+    "unit": "dB",
+    "decimals": 1
   },
   "Voice_Modulators_AmpEnvelope_Times_Release": {
     "type": "number",
-    "min": 0.0,
-    "max": 3.053029,
-    "options": []
+    "min": 0,
+    "max": 20,
+    "options": [],
+    "unit": "s",
+    "decimals": 3
   },
   "Voice_Modulators_Envelope2_LoopMode": {
     "type": "enum",
@@ -281,21 +293,35 @@
   },
   "Voice_Modulators_Envelope2_Times_Attack": {
     "type": "number",
-    "min": 0.0,
-    "max": 20.0,
-    "options": []
+    "min": 0,
+    "max": 20,
+    "options": [],
+    "unit": "s",
+    "decimals": 3
   },
   "Voice_Modulators_Envelope2_Times_Decay": {
     "type": "number",
+    "min": 0,
+    "max": 20,
+    "options": [],
+    "unit": "s",
+    "decimals": 3
+  },
+  "Voice_Modulators_Envelope2_Values_Sustain": {
+    "type": "number",
     "min": 0.0,
-    "max": 20.0,
-    "options": []
+    "max": 1.0,
+    "options": [],
+    "unit": "%",
+    "decimals": 2
   },
   "Voice_Modulators_Envelope2_Times_Release": {
     "type": "number",
-    "min": 0.0,
-    "max": 20.0,
-    "options": []
+    "min": 0,
+    "max": 20,
+    "options": [],
+    "unit": "s",
+    "decimals": 3
   },
   "Voice_Modulators_Envelope2_Values_Final": {
     "type": "number",
@@ -310,12 +336,6 @@
     "options": []
   },
   "Voice_Modulators_Envelope2_Values_Peak": {
-    "type": "number",
-    "min": 0.0,
-    "max": 1.0,
-    "options": []
-  },
-  "Voice_Modulators_Envelope2_Values_Sustain": {
     "type": "number",
     "min": 0.0,
     "max": 1.0,
@@ -351,21 +371,35 @@
   },
   "Voice_Modulators_Envelope3_Times_Attack": {
     "type": "number",
-    "min": 0.0,
-    "max": 20.0,
-    "options": []
+    "min": 0,
+    "max": 20,
+    "options": [],
+    "unit": "s",
+    "decimals": 3
   },
   "Voice_Modulators_Envelope3_Times_Decay": {
     "type": "number",
+    "min": 0,
+    "max": 20,
+    "options": [],
+    "unit": "s",
+    "decimals": 3
+  },
+  "Voice_Modulators_Envelope3_Values_Sustain": {
+    "type": "number",
     "min": 0.0,
-    "max": 20.0,
-    "options": []
+    "max": 1.0,
+    "options": [],
+    "unit": "%",
+    "decimals": 2
   },
   "Voice_Modulators_Envelope3_Times_Release": {
     "type": "number",
-    "min": 0.0,
-    "max": 20.0,
-    "options": []
+    "min": 0,
+    "max": 20,
+    "options": [],
+    "unit": "s",
+    "decimals": 3
   },
   "Voice_Modulators_Envelope3_Values_Final": {
     "type": "number",
@@ -385,12 +419,6 @@
     "max": 1.0,
     "options": []
   },
-  "Voice_Modulators_Envelope3_Values_Sustain": {
-    "type": "number",
-    "min": 0.0,
-    "max": 1.0,
-    "options": []
-  },
   "Voice_Modulators_Lfo1_Retrigger": {
     "type": "boolean",
     "min": null,
@@ -401,19 +429,24 @@
     "type": "number",
     "min": 0.0,
     "max": 1.0,
-    "options": []
+    "options": [],
+    "unit": "%",
+    "decimals": 2
   },
   "Voice_Modulators_Lfo1_Shape_PhaseOffset": {
     "type": "number",
     "min": 0.0,
-    "max": 270.0,
-    "options": []
+    "max": 360.0,
+    "options": [],
+    "unit": "\u00ba"
   },
   "Voice_Modulators_Lfo1_Shape_Shaping": {
     "type": "number",
     "min": -1.0,
     "max": 1.0,
-    "options": []
+    "options": [],
+    "unit": "%",
+    "decimals": 2
   },
   "Voice_Modulators_Lfo1_Shape_Type": {
     "type": "enum",
@@ -429,9 +462,11 @@
   },
   "Voice_Modulators_Lfo1_Time_AttackTime": {
     "type": "number",
-    "min": 0.0,
-    "max": 14.44502,
-    "options": []
+    "min": 0,
+    "max": 20,
+    "options": [],
+    "unit": "s",
+    "decimals": 3
   },
   "Voice_Modulators_Lfo1_Time_Rate": {
     "type": "number",
@@ -470,19 +505,24 @@
     "type": "number",
     "min": 0.0,
     "max": 1.0,
-    "options": []
+    "options": [],
+    "unit": "%",
+    "decimals": 2
   },
   "Voice_Modulators_Lfo2_Shape_PhaseOffset": {
     "type": "number",
     "min": 0.0,
     "max": 360.0,
-    "options": []
+    "options": [],
+    "unit": "\u00ba"
   },
   "Voice_Modulators_Lfo2_Shape_Shaping": {
     "type": "number",
-    "min": -0.84375,
+    "min": -1.0,
     "max": 1.0,
-    "options": []
+    "options": [],
+    "unit": "%",
+    "decimals": 2
   },
   "Voice_Modulators_Lfo2_Shape_Type": {
     "type": "enum",
@@ -497,9 +537,11 @@
   },
   "Voice_Modulators_Lfo2_Time_AttackTime": {
     "type": "number",
-    "min": 0.0,
-    "max": 14.940941,
-    "options": []
+    "min": 0,
+    "max": 20,
+    "options": [],
+    "unit": "s",
+    "decimals": 3
   },
   "Voice_Modulators_Lfo2_Time_Rate": {
     "type": "number",
@@ -555,9 +597,11 @@
   },
   "Voice_Oscillator1_Gain": {
     "type": "number",
-    "min": 0.193371,
-    "max": 1.0,
-    "options": []
+    "min": 0,
+    "max": 2,
+    "options": [],
+    "unit": "dB",
+    "decimals": 1
   },
   "Voice_Oscillator1_On": {
     "type": "boolean",
@@ -630,9 +674,11 @@
   },
   "Voice_Oscillator2_Gain": {
     "type": "number",
-    "min": 0.0,
-    "max": 1.0,
-    "options": []
+    "min": 0,
+    "max": 2,
+    "options": [],
+    "unit": "dB",
+    "decimals": 1
   },
   "Voice_Oscillator2_On": {
     "type": "boolean",
@@ -680,9 +726,11 @@
   },
   "Voice_SubOscillator_Gain": {
     "type": "number",
-    "min": 0.0,
-    "max": 1.0,
-    "options": []
+    "min": 0,
+    "max": 2,
+    "options": [],
+    "unit": "dB",
+    "decimals": 1
   },
   "Voice_SubOscillator_On": {
     "type": "boolean",
@@ -713,7 +761,9 @@
     "type": "number",
     "min": 0.0,
     "max": 1.0,
-    "options": []
+    "options": [],
+    "unit": "%",
+    "decimals": 2
   },
   "Voice_Unison_Mode": {
     "type": "enum",
@@ -728,8 +778,9 @@
   "Voice_Unison_VoiceCount": {
     "type": "number",
     "min": 2,
-    "max": 6,
-    "options": []
+    "max": 8,
+    "options": [],
+    "decimals": 0
   },
   "Volume": {
     "type": "number",
