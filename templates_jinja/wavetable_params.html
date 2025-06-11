@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <h2>Wavetable Preset Editor</h2>
-<p><em>Edit parameter values and assign macros. Note that Macro assignments override other values.</em></p>
+<p><em>Edit parameter values and assign macros. Note that Macro assignments override other values. This can easily create presets that are too complicated for the Move! If things are screwy, restart your Move. </em></p>
 {% if message %}
   <p class="{{ message_type if message_type else ('success' if success else 'error') }}">{{ message }}</p>
 {% endif %}
