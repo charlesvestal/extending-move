@@ -41,6 +41,7 @@ from handlers.refresh_handler_class import RefreshHandler
 from handlers.filter_viz_handler_class import FilterVizHandler
 from handlers.update_handler_class import UpdateHandler, REPO
 from handlers.adsr_handler_class import AdsrHandler
+from handlers.cyc_env_handler_class import CycEnvHandler
 from core.refresh_handler import refresh_library
 from core.file_browser import generate_dir_html
 
@@ -127,6 +128,7 @@ drum_rack_handler = DrumRackInspectorHandler()
 filter_viz_handler = FilterVizHandler()
 update_handler = UpdateHandler()
 adsr_handler = AdsrHandler()
+cyc_env_handler = CycEnvHandler()
 
 
 @app.before_request
@@ -343,6 +345,21 @@ def adsr_route():
         message_type=message_type,
         defaults=defaults,
         active_tab="adsr",
+    )
+
+
+@app.route("/cyc-env", methods=["GET"])
+def cyc_env_route():
+    result = cyc_env_handler.handle_get()
+    message = result.get("message")
+    message_type = result.get("message_type")
+    defaults = result.get("defaults", {})
+    return render_template(
+        "cyc_env.html",
+        message=message,
+        message_type=message_type,
+        defaults=defaults,
+        active_tab="cyc-env",
     )
 
 
