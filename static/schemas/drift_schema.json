@@ -34,7 +34,7 @@
   "CyclingEnvelope_Ratio": {
     "type": "number",
     "min": 0.25,
-    "max": 5.787109,
+    "max": 16,
     "options": []
   },
   "CyclingEnvelope_SyncedRate": {
@@ -126,7 +126,7 @@
   "Filter_HiPassFrequency": {
     "type": "number",
     "min": 10.0,
-    "max": 20500.00,
+    "max": 20480.00,
     "options": [],
     "unit": "Hz",
     "decimals": 2
@@ -196,7 +196,7 @@
   "Filter_Resonance": {
     "type": "number",
     "min": 0.0,
-    "max": 0.75,
+    "max": 1.0,
     "options": []
   },
   "Filter_Tracking": {
@@ -341,7 +341,7 @@
   },
   "Global_Volume": {
     "type": "number",
-    "min": 0.183872,
+    "min": 0.0,
     "max": 1.0,
     "options": []
   },
