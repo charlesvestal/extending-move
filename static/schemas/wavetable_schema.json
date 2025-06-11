@@ -47,7 +47,7 @@
   },
   "Voice_Filter1_Frequency": {
     "type": "number",
-    "min": 20.0,
+    "min": 10.0,
     "max": 20480.0,
     "options": [],
     "unit": "Hz",
@@ -118,7 +118,7 @@
   },
   "Voice_Filter2_Frequency": {
     "type": "number",
-    "min": 20.0,
+    "min": 10.0,
     "max": 20480.0,
     "options": [],
     "unit": "Hz",
