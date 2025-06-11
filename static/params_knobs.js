@@ -4,6 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const decimals = parseInt(el.dataset.decimals || '2', 10);
         const unit = el.dataset.unit || '';
         const step = parseFloat(el.step || el.dataset.step || '1');
+        const enumOptions = el.dataset.enumOptions ? el.dataset.enumOptions.split(',') : null;
+        const enumOffset = enumOptions ? parseFloat(el.min || '0') : 0;
         const percentUnit = unit === '%' || unit === 'ct';
         const displayDecimalsDefault = percentUnit ? 0 : decimals;
         const displayId = el.dataset.display;
@@ -30,6 +32,10 @@ document.addEventListener('DOMContentLoaded', () => {
             return 1 + db / 6;
         };
         const format = (v) => {
+            if (enumOptions) {
+                const idx = Math.round(v - enumOffset);
+                return enumOptions[idx] || v;
+            }
             let displayVal = shouldScale ? v * 100 : v;
             let unitLabel = unit;
             if (unit === 'Hz') {
@@ -58,7 +64,9 @@ document.addEventListener('DOMContentLoaded', () => {
             el.addEventListener('input', () => {
                 let v = parseFloat(el.value);
                 let q;
-                if (oscGain) {
+                if (enumOptions) {
+                    q = Math.round(v);
+                } else if (oscGain) {
                     let db = oscValToDb(v);
                     if (isFinite(db)) {
                         db = Math.round(db * 10) / 10;
