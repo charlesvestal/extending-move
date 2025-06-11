@@ -401,6 +401,34 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
     if (name && val !== null) baseParamValues[name] = val;
+
+    function getCurrent() {
+      let cur = null;
+      const hid = item.querySelector('input[type="hidden"][name$="_value"]');
+      if (hid) {
+        const num = parseFloat(hid.value);
+        cur = isNaN(num) ? hid.value : num;
+      } else {
+        const sl = item.querySelector('.rect-slider');
+        if (sl) {
+          cur = parseFloat(sl.dataset.value || '0');
+        } else {
+          const sel = item.querySelector('select.param-select');
+          if (sel) cur = sel.value;
+        }
+      }
+      return cur;
+    }
+
+    function updateBase() {
+      const v = getCurrent();
+      if (v !== null) baseParamValues[name] = v;
+    }
+
+    item.querySelectorAll('input.param-dial, input.param-slider, input.param-toggle, select.param-select, .rect-slider').forEach(ctrl => {
+      ctrl.addEventListener('input', updateBase);
+      ctrl.addEventListener('change', updateBase);
+    });
   });
 
   function formatDialValue(dial, v) {
