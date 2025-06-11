@@ -1,6 +1,9 @@
 import numpy as np
 from scipy import signal
 
+F_MIN = 20
+F_MAX = 20000
+
 
 def _biquad_coeffs(filter_type: str, freq: float, q: float, sr: int = 44100):
     """Return biquad filter coefficients."""
@@ -50,16 +53,24 @@ def _biquad_coeffs(filter_type: str, freq: float, q: float, sr: int = 44100):
     return b, a
 
 
-def compute_filter_response(filter_type: str, cutoff: float, resonance: float, slope: str, sr: int = 44100, n: int = 512):
-    """Compute frequency response for a single filter."""
+def compute_filter_response(
+    filter_type: str,
+    cutoff: float,
+    resonance: float,
+    slope: str,
+    sr: int = 44100,
+    n: int = 512,
+):
+    """Compute logarithmically spaced magnitude response for one filter."""
     q = 0.5 + 9.5 * resonance
     b, a = _biquad_coeffs(filter_type, cutoff, q, sr)
-    w, h = signal.freqz(b, a, n, fs=sr)
+    freqs = np.geomspace(F_MIN, F_MAX, n)
+    w, h = signal.freqz(b, a, worN=freqs, fs=sr)
     if str(slope) == "24":
-        w2, h2 = signal.freqz(b, a, n, fs=sr)
+        _, h2 = signal.freqz(b, a, worN=freqs, fs=sr)
         h *= h2
     mag = 20 * np.log10(np.abs(h) + 1e-9)
-    return w.tolist(), mag.tolist()
+    return freqs.tolist(), mag.tolist()
 
 
 def compute_chain_response(
