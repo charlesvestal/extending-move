@@ -367,6 +367,108 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // --- Macro visualization support ---
+  const baseParamValues = {};
+  document.querySelectorAll('.param-item').forEach(item => {
+    const name = item.dataset.name;
+    let val = null;
+    const hid = item.querySelector('input[type="hidden"][name$="_value"]');
+    if (hid) {
+      val = parseFloat(hid.value);
+    } else {
+      const sl = item.querySelector('.rect-slider');
+      if (sl) val = parseFloat(sl.dataset.value || '0');
+    }
+    if (name && !isNaN(val)) baseParamValues[name] = val;
+  });
+
+  function simpleFormat(v, dec) {
+    if (isNaN(v)) return 'not set';
+    const d = dec === undefined ? 2 : dec;
+    return Number(v).toFixed(d);
+  }
+
+  function updateParamVisual(name, value) {
+    const item = document.querySelector(`.param-item[data-name="${name}"]`);
+    if (!item) return;
+    const dial = item.querySelector('input.param-dial');
+    if (dial) {
+      dial.value = value;
+      dial.setAttribute('value', value);
+      if (dial.inputKnobs && typeof dial.redraw === 'function') dial.redraw(true);
+      const dispId = dial.dataset.display;
+      if (dispId) {
+        const dispEl = document.getElementById(dispId);
+        if (dispEl) dispEl.textContent = simpleFormat(value);
+      }
+      return;
+    }
+    const slider = item.querySelector('.rect-slider');
+    if (slider) {
+      const label = slider.querySelector('.rect-slider-label');
+      const fill = slider.querySelector('.rect-slider-fill');
+      const min = parseFloat(slider.dataset.min || '0');
+      const max = parseFloat(slider.dataset.max || '1');
+      const centered = slider.classList.contains('center') || slider.dataset.centered === 'true';
+      const range = max - min;
+      let v = Math.min(Math.max(value, min), max);
+      slider.dataset.value = v;
+      if (label) label.textContent = simpleFormat(v);
+      if (fill) {
+        if (centered) {
+          const mid = (max + min) / 2;
+          if (v >= mid) {
+            const pct = (v - mid) / (max - mid);
+            fill.style.left = '50%';
+            fill.style.width = pct * 50 + '%';
+          } else {
+            const pct = (mid - v) / (mid - min);
+            fill.style.left = 50 - pct * 50 + '%';
+            fill.style.width = pct * 50 + '%';
+          }
+        } else {
+          const pct = (v - min) / range;
+          fill.style.left = '0%';
+          fill.style.width = pct * 100 + '%';
+        }
+      }
+    }
+  }
+
+  function applyMacroVisuals() {
+    const macroValues = {};
+    document.querySelectorAll('input[name^="macro_"][name$="_value"]').forEach(h => {
+      const m = h.name.match(/macro_(\d+)_value/);
+      if (m) macroValues[parseInt(m[1], 10)] = parseFloat(h.value);
+    });
+
+    const mappedNow = new Set();
+    macros.forEach(m => {
+      const mval = macroValues[m.index] ?? 0;
+      (m.parameters || []).forEach(p => {
+        const info = paramInfo[p.name] || {};
+        let min = p.rangeMin !== undefined ? parseFloat(p.rangeMin) : (info.min !== undefined ? parseFloat(info.min) : 0);
+        let max = p.rangeMax !== undefined ? parseFloat(p.rangeMax) : (info.max !== undefined ? parseFloat(info.max) : 127);
+        const val = min + (max - min) * (mval / 127);
+        updateParamVisual(p.name, val);
+        mappedNow.add(p.name);
+      });
+    });
+
+    Object.keys(baseParamValues).forEach(name => {
+      if (!mappedNow.has(name)) {
+        updateParamVisual(name, baseParamValues[name]);
+      }
+    });
+  }
+
+  macrosInput.addEventListener('change', applyMacroVisuals);
+  document.querySelectorAll('.macro-dial').forEach(d => {
+    d.addEventListener('input', applyMacroVisuals);
+  });
+
+  applyMacroVisuals();
+
   updateHighlights();
   updateAddBtn();
 });
