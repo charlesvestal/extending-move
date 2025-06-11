@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import json
+import csv
 import logging
 from core.cache_manager import get_cache, set_cache
 
@@ -27,15 +28,50 @@ WAVETABLE_SPRITES_PATH = os.path.join(
     "wavetable_sprites.json",
 )
 
+DRIFT_CSV_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(__file__)),
+    "examples",
+    "Track Presets",
+    "Drift",
+    "drift_data.csv",
+)
+
 
 def load_drift_schema():
     """Load parameter metadata for Drift from ``drift_schema.json``."""
+    schema = {}
     try:
         with open(SCHEMA_PATH, "r") as f:
-            return json.load(f)
+            schema = json.load(f)
     except Exception as exc:
         logger.warning("Could not load drift schema: %s", exc)
-        return {}
+
+    # Merge additional metadata from the CSV if available
+    try:
+        with open(DRIFT_CSV_PATH, newline="") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                key = row.get("key")
+                if not key:
+                    continue
+                info = schema.get(key, {})
+                curve = row.get("curve")
+                if curve:
+                    info["curve"] = curve
+                try:
+                    mn = float(row.get("min"))
+                    mx = float(row.get("max"))
+                    info["min"] = mn
+                    info["max"] = mx
+                except (TypeError, ValueError):
+                    pass
+                schema[key] = info
+    except FileNotFoundError:
+        pass
+    except Exception as exc:
+        logger.warning("Could not merge drift CSV metadata: %s", exc)
+
+    return schema
 
 
 def load_wavetable_schema():

@@ -7,14 +7,32 @@ function initSlider(el){
   const max=parseFloat(el.dataset.max||1);
   const step=parseFloat(el.dataset.step||1);
   const unit=el.dataset.unit||'';
+  const curve=el.dataset.curve||'linear';
+  const rangeMin=parseFloat(el.dataset.rangeMin||min);
+  const rangeMax=parseFloat(el.dataset.rangeMax||max);
   const defaultValue=el.dataset.default!==undefined?parseFloat(el.dataset.default):0;
+  function toActual(v){
+    if(curve==='log'){
+      const t=(v-min)/(max-min);
+      return Math.exp(Math.log(rangeMin)+t*(Math.log(rangeMax)-Math.log(rangeMin)));
+    }
+    return v;
+  }
+  function fromActual(v){
+    if(curve==='log'){
+      const t=(Math.log(v)-Math.log(rangeMin))/(Math.log(rangeMax)-Math.log(rangeMin));
+      return min+t*(max-min);
+    }
+    return v;
+  }
   function getStep(v){
     return getPercentStep(v, unit, step, shouldScale);
   }
   const decimals=parseInt(el.dataset.decimals||2,10);
   const displayDecimalsDefault=(unit==='%'||unit==='ct')?0:decimals;
-  const shouldScale=(unit==='%'||unit==='ct') && Math.abs(max)<=1 && Math.abs(min)<=1;
-  let value=parseFloat(el.dataset.value||min);
+  const shouldScale=(unit==='%'||unit==='ct') && Math.abs(rangeMax)<=1 && Math.abs(rangeMin)<=1;
+  let normValue=parseFloat(el.dataset.value||min);
+  let value=toActual(normValue);
   const centered=el.classList.contains('center')||el.dataset.centered==='true';
   const targetId=el.dataset.target;
   const target=targetId?document.querySelector(`#${targetId}, input[name="${targetId}"]`):null;
@@ -53,30 +71,31 @@ function initSlider(el){
     label.textContent=format(value);
     if(target){target.value=value;target.dispatchEvent(new Event('change'));}
     const range=max-min;
+    let disp=normValue;
     if(centered){
       const mid=(max+min)/2;
-      if(value>=mid){
-        const pct=(value-mid)/(max-mid); //0..1
+      if(disp>=mid){
+        const pct=(disp-mid)/(max-mid);
         fill.style.left='50%';
         fill.style.width=(pct*50)+'%';
       }else{
-        const pct=(mid-value)/(mid-min);
+        const pct=(mid-disp)/(mid-min);
         fill.style.left=(50-pct*50)+'%';
         fill.style.width=(pct*50)+'%';
       }
     }else{
-      const pct=(value-min)/range;
+      const pct=(disp-min)/range;
       fill.style.left='0%';
       fill.style.width=(pct*100)+'%';
     }
   }
-  el._sliderUpdate = (v)=>{ value = clamp(parseFloat(v),min,max); update(); };
+  el._sliderUpdate = (v)=>{ normValue = clamp(parseFloat(v),min,max); value = toActual(normValue); update(); };
   function start(ev){
     if(el.classList.contains('disabled') || el.dataset.disabled==='true') return;
     ev.preventDefault();
     const startY=ev.touches?ev.touches[0].clientY:ev.clientY;
     const startX=ev.touches?ev.touches[0].clientX:ev.clientX;
-    const startVal=value;
+    const startVal=normValue;
     function move(e){
       const y=e.touches?e.touches[0].clientY:e.clientY;
       const x=e.touches?e.touches[0].clientX:e.clientX;
@@ -89,9 +108,12 @@ function initSlider(el){
       const scale=(max-min)/dragSense;
       const drag=Math.abs(dy)>Math.abs(dx)?dy:dx;
       let v=startVal+drag*scale;
-      let st=getStep(v);
-      v=Math.round(v/st)*st;
-      value=clamp(v,min,max);
+      let act=toActual(v);
+      let st=getStep(act);
+      act=Math.round((act-rangeMin)/st)*st+rangeMin;
+      act=clamp(act,rangeMin,rangeMax);
+      normValue=fromActual(act);
+      value=act;
       update();
     }
     function end(){
@@ -108,18 +130,21 @@ function initSlider(el){
   el.addEventListener('mousedown',start);
   el.addEventListener('touchstart',start);
   el.addEventListener('dblclick',()=>{
-    value=clamp(defaultValue,min,max);
+    value=clamp(defaultValue,rangeMin,rangeMax);
+    normValue=fromActual(value);
     update();
   });
   el.addEventListener('keydown',(e)=>{
     if(['ArrowUp','ArrowRight'].includes(e.key)){
       let st=getStep(value);
-      value=clamp(value+st,min,max);
+      value=clamp(value+st,rangeMin,rangeMax);
+      normValue=fromActual(value);
       update();
       e.preventDefault();
     }else if(['ArrowDown','ArrowLeft'].includes(e.key)){
       let st=getStep(value);
-      value=clamp(value-st,min,max);
+      value=clamp(value-st,rangeMin,rangeMax);
+      normValue=fromActual(value);
       update();
       e.preventDefault();
     }

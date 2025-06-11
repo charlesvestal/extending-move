@@ -11,14 +11,31 @@ document.addEventListener('DOMContentLoaded', () => {
         const displayEl = displayId ? document.getElementById(displayId) : null;
         const min = parseFloat(el.min);
         const max = parseFloat(el.max);
+        const curve = el.dataset.curve || 'linear';
+        const rangeMin = parseFloat(el.dataset.rangeMin || min);
+        const rangeMax = parseFloat(el.dataset.rangeMax || max);
         const oscGain = unit === 'dB' && !isNaN(min) && !isNaN(max) && min === 0 && max <= 2;
         if (oscGain) {
             // allow smooth input; actual rounding happens in handler
             el.step = '0.001';
         }
-        const shouldScale = (unit === '%' || unit === 'ct') && Math.abs(max) <= 1 && Math.abs(min) <= 1;
+        const shouldScale = (unit === '%' || unit === 'ct') && Math.abs(rangeMax) <= 1 && Math.abs(rangeMin) <= 1;
         const getStep = (v) => getPercentStep(v, unit, step, shouldScale);
         const getDisplayDecimals = (v) => getPercentDecimals(v, unit, displayDecimalsDefault, shouldScale);
+        const toActual = (val) => {
+            if (curve === 'log') {
+                const t = (val - min) / (max - min);
+                return Math.exp(Math.log(rangeMin) + t * (Math.log(rangeMax) - Math.log(rangeMin)));
+            }
+            return val;
+        };
+        const fromActual = (val) => {
+            if (curve === 'log') {
+                const t = (Math.log(val) - Math.log(rangeMin)) / (Math.log(rangeMax) - Math.log(rangeMin));
+                return t * (max - min) + min;
+            }
+            return val;
+        };
         const valueLabels = el.dataset.values ? el.dataset.values.split(',') : null;
         const oscValToDb = (val) => {
             if (val <= 0) return -Infinity;
@@ -58,8 +75,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             return Number(displayVal).toFixed(getDisplayDecimals(v)) + (unit ? ' ' + unitLabel : '');
         };
+        if (!isNaN(el.value)) {
+            el.value = fromActual(parseFloat(el.value));
+        }
         if (displayEl) {
-            displayEl.textContent = isNaN(el.value) ? 'not set' : format(parseFloat(el.value));
+            displayEl.textContent = isNaN(el.value) ? 'not set' : format(toActual(parseFloat(el.value)));
         }
         if (hidden) {
             el.addEventListener('input', () => {
@@ -74,8 +94,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         q = 0;
                     }
                 } else {
-                    const st = getStep(v);
-                    q = Math.round((v - min) / st) * st + min;
+                    const actual = toActual(v);
+                    const st = getStep(actual);
+                    q = Math.round((actual - rangeMin) / st) * st + rangeMin;
                 }
                 hidden.value = q;
                 if (displayEl) displayEl.textContent = format(q);

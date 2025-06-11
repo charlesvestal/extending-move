@@ -585,6 +585,7 @@ class SynthParamEditorHandler(BaseHandler):
             max_val = meta.get("max")
             decimals = meta.get("decimals")
             step_val = meta.get("step")
+            curve_val = meta.get("curve")
             if decimals is not None and step_val is None:
                 step_val = 10 ** (-decimals)
             if step_val is None and min_val is not None and max_val is not None and max_val <= 1 and min_val >= -1:
@@ -595,16 +596,26 @@ class SynthParamEditorHandler(BaseHandler):
                 if min_val is not None and max_val is not None and min_val < 0 < max_val:
                     classes.append("center")
                 attrs = []
-                if min_val is not None:
-                    attrs.append(f'data-min="{min_val}"')
-                if max_val is not None:
-                    attrs.append(f'data-max="{max_val}"')
+                if curve_val == "log":
+                    attrs.append('data-min="0"')
+                    attrs.append('data-max="1"')
+                    attrs.append(f'data-range-min="{min_val}"')
+                    attrs.append(f'data-range-max="{max_val}"')
+                    if step_val is None:
+                        attrs.append('data-step="0.01"')
+                else:
+                    if min_val is not None:
+                        attrs.append(f'data-min="{min_val}"')
+                    if max_val is not None:
+                        attrs.append(f'data-max="{max_val}"')
                 if step_val is not None:
                     attrs.append(f'data-step="{step_val}"')
                 if decimals is not None:
                     attrs.append(f'data-decimals="{decimals}"')
                 if unit_val:
                     attrs.append(f'data-unit="{unit_val}"')
+                if curve_val:
+                    attrs.append(f'data-curve="{curve_val}"')
                 attrs.append(f'data-target="param_{idx}_value"')
                 attrs.append(f'data-value="{value}"')
                 attr_str = " ".join(attrs)
@@ -613,11 +624,12 @@ class SynthParamEditorHandler(BaseHandler):
                 )
                 html.append(f'<input type="hidden" name="param_{idx}_value" value="{value}">')
             else:
-                min_attr = f' min="{min_val}"' if min_val is not None else ''
-                max_attr = f' max="{max_val}"' if max_val is not None else ''
+                min_attr = f' min="{0 if curve_val == "log" else min_val}"' if min_val is not None else ''
+                max_attr = f' max="{1 if curve_val == "log" else max_val}"' if max_val is not None else ''
                 step_attr = f' step="{step_val}"' if step_val is not None else ''
                 unit_attr = f' data-unit="{unit_val}"' if unit_val else ''
                 dec_attr = f' data-decimals="{decimals}"' if decimals is not None else ''
+                curve_attr = f' data-curve="{curve_val}" data-range-min="{min_val}" data-range-max="{max_val}"' if curve_val else ''
                 disp_id = f'param_{idx}_display'
                 input_classes = "param-dial input-knob"
                 extra_attrs = ""
@@ -630,7 +642,7 @@ class SynthParamEditorHandler(BaseHandler):
                     extra_attrs += f' data-values="{",".join(SYNC_RATE_LABELS)}"'
                 html.append(
                     f'<input id="param_{idx}_dial" type="range" class="{input_classes}" data-target="param_{idx}_value" '
-                    f'data-display="{disp_id}" value="{value}"{min_attr}{max_attr}{step_attr}{unit_attr}{dec_attr}{extra_attrs}>'
+                    f'data-display="{disp_id}" value="{value}"{min_attr}{max_attr}{step_attr}{unit_attr}{dec_attr}{curve_attr}{extra_attrs}>'
                 )
                 html.append(f'<span id="{disp_id}" class="param-number"></span>')
                 html.append(f'<input type="hidden" name="param_{idx}_value" value="{value}">')
