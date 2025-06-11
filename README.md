@@ -38,6 +38,7 @@ Tools for extending the Ableton Move. This project provides a companion webserve
   - Numeric parameters use sliders with an input field
   - Slider steps are 0.01 for values near ±1 and adapt to the parameter's default precision
   - Double-click a slider or knob to reset it to its default value (0 if unspecified)
+  - Per-control drag sensitivity can be tweaked with the `data-sensitivity` attribute
   - Enum parameters provide a dropdown of options
   - Create new presets starting from the included Analog Shape example
  

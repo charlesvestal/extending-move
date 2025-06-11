@@ -136,20 +136,22 @@ input[type=checkbox].input-switch:checked,input[type=radio].input-switch:checked
       h=parseFloat(el.getAttribute("data-height")||d||st.height);
       bg=el.getAttribute("data-bgcolor")||op.bgcolor;
       fg=el.getAttribute("data-fgcolor")||op.fgcolor;
-      ik.sensex=ik.sensey=200;
+      let sensFactor=parseFloat(el.getAttribute("data-sensitivity")||"1");
+      ik.sensFactor = sensFactor;
+      ik.sensex=ik.sensey=200*sensFactor;
       if(el.className.indexOf("input-knob")>=0)
         ik.itype="k";
       else{
         if(w>=h){
           ik.itype="h";
-          ik.sensex=w-h;
+          ik.sensex=(w-h)*sensFactor;
           ik.sensey=Infinity;
           el.style.backgroundSize="auto 100%";
         }
         else{
           ik.itype="v";
           ik.sensex=Infinity;
-          ik.sensey=h-w;
+          ik.sensey=(h-w)*sensFactor;
           el.style.backgroundSize="100% auto";
         }
       }
@@ -295,6 +297,7 @@ input[type=checkbox].input-switch:checked,input[type=radio].input-switch:checked
       let delta=ev.deltaY>0?-st:st;
       if(!ev.shiftKey)
         delta*=5;
+      delta /= ik.sensFactor;
       el.setValue(+el.value+delta);
       ev.preventDefault();
       ev.stopPropagation();
