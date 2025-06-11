@@ -68,7 +68,7 @@
   "Voice_Filter1_Resonance": {
     "type": "number",
     "min": 0.0,
-    "max": 0.75,
+    "max": 1.0,
     "options": []
   },
   "Voice_Filter1_Slope": {
@@ -139,7 +139,7 @@
   "Voice_Filter2_Resonance": {
     "type": "number",
     "min": 0.0,
-    "max": 0.75,
+    "max": 1.0,
     "options": []
   },
   "Voice_Filter2_Slope": {
