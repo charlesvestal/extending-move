@@ -23,7 +23,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const rise_frac = 0.5 * (1 - hold);
       const fall_start = rise_frac + hold;
       let y0;
-      if (phase < rise_frac) {
+      if (rise_frac <= 0) {
+        y0 = 1;
+      } else if (phase < rise_frac) {
         y0 = phase / rise_frac;
       } else if (phase < fall_start) {
         y0 = 1;
@@ -40,13 +42,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const skew = (tilt - 0.2) / 0.8;
         const attack = mix(0.5, 0.1, skew);
         const decay = 1 - attack;
-        if (phase < attack) {
-          y1 = phase / attack;
+        const localPhase = phase < rise_frac
+          ? (phase / rise_frac) * attack
+          : phase < fall_start
+            ? attack
+            : attack + ((phase - fall_start) / rise_frac) * decay;
+        if (localPhase < attack) {
+          y1 = localPhase / attack;
         } else {
-          y1 = 1 - (phase - attack) / decay;
+          y1 = 1 - (localPhase - attack) / decay;
         }
       }
-      const x = phase * w;
+      const maxTime = parseFloat(timeEl.max) || 1;
+      const x = (phase * time / maxTime) * w;
       const y = h - y1 * h;
       if (i === 0) {
         ctx.moveTo(x, y);
