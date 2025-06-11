@@ -563,7 +563,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function applyMacroVisuals() {
+  function applyMacroVisuals(changedIdx = null) {
     const macroValues = {};
     document.querySelectorAll('input[name^="macro_"][name$="_value"]').forEach(h => {
       const m = h.name.match(/macro_(\d+)_value/);
@@ -574,25 +574,24 @@ document.addEventListener('DOMContentLoaded', () => {
     macros.forEach(m => {
       const mval = macroValues[m.index] ?? 0;
       (m.parameters || []).forEach(p => {
+        mappedNow.add(p.name);
+        if (changedIdx !== null && m.index !== changedIdx) return;
         const info = paramInfo[p.name] || {};
         if (info.type === 'enum' && Array.isArray(info.options)) {
           const opts = info.options;
           const idx = Math.min(Math.floor((mval / 127) * opts.length), opts.length - 1);
           const val = opts[idx];
           updateParamVisual(p.name, val);
-          mappedNow.add(p.name);
           return;
         } else if (info.type === 'boolean') {
           const val = mval >= 64 ? 1 : 0;
           updateParamVisual(p.name, val);
-          mappedNow.add(p.name);
           return;
         }
         let min = p.rangeMin !== undefined ? parseFloat(p.rangeMin) : (info.min !== undefined ? parseFloat(info.min) : 0);
         let max = p.rangeMax !== undefined ? parseFloat(p.rangeMax) : (info.max !== undefined ? parseFloat(info.max) : 127);
         const val = min + (max - min) * (mval / 127);
         updateParamVisual(p.name, val);
-        mappedNow.add(p.name);
       });
     });
 
@@ -619,8 +618,10 @@ document.addEventListener('DOMContentLoaded', () => {
       if (macro) {
         const sections = macroSections(macro);
         activateViz(sections);
+        applyMacroVisuals(idx);
+      } else {
+        applyMacroVisuals();
       }
-      applyMacroVisuals();
     });
   });
 
