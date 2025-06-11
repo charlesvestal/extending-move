@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (n.includes('filter')) return 'filter';
     if (n.startsWith('envelope1_') || n.includes('ampenvelope')) return 'amp';
     if (n.startsWith('envelope2_') || n.startsWith('cyclingenvelope_') || n === 'global_envelope2mode') return 'env';
+    if (n.startsWith('lfo_')) return 'lfo';
     return null;
   }
   function addSpaces(str) {
@@ -497,6 +498,7 @@ document.addEventListener('DOMContentLoaded', () => {
           hidden.dispatchEvent(new Event('change'));
         }
       }
+      dial.dispatchEvent(new Event('input'));
       return;
     }
     const select = item.querySelector('select.param-select');
@@ -504,6 +506,7 @@ document.addEventListener('DOMContentLoaded', () => {
       select.value = value;
       const hid = item.querySelector('input[type="hidden"][name$="_value"]');
       if (hid) hid.value = value;
+      select.dispatchEvent(new Event('change'));
       return;
     }
     const toggle = item.querySelector('input.param-toggle');
@@ -517,6 +520,7 @@ document.addEventListener('DOMContentLoaded', () => {
         hid.value = isOn ? trueVal : falseVal;
         hid.dispatchEvent(new Event('change'));
       }
+      toggle.dispatchEvent(new Event('change'));
       return;
     }
     const slider = item.querySelector('.rect-slider');
@@ -524,6 +528,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (typeof slider._sliderUpdate === 'function') {
         slider._sliderUpdate(value);
       }
+      slider.dispatchEvent(new Event('input'));
     }
   }
 
@@ -573,17 +578,22 @@ document.addEventListener('DOMContentLoaded', () => {
       const m = d.dataset.target.match(/macro_(\d+)_value/);
       const idx = m ? parseInt(m[1], 10) : NaN;
       const macro = macros.find(mc => mc.index === idx);
-      if (macro && window.driftVizSetMode) {
+      if (macro) {
         const sections = new Set();
         (macro.parameters || []).forEach(p => {
           const sec = paramSection(p.name);
           if (sec) sections.add(sec);
         });
-        let mode = null;
-        if (sections.has('filter')) mode = 'filter';
-        else if (sections.has('amp')) mode = 'env1';
-        else if (sections.has('env')) mode = 'env2';
-        if (mode) window.driftVizSetMode(mode);
+        if (window.driftVizSetMode) {
+          let mode = null;
+          if (sections.has('filter')) mode = 'filter';
+          else if (sections.has('amp')) mode = 'env1';
+          else if (sections.has('env')) mode = 'env2';
+          if (mode) window.driftVizSetMode(mode);
+        }
+        if (sections.has('lfo') && window.driftLfoVizUpdate) {
+          window.driftLfoVizUpdate();
+        }
       }
       applyMacroVisuals();
     });
