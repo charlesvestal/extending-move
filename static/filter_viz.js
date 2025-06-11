@@ -23,8 +23,14 @@ export function initFilterViz() {
     ctx.beginPath();
     const minDb = -60;
     const maxDb = 12;
+    const minF = 10;
+    const maxF = 22050;
+    const logMin = Math.log10(minF);
+    const logMax = Math.log10(maxF);
     for (let i = 0; i < freq.length; i++) {
-      const x = (i / (freq.length - 1)) * canvas.width;
+      const f = Math.max(minF, Math.min(maxF, freq[i]));
+      const norm = (Math.log10(f) - logMin) / (logMax - logMin);
+      const x = norm * canvas.width;
       const db = Math.max(minDb, Math.min(maxDb, mag[i]));
       const y = canvas.height - ((db - minDb) / (maxDb - minDb)) * canvas.height;
       if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);

@@ -73,11 +73,14 @@ export function initWavetableFilterViz() {
     const { b, a } = biquadCoeffs(type, freq, q, sr);
     const freqArr = [];
     const mag = [];
+    const minF = 10;
+    const maxF = sr / 2;
     for (let i = 0; i < n; i++) {
-      const w = Math.PI * i / (n - 1);
+      const f = minF * Math.pow(maxF / minF, i / (n - 1));
+      const w = 2 * Math.PI * f / sr;
       let m = biquadMag(b, a, w);
       if (String(slope) === '24') m *= biquadMag(b, a, w);
-      freqArr.push(sr * i / (2 * (n - 1)));
+      freqArr.push(f);
       mag.push(20 * Math.log10(m + 1e-9));
     }
     return { freq: freqArr, mag };
@@ -120,8 +123,14 @@ export function initWavetableFilterViz() {
     ctx.beginPath();
     const minDb = -60;
     const maxDb = 12;
+    const minF = 10;
+    const maxF = 22050;
+    const logMin = Math.log10(minF);
+    const logMax = Math.log10(maxF);
     for (let i = 0; i < freq.length; i++) {
-      const x = (i / (freq.length - 1)) * canvas.width;
+      const f = Math.max(minF, Math.min(maxF, freq[i]));
+      const norm = (Math.log10(f) - logMin) / (logMax - logMin);
+      const x = norm * canvas.width;
       const db = Math.max(minDb, Math.min(maxDb, mag[i]));
       const y = canvas.height - ((db - minDb) / (maxDb - minDb)) * canvas.height;
       if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
