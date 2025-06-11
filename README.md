@@ -2,7 +2,7 @@
 
 Tools for extending the Ableton Move. This project provides a companion webserver that runs alongside the official Move server, accessible at ``move.local:909``!
 
-![CleanShot 2025-05-11 at 10 56 02](https://github.com/user-attachments/assets/be64a1d8-992a-4a84-bbbf-15095479d11d)
+![CleanShot 2025-06-11 at 14 22 41](https://github.com/user-attachments/assets/e3ef7449-67e8-4b5e-958f-2c628a90b64d)
 
 
 [Demo on YouTube](https://www.youtube.com/watch?v=MCmaCifzgbg)
