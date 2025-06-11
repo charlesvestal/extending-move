@@ -160,6 +160,72 @@ export function initDriftCombinedViz() {
     drawLabel(label);
   }
 
+  const SYNC_RATES = [
+    8, 6, 4, 3, 2, 1.5, 1, 0.75, 0.5, 0.375, 1/3, 5/16,
+    0.25, 3/16, 1/6, 1/8, 1/12, 1/16, 1/24, 1/32, 1/48,
+    1/64
+  ];
+  const BPM = 120;
+
+  function getCycleSeconds() {
+    const mode = env2Cyc.modeSel ? env2Cyc.modeSel.value : 'Freq';
+    if (mode === 'Freq' && env2Cyc.rate) {
+      const r = parseFloat(env2Cyc.rate.value || '0');
+      return r > 0 ? 1 / r : 0;
+    }
+    if (mode === 'Ratio' && env2Cyc.ratio) {
+      const r = parseFloat(env2Cyc.ratio.value || '0');
+      return r > 0 ? 1 / r : 0;
+    }
+    if (mode === 'Time' && env2Cyc.time) {
+      return parseFloat(env2Cyc.time.value || '0');
+    }
+    if (mode === 'Sync' && env2Cyc.sync) {
+      const idx = parseInt(env2Cyc.sync.value || '0', 10);
+      const bars = SYNC_RATES[idx] || 1;
+      const beats = bars * 4;
+      return (60 / BPM) * beats;
+    }
+    return 0;
+  }
+
+  function drawCyc() {
+    const mid = env2Cyc.mid ? parseFloat(env2Cyc.mid.value) : 0.5;
+    const hold = env2Cyc.hold ? parseFloat(env2Cyc.hold.value) : 0;
+    const duration = getCycleSeconds() || 1;
+    const maxTime = env2Cyc.time ? parseFloat(env2Cyc.time.max || '1') : duration;
+    const w = canvas.width;
+    const h = canvas.height;
+    ctx.beginPath();
+    const steps = 100;
+    const peakPos = Math.min(Math.max((mid - 0.2) / 0.8, 0), 1);
+    const riseEnd = peakPos * (1 - hold);
+    const fallStart = riseEnd + hold;
+    for (let i = 0; i <= steps; i++) {
+      const phase = i / steps;
+      let y;
+      if (phase < riseEnd) {
+        y = riseEnd === 0 ? 1 : phase / riseEnd;
+      } else if (phase < fallStart) {
+        y = 1;
+      } else {
+        const denom = 1 - fallStart;
+        const p = denom === 0 ? 0 : (phase - fallStart) / denom;
+        y = denom === 0 ? 1 : 1 - p;
+      }
+      const x = (phase * duration / maxTime) * w;
+      const yPix = h - y * h;
+      if (i === 0) {
+        ctx.moveTo(x, yPix);
+      } else {
+        ctx.lineTo(x, yPix);
+      }
+    }
+    ctx.strokeStyle = '#f00';
+    ctx.stroke();
+    drawLabel('Cyc');
+  }
+
   function drawPlaceholder(text) {
     ctx.save();
     ctx.font = '16px sans-serif';
@@ -201,7 +267,7 @@ export function initDriftCombinedViz() {
       drawEnv(env1, 'Amp');
     } else if (active === 'env2') {
       if (env2.mode && env2.mode.value === 'Cyc') {
-        drawPlaceholder('cyc');
+        drawCyc();
       } else {
         drawEnv(env2, 'Env2');
       }
