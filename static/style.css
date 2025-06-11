@@ -1154,7 +1154,7 @@ button#macro-add-param {
 
 .env-container {
     display: flex;
-    align-items: center;
+    align-items: top;
     gap: 0.5rem;
 }
 
