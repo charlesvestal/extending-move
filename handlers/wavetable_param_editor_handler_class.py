@@ -882,11 +882,11 @@ class WavetableParamEditorHandler(BaseHandler):
         )
 
         loop = items.pop("LoopMode", "")
-        final_val = items.pop("Final", "")
         initial_val = items.pop("Initial", "")
         peak_val = items.pop("Peak", "")
+        final_val = items.pop("Final", "")
 
-        second_row = "".join([loop, final_val, initial_val, peak_val])
+        second_row = "".join([loop, initial_val, peak_val, final_val])
 
         rows = []
         if row.strip():
