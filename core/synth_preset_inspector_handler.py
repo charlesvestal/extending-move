@@ -21,6 +21,13 @@ WAVETABLE_SCHEMA_PATH = os.path.join(
     "wavetable_schema.json",
 )
 
+MELODIC_SAMPLER_SCHEMA_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(__file__)),
+    "static",
+    "schemas",
+    "melodicSampler_schema.json",
+)
+
 WAVETABLE_SPRITES_PATH = os.path.join(
     os.path.dirname(os.path.dirname(__file__)),
     "static",
@@ -45,6 +52,16 @@ def load_wavetable_schema():
             return json.load(f)
     except Exception as exc:
         logger.warning("Could not load wavetable schema: %s", exc)
+        return {}
+
+
+def load_melodic_sampler_schema():
+    """Load parameter metadata for MelodicSampler from ``melodicSampler_schema.json``."""
+    try:
+        with open(MELODIC_SAMPLER_SCHEMA_PATH, "r") as f:
+            return json.load(f)
+    except Exception as exc:
+        logger.warning("Could not load melodic sampler schema: %s", exc)
         return {}
 
 
