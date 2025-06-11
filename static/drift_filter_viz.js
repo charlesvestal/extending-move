@@ -55,19 +55,19 @@ export function initDriftFilterViz() {
 
   function computeResponse(type, freq, res, slope, sr = 44100, n = 256) {
     const q = 0.5 + 9.5 * res;
+    const freqs = Array.from({ length: n }, (_, i) =>
+      10 ** (Math.log10(10) + (Math.log10(20000) - Math.log10(10)) * i / (n - 1)));
     const { b, a } = biquadCoeffs(type, freq, q, sr);
-    const freqArr = [];
     const mag = [];
-    for (let i = 0; i < n; i++) {
-      const w = Math.PI * i / (n - 1);
+    for (let i = 0; i < freqs.length; i++) {
+      const w = 2 * Math.PI * freqs[i] / sr;
       let m = biquadMag(b, a, w);
       if (String(slope) === '24') {
         m *= biquadMag(b, a, w);
       }
-      freqArr.push(sr * i / (2 * (n - 1)));
       mag.push(20 * Math.log10(m + 1e-9));
     }
-    return { freq: freqArr, mag };
+    return { freq: freqs, mag };
   }
 
   function update() {
@@ -86,9 +86,11 @@ export function initDriftFilterViz() {
   function drawLine(freq, mag, color) {
     ctx.beginPath();
     const minDb = -60;
-    const maxDb = 12;
+    const maxDb = 0;
+    const logMin = Math.log10(10);
+    const logMax = Math.log10(20000);
     for (let i = 0; i < freq.length; i++) {
-      const x = (i / (freq.length - 1)) * canvas.width;
+      const x = ((Math.log10(freq[i]) - logMin) / (logMax - logMin)) * canvas.width;
       const db = Math.max(minDb, Math.min(maxDb, mag[i]));
       const y = canvas.height - ((db - minDb) / (maxDb - minDb)) * canvas.height;
       if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);

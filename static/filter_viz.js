@@ -22,9 +22,11 @@ export function initFilterViz() {
   function drawLine(freq, mag, color) {
     ctx.beginPath();
     const minDb = -60;
-    const maxDb = 12;
+    const maxDb = 0;
+    const logMin = Math.log10(10);
+    const logMax = Math.log10(20000);
     for (let i = 0; i < freq.length; i++) {
-      const x = (i / (freq.length - 1)) * canvas.width;
+      const x = ((Math.log10(freq[i]) - logMin) / (logMax - logMin)) * canvas.width;
       const db = Math.max(minDb, Math.min(maxDb, mag[i]));
       const y = canvas.height - ((db - minDb) / (maxDb - minDb)) * canvas.height;
       if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);

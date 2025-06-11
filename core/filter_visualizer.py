@@ -50,16 +50,50 @@ def _biquad_coeffs(filter_type: str, freq: float, q: float, sr: int = 44100):
     return b, a
 
 
-def compute_filter_response(filter_type: str, cutoff: float, resonance: float, slope: str, sr: int = 44100, n: int = 512):
-    """Compute frequency response for a single filter."""
-    q = 0.5 + 9.5 * resonance
+def _single_response(
+    filter_type: str,
+    cutoff: float,
+    q: float,
+    slope: str,
+    sr: int,
+    freqs: np.ndarray,
+):
+    """Return magnitude response for a single biquad type."""
     b, a = _biquad_coeffs(filter_type, cutoff, q, sr)
-    w, h = signal.freqz(b, a, n, fs=sr)
+    w = 2 * np.pi * freqs / sr
+    w, h = signal.freqz(b, a, worN=w)
     if str(slope) == "24":
-        w2, h2 = signal.freqz(b, a, n, fs=sr)
+        _, h2 = signal.freqz(b, a, worN=w)
         h *= h2
     mag = 20 * np.log10(np.abs(h) + 1e-9)
-    return w.tolist(), mag.tolist()
+    return mag
+
+
+def compute_filter_response(
+    filter_type: str,
+    cutoff: float,
+    resonance: float,
+    slope: str,
+    sr: int = 44100,
+    n: int = 512,
+    morph: float = 0.0,
+):
+    """Compute frequency response for a single filter."""
+    freqs = np.logspace(np.log10(10), np.log10(20000), n)
+    q = 0.5 + 9.5 * resonance
+
+    if filter_type.lower() == "morph":
+        stages = ["lowpass", "bandpass", "highpass", "notch", "lowpass"]
+        pos = morph * 4
+        idx = int(np.floor(pos))
+        frac = pos - idx
+        mag1 = _single_response(stages[idx], cutoff, q, slope, sr, freqs)
+        mag2 = _single_response(stages[idx + 1], cutoff, q, slope, sr, freqs)
+        mag = mag1 * (1 - frac) + mag2 * frac
+    else:
+        mag = _single_response(filter_type, cutoff, q, slope, sr, freqs)
+
+    return freqs.tolist(), mag.tolist()
 
 
 def compute_chain_response(
