@@ -17,12 +17,14 @@ class FilterVizHandler(BaseHandler):
         f1_freq = float(form.getvalue("filter1_freq", 1000))
         f1_res = float(form.getvalue("filter1_res", 0.0))
         f1_slope = form.getvalue("filter1_slope", "12")
+        f1_morph = float(form.getvalue("filter1_morph", 0.0))
 
         filter1 = {
             "filter_type": f1_type,
             "cutoff": f1_freq,
             "resonance": f1_res,
             "slope": f1_slope,
+            "morph": f1_morph,
         }
 
         if form.getvalue("use_filter2"):
@@ -30,11 +32,13 @@ class FilterVizHandler(BaseHandler):
             f2_freq = float(form.getvalue("filter2_freq", 1000))
             f2_res = float(form.getvalue("filter2_res", 0.0))
             f2_slope = form.getvalue("filter2_slope", "12")
+            f2_morph = float(form.getvalue("filter2_morph", 0.0))
             filter2 = {
                 "filter_type": f2_type,
                 "cutoff": f2_freq,
                 "resonance": f2_res,
                 "slope": f2_slope,
+                "morph": f2_morph,
             }
         else:
             filter2 = None
