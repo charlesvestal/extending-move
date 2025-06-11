@@ -554,7 +554,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function applyMacroVisuals() {
+  function applyMacroVisuals(targetIndices = null) {
+    const indicesToProcess = new Set();
+    if (targetIndices !== null) {
+      (Array.isArray(targetIndices) ? targetIndices : [targetIndices]).forEach(i => indicesToProcess.add(i));
+    }
+
     const macroValues = {};
     document.querySelectorAll('input[name^="macro_"][name$="_value"]').forEach(h => {
       const m = h.name.match(/macro_(\d+)_value/);
@@ -563,6 +568,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const mappedNow = new Set();
     macros.forEach(m => {
+      if (indicesToProcess.size && !indicesToProcess.has(m.index)) return;
       const mval = macroValues[m.index] ?? 0;
       (m.parameters || []).forEach(p => {
         const info = paramInfo[p.name] || {};
@@ -587,11 +593,13 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
-    Object.keys(baseParamValues).forEach(name => {
-      if (!mappedNow.has(name)) {
-        updateParamVisual(name, baseParamValues[name]);
-      }
-    });
+    if (!indicesToProcess.size) {
+      Object.keys(baseParamValues).forEach(name => {
+        if (!mappedNow.has(name)) {
+          updateParamVisual(name, baseParamValues[name]);
+        }
+      });
+    }
   }
 
   macrosInput.addEventListener('change', () => {
@@ -611,7 +619,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const sections = macroSections(macro);
         activateViz(sections);
       }
-      applyMacroVisuals();
+      applyMacroVisuals(idx);
     });
   });
 
