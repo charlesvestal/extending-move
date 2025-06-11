@@ -42,6 +42,7 @@ from handlers.filter_viz_handler_class import FilterVizHandler
 from handlers.update_handler_class import UpdateHandler, REPO
 from handlers.adsr_handler_class import AdsrHandler
 from handlers.cyc_env_handler_class import CycEnvHandler
+from handlers.lfo_handler_class import LfoHandler
 from core.refresh_handler import refresh_library
 from core.file_browser import generate_dir_html
 
@@ -129,6 +130,7 @@ filter_viz_handler = FilterVizHandler()
 update_handler = UpdateHandler()
 adsr_handler = AdsrHandler()
 cyc_env_handler = CycEnvHandler()
+lfo_handler = LfoHandler()
 
 
 @app.before_request
@@ -360,6 +362,21 @@ def cyc_env_route():
         message_type=message_type,
         defaults=defaults,
         active_tab="cyc-env",
+    )
+
+
+@app.route("/lfo", methods=["GET"])
+def lfo_route():
+    result = lfo_handler.handle_get()
+    message = result.get("message")
+    message_type = result.get("message_type")
+    defaults = result.get("defaults", {})
+    return render_template(
+        "lfo.html",
+        message=message,
+        message_type=message_type,
+        defaults=defaults,
+        active_tab="lfo",
     )
 
 
