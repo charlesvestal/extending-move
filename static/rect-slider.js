@@ -84,7 +84,8 @@ function initSlider(el){
       const dx=x-startX;
       const isShift = e.shiftKey;
       // slower movement when holding Shift
-      const dragSense = isShift ? 2000 : 200;
+      const sens=parseFloat(el.dataset.sensitivity||'1');
+      const dragSense = (isShift ? 2000 : 200) * sens;
       const scale=(max-min)/dragSense;
       const drag=Math.abs(dy)>Math.abs(dx)?dy:dx;
       let v=startVal+drag*scale;
