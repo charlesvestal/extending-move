@@ -1,0 +1,132 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "instrumentRack",
+  "name": "E-Piano Wurli",
+  "lockId": 1001,
+  "lockSeal": -139892123,
+  "parameters": {
+    "Enabled": true,
+    "Macro0": 0.0,
+    "Macro1": 0.0,
+    "Macro2": 0.0,
+    "Macro3": 0.0,
+    "Macro4": 0.0,
+    "Macro5": 0.0,
+    "Macro6": 0.0,
+    "Macro7": 0.0
+  },
+  "chains": [
+    {
+      "name": "",
+      "color": 0,
+      "devices": [
+        {
+          "presetUri": null,
+          "kind": "melodicSampler",
+          "name": "E-Piano Wurli",
+          "parameters": {
+            "Enabled": true,
+            "Voice_AmplitudeEnvelope_Attack": 0.0010040825605392456,
+            "Voice_AmplitudeEnvelope_Decay": 42.42856640625,
+            "Voice_AmplitudeEnvelope_Release": 0.14999998474121093,
+            "Voice_AmplitudeEnvelope_Sustain": 0.10748888552188873,
+            "Voice_AmplitudeEnvelope_SustainMode": "Gate",
+            "Voice_Detune": 0.0,
+            "Voice_FilterEnvelope_Attack": 0.00010000000149011613,
+            "Voice_FilterEnvelope_Decay": 0.6,
+            "Voice_FilterEnvelope_On": true,
+            "Voice_FilterEnvelope_Release": 0.05,
+            "Voice_FilterEnvelope_Sustain": 0.0,
+            "Voice_Filter_Frequency": 8699.4072265625,
+            "Voice_Filter_FrequencyModulationAmounts_EnvelopeAmount": 0,
+            "Voice_Filter_FrequencyModulationAmounts_LfoAmount": 21.732282638549805,
+            "Voice_Filter_On": true,
+            "Voice_Filter_Resonance": 0.0,
+            "Voice_Filter_Slope": "12",
+            "Voice_Filter_Type": "Lowpass",
+            "Voice_Gain": 1.0,
+            "Voice_Lfo_On": true,
+            "Voice_Lfo_Rate": 1.0,
+            "Voice_Lfo_Type": "Sine",
+            "Voice_PlaybackLength": 1.0,
+            "Voice_PlaybackStart": 0.0,
+            "Voice_Transpose": 0,
+            "Voice_VelocityToVolume": 0.3499999940395355,
+            "Volume": -16.0
+          },
+          "deviceData": {
+            "sampleUri": "ableton:/packs/abl-core-library/Samples/Notes/E-Piano%20Wurli%20C3.aif"
+          }
+        },
+        {
+          "presetUri": null,
+          "kind": "chorus",
+          "name": "",
+          "parameters": {
+            "Amount": 0.1111111119389534,
+            "DryWet": 0.5,
+            "Enabled": true,
+            "Feedback": 0.0,
+            "HighpassEnabled": true,
+            "HighpassFrequency": 20.0,
+            "InvertFeedback": false,
+            "Mode": "Vibrato",
+            "OutputGain": 0.9999999403953552,
+            "Rate": 1.1341490745544434,
+            "Shaping": 0.0,
+            "VibratoOffset": 0.0,
+            "Warmth": 0.0,
+            "Width": 1.0
+          },
+          "deviceData": {}
+        },
+        {
+          "presetUri": null,
+          "kind": "phaser",
+          "name": "",
+          "parameters": {
+            "CenterFrequency": 999.9998779296875,
+            "DoublerDelayTime": 0.07999999821186066,
+            "DryWet": 0.546875,
+            "Enabled": true,
+            "Feedback": 0.0,
+            "FlangerDelayTime": 0.002500000176951289,
+            "InvertWet": false,
+            "Mode": "Phaser",
+            "ModulationBlend": 0.0,
+            "Modulation_Amount": 0.7559055089950562,
+            "Modulation_DutyCycle": 0.0,
+            "Modulation_EnvelopeAmount": 0.0,
+            "Modulation_EnvelopeAttack": 0.006000000052154064,
+            "Modulation_EnvelopeEnabled": true,
+            "Modulation_EnvelopeRelease": 0.20000000298023224,
+            "Modulation_Frequency": 0.20000000298023224,
+            "Modulation_Frequency2": 0.20000000298023224,
+            "Modulation_LfoBlend": 0.0,
+            "Modulation_PhaseOffset": 0.0,
+            "Modulation_Spin": 0.0,
+            "Modulation_SpinEnabled": false,
+            "Modulation_Sync": true,
+            "Modulation_Sync2": true,
+            "Modulation_SyncedRate": 6,
+            "Modulation_SyncedRate2": 4,
+            "Modulation_Waveform": "Triangle",
+            "Notches": 2,
+            "OutputGain": 0.9999999403953552,
+            "SafeBassFrequency": 99.99999237060547,
+            "Spread": 0.5,
+            "Warmth": 0.0
+          },
+          "deviceData": {}
+        }
+      ],
+      "mixer": {
+        "pan": 0.0,
+        "solo-cue": false,
+        "speakerOn": true,
+        "volume": 0.0,
+        "sends": []
+      }
+    }
+  ]
+}
