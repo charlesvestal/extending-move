@@ -91,7 +91,11 @@ export function initWavetableLfoViz(idx = 1) {
     for (let i = 0; i <= w; i++) {
       const t = (i / w) * duration;
       let amp = amount;
-      if (attack > 0 && t < attack) amp = amount * t / attack;
+      if (attack > 0 && t < attack) {
+        const p = t / attack;
+        const scaled = Math.log10(1 + 9 * p) / Math.log10(10);
+        amp = amount * scaled;
+      }
       const ph = rate * t + offset;
       const val = wave(shape, ph) * amp * 0.5 + 0.5;
       const y = h - val * h;
