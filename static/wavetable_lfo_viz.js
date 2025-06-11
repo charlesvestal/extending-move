@@ -31,6 +31,14 @@ export function initWavetableLfoViz() {
   ];
   const BPM = 120;
 
+  function knobRatio(el, maxOverride = null) {
+    if (!el) return 0;
+    const min = parseFloat(el.getAttribute('min') || '0');
+    const max = maxOverride !== null ? maxOverride : parseFloat(el.getAttribute('max') || '1');
+    const val = parseFloat(el.value || '0');
+    return Math.min(Math.max((val - min) / (max - min), 0), 1);
+  }
+
   function wave(shape, phase) {
     const p = phase % 1;
     switch (shape) {
@@ -71,11 +79,10 @@ export function initWavetableLfoViz() {
     ctx.clearRect(0, 0, w, h);
     ctx.beginPath();
     let ratio = 0;
-    if (rateEl) {
-      const min = parseFloat(rateEl.getAttribute('min') || '0');
-      const max = parseFloat(rateEl.getAttribute('max') || '1');
-      const val = parseFloat(rateEl.value || '0');
-      ratio = Math.min(Math.max((val - min) / (max - min), 0), 1);
+    if (syncSel && syncSel.value === 'Tempo' && syncRateEl) {
+      ratio = knobRatio(syncRateEl, SYNC_RATES.length - 1);
+    } else if (rateEl) {
+      ratio = knobRatio(rateEl);
     }
     const cycles = 2 + ratio * 8;
     const duration = rate > 0 ? cycles / rate : 1;

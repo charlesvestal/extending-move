@@ -605,7 +605,6 @@ class WavetableParamEditorHandler(BaseHandler):
     # Parameters that use a horizontal slider instead of a dial.
     SLIDER_PARAMS = {
         "Voice_Modulators_TimeScale",
-        "Voice_Modulators_Lfo1_Time_Rate",
         "Voice_Modulators_Lfo2_Time_Rate",
         "Voice_Global_Glide",
         "Voice_Global_Transpose",
