@@ -1,0 +1,121 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "instrumentRack",
+  "name": "Electric Bass Soft",
+  "lockId": 1001,
+  "lockSeal": -139892364,
+  "parameters": {
+    "Enabled": true,
+    "Macro0": 0.0,
+    "Macro1": 0.0,
+    "Macro2": 0.0,
+    "Macro3": 0.0,
+    "Macro4": 0.0,
+    "Macro5": 0.0,
+    "Macro6": 0.0,
+    "Macro7": 0.0
+  },
+  "chains": [
+    {
+      "name": "",
+      "color": 0,
+      "devices": [
+        {
+          "presetUri": null,
+          "kind": "melodicSampler",
+          "name": "Bass Electric Soft",
+          "parameters": {
+            "Enabled": true,
+            "Voice_AmplitudeEnvelope_Attack": 0.00010000000149011613,
+            "Voice_AmplitudeEnvelope_Decay": 4.040001220703125,
+            "Voice_AmplitudeEnvelope_Release": 0.2619999694824219,
+            "Voice_AmplitudeEnvelope_Sustain": 0.049909722059965134,
+            "Voice_AmplitudeEnvelope_SustainMode": "Gate",
+            "Voice_Detune": 0.0,
+            "Voice_FilterEnvelope_Attack": 0.00010000000149011613,
+            "Voice_FilterEnvelope_Decay": 0.6,
+            "Voice_FilterEnvelope_On": false,
+            "Voice_FilterEnvelope_Release": 0.05,
+            "Voice_FilterEnvelope_Sustain": 0.0,
+            "Voice_Filter_Frequency": 22000.0,
+            "Voice_Filter_FrequencyModulationAmounts_EnvelopeAmount": 0,
+            "Voice_Filter_FrequencyModulationAmounts_LfoAmount": 0.0,
+            "Voice_Filter_On": true,
+            "Voice_Filter_Resonance": 0.10999999940395355,
+            "Voice_Filter_Slope": "12",
+            "Voice_Filter_Type": "Lowpass",
+            "Voice_Gain": 1.0,
+            "Voice_Lfo_On": true,
+            "Voice_Lfo_Rate": 5.999998569488525,
+            "Voice_Lfo_Type": "Sine",
+            "Voice_PlaybackLength": 1.0,
+            "Voice_PlaybackStart": 0.0,
+            "Voice_Transpose": 24,
+            "Voice_VelocityToVolume": 0.3499999940395355,
+            "Volume": -6.0
+          },
+          "deviceData": {
+            "sampleUri": "ableton:/packs/abl-core-library/Samples/Notes/Electric%20Bass%20C1.aif"
+          }
+        },
+        {
+          "presetUri": null,
+          "kind": "chorus",
+          "name": "Chorus-Ensemble",
+          "parameters": {
+            "Amount": 0.7460317611694336,
+            "DryWet": 0.1349206417798996,
+            "Enabled": true,
+            "Feedback": 0.0,
+            "HighpassEnabled": true,
+            "HighpassFrequency": 20.0,
+            "InvertFeedback": false,
+            "Mode": "Classic",
+            "OutputGain": 1.2589285373687744,
+            "Rate": 0.658519446849823,
+            "Shaping": 0.0,
+            "VibratoOffset": 0.0,
+            "Warmth": 0.10479619354009628,
+            "Width": 1.0
+          },
+          "deviceData": {}
+        },
+        {
+          "presetUri": null,
+          "kind": "saturator",
+          "name": "",
+          "parameters": {
+            "BaseDrive": -12.571428298950195,
+            "BassShaperThreshold": -50.0,
+            "ColorDepth": 7.619047164916992,
+            "ColorFrequency": 1120.1917724609375,
+            "ColorOn": true,
+            "ColorWidth": 0.3730158805847168,
+            "DryWet": 0.5,
+            "Enabled": true,
+            "Oversampling": false,
+            "PostClip": "on",
+            "PostDrive": -10.488187789916992,
+            "PreDcFilter": false,
+            "PreDrive": 8.0,
+            "Type": "Bass Shaper",
+            "WsCurve": 0.0,
+            "WsDamp": 0.3828125,
+            "WsDepth": 0.0,
+            "WsDrive": 1.0,
+            "WsLin": 0.3203125,
+            "WsPeriod": 0.0
+          },
+          "deviceData": {}
+        }
+      ],
+      "mixer": {
+        "pan": 0.0,
+        "solo-cue": false,
+        "speakerOn": true,
+        "volume": 0.0,
+        "sends": []
+      }
+    }
+  ]
+}

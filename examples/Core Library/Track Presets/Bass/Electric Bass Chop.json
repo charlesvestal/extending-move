@@ -1,0 +1,114 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "instrumentRack",
+  "name": "Electric Bass Chop",
+  "lockId": 1001,
+  "lockSeal": -561927820,
+  "parameters": {
+    "Enabled": true,
+    "Macro0": 0.0,
+    "Macro1": 0.0,
+    "Macro2": 0.0,
+    "Macro3": 0.0,
+    "Macro4": 0.0,
+    "Macro5": 0.0,
+    "Macro6": 0.0,
+    "Macro7": 0.0
+  },
+  "chains": [
+    {
+      "name": "",
+      "color": 0,
+      "devices": [
+        {
+          "presetUri": null,
+          "kind": "melodicSampler",
+          "name": "",
+          "parameters": {
+            "Enabled": true,
+            "Voice_AmplitudeEnvelope_Attack": 0.00010000000149011613,
+            "Voice_AmplitudeEnvelope_Decay": 3.081831787109375,
+            "Voice_AmplitudeEnvelope_Release": 0.15829473876953126,
+            "Voice_AmplitudeEnvelope_Sustain": 0.0003162277571391314,
+            "Voice_AmplitudeEnvelope_SustainMode": "Gate",
+            "Voice_Detune": 0.0,
+            "Voice_FilterEnvelope_Attack": 0.00010000000149011613,
+            "Voice_FilterEnvelope_Decay": 0.6,
+            "Voice_FilterEnvelope_On": true,
+            "Voice_FilterEnvelope_Release": 0.05,
+            "Voice_FilterEnvelope_Sustain": 0.0,
+            "Voice_Filter_Frequency": 22000.0,
+            "Voice_Filter_FrequencyModulationAmounts_EnvelopeAmount": 0,
+            "Voice_Filter_FrequencyModulationAmounts_LfoAmount": 0.0,
+            "Voice_Filter_On": true,
+            "Voice_Filter_Resonance": 0.677548348903656,
+            "Voice_Filter_Slope": "12",
+            "Voice_Filter_Type": "Lowpass",
+            "Voice_Gain": 1.0,
+            "Voice_Lfo_On": true,
+            "Voice_Lfo_Rate": 1.0,
+            "Voice_Lfo_Type": "Sine",
+            "Voice_PlaybackLength": 1.0,
+            "Voice_PlaybackStart": 0.0,
+            "Voice_Transpose": 22,
+            "Voice_VelocityToVolume": 0.3499999940395355,
+            "Volume": -9.0
+          },
+          "deviceData": {
+            "sampleUri": "ableton:/packs/abl-core-library/Samples/Notes/Bass%20Deep%20Money%20D1.aif"
+          }
+        },
+        {
+          "presetUri": null,
+          "kind": "channelEq",
+          "name": "",
+          "parameters": {
+            "Enabled": true,
+            "Gain": 1.0,
+            "HighShelfGain": 1.2589285373687744,
+            "HighpassOn": false,
+            "LowShelfGain": 0.9999999403953552,
+            "MidFrequency": 269.11566162109375,
+            "MidGain": 0.6299605369567871
+          },
+          "deviceData": {}
+        },
+        {
+          "presetUri": null,
+          "kind": "saturator",
+          "name": "",
+          "parameters": {
+            "BaseDrive": -4.571428298950195,
+            "BassShaperThreshold": -9.765625,
+            "ColorDepth": 6.095237731933594,
+            "ColorFrequency": 1000.0001831054688,
+            "ColorOn": true,
+            "ColorWidth": 0.0,
+            "DryWet": 0.5,
+            "Enabled": true,
+            "Oversampling": false,
+            "PostClip": "off",
+            "PostDrive": -12.0,
+            "PreDcFilter": false,
+            "PreDrive": 18.85714340209961,
+            "Type": "Bass Shaper",
+            "WsCurve": 0.0,
+            "WsDamp": 0.0,
+            "WsDepth": 0.0,
+            "WsDrive": 1.0,
+            "WsLin": 0.5,
+            "WsPeriod": 0.0
+          },
+          "deviceData": {}
+        }
+      ],
+      "mixer": {
+        "pan": 0.0,
+        "solo-cue": false,
+        "speakerOn": true,
+        "volume": 0.0,
+        "sends": []
+      }
+    }
+  ]
+}
