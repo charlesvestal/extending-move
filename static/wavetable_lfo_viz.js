@@ -14,18 +14,21 @@ export function initWavetableLfoViz() {
     const attackEl = qRange('Time_AttackTime');
     const offsetEl = qRange('Shape_PhaseOffset');
     const amountEl = qRange('Shape_Amount');
+    const timeScaleEl = document.querySelector(
+      '.param-item[data-name="Voice_Modulators_TimeScale"] input[type="range"]'
+    );
 
     const SYNC_RATES = [
-      8, 6, 4, 3, 2, 1.5, 1, 0.75, 0.5, 0.375, 1/3, 5/16,
-      0.25, 3/16, 1/6, 1/8, 1/12, 1/16, 1/24, 1/32, 1/48,
-      1/64
+      8, 6, 4, 3, 2, 1.5, 1, 0.75, 0.5, 0.375, 1 / 3, 5 / 16,
+      0.25, 3 / 16, 1 / 6, 1 / 8, 1 / 12, 1 / 16, 1 / 24, 1 / 32, 1 / 48,
+      1 / 64
     ];
     const BPM = 120;
 
-    function knobRatio(el) {
+    function knobRatio(el, maxOverride = null) {
       if (!el) return 0;
       const min = parseFloat(el.min || '0');
-      const max = parseFloat(el.max || '1');
+      const max = maxOverride !== null ? maxOverride : parseFloat(el.max || '1');
       const val = parseFloat(el.value || '0');
       return Math.min(Math.max((val - min) / (max - min), 0), 1);
     }
@@ -40,6 +43,12 @@ export function initWavetableLfoViz() {
         return sec > 0 ? 1 / sec : 0;
       }
       return parseFloat(rateEl ? rateEl.value || '0' : '0');
+    }
+
+    function getTimeScale() {
+      if (!timeScaleEl) return 1;
+      const val = parseFloat(timeScaleEl.value || '0');
+      return Math.pow(2, val);
     }
 
     function wave(shape, phase) {
@@ -61,7 +70,7 @@ export function initWavetableLfoViz() {
     }
 
     function draw() {
-      const rate = getRateHz();
+      const rate = getRateHz() * getTimeScale();
       const attack = attackEl ? parseFloat(attackEl.value || '0') : 0;
       const offset = offsetEl ? parseFloat(offsetEl.value || '0') / 360 : 0;
       const amount = amountEl ? parseFloat(amountEl.value || '1') : 1;
@@ -71,8 +80,11 @@ export function initWavetableLfoViz() {
       ctx.clearRect(0, 0, w, h);
       ctx.beginPath();
       let ratio = 0;
-      if (syncSel && syncSel.value === 'Tempo') ratio = knobRatio(syncRateEl);
-      else ratio = knobRatio(rateEl);
+      if (syncSel && syncSel.value === 'Tempo') {
+        ratio = knobRatio(syncRateEl, SYNC_RATES.length - 1);
+      } else {
+        ratio = knobRatio(rateEl);
+      }
       const cycles = 1 + ratio * 9;
       const duration = rate > 0 ? cycles / rate : 1;
       for (let i = 0; i <= w; i++) {
@@ -88,7 +100,7 @@ export function initWavetableLfoViz() {
       ctx.stroke();
     }
 
-    [shapeEl, rateEl, syncSel, syncRateEl, attackEl, offsetEl, amountEl].forEach(el => {
+    [shapeEl, rateEl, syncSel, syncRateEl, attackEl, offsetEl, amountEl, timeScaleEl].forEach(el => {
       if (!el) return;
       const evt = el.tagName === 'SELECT' ? 'change' : 'input';
       el.addEventListener(evt, draw);
