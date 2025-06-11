@@ -464,6 +464,19 @@ document.addEventListener('DOMContentLoaded', () => {
       if (hid) hid.value = value;
       return;
     }
+    const toggle = item.querySelector('input.param-toggle');
+    if (toggle) {
+      const hid = item.querySelector('input[type="hidden"][name$="_value"]');
+      const trueVal = toggle.dataset.trueValue ?? '1';
+      const falseVal = toggle.dataset.falseValue ?? '0';
+      const isOn = String(value) === trueVal || (!isNaN(value) && parseFloat(value) >= 1);
+      toggle.checked = isOn;
+      if (hid) {
+        hid.value = isOn ? trueVal : falseVal;
+        hid.dispatchEvent(new Event('change'));
+      }
+      return;
+    }
     const slider = item.querySelector('.rect-slider');
     if (slider) {
       if (typeof slider._sliderUpdate === 'function') {
@@ -488,6 +501,11 @@ document.addEventListener('DOMContentLoaded', () => {
           const opts = info.options;
           const idx = Math.min(Math.floor((mval / 127) * opts.length), opts.length - 1);
           const val = opts[idx];
+          updateParamVisual(p.name, val);
+          mappedNow.add(p.name);
+          return;
+        } else if (info.type === 'boolean') {
+          const val = mval >= 64 ? 1 : 0;
           updateParamVisual(p.name, val);
           mappedNow.add(p.name);
           return;
