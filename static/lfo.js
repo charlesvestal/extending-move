@@ -33,7 +33,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const h = canvas.height;
     ctx.clearRect(0, 0, w, h);
     ctx.beginPath();
-    const duration = 1; // seconds shown
+
+    const minHz = parseFloat(rateEl.min || '0.17');
+    const maxHz = parseFloat(rateEl.max || '1700');
+    const logMin = Math.log10(minHz);
+    const logMax = Math.log10(maxHz);
+    const logRate = rate > 0 ? Math.log10(rate) : logMin;
+    const ratio = Math.min(Math.max((logRate - logMin) / (logMax - logMin), 0), 1);
+    const cycles = 2 + (10 - 2) * ratio;
+    const duration = cycles / Math.max(rate, 0.0001);
+
     for (let i = 0; i <= w; i++) {
       const t = (i / w) * duration;
       let amp = amount;

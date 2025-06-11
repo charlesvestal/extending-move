@@ -79,20 +79,16 @@ export function initDriftLfoViz() {
     const h = canvas.height;
     ctx.clearRect(0, 0, w, h);
     ctx.beginPath();
-    let duration = 1;
-    if (mode === 'Time' && timeEl) {
-      const t = parseFloat(timeEl.value || '0');
-      if (t > 0) {
-        const minT = parseFloat(timeEl.min || '0.1');
-        const maxT = parseFloat(timeEl.max || '60');
-        const logMin = Math.log10(minT);
-        const logMax = Math.log10(maxT);
-        const logT = Math.log10(t);
-        const ratio = Math.min(Math.max((logT - logMin) / (logMax - logMin), 0), 1);
-        const cycles = 3.5 + (1 - 3.5) * ratio;
-        duration = t * cycles;
-      }
-    }
+
+    const rateHz = Math.max(rate, 0.0001);
+    const minHz = parseFloat(rateEl ? rateEl.min || '0.17' : '0.17');
+    const maxHz = parseFloat(rateEl ? rateEl.max || '1700' : '1700');
+    const logMin = Math.log10(minHz);
+    const logMax = Math.log10(maxHz);
+    const logRate = rate > 0 ? Math.log10(rate) : logMin;
+    const ratio = Math.min(Math.max((logRate - logMin) / (logMax - logMin), 0), 1);
+    const cycles = 2 + (10 - 2) * ratio;
+    const duration = cycles / rateHz;
     for (let i = 0; i <= w; i++) {
       const t = (i / w) * duration;
       const ph = rate * t;
