@@ -94,50 +94,50 @@ class SynthParamEditorHandler(BaseHandler):
         browser_html = generate_dir_html(
             base_dir,
             "",
-            '/synth-params',
-            'preset_select',
-            'select_preset',
-            filter_key='drift',
+            "/synth-params",
+            "preset_select",
+            "select_preset",
+            filter_key="drift",
         )
         core_li = (
             '<li class="dir closed" data-path="Core Library">'
-            '<span>📁 Core Library</span>'
+            "<span>📁 Core Library</span>"
             '<ul class="hidden"></ul></li>'
         )
-        if browser_html.endswith('</ul>'):
-            browser_html = browser_html[:-5] + core_li + '</ul>'
+        if browser_html.endswith("</ul>"):
+            browser_html = browser_html[:-5] + core_li + "</ul>"
         schema = load_drift_schema()
         return {
-            'message': 'Select a Drift preset from the list or create a new one',
-            'message_type': 'info',
-            'file_browser_html': browser_html,
-            'params_html': '',
-            'selected_preset': None,
-            'param_count': 0,
-            'browser_root': base_dir,
-            'browser_filter': 'drift',
-            'schema_json': json.dumps(schema),
-            'default_preset_path': DEFAULT_PRESET,
-            'macro_knobs_html': '',
-            'rename_checked': False,
-            'macros_json': '[]',
-            'available_params_json': '[]',
-            'param_paths_json': '{}',
+            "message": "Select a Drift preset from the list or create a new one",
+            "message_type": "info",
+            "file_browser_html": browser_html,
+            "params_html": "",
+            "selected_preset": None,
+            "param_count": 0,
+            "browser_root": base_dir,
+            "browser_filter": "drift",
+            "schema_json": json.dumps(schema),
+            "default_preset_path": DEFAULT_PRESET,
+            "macro_knobs_html": "",
+            "rename_checked": False,
+            "macros_json": "[]",
+            "available_params_json": "[]",
+            "param_paths_json": "{}",
         }
 
     def handle_post(self, form):
-        action = form.getvalue('action')
-        if action == 'reset_preset':
+        action = form.getvalue("action")
+        if action == "reset_preset":
             return self.handle_get()
 
-        message = ''
-        if action == 'new_preset':
-            new_name = form.getvalue('new_preset_name')
+        message = ""
+        if action == "new_preset":
+            new_name = form.getvalue("new_preset_name")
             if not new_name:
                 return self.format_error_response("Preset name required")
             os.makedirs(NEW_PRESET_DIR, exist_ok=True)
-            if not new_name.endswith('.ablpreset') and not new_name.endswith('.json'):
-                new_name += '.ablpreset'
+            if not new_name.endswith(".ablpreset") and not new_name.endswith(".json"):
+                new_name += ".ablpreset"
             preset_path = os.path.join(NEW_PRESET_DIR, new_name)
             if os.path.exists(preset_path):
                 return self.format_error_response("Preset already exists")
@@ -157,7 +157,7 @@ class SynthParamEditorHandler(BaseHandler):
             except Exception as exc:
                 return self.format_error_response(f"Could not create preset: {exc}")
         else:
-            preset_path = form.getvalue('preset_select')
+            preset_path = form.getvalue("preset_select")
 
         if not preset_path:
             return self.format_error_response("No preset selected")
@@ -165,48 +165,48 @@ class SynthParamEditorHandler(BaseHandler):
         is_core = preset_path.startswith(CORE_LIBRARY_DIR)
 
         rename_flag = False
-        if action == 'save_params':
+        if action == "save_params":
             try:
-                count = int(form.getvalue('param_count', '0'))
+                count = int(form.getvalue("param_count", "0"))
             except ValueError:
                 count = 0
             updates = {}
             for i in range(count):
-                name = form.getvalue(f'param_{i}_name')
-                value = form.getvalue(f'param_{i}_value')
+                name = form.getvalue(f"param_{i}_name")
+                value = form.getvalue(f"param_{i}_value")
                 if name is not None and value is not None:
                     updates[name] = value
-            rename_flag = form.getvalue('rename') in ('on', 'true', '1') or is_core
-            new_name = form.getvalue('new_preset_name')
+            rename_flag = form.getvalue("rename") in ("on", "true", "1") or is_core
+            new_name = form.getvalue("new_preset_name")
             output_path = None
             if rename_flag:
                 if not new_name:
                     new_name = os.path.basename(preset_path)
                 # Convert json factory presets to .ablpreset when copying
-                if new_name.endswith('.json'):
+                if new_name.endswith(".json"):
                     new_name = new_name[:-5]
-                if not new_name.endswith('.ablpreset'):
-                    new_name += '.ablpreset'
+                if not new_name.endswith(".ablpreset"):
+                    new_name += ".ablpreset"
                 directory = os.path.dirname(preset_path)
                 if is_core:
                     directory = NEW_PRESET_DIR
                 output_path = os.path.join(directory, new_name)
                 os.makedirs(os.path.dirname(output_path), exist_ok=True)
             result = update_parameter_values(preset_path, updates, output_path)
-            if not result['success']:
-                return self.format_error_response(result['message'])
-            preset_path = result['path']
+            if not result["success"]:
+                return self.format_error_response(result["message"])
+            preset_path = result["path"]
 
             macro_updates = {}
             for i in range(8):
-                val = form.getvalue(f'macro_{i}_value')
+                val = form.getvalue(f"macro_{i}_value")
                 if val is not None:
                     macro_updates[i] = val
             macro_result = update_macro_values(preset_path, macro_updates, preset_path)
-            if not macro_result['success']:
-                return self.format_error_response(macro_result['message'])
+            if not macro_result["success"]:
+                return self.format_error_response(macro_result["message"])
 
-            macros_data_str = form.getvalue('macros_data')
+            macros_data_str = form.getvalue("macros_data")
             if macros_data_str:
                 try:
                     macros_data = json.loads(macros_data_str)
@@ -216,39 +216,43 @@ class SynthParamEditorHandler(BaseHandler):
                 macros_data = []
 
             # Update macro names
-            name_updates = {m.get('index'): m.get('name') for m in macros_data}
+            name_updates = {m.get("index"): m.get("name") for m in macros_data}
             name_result = update_preset_macro_names(preset_path, name_updates)
-            if not name_result['success']:
-                return self.format_error_response(name_result['message'])
+            if not name_result["success"]:
+                return self.format_error_response(name_result["message"])
 
             # Determine existing mappings to remove
             existing_info = extract_macro_information(preset_path)
-            existing_mapped = existing_info.get('mapped_parameters', {}) if existing_info['success'] else {}
+            existing_mapped = (
+                existing_info.get("mapped_parameters", {})
+                if existing_info["success"]
+                else {}
+            )
 
             processed = set()
             for m in macros_data:
-                idx = m.get('index')
-                for p in m.get('parameters', []):
-                    pname = p.get('name')
+                idx = m.get("index")
+                for p in m.get("parameters", []):
+                    pname = p.get("name")
                     param_updates = {
                         idx: {
-                            'parameter': pname,
-                            'parameter_path': p.get('path'),
-                            'rangeMin': p.get('rangeMin'),
-                            'rangeMax': p.get('rangeMax'),
+                            "parameter": pname,
+                            "parameter_path": p.get("path"),
+                            "rangeMin": p.get("rangeMin"),
+                            "rangeMax": p.get("rangeMax"),
                         }
                     }
                     upd = update_preset_parameter_mappings(preset_path, param_updates)
-                    if not upd['success']:
-                        return self.format_error_response(upd['message'])
+                    if not upd["success"]:
+                        return self.format_error_response(upd["message"])
                     processed.add(pname)
                     existing_mapped.pop(pname, None)
 
             # Remove mappings not present anymore
             for pname, info in existing_mapped.items():
-                delete_parameter_mapping(preset_path, info['path'])
+                delete_parameter_mapping(preset_path, info["path"])
 
-            message = result['message'] + "; " + macro_result['message']
+            message = result["message"] + "; " + macro_result["message"]
             if output_path:
                 message += f" Saved to {output_path}"
             refresh_success, refresh_message = refresh_library()
@@ -256,12 +260,12 @@ class SynthParamEditorHandler(BaseHandler):
                 message += " Library refreshed."
             else:
                 message += f" Library refresh failed: {refresh_message}"
-        elif action in ['select_preset', 'new_preset']:
-            if action == 'select_preset':
+        elif action in ["select_preset", "new_preset"]:
+            if action == "select_preset":
                 if is_core:
                     dest_name = os.path.basename(preset_path)
-                    if dest_name.endswith('.json'):
-                        dest_name = dest_name[:-5] + '.ablpreset'
+                    if dest_name.endswith(".json"):
+                        dest_name = dest_name[:-5] + ".ablpreset"
                     save_path = os.path.join(NEW_PRESET_DIR, dest_name)
                     message = f"Core Library preset will be saved to {save_path}"
                 else:
@@ -270,42 +274,42 @@ class SynthParamEditorHandler(BaseHandler):
             return self.format_error_response("Unknown action")
 
         values = extract_parameter_values(preset_path)
-        params_html = ''
+        params_html = ""
         param_count = 0
 
-        macro_knobs_html = ''
+        macro_knobs_html = ""
         macro_info = extract_macro_information(preset_path)
         mapped_params = {}
-        macros_json = '[]'
-        available_params_json = '[]'
-        param_paths_json = '{}'
-        if macro_info['success']:
-            macro_knobs_html = self.generate_macro_knobs_html(macro_info['macros'])
-            mapped_params = macro_info.get('mapped_parameters', {})
+        macros_json = "[]"
+        available_params_json = "[]"
+        param_paths_json = "{}"
+        if macro_info["success"]:
+            macro_knobs_html = self.generate_macro_knobs_html(macro_info["macros"])
+            mapped_params = macro_info.get("mapped_parameters", {})
             macros_for_json = []
-            for m in macro_info['macros']:
+            for m in macro_info["macros"]:
                 mc = dict(m)
-                if mc.get('name') == f"Macro {mc.get('index')}":
-                    mc['name'] = ""
+                if mc.get("name") == f"Macro {mc.get('index')}":
+                    mc["name"] = ""
                 macros_for_json.append(mc)
             macros_json = json.dumps(macros_for_json)
 
         param_info = extract_available_parameters(preset_path)
-        if param_info['success']:
+        if param_info["success"]:
             params = [
-                p for p in param_info['parameters'] if p not in EXCLUDED_MACRO_PARAMS
+                p for p in param_info["parameters"] if p not in EXCLUDED_MACRO_PARAMS
             ]
             paths = {
                 k: v
-                for k, v in param_info.get('parameter_paths', {}).items()
+                for k, v in param_info.get("parameter_paths", {}).items()
                 if k not in EXCLUDED_MACRO_PARAMS
             }
             available_params_json = json.dumps(params)
             param_paths_json = json.dumps(paths)
-        
-        if values['success']:
-            params_html = self.generate_params_html(values['parameters'], mapped_params)
-            param_count = len(values['parameters'])
+
+        if values["success"]:
+            params_html = self.generate_params_html(values["parameters"], mapped_params)
+            param_count = len(values["parameters"])
 
         base_dir = "/data/UserData/UserLibrary/Track Presets"
         if not os.path.exists(base_dir) and os.path.exists("examples/Track Presets"):
@@ -313,34 +317,34 @@ class SynthParamEditorHandler(BaseHandler):
         browser_html = generate_dir_html(
             base_dir,
             "",
-            '/synth-params',
-            'preset_select',
-            'select_preset',
-            filter_key='drift',
+            "/synth-params",
+            "preset_select",
+            "select_preset",
+            filter_key="drift",
         )
         core_li = (
             '<li class="dir closed" data-path="Core Library">'
-            '<span>📁 Core Library</span>'
+            "<span>📁 Core Library</span>"
             '<ul class="hidden"></ul></li>'
         )
-        if browser_html.endswith('</ul>'):
-            browser_html = browser_html[:-5] + core_li + '</ul>'
+        if browser_html.endswith("</ul>"):
+            browser_html = browser_html[:-5] + core_li + "</ul>"
         return {
-            'message': message,
-            'message_type': 'success',
-            'file_browser_html': browser_html,
-            'params_html': params_html,
-            'selected_preset': preset_path,
-            'param_count': param_count,
-            'browser_root': base_dir,
-            'browser_filter': 'drift',
-            'schema_json': json.dumps(load_drift_schema()),
-            'default_preset_path': DEFAULT_PRESET,
-            'macro_knobs_html': macro_knobs_html,
-            'rename_checked': rename_flag if action == 'save_params' else is_core,
-            'macros_json': macros_json,
-            'available_params_json': available_params_json,
-            'param_paths_json': param_paths_json,
+            "message": message,
+            "message_type": "success",
+            "file_browser_html": browser_html,
+            "params_html": params_html,
+            "selected_preset": preset_path,
+            "param_count": param_count,
+            "browser_root": base_dir,
+            "browser_filter": "drift",
+            "schema_json": json.dumps(load_drift_schema()),
+            "default_preset_path": DEFAULT_PRESET,
+            "macro_knobs_html": macro_knobs_html,
+            "rename_checked": rename_flag if action == "save_params" else is_core,
+            "macros_json": macros_json,
+            "available_params_json": available_params_json,
+            "param_paths_json": param_paths_json,
         }
 
     SECTION_ORDER = [
@@ -369,7 +373,6 @@ class SynthParamEditorHandler(BaseHandler):
         "PitchModulation_Amount1": "Amount",
         "PitchModulation_Source2": "Source",
         "PitchModulation_Amount2": "Amount",
-
         # Mixer
         "Mixer_OscillatorOn1": "On/Off",
         "Mixer_OscillatorGain1": "Osc 1",
@@ -380,7 +383,6 @@ class SynthParamEditorHandler(BaseHandler):
         "Mixer_NoiseOn": "On/Off",
         "Mixer_NoiseLevel": "Noise",
         "Filter_NoiseThrough": "Filter",
-
         # Filter
         "Filter_Frequency": "Freq",
         "Filter_Type": "Type",
@@ -391,7 +393,6 @@ class SynthParamEditorHandler(BaseHandler):
         "Filter_ModAmount1": "Mod Amount 1",
         "Filter_ModSource2": "Mod Source 2",
         "Filter_ModAmount2": "Mod Amount 2",
-
         # Envelopes
         "Envelope1_Attack": "Attack",
         "Envelope1_Decay": "Decay",
@@ -408,7 +409,6 @@ class SynthParamEditorHandler(BaseHandler):
         "CyclingEnvelope_Time": "ms",
         "CyclingEnvelope_SyncedRate": "Sync",
         "CyclingEnvelope_Mode": "Mode",
-
         # LFO
         "Lfo_Shape": "Shape",
         "Lfo_Rate": "Rate",
@@ -419,7 +419,6 @@ class SynthParamEditorHandler(BaseHandler):
         "Lfo_Amount": "Amount",
         "Lfo_ModSource": "LFO Mod",
         "Lfo_ModAmount": "Mod Amount",
-
         # Modulation Matrix
         "ModulationMatrix_Source1": "Source",
         "ModulationMatrix_Target1": "Destination",
@@ -430,7 +429,6 @@ class SynthParamEditorHandler(BaseHandler):
         "ModulationMatrix_Source3": "Source",
         "ModulationMatrix_Target3": "Destination",
         "ModulationMatrix_Amount3": "Amount",
-
         # Global
         "Global_VoiceMode": "Mode",
         "Global_VoiceCount": "Voices",
@@ -450,7 +448,6 @@ class SynthParamEditorHandler(BaseHandler):
         "Global_ResetOscillatorPhase": "Reset Osc Phase",
         "Global_HiQuality": "HQ",
         "Global_SerialNumber": "Serial",
-
     }
 
     # Short labels for oscillator waveforms
@@ -474,6 +471,36 @@ class SynthParamEditorHandler(BaseHandler):
         "Square": "Square",
         "Triangle": "Tri",
         "Wander": "Wndr",
+    }
+
+    # Display strings for tempo-synced rate values
+    SYNC_RATE_OPTIONS = [
+        "8",
+        "6",
+        "4",
+        "2",
+        "1.5",
+        "1",
+        "3/4",
+        "1/2",
+        "3/8",
+        "1/3",
+        "5/16",
+        "1/4",
+        "3/16",
+        "1/6",
+        "1/8",
+        "1/12",
+        "1/16",
+        "1/24",
+        "1/32",
+        "1/48",
+        "1/64",
+    ]
+
+    SYNC_RATE_PARAMS = {
+        "CyclingEnvelope_SyncedRate",
+        "Lfo_SyncedRate",
     }
 
     # Parameters that should display without a text label
@@ -517,11 +544,19 @@ class SynthParamEditorHandler(BaseHandler):
         "ModulationMatrix_Amount3",
         "Lfo_ModAmount",
         "Filter_Tracking",
-
     }
 
-    def _build_param_item(self, idx, name, value, meta, label=None,
-                           hide_label=False, slider=False, extra_classes=""):
+    def _build_param_item(
+        self,
+        idx,
+        name,
+        value,
+        meta,
+        label=None,
+        hide_label=False,
+        slider=False,
+        extra_classes="",
+    ):
         """Create HTML for a single parameter control."""
         p_type = meta.get("type")
         label = label if label is not None else self.LABEL_OVERRIDES.get(name, name)
@@ -541,7 +576,9 @@ class SynthParamEditorHandler(BaseHandler):
                 f'<input type="checkbox" id="param_{idx}_toggle" class="param-toggle input-switch" '
                 f'data-target="param_{idx}_value" data-true-value="{true_val}" data-false-value="{false_val}" {checked}>'
             )
-            html.append(f'<input type="hidden" name="param_{idx}_value" value="{value}">')
+            html.append(
+                f'<input type="hidden" name="param_{idx}_value" value="{value}">'
+            )
         elif p_type == "enum" and meta.get("options"):
             select_class = "param-select"
             if name == "Filter_Type":
@@ -556,9 +593,13 @@ class SynthParamEditorHandler(BaseHandler):
                 sel = " selected" if str(value) == str(opt) else ""
                 label_opt = short_map.get(opt, opt)
                 title_attr = f' title="{opt}"' if label_opt != opt else ""
-                html.append(f'<option value="{opt}"{title_attr}{sel}>{label_opt}</option>')
-            html.append('</select>')
-            html.append(f'<input type="hidden" name="param_{idx}_value" value="{value}">')
+                html.append(
+                    f'<option value="{opt}"{title_attr}{sel}>{label_opt}</option>'
+                )
+            html.append("</select>")
+            html.append(
+                f'<input type="hidden" name="param_{idx}_value" value="{value}">'
+            )
         elif p_type == "boolean":
             bool_val = 1 if str(value).lower() in ("true", "1") else 0
             html.append(
@@ -566,10 +607,16 @@ class SynthParamEditorHandler(BaseHandler):
                 f'data-target="param_{idx}_value" data-true-value="1" data-false-value="0"'
                 f' {"checked" if bool_val else ""}>'
             )
-            html.append(f'<input type="hidden" name="param_{idx}_value" value="{bool_val}">')
+            html.append(
+                f'<input type="hidden" name="param_{idx}_value" value="{bool_val}">'
+            )
         elif name == "Global_SerialNumber":
-            min_attr = f' min="{meta.get("min")}"' if meta.get("min") is not None else ''
-            max_attr = f' max="{meta.get("max")}"' if meta.get("max") is not None else ''
+            min_attr = (
+                f' min="{meta.get("min")}"' if meta.get("min") is not None else ""
+            )
+            max_attr = (
+                f' max="{meta.get("max")}"' if meta.get("max") is not None else ""
+            )
             html.append(
                 f'<input type="number" class="param-input" name="param_{idx}_value" value="{value}"{min_attr}{max_attr}>'
             )
@@ -578,14 +625,29 @@ class SynthParamEditorHandler(BaseHandler):
             max_val = meta.get("max")
             decimals = meta.get("decimals")
             step_val = meta.get("step")
+            enum_attr = ""
+            if name in self.SYNC_RATE_PARAMS:
+                step_val = 1
+                decimals = 0
+                enum_attr = f' data-enum-options="{",".join(self.SYNC_RATE_OPTIONS)}"'
             if decimals is not None and step_val is None:
                 step_val = 10 ** (-decimals)
-            if step_val is None and min_val is not None and max_val is not None and max_val <= 1 and min_val >= -1:
+            if (
+                step_val is None
+                and min_val is not None
+                and max_val is not None
+                and max_val <= 1
+                and min_val >= -1
+            ):
                 step_val = 0.01
             unit_val = meta.get("unit")
             if slider:
                 classes = ["rect-slider"]
-                if min_val is not None and max_val is not None and min_val < 0 < max_val:
+                if (
+                    min_val is not None
+                    and max_val is not None
+                    and min_val < 0 < max_val
+                ):
                     classes.append("center")
                 attrs = []
                 if min_val is not None:
@@ -604,14 +666,18 @@ class SynthParamEditorHandler(BaseHandler):
                 html.append(
                     f'<div id="param_{idx}_slider" class="{" ".join(classes)}" {attr_str}></div>'
                 )
-                html.append(f'<input type="hidden" name="param_{idx}_value" value="{value}">')
+                html.append(
+                    f'<input type="hidden" name="param_{idx}_value" value="{value}">'
+                )
             else:
-                min_attr = f' min="{min_val}"' if min_val is not None else ''
-                max_attr = f' max="{max_val}"' if max_val is not None else ''
-                step_attr = f' step="{step_val}"' if step_val is not None else ''
-                unit_attr = f' data-unit="{unit_val}"' if unit_val else ''
-                dec_attr = f' data-decimals="{decimals}"' if decimals is not None else ''
-                disp_id = f'param_{idx}_display'
+                min_attr = f' min="{min_val}"' if min_val is not None else ""
+                max_attr = f' max="{max_val}"' if max_val is not None else ""
+                step_attr = f' step="{step_val}"' if step_val is not None else ""
+                unit_attr = f' data-unit="{unit_val}"' if unit_val else ""
+                dec_attr = (
+                    f' data-decimals="{decimals}"' if decimals is not None else ""
+                )
+                disp_id = f"param_{idx}_display"
                 input_classes = "param-dial input-knob"
                 extra_attrs = ""
                 if name == "Filter_Frequency":
@@ -619,21 +685,27 @@ class SynthParamEditorHandler(BaseHandler):
                     extra_attrs += ' data-diameter="48"'
                 html.append(
                     f'<input id="param_{idx}_dial" type="range" class="{input_classes}" data-target="param_{idx}_value" '
-                    f'data-display="{disp_id}" value="{value}"{min_attr}{max_attr}{step_attr}{unit_attr}{dec_attr}{extra_attrs}>'
+                    f'data-display="{disp_id}" value="{value}"{min_attr}{max_attr}{step_attr}{unit_attr}{dec_attr}{extra_attrs}{enum_attr}>'
                 )
                 html.append(f'<span id="{disp_id}" class="param-number"></span>')
-                html.append(f'<input type="hidden" name="param_{idx}_value" value="{value}">')
+                html.append(
+                    f'<input type="hidden" name="param_{idx}_value" value="{value}">'
+                )
 
         html.append(f'<input type="hidden" name="param_{idx}_name" value="{name}">')
-        html.append('</div>')
-        return ''.join(html)
+        html.append("</div>")
+        return "".join(html)
 
     def _get_section(self, name):
         if name == "Global_Envelope2Mode":
             return "Envelopes"
         if name.startswith(("Oscillator1_", "Oscillator2_", "PitchModulation_")):
             return "Oscillators"
-        if name.startswith("Mixer_") or name.startswith("Filter_OscillatorThrough") or name.startswith("Filter_NoiseThrough"):
+        if (
+            name.startswith("Mixer_")
+            or name.startswith("Filter_OscillatorThrough")
+            or name.startswith("Filter_NoiseThrough")
+        ):
             return "Mixer"
         if name.startswith("Filter_"):
             return "Filter"
@@ -660,7 +732,7 @@ class SynthParamEditorHandler(BaseHandler):
     def generate_params_html(self, params, mapped_parameters=None):
         """Return HTML controls for the given parameter values."""
         if not params:
-            return '<p>No parameters found.</p>'
+            return "<p>No parameters found.</p>"
 
         if mapped_parameters is None:
             mapped_parameters = {}
@@ -679,8 +751,8 @@ class SynthParamEditorHandler(BaseHandler):
         lfo_mode_val = None
 
         for i, item in enumerate(params):
-            name = item['name']
-            val = item['value']
+            name = item["name"]
+            val = item["value"]
             meta = dict(schema.get(name, {}))
 
             if name == "Oscillator1_Transpose":
@@ -710,7 +782,7 @@ class SynthParamEditorHandler(BaseHandler):
                 extra = "lfo-rate sync-rate"
 
             if name in mapped_parameters:
-                macro_idx = mapped_parameters[name]['macro_index']
+                macro_idx = mapped_parameters[name]["macro_index"]
                 extra = f"{extra} macro-{macro_idx}".strip()
 
             html = self._build_param_item(
@@ -762,7 +834,11 @@ class SynthParamEditorHandler(BaseHandler):
             if row1_html.strip():
                 ordered.append(f'<div class="param-row">{row1_html}</div>')
 
-            row2_html = "".join(filter_items.pop(p, "") for p in ["Filter_Resonance", "Filter_HiPassFrequency"] if p in filter_items)
+            row2_html = "".join(
+                filter_items.pop(p, "")
+                for p in ["Filter_Resonance", "Filter_HiPassFrequency"]
+                if p in filter_items
+            )
             if row2_html:
                 ordered.append(f'<div class="param-row">{row2_html}</div>')
 
@@ -770,24 +846,40 @@ class SynthParamEditorHandler(BaseHandler):
             amt1 = filter_items.pop("Filter_ModAmount1", "")
             src2 = filter_items.pop("Filter_ModSource2", "")
             amt2 = filter_items.pop("Filter_ModAmount2", "")
-            pair1 = f'<div class="param-pair">{src1}{amt1}</div>' if (src1 or amt1) else ""
-            pair2 = f'<div class="param-pair">{src2}{amt2}</div>' if (src2 or amt2) else ""
+            pair1 = (
+                f'<div class="param-pair">{src1}{amt1}</div>' if (src1 or amt1) else ""
+            )
+            pair2 = (
+                f'<div class="param-pair">{src2}{amt2}</div>' if (src2 or amt2) else ""
+            )
             if pair1.strip() or pair2.strip():
                 ordered.append('<div class="freq-mod-label">Freq Mod</div>')
-                ordered.append(f'<div class="param-row filter-mod-row">{pair1}{pair2}</div>')
+                ordered.append(
+                    f'<div class="param-row filter-mod-row">{pair1}{pair2}</div>'
+                )
 
             ordered.extend(filter_items.values())
             sections["Filter"] = ordered
 
         if mixer_items:
             mixer_rows = [
-                ["Mixer_OscillatorOn1", "Mixer_OscillatorGain1", "Filter_OscillatorThrough1"],
-                ["Mixer_OscillatorOn2", "Mixer_OscillatorGain2", "Filter_OscillatorThrough2"],
+                [
+                    "Mixer_OscillatorOn1",
+                    "Mixer_OscillatorGain1",
+                    "Filter_OscillatorThrough1",
+                ],
+                [
+                    "Mixer_OscillatorOn2",
+                    "Mixer_OscillatorGain2",
+                    "Filter_OscillatorThrough2",
+                ],
                 ["Mixer_NoiseOn", "Mixer_NoiseLevel", "Filter_NoiseThrough"],
             ]
             ordered = []
             for row in mixer_rows:
-                row_html = "".join(mixer_items.pop(p, "") for p in row if p in mixer_items)
+                row_html = "".join(
+                    mixer_items.pop(p, "") for p in row if p in mixer_items
+                )
                 if row_html:
                     ordered.append(f'<div class="param-row">{row_html}</div>')
             ordered.extend(mixer_items.values())
@@ -802,16 +894,22 @@ class SynthParamEditorHandler(BaseHandler):
             ]
             shape_src = osc_items.pop("Oscillator1_ShapeModSource", "")
             shape_amt = osc_items.pop("Oscillator1_ShapeMod", "")
-            shape_pair = f'<div class="param-pair">{shape_src}{shape_amt}</div>' if (shape_src or shape_amt) else ""
+            shape_pair = (
+                f'<div class="param-pair">{shape_src}{shape_amt}</div>'
+                if (shape_src or shape_amt)
+                else ""
+            )
             row1 = "".join(row1_parts) + shape_pair
             if row1:
                 ordered.append(f'<div class="param-row">{row1}</div>')
 
-            row2 = "".join([
-                osc_items.pop("Oscillator2_Type", ""),
-                osc_items.pop("Oscillator2_Transpose", ""),
-                osc_items.pop("Oscillator2_Detune", ""),
-            ])
+            row2 = "".join(
+                [
+                    osc_items.pop("Oscillator2_Type", ""),
+                    osc_items.pop("Oscillator2_Transpose", ""),
+                    osc_items.pop("Oscillator2_Detune", ""),
+                ]
+            )
             if row2:
                 ordered.append(f'<div class="param-row">{row2}</div>')
 
@@ -825,7 +923,9 @@ class SynthParamEditorHandler(BaseHandler):
             )
             if pm_pair1.strip() or pm_pair2.strip():
                 ordered.append('<div class="pitch-mod-label">Pitch Mod</div>')
-                ordered.append(f'<div class="param-row pitch-mod-row">{pm_pair1}{pm_pair2}</div>')
+                ordered.append(
+                    f'<div class="param-row pitch-mod-row">{pm_pair1}{pm_pair2}</div>'
+                )
 
             ordered.extend(osc_items.values())
             sections["Oscillators"] = ordered
@@ -864,13 +964,12 @@ class SynthParamEditorHandler(BaseHandler):
                 )
                 ordered.append(
                     f'<div class="param-row env1-row env1-section"><span class="param-row-label">Amp envelope</span>{row1}</div>'
-
                 )
             if cycle_toggle:
                 ordered.append(
                     f'<div class="param-row env2-mode env2-section">'
                     f'<span class="param-row-label">Env/Cyc</span>{cycle_toggle}'
-                    '</div>'
+                    "</div>"
                 )
             row2_main = "".join(env2_adsr)
             if row2_main.strip():
@@ -879,20 +978,9 @@ class SynthParamEditorHandler(BaseHandler):
                 )
                 ordered.append(
                     f'<div class="param-row env2-adsr env2-section"><span class="param-row-label">Env 2</span>{row2_main}</div>'
-
                 )
-            if any([cycle_mid, cycle_hold, cycle_rate, cycle_ratio, cycle_time, cycle_sync, cycle_mode]):
-                # Hide unselected rate controls based on current mode
-                if cycling_mode_val != "Freq" and cycle_rate:
-                    cycle_rate = cycle_rate.replace('param-item"', 'param-item hidden"', 1)
-                if cycling_mode_val != "Ratio" and cycle_ratio:
-                    cycle_ratio = cycle_ratio.replace('param-item"', 'param-item hidden"', 1)
-                if cycling_mode_val != "Time" and cycle_time:
-                    cycle_time = cycle_time.replace('param-item"', 'param-item hidden"', 1)
-                if cycling_mode_val != "Sync" and cycle_sync:
-                    cycle_sync = cycle_sync.replace('param-item"', 'param-item hidden"', 1)
-
-                row3_extra = "".join([
+            if any(
+                [
                     cycle_mid,
                     cycle_hold,
                     cycle_rate,
@@ -900,7 +988,37 @@ class SynthParamEditorHandler(BaseHandler):
                     cycle_time,
                     cycle_sync,
                     cycle_mode,
-                ])
+                ]
+            ):
+                # Hide unselected rate controls based on current mode
+                if cycling_mode_val != "Freq" and cycle_rate:
+                    cycle_rate = cycle_rate.replace(
+                        'param-item"', 'param-item hidden"', 1
+                    )
+                if cycling_mode_val != "Ratio" and cycle_ratio:
+                    cycle_ratio = cycle_ratio.replace(
+                        'param-item"', 'param-item hidden"', 1
+                    )
+                if cycling_mode_val != "Time" and cycle_time:
+                    cycle_time = cycle_time.replace(
+                        'param-item"', 'param-item hidden"', 1
+                    )
+                if cycling_mode_val != "Sync" and cycle_sync:
+                    cycle_sync = cycle_sync.replace(
+                        'param-item"', 'param-item hidden"', 1
+                    )
+
+                row3_extra = "".join(
+                    [
+                        cycle_mid,
+                        cycle_hold,
+                        cycle_rate,
+                        cycle_ratio,
+                        cycle_time,
+                        cycle_sync,
+                        cycle_mode,
+                    ]
+                )
                 ordered.append(
                     f'<div class="param-row env2-cycling env2-section"><span class="param-row-label">Env 2</span>{row3_extra}</div>'
                 )
@@ -946,16 +1064,14 @@ class SynthParamEditorHandler(BaseHandler):
                     mods.append(
                         f'<div class="param-pair mod-group">'
                         f'<span class="mod-label">Mod {idx}</span>'
-                        f'{src}{amt}{dst}'
-                        f'</div>'
+                        f"{src}{amt}{dst}"
+                        f"</div>"
                     )
 
             ordered = []
             if mods:
                 for mod in mods:
-                    ordered.append(
-                        f'<div class="param-row mod-matrix-row">{mod}</div>'
-                    )
+                    ordered.append(f'<div class="param-row mod-matrix-row">{mod}</div>')
 
             ordered.extend(mod_items.values())
             sections["Modulation"] = ordered
@@ -988,7 +1104,11 @@ class SynthParamEditorHandler(BaseHandler):
             row2 = "".join([shape, retrig])
             if row2.strip():
                 ordered.append(f'<div class="param-row">{row2}</div>')
-            pair = f'<div class="param-pair">{mod_src}{mod_amt}</div>' if (mod_src or mod_amt) else ""
+            pair = (
+                f'<div class="param-pair">{mod_src}{mod_amt}</div>'
+                if (mod_src or mod_amt)
+                else ""
+            )
             row3 = "".join([amount, pair])
             if row3.strip():
                 ordered.append(f'<div class="param-row">{row3}</div>')
@@ -1003,7 +1123,7 @@ class SynthParamEditorHandler(BaseHandler):
             items = sections.get(sec)
             if not items:
                 continue
-            cls = sec.lower().replace(' ', '-').replace('+', '')
+            cls = sec.lower().replace(" ", "-").replace("+", "")
             panel_html = (
                 f'<div class="param-panel {cls}"><h3>{sec}</h3>'
                 f'<div class="param-items">{"".join(items)}</div></div>'
@@ -1012,11 +1132,11 @@ class SynthParamEditorHandler(BaseHandler):
                 bottom_panels.append(panel_html)
             else:
                 out_html += panel_html
-        out_html += '</div>'
+        out_html += "</div>"
         if bottom_panels:
             out_html += '<div class="drift-param-panels">'
-            out_html += ''.join(bottom_panels)
-            out_html += '</div>'
+            out_html += "".join(bottom_panels)
+            out_html += "</div>"
         return out_html
 
     def generate_macro_knobs_html(self, macros):
@@ -1070,8 +1190,7 @@ class SynthParamEditorHandler(BaseHandler):
                 f'value="{display_val}" min="0" max="127" step="0.1" data-decimals="1">'
                 f'<span id="macro_{i}_disp" class="macro-number"></span>'
                 f'<input type="hidden" name="macro_{i}_value" value="{display_val}">'
-                f'</div>'
+                f"</div>"
             )
-        html.append('</div>')
-        return ''.join(html)
-
+        html.append("</div>")
+        return "".join(html)

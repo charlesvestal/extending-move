@@ -91,55 +91,55 @@ class WavetableParamEditorHandler(BaseHandler):
         browser_html = generate_dir_html(
             base_dir,
             "",
-            '/wavetable-params',
-            'preset_select',
-            'select_preset',
-            filter_key='wavetable',
+            "/wavetable-params",
+            "preset_select",
+            "select_preset",
+            filter_key="wavetable",
         )
         core_li = (
             '<li class="dir closed" data-path="Core Library">'
-            '<span>📁 Core Library</span>'
+            "<span>📁 Core Library</span>"
             '<ul class="hidden"></ul></li>'
         )
-        if browser_html.endswith('</ul>'):
-            browser_html = browser_html[:-5] + core_li + '</ul>'
+        if browser_html.endswith("</ul>"):
+            browser_html = browser_html[:-5] + core_li + "</ul>"
         schema = load_wavetable_schema()
         sprites = load_wavetable_sprites()
         return {
-            'message': 'Select a Wavetable preset from the list or create a new one',
-            'message_type': 'info',
-            'file_browser_html': browser_html,
-            'params_html': '',
-            'selected_preset': None,
-            'param_count': 0,
-            'browser_root': base_dir,
-            'browser_filter': 'wavetable',
-            'schema_json': json.dumps(schema),
-            'default_preset_path': DEFAULT_PRESET,
-            'macro_knobs_html': '',
-            'rename_checked': False,
-            'macros_json': '[]',
-            'available_params_json': '[]',
-            'param_paths_json': '{}',
-            'sprites_json': json.dumps(sprites),
-            'sprite1': '',
-            'sprite2': '',
-            'mod_matrix_json': '[]',
+            "message": "Select a Wavetable preset from the list or create a new one",
+            "message_type": "info",
+            "file_browser_html": browser_html,
+            "params_html": "",
+            "selected_preset": None,
+            "param_count": 0,
+            "browser_root": base_dir,
+            "browser_filter": "wavetable",
+            "schema_json": json.dumps(schema),
+            "default_preset_path": DEFAULT_PRESET,
+            "macro_knobs_html": "",
+            "rename_checked": False,
+            "macros_json": "[]",
+            "available_params_json": "[]",
+            "param_paths_json": "{}",
+            "sprites_json": json.dumps(sprites),
+            "sprite1": "",
+            "sprite2": "",
+            "mod_matrix_json": "[]",
         }
 
     def handle_post(self, form):
-        action = form.getvalue('action')
-        if action == 'reset_preset':
+        action = form.getvalue("action")
+        if action == "reset_preset":
             return self.handle_get()
 
-        message = ''
-        if action == 'new_preset':
-            new_name = form.getvalue('new_preset_name')
+        message = ""
+        if action == "new_preset":
+            new_name = form.getvalue("new_preset_name")
             if not new_name:
                 return self.format_error_response("Preset name required")
             os.makedirs(NEW_PRESET_DIR, exist_ok=True)
-            if not new_name.endswith('.ablpreset') and not new_name.endswith('.json'):
-                new_name += '.ablpreset'
+            if not new_name.endswith(".ablpreset") and not new_name.endswith(".json"):
+                new_name += ".ablpreset"
             preset_path = os.path.join(NEW_PRESET_DIR, new_name)
             if os.path.exists(preset_path):
                 return self.format_error_response("Preset already exists")
@@ -159,7 +159,7 @@ class WavetableParamEditorHandler(BaseHandler):
             except Exception as exc:
                 return self.format_error_response(f"Could not create preset: {exc}")
         else:
-            preset_path = form.getvalue('preset_select')
+            preset_path = form.getvalue("preset_select")
 
         if not preset_path:
             return self.format_error_response("No preset selected")
@@ -167,28 +167,28 @@ class WavetableParamEditorHandler(BaseHandler):
         is_core = preset_path.startswith(CORE_LIBRARY_DIR)
 
         rename_flag = False
-        if action == 'save_params':
+        if action == "save_params":
             try:
-                count = int(form.getvalue('param_count', '0'))
+                count = int(form.getvalue("param_count", "0"))
             except ValueError:
                 count = 0
             updates = {}
             for i in range(count):
-                name = form.getvalue(f'param_{i}_name')
-                value = form.getvalue(f'param_{i}_value')
+                name = form.getvalue(f"param_{i}_name")
+                value = form.getvalue(f"param_{i}_value")
                 if name is not None and value is not None:
                     updates[name] = value
-            rename_flag = form.getvalue('rename') in ('on', 'true', '1') or is_core
-            new_name = form.getvalue('new_preset_name')
+            rename_flag = form.getvalue("rename") in ("on", "true", "1") or is_core
+            new_name = form.getvalue("new_preset_name")
             output_path = None
             if rename_flag:
                 if not new_name:
                     new_name = os.path.basename(preset_path)
                 # Convert json factory presets to .ablpreset when copying
-                if new_name.endswith('.json'):
+                if new_name.endswith(".json"):
                     new_name = new_name[:-5]
-                if not new_name.endswith('.ablpreset'):
-                    new_name += '.ablpreset'
+                if not new_name.endswith(".ablpreset"):
+                    new_name += ".ablpreset"
                 directory = os.path.dirname(preset_path)
                 if is_core:
                     directory = NEW_PRESET_DIR
@@ -200,20 +200,20 @@ class WavetableParamEditorHandler(BaseHandler):
                 output_path,
                 device_types=("wavetable",),
             )
-            if not result['success']:
-                return self.format_error_response(result['message'])
-            preset_path = result['path']
+            if not result["success"]:
+                return self.format_error_response(result["message"])
+            preset_path = result["path"]
 
             macro_updates = {}
             for i in range(8):
-                val = form.getvalue(f'macro_{i}_value')
+                val = form.getvalue(f"macro_{i}_value")
                 if val is not None:
                     macro_updates[i] = val
             macro_result = update_macro_values(preset_path, macro_updates, preset_path)
-            if not macro_result['success']:
-                return self.format_error_response(macro_result['message'])
+            if not macro_result["success"]:
+                return self.format_error_response(macro_result["message"])
 
-            macros_data_str = form.getvalue('macros_data')
+            macros_data_str = form.getvalue("macros_data")
             if macros_data_str:
                 try:
                     macros_data = json.loads(macros_data_str)
@@ -223,50 +223,54 @@ class WavetableParamEditorHandler(BaseHandler):
                 macros_data = []
 
             # Update macro names
-            name_updates = {m.get('index'): m.get('name') for m in macros_data}
+            name_updates = {m.get("index"): m.get("name") for m in macros_data}
             name_result = update_preset_macro_names(preset_path, name_updates)
-            if not name_result['success']:
-                return self.format_error_response(name_result['message'])
+            if not name_result["success"]:
+                return self.format_error_response(name_result["message"])
 
             # Determine existing mappings to remove
             existing_info = extract_macro_information(preset_path)
-            existing_mapped = existing_info.get('mapped_parameters', {}) if existing_info['success'] else {}
+            existing_mapped = (
+                existing_info.get("mapped_parameters", {})
+                if existing_info["success"]
+                else {}
+            )
 
             processed = set()
             for m in macros_data:
-                idx = m.get('index')
-                for p in m.get('parameters', []):
-                    pname = p.get('name')
+                idx = m.get("index")
+                for p in m.get("parameters", []):
+                    pname = p.get("name")
                     param_updates = {
                         idx: {
-                            'parameter': pname,
-                            'parameter_path': p.get('path'),
-                            'rangeMin': p.get('rangeMin'),
-                            'rangeMax': p.get('rangeMax'),
+                            "parameter": pname,
+                            "parameter_path": p.get("path"),
+                            "rangeMin": p.get("rangeMin"),
+                            "rangeMax": p.get("rangeMax"),
                         }
                     }
                     upd = update_preset_parameter_mappings(preset_path, param_updates)
-                    if not upd['success']:
-                        return self.format_error_response(upd['message'])
+                    if not upd["success"]:
+                        return self.format_error_response(upd["message"])
                     processed.add(pname)
                     existing_mapped.pop(pname, None)
 
             # Remove mappings not present anymore
             for pname, info in existing_mapped.items():
-                delete_parameter_mapping(preset_path, info['path'])
+                delete_parameter_mapping(preset_path, info["path"])
 
-            sprite1 = form.getvalue('sprite1')
-            sprite2 = form.getvalue('sprite2')
+            sprite1 = form.getvalue("sprite1")
+            sprite2 = form.getvalue("sprite2")
             sprite_res = update_wavetable_sprites(
                 preset_path,
                 sprite1 if sprite1 is not None else None,
                 sprite2 if sprite2 is not None else None,
                 preset_path,
             )
-            if not sprite_res['success']:
-                return self.format_error_response(sprite_res['message'])
+            if not sprite_res["success"]:
+                return self.format_error_response(sprite_res["message"])
 
-            matrix_str = form.getvalue('mod_matrix_data')
+            matrix_str = form.getvalue("mod_matrix_data")
             if matrix_str:
                 try:
                     matrix_data = json.loads(matrix_str)
@@ -274,11 +278,13 @@ class WavetableParamEditorHandler(BaseHandler):
                     matrix_data = []
             else:
                 matrix_data = []
-            matrix_res = update_wavetable_mod_matrix(preset_path, matrix_data, preset_path)
-            if not matrix_res['success']:
-                return self.format_error_response(matrix_res['message'])
+            matrix_res = update_wavetable_mod_matrix(
+                preset_path, matrix_data, preset_path
+            )
+            if not matrix_res["success"]:
+                return self.format_error_response(matrix_res["message"])
 
-            message = result['message'] + "; " + macro_result['message']
+            message = result["message"] + "; " + macro_result["message"]
             if output_path:
                 message += f" Saved to {output_path}"
             refresh_success, refresh_message = refresh_library()
@@ -286,12 +292,12 @@ class WavetableParamEditorHandler(BaseHandler):
                 message += " Library refreshed."
             else:
                 message += f" Library refresh failed: {refresh_message}"
-        elif action in ['select_preset', 'new_preset']:
-            if action == 'select_preset':
+        elif action in ["select_preset", "new_preset"]:
+            if action == "select_preset":
                 if is_core:
                     dest_name = os.path.basename(preset_path)
-                    if dest_name.endswith('.json'):
-                        dest_name = dest_name[:-5] + '.ablpreset'
+                    if dest_name.endswith(".json"):
+                        dest_name = dest_name[:-5] + ".ablpreset"
                     save_path = os.path.join(NEW_PRESET_DIR, dest_name)
                     message = f"Core Library preset will be saved to {save_path}"
                 else:
@@ -300,23 +306,23 @@ class WavetableParamEditorHandler(BaseHandler):
             return self.format_error_response("Unknown action")
 
         values = extract_parameter_values(preset_path, device_types=("wavetable",))
-        params_html = ''
+        params_html = ""
         param_count = 0
 
-        macro_knobs_html = ''
+        macro_knobs_html = ""
         macro_info = extract_macro_information(preset_path)
         mapped_params = {}
-        macros_json = '[]'
-        available_params_json = '[]'
-        param_paths_json = '{}'
-        if macro_info['success']:
-            macro_knobs_html = self.generate_macro_knobs_html(macro_info['macros'])
-            mapped_params = macro_info.get('mapped_parameters', {})
+        macros_json = "[]"
+        available_params_json = "[]"
+        param_paths_json = "{}"
+        if macro_info["success"]:
+            macro_knobs_html = self.generate_macro_knobs_html(macro_info["macros"])
+            mapped_params = macro_info.get("mapped_parameters", {})
             macros_for_json = []
-            for m in macro_info['macros']:
+            for m in macro_info["macros"]:
                 mc = dict(m)
-                if mc.get('name') == f"Macro {mc.get('index')}":
-                    mc['name'] = ""
+                if mc.get("name") == f"Macro {mc.get('index')}":
+                    mc["name"] = ""
                 macros_for_json.append(mc)
             macros_json = json.dumps(macros_for_json)
 
@@ -325,21 +331,21 @@ class WavetableParamEditorHandler(BaseHandler):
             device_types=("wavetable",),
             schema_loader=load_wavetable_schema,
         )
-        if param_info['success']:
+        if param_info["success"]:
             params = [
-                p for p in param_info['parameters'] if p not in EXCLUDED_MACRO_PARAMS
+                p for p in param_info["parameters"] if p not in EXCLUDED_MACRO_PARAMS
             ]
             paths = {
                 k: v
-                for k, v in param_info.get('parameter_paths', {}).items()
+                for k, v in param_info.get("parameter_paths", {}).items()
                 if k not in EXCLUDED_MACRO_PARAMS
             }
             available_params_json = json.dumps(params)
             param_paths_json = json.dumps(paths)
-        
-        if values['success']:
-            params_html = self.generate_params_html(values['parameters'], mapped_params)
-            param_count = len(values['parameters'])
+
+        if values["success"]:
+            params_html = self.generate_params_html(values["parameters"], mapped_params)
+            param_count = len(values["parameters"])
 
         base_dir = "/data/UserData/UserLibrary/Track Presets"
         if not os.path.exists(base_dir) and os.path.exists("examples/Track Presets"):
@@ -347,44 +353,52 @@ class WavetableParamEditorHandler(BaseHandler):
         browser_html = generate_dir_html(
             base_dir,
             "",
-            '/wavetable-params',
-            'preset_select',
-            'select_preset',
-            filter_key='wavetable',
+            "/wavetable-params",
+            "preset_select",
+            "select_preset",
+            filter_key="wavetable",
         )
         core_li = (
             '<li class="dir closed" data-path="Core Library">'
-            '<span>📁 Core Library</span>'
+            "<span>📁 Core Library</span>"
             '<ul class="hidden"></ul></li>'
         )
-        if browser_html.endswith('</ul>'):
-            browser_html = browser_html[:-5] + core_li + '</ul>'
+        if browser_html.endswith("</ul>"):
+            browser_html = browser_html[:-5] + core_li + "</ul>"
         sprites_json = json.dumps(load_wavetable_sprites())
         sprite_info = extract_wavetable_sprites(preset_path)
-        sprite1 = sprite_info.get('sprite1') if sprite_info.get('success', True) else None
-        sprite2 = sprite_info.get('sprite2') if sprite_info.get('success', True) else None
+        sprite1 = (
+            sprite_info.get("sprite1") if sprite_info.get("success", True) else None
+        )
+        sprite2 = (
+            sprite_info.get("sprite2") if sprite_info.get("success", True) else None
+        )
         matrix_info = extract_wavetable_mod_matrix(preset_path)
-        mod_matrix_json = json.dumps(matrix_info.get('matrix', [])) if matrix_info.get('success', False) else '[]'
+        mod_matrix_json = (
+            json.dumps(matrix_info.get("matrix", []))
+            if matrix_info.get("success", False)
+            else "[]"
+        )
         return {
-            'message': message,
-            'message_type': 'success',
-            'file_browser_html': browser_html,
-            'params_html': params_html,
-            'selected_preset': preset_path,
-            'param_count': param_count,
-            'browser_root': base_dir,
-            'browser_filter': 'wavetable',
-            'schema_json': json.dumps(load_wavetable_schema()),
-            'default_preset_path': DEFAULT_PRESET,
-            'macro_knobs_html': macro_knobs_html,
-            'rename_checked': rename_flag if action == 'save_params' else is_core,
-            'macros_json': macros_json,
-            'available_params_json': available_params_json,
-            'param_paths_json': param_paths_json,
-            'sprites_json': sprites_json,
-            'mod_matrix_json': mod_matrix_json,
-            'sprite1': sprite1 or '',
-            'sprite2': sprite2 or '',
+            "message": message,
+            "message_type": "success",
+            "file_browser_html": browser_html,
+            "params_html": params_html,
+            "selected_preset": preset_path,
+            "param_count": param_count,
+            "browser_root": base_dir,
+            "browser_filter": "wavetable",
+            "schema_json": json.dumps(load_wavetable_schema()),
+            "default_preset_path": DEFAULT_PRESET,
+            "macro_knobs_html": macro_knobs_html,
+            "rename_checked": rename_flag if action == "save_params" else is_core,
+            "macros_json": macros_json,
+            "available_params_json": available_params_json,
+            "param_paths_json": param_paths_json,
+            "sprites_json": sprites_json,
+            "mod_matrix_json": mod_matrix_json,
+            "sprite1": sprite1 or "",
+            "sprite2": sprite2 or "",
         }
 
     SECTION_ORDER = [
@@ -451,7 +465,6 @@ class WavetableParamEditorHandler(BaseHandler):
         "PitchModulation_Amount1": "Amount",
         "PitchModulation_Source2": "Source",
         "PitchModulation_Amount2": "Amount",
-
         # FX
         "Oscillator1_Effects_EffectMode": "Effects Mode",
         "Oscillator1_Effects_Effect1": "FX 1",
@@ -459,7 +472,6 @@ class WavetableParamEditorHandler(BaseHandler):
         "Oscillator2_Effects_EffectMode": "Effects Mode",
         "Oscillator2_Effects_Effect1": "FX 1",
         "Oscillator2_Effects_Effect2": "FX 2",
-
         # Mixer
         "Oscillator1_On": "On/Off",
         "Oscillator1_Gain": "Gain",
@@ -469,7 +481,6 @@ class WavetableParamEditorHandler(BaseHandler):
         "Oscillator2_Pan": "Pan",
         "SubOscillator_On": "On/Off",
         "SubOscillator_Gain": "Gain",
-
         # Mixer
         "Mixer_OscillatorOn1": "On/Off",
         "Mixer_OscillatorGain1": "Osc 1",
@@ -480,7 +491,6 @@ class WavetableParamEditorHandler(BaseHandler):
         "Mixer_NoiseOn": "On/Off",
         "Mixer_NoiseLevel": "Noise",
         "Filter_NoiseThrough": "Filter",
-
         # Filter
         "Filter_Frequency": "Freq",
         "Filter_Type": "Type",
@@ -491,7 +501,6 @@ class WavetableParamEditorHandler(BaseHandler):
         "Filter_ModAmount1": "Mod Amount 1",
         "Filter_ModSource2": "Mod Source 2",
         "Filter_ModAmount2": "Mod Amount 2",
-
         # Envelopes
         "Envelope1_Attack": "Attack",
         "Envelope1_Decay": "Decay",
@@ -508,7 +517,6 @@ class WavetableParamEditorHandler(BaseHandler):
         "CyclingEnvelope_Time": "ms",
         "CyclingEnvelope_SyncedRate": "Sync",
         "CyclingEnvelope_Mode": "Mode",
-
         # LFO
         "Lfo_Shape": "Shape",
         "Lfo_Rate": "Rate",
@@ -523,7 +531,6 @@ class WavetableParamEditorHandler(BaseHandler):
         "Lfo_PhaseOffset": "Offset",
         "Lfo_Shaping": "Shape",
         "Lfo_Sync": "Sync Type",
-
         # Modulation Matrix
         "ModulationMatrix_Source1": "Source",
         "ModulationMatrix_Target1": "Destination",
@@ -534,7 +541,6 @@ class WavetableParamEditorHandler(BaseHandler):
         "ModulationMatrix_Source3": "Source",
         "ModulationMatrix_Target3": "Destination",
         "ModulationMatrix_Amount3": "Amount",
-
         # Global
         "Global_VoiceMode": "Mode",
         "Global_VoiceCount": "Voices",
@@ -558,7 +564,6 @@ class WavetableParamEditorHandler(BaseHandler):
         "Voice_Unison_Mode": "Unison",
         "Voice_Unison_Amount": "Amount",
         "Voice_Unison_VoiceCount": "Voices",
-
     }
 
     # Short labels for oscillator waveforms
@@ -582,6 +587,37 @@ class WavetableParamEditorHandler(BaseHandler):
         "Square": "Square",
         "Triangle": "Tri",
         "Wander": "Wndr",
+    }
+
+    SYNC_RATE_OPTIONS = [
+        "8",
+        "6",
+        "4",
+        "2",
+        "1.5",
+        "1",
+        "3/4",
+        "1/2",
+        "3/8",
+        "1/3",
+        "5/16",
+        "1/4",
+        "3/16",
+        "1/6",
+        "1/8",
+        "1/12",
+        "1/16",
+        "1/24",
+        "1/32",
+        "1/48",
+        "1/64",
+    ]
+
+    SYNC_RATE_PARAMS = {
+        "CyclingEnvelope_SyncedRate",
+        "Lfo_SyncedRate",
+        "Voice_Modulators_Lfo1_Time_SyncedRate",
+        "Voice_Modulators_Lfo2_Time_SyncedRate",
     }
 
     # Parameters that should display without a text label.  This keeps the
@@ -637,12 +673,23 @@ class WavetableParamEditorHandler(BaseHandler):
                     changed = True
         return name
 
-    def _build_param_item(self, idx, name, value, meta, label=None,
-                           hide_label=False, slider=False, extra_classes=""):
+    def _build_param_item(
+        self,
+        idx,
+        name,
+        value,
+        meta,
+        label=None,
+        hide_label=False,
+        slider=False,
+        extra_classes="",
+    ):
         """Create HTML for a single parameter control."""
         p_type = meta.get("type")
-        label = label if label is not None else self.LABEL_OVERRIDES.get(
-            name, self._friendly_label(name)
+        label = (
+            label
+            if label is not None
+            else self.LABEL_OVERRIDES.get(name, self._friendly_label(name))
         )
 
         classes = "param-item"
@@ -663,8 +710,10 @@ class WavetableParamEditorHandler(BaseHandler):
                 if name.endswith("_Slope"):
                     disp = f"{opt}-pole"
                 html.append(f'<option value="{opt}"{sel}>{disp}</option>')
-            html.append('</select>')
-            html.append(f'<input type="hidden" name="param_{idx}_value" value="{value}">')
+            html.append("</select>")
+            html.append(
+                f'<input type="hidden" name="param_{idx}_value" value="{value}">'
+            )
         elif p_type == "boolean":
             bool_val = 1 if str(value).lower() in ("true", "1") else 0
             html.append(
@@ -672,10 +721,16 @@ class WavetableParamEditorHandler(BaseHandler):
                 f'data-target="param_{idx}_value" data-true-value="1" data-false-value="0"'
                 f' {"checked" if bool_val else ""}>'
             )
-            html.append(f'<input type="hidden" name="param_{idx}_value" value="{bool_val}">')
+            html.append(
+                f'<input type="hidden" name="param_{idx}_value" value="{bool_val}">'
+            )
         elif name == "Global_SerialNumber":
-            min_attr = f' min="{meta.get("min")}"' if meta.get("min") is not None else ''
-            max_attr = f' max="{meta.get("max")}"' if meta.get("max") is not None else ''
+            min_attr = (
+                f' min="{meta.get("min")}"' if meta.get("min") is not None else ""
+            )
+            max_attr = (
+                f' max="{meta.get("max")}"' if meta.get("max") is not None else ""
+            )
             html.append(
                 f'<input type="number" class="param-input" name="param_{idx}_value" value="{value}"{min_attr}{max_attr}>'
             )
@@ -684,14 +739,29 @@ class WavetableParamEditorHandler(BaseHandler):
             max_val = meta.get("max")
             decimals = meta.get("decimals")
             step_val = meta.get("step")
+            enum_attr = ""
+            if name in self.SYNC_RATE_PARAMS:
+                step_val = 1
+                decimals = 0
+                enum_attr = f' data-enum-options="{",".join(self.SYNC_RATE_OPTIONS)}"'
             if decimals is not None and step_val is None:
                 step_val = 10 ** (-decimals)
-            if step_val is None and min_val is not None and max_val is not None and max_val <= 1 and min_val >= -1:
+            if (
+                step_val is None
+                and min_val is not None
+                and max_val is not None
+                and max_val <= 1
+                and min_val >= -1
+            ):
                 step_val = 0.01
             unit_val = meta.get("unit")
             if slider:
                 classes = ["rect-slider"]
-                if min_val is not None and max_val is not None and min_val < 0 < max_val:
+                if (
+                    min_val is not None
+                    and max_val is not None
+                    and min_val < 0 < max_val
+                ):
                     classes.append("center")
                 attrs = []
                 if min_val is not None:
@@ -710,14 +780,18 @@ class WavetableParamEditorHandler(BaseHandler):
                 html.append(
                     f'<div id="param_{idx}_slider" class="{" ".join(classes)}" {attr_str}></div>'
                 )
-                html.append(f'<input type="hidden" name="param_{idx}_value" value="{value}">')
+                html.append(
+                    f'<input type="hidden" name="param_{idx}_value" value="{value}">'
+                )
             else:
-                min_attr = f' min="{min_val}"' if min_val is not None else ''
-                max_attr = f' max="{max_val}"' if max_val is not None else ''
-                step_attr = f' step="{step_val}"' if step_val is not None else ''
-                unit_attr = f' data-unit="{unit_val}"' if unit_val else ''
-                dec_attr = f' data-decimals="{decimals}"' if decimals is not None else ''
-                disp_id = f'param_{idx}_display'
+                min_attr = f' min="{min_val}"' if min_val is not None else ""
+                max_attr = f' max="{max_val}"' if max_val is not None else ""
+                step_attr = f' step="{step_val}"' if step_val is not None else ""
+                unit_attr = f' data-unit="{unit_val}"' if unit_val else ""
+                dec_attr = (
+                    f' data-decimals="{decimals}"' if decimals is not None else ""
+                )
+                disp_id = f"param_{idx}_display"
                 input_classes = "param-dial input-knob"
                 extra_attrs = ""
                 if name == "Filter_Frequency":
@@ -725,20 +799,24 @@ class WavetableParamEditorHandler(BaseHandler):
                     extra_attrs += ' data-diameter="48"'
                 html.append(
                     f'<input id="param_{idx}_dial" type="range" class="{input_classes}" data-target="param_{idx}_value" '
-                    f'data-display="{disp_id}" value="{value}"{min_attr}{max_attr}{step_attr}{unit_attr}{dec_attr}{extra_attrs}>'
+                    f'data-display="{disp_id}" value="{value}"{min_attr}{max_attr}{step_attr}{unit_attr}{dec_attr}{extra_attrs}{enum_attr}>'
                 )
                 html.append(f'<span id="{disp_id}" class="param-number"></span>')
-                html.append(f'<input type="hidden" name="param_{idx}_value" value="{value}">')
+                html.append(
+                    f'<input type="hidden" name="param_{idx}_value" value="{value}">'
+                )
 
         html.append(f'<input type="hidden" name="param_{idx}_name" value="{name}">')
-        html.append('</div>')
-        return ''.join(html)
+        html.append("</div>")
+        return "".join(html)
 
     def _get_section(self, name):
         """Return the panel section for a raw Wavetable parameter name."""
         if name == "Voice_Global_FilterRouting":
             return "Filter"
-        if name.startswith(("Voice_Oscillator1_Effects_", "Voice_Oscillator2_Effects_")):
+        if name.startswith(
+            ("Voice_Oscillator1_Effects_", "Voice_Oscillator2_Effects_")
+        ):
             return "FX"
         if re.search(r"Voice_(?:Oscillator[12]|SubOscillator)_(?:On|Gain|Pan)$", name):
             return "Mixer"
@@ -746,13 +824,20 @@ class WavetableParamEditorHandler(BaseHandler):
             return "Oscillators"
         if name.startswith("Voice_Filter"):
             return "Filter"
-        if name.startswith("Voice_Modulators_AmpEnvelope") or name.startswith("Voice_Modulators_Envelope"):
+        if name.startswith("Voice_Modulators_AmpEnvelope") or name.startswith(
+            "Voice_Modulators_Envelope"
+        ):
             return "Envelopes"
         if name.startswith("Voice_Modulators_Lfo"):
             return "Modulation"
         if name.startswith("Voice_Modulators"):
             return "Modulation"
-        if name.startswith(("Voice_Global_", "Voice_Unison_")) or name in {"HiQ", "MonoPoly", "PolyVoices", "Volume"}:
+        if name.startswith(("Voice_Global_", "Voice_Unison_")) or name in {
+            "HiQ",
+            "MonoPoly",
+            "PolyVoices",
+            "Volume",
+        }:
             return "Global"
         return "Other"
 
@@ -776,15 +861,15 @@ class WavetableParamEditorHandler(BaseHandler):
 
         if drive:
             drive = drive.replace(
-                'param-item',
-                f'param-item filter-drive filter{idx}-drive hidden',
+                "param-item",
+                f"param-item filter-drive filter{idx}-drive hidden",
                 1,
             )
 
         if morph:
             morph = morph.replace(
-                'param-item',
-                f'param-item filter-morph filter{idx}-morph hidden',
+                "param-item",
+                f"param-item filter-morph filter{idx}-morph hidden",
                 1,
             )
 
@@ -802,20 +887,24 @@ class WavetableParamEditorHandler(BaseHandler):
     def _arrange_osc_panel(self, items: dict, sprite_html: str) -> list:
         """Return oscillator panel rows including sprite selection."""
         ordered = []
-        row = "".join([
-            sprite_html,
-            items.pop("Pitch_Detune", ""),
-            items.pop("Pitch_Transpose", ""),
-            items.pop("Wavetables_WavePosition", ""),
-        ])
+        row = "".join(
+            [
+                sprite_html,
+                items.pop("Pitch_Detune", ""),
+                items.pop("Pitch_Transpose", ""),
+                items.pop("Wavetables_WavePosition", ""),
+            ]
+        )
         if row.strip():
             ordered.append(f'<div class="param-row">{row}</div>')
 
-        fx_row = "".join([
-            items.pop("EffectMode", ""),
-            items.pop("Effect1", ""),
-            items.pop("Effect2", ""),
-        ])
+        fx_row = "".join(
+            [
+                items.pop("EffectMode", ""),
+                items.pop("Effect1", ""),
+                items.pop("Effect2", ""),
+            ]
+        )
 
         if items:
             ordered.extend(items.values())
@@ -828,10 +917,12 @@ class WavetableParamEditorHandler(BaseHandler):
     def _arrange_sub_panel(self, items: dict) -> list:
         """Return sub oscillator panel rows."""
         ordered = []
-        row = "".join([
-            items.pop("Tone", ""),
-            items.pop("Transpose", ""),
-        ])
+        row = "".join(
+            [
+                items.pop("Tone", ""),
+                items.pop("Transpose", ""),
+            ]
+        )
         if row.strip():
             ordered.append(f'<div class="param-row">{row}</div>')
         if items:
@@ -841,11 +932,13 @@ class WavetableParamEditorHandler(BaseHandler):
     def _arrange_fx_panel(self, items: dict) -> list:
         """Return FX panel rows for an oscillator."""
         ordered = []
-        row = "".join([
-            items.pop("EffectMode", ""),
-            items.pop("Effect1", ""),
-            items.pop("Effect2", ""),
-        ])
+        row = "".join(
+            [
+                items.pop("EffectMode", ""),
+                items.pop("Effect1", ""),
+                items.pop("Effect2", ""),
+            ]
+        )
         if row.strip():
             ordered.append(f'<div class="param-row">{row}</div>')
         if items:
@@ -912,21 +1005,25 @@ class WavetableParamEditorHandler(BaseHandler):
     def _arrange_lfo_panel(self, items: dict) -> list:
         """Return LFO panel rows in a specific layout."""
         ordered = []
-        row1 = "".join([
-            items.pop("Type", ""),
-            items.pop("Sync", ""),
-            items.pop("AttackTime", ""),
-            items.pop("Retrigger", ""),
-        ])
+        row1 = "".join(
+            [
+                items.pop("Type", ""),
+                items.pop("Sync", ""),
+                items.pop("AttackTime", ""),
+                items.pop("Retrigger", ""),
+            ]
+        )
         if row1.strip():
             ordered.append(f'<div class="param-row">{row1}</div>')
 
-        row2 = "".join([
-            items.pop("Rate", ""),
-            items.pop("Amount", ""),
-            items.pop("Shaping", ""),
-            items.pop("PhaseOffset", ""),
-        ])
+        row2 = "".join(
+            [
+                items.pop("Rate", ""),
+                items.pop("Amount", ""),
+                items.pop("Shaping", ""),
+                items.pop("PhaseOffset", ""),
+            ]
+        )
         if row2.strip():
             ordered.append(f'<div class="param-row">{row2}</div>')
 
@@ -1004,29 +1101,37 @@ class WavetableParamEditorHandler(BaseHandler):
     def _arrange_global_panel(self, items: dict) -> list:
         """Return ordered rows for the Global panel."""
         ordered = []
-        row = "".join([
-            items.pop("HiQ", ""),
-            items.pop("Volume", ""),
-        ])
+        row = "".join(
+            [
+                items.pop("HiQ", ""),
+                items.pop("Volume", ""),
+            ]
+        )
         if row.strip():
             ordered.append(f'<div class="param-row">{row}</div>')
-        row = "".join([
-            items.pop("Glide", ""),
-            items.pop("Transpose", ""),
-        ])
+        row = "".join(
+            [
+                items.pop("Glide", ""),
+                items.pop("Transpose", ""),
+            ]
+        )
         if row.strip():
             ordered.append(f'<div class="param-row">{row}</div>')
-        row = "".join([
-            items.pop("MonoPoly", ""),
-            items.pop("PolyVoices", ""),
-        ])
+        row = "".join(
+            [
+                items.pop("MonoPoly", ""),
+                items.pop("PolyVoices", ""),
+            ]
+        )
         if row.strip():
             ordered.append(f'<div class="param-row">{row}</div>')
-        row = "".join([
-            items.pop("Mode", ""),
-            items.pop("Amount", ""),
-            items.pop("VoiceCount", ""),
-        ])
+        row = "".join(
+            [
+                items.pop("Mode", ""),
+                items.pop("Amount", ""),
+                items.pop("VoiceCount", ""),
+            ]
+        )
         if row.strip():
             ordered.append(f'<div class="param-row">{row}</div>')
         if items:
@@ -1036,19 +1141,19 @@ class WavetableParamEditorHandler(BaseHandler):
     def generate_params_html(self, params, mapped_parameters=None):
         """Return HTML controls for the given parameter values."""
         if not params:
-            return '<p>No parameters found.</p>'
+            return "<p>No parameters found.</p>"
 
         if mapped_parameters is None:
             mapped_parameters = {}
 
         schema = load_wavetable_schema()
-        fx_modes = {1: 'None', 2: 'None'}
+        fx_modes = {1: "None", 2: "None"}
         for item in params:
-            n = item.get('name')
-            if n == 'Voice_Oscillator1_Effects_EffectMode':
-                fx_modes[1] = item.get('value')
-            elif n == 'Voice_Oscillator2_Effects_EffectMode':
-                fx_modes[2] = item.get('value')
+            n = item.get("name")
+            if n == "Voice_Oscillator1_Effects_EffectMode":
+                fx_modes[1] = item.get("value")
+            elif n == "Voice_Oscillator2_Effects_EffectMode":
+                fx_modes[2] = item.get("value")
         sections = {s: [] for s in self.SECTION_ORDER}
         subgroups = {
             sec: {lbl: {} for _, lbl, _ in self.SECTION_SUBPANELS.get(sec, [])}
@@ -1088,7 +1193,10 @@ class WavetableParamEditorHandler(BaseHandler):
                         label_override = self.LABEL_OVERRIDES.get(
                             f"{ov_prefix}_{base}", self._friendly_label(base)
                         )
-                        if ov_prefix.startswith("Oscillator") and base in {"Effect1", "Effect2"}:
+                        if ov_prefix.startswith("Oscillator") and base in {
+                            "Effect1",
+                            "Effect2",
+                        }:
                             idx = 1 if ov_prefix.startswith("Oscillator1") else 2
                             labels = {
                                 "None": ("FX 1", "FX 2"),
@@ -1098,7 +1206,9 @@ class WavetableParamEditorHandler(BaseHandler):
                                 "Modern": ("Warp", "Fold"),
                             }
                             mode = fx_modes.get(idx, "None")
-                            label_override = labels.get(mode, labels["None"])[0 if base == "Effect1" else 1]
+                            label_override = labels.get(mode, labels["None"])[
+                                0 if base == "Effect1" else 1
+                            ]
                         html = self._build_param_item(
                             i,
                             name,
@@ -1143,9 +1253,7 @@ class WavetableParamEditorHandler(BaseHandler):
             for _prefix, label, _ in groups:
                 items = subgroups.get(sec, {}).get(label)
                 if items:
-                    group_items.append(
-                        f'<div class="param-group-label">{label}</div>'
-                    )
+                    group_items.append(f'<div class="param-group-label">{label}</div>')
                     if sec == "Filter":
                         group_items.extend(self._arrange_filter_panel(items))
                     elif sec == "Envelopes":
@@ -1177,14 +1285,14 @@ class WavetableParamEditorHandler(BaseHandler):
         osc2_mixer = subgroups.get("Mixer", {}).get("Oscillator 2", {})
         osc2_fx = subgroups.get("FX", {}).get("Oscillator 2", {})
 
-        sub_panel = ''.join(self._arrange_sub_column(sub_items, sub_mixer))
+        sub_panel = "".join(self._arrange_sub_column(sub_items, sub_mixer))
         osc1_sprite = (
             '<div class="param-item"><span class="param-label">Osc 1</span>'
             '<select id="sprite1-cat" class="param-select"></select>'
             '<select id="sprite1-select" class="param-select"></select>'
             '<input type="hidden" name="sprite1" id="sprite1-input"></div>'
         )
-        osc1_panel = ''.join(
+        osc1_panel = "".join(
             self._arrange_osc_column(osc1_items, osc1_mixer, osc1_fx, osc1_sprite)
         )
         osc2_sprite = (
@@ -1193,11 +1301,11 @@ class WavetableParamEditorHandler(BaseHandler):
             '<select id="sprite2-select" class="param-select"></select>'
             '<input type="hidden" name="sprite2" id="sprite2-input"></div>'
         )
-        osc2_panel = ''.join(
+        osc2_panel = "".join(
             self._arrange_osc_column(osc2_items, osc2_mixer, osc2_fx, osc2_sprite)
         )
 
-        filter_panel = ''
+        filter_panel = ""
         filter_items = sections.pop("Filter", None)
         if filter_items:
             filter_panel = (
@@ -1213,7 +1321,9 @@ class WavetableParamEditorHandler(BaseHandler):
         if filter_panel:
             top_panels.append(filter_panel)
 
-        custom_top = '<div class="wavetable-param-panels">' + ''.join(top_panels) + '</div>'
+        custom_top = (
+            '<div class="wavetable-param-panels">' + "".join(top_panels) + "</div>"
+        )
 
         bottom_panels = []
         for sec in self.SECTION_ORDER:
@@ -1222,7 +1332,7 @@ class WavetableParamEditorHandler(BaseHandler):
             items = sections.get(sec)
             if not items:
                 continue
-            cls = sec.lower().replace(' ', '-').replace('+', '')
+            cls = sec.lower().replace(" ", "-").replace("+", "")
             panel_html = (
                 f'<div class="param-panel {cls}"><h3>{sec}</h3>'
                 f'<div class="param-items">{"".join(items)}</div></div>'
@@ -1232,8 +1342,8 @@ class WavetableParamEditorHandler(BaseHandler):
         out_html = custom_top
         if bottom_panels:
             out_html += '<div class="wavetable-param-panels">'
-            out_html += ''.join(bottom_panels)
-            out_html += '</div>'
+            out_html += "".join(bottom_panels)
+            out_html += "</div>"
         return out_html
 
     def generate_macro_knobs_html(self, macros):
@@ -1246,8 +1356,11 @@ class WavetableParamEditorHandler(BaseHandler):
             if not name:
                 return name
             parts = [
-                re.sub(r"([a-z])([A-Z])", r"\1 \2",
-                       re.sub(r"([A-Za-z])([0-9])", r"\1 \2", p))
+                re.sub(
+                    r"([a-z])([A-Z])",
+                    r"\1 \2",
+                    re.sub(r"([A-Za-z])([0-9])", r"\1 \2", p),
+                )
                 for p in name.split("_")
             ]
             return ": ".join(parts)
@@ -1284,8 +1397,7 @@ class WavetableParamEditorHandler(BaseHandler):
                 f'value="{display_val}" min="0" max="127" step="0.1" data-decimals="1">'
                 f'<span id="macro_{i}_disp" class="macro-number"></span>'
                 f'<input type="hidden" name="macro_{i}_value" value="{display_val}">'
-                f'</div>'
+                f"</div>"
             )
-        html.append('</div>')
-        return ''.join(html)
-
+        html.append("</div>")
+        return "".join(html)
