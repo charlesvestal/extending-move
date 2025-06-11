@@ -8,9 +8,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const paramInfo = {};
   function paramSection(name) {
     if (!name) return null;
-    if (name.startsWith('Filter_')) return 'filter';
-    if (name.startsWith('Envelope1_')) return 'amp';
-    if (name.startsWith('Envelope2_') || name.startsWith('CyclingEnvelope_') || name === 'Global_Envelope2Mode') return 'env';
+    const n = name.toLowerCase();
+    if (n.includes('filter')) return 'filter';
+    if (n.startsWith('envelope1_') || n.includes('ampenvelope')) return 'amp';
+    if (n.startsWith('envelope2_') || n.startsWith('cyclingenvelope_') || n === 'global_envelope2mode') return 'env';
     return null;
   }
   function addSpaces(str) {
