@@ -3,6 +3,7 @@ from scipy import signal
 
 F_MIN = 20
 F_MAX = 20000
+MAG_FLOOR = -60
 
 
 def _biquad_coeffs(filter_type: str, freq: float, q: float, sr: int = 44100):
@@ -62,10 +63,30 @@ def compute_filter_response(
     n: int = 512,
 ):
     """Compute logarithmically spaced magnitude response for one filter."""
+
+    freqs = np.geomspace(F_MIN, F_MAX, n)
+
+    f = filter_type.lower()
+
+    if f == "lowpass" and cutoff >= F_MAX:
+        mag = np.zeros_like(freqs)
+        return freqs.tolist(), mag.tolist()
+
+    if f == "lowpass" and cutoff <= F_MIN:
+        mag = np.full_like(freqs, MAG_FLOOR)
+        return freqs.tolist(), mag.tolist()
+
+    if f == "highpass" and cutoff <= F_MIN:
+        mag = np.zeros_like(freqs)
+        return freqs.tolist(), mag.tolist()
+
+    if f == "highpass" and cutoff >= F_MAX:
+        mag = np.full_like(freqs, MAG_FLOOR)
+        return freqs.tolist(), mag.tolist()
+
     q = 0.5 + 9.5 * resonance
     b, a = _biquad_coeffs(filter_type, cutoff, q, sr)
-    freqs = np.geomspace(F_MIN, F_MAX, n)
-    w, h = signal.freqz(b, a, worN=freqs, fs=sr)
+    _, h = signal.freqz(b, a, worN=freqs, fs=sr)
     if str(slope) == "24":
         _, h2 = signal.freqz(b, a, worN=freqs, fs=sr)
         h *= h2
