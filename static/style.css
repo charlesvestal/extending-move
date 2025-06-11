@@ -822,6 +822,12 @@ select {
 
 .macro-knobs-section {
     text-align: center;
+    position: sticky;
+    top: 0;
+    background: #fff;
+    z-index: 10;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
 }
 
 .macro-knobs-section h3 {
