@@ -3,23 +3,23 @@ export function initWavetableLfoViz() {
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
 
-  const qValue = name => {
+  const qRange = name => {
     const item = document.querySelector(`.param-item[data-name="${name}"]`);
     if (!item) return null;
-    return item.querySelector('input[name$="_value"]');
+    return item.querySelector('input[type="range"]');
   };
   const qSelect = name => {
     const item = document.querySelector(`.param-item[data-name="${name}"]`);
     return item ? item.querySelector('select') : null;
   };
 
-  const rateEl = qValue('Voice_Modulators_Lfo1_Time_Rate');
-  const syncRateEl = qValue('Voice_Modulators_Lfo1_Time_SyncedRate');
+  const rateEl = qRange('Voice_Modulators_Lfo1_Time_Rate');
+  const syncRateEl = qRange('Voice_Modulators_Lfo1_Time_SyncedRate');
   const syncSel = qSelect('Voice_Modulators_Lfo1_Time_Sync');
   const shapeSel = qSelect('Voice_Modulators_Lfo1_Shape_Type');
-  const amountEl = qValue('Voice_Modulators_Lfo1_Shape_Amount');
-  const attackEl = qValue('Voice_Modulators_Lfo1_Time_AttackTime');
-  const offsetEl = qValue('Voice_Modulators_Lfo1_Shape_PhaseOffset');
+  const amountEl = qRange('Voice_Modulators_Lfo1_Shape_Amount');
+  const attackEl = qRange('Voice_Modulators_Lfo1_Time_AttackTime');
+  const offsetEl = qRange('Voice_Modulators_Lfo1_Shape_PhaseOffset');
 
   const rateItem = document.querySelector('.param-item[data-name="Voice_Modulators_Lfo1_Time_Rate"]');
   const syncRateItem = document.querySelector('.param-item[data-name="Voice_Modulators_Lfo1_Time_SyncedRate"]');
