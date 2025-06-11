@@ -152,7 +152,7 @@ export function initDriftCombinedViz() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.beginPath();
     const minDb = -60;
-    const maxDb = 0;
+    const maxDb = 60;
     const logMin = Math.log10(10);
     const logMax = Math.log10(20000);
     for (let i = 0; i < freq.length; i++) {
