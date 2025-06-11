@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const shouldScale = (unit === '%' || unit === 'ct') && Math.abs(max) <= 1 && Math.abs(min) <= 1;
         const getStep = (v) => getPercentStep(v, unit, step, shouldScale);
         const getDisplayDecimals = (v) => getPercentDecimals(v, unit, displayDecimalsDefault, shouldScale);
+        const valueLabels = el.dataset.values ? el.dataset.values.split(',') : null;
         const oscValToDb = (val) => {
             if (val <= 0) return -Infinity;
             if (val <= 1) return val * 64 - 64;
@@ -30,6 +31,12 @@ document.addEventListener('DOMContentLoaded', () => {
             return 1 + db / 6;
         };
         const format = (v) => {
+            if (valueLabels) {
+                const idx = Math.round(v);
+                if (idx >= 0 && idx < valueLabels.length) {
+                    return valueLabels[idx];
+                }
+            }
             let displayVal = shouldScale ? v * 100 : v;
             let unitLabel = unit;
             if (unit === 'Hz') {
