@@ -95,7 +95,7 @@ export function initDriftLfoViz() {
       const t = parseFloat(timeEl.value || '0');
       if (t > 0) {
         const ratio = knobRatio(timeEl);
-        const cycles = 1 + ratio * 9;
+        const cycles = 2 + ratio * 8;
         duration = t * cycles;
       }
     } else {
@@ -103,7 +103,7 @@ export function initDriftLfoViz() {
       if (mode === 'Freq') ratio = knobRatio(rateEl);
       else if (mode === 'Ratio') ratio = knobRatio(ratioEl);
       else if (mode === 'Sync') ratio = knobRatio(syncEl, SYNC_RATES.length - 1);
-      const cycles = 1 + ratio * 9;
+      const cycles = 2 + ratio * 8;
       duration = rate > 0 ? cycles / rate : 1;
     }
     let steps = Math.max(2, Math.round(rate * 6));
