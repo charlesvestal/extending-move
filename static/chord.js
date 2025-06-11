@@ -796,3 +796,36 @@ function updateStretchProgress(current, total) {
   }
 }
 
+async function randomizeChordSelections() {
+  const chords = Object.keys(CHORDS);
+  const octaves = [-2, -1, 0, 1, 2];
+  const overlay = document.getElementById('stretchOverlay');
+  let count = 0;
+  if (window.decodedBuffer && overlay) overlay.style.display = 'flex';
+  for (let i = 1; i <= 16; i++) {
+    const chord = chords[Math.floor(Math.random() * chords.length)];
+    const voicing = Math.floor(Math.random() * 4);
+    const octave = octaves[Math.floor(Math.random() * octaves.length)];
+    window.selectedChords[i - 1] = chord;
+    window.selectedVoicings[i - 1] = voicing;
+    window.selectedOctaves[i - 1] = octave;
+    const chordSel = document.getElementById(`chord-select-${i}`);
+    if (chordSel) chordSel.value = chord;
+    const voiceSel = document.getElementById(`voicing-select-${i}`);
+    if (voiceSel) voiceSel.value = voicing;
+    const octaveSel = document.getElementById(`octave-select-${i}`);
+    if (octaveSel) octaveSel.value = octave;
+    if (window.decodedBuffer) {
+      count++;
+      updateStretchProgress(count, 16);
+      await regenerateChordPreview(i);
+    }
+  }
+  if (window.decodedBuffer && overlay) overlay.style.display = 'none';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('randomizeChords');
+  if (btn) btn.addEventListener('click', () => randomizeChordSelections());
+});
+
