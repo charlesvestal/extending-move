@@ -63,6 +63,28 @@ MACRO_HIGHLIGHT_COLORS = {
     7: "#ffb6c1",  # lightpink
 }
 
+# Parameters that should not be assignable to macros in the Drift editor.
+EXCLUDED_MACRO_PARAMS = {
+    "Filter_ModSource1",
+    "Filter_ModSource2",
+    "Global_HiQuality",
+    "Global_PitchBendRange",
+    "Global_SerialNumber",
+    "Global_VoiceCount",
+    "Global_VoiceMode",
+    "Lfo_ModSource",
+    "ModulationMatrix_Source1",
+    "ModulationMatrix_Source2",
+    "ModulationMatrix_Source3",
+    "ModulationMatrix_Target1",
+    "ModulationMatrix_Target2",
+    "ModulationMatrix_Target3",
+    "Oscillator1_Shape",
+    "Oscillator1_ShapeModSource",
+    "PitchModulation_Source1",
+    "PitchModulation_Source2",
+}
+
 
 class SynthParamEditorHandler(BaseHandler):
     def handle_get(self):
@@ -270,8 +292,16 @@ class SynthParamEditorHandler(BaseHandler):
 
         param_info = extract_available_parameters(preset_path)
         if param_info['success']:
-            available_params_json = json.dumps(param_info['parameters'])
-            param_paths_json = json.dumps(param_info.get('parameter_paths', {}))
+            params = [
+                p for p in param_info['parameters'] if p not in EXCLUDED_MACRO_PARAMS
+            ]
+            paths = {
+                k: v
+                for k, v in param_info.get('parameter_paths', {}).items()
+                if k not in EXCLUDED_MACRO_PARAMS
+            }
+            available_params_json = json.dumps(params)
+            param_paths_json = json.dumps(paths)
         
         if values['success']:
             params_html = self.generate_params_html(values['parameters'], mapped_params)
