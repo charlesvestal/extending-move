@@ -54,7 +54,7 @@
   "Envelope1_Attack": {
     "type": "number",
     "min": 0.0,
-    "max": 60.0,
+    "max": 20.0,
     "options": [],
     "unit": "s",
     "decimals": 3
@@ -62,7 +62,7 @@
   "Envelope1_Decay": {
     "type": "number",
     "min": 0.005,
-    "max": 60.0,
+    "max": 20.0,
     "options": [],
     "unit": "s",
     "decimals": 3
@@ -70,7 +70,7 @@
   "Envelope1_Release": {
     "type": "number",
     "min": 0.01,
-    "max": 60.0,
+    "max": 20.0,
     "options": [],
     "unit": "s",
     "decimals": 3
@@ -86,7 +86,7 @@
   "Envelope2_Attack": {
     "type": "number",
     "min": 0.0,
-    "max": 60.0,
+    "max": 20.0,
     "options": [],
     "unit": "s",
     "decimals": 3
@@ -94,7 +94,7 @@
   "Envelope2_Decay": {
     "type": "number",
     "min": 0.005,
-    "max": 60.0,
+    "max": 20.0,
     "options": [],
     "unit": "s",
     "decimals": 3
@@ -102,7 +102,7 @@
   "Envelope2_Release": {
     "type": "number",
     "min": 0.01,
-    "max": 60.0,
+    "max": 20.0,
     "options": [],
     "unit": "s",
     "decimals": 3
