@@ -49,7 +49,9 @@
     "type": "number",
     "min": 20.0,
     "max": 20480.0,
-    "options": []
+    "options": [],
+    "unit": "Hz",
+    "decimals": 0
   },
   "Voice_Filter1_Morph": {
     "type": "number",
@@ -66,7 +68,7 @@
   "Voice_Filter1_Resonance": {
     "type": "number",
     "min": 0.0,
-    "max": 0.694444,
+    "max": 0.75,
     "options": []
   },
   "Voice_Filter1_Slope": {
@@ -118,7 +120,9 @@
     "type": "number",
     "min": 20.0,
     "max": 20480.0,
-    "options": []
+    "options": [],
+    "unit": "Hz",
+    "decimals": 0
   },
   "Voice_Filter2_Morph": {
     "type": "number",
@@ -135,7 +139,7 @@
   "Voice_Filter2_Resonance": {
     "type": "number",
     "min": 0.0,
-    "max": 0.813492,
+    "max": 0.75,
     "options": []
   },
   "Voice_Filter2_Slope": {
@@ -231,25 +235,33 @@
     "type": "number",
     "min": 0.0,
     "max": 1.0,
-    "options": []
+    "options": [],
+    "unit": "%",
+    "decimals": 2
   },
   "Voice_Modulators_AmpEnvelope_Times_Attack": {
     "type": "number",
-    "min": 0.0,
-    "max": 0.0,
-    "options": []
+    "min": 0,
+    "max": 60,
+    "options": [],
+    "unit": "s",
+    "decimals": 3
   },
   "Voice_Modulators_AmpEnvelope_Times_Decay": {
     "type": "number",
-    "min": 0.0,
-    "max": 20.0,
-    "options": []
+    "min": 0,
+    "max": 60,
+    "options": [],
+    "unit": "s",
+    "decimals": 3
   },
   "Voice_Modulators_AmpEnvelope_Times_Release": {
     "type": "number",
-    "min": 0.0,
-    "max": 3.053029,
-    "options": []
+    "min": 0,
+    "max": 60,
+    "options": [],
+    "unit": "s",
+    "decimals": 3
   },
   "Voice_Modulators_Envelope2_LoopMode": {
     "type": "enum",
@@ -281,21 +293,27 @@
   },
   "Voice_Modulators_Envelope2_Times_Attack": {
     "type": "number",
-    "min": 0.0,
-    "max": 20.0,
-    "options": []
+    "min": 0,
+    "max": 60,
+    "options": [],
+    "unit": "s",
+    "decimals": 3
   },
   "Voice_Modulators_Envelope2_Times_Decay": {
     "type": "number",
-    "min": 0.0,
-    "max": 20.0,
-    "options": []
+    "min": 0,
+    "max": 60,
+    "options": [],
+    "unit": "s",
+    "decimals": 3
   },
   "Voice_Modulators_Envelope2_Times_Release": {
     "type": "number",
-    "min": 0.0,
-    "max": 20.0,
-    "options": []
+    "min": 0,
+    "max": 60,
+    "options": [],
+    "unit": "s",
+    "decimals": 3
   },
   "Voice_Modulators_Envelope2_Values_Final": {
     "type": "number",
@@ -319,7 +337,9 @@
     "type": "number",
     "min": 0.0,
     "max": 1.0,
-    "options": []
+    "options": [],
+    "unit": "%",
+    "decimals": 2
   },
   "Voice_Modulators_Envelope3_LoopMode": {
     "type": "enum",
@@ -351,21 +371,27 @@
   },
   "Voice_Modulators_Envelope3_Times_Attack": {
     "type": "number",
-    "min": 0.0,
-    "max": 20.0,
-    "options": []
+    "min": 0,
+    "max": 60,
+    "options": [],
+    "unit": "s",
+    "decimals": 3
   },
   "Voice_Modulators_Envelope3_Times_Decay": {
     "type": "number",
-    "min": 0.0,
-    "max": 20.0,
-    "options": []
+    "min": 0,
+    "max": 60,
+    "options": [],
+    "unit": "s",
+    "decimals": 3
   },
   "Voice_Modulators_Envelope3_Times_Release": {
     "type": "number",
-    "min": 0.0,
-    "max": 20.0,
-    "options": []
+    "min": 0,
+    "max": 60,
+    "options": [],
+    "unit": "s",
+    "decimals": 3
   },
   "Voice_Modulators_Envelope3_Values_Final": {
     "type": "number",
@@ -389,7 +415,9 @@
     "type": "number",
     "min": 0.0,
     "max": 1.0,
-    "options": []
+    "options": [],
+    "unit": "%",
+    "decimals": 2
   },
   "Voice_Modulators_Lfo1_Retrigger": {
     "type": "boolean",
@@ -555,9 +583,11 @@
   },
   "Voice_Oscillator1_Gain": {
     "type": "number",
-    "min": 0.193371,
-    "max": 1.0,
-    "options": []
+    "min": 0,
+    "max": 2,
+    "options": [],
+    "unit": "dB",
+    "decimals": 1
   },
   "Voice_Oscillator1_On": {
     "type": "boolean",
@@ -630,9 +660,11 @@
   },
   "Voice_Oscillator2_Gain": {
     "type": "number",
-    "min": 0.0,
-    "max": 1.0,
-    "options": []
+    "min": 0,
+    "max": 2,
+    "options": [],
+    "unit": "dB",
+    "decimals": 1
   },
   "Voice_Oscillator2_On": {
     "type": "boolean",
