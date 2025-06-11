@@ -58,6 +58,7 @@
         {% set _display = '/' + selected_preset.split('examples/Track Presets',1)[1] %}
     {% endif %}
     <p class="current-preset">Editing: {{ _display }}</p>
+    {% if sample_name %}<p class="sample-name">Sample: {{ sample_name }}</p>{% endif %}
     {% set _basename = selected_preset.split('/')[-1] %}
     {% if _basename.endswith('.json') or _basename.endswith('.ablpreset') %}
         {% set _prefill = _basename.rsplit('.', 1)[0] %}
@@ -110,6 +111,8 @@
 <script src="{{ host_prefix }}/static/input-knobs.js"></script>
 <script src="{{ host_prefix }}/static/params_knobs.js"></script>
 <script src="{{ host_prefix }}/static/rect-slider.js"></script>
+<script type="module" src="{{ host_prefix }}/static/melodic_filter_viz.js"></script>
+<script type="module" src="{{ host_prefix }}/static/melodic_lfo_viz.js"></script>
 <script>
 window.driftSchema = {{ schema_json|safe }};
 </script>
