@@ -155,6 +155,8 @@ export function initDriftLfoViz() {
     el.addEventListener(evt, draw);
   });
 
+  window.driftLfoVizUpdate = draw;
+
   draw();
 }
 
