@@ -6,6 +6,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const schema = window.driftSchema || {};
   const paramDisplay = {};
   const paramInfo = {};
+  function paramSection(name) {
+    if (!name) return null;
+    if (name.startsWith('Filter_')) return 'filter';
+    if (name.startsWith('Envelope1_')) return 'amp';
+    if (name.startsWith('Envelope2_') || name.startsWith('CyclingEnvelope_') || name === 'Global_Envelope2Mode') return 'env';
+    return null;
+  }
   function addSpaces(str) {
     return str
       .replace(/([A-Za-z])([0-9])/g, '$1 $2')
@@ -493,7 +500,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
   macrosInput.addEventListener('change', applyMacroVisuals);
   document.querySelectorAll('.macro-dial').forEach(d => {
-    d.addEventListener('input', applyMacroVisuals);
+    d.addEventListener('input', () => {
+      const m = d.dataset.target.match(/macro_(\d+)_value/);
+      const idx = m ? parseInt(m[1], 10) : NaN;
+      const macro = macros.find(mc => mc.index === idx);
+      if (macro && window.driftVizSetMode) {
+        const sections = new Set();
+        (macro.parameters || []).forEach(p => {
+          const sec = paramSection(p.name);
+          if (sec) sections.add(sec);
+        });
+        let mode = null;
+        if (sections.has('filter')) mode = 'filter';
+        else if (sections.has('amp')) mode = 'env1';
+        else if (sections.has('env')) mode = 'env2';
+        if (mode) window.driftVizSetMode(mode);
+      }
+      applyMacroVisuals();
+    });
   });
 
   applyMacroVisuals();
