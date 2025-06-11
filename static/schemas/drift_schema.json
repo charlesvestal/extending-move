@@ -39,8 +39,8 @@
   },
   "CyclingEnvelope_SyncedRate": {
     "type": "number",
-    "min": 15,
-    "max": 17,
+    "min": 0,
+    "max": 21,
     "options": []
   },
   "CyclingEnvelope_Time": {
@@ -425,7 +425,7 @@
   },
   "Lfo_SyncedRate": {
     "type": "number",
-    "min": 9,
+    "min": 0,
     "max": 21,
     "options": []
   },
