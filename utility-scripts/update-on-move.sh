@@ -41,12 +41,34 @@ REMOTE_DIR="/data/UserData/extending-move"
 # --- Version check: ensure Move version is within tested range ---
 HIGHEST_TESTED_VERSION="1.5.0"
 INSTALLED_VERSION=$(ssh -T "${REMOTE_USER}@${REMOTE_HOST}" "/opt/move/Move -v" | awk '{print $3}')
-if ! printf "%s\n%s\n" "$HIGHEST_TESTED_VERSION" "$INSTALLED_VERSION" | sort -V | head -n1 | grep -qx "$HIGHEST_TESTED_VERSION"; then
+
+# Compare versions with Python's packaging module so beta versions sort correctly
+COMPARISON=$(INST="$INSTALLED_VERSION" HIGH="$HIGHEST_TESTED_VERSION" python3 - <<'PY'
+import os
+try:
+    from packaging.version import Version
+except Exception:
+    from distutils.version import LooseVersion as Version
+v1 = Version(os.getenv('INST'))
+v2 = Version(os.getenv('HIGH'))
+if v1 > v2:
+    print('gt')
+elif v1 < v2:
+    print('lt')
+else:
+    print('eq')
+PY
+)
+
+if [ "$COMPARISON" = "gt" ]; then
   read -p "Warning: Installed Move ($INSTALLED_VERSION) > tested ($HIGHEST_TESTED_VERSION). Continue? [y/N] " confirm
-  if [[ ! $confirm =~ ^[Yy]$ ]]; then
-    echo "Aborting."
-    exit 1
-  fi
+elif [ "$COMPARISON" = "lt" ]; then
+  read -p "Warning: Installed Move ($INSTALLED_VERSION) < tested ($HIGHEST_TESTED_VERSION). Continue? [y/N] " confirm
+fi
+
+if [ "$COMPARISON" != "eq" ] && [[ ! $confirm =~ ^[Yy]$ ]]; then
+  echo "Aborting."
+  exit 1
 fi
 
 # --- Ensure remote directory exists ---
