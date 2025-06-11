@@ -447,6 +447,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const dispEl = document.getElementById(dispId);
         if (dispEl) dispEl.textContent = formatDialValue(dial, value);
       }
+      const target = dial.dataset.target;
+      if (target) {
+        const hidden = document.querySelector(`input[name="${target}"]`);
+        if (hidden) {
+          hidden.value = value;
+          hidden.dispatchEvent(new Event('change'));
+        }
+      }
       return;
     }
     const select = item.querySelector('select.param-select');
