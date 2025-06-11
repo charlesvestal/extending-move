@@ -1131,6 +1131,13 @@ button#macro-add-param {
     width:100%
 }
 
+.cyc-env-canvas {
+    display: block;
+    margin: 0.5rem 0;
+    border: 1px solid #dedede;
+    width:100%
+}
+
 .env-container {
     display: flex;
     align-items: center;

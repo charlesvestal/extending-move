@@ -119,6 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cyclingRow = document.querySelector('.env2-cycling');
     const adsrRow = document.querySelector('.env2-adsr');
     const env2Canvas = document.getElementById('env2-canvas');
+    const cycCanvas = document.getElementById('env2-cyc-canvas');
     function updateCycling() {
         if (!env2Input) return;
         const show = env2Input.value === 'Cyc';
@@ -130,6 +131,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (env2Canvas) {
             env2Canvas.classList.toggle('hidden', show);
+        }
+        if (cycCanvas) {
+            cycCanvas.classList.toggle('hidden', !show);
         }
     }
     if (env2Input) {
