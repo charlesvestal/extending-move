@@ -429,19 +429,24 @@
     "type": "number",
     "min": 0.0,
     "max": 1.0,
-    "options": []
+    "options": [],
+    "unit": "%",
+    "decimals": 0
   },
   "Voice_Modulators_Lfo1_Shape_PhaseOffset": {
     "type": "number",
     "min": 0.0,
     "max": 270.0,
-    "options": []
+    "options": [],
+    "unit": "\u00ba"
   },
   "Voice_Modulators_Lfo1_Shape_Shaping": {
     "type": "number",
     "min": -1.0,
     "max": 1.0,
-    "options": []
+    "options": [],
+    "unit": "%",
+    "decimals": 0
   },
   "Voice_Modulators_Lfo1_Shape_Type": {
     "type": "enum",
@@ -457,9 +462,11 @@
   },
   "Voice_Modulators_Lfo1_Time_AttackTime": {
     "type": "number",
-    "min": 0.0,
-    "max": 14.44502,
-    "options": []
+    "min": 0,
+    "max": 20,
+    "options": [],
+    "unit": "s",
+    "decimals": 3
   },
   "Voice_Modulators_Lfo1_Time_Rate": {
     "type": "number",
@@ -498,19 +505,24 @@
     "type": "number",
     "min": 0.0,
     "max": 1.0,
-    "options": []
+    "options": [],
+    "unit": "%",
+    "decimals": 0
   },
   "Voice_Modulators_Lfo2_Shape_PhaseOffset": {
     "type": "number",
     "min": 0.0,
     "max": 360.0,
-    "options": []
+    "options": [],
+    "unit": "\u00ba"
   },
   "Voice_Modulators_Lfo2_Shape_Shaping": {
     "type": "number",
-    "min": -0.84375,
+    "min": -1.0,
     "max": 1.0,
-    "options": []
+    "options": [],
+    "unit": "%",
+    "decimals": 0
   },
   "Voice_Modulators_Lfo2_Shape_Type": {
     "type": "enum",
@@ -525,9 +537,11 @@
   },
   "Voice_Modulators_Lfo2_Time_AttackTime": {
     "type": "number",
-    "min": 0.0,
-    "max": 14.940941,
-    "options": []
+    "min": 0,
+    "max": 20,
+    "options": [],
+    "unit": "s",
+    "decimals": 3
   },
   "Voice_Modulators_Lfo2_Time_Rate": {
     "type": "number",

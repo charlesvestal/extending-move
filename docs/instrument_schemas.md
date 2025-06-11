@@ -9,3 +9,9 @@ Generated schema files can be found in `static/schemas/`:
 - `melodicSampler_schema.json`
 
 These schemas are not currently used beyond documentation but provide a reference for building macro editors or validation tools.
+
+Numeric entries may also include a `unit` and `decimals` key. The web editor uses
+this metadata to format values—frequencies labeled `Hz` automatically switch to
+`kHz` when above 1,000 and times labeled `s` display in milliseconds when below
+one second. Gain parameters spanning `0.0`–`2.0` are shown in decibels to match
+Live's controls.
