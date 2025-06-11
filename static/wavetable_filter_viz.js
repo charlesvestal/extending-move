@@ -157,6 +157,14 @@ export function initWavetableFilterViz() {
     if (mag2) drawLine(freq, mag2, '#FF4136');
   }
 
+  function normMorph(inp) {
+    if (!inp) return 0;
+    const val = parseFloat(inp.value || '0');
+    const max = parseFloat(inp.max || '1');
+    if (!max || isNaN(max)) return val;
+    return val / max;
+  }
+
   function getFilterValues() {
     let f1 = null;
     if (!inputs.on1 || parseFloat(inputs.on1.value) !== 0) {
@@ -165,7 +173,7 @@ export function initWavetableFilterViz() {
         freq: parseFloat(inputs.freq1?.value || '1000'),
         res: parseFloat(inputs.res1?.value || '0'),
         slope: inputs.slope1 ? inputs.slope1.value : '12',
-        morph: parseFloat(inputs.morph1?.value || '0')
+        morph: normMorph(inputs.morph1)
       };
     }
     let f2 = null;
@@ -175,7 +183,7 @@ export function initWavetableFilterViz() {
         freq: parseFloat(inputs.freq2?.value || '1000'),
         res: parseFloat(inputs.res2?.value || '0'),
         slope: inputs.slope2 ? inputs.slope2.value : '12',
-        morph: parseFloat(inputs.morph2?.value || '0')
+        morph: normMorph(inputs.morph2)
       };
     }
     const routing = inputs.routing ? inputs.routing.value : 'Serial';
@@ -188,7 +196,11 @@ export function initWavetableFilterViz() {
     draw(resp.freq, resp.mag1, resp.mag2);
   }
 
-  Object.values(inputs).forEach(inp => inp && inp.addEventListener('change', update));
+  Object.values(inputs).forEach(inp => {
+    if (!inp) return;
+    inp.addEventListener('change', update);
+    inp.addEventListener('input', update);
+  });
   update();
 }
 
