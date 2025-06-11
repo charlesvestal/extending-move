@@ -50,6 +50,12 @@ export function initDriftCombinedViz() {
     mode: qsel('Global_Envelope2Mode')
   };
 
+  const env2Cyc = {
+    time: qenv('CyclingEnvelope_Time'),
+    tilt: qenv('CyclingEnvelope_MidPoint'),
+    hold: qenv('CyclingEnvelope_Hold')
+  };
+
   function biquadCoeffs(type, freq, q, sr) {
     const w0 = 2 * Math.PI * freq / sr;
     const alpha = Math.sin(w0) / (2 * q);
@@ -148,6 +154,48 @@ export function initDriftCombinedViz() {
     drawLabel(label);
   }
 
+  function envCycleValue(phase, tilt, hold) {
+    const peakPos = Math.min(Math.max((tilt - 0.2) / 0.8, 0), 1);
+    const riseEnd = peakPos * (1 - hold);
+    const fallStart = riseEnd + hold;
+    if (phase < riseEnd) {
+      return riseEnd === 0 ? 1 : phase / riseEnd;
+    }
+    if (phase < fallStart) return 1;
+    const denom = 1 - fallStart;
+    const p = denom === 0 ? 0 : (phase - fallStart) / denom;
+    let linear = denom === 0 ? 1 : 1 - p;
+    if (tilt < 0.2 && denom !== 0) {
+      const t = (0.2 - tilt) / 0.2;
+      const k = 5;
+      const curve = (1 / (1 + (k - 1) * p) - 1 / k) / (1 - 1 / k);
+      linear = linear * (1 - t) + curve * t;
+    }
+    return linear;
+  }
+
+  function drawCycEnv(label) {
+    const time = parseFloat(env2Cyc.time.value);
+    const tilt = parseFloat(env2Cyc.tilt.value);
+    const hold = parseFloat(env2Cyc.hold.value);
+    const total = 2.5;
+    const steps = 200;
+    const w = canvas.width;
+    const h = canvas.height;
+    ctx.beginPath();
+    for (let i = 0; i <= steps; i++) {
+      const t = (i / steps) * total;
+      const phase = time === 0 ? 0 : (t % time) / time;
+      const y = envCycleValue(phase, tilt, hold);
+      const x = (t / total) * w;
+      const yPix = h - y * h;
+      if (i === 0) ctx.moveTo(x, yPix); else ctx.lineTo(x, yPix);
+    }
+    ctx.strokeStyle = '#f00';
+    ctx.stroke();
+    drawLabel(label);
+  }
+
   function drawLine(freq, mag, color) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.beginPath();
@@ -177,8 +225,12 @@ export function initDriftCombinedViz() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     if (active === 'env1') {
       drawEnv(env1, 'Amp');
-    } else if (active === 'env2' && (!env2.mode || env2.mode.value !== 'Cyc')) {
-      drawEnv(env2, 'Env2');
+    } else if (active === 'env2') {
+      if (env2.mode && env2.mode.value === 'Cyc') {
+        drawCycEnv('Env2');
+      } else {
+        drawEnv(env2, 'Env2');
+      }
     } else {
       drawFilter();
     }
@@ -194,7 +246,8 @@ export function initDriftCombinedViz() {
     el.addEventListener('input', setFilter);
   });
   [env1.attack, env1.decay, env1.sustain, env1.release].forEach(el => el && el.addEventListener('input', setEnv1));
-  [env2.attack, env2.decay, env2.sustain, env2.release].forEach(el => el && el.addEventListener('input', setEnv2));
+  [env2.attack, env2.decay, env2.sustain, env2.release,
+   env2Cyc.time, env2Cyc.tilt, env2Cyc.hold].forEach(el => el && el.addEventListener('input', setEnv2));
   if (env2.mode) env2.mode.addEventListener('change', () => { if (active === 'env2') update(); });
 
   update();
