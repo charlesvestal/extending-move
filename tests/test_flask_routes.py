@@ -319,7 +319,6 @@ def test_melodic_sampler_params_post(client, monkeypatch):
             'browser_root': '/tmp',
             'selected_preset': 'x',
             'param_count': 1,
-            'sample_name': 'Piano.aif',
         }
 
     monkeypatch.setattr(move_webserver.melodic_sampler_param_handler, 'handle_post', fake_post)
@@ -327,7 +326,6 @@ def test_melodic_sampler_params_post(client, monkeypatch):
     assert resp.status_code == 200
     assert b'ok' in resp.data
     assert b'<div>p</div>' in resp.data
-    assert b'Piano.aif' in resp.data
 
 
 def test_melodic_sampler_params_get(client, monkeypatch):
@@ -343,7 +341,6 @@ def test_melodic_sampler_params_get(client, monkeypatch):
             'param_count': 0,
             'browser_root': '/tmp',
             'default_preset_path': MP,
-            'sample_name': '',
         }
 
     monkeypatch.setattr(move_webserver.melodic_sampler_param_handler, 'handle_get', fake_get)

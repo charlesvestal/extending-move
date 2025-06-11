@@ -693,7 +693,6 @@ def melodic_sampler_params():
     available_params_json = result.get("available_params_json", "[]")
     param_paths_json = result.get("param_paths_json", "{}")
     schema_json = result.get("schema_json", "{}")
-    sample_name = result.get("sample_name", "")
     preset_selected = bool(selected_preset)
     return render_template(
         "melodic_sampler_params.html",
@@ -714,7 +713,6 @@ def melodic_sampler_params():
         available_params_json=available_params_json,
         param_paths_json=param_paths_json,
         schema_json=schema_json,
-        sample_name=sample_name,
         active_tab="melodic-sampler",
     )
 
