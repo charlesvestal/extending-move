@@ -58,6 +58,25 @@ def test_adsr_get(client, monkeypatch):
     assert b'id="peak"' in resp.data
     assert b'id="final"' in resp.data
 
+def test_cyc_env_get(client, monkeypatch):
+    def fake_get():
+        return {
+            'defaults': {
+                'time': 1.0,
+                'tilt': 0.5,
+                'hold': 0.0,
+            },
+            'message': 'hello',
+            'message_type': 'info'
+        }
+    monkeypatch.setattr(move_webserver.cyc_env_handler, 'handle_get', fake_get)
+    resp = client.get('/cyc-env')
+    assert resp.status_code == 200
+    assert b'Cyclic Envelope Visualizer' in resp.data
+    assert b'id="time"' in resp.data
+    assert b'id="tilt"' in resp.data
+    assert b'id="hold"' in resp.data
+
 def test_restore_get(client, monkeypatch):
     def fake_get():
         return {'options': '<option value="1">1</option>', 'pad_grid': '<div class="pad-grid"></div>', 'message': ''}
