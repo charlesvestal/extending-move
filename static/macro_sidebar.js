@@ -246,17 +246,17 @@ document.addEventListener('DOMContentLoaded', () => {
     macro.parameters.forEach((p, idx) => {
       const div = document.createElement('div');
       div.className = 'assign-item';
-      const dropdown = buildDropdown(p.name, val => {
-        p.name = val;
-        p.path = paramPaths[val];
-        p.rangeMin = undefined;
-        p.rangeMax = undefined;
-        rebuildRange();
-        updateAddBtn();
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = 'Remove';
+      btn.addEventListener('click', () => {
+        macro.parameters.splice(idx, 1);
+        rebuildLists(macro);
         updateHighlights();
-        updateKnobLabels();
         saveState();
       });
+
       const rangeDiv = document.createElement('div');
       rangeDiv.className = 'range-inputs';
 
@@ -294,20 +294,27 @@ document.addEventListener('DOMContentLoaded', () => {
         rangeDiv.appendChild(maxInput);
       }
 
-      rebuildRange();
-
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.textContent = 'Remove';
-      btn.addEventListener('click', () => {
-        macro.parameters.splice(idx, 1);
-        rebuildLists(macro);
+      const dropdown = buildDropdown(p.name, val => {
+        p.name = val;
+        p.path = paramPaths[val];
+        p.rangeMin = undefined;
+        p.rangeMax = undefined;
+        rebuildRange();
+        if (rangeDiv.childNodes.length && !div.contains(rangeDiv)) {
+          div.insertBefore(rangeDiv, btn);
+        } else if (!rangeDiv.childNodes.length && div.contains(rangeDiv)) {
+          div.removeChild(rangeDiv);
+        }
+        updateAddBtn();
         updateHighlights();
+        updateKnobLabels();
         saveState();
       });
 
+      rebuildRange();
+
       div.appendChild(dropdown);
-      if (rangeDiv.childNodes.length) div.appendChild(rangeDiv);
+      if (rangeDiv.childNodes.length) div.insertBefore(rangeDiv, btn);
       div.appendChild(btn);
       assignedDiv.appendChild(div);
     });
