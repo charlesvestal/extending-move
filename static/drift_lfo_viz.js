@@ -78,7 +78,13 @@ export function initDriftLfoViz() {
     const h = canvas.height;
     ctx.clearRect(0, 0, w, h);
     ctx.beginPath();
-    const duration = 1;
+    const minCycles = 2;
+    const maxCycles = 10;
+    const minRate = 0.17; // matches standalone LFO viz
+    const maxRate = 1700;
+    const rateNorm = Math.max(0, Math.min(1, (rate - minRate) / (maxRate - minRate)));
+    const cycles = minCycles + (maxCycles - minCycles) * rateNorm;
+    const duration = rate > 0 ? cycles / rate : 0;
     for (let i = 0; i <= w; i++) {
       const t = (i / w) * duration;
       const ph = rate * t;
