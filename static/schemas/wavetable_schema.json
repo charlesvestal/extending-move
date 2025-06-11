@@ -472,7 +472,8 @@
     "type": "number",
     "min": 0.0,
     "max": 30.0,
-    "options": []
+    "options": [],
+    "decimals": 2
   },
   "Voice_Modulators_Lfo1_Time_Sync": {
     "type": "enum",
