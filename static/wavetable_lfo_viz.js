@@ -77,7 +77,7 @@ export function initWavetableLfoViz() {
       const val = parseFloat(rateEl.value || '0');
       ratio = Math.min(Math.max((val - min) / (max - min), 0), 1);
     }
-    const cycles = 1 + ratio * 9;
+    const cycles = 2 + ratio * 8;
     const duration = rate > 0 ? cycles / rate : 1;
     for (let i = 0; i <= w; i++) {
       const t = (i / w) * duration;
