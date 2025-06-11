@@ -72,13 +72,27 @@ export function initDriftLfoViz() {
 
   function draw() {
     const rate = getRateHz();
+    const mode = modeSel ? modeSel.value : 'Freq';
     const shape = shapeSel ? shapeSel.value : 'Sine';
     const amount = amountEl ? parseFloat(amountEl.value) : 1;
     const w = canvas.width;
     const h = canvas.height;
     ctx.clearRect(0, 0, w, h);
     ctx.beginPath();
-    const duration = 1;
+    let duration = 1;
+    if (mode === 'Time' && timeEl) {
+      const t = parseFloat(timeEl.value || '0');
+      if (t > 0) {
+        const minT = parseFloat(timeEl.min || '0.1');
+        const maxT = parseFloat(timeEl.max || '60');
+        const logMin = Math.log10(minT);
+        const logMax = Math.log10(maxT);
+        const logT = Math.log10(t);
+        const ratio = Math.min(Math.max((logT - logMin) / (logMax - logMin), 0), 1);
+        const cycles = 3.5 + (1 - 3.5) * ratio;
+        duration = t * cycles;
+      }
+    }
     for (let i = 0; i <= w; i++) {
       const t = (i / w) * duration;
       const ph = rate * t;
