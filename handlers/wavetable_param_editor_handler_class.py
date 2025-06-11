@@ -920,9 +920,13 @@ class WavetableParamEditorHandler(BaseHandler):
             ordered.extend(items.values())
         return ordered
 
-    def _arrange_lfo_panel(self, items: dict) -> list:
-        """Return LFO panel rows in a specific layout."""
+    def _arrange_lfo_panel(self, items: dict, canvas_id: str | None = None) -> list:
+        """Return LFO panel rows with optional visualization canvas."""
         ordered = []
+        if canvas_id:
+            ordered.append(
+                f'<canvas id="{canvas_id}" class="lfo-canvas" width="300" height="88"></canvas>'
+            )
         row1 = "".join([
             items.pop("Type", ""),
             items.pop("Sync", ""),
@@ -1168,7 +1172,9 @@ class WavetableParamEditorHandler(BaseHandler):
                         cid = canvas_map.get(label)
                         group_items.extend(self._arrange_envelope_panel(items, cid))
                     elif sec == "Modulation" and label.startswith("LFO"):
-                        group_items.extend(self._arrange_lfo_panel(items))
+                        cid_map = {"LFO 1": "lfo1-canvas", "LFO 2": "lfo2-canvas"}
+                        cid = cid_map.get(label)
+                        group_items.extend(self._arrange_lfo_panel(items, cid))
                     else:
                         group_items.extend(items.values())
             if sections.get(sec):
