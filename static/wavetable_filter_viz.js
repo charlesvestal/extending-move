@@ -120,7 +120,9 @@ export function initWavetableFilterViz() {
     ctx.beginPath();
     const minDb = -60;
     const maxDb = 12;
-    const minFreq = 1;
+    // Avoid log(0) by clamping to a small value. A slightly higher
+    // threshold keeps the lowest frequencies from stretching the axis.
+    const minFreq = 3;
     let fMin = Infinity;
     let fMax = 0;
     for (let i = 0; i < freq.length; i++) {

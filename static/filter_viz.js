@@ -23,7 +23,9 @@ export function initFilterViz() {
     ctx.beginPath();
     const minDb = -60;
     const maxDb = 12;
-    const minFreq = 1;
+    // Use a small positive minimum to avoid log(0) while keeping
+    // the lowest portion of the spectrum from dominating the scale.
+    const minFreq = 3;
     let fMin = Infinity;
     let fMax = 0;
     for (let i = 0; i < freq.length; i++) {
