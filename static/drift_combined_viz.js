@@ -90,6 +90,16 @@ export function initDriftCombinedViz() {
     return { freq: freqArr, mag };
   }
 
+  function drawLabel(text) {
+    ctx.save();
+    ctx.font = '10px sans-serif';
+    ctx.fillStyle = '#000';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'top';
+    ctx.fillText(text, canvas.width - 4, 2);
+    ctx.restore();
+  }
+
   function drawFilter() {
     const { freq, type, res, hp } = filterInputs;
     if (!freq || !type || !res || !hp) return;
@@ -102,9 +112,10 @@ export function initDriftCombinedViz() {
       return 20 * Math.log10(h1 * h2 + 1e-9);
     });
     drawLine(lp.freq, mag, '#0074D9');
+    drawLabel('Filter');
   }
 
-  function drawEnv(inputs) {
+  function drawEnv(inputs, label) {
     const a = parseFloat(inputs.attack.value);
     const d = parseFloat(inputs.decay.value);
     const s = parseFloat(inputs.sustain.value);
@@ -127,6 +138,7 @@ export function initDriftCombinedViz() {
     ctx.lineTo(w, h - f * h);
     ctx.strokeStyle = '#f00';
     ctx.stroke();
+    drawLabel(label);
   }
 
   function drawLine(freq, mag, color) {
@@ -147,9 +159,13 @@ export function initDriftCombinedViz() {
   let active = 'filter';
   function update() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    if (active === 'env1') drawEnv(env1);
-    else if (active === 'env2' && (!env2.mode || env2.mode.value !== 'Cyc')) drawEnv(env2);
-    else drawFilter();
+    if (active === 'env1') {
+      drawEnv(env1, 'Amp');
+    } else if (active === 'env2' && (!env2.mode || env2.mode.value !== 'Cyc')) {
+      drawEnv(env2, 'Env2');
+    } else {
+      drawFilter();
+    }
   }
 
   const setFilter = () => { active = 'filter'; update(); };
