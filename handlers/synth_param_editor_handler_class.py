@@ -992,7 +992,9 @@ class SynthParamEditorHandler(BaseHandler):
             if lfo_mode_val != "Sync" and sync:
                 sync = sync.replace('param-item"', 'param-item hidden"', 1)
 
-            ordered = []
+            ordered = [
+                '<canvas id="lfo-canvas" class="lfo-canvas" width="300" height="88"></canvas>'
+            ]
             row1 = "".join([rate, ratio, time, sync, mode])
             if row1.strip():
                 ordered.append(f'<div class="param-row lfo-rate-row">{row1}</div>')
