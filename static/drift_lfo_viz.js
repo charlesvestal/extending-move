@@ -27,6 +27,14 @@ export function initDriftLfoViz() {
   ];
   const BPM = 120;
 
+  function knobRatio(el, maxOverride = null) {
+    if (!el) return 0;
+    const min = parseFloat(el.min || '0');
+    const max = maxOverride !== null ? maxOverride : parseFloat(el.max || '1');
+    const val = parseFloat(el.value || '0');
+    return Math.min(Math.max((val - min) / (max - min), 0), 1);
+  }
+
   function wave(shape, phase) {
     const p = phase % 1;
     switch (shape) {
@@ -86,15 +94,17 @@ export function initDriftLfoViz() {
     if (mode === 'Time' && timeEl) {
       const t = parseFloat(timeEl.value || '0');
       if (t > 0) {
-        const minT = parseFloat(timeEl.min || '0.1');
-        const maxT = parseFloat(timeEl.max || '60');
-        const logMin = Math.log10(minT);
-        const logMax = Math.log10(maxT);
-        const logT = Math.log10(t);
-        const ratio = Math.min(Math.max((logT - logMin) / (logMax - logMin), 0), 1);
-        const cycles = 3.5 + (1 - 3.5) * ratio;
+        const ratio = knobRatio(timeEl);
+        const cycles = 1 + ratio * 9;
         duration = t * cycles;
       }
+    } else {
+      let ratio = 0;
+      if (mode === 'Freq') ratio = knobRatio(rateEl);
+      else if (mode === 'Ratio') ratio = knobRatio(ratioEl);
+      else if (mode === 'Sync') ratio = knobRatio(syncEl, SYNC_RATES.length - 1);
+      const cycles = 1 + ratio * 9;
+      duration = rate > 0 ? cycles / rate : 1;
     }
     let steps = Math.max(2, Math.round(rate * 6));
     if ((shape === 'Sample & Hold' || shape === 'Wander') &&
