@@ -77,6 +77,30 @@ def test_cyc_env_get(client, monkeypatch):
     assert b'id="tilt"' in resp.data
     assert b'id="hold"' in resp.data
 
+def test_lfo_get(client, monkeypatch):
+    def fake_get():
+        return {
+            'defaults': {
+                'shape': 'sine',
+                'rate': 1.0,
+                'offset': 0.0,
+                'amount': 1.0,
+                'attack': 0.0,
+            },
+            'message': 'hello',
+            'message_type': 'info',
+        }
+
+    monkeypatch.setattr(move_webserver.lfo_handler, 'handle_get', fake_get)
+    resp = client.get('/lfo')
+    assert resp.status_code == 200
+    assert b'LFO Cycle Visualizer' in resp.data
+    assert b'id="shape"' in resp.data
+    assert b'id="rate"' in resp.data
+    assert b'id="offset"' in resp.data
+    assert b'id="amount"' in resp.data
+    assert b'id="attack"' in resp.data
+
 def test_restore_get(client, monkeypatch):
     def fake_get():
         return {'options': '<option value="1">1</option>', 'pad_grid': '<div class="pad-grid"></div>', 'message': ''}
