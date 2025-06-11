@@ -83,19 +83,32 @@ export function initDriftLfoViz() {
     ctx.clearRect(0, 0, w, h);
     ctx.beginPath();
     let duration = 1;
-    if (mode === 'Time' && timeEl) {
-      const t = parseFloat(timeEl.value || '0');
-      if (t > 0) {
-        const minT = parseFloat(timeEl.min || '0.1');
-        const maxT = parseFloat(timeEl.max || '60');
-        const logMin = Math.log10(minT);
-        const logMax = Math.log10(maxT);
-        const logT = Math.log10(t);
-        const ratio = Math.min(Math.max((logT - logMin) / (logMax - logMin), 0), 1);
-        const cycles = 3.5 + (1 - 3.5) * ratio;
-        duration = t * cycles;
-      }
+    let minRate = rate;
+    let maxRate = rate;
+    if (mode === 'Freq' && rateEl) {
+      minRate = parseFloat(rateEl.min || '0.17');
+      maxRate = parseFloat(rateEl.max || '1700');
+    } else if (mode === 'Ratio' && ratioEl) {
+      minRate = parseFloat(ratioEl.min || '0.25');
+      maxRate = parseFloat(ratioEl.max || '16');
+    } else if (mode === 'Time' && timeEl) {
+      const minT = parseFloat(timeEl.min || '0.1');
+      const maxT = parseFloat(timeEl.max || '60');
+      minRate = 1 / maxT;
+      maxRate = 1 / minT;
+    } else if (mode === 'Sync' && syncEl) {
+      const minBars = SYNC_RATES[SYNC_RATES.length - 1];
+      const maxBars = SYNC_RATES[0];
+      minRate = 1 / ((60 / BPM) * (minBars * 4));
+      maxRate = 1 / ((60 / BPM) * (maxBars * 4));
     }
+
+    const logMin = Math.log10(minRate);
+    const logMax = Math.log10(maxRate);
+    const logRate = Math.log10(Math.max(rate, minRate));
+    const ratio = Math.min(Math.max((logRate - logMin) / (logMax - logMin), 0), 1);
+    const cycles = 10 - 8 * ratio; // 10 cycles at slowest, 2 at fastest
+    duration = cycles / (rate || 1);
     let steps = Math.max(2, Math.round(rate * 6));
     if ((shape === 'Sample & Hold' || shape === 'Wander') &&
         (stepCache.shape !== shape || stepCache.count !== steps)) {
