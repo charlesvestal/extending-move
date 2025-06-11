@@ -123,15 +123,8 @@ export function initWavetableFilterViz() {
     // Avoid log(0) by clamping to a small value. A slightly higher
     // threshold keeps the lowest frequencies from stretching the axis.
     const minFreq = 3;
-    let fMin = Infinity;
-    let fMax = 0;
-    for (let i = 0; i < freq.length; i++) {
-      const f = Math.max(minFreq, freq[i]);
-      if (f < fMin) fMin = f;
-      if (f > fMax) fMax = f;
-    }
-    const logMin = Math.log10(fMin);
-    const logMax = Math.log10(fMax);
+    const logMin = Math.log10(Math.max(minFreq, freq[1] || freq[0] || minFreq));
+    const logMax = Math.log10(Math.max(minFreq, freq[freq.length - 1]));
     for (let i = 0; i < freq.length; i++) {
       const f = Math.max(minFreq, freq[i]);
       const x = (Math.log10(f) - logMin) / (logMax - logMin) * canvas.width;
