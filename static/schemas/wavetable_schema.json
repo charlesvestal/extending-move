@@ -51,7 +51,8 @@
     "max": 20480.0,
     "options": [],
     "unit": "Hz",
-    "decimals": 0
+    "decimals": 0,
+    "curve": "log"
   },
   "Voice_Filter1_Morph": {
     "type": "number",
@@ -122,7 +123,8 @@
     "max": 20480.0,
     "options": [],
     "unit": "Hz",
-    "decimals": 0
+    "decimals": 0,
+    "curve": "log"
   },
   "Voice_Filter2_Morph": {
     "type": "number",
@@ -237,7 +239,8 @@
     "max": 20,
     "options": [],
     "unit": "s",
-    "decimals": 3
+    "decimals": 3,
+    "curve": "log"
   },
   "Voice_Modulators_AmpEnvelope_Times_Decay": {
     "type": "number",
@@ -245,7 +248,8 @@
     "max": 20,
     "options": [],
     "unit": "s",
-    "decimals": 3
+    "decimals": 3,
+    "curve": "log"
   },
   "Voice_Modulators_AmpEnvelope_Sustain": {
     "type": "number",
@@ -261,7 +265,8 @@
     "max": 20,
     "options": [],
     "unit": "s",
-    "decimals": 3
+    "decimals": 3,
+    "curve": "log"
   },
   "Voice_Modulators_Envelope2_LoopMode": {
     "type": "enum",
@@ -297,7 +302,8 @@
     "max": 20,
     "options": [],
     "unit": "s",
-    "decimals": 3
+    "decimals": 3,
+    "curve": "log"
   },
   "Voice_Modulators_Envelope2_Times_Decay": {
     "type": "number",
@@ -305,7 +311,8 @@
     "max": 20,
     "options": [],
     "unit": "s",
-    "decimals": 3
+    "decimals": 3,
+    "curve": "log"
   },
   "Voice_Modulators_Envelope2_Values_Sustain": {
     "type": "number",
@@ -321,7 +328,8 @@
     "max": 20,
     "options": [],
     "unit": "s",
-    "decimals": 3
+    "decimals": 3,
+    "curve": "log"
   },
   "Voice_Modulators_Envelope2_Values_Final": {
     "type": "number",
@@ -375,7 +383,8 @@
     "max": 20,
     "options": [],
     "unit": "s",
-    "decimals": 3
+    "decimals": 3,
+    "curve": "log"
   },
   "Voice_Modulators_Envelope3_Times_Decay": {
     "type": "number",
@@ -383,7 +392,8 @@
     "max": 20,
     "options": [],
     "unit": "s",
-    "decimals": 3
+    "decimals": 3,
+    "curve": "log"
   },
   "Voice_Modulators_Envelope3_Values_Sustain": {
     "type": "number",
@@ -399,7 +409,8 @@
     "max": 20,
     "options": [],
     "unit": "s",
-    "decimals": 3
+    "decimals": 3,
+    "curve": "log"
   },
   "Voice_Modulators_Envelope3_Values_Final": {
     "type": "number",
@@ -466,7 +477,8 @@
     "max": 20,
     "options": [],
     "unit": "s",
-    "decimals": 3
+    "decimals": 3,
+    "curve": "log"
   },
   "Voice_Modulators_Lfo1_Time_Rate": {
     "type": "number",
@@ -542,7 +554,8 @@
     "max": 20,
     "options": [],
     "unit": "s",
-    "decimals": 3
+    "decimals": 3,
+    "curve": "log"
   },
   "Voice_Modulators_Lfo2_Time_Rate": {
     "type": "number",
