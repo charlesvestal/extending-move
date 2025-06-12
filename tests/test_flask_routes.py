@@ -588,4 +588,104 @@ def test_filter_viz_parallel_post(client, monkeypatch):
     assert resp.json['mag2'] == [0, -6]
 
 
+def test_files_route_user_library(client, tmp_path, monkeypatch):
+    user_dir = tmp_path / 'user'
+    user_dir.mkdir()
+    sample = user_dir / 'sample.wav'
+    sample.write_bytes(b'data')
+
+    base_user = '/data/UserData/UserLibrary'
+    base_core = '/data/CoreLibrary'
+    real_join = move_webserver.os.path.join
+    real_real = move_webserver.os.path.realpath
+
+    def fake_join(a, *rest):
+        if a == base_user:
+            return real_join(user_dir, *rest)
+        if a == base_core:
+            return real_join(user_dir, *rest)
+        return real_join(a, *rest)
+
+    def fake_real(path):
+        if path.startswith(base_user):
+            new = path.replace(base_user, str(user_dir), 1)
+            return real_real(new)
+        if path.startswith(base_core):
+            new = path.replace(base_core, str(user_dir), 1)
+            return real_real(new)
+        return real_real(path)
+
+    monkeypatch.setattr(move_webserver.os.path, 'join', fake_join)
+    monkeypatch.setattr(move_webserver.os.path, 'realpath', fake_real)
+
+    resp = client.get('/files/user-library/sample.wav')
+    assert resp.status_code == 200
+    assert resp.headers['Access-Control-Allow-Origin'] == '*'
+    assert b'data' in resp.data
+
+
+def test_files_route_core_library(client, tmp_path, monkeypatch):
+    core_dir = tmp_path / 'core'
+    core_dir.mkdir()
+    file = core_dir / 'preset.json'
+    file.write_bytes(b'{}')
+
+    base_user = '/data/UserData/UserLibrary'
+    base_core = '/data/CoreLibrary'
+    real_join = move_webserver.os.path.join
+    real_real = move_webserver.os.path.realpath
+
+    def fake_join(a, *rest):
+        if a == base_core:
+            return real_join(core_dir, *rest)
+        if a == base_user:
+            return real_join(core_dir, *rest)
+        return real_join(a, *rest)
+
+    def fake_real(path):
+        if path.startswith(base_core):
+            new = path.replace(base_core, str(core_dir), 1)
+            return real_real(new)
+        if path.startswith(base_user):
+            new = path.replace(base_user, str(core_dir), 1)
+            return real_real(new)
+        return real_real(path)
+
+    monkeypatch.setattr(move_webserver.os.path, 'join', fake_join)
+    monkeypatch.setattr(move_webserver.os.path, 'realpath', fake_real)
+
+    resp = client.get('/files/core-library/preset.json')
+    assert resp.status_code == 200
+    assert resp.headers['Access-Control-Allow-Origin'] == '*'
+    assert b'{}' in resp.data
+
+
+def test_files_route_not_found(client, tmp_path, monkeypatch):
+    user_dir = tmp_path / 'user'
+    user_dir.mkdir()
+
+    base_user = '/data/UserData/UserLibrary'
+    base_core = '/data/CoreLibrary'
+    real_join = move_webserver.os.path.join
+    real_real = move_webserver.os.path.realpath
+
+    def fake_join(a, *rest):
+        if a == base_user or a == base_core:
+            return real_join(user_dir, *rest)
+        return real_join(a, *rest)
+
+    def fake_real(path):
+        if path.startswith(base_user) or path.startswith(base_core):
+            new = path.replace(base_user, str(user_dir), 1)
+            new = new.replace(base_core, str(user_dir), 1)
+            return real_real(new)
+        return real_real(path)
+
+    monkeypatch.setattr(move_webserver.os.path, 'join', fake_join)
+    monkeypatch.setattr(move_webserver.os.path, 'realpath', fake_real)
+
+    resp = client.get('/files/user-library/missing.wav')
+    assert resp.status_code == 404
+
+
 
