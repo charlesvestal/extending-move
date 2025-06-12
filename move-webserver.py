@@ -729,35 +729,12 @@ def chord():
     return render_template("chord.html", active_tab="chord")
 
 
-@app.route("/file/<path:filepath>", methods=["GET", "OPTIONS"])
-def serve_file_path(filepath):
-    """Serve arbitrary files from allowed directories with CORS headers."""
-    from urllib.parse import unquote
-
-    decoded = unquote(filepath)
-    allowed_bases = ["/data/UserData", "examples"]
-    for base in allowed_bases:
-        full = os.path.join(base, decoded)
-        base_real = os.path.realpath(base)
-        file_real = os.path.realpath(full)
-        if file_real.startswith(base_real) and os.path.exists(file_real):
-            if request.method == "OPTIONS":
-                resp = app.make_response("")
-            else:
-                resp = send_file(file_real)
-            resp.headers["Access-Control-Allow-Origin"] = "*"
-            resp.headers["Access-Control-Allow-Methods"] = "GET, OPTIONS"
-            resp.headers["Access-Control-Allow-Headers"] = "Content-Type"
-            return resp
-    return ("File not found", 404)
-
-
 @app.route("/samples/<path:sample_path>", methods=["GET", "OPTIONS"])
 def serve_sample(sample_path):
     """Serve sample audio files with CORS headers."""
     from urllib.parse import unquote
 
-    base_dir = "/data/UserData/UserLibrary/Samples/Preset Samples"
+    base_dir = "/data/UserData/UserLibrary/Samples"
     decoded_path = unquote(sample_path)
     full_path = os.path.join(base_dir, decoded_path)
 
