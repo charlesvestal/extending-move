@@ -215,33 +215,8 @@ class MelodicSamplerParamEditorHandler(BaseHandler):
                 return self.format_error_response(result['message'])
             preset_path = result['path']
 
-            name_updates = {i: DEFAULT_MACRO_NAMES[i] for i in range(8)}
-            name_result = update_preset_macro_names(preset_path, name_updates)
-            if not name_result['success']:
-                return self.format_error_response(name_result['message'])
-
-            param_info = extract_available_parameters(
-                preset_path,
-                device_types=("melodicSampler",),
-                schema_loader=load_melodic_sampler_schema,
-            )
-            paths = param_info.get('parameter_paths', {}) if param_info['success'] else {}
-            param_updates = {
-                i: {
-                    'parameter': DEFAULT_MACRO_PARAMS[i],
-                    'parameter_path': paths.get(DEFAULT_MACRO_PARAMS[i]),
-                }
-                for i in range(8)
-            }
-            map_result = update_preset_parameter_mappings(preset_path, param_updates)
-            if not map_result['success']:
-                return self.format_error_response(map_result['message'])
-
-            existing_info = extract_macro_information(preset_path)
-            existing_mapped = existing_info.get('mapped_parameters', {}) if existing_info['success'] else {}
-            for pname, info in existing_mapped.items():
-                if pname not in DEFAULT_MACRO_PARAMS:
-                    delete_parameter_mapping(preset_path, info['path'])
+            # Melodic Sampler presets do not use macros. Skip macro name updates
+            # and parameter mapping to avoid writing macroMapping entries.
 
             message = result['message']
             if output_path:
