@@ -81,6 +81,10 @@
     </div>
 
     <p class="current-sample-path">Sample:  {{ sample_path if sample_path else 'None' }}</p>
+    {% if sample_path %}
+    <div id="sample-waveform" class="waveform-container"></div>
+    <input type="hidden" id="sample-path-hidden" value="{{ sample_path }}">
+    {% endif %}
 
     <div class="replace-sample">
         <label><input type="checkbox" name="replace_sample" id="replace-sample-checkbox"> Replace sample</label>
@@ -115,6 +119,8 @@
 window.driftSchema = {{ schema_json|safe }};
 </script>
 <script src="{{ host_prefix }}/static/melodic_sampler_macros.js"></script>
+<script src="https://unpkg.com/wavesurfer.js@6/dist/wavesurfer.js"></script>
+<script src="{{ host_prefix }}/static/melodic_sampler_preview.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const cb = document.getElementById('rename-checkbox');
