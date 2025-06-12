@@ -36,9 +36,7 @@
     "min": null,
     "max": null,
     "options": [
-      "Gate",
-      "Hold",
-      "Loop"
+      "Gate"
     ]
   },
   "Voice_Detune": {
