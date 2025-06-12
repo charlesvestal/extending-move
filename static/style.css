@@ -295,6 +295,9 @@ input[type="submit"]:disabled {
     padding: 0.5rem;
     min-height: 64px;
     cursor: pointer;
+}
+
+body.page-melodic-sampler .waveform-container {
     position: sticky;
     top: 0;
     z-index: 10;
@@ -841,8 +844,19 @@ select {
 
 .macro-knobs-section {
     text-align: center;
+    position: sticky;
+    top: 0;
+    background: #fff;
+    z-index: 10;
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
+}
+
+body.page-melodic-sampler .macro-knobs-section {
+    position: static;
+    top: auto;
+    background: none;
+    z-index: auto;
 }
 
 .macro-knobs-section h3 {
