@@ -160,9 +160,9 @@ function createDrumCellChain(receivingNote, name, params, sampleUri) {
  * @param {boolean} shouldScale - Whether the value is represented as 0..1.
  * @returns {number} - The adjusted step size.
  */
-function getPercentStep(value, unit, baseStep, shouldScale) {
+function getPercentStep(value, unit, baseStep, shouldScale, scaleFactor = 100) {
   if ((unit === '%' || unit === 'ct') && baseStep >= 1) {
-    const disp = shouldScale ? value * 100 : value;
+    const disp = shouldScale ? value * scaleFactor : value;
     if (Math.abs(disp) < 10) return baseStep / 10;
   }
   return baseStep;
@@ -177,8 +177,8 @@ function getPercentStep(value, unit, baseStep, shouldScale) {
  * @param {boolean} shouldScale - Whether the value is represented as 0..1.
  * @returns {number} - The decimals to use when formatting.
  */
-function getPercentDecimals(value, unit, defaultDecimals, shouldScale) {
-  if ((unit === '%' || unit === 'ct') && Math.abs((shouldScale ? value * 100 : value)) < 10) {
+function getPercentDecimals(value, unit, defaultDecimals, shouldScale, scaleFactor = 100) {
+  if ((unit === '%' || unit === 'ct') && Math.abs((shouldScale ? value * scaleFactor : value)) < 10) {
     return 1;
   }
   return defaultDecimals;
