@@ -46,6 +46,46 @@ logger = logging.getLogger(__name__)
 EXCLUDED_MACRO_PARAMS = set()
 
 class MelodicSamplerParamEditorHandler(BaseHandler):
+    LABEL_OVERRIDES = {
+        # Voice
+        "Voice_PlaybackStart": "Start",
+        "Voice_PlaybackLength": "Length",
+        "Voice_Transpose": "Transpose",
+        "Voice_VelocityToVolume": "Vel > Vol",
+        "Volume": "Volume",
+
+        # Filter
+        "Voice_Filter_On": "On/Off",
+        "Voice_Filter_Type": "Type",
+        "Voice_Filter_Frequency": "Freq",
+        "Voice_Filter_Resonance": "Res",
+        "Voice_Filter_Slope": "Slope",
+        "Voice_Filter_FrequencyModulationAmounts_EnvelopeAmount": "Freq > Env",
+        "Voice_Filter_FrequencyModulationAmounts_LfoAmount": "Freq > LFO",
+
+        # Amplitude Envelope
+        "Voice_AmplitudeEnvelope_Attack": "Attack",
+        "Voice_AmplitudeEnvelope_Decay": "Decay",
+        "Voice_AmplitudeEnvelope_Sustain": "Sustain",
+        "Voice_AmplitudeEnvelope_Release": "Release",
+
+        # Filter Envelope
+        "Voice_FilterEnvelope_On": "On/Off",
+        "Voice_FilterEnvelope_Attack": "Attack",
+        "Voice_FilterEnvelope_Decay": "Decay",
+        "Voice_FilterEnvelope_Sustain": "Sustain",
+        "Voice_FilterEnvelope_Release": "Release",
+
+        # LFO
+        "Voice_Lfo_On": "On/Off",
+        "Voice_Lfo_Type": "Type",
+        "Voice_Lfo_Rate": "Rate",
+
+        # Other
+        "Voice_AmplitudeEnvelope_SustainMode": "Sustain Mode",
+        "Voice_Detune": "Detune",
+        "Voice_Gain": "Gain",
+    }
     def handle_get(self):
         base_dir = "/data/UserData/UserLibrary/Track Presets"
         if not os.path.exists(base_dir) and os.path.exists("examples/Track Presets"):
@@ -303,7 +343,7 @@ class MelodicSamplerParamEditorHandler(BaseHandler):
 
     def _build_param_item(self, idx, name, value, meta, label=None, hide_label=False, slider=False, extra_classes=""):
         p_type = meta.get('type')
-        label = label if label is not None else name
+        label = label if label is not None else self.LABEL_OVERRIDES.get(name, name)
         classes = 'param-item'
         if extra_classes:
             classes += f' {extra_classes}'
@@ -353,12 +393,17 @@ class MelodicSamplerParamEditorHandler(BaseHandler):
         return ''.join(html)
 
     def generate_params_html(self, params, mapped_parameters=None):
+        """Return HTML for Melodic Sampler parameters arranged in panels."""
         if not params:
             return '<p>No parameters found.</p>'
+
         if mapped_parameters is None:
             mapped_parameters = {}
+
         schema = load_melodic_sampler_schema()
-        items = []
+
+        # Build HTML for each parameter keyed by name
+        param_items = {}
         for i, item in enumerate(params):
             name = item['name']
             val = item['value']
@@ -367,8 +412,96 @@ class MelodicSamplerParamEditorHandler(BaseHandler):
             if name in mapped_parameters:
                 macro_idx = mapped_parameters[name]['macro_index']
                 extra = f'macro-{macro_idx}'
-            items.append(self._build_param_item(i, name, val, meta, extra_classes=extra))
-        return '<div class="param-panel"><div class="param-items">' + ''.join(items) + '</div></div>'
+            param_items[name] = self._build_param_item(
+                i, name, val, meta, extra_classes=extra
+            )
+
+        def row(names):
+            return '<div class="param-row">' + ''.join(
+                param_items.pop(n, '') for n in names
+            ) + '</div>'
+
+        voice_names = [
+            'Voice_PlaybackStart',
+            'Voice_PlaybackLength',
+            'Voice_Transpose',
+            'Voice_VelocityToVolume',
+            'Volume',
+        ]
+
+        filter_row1 = [
+            'Voice_Filter_On',
+            'Voice_Filter_Type',
+            'Voice_Filter_Frequency',
+            'Voice_Filter_Resonance',
+            'Voice_Filter_Slope',
+        ]
+        filter_row2 = [
+            'Voice_Filter_FrequencyModulationAmounts_EnvelopeAmount',
+            'Voice_Filter_FrequencyModulationAmounts_LfoAmount',
+        ]
+
+        amp_env = [
+            'Voice_AmplitudeEnvelope_Attack',
+            'Voice_AmplitudeEnvelope_Decay',
+            'Voice_AmplitudeEnvelope_Sustain',
+            'Voice_AmplitudeEnvelope_Release',
+        ]
+        filt_env = [
+            'Voice_FilterEnvelope_On',
+            'Voice_FilterEnvelope_Attack',
+            'Voice_FilterEnvelope_Decay',
+            'Voice_FilterEnvelope_Sustain',
+            'Voice_FilterEnvelope_Release',
+        ]
+
+        lfo_names = [
+            'Voice_Lfo_On',
+            'Voice_Lfo_Type',
+            'Voice_Lfo_Rate',
+        ]
+
+        panels = []
+
+        voice_panel = (
+            '<div class="param-panel voice"><h3>Voice</h3>'
+            '<div class="param-items">' + row(voice_names) + '</div></div>'
+        )
+        panels.append(voice_panel)
+
+        filter_panel = (
+            '<div class="param-panel filter"><h3>Filter</h3>'
+            '<div class="param-items">' + row(filter_row1) + row(filter_row2) + '</div></div>'
+        )
+        panels.append(filter_panel)
+
+        env_panel = (
+            '<div class="param-panel envelopes"><h3>Envelopes</h3>'
+            '<div class="param-items">'
+            '<div class="param-group-label">Amp</div>' + row(amp_env) +
+            '<div class="param-group-label">Filter</div>' + row(filt_env) +
+            '</div></div>'
+        )
+        panels.append(env_panel)
+
+        lfo_panel = (
+            '<div class="param-panel lfo"><h3>LFO</h3>'
+            '<div class="param-items">' + row(lfo_names) + '</div></div>'
+        )
+        panels.append(lfo_panel)
+
+        other_panel = ''
+        if param_items:
+            other_panel = (
+                '<div class="param-panel other"><h3>Other</h3>'
+                '<div class="param-items">' + ''.join(param_items.values()) + '</div></div>'
+            )
+
+        html = '<div class="melodic-param-panels">' + ''.join(panels[:2]) + '</div>'
+        html += '<div class="melodic-param-panels">' + ''.join(panels[2:]) + '</div>'
+        if other_panel:
+            html += '<div class="melodic-param-panels">' + other_panel + '</div>'
+        return html
 
     def generate_macro_knobs_html(self, macros):
         if not macros:

@@ -627,6 +627,17 @@ select {
     margin-top: 0.5rem;
 }
 
+/* Layout for the Melodic Sampler parameter editor */
+.melodic-param-panels {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.melodic-param-panels + .melodic-param-panels {
+    margin-top: 0.5rem;
+}
+
 .wavetable-param-panels .param-select {
     width:auto;
 }
