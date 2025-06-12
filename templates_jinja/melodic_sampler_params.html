@@ -79,9 +79,9 @@
         <h3>Macros</h3>
         {{ macro_knobs_html | safe }}
     </div>
-    {% if sample_path %}
-    <p class="current-sample-path">Sample: {{ sample_path }}</p>
-    {% endif %}
+
+    <p class="current-sample-path">Sample:  {{ sample_path if sample_path else 'None' }}</p>
+
     <div class="replace-sample">
         <label><input type="checkbox" name="replace_sample" id="replace-sample-checkbox"> Replace sample</label>
         <input type="file" name="new_sample_file" id="new-sample-file" accept=".wav,.aif,.aiff" style="display:none;">
