@@ -1,27 +1,35 @@
 {
   "Voice_AmplitudeEnvelope_Attack": {
     "type": "number",
-    "min": 0.0,
-    "max": 0.15449,
-    "options": []
+    "min": 0.0001,
+    "max": 20.0,
+    "options": [],
+    "unit": "s",
+    "decimals": 4
   },
   "Voice_AmplitudeEnvelope_Decay": {
     "type": "number",
-    "min": 0.0,
+    "min": 0.001,
     "max": 60.0,
-    "options": []
+    "options": [],
+    "unit": "s",
+    "decimals": 3
   },
   "Voice_AmplitudeEnvelope_Release": {
     "type": "number",
-    "min": 0.0,
-    "max": 23.0,
-    "options": []
+    "min": 0.001,
+    "max": 60.0,
+    "options": [],
+    "unit": "s",
+    "decimals": 3
   },
   "Voice_AmplitudeEnvelope_Sustain": {
     "type": "number",
-    "min": 0.0,
-    "max": 1.0,
-    "options": []
+    "min": -60.0,
+    "max": 0.0,
+    "options": [],
+    "unit": "dB",
+    "decimals": 1
   },
   "Voice_AmplitudeEnvelope_SustainMode": {
     "type": "enum",
@@ -33,21 +41,27 @@
   },
   "Voice_Detune": {
     "type": "number",
-    "min": 0.0,
-    "max": 0.0,
-    "options": []
+    "min": -50,
+    "max": 50,
+    "options": [],
+    "unit": "c",
+    "decimals": 0
   },
   "Voice_FilterEnvelope_Attack": {
     "type": "number",
-    "min": 0.0,
-    "max": 0.0,
-    "options": []
+    "min": 0.0001,
+    "max": 20.0,
+    "options": [],
+    "unit": "s",
+    "decimals": 4
   },
   "Voice_FilterEnvelope_Decay": {
     "type": "number",
-    "min": 0.173683,
-    "max": 2.962276,
-    "options": []
+    "min": 0.001,
+    "max": 60.0,
+    "options": [],
+    "unit": "s",
+    "decimals": 3
   },
   "Voice_FilterEnvelope_On": {
     "type": "boolean",
@@ -57,33 +71,41 @@
   },
   "Voice_FilterEnvelope_Release": {
     "type": "number",
-    "min": 0.05,
-    "max": 3.833659,
-    "options": []
+    "min": 0.001,
+    "max": 60.0,
+    "options": [],
+    "unit": "s",
+    "decimals": 3
   },
   "Voice_FilterEnvelope_Sustain": {
     "type": "number",
     "min": 0.0,
-    "max": 0.726562,
-    "options": []
+    "max": 100.0,
+    "options": [],
+    "unit": "%",
+    "decimals": 1
   },
   "Voice_Filter_Frequency": {
     "type": "number",
     "min": 30.0,
     "max": 22000.0,
-    "options": []
+    "options": [],
+    "unit": "Hz",
+    "decimals": 1
   },
   "Voice_Filter_FrequencyModulationAmounts_EnvelopeAmount": {
     "type": "number",
-    "min": -72,
-    "max": 0,
-    "options": []
+    "min": -100,
+    "max": 100,
+    "options": [],
+    "decimals": 1
   },
   "Voice_Filter_FrequencyModulationAmounts_LfoAmount": {
     "type": "number",
     "min": 0.0,
-    "max": 21.732283,
-    "options": []
+    "max": 24.0,
+    "options": [],
+    "decimals": 2
   },
   "Voice_Filter_On": {
     "type": "boolean",
@@ -94,8 +116,10 @@
   "Voice_Filter_Resonance": {
     "type": "number",
     "min": 0.0,
-    "max": 0.677548,
-    "options": []
+    "max": 90.0,
+    "options": [],
+    "unit": "%",
+    "decimals": 1
   },
   "Voice_Filter_Slope": {
     "type": "enum",
@@ -117,9 +141,11 @@
   },
   "Voice_Gain": {
     "type": "number",
-    "min": 1.0,
-    "max": 1.0,
-    "options": []
+    "min": -60.0,
+    "max": 2.0,
+    "options": [],
+    "unit": "dB",
+    "decimals": 1
   },
   "Voice_Lfo_On": {
     "type": "boolean",
@@ -143,27 +169,35 @@
   },
   "Voice_PlaybackLength": {
     "type": "number",
-    "min": 1.0,
-    "max": 1.0,
-    "options": []
+    "min": 0.0,
+    "max": 100.0,
+    "options": [],
+    "unit": "%",
+    "decimals": 1
   },
   "Voice_PlaybackStart": {
     "type": "number",
     "min": 0.0,
-    "max": 0.0,
-    "options": []
+    "max": 100.0,
+    "options": [],
+    "unit": "%",
+    "decimals": 1
   },
   "Voice_Transpose": {
     "type": "number",
-    "min": -36,
-    "max": 36,
-    "options": []
+    "min": -48,
+    "max": 48,
+    "options": [],
+    "unit": "st",
+    "decimals": 0
   },
   "Voice_VelocityToVolume": {
     "type": "number",
     "min": 0.0,
-    "max": 0.35,
-    "options": []
+    "max": 100.0,
+    "options": [],
+    "unit": "%",
+    "decimals": 1
   },
   "Volume": {
     "type": "number",
