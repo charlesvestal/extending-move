@@ -79,6 +79,7 @@
         <h3>Macros</h3>
         {{ macro_knobs_html | safe }}
     </div>
+    <input type="hidden" name="macros_data" id="macros-data-input" value='{{ macros_json }}'>
     <!-- macros fixed, no sidebar -->
     <div class="param-list">
         {{ params_html | safe }}
@@ -101,6 +102,7 @@
 <script>
 window.driftSchema = {{ schema_json|safe }};
 </script>
+<script src="{{ host_prefix }}/static/macro_fixed.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const cb = document.getElementById('rename-checkbox');
