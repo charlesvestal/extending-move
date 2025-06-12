@@ -44,10 +44,20 @@ def get_melodic_sampler_sample(preset_path):
                 "sample_path": None,
             }
 
-        # Get filename from URI
+        # Get filename from URI and convert to local path if needed
         name_part = sample_uri.rsplit("/", 1)[-1]
         sample_name = urllib.parse.unquote(name_part)
-        sample_path = urllib.parse.unquote(sample_uri)
+        if sample_uri.startswith("ableton:/user-library/Samples/"):
+            sample_path = sample_uri.replace(
+                "ableton:/user-library/Samples/",
+                "/data/UserData/UserLibrary/Samples/",
+                1,
+            )
+        elif sample_uri.startswith("file://"):
+            sample_path = sample_uri.split("file://", 1)[1]
+        else:
+            sample_path = sample_uri
+        sample_path = urllib.parse.unquote(sample_path)
 
         return {
             "success": True,
