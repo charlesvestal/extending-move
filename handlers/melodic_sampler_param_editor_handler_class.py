@@ -224,7 +224,9 @@ class MelodicSamplerParamEditorHandler(BaseHandler):
             if replace_flag and 'new_sample_file' in form:
                 success, new_path, err = self.handle_file_upload(form, 'new_sample_file')
                 if not success:
-                    return self.format_error_response('Failed to upload new sample')
+                    if err:
+                        logger.error('Sample upload failed: %s', err.get('message'))
+                    return self.format_error_response(err.get('message', 'Failed to upload new sample'))
                 res = replace_melodic_sampler_sample(preset_path, new_path)
                 self.cleanup_upload(new_path)
                 if not res.get('success'):
