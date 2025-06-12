@@ -115,3 +115,35 @@ def test_scan_for_drum_rack_presets(monkeypatch, tmp_path):
     monkeypatch.setattr(drih, "get_cache", lambda k: captured["data"])
     result_cached = drih.scan_for_drum_rack_presets()
     assert "cached" in result_cached["message"]
+
+
+def test_get_samples_core_library_translation(tmp_path):
+    preset = tmp_path / "preset.json"
+    uri = (
+        "ableton:/packs/abl-core-library/"
+        "Samples/Drums/Snare/Snare 606.aif"
+    )
+    create_simple_preset(preset, sample_uri=uri)
+
+    info = drih.get_drum_cell_samples(str(preset))
+    assert info["success"], info.get("message")
+    sample = info["samples"][0]
+    assert sample["path"].startswith("/data/CoreLibrary/")
+    assert sample["path"].endswith("Snare 606.aif")
+
+
+def test_generate_samples_html_core_preview():
+    from handlers.drum_rack_inspector_handler_class import DrumRackInspectorHandler
+
+    handler = DrumRackInspectorHandler()
+    sample = {
+        "pad": 1,
+        "sample": "Kick",
+        "path": "/data/CoreLibrary/Samples/Kick.wav",
+        "playback_start": 0.0,
+        "playback_length": 1.0,
+    }
+
+    html = handler.generate_samples_html([sample], "/data/CoreLibrary/Track Presets/Kit.ablpreset", editable=False)
+    assert "reverse-button" not in html
+    assert "time-stretch-button" not in html
