@@ -374,6 +374,7 @@ class MelodicSamplerParamEditorHandler(BaseHandler):
 
     def generate_macro_knobs_html(self, macros):
         values = {m.get('index'): m.get('value', 0.0) for m in (macros or [])}
+        assigned = {m.get('index'): bool(m.get('parameters')) for m in (macros or [])}
         html = ['<div class="macro-knob-row">']
         for i in range(8):
             val = values.get(i, 0.0)
@@ -383,8 +384,12 @@ class MelodicSamplerParamEditorHandler(BaseHandler):
                 val = 0.0
             display_val = round(val, 1)
             name = DEFAULT_MACRO_NAMES[i]
+            classes = ['macro-knob']
+            if assigned.get(i):
+                classes.append(f'macro-{i}')
+            cls = ' '.join(classes)
             html.append(
-                f'<div class="macro-knob" data-index="{i}">' +
+                f'<div class="{cls}" data-index="{i}">' +
                 f'<span class="macro-label" data-index="{i}">{name}</span>' +
                 f'<input id="macro_{i}_dial" type="range" class="macro-dial input-knob" ' +
                 f'data-target="macro_{i}_value" data-display="macro_{i}_disp" ' +
