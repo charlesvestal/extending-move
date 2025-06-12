@@ -19,6 +19,7 @@ from core.synth_param_editor_handler import (
     update_parameter_values,
     update_macro_values,
 )
+from core.melodic_sampler_handler import get_melodic_sampler_sample
 from core.refresh_handler import refresh_library
 
 DEFAULT_PRESET = os.path.join(
@@ -124,6 +125,8 @@ class MelodicSamplerParamEditorHandler(BaseHandler):
             'file_browser_html': browser_html,
             'params_html': '',
             'selected_preset': None,
+            'sample_name': '',
+            'sample_path': '',
             'param_count': 0,
             'browser_root': base_dir,
             'browser_filter': 'melodicsampler',
@@ -296,11 +299,15 @@ class MelodicSamplerParamEditorHandler(BaseHandler):
             device_types=("melodicSampler",),
             schema_loader=load_melodic_sampler_schema,
         )
+        sample_info = get_melodic_sampler_sample(preset_path)
         if param_info['success']:
             params = [p for p in param_info['parameters'] if p not in EXCLUDED_MACRO_PARAMS]
             paths = {k: v for k, v in param_info.get('parameter_paths', {}).items() if k not in EXCLUDED_MACRO_PARAMS}
             available_params_json = json.dumps(params)
             param_paths_json = json.dumps(paths)
+
+        sample_name = sample_info.get('sample_name') if sample_info.get('success', False) else None
+        sample_path = sample_info.get('sample_path') if sample_info.get('success', False) else None
 
         if values['success']:
             params_html = self.generate_params_html(values['parameters'], mapped_params)
@@ -340,6 +347,8 @@ class MelodicSamplerParamEditorHandler(BaseHandler):
             'macros_json': macros_json,
             'available_params_json': available_params_json,
             'param_paths_json': param_paths_json,
+            'sample_name': sample_name or '',
+            'sample_path': sample_info.get('sample_path', '') if sample_info.get('success', False) else '',
         }
 
     def _build_param_item(self, idx, name, value, meta, label=None, hide_label=False, slider=False, extra_classes=""):
