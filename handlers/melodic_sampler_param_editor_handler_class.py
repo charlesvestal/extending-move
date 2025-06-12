@@ -3,6 +3,7 @@ import os
 import json
 import logging
 import shutil
+import re
 
 from handlers.base_handler import BaseHandler
 from core.file_browser import generate_dir_html
@@ -506,19 +507,50 @@ class MelodicSamplerParamEditorHandler(BaseHandler):
 
 
     def generate_macro_knobs_html(self, macros):
-        values = {m.get('index'): m.get('value', 0.0) for m in (macros or [])}
+        """Return HTML for a row of macro value knobs with highlighting."""
+        if not macros:
+            macros = []
+
+        def friendly(name: str) -> str:
+            if not name:
+                return name
+            parts = name.split('_', 1)
+            if len(parts) == 2:
+                group, param = parts
+                group = re.sub(r"([A-Za-z])([0-9])", r"\1 \2", group)
+                group = re.sub(r"([a-z])([A-Z])", r"\1 \2", group)
+                param = re.sub(r"([A-Za-z])([0-9])", r"\1 \2", param)
+                param = re.sub(r"([a-z])([A-Z])", r"\1 \2", param)
+                return f"{group}: {param}"
+            return re.sub(r"([a-z])([A-Z])", r"\1 \2", name)
+
+        by_index = {m["index"]: m for m in macros}
         html = ['<div class="macro-knob-row">']
         for i in range(8):
-            val = values.get(i, 0.0)
+            info = by_index.get(i, {"name": DEFAULT_MACRO_NAMES[i], "value": 0.0})
+            name = info.get("name", DEFAULT_MACRO_NAMES[i])
+            label_class = ""
+            if not name or name == f"Macro {i}":
+                params = info.get("parameters") or []
+                if len(params) == 1:
+                    pname = params[0].get("name", f"Knob {i + 1}")
+                    name = friendly(pname)
+                    label_class = " placeholder"
+                else:
+                    name = f"Knob {i + 1}"
+            val = info.get("value", 0.0)
             try:
                 val = float(val)
             except Exception:
                 val = 0.0
             display_val = round(val, 1)
-            name = DEFAULT_MACRO_NAMES[i]
+            classes = ["macro-knob"]
+            if info.get("parameters"):
+                classes.append(f"macro-{i}")
+            cls_str = " ".join(classes)
             html.append(
-                f'<div class="macro-knob" data-index="{i}">' +
-                f'<span class="macro-label" data-index="{i}">{name}</span>' +
+                f'<div class="{cls_str}" data-index="{i}">' +
+                f'<span class="macro-label{label_class}" data-index="{i}">{name}</span>' +
                 f'<input id="macro_{i}_dial" type="range" class="macro-dial input-knob" ' +
                 f'data-target="macro_{i}_value" data-display="macro_{i}_disp" ' +
                 f'value="{display_val}" min="0" max="127" step="0.1" data-decimals="1">' +
