@@ -468,11 +468,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const min = parseFloat(dial.min || '0');
     const max = parseFloat(dial.max || '0');
     const oscGain = unit === 'dB' && !isNaN(min) && !isNaN(max) && min === 0 && max <= 2;
-    const shouldScale = (unit === '%' || unit === 'ct') && Math.abs(max) <= 1 && Math.abs(min) <= 1;
-    const displayDecimalsDefault = (unit === '%' || unit === 'ct') ? 0 : decimals;
-    const getDisplayDecimals = (val) => window.getPercentDecimals(val, unit, displayDecimalsDefault, shouldScale);
+    const percentUnit = unit === '%' || unit === 'ct';
+    const baseScale = percentUnit && Math.abs(max) <= 1 && Math.abs(min) <= 1 ? 100 : 1;
+    const displayScale = parseFloat(dial.dataset.displayScale || baseScale);
+    const shouldScale = displayScale !== 1;
+    const displayDecimalsDefault = percentUnit ? 0 : decimals;
+    const getDisplayDecimals = (val) => window.getPercentDecimals(val, unit, displayDecimalsDefault, shouldScale, displayScale);
 
-    let displayVal = shouldScale ? v * 100 : v;
+    let displayVal = shouldScale ? v * displayScale : v;
     let unitLabel = unit;
     if (unit === 'Hz') {
       displayVal = Number(displayVal);

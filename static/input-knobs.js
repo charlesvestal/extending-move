@@ -186,8 +186,10 @@ input[type=checkbox].input-switch:checked,input[type=radio].input-switch:checked
       }
       ik.valrange={min:+el.min, max:(el.max=="")?100:+el.max, step:(el.step=="")?1:+el.step};
       ik.percentUnit=el.getAttribute("data-unit")==="%" || el.getAttribute("data-unit")==="ct";
-      ik.shouldScale=ik.percentUnit && ik.valrange.max<=1 && ik.valrange.min>=-1;
-      ik.getStep=(v)=>getPercentStep(v, ik.percentUnit?el.getAttribute("data-unit"):'' , ik.valrange.step, ik.shouldScale);
+      let baseScale=ik.percentUnit && ik.valrange.max<=1 && ik.valrange.min>=-1 ? 100 : 1;
+      ik.displayScale=parseFloat(el.getAttribute("data-display-scale")||baseScale);
+      ik.shouldScale=ik.displayScale!==1;
+      ik.getStep=(v)=>getPercentStep(v, ik.percentUnit?el.getAttribute("data-unit"):'' , ik.valrange.step, ik.shouldScale, ik.displayScale);
       el.redraw(true);
     };
     el.setValue=(v)=>{
