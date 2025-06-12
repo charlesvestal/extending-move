@@ -590,6 +590,7 @@ class SynthParamEditorHandler(BaseHandler):
             if step_val is None and min_val is not None and max_val is not None and max_val <= 1 and min_val >= -1:
                 step_val = 0.01
             unit_val = meta.get("unit")
+            curve_val = meta.get("curve")
             if slider:
                 classes = ["rect-slider"]
                 if min_val is not None and max_val is not None and min_val < 0 < max_val:
@@ -605,6 +606,8 @@ class SynthParamEditorHandler(BaseHandler):
                     attrs.append(f'data-decimals="{decimals}"')
                 if unit_val:
                     attrs.append(f'data-unit="{unit_val}"')
+                if curve_val:
+                    attrs.append(f'data-curve="{curve_val}"')
                 attrs.append(f'data-target="param_{idx}_value"')
                 attrs.append(f'data-value="{value}"')
                 attr_str = " ".join(attrs)
@@ -617,6 +620,7 @@ class SynthParamEditorHandler(BaseHandler):
                 max_attr = f' max="{max_val}"' if max_val is not None else ''
                 step_attr = f' step="{step_val}"' if step_val is not None else ''
                 unit_attr = f' data-unit="{unit_val}"' if unit_val else ''
+                curve_attr = f' data-curve="{curve_val}"' if curve_val else ''
                 dec_attr = f' data-decimals="{decimals}"' if decimals is not None else ''
                 disp_id = f'param_{idx}_display'
                 input_classes = "param-dial input-knob"
@@ -630,7 +634,7 @@ class SynthParamEditorHandler(BaseHandler):
                     extra_attrs += f' data-values="{",".join(SYNC_RATE_LABELS)}"'
                 html.append(
                     f'<input id="param_{idx}_dial" type="range" class="{input_classes}" data-target="param_{idx}_value" '
-                    f'data-display="{disp_id}" value="{value}"{min_attr}{max_attr}{step_attr}{unit_attr}{dec_attr}{extra_attrs}>'
+                    f'data-display="{disp_id}" value="{value}"{min_attr}{max_attr}{step_attr}{unit_attr}{curve_attr}{dec_attr}{extra_attrs}>'
                 )
                 html.append(f'<span id="{disp_id}" class="param-number"></span>')
                 html.append(f'<input type="hidden" name="param_{idx}_value" value="{value}">')
