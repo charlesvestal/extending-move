@@ -82,7 +82,9 @@
 
     <p class="current-sample-path">Sample:  {{ sample_path if sample_path else 'None' }}</p>
     {% if sample_path %}
-    <div id="sample-waveform" class="waveform-container"></div>
+    <div id="sample-waveform" class="waveform-container">
+        <canvas id="adsr-overlay" class="adsr-overlay"></canvas>
+    </div>
     <input type="hidden" id="sample-path-hidden" value="{{ sample_path }}">
     {% endif %}
 
