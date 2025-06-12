@@ -19,7 +19,10 @@ from core.synth_param_editor_handler import (
     update_parameter_values,
     update_macro_values,
 )
-from core.melodic_sampler_handler import get_melodic_sampler_sample
+from core.melodic_sampler_handler import (
+    get_melodic_sampler_sample,
+    replace_melodic_sampler_sample,
+)
 from core.refresh_handler import refresh_library
 
 DEFAULT_PRESET = os.path.join(
@@ -215,10 +218,23 @@ class MelodicSamplerParamEditorHandler(BaseHandler):
                 return self.format_error_response(result['message'])
             preset_path = result['path']
 
+            # Handle optional sample replacement
+            replace_flag = form.getvalue('replace_sample') in ('on', 'true', '1')
+            sample_msg = ''
+            if replace_flag and 'new_sample_file' in form:
+                success, new_path, err = self.handle_file_upload(form, 'new_sample_file')
+                if not success:
+                    return self.format_error_response('Failed to upload new sample')
+                res = replace_melodic_sampler_sample(preset_path, new_path)
+                self.cleanup_upload(new_path)
+                if not res.get('success'):
+                    return self.format_error_response(res.get('message', 'Sample replace failed'))
+                sample_msg = ' ' + res['message']
+
             # Melodic Sampler presets do not use macros. Skip macro name updates
             # and parameter mapping to avoid writing macroMapping entries.
 
-            message = result['message']
+            message = result['message'] + sample_msg
             if output_path:
                 message += f" Saved to {output_path}"
             refresh_success, refresh_message = refresh_library()
