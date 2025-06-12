@@ -47,7 +47,7 @@
   </div>
 </div>
 {% else %}
-<form method="post" action="{{ host_prefix }}/melodic-sampler" id="param-form">
+<form method="post" enctype="multipart/form-data" action="{{ host_prefix }}/melodic-sampler" id="param-form">
     <input type="hidden" name="action" id="action-input" value="save_params">
     <input type="hidden" name="preset_select" value="{{ selected_preset }}">
     <input type="hidden" name="param_count" value="{{ param_count }}">
