@@ -145,21 +145,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function resizeOverlay() {
     if (!overlay) return;
-    const w = container.clientWidth;
-    const h = container.clientHeight;
-    overlay.width = w;
-    overlay.height = h;
-    overlay.style.left = 0;
-    overlay.style.top = 0;
-    overlay.style.width = w + 'px';
-    overlay.style.height = h + 'px';
+    const cs = getComputedStyle(container);
+    const padL = parseFloat(cs.paddingLeft) || 0;
+    const padR = parseFloat(cs.paddingRight) || 0;
+    const padT = parseFloat(cs.paddingTop) || 0;
+    const padB = parseFloat(cs.paddingBottom) || 0;
+    const innerW = container.clientWidth - padL - padR;
+    const innerH = container.clientHeight - padT - padB;
+
+    const startPct = parseFloat(pbStart?.value || '0');
+    const lengthPct = parseFloat(pbLength?.value || '1');
+    const startOffset = Math.max(0, Math.min(1, startPct)) * innerW;
+    const regionWidth = Math.max(0, Math.min(1, lengthPct)) * innerW;
+
+    overlay.width = regionWidth;
+    overlay.height = innerH;
+    overlay.style.left = padL + startOffset + 'px';
+    overlay.style.top = padT + 'px';
+    overlay.style.width = regionWidth + 'px';
+    overlay.style.height = innerH + 'px';
     if (filterOverlay) {
-      filterOverlay.width = w;
-      filterOverlay.height = h;
-      filterOverlay.style.left = 0;
-      filterOverlay.style.top = 0;
-      filterOverlay.style.width = w + 'px';
-      filterOverlay.style.height = h + 'px';
+      filterOverlay.width = regionWidth;
+      filterOverlay.height = innerH;
+      filterOverlay.style.left = padL + startOffset + 'px';
+      filterOverlay.style.top = padT + 'px';
+      filterOverlay.style.width = regionWidth + 'px';
+      filterOverlay.style.height = innerH + 'px';
     }
     drawEnvelope();
     drawFilterEnvelope();
@@ -229,7 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (el && el.type === 'checkbox') el.addEventListener('change', drawFilterEnvelope);
   });
   [pbStart, pbLength].forEach(el => {
-    if (el) el.addEventListener('input', updateRegion);
+    if (el) el.addEventListener('input', resizeOverlay);
   });
   resizeOverlay();
 });
