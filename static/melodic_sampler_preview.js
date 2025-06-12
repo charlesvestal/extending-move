@@ -1,9 +1,11 @@
 // Load and play the current melodic sampler sample
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   const container = document.getElementById('sample-waveform');
   const hidden = document.getElementById('sample-path-hidden');
   if (!container || !hidden || !hidden.value) return;
+
+  const utils = await import('/static/loop_utils.js');
 
   const overlay = document.getElementById('adsr-overlay');
   const filterOverlay = document.getElementById('filter-adsr-overlay');
@@ -207,7 +209,23 @@ document.addEventListener('DOMContentLoaded', () => {
     plugins: [WaveSurfer.regions.create({})]
   });
 
-  ws.load(fileUrl);
+  const audioCtx = ws.backend.getAudioContext();
+  const arr = await fetch(fileUrl).then(r => r.arrayBuffer());
+  const decoded = await audioCtx.decodeAudioData(arr.slice(0));
+  ws.loadDecodedBuffer(decoded);
+  try {
+    const { loopStart, loopEnd } = await utils.parseLoopPoints(arr.slice(0));
+    const startSec = loopStart / decoded.sampleRate;
+    const endSec = loopEnd / decoded.sampleRate;
+    ws.clearRegions();
+    region = ws.addRegion({ start: startSec, end: endSec, color: 'rgba(0,255,0,0.2)', drag: false, resize: false });
+    if (duration === 0) duration = decoded.duration;
+    if (pbStart) pbStart.value = (startSec / duration).toFixed(4);
+    if (pbLength) pbLength.value = ((endSec - startSec) / duration).toFixed(4);
+    updateRegion();
+  } catch (e) {
+    console.log('loop parse', e);
+  }
   container.addEventListener('click', (e) => {
     e.stopPropagation();
     ws.stop();
