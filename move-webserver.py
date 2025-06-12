@@ -758,6 +758,44 @@ def serve_sample(sample_path):
     return resp
 
 
+@app.route("/files/<path:file_path>", methods=["GET", "OPTIONS"])
+def serve_file(file_path):
+    """Serve files from User Library or Core Library."""
+    from urllib.parse import unquote
+
+    decoded_path = unquote(file_path)
+
+    if decoded_path.startswith("user-library/"):
+        base_dir = "/data/UserData/UserLibrary"
+        rel_path = decoded_path[len("user-library/") :]
+    elif decoded_path.startswith("core-library/"):
+        base_dir = "/data/CoreLibrary"
+        rel_path = decoded_path[len("core-library/") :]
+    else:
+        return ("Invalid path", 400)
+
+    full_path = os.path.join(base_dir, rel_path)
+
+    base_real = os.path.realpath(base_dir)
+    file_real = os.path.realpath(full_path)
+
+    if not file_real.startswith(base_real):
+        return ("Access denied", 403)
+
+    if not os.path.exists(file_real):
+        return ("File not found", 404)
+
+    if request.method == "OPTIONS":
+        resp = app.make_response("")
+    else:
+        resp = send_file(file_real)
+
+    resp.headers["Access-Control-Allow-Origin"] = "*"
+    resp.headers["Access-Control-Allow-Methods"] = "GET, OPTIONS"
+    resp.headers["Access-Control-Allow-Headers"] = "Content-Type"
+    return resp
+
+
 @app.route("/drum-rack-inspector", methods=["GET", "POST"])
 def drum_rack_inspector():
     if request.method == "POST":
