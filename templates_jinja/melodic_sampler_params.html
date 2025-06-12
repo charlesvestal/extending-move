@@ -113,6 +113,7 @@
 <script>
 window.driftSchema = {{ schema_json|safe }};
 </script>
+<script>window.disableMacroEditing = true;</script>
 <script src="{{ host_prefix }}/static/macro_sidebar.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -120,10 +121,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const nameInput = document.getElementById('new-preset-name');
   const saveBtn = document.getElementById('save-params-btn');
   const form = document.getElementById('param-form');
-  const macrosInput = document.getElementById('macros-data-input');
   if (cb) cb.addEventListener('change', updateSaveState);
 
-  const initialMacros = macrosInput ? macrosInput.value : null;
   const initialValues = {};
 
   function recordInitial() {
@@ -136,7 +135,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function hasChanges() {
     if (cb && cb.checked) return true;
-    if (macrosInput && macrosInput.value !== initialMacros) return true;
     for (const [name, val] of Object.entries(initialValues)) {
       const cur = form.querySelector(`[name="${name}"]`);
       if (cur && cur.value !== val) return true;
@@ -151,7 +149,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (form) {
     recordInitial();
-    if (macrosInput) macrosInput.addEventListener('change', updateSaveState);
     updateSaveState();
 
     const orig = nameInput ? nameInput.dataset.originalName : null;
