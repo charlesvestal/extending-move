@@ -46,6 +46,46 @@ logger = logging.getLogger(__name__)
 EXCLUDED_MACRO_PARAMS = set()
 
 class MelodicSamplerParamEditorHandler(BaseHandler):
+    LABEL_OVERRIDES = {
+        # Voice
+        "Voice_PlaybackStart": "Start",
+        "Voice_PlaybackLength": "Length",
+        "Voice_Transpose": "Transpose",
+        "Voice_VelocityToVolume": "Vel > Vol",
+        "Volume": "Volume",
+
+        # Filter
+        "Voice_Filter_On": "On/Off",
+        "Voice_Filter_Type": "Type",
+        "Voice_Filter_Frequency": "Freq",
+        "Voice_Filter_Resonance": "Res",
+        "Voice_Filter_Slope": "Slope",
+        "Voice_Filter_FrequencyModulationAmounts_EnvelopeAmount": "Freq > Env",
+        "Voice_Filter_FrequencyModulationAmounts_LfoAmount": "Freq > LFO",
+
+        # Amplitude Envelope
+        "Voice_AmplitudeEnvelope_Attack": "Attack",
+        "Voice_AmplitudeEnvelope_Decay": "Decay",
+        "Voice_AmplitudeEnvelope_Sustain": "Sustain",
+        "Voice_AmplitudeEnvelope_Release": "Release",
+
+        # Filter Envelope
+        "Voice_FilterEnvelope_On": "On/Off",
+        "Voice_FilterEnvelope_Attack": "Attack",
+        "Voice_FilterEnvelope_Decay": "Decay",
+        "Voice_FilterEnvelope_Sustain": "Sustain",
+        "Voice_FilterEnvelope_Release": "Release",
+
+        # LFO
+        "Voice_Lfo_On": "On/Off",
+        "Voice_Lfo_Type": "Type",
+        "Voice_Lfo_Rate": "Rate",
+
+        # Other
+        "Voice_AmplitudeEnvelope_SustainMode": "Sustain Mode",
+        "Voice_Detune": "Detune",
+        "Voice_Gain": "Gain",
+    }
     def handle_get(self):
         base_dir = "/data/UserData/UserLibrary/Track Presets"
         if not os.path.exists(base_dir) and os.path.exists("examples/Track Presets"):
@@ -303,7 +343,7 @@ class MelodicSamplerParamEditorHandler(BaseHandler):
 
     def _build_param_item(self, idx, name, value, meta, label=None, hide_label=False, slider=False, extra_classes=""):
         p_type = meta.get('type')
-        label = label if label is not None else name
+        label = label if label is not None else self.LABEL_OVERRIDES.get(name, name)
         classes = 'param-item'
         if extra_classes:
             classes += f' {extra_classes}'
