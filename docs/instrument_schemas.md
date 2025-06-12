@@ -16,3 +16,5 @@ this metadata to format values—frequencies labeled `Hz` automatically switch t
 one second. Gain parameters using a `dB` unit and ranges up to `2.0` (including
 envelope sustain at `0.0–1.0`) are displayed as decibels to match Live's
 controls.
+
+The Melodic Sampler schema now includes unit and decimal information so parameter values match Ableton Live. Playback controls use percentages, transpose is in semitones, detune is in cents, envelope times use seconds, and filter settings include proper frequency, resonance, and gain ranges.
