@@ -488,8 +488,8 @@ class MelodicSamplerParamEditorHandler(BaseHandler):
         env_panel = (
             '<div class="param-panel envelopes"><h3>Envelopes</h3>'
             '<div class="param-items">'
-            '<div class="param-group-label">Amp</div>' + row(amp_env) +
-            '<div class="param-group-label">Filter</div>' + row(filt_env) +
+            '<div class="param-group-label">Amp Env</div>' + row(amp_env) +
+            '<div class="param-group-label">Filter Env</div>' + row(filt_env) +
             '</div></div>'
         )
         panels.append(env_panel)
