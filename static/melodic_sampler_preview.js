@@ -145,26 +145,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function resizeOverlay() {
     if (!overlay) return;
-    const cs = getComputedStyle(container);
-    const padL = parseFloat(cs.paddingLeft) || 0;
-    const padR = parseFloat(cs.paddingRight) || 0;
-    const padT = parseFloat(cs.paddingTop) || 0;
-    const padB = parseFloat(cs.paddingBottom) || 0;
-    const innerW = container.clientWidth - padL - padR;
-    const innerH = container.clientHeight - padT - padB;
-    overlay.width = innerW;
-    overlay.height = innerH;
-    overlay.style.left = padL + 'px';
-    overlay.style.top = padT + 'px';
-    overlay.style.width = innerW + 'px';
-    overlay.style.height = innerH + 'px';
+    const w = container.clientWidth;
+    const h = container.clientHeight;
+    overlay.width = w;
+    overlay.height = h;
+    overlay.style.left = 0;
+    overlay.style.top = 0;
+    overlay.style.width = w + 'px';
+    overlay.style.height = h + 'px';
     if (filterOverlay) {
-      filterOverlay.width = innerW;
-      filterOverlay.height = innerH;
-      filterOverlay.style.left = padL + 'px';
-      filterOverlay.style.top = padT + 'px';
-      filterOverlay.style.width = innerW + 'px';
-      filterOverlay.style.height = innerH + 'px';
+      filterOverlay.width = w;
+      filterOverlay.height = h;
+      filterOverlay.style.left = 0;
+      filterOverlay.style.top = 0;
+      filterOverlay.style.width = w + 'px';
+      filterOverlay.style.height = h + 'px';
     }
     drawEnvelope();
     drawFilterEnvelope();
