@@ -1,9 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
   const macrosInput = document.getElementById('macros-data-input');
   if (!macrosInput) return;
-  const paramPaths = JSON.parse(document.getElementById('param-paths-input').value || '{}');
-  const availableParams = JSON.parse(document.getElementById('available-params-input').value || '[]');
+  const paramPathsEl = document.getElementById('param-paths-input');
+  const availableParamsEl = document.getElementById('available-params-input');
+  const paramPaths = paramPathsEl ? JSON.parse(paramPathsEl.value || '{}') : {};
+  const availableParams = availableParamsEl ? JSON.parse(availableParamsEl.value || '[]') : [];
   const schema = window.driftSchema || {};
+  const editingEnabled = !window.disableMacroEditing && paramPathsEl && availableParamsEl;
   const paramDisplay = {};
   const paramInfo = {};
   function paramSection(name) {
@@ -67,26 +70,29 @@ document.addEventListener('DOMContentLoaded', () => {
   const assignedDiv = document.querySelector('.macro-assigned-list');
   const addBtn = document.getElementById('macro-add-param');
   const closeBtn = document.getElementById('macro-sidebar-close');
+  const editing = editingEnabled && overlay && sidebar && nameInput && assignedDiv && addBtn && closeBtn;
 
   let openMacro = null;
   let openMacroNew = false;
 
   function updateAddBtn() {
-    if (!openMacro) return;
+    if (!editing || !openMacro) return;
     addBtn.disabled = openMacro.parameters.length >= availableParams.length;
   }
 
-  nameInput.addEventListener('input', () => {
-    if (currentIndex !== null) {
-      const macro = macros.find(m => m.index === currentIndex);
-      if (macro) {
-        macro.name = nameInput.value.trim();
-        // Update the knob labels immediately so the fallback
-        // parameter name is shown when the input is cleared.
-        updateKnobLabels();
+  if (editing) {
+    nameInput.addEventListener('input', () => {
+      if (currentIndex !== null) {
+        const macro = macros.find(m => m.index === currentIndex);
+        if (macro) {
+          macro.name = nameInput.value.trim();
+          // Update the knob labels immediately so the fallback
+          // parameter name is shown when the input is cleared.
+          updateKnobLabels();
+        }
       }
-    }
-  });
+    });
+  }
 
   function allAssigned() {
     const arr = [];
@@ -97,6 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentIndex = null;
 
   function saveState() {
+    if (!editing) return;
     macrosInput.value = JSON.stringify(macros);
     macrosInput.dispatchEvent(new Event('change'));
   }
@@ -171,8 +178,12 @@ document.addEventListener('DOMContentLoaded', () => {
     return tree;
   }
 
-  const paramTree = buildParamTree();
+  let paramTree;
+  if (editing) {
+    paramTree = buildParamTree();
+  }
 
+  if (editing) {
   function buildDropdown(current, onChange) {
     const container = document.createElement('div');
     container.className = 'nested-dropdown';
@@ -404,6 +415,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!isNaN(idx)) openSidebar(idx);
     });
   });
+  }
 
   // --- Macro visualization support ---
   const baseParamValues = {};
