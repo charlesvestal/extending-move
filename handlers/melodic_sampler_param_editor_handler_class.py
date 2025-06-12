@@ -46,16 +46,16 @@ logger = logging.getLogger(__name__)
 
 EXCLUDED_MACRO_PARAMS = set()
 
-DEFAULT_MACRO_NAMES = ["A", "B", "C", "D", "E", "F", "G", "H"]
+DEFAULT_MACRO_NAMES = ["Transpose", "Playback Start", "Attack", "Decay", "Release", "Filter Freq", "Filter Res", "LFO"]
 DEFAULT_MACRO_PARAMS = [
+    "Voice_Transpose",
+    "Voice_PlaybackStart",
     "Voice_AmplitudeEnvelope_Attack",
     "Voice_AmplitudeEnvelope_Decay",
     "Voice_AmplitudeEnvelope_Release",
-    "Voice_AmplitudeEnvelope_Sustain",
-    "Voice_Detune",
-    "Voice_FilterEnvelope_Attack",
-    "Voice_FilterEnvelope_Decay",
-    "Voice_FilterEnvelope_Release",
+    "Voice_Filter_Frequency",
+    "Voice_Filter_Resonance",
+    "Voice_Filter_FrequencyModulationAmounts_LfoAmount",
 ]
 
 class MelodicSamplerParamEditorHandler(BaseHandler):
@@ -73,8 +73,8 @@ class MelodicSamplerParamEditorHandler(BaseHandler):
         "Voice_Filter_Frequency": "Freq",
         "Voice_Filter_Resonance": "Res",
         "Voice_Filter_Slope": "Slope",
-        "Voice_Filter_FrequencyModulationAmounts_EnvelopeAmount": "Freq > Env",
-        "Voice_Filter_FrequencyModulationAmounts_LfoAmount": "Freq > LFO",
+        "Voice_Filter_FrequencyModulationAmounts_EnvelopeAmount": "Env > Freq",
+        "Voice_Filter_FrequencyModulationAmounts_LfoAmount": "LFO > Freq",
 
         # Amplitude Envelope
         "Voice_AmplitudeEnvelope_Attack": "Attack",
