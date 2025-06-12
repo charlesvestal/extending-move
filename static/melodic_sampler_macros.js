@@ -8,6 +8,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let macros = [];
   try { macros = JSON.parse(macrosInput.value || '[]'); } catch (e) {}
+  const baseMacroValues = {};
+  macros.forEach(m => {
+    try {
+      baseMacroValues[m.index] = parseFloat(m.value) || 0;
+    } catch (err) {
+      baseMacroValues[m.index] = 0;
+    }
+  });
 
   const paramInfo = window.driftSchema || {};
   const baseParamValues = {};
@@ -140,25 +148,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const mappedNow = new Set();
     macros.forEach(m => {
       if (indicesToProcess.size && !indicesToProcess.has(m.index)) return;
-      const mval = macroValues[m.index] ?? 0;
+      const curVal = macroValues[m.index] ?? 0;
+      const baseVal = baseMacroValues[m.index] ?? 0;
+      const delta = curVal - baseVal;
+      if (!delta) return;
       (m.parameters || []).forEach(p => {
         const info = paramInfo[p.name] || {};
-        if (info.type === 'enum' && Array.isArray(info.options)) {
-          const opts = info.options;
-          const idx = Math.min(Math.floor((mval / 127) * opts.length), opts.length - 1);
-          const val = opts[idx];
-          updateParamVisual(p.name, val);
-          mappedNow.add(p.name);
-          return;
-        } else if (info.type === 'boolean') {
-          const val = mval >= 64 ? 1 : 0;
-          updateParamVisual(p.name, val);
-          mappedNow.add(p.name);
+        if (info.type === 'enum' || info.type === 'boolean') {
           return;
         }
         let min = p.rangeMin !== undefined ? parseFloat(p.rangeMin) : (info.min !== undefined ? parseFloat(info.min) : 0);
         let max = p.rangeMax !== undefined ? parseFloat(p.rangeMax) : (info.max !== undefined ? parseFloat(info.max) : 127);
-        const val = min + (max - min) * (mval / 127);
+        const range = max - min;
+        let val = parseFloat(baseParamValues[p.name]);
+        if (isNaN(val)) val = min;
+        val += (range * delta) / 127;
+        if (val < min) val = min;
+        if (val > max) val = max;
         updateParamVisual(p.name, val);
         mappedNow.add(p.name);
       });
