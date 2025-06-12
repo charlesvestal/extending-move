@@ -13,6 +13,9 @@ MSETS_DIRECTORY = "/data/UserData/UserLibrary/Sets"
 # inside a restored set, paths are redirected here.
 MSET_SAMPLE_PATH = "/data/UserData/UserLibrary/Samples"
 
+# Directory for samples placed when replacing Melodic Sampler presets.
+MELODIC_SAMPLER_SAMPLE_DIR = "/data/UserData/UserLibrary/Samples/melodicSampler"
+
 # Base URI prefix inserted into Song.abl files to reference set contents.
 MSET_ABLETON_URI = "ableton:/user-library/Sets"
 

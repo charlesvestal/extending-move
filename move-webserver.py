@@ -663,7 +663,10 @@ def wavetable_params():
 @app.route("/melodic-sampler", methods=["GET", "POST"])
 def melodic_sampler_params():
     if request.method == "POST":
-        form = SimpleForm(request.form.to_dict())
+        form_data = request.form.to_dict()
+        if "new_sample_file" in request.files:
+            form_data["new_sample_file"] = FileField(request.files["new_sample_file"])
+        form = SimpleForm(form_data)
         result = melodic_sampler_param_handler.handle_post(form)
     else:
         if "preset" in request.args:

@@ -47,7 +47,7 @@
   </div>
 </div>
 {% else %}
-<form method="post" action="{{ host_prefix }}/melodic-sampler" id="param-form">
+<form method="post" enctype="multipart/form-data" action="{{ host_prefix }}/melodic-sampler" id="param-form">
     <input type="hidden" name="action" id="action-input" value="save_params">
     <input type="hidden" name="preset_select" value="{{ selected_preset }}">
     <input type="hidden" name="param_count" value="{{ param_count }}">
@@ -83,6 +83,11 @@
     {% if sample_path %}
     <p class="current-sample-path">Path: {{ sample_path }}</p>
     {% endif %}
+    <div class="replace-sample">
+        <label><input type="checkbox" name="replace_sample" id="replace-sample-checkbox"> Replace sample</label>
+        <input type="file" name="new_sample_file" id="new-sample-file" accept=".wav,.aif,.aiff" style="display:none;">
+        <span id="new-sample-name"></span>
+    </div>
     <input type="hidden" name="macros_data" id="macros-data-input" value='{{ macros_json }}'>
     <input type="hidden" id="available-params-input" value='{{ available_params_json }}'>
     <input type="hidden" id="param-paths-input" value='{{ param_paths_json }}'>
@@ -117,7 +122,24 @@ document.addEventListener('DOMContentLoaded', () => {
   const nameInput = document.getElementById('new-preset-name');
   const saveBtn = document.getElementById('save-params-btn');
   const form = document.getElementById('param-form');
+  const repCb = document.getElementById('replace-sample-checkbox');
+  const fileInput = document.getElementById('new-sample-file');
+  const fileName = document.getElementById('new-sample-name');
   if (cb) cb.addEventListener('change', updateSaveState);
+  if (repCb) repCb.addEventListener('change', () => {
+    if (repCb.checked && fileInput) {
+      fileInput.style.display = 'inline';
+    } else if (fileInput) {
+      fileInput.style.display = 'none';
+      fileInput.value = '';
+      if (fileName) fileName.textContent = '';
+    }
+    updateSaveState();
+  });
+  if (fileInput) fileInput.addEventListener('change', () => {
+    if (fileName) fileName.textContent = fileInput.files.length ? fileInput.files[0].name : '';
+    updateSaveState();
+  });
 
   const initialValues = {};
 
@@ -130,7 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function hasChanges() {
-    if (cb && cb.checked) return true;
+    if ((cb && cb.checked) || (repCb && repCb.checked)) return true;
     for (const [name, val] of Object.entries(initialValues)) {
       const cur = form.querySelector(`[name="${name}"]`);
       if (cur && cur.value !== val) return true;
