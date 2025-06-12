@@ -189,6 +189,12 @@ input[type=checkbox].input-switch:checked,input[type=radio].input-switch:checked
       let baseScale=ik.percentUnit && ik.valrange.max<=1 && ik.valrange.min>=-1 ? 100 : 1;
       ik.displayScale=parseFloat(el.getAttribute("data-display-scale")||baseScale);
       ik.shouldScale=ik.displayScale!==1;
+      ik.curve=el.getAttribute("data-curve")||"linear";
+      if(ik.curve==="log"){
+        const minVal=ik.valrange.min>0?ik.valrange.min:1e-6;
+        const maxVal=ik.valrange.max>0?ik.valrange.max:1e-6;
+        ik.logrange={min:Math.log(minVal),max:Math.log(maxVal)};
+      }
       ik.getStep=(v)=>getPercentStep(v, ik.percentUnit?el.getAttribute("data-unit"):'' , ik.valrange.step, ik.shouldScale, ik.displayScale);
       el.redraw(true);
     };
@@ -224,7 +230,11 @@ input[type=checkbox].input-switch:checked,input[type=radio].input-switch:checked
         dv=(ik.valrange.min+ik.valrange.max)*0.5+((dx-cx)/ik.sensex-(dy-cy)/ik.sensey)*(ik.valrange.max-ik.valrange.min);
         el.setValue(dv);
       }
-      ik.dragfrom={x:ev.clientX,y:ev.clientY,a:Math.atan2(ev.clientX-cx,cy-ev.clientY),v:+el.value};
+      let startVal=+el.value;
+      if(ik.curve==="log"){
+        startVal=startVal>0?startVal:1e-6;
+      }
+      ik.dragfrom={x:ev.clientX,y:ev.clientY,a:Math.atan2(ev.clientX-cx,cy-ev.clientY),v:(ik.curve==="log"?Math.log(startVal):startVal)};
       document.addEventListener("mousemove",ik.pointermove);
       document.addEventListener("mouseup",ik.pointerup);
       document.addEventListener("touchmove",ik.pointermove);
@@ -246,10 +256,15 @@ input[type=checkbox].input-switch:checked,input[type=radio].input-switch:checked
       case "k":
         switch(op.knobMode){
         case "linear":
-          dv=(dx/ik.sensex-dy/ik.sensey)*(ik.valrange.max-ik.valrange.min);
-          if(ev.shiftKey)
-            dv*=0.2;
-          el.setValue(ik.dragfrom.v+dv);
+          if(ik.curve==="log"){
+            dv=(dx/ik.sensex-dy/ik.sensey)*(ik.logrange.max-ik.logrange.min);
+            if(ev.shiftKey) dv*=0.2;
+            el.setValue(Math.exp(ik.dragfrom.v+dv));
+          }else{
+            dv=(dx/ik.sensex-dy/ik.sensey)*(ik.valrange.max-ik.valrange.min);
+            if(ev.shiftKey) dv*=0.2;
+            el.setValue(ik.dragfrom.v+dv);
+          }
           break;
         case "circularabs":
           if(!ev.shiftKey){
@@ -269,10 +284,15 @@ input[type=checkbox].input-switch:checked,input[type=radio].input-switch:checked
         break;
       case "h":
       case "v":
-        dv=(dx/ik.sensex-dy/ik.sensey)*(ik.valrange.max-ik.valrange.min);
-        if(ev.shiftKey)
-          dv*=0.2;
-        el.setValue(ik.dragfrom.v+dv);
+        if(ik.curve==="log"){
+          dv=(dx/ik.sensex-dy/ik.sensey)*(ik.logrange.max-ik.logrange.min);
+          if(ev.shiftKey) dv*=0.2;
+          el.setValue(Math.exp(ik.dragfrom.v+dv));
+        }else{
+          dv=(dx/ik.sensex-dy/ik.sensey)*(ik.valrange.max-ik.valrange.min);
+          if(ev.shiftKey) dv*=0.2;
+          el.setValue(ik.dragfrom.v+dv);
+        }
         break;
       }
     };
@@ -300,13 +320,26 @@ input[type=checkbox].input-switch:checked,input[type=radio].input-switch:checked
       if(!ev.shiftKey)
         delta*=5;
       delta /= ik.sensFactor;
-      el.setValue(+el.value+delta);
+      if(ik.curve==="log"){
+        let current=+el.value>0?+el.value:1e-6;
+        let ratio=(ik.logrange.max-ik.logrange.min)/(ik.valrange.max-ik.valrange.min);
+        let newLog=Math.log(current)+delta*ratio;
+        el.setValue(Math.exp(newLog));
+      }else{
+        el.setValue(+el.value+delta);
+      }
       ev.preventDefault();
       ev.stopPropagation();
     };
     el.redraw=(f)=>{
       if(f||ik.valueold!=el.value){
-        let v=(el.value-ik.valrange.min)/(ik.valrange.max-ik.valrange.min);
+        let v;
+        if(ik.curve==="log"){
+          const cur=+el.value>0?+el.value:1e-6;
+          v=(Math.log(cur)-ik.logrange.min)/(ik.logrange.max-ik.logrange.min);
+        }else{
+          v=(el.value-ik.valrange.min)/(ik.valrange.max-ik.valrange.min);
+        }
         if(ik.sprites>=1)
           el.style.backgroundPosition="0px "+(-((v*ik.sprites)|0)*ik.frameheight)+"px";
         else{
