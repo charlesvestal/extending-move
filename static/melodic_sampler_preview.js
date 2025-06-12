@@ -94,7 +94,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const a = parseFloat(fAttack?.value || '0');
     const d = parseFloat(fDecay?.value || '0');
     let s = parseFloat(fSustain?.value || '0');
-    if (s > 1) s /= 100; // convert percent to 0..1 range
+    const sMax = parseFloat(fSustain?.max || '1');
+    if (sMax > 1) s /= sMax; // convert percent to 0..1 range based on max
     const r = parseFloat(fRelease?.value || '0');
 
     const startPct = parseFloat(pbStart?.value || '0');
