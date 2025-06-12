@@ -6,19 +6,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const step = parseFloat(el.step || el.dataset.step || '1');
         const percentUnit = unit === '%' || unit === 'ct';
         const displayDecimalsDefault = percentUnit ? 0 : decimals;
+        const min = parseFloat(el.min);
+        const max = parseFloat(el.max);
+        const baseScale = percentUnit && Math.abs(max) <= 1 && Math.abs(min) <= 1 ? 100 : 1;
+        const displayScale = parseFloat(el.dataset.displayScale || baseScale);
+        const shouldScale = displayScale !== 1;
         const displayId = el.dataset.display;
         const hidden = document.querySelector(`input[name="${target}"]`);
         const displayEl = displayId ? document.getElementById(displayId) : null;
-        const min = parseFloat(el.min);
-        const max = parseFloat(el.max);
         const oscGain = unit === 'dB' && !isNaN(min) && !isNaN(max) && min === 0 && max <= 2;
         if (oscGain) {
             // allow smooth input; actual rounding happens in handler
             el.step = '0.001';
         }
-        const shouldScale = (unit === '%' || unit === 'ct') && Math.abs(max) <= 1 && Math.abs(min) <= 1;
-        const getStep = (v) => getPercentStep(v, unit, step, shouldScale);
-        const getDisplayDecimals = (v) => getPercentDecimals(v, unit, displayDecimalsDefault, shouldScale);
+        const getStep = (v) => getPercentStep(v, unit, step, shouldScale, displayScale);
+        const getDisplayDecimals = (v) => getPercentDecimals(v, unit, displayDecimalsDefault, shouldScale, displayScale);
         const valueLabels = el.dataset.values ? el.dataset.values.split(',') : null;
         const oscValToDb = (val) => {
             if (val <= 0) return -Infinity;
@@ -37,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     return valueLabels[idx];
                 }
             }
-            let displayVal = shouldScale ? v * 100 : v;
+            let displayVal = shouldScale ? v * displayScale : v;
             let unitLabel = unit;
             if (unit === 'Hz') {
                 displayVal = Number(displayVal);
