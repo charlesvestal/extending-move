@@ -295,7 +295,9 @@ input[type="submit"]:disabled {
     padding: 0.5rem;
     min-height: 64px;
     cursor: pointer;
-    position: relative;
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
 #waveform {
@@ -839,10 +841,6 @@ select {
 
 .macro-knobs-section {
     text-align: center;
-    position: sticky;
-    top: 0;
-    background: #fff;
-    z-index: 10;
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
 }
