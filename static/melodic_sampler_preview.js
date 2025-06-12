@@ -18,8 +18,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const release = document.querySelector(
     '.param-item[data-name="Voice_AmplitudeEnvelope_Release"] input[type="range"]'
   );
+  const pbStart = document.querySelector(
+    '.param-item[data-name="Voice_PlaybackStart"] input[type="range"]'
+  );
+  const pbLength = document.querySelector(
+    '.param-item[data-name="Voice_PlaybackLength"] input[type="range"]'
+  );
 
   let duration = 0;
+  let region = null;
 
   function drawEnvelope() {
     if (!overlay || !duration) return;
@@ -29,26 +36,48 @@ document.addEventListener('DOMContentLoaded', () => {
     const s = parseFloat(sustain?.value || '0');
     const r = parseFloat(release?.value || '0');
 
-    const aT = Math.min(a, duration);
-    const dT = Math.min(d, Math.max(0, duration - aT));
-    const rT = Math.min(r, Math.max(0, duration - aT - dT));
-    const total = duration;
+    const startPct = parseFloat(pbStart?.value || '0');
+    const lengthPct = parseFloat(pbLength?.value || '1');
+    const start = Math.max(0, Math.min(1, startPct)) * duration;
+    const end = Math.min(duration, start + Math.max(0, Math.min(1, lengthPct)) * duration);
+    const playDur = Math.max(0, end - start);
+
+    const aT = Math.min(a, playDur);
+    const dT = Math.min(d, Math.max(0, playDur - aT));
+    const rT = Math.min(r, Math.max(0, playDur - aT - dT));
+    const total = playDur || 1;
 
     const w = overlay.width;
     const h = overlay.height;
     ctx.clearRect(0, 0, w, h);
     ctx.beginPath();
-    ctx.moveTo(0, h);
-    const attackEnd = (aT / total) * w;
+    const startX = (start / duration) * w;
+    const regionWidth = (playDur / duration) * w;
+    ctx.moveTo(startX, h);
+    const attackEnd = startX + (aT / total) * regionWidth;
     ctx.lineTo(attackEnd, 0);
-    const decayEnd = attackEnd + (dT / total) * w;
+    const decayEnd = attackEnd + (dT / total) * regionWidth;
     ctx.lineTo(decayEnd, h - s * h);
-    const releaseStart = w - (rT / total) * w;
+    const releaseStart = startX + regionWidth - (rT / total) * regionWidth;
     ctx.lineTo(releaseStart, h - s * h);
-    ctx.lineTo(w, h);
+    ctx.lineTo(startX + regionWidth, h);
     ctx.strokeStyle = '#f00';
     ctx.lineWidth = 2;
     ctx.stroke();
+  }
+
+  function updateRegion() {
+    if (!ws || !duration) return;
+    const startPct = parseFloat(pbStart?.value || '0');
+    const lengthPct = parseFloat(pbLength?.value || '1');
+    const start = Math.max(0, Math.min(1, startPct)) * duration;
+    const end = Math.min(duration, start + Math.max(0, Math.min(1, lengthPct)) * duration);
+    if (region) {
+      region.update({ start, end });
+    } else if (ws.regions) {
+      region = ws.addRegion({ start, end, color: 'rgba(0,255,0,0.2)', drag: false, resize: false });
+    }
+    drawEnvelope();
   }
 
   function resizeOverlay() {
@@ -56,6 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
     overlay.width = container.clientWidth;
     overlay.height = container.clientHeight;
     drawEnvelope();
+    updateRegion();
   }
 
   function toFilesUrl(path) {
@@ -82,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const fileUrl = toFilesUrl(hidden.value.trim());
   if (!fileUrl) return;
 
-  const ws = WaveSurfer.create({
+  let ws = WaveSurfer.create({
     container: container,
     waveColor: '#888',
     progressColor: '#555',
@@ -90,24 +120,31 @@ document.addEventListener('DOMContentLoaded', () => {
     responsive: true,
     normalize: true,
     cursorWidth: 0,
-    hideScrollbar: true
+    hideScrollbar: true,
+    plugins: [WaveSurfer.regions.create({})]
   });
 
   ws.load(fileUrl);
   container.addEventListener('click', (e) => {
     e.stopPropagation();
     ws.stop();
-    ws.seekTo(0);
-    requestAnimationFrame(() => ws.play(0));
+    const start = region ? region.start : 0;
+    const end = region ? region.end : undefined;
+    ws.seekTo(start / duration);
+    requestAnimationFrame(() => ws.play(start, end));
   });
 
   ws.on('ready', () => {
     duration = ws.getDuration();
     resizeOverlay();
+    updateRegion();
   });
   window.addEventListener('resize', resizeOverlay);
   [attack, decay, sustain, release].forEach(el => {
     if (el) el.addEventListener('input', drawEnvelope);
+  });
+  [pbStart, pbLength].forEach(el => {
+    if (el) el.addEventListener('input', updateRegion);
   });
   resizeOverlay();
 });
