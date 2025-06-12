@@ -79,9 +79,8 @@
         <h3>Macros</h3>
         {{ macro_knobs_html | safe }}
     </div>
-    <p class="current-sample">Sample: {{ sample_name if sample_name else 'None' }}</p>
     {% if sample_path %}
-    <p class="current-sample-path">Path: {{ sample_path }}</p>
+    <p class="current-sample-path">Sample: {{ sample_path }}</p>
     {% endif %}
     <div class="replace-sample">
         <label><input type="checkbox" name="replace_sample" id="replace-sample-checkbox"> Replace sample</label>
