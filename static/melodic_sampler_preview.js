@@ -82,8 +82,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function resizeOverlay() {
     if (!overlay) return;
-    overlay.width = container.clientWidth;
-    overlay.height = container.clientHeight;
+    const cs = getComputedStyle(container);
+    const padL = parseFloat(cs.paddingLeft) || 0;
+    const padR = parseFloat(cs.paddingRight) || 0;
+    const padT = parseFloat(cs.paddingTop) || 0;
+    const padB = parseFloat(cs.paddingBottom) || 0;
+    const innerW = container.clientWidth - padL - padR;
+    const innerH = container.clientHeight - padT - padB;
+    overlay.width = innerW;
+    overlay.height = innerH;
+    overlay.style.left = padL + 'px';
+    overlay.style.top = padT + 'px';
+    overlay.style.width = innerW + 'px';
+    overlay.style.height = innerH + 'px';
     drawEnvelope();
     updateRegion();
   }
