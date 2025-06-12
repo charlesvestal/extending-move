@@ -45,6 +45,18 @@ logger = logging.getLogger(__name__)
 
 EXCLUDED_MACRO_PARAMS = set()
 
+DEFAULT_MACRO_NAMES = ["A", "B", "C", "D", "E", "F", "G", "H"]
+DEFAULT_MACRO_PARAMS = [
+    "Voice_AmplitudeEnvelope_Attack",
+    "Voice_AmplitudeEnvelope_Decay",
+    "Voice_AmplitudeEnvelope_Release",
+    "Voice_AmplitudeEnvelope_Sustain",
+    "Voice_Detune",
+    "Voice_FilterEnvelope_Attack",
+    "Voice_FilterEnvelope_Decay",
+    "Voice_FilterEnvelope_Release",
+]
+
 class MelodicSamplerParamEditorHandler(BaseHandler):
     LABEL_OVERRIDES = {
         # Voice
@@ -209,44 +221,33 @@ class MelodicSamplerParamEditorHandler(BaseHandler):
             if not macro_result['success']:
                 return self.format_error_response(macro_result['message'])
 
-            macros_data_str = form.getvalue('macros_data')
-            if macros_data_str:
-                try:
-                    macros_data = json.loads(macros_data_str)
-                except Exception:
-                    macros_data = []
-            else:
-                macros_data = []
-
-            name_updates = {m.get('index'): m.get('name') for m in macros_data}
+            name_updates = {i: DEFAULT_MACRO_NAMES[i] for i in range(8)}
             name_result = update_preset_macro_names(preset_path, name_updates)
             if not name_result['success']:
                 return self.format_error_response(name_result['message'])
 
+            param_info = extract_available_parameters(
+                preset_path,
+                device_types=("melodicSampler",),
+                schema_loader=load_melodic_sampler_schema,
+            )
+            paths = param_info.get('parameter_paths', {}) if param_info['success'] else {}
+            param_updates = {
+                i: {
+                    'parameter': DEFAULT_MACRO_PARAMS[i],
+                    'parameter_path': paths.get(DEFAULT_MACRO_PARAMS[i]),
+                }
+                for i in range(8)
+            }
+            map_result = update_preset_parameter_mappings(preset_path, param_updates)
+            if not map_result['success']:
+                return self.format_error_response(map_result['message'])
+
             existing_info = extract_macro_information(preset_path)
             existing_mapped = existing_info.get('mapped_parameters', {}) if existing_info['success'] else {}
-
-            processed = set()
-            for m in macros_data:
-                idx = m.get('index')
-                for p in m.get('parameters', []):
-                    pname = p.get('name')
-                    param_updates = {
-                        idx: {
-                            'parameter': pname,
-                            'parameter_path': p.get('path'),
-                            'rangeMin': p.get('rangeMin'),
-                            'rangeMax': p.get('rangeMax'),
-                        }
-                    }
-                    upd = update_preset_parameter_mappings(preset_path, param_updates)
-                    if not upd['success']:
-                        return self.format_error_response(upd['message'])
-                    processed.add(pname)
-                    existing_mapped.pop(pname, None)
-
             for pname, info in existing_mapped.items():
-                delete_parameter_mapping(preset_path, info['path'])
+                if pname not in DEFAULT_MACRO_PARAMS:
+                    delete_parameter_mapping(preset_path, info['path'])
 
             message = result['message'] + "; " + macro_result['message']
             if output_path:
@@ -503,42 +504,27 @@ class MelodicSamplerParamEditorHandler(BaseHandler):
             html += '<div class="melodic-param-panels">' + other_panel + '</div>'
         return html
 
+
     def generate_macro_knobs_html(self, macros):
-        if not macros:
-            macros = []
-        by_index = {m['index']: m for m in macros}
+        values = {m.get('index'): m.get('value', 0.0) for m in (macros or [])}
         html = ['<div class="macro-knob-row">']
         for i in range(8):
-            info = by_index.get(i, {'name': f'Macro {i}', 'value': 0.0})
-            name = info.get('name', f'Macro {i}')
-            label_class = ''
-            if not name or name == f'Macro {i}':
-                params = info.get('parameters') or []
-                if len(params) == 1:
-                    pname = params[0].get('name', f'Knob {i + 1}')
-                    name = pname.replace('_', ' ')
-                    label_class = ' placeholder'
-                else:
-                    name = f'Knob {i + 1}'
-            val = info.get('value', 0.0)
+            val = values.get(i, 0.0)
             try:
                 val = float(val)
             except Exception:
                 val = 0.0
             display_val = round(val, 1)
-            classes = ['macro-knob']
-            if info.get('parameters'):
-                classes.append(f'macro-{i}')
-            cls_str = ' '.join(classes)
+            name = DEFAULT_MACRO_NAMES[i]
             html.append(
-                f'<div class="{cls_str}" data-index="{i}">'
-                f'<span class="macro-label{label_class}" data-index="{i}">{name}</span>'
-                f'<input id="macro_{i}_dial" type="range" class="macro-dial input-knob" '
-                f'data-target="macro_{i}_value" data-display="macro_{i}_disp" '
-                f'value="{display_val}" min="0" max="127" step="0.1" data-decimals="1">'
-                f'<span id="macro_{i}_disp" class="macro-number"></span>'
-                f'<input type="hidden" name="macro_{i}_value" value="{display_val}">' 
-                f'</div>'
+                f'<div class="macro-knob" data-index="{i}">' +
+                f'<span class="macro-label" data-index="{i}">{name}</span>' +
+                f'<input id="macro_{i}_dial" type="range" class="macro-dial input-knob" ' +
+                f'data-target="macro_{i}_value" data-display="macro_{i}_disp" ' +
+                f'value="{display_val}" min="0" max="127" step="0.1" data-decimals="1">' +
+                f'<span id="macro_{i}_disp" class="macro-number"></span>' +
+                f'<input type="hidden" name="macro_{i}_value" value="{display_val}">' +
+                '</div>'
             )
         html.append('</div>')
         return ''.join(html)
