@@ -6,9 +6,14 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!container || !hidden || !hidden.value) return;
 
   function toFilesUrl(path) {
+    // Convert a sample URI or absolute path to the /files route.
     if (path.startsWith('ableton:/user-library/')) {
       const rel = path.replace('ableton:/user-library/', 'user-library/');
       return '/files/' + encodeURI(rel);
+    }
+    const packMatch = path.match(/^ableton:\/packs\/[^/]+\/(.+)$/);
+    if (packMatch) {
+      return '/files/core-library/' + encodeURI(packMatch[1]);
     }
     if (path.startsWith('/data/UserData/UserLibrary/')) {
       const rel = path.replace('/data/UserData/UserLibrary/', 'user-library/');
