@@ -236,3 +236,27 @@ def test_remove_macro_name(tmp_path):
         data = json.load(f)
     assert "customName" not in data["chains"][0]["devices"][0]["parameters"]["Macro0"]
 
+
+def test_get_melodic_sampler_sample(tmp_path):
+    preset_path = tmp_path / "preset.json"
+    preset = {
+        "kind": "instrumentRack",
+        "chains": [
+            {
+                "devices": [
+                    {
+                        "kind": "melodicSampler",
+                        "deviceData": {"sampleUri": "ableton:/user-library/Samples/test%20sample.wav"},
+                    }
+                ]
+            }
+        ],
+    }
+    preset_path.write_text(json.dumps(preset))
+
+    from core.melodic_sampler_handler import get_melodic_sampler_sample
+
+    info = get_melodic_sampler_sample(str(preset_path))
+    assert info["success"], info.get("message")
+    assert info["sample_name"] == "test sample.wav"
+

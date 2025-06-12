@@ -58,6 +58,7 @@
         {% set _display = '/' + selected_preset.split('examples/Track Presets',1)[1] %}
     {% endif %}
     <p class="current-preset">Editing: {{ _display }}</p>
+    <p class="current-sample">Sample: {{ sample_name if sample_name else 'None' }}</p>
     {% set _basename = selected_preset.split('/')[-1] %}
     {% if _basename.endswith('.json') or _basename.endswith('.ablpreset') %}
         {% set _prefill = _basename.rsplit('.', 1)[0] %}
