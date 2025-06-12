@@ -487,7 +487,7 @@ def test_samples_route(client, tmp_path, monkeypatch):
     real_join = move_webserver.os.path.join
     real_real = move_webserver.os.path.realpath
 
-    base = '/data/UserData/UserLibrary/Samples/Preset Samples'
+    base = '/data/UserData/UserLibrary/Samples'
 
     def fake_join(a, *rest):
         if a == base:
@@ -511,7 +511,7 @@ def test_samples_route(client, tmp_path, monkeypatch):
 def test_samples_route_not_found(client, tmp_path, monkeypatch):
     real_join = move_webserver.os.path.join
     real_real = move_webserver.os.path.realpath
-    base = '/data/UserData/UserLibrary/Samples/Preset Samples'
+    base = '/data/UserData/UserLibrary/Samples'
 
     def fake_join(a, *rest):
         if a == base:

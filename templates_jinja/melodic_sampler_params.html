@@ -82,7 +82,11 @@
     <p class="current-sample">Sample: {{ sample_name if sample_name else 'None' }}</p>
     {% if sample_path %}
     <p class="current-sample-path">Path: {{ sample_path }}</p>
-    <div id="melodicSampleWaveform" class="waveform-container" data-audio-path="{{ host_prefix }}/file/{{ sample_path|urlencode }}"></div>
+    {% if sample_web_path %}
+    <div id="melodicSampleWaveform" class="waveform-container" data-audio-path="{{ host_prefix }}/samples/{{ sample_web_path|urlencode }}"></div>
+    {% else %}
+    <div id="melodicSampleWaveform" class="waveform-container hidden"></div>
+    {% endif %}
     {% else %}
     <div id="melodicSampleWaveform" class="waveform-container hidden"></div>
     {% endif %}

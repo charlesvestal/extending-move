@@ -305,6 +305,10 @@ class MelodicSamplerParamEditorHandler(BaseHandler):
 
         sample_name = sample_info.get('sample_name') if sample_info.get('success', False) else None
         sample_path = sample_info.get('sample_path') if sample_info.get('success', False) else None
+        sample_web_path = ''
+        base_prefix = '/data/UserData/UserLibrary/Samples/'
+        if sample_path and sample_path.startswith(base_prefix):
+            sample_web_path = sample_path[len(base_prefix):]
 
         if values['success']:
             params_html = self.generate_params_html(values['parameters'], mapped_params)
@@ -346,6 +350,7 @@ class MelodicSamplerParamEditorHandler(BaseHandler):
             'param_paths_json': param_paths_json,
             'sample_name': sample_name or '',
             'sample_path': sample_info.get('sample_path', '') if sample_info.get('success', False) else '',
+            'sample_web_path': sample_web_path,
         }
 
     def _build_param_item(self, idx, name, value, meta, label=None, hide_label=False, slider=False, extra_classes=""):
