@@ -79,7 +79,19 @@
         <h3>Macros</h3>
         {{ macro_knobs_html | safe }}
     </div>
-    <!-- macros fixed, no sidebar -->
+    <input type="hidden" name="macros_data" id="macros-data-input" value='{{ macros_json }}'>
+    <input type="hidden" id="available-params-input" value='{{ available_params_json }}'>
+    <input type="hidden" id="param-paths-input" value='{{ param_paths_json }}'>
+    <div id="macro-sidebar" class="macro-sidebar hidden">
+        <h3 id="macro-sidebar-title"></h3>
+        <label>Custom Name: <input type="text" id="macro-name-input" placeholder="No name specified"></label>
+        <div class="macro-assigned-list"></div>
+        <div class="macro-add-section">
+            <button type="button" id="macro-add-param">Add</button>
+        </div>
+        <button type="button" id="macro-sidebar-close">Close</button>
+    </div>
+    <div id="sidebar-overlay" class="sidebar-overlay hidden"></div>
     <div class="param-list">
         {{ params_html | safe }}
     </div>
@@ -101,6 +113,7 @@
 <script>
 window.driftSchema = {{ schema_json|safe }};
 </script>
+<script src="{{ host_prefix }}/static/macro_sidebar.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const cb = document.getElementById('rename-checkbox');
