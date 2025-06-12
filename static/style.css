@@ -305,6 +305,15 @@ input[type="submit"]:disabled {
     margin-bottom: 1rem;
 }
 
+/* Sticky waveform for Melodic Sampler editor
+   Keeps the waveform visible below the macro knobs when scrolling
+   without affecting other pages that use .waveform-container */
+#sample-waveform {
+    position: sticky;
+    top: 5rem;
+    z-index: 9;
+}
+
 /* Success/Error messages */
 .success {
     color: #00a550;
