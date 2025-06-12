@@ -590,7 +590,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         let min = p.rangeMin !== undefined ? parseFloat(p.rangeMin) : (info.min !== undefined ? parseFloat(info.min) : 0);
         let max = p.rangeMax !== undefined ? parseFloat(p.rangeMax) : (info.max !== undefined ? parseFloat(info.max) : 127);
-        const val = min + (max - min) * (mval / 127);
+        let val;
+        if (info.curve === 'log' && min > 0 && max > 0) {
+          const logMin = Math.log(min);
+          const logMax = Math.log(max);
+          const logVal = logMin + (logMax - logMin) * (mval / 127);
+          val = Math.exp(logVal);
+        } else {
+          val = min + (max - min) * (mval / 127);
+        }
         updateParamVisual(p.name, val);
         mappedNow.add(p.name);
       });
