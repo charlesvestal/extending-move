@@ -26,16 +26,16 @@ from core.melodic_sampler_handler import (
 from core.refresh_handler import refresh_library
 
 DEFAULT_PRESET = os.path.join(
-    "/data/UserData/UserLibrary/Track Presets",
-    "melodicSampler",
-    "Ac Piano Grand.ablpreset",
+    "/data/CoreLibray/Track Presets",
+    "Templates",
+    "Sampler.json",
 )
 if not os.path.exists(DEFAULT_PRESET):
     DEFAULT_PRESET = os.path.join(
         "examples",
         "Track Presets",
         "melodicSampler",
-        "Ac Piano Grand.ablpreset",
+        "Sampler.json",
     )
 
 NEW_PRESET_DIR = os.path.join(
