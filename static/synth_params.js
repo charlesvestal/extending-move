@@ -15,6 +15,15 @@ function initNewPresetModal() {
 
 function randomizeParams() {
   document.querySelectorAll('.param-item').forEach(item => {
+    const name = (item.dataset.name || '').toLowerCase();
+    // Skip panning, volume, and gain controls for all synth editors
+    if (
+      name === 'pan' ||
+      name.endsWith('_pan') ||
+      name === 'volume' ||
+      name.includes('gain')
+    ) return;
+
     const dial = item.querySelector('input.param-dial');
     const select = item.querySelector('select.param-select');
     const toggle = item.querySelector('input.param-toggle');

@@ -47,7 +47,11 @@ CORE_LIBRARY_DIR = "/data/CoreLibrary/Track Presets"
 
 logger = logging.getLogger(__name__)
 
-EXCLUDED_MACRO_PARAMS = set()
+EXCLUDED_MACRO_PARAMS = {
+    "Volume",
+    "Voice_Gain",
+    "Voice_VelocityToVolume",
+}
 
 DEFAULT_MACRO_NAMES = ["Transpose", "Playback Start", "Attack", "Decay", "Release", "Filter Frequency", "Filter Resonance", "Filter LFO"]
 DEFAULT_MACRO_PARAMS = [

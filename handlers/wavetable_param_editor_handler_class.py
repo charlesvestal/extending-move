@@ -87,6 +87,13 @@ EXCLUDED_MACRO_PARAMS = {
     "Voice_Oscillator2_Effects_EffectMode",
     "Voice_Unison_Mode",
     "Voice_Unison_VoiceCount",
+    "Volume",
+    "Global_Volume",
+    "Voice_Oscillator1_Gain",
+    "Voice_Oscillator2_Gain",
+    "Voice_SubOscillator_Gain",
+    "Mixer_OscillatorGain1",
+    "Mixer_OscillatorGain2",
 }
 
 
