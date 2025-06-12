@@ -215,15 +215,6 @@ class MelodicSamplerParamEditorHandler(BaseHandler):
                 return self.format_error_response(result['message'])
             preset_path = result['path']
 
-            macro_updates = {}
-            for i in range(8):
-                val = form.getvalue(f'macro_{i}_value')
-                if val is not None:
-                    macro_updates[i] = val
-            macro_result = update_macro_values(preset_path, macro_updates, preset_path)
-            if not macro_result['success']:
-                return self.format_error_response(macro_result['message'])
-
             name_updates = {i: DEFAULT_MACRO_NAMES[i] for i in range(8)}
             name_result = update_preset_macro_names(preset_path, name_updates)
             if not name_result['success']:
@@ -252,7 +243,7 @@ class MelodicSamplerParamEditorHandler(BaseHandler):
                 if pname not in DEFAULT_MACRO_PARAMS:
                     delete_parameter_mapping(preset_path, info['path'])
 
-            message = result['message'] + "; " + macro_result['message']
+            message = result['message']
             if output_path:
                 message += f" Saved to {output_path}"
             refresh_success, refresh_message = refresh_library()
@@ -528,24 +519,15 @@ class MelodicSamplerParamEditorHandler(BaseHandler):
 
 
     def generate_macro_knobs_html(self, macros):
-        values = {m.get('index'): m.get('value', 0.0) for m in (macros or [])}
         html = ['<div class="macro-knob-row">']
         for i in range(8):
-            val = values.get(i, 0.0)
-            try:
-                val = float(val)
-            except Exception:
-                val = 0.0
-            display_val = round(val, 1)
             name = DEFAULT_MACRO_NAMES[i]
             html.append(
                 f'<div class="macro-knob" data-index="{i}">' +
                 f'<span class="macro-label" data-index="{i}">{name}</span>' +
                 f'<input id="macro_{i}_dial" type="range" class="macro-dial input-knob" ' +
-                f'data-target="macro_{i}_value" data-display="macro_{i}_disp" ' +
-                f'value="{display_val}" min="0" max="127" step="0.1" data-decimals="1">' +
-                f'<span id="macro_{i}_disp" class="macro-number"></span>' +
-                f'<input type="hidden" name="macro_{i}_value" value="{display_val}">' +
+                f'value="0" min="0" max="127" step="0.1" disabled>' +
+                f'<input type="hidden" name="macro_{i}_value" value="0">' +
                 '</div>'
             )
         html.append('</div>')
