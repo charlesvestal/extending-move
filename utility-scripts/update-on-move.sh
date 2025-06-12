@@ -41,7 +41,26 @@ REMOTE_DIR="/data/UserData/extending-move"
 # --- Version check: ensure Move version is within tested range ---
 HIGHEST_TESTED_VERSION="1.5.0"
 INSTALLED_VERSION=$(ssh -T "${REMOTE_USER}@${REMOTE_HOST}" "/opt/move/Move -v" | awk '{print $3}')
-if ! printf "%s\n%s\n" "$HIGHEST_TESTED_VERSION" "$INSTALLED_VERSION" | sort -V | head -n1 | grep -qx "$HIGHEST_TESTED_VERSION"; then
+
+normalize_version() {
+  local ver="$1"
+  ver="${ver#v}"
+  ver="${ver#V}"
+  ver="$(echo "$ver" | tr '[:upper:]' '[:lower:]')"
+  ver="$(echo "$ver" | \
+    sed -E 's/([0-9])([-.]?b)([0-9]+)/\1~b\3/' | \
+    sed -E 's/([0-9])([-.]?beta)([0-9]+)/\1~beta\3/' | \
+    sed -E 's/([0-9])([-.]?rc)([0-9]+)/\1~rc\3/')"
+  echo "$ver"
+}
+
+version_gt() {
+  local v1=$(normalize_version "$1")
+  local v2=$(normalize_version "$2")
+  [ "$v1" != "$v2" ] && [ "$(printf '%s\n%s\n' "$v1" "$v2" | sort -V | tail -n1)" = "$v1" ]
+}
+
+if version_gt "$INSTALLED_VERSION" "$HIGHEST_TESTED_VERSION"; then
   read -p "Warning: Installed Move ($INSTALLED_VERSION) > tested ($HIGHEST_TESTED_VERSION). Continue? [y/N] " confirm
   if [[ ! $confirm =~ ^[Yy]$ ]]; then
     echo "Aborting."
