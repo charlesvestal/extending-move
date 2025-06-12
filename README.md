@@ -31,9 +31,10 @@ Here’s what you can do with Extending Move:
   - Reverse or time stretch samples to a target BPM and length with different algorithms for melodic or rhythmic content
 
 
-- **Drift and Wavetable Preset Editor**
+- **Drift Wavetable and melodicSampler Preset Editor**
   - Modify any preset parameter value or create a preset from scratch
   - Manage macro knob assignments and preview their effect on mapped parameters in real time
+  - Preview samples and see region and envelopes on melodicSampler presets
  
 - **MIDI Import**
   - Upload MIDI files to create new Melodic or Drum Sets
