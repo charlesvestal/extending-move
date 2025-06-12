@@ -19,30 +19,33 @@ document.addEventListener('DOMContentLoaded', () => {
     '.param-item[data-name="Voice_AmplitudeEnvelope_Release"] input[type="range"]'
   );
 
+  let duration = 0;
+
   function drawEnvelope() {
-    if (!overlay) return;
+    if (!overlay || !duration) return;
     const ctx = overlay.getContext('2d');
     const a = parseFloat(attack?.value || '0');
     const d = parseFloat(decay?.value || '0');
     const s = parseFloat(sustain?.value || '0');
     const r = parseFloat(release?.value || '0');
-    const i = 0;
-    const p = 1;
-    const f = 0;
-    const hold = 0.25;
-    const total = a + d + r + hold;
+
+    const aT = Math.min(a, duration);
+    const dT = Math.min(d, Math.max(0, duration - aT));
+    const rT = Math.min(r, Math.max(0, duration - aT - dT));
+    const total = duration;
+
     const w = overlay.width;
     const h = overlay.height;
     ctx.clearRect(0, 0, w, h);
     ctx.beginPath();
     ctx.moveTo(0, h);
-    let x = (a / total) * w;
-    ctx.lineTo(x, h - p * h);
-    const decEnd = x + (d / total) * w;
-    ctx.lineTo(decEnd, h - s * h);
-    const relStart = w - (r / total) * w;
-    ctx.lineTo(relStart, h - s * h);
-    ctx.lineTo(w, h - f * h);
+    const attackEnd = (aT / total) * w;
+    ctx.lineTo(attackEnd, 0);
+    const decayEnd = attackEnd + (dT / total) * w;
+    ctx.lineTo(decayEnd, h - s * h);
+    const releaseStart = w - (rT / total) * w;
+    ctx.lineTo(releaseStart, h - s * h);
+    ctx.lineTo(w, h);
     ctx.strokeStyle = '#f00';
     ctx.lineWidth = 2;
     ctx.stroke();
@@ -98,7 +101,10 @@ document.addEventListener('DOMContentLoaded', () => {
     requestAnimationFrame(() => ws.play(0));
   });
 
-  ws.on('ready', resizeOverlay);
+  ws.on('ready', () => {
+    duration = ws.getDuration();
+    resizeOverlay();
+  });
   window.addEventListener('resize', resizeOverlay);
   [attack, decay, sustain, release].forEach(el => {
     if (el) el.addEventListener('input', drawEnvelope);
