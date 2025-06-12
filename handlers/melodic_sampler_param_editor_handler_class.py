@@ -306,6 +306,19 @@ class MelodicSamplerParamEditorHandler(BaseHandler):
             available_params_json = json.dumps(params)
             param_paths_json = json.dumps(paths)
 
+            if macro_info['success'] and not mapped_params:
+                macros_for_json = [
+                    {
+                        'index': i,
+                        'name': DEFAULT_MACRO_NAMES[i],
+                        'value': next((m.get('value', 0.0) for m in macro_info['macros'] if m.get('index') == i), 0.0),
+                        'parameters': [{'name': DEFAULT_MACRO_PARAMS[i], 'path': paths.get(DEFAULT_MACRO_PARAMS[i])}],
+                    }
+                    for i in range(8)
+                ]
+                macros_json = json.dumps(macros_for_json)
+                mapped_params = {DEFAULT_MACRO_PARAMS[i]: {'macro_index': i} for i in range(8)}
+
         sample_name = sample_info.get('sample_name') if sample_info.get('success', False) else None
         sample_path = sample_info.get('sample_path') if sample_info.get('success', False) else None
 
