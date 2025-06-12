@@ -382,18 +382,20 @@ class MelodicSamplerParamEditorHandler(BaseHandler):
             if step_val is None and min_val is not None and max_val is not None and max_val <= 1 and min_val >= -1:
                 step_val = 0.01
             unit_val = meta.get('unit')
+            curve_val = meta.get('curve')
             display_scale = meta.get('display_scale')
             min_attr = f' min="{min_val}"' if min_val is not None else ''
             max_attr = f' max="{max_val}"' if max_val is not None else ''
             step_attr = f' step="{step_val}"' if step_val is not None else ''
             unit_attr = f' data-unit="{unit_val}"' if unit_val else ''
+            curve_attr = f' data-curve="{curve_val}"' if curve_val else ''
             scale_attr = f' data-display-scale="{display_scale}"' if display_scale is not None else ''
             dec_attr = f' data-decimals="{decimals}"' if decimals is not None else ''
             disp_id = f'param_{idx}_display'
             input_classes = 'param-dial input-knob'
             html.append(
                 f'<input id="param_{idx}_dial" type="range" class="{input_classes}" data-target="param_{idx}_value" '
-                f'data-display="{disp_id}" value="{value}"{min_attr}{max_attr}{step_attr}{unit_attr}{scale_attr}{dec_attr}>'
+                f'data-display="{disp_id}" value="{value}"{min_attr}{max_attr}{step_attr}{unit_attr}{scale_attr}{dec_attr}{curve_attr}>'
             )
             html.append(f'<span id="{disp_id}" class="param-number"></span>')
             html.append(f'<input type="hidden" name="param_{idx}_value" value="{value}">')

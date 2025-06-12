@@ -29,7 +29,8 @@
     "max": 1700.0,
     "options": [],
     "unit": "Hz",
-    "decimals": 1
+    "decimals": 1,
+    "curve": "log"
   },
   "CyclingEnvelope_Ratio": {
     "type": "number",
@@ -49,7 +50,8 @@
     "max": 60.0,
     "options": [],
     "unit": "s",
-    "decimals": 3
+    "decimals": 3,
+    "curve": "log"
   },
   "Envelope1_Attack": {
     "type": "number",
@@ -57,7 +59,8 @@
     "max": 20.0,
     "options": [],
     "unit": "s",
-    "decimals": 3
+    "decimals": 3,
+    "curve": "log"
   },
   "Envelope1_Decay": {
     "type": "number",
@@ -65,7 +68,8 @@
     "max": 20.0,
     "options": [],
     "unit": "s",
-    "decimals": 3
+    "decimals": 3,
+    "curve": "log"
   },
   "Envelope1_Release": {
     "type": "number",
@@ -73,7 +77,8 @@
     "max": 20.0,
     "options": [],
     "unit": "s",
-    "decimals": 3
+    "decimals": 3,
+    "curve": "log"
   },
   "Envelope1_Sustain": {
     "type": "number",
@@ -89,7 +94,8 @@
     "max": 20.0,
     "options": [],
     "unit": "s",
-    "decimals": 3
+    "decimals": 3,
+    "curve": "log"
   },
   "Envelope2_Decay": {
     "type": "number",
@@ -97,7 +103,8 @@
     "max": 20.0,
     "options": [],
     "unit": "s",
-    "decimals": 3
+    "decimals": 3,
+    "curve": "log"
   },
   "Envelope2_Release": {
     "type": "number",
@@ -105,7 +112,8 @@
     "max": 20.0,
     "options": [],
     "unit": "s",
-    "decimals": 3
+    "decimals": 3,
+    "curve": "log"
   },
   "Envelope2_Sustain": {
     "type": "number",
@@ -121,15 +129,17 @@
     "max": 20000.0,
     "options": [],
     "unit": "Hz",
-    "decimals": 0
+    "decimals": 0,
+    "curve": "log"
   },
   "Filter_HiPassFrequency": {
     "type": "number",
     "min": 10.0,
-    "max": 20480.00,
+    "max": 20480.0,
     "options": [],
     "unit": "Hz",
-    "decimals": 2
+    "decimals": 2,
+    "curve": "log"
   },
   "Filter_ModAmount1": {
     "type": "number",
@@ -197,7 +207,8 @@
     "type": "number",
     "min": 0.0,
     "max": 1.0,
-    "options": []
+    "options": [],
+    "curve": "log"
   },
   "Filter_Tracking": {
     "type": "number",
@@ -237,7 +248,8 @@
     "max": 2.0,
     "options": [],
     "unit": "s",
-    "decimals": 2
+    "decimals": 2,
+    "curve": "log"
   },
   "Global_HiQuality": {
     "type": "boolean",
@@ -393,7 +405,8 @@
     "max": 1700.0,
     "options": [],
     "unit": "Hz",
-    "decimals": 1
+    "decimals": 1,
+    "curve": "log"
   },
   "Lfo_Ratio": {
     "type": "number",
@@ -435,7 +448,8 @@
     "max": 60.0,
     "options": [],
     "unit": "s",
-    "decimals": 3
+    "decimals": 3,
+    "curve": "log"
   },
   "Mixer_NoiseLevel": {
     "type": "number",

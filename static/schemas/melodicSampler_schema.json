@@ -5,7 +5,8 @@
     "max": 20.0,
     "options": [],
     "unit": "s",
-    "decimals": 4
+    "decimals": 4,
+    "curve": "log"
   },
   "Voice_AmplitudeEnvelope_Decay": {
     "type": "number",
@@ -13,7 +14,8 @@
     "max": 20.0,
     "options": [],
     "unit": "s",
-    "decimals": 3
+    "decimals": 3,
+    "curve": "log"
   },
   "Voice_AmplitudeEnvelope_Release": {
     "type": "number",
@@ -21,7 +23,8 @@
     "max": 60.0,
     "options": [],
     "unit": "s",
-    "decimals": 3
+    "decimals": 3,
+    "curve": "log"
   },
   "Voice_AmplitudeEnvelope_Sustain": {
     "type": "number",
@@ -53,7 +56,8 @@
     "max": 20.0,
     "options": [],
     "unit": "s",
-    "decimals": 4
+    "decimals": 4,
+    "curve": "log"
   },
   "Voice_FilterEnvelope_Decay": {
     "type": "number",
@@ -61,7 +65,8 @@
     "max": 20.0,
     "options": [],
     "unit": "s",
-    "decimals": 3
+    "decimals": 3,
+    "curve": "log"
   },
   "Voice_FilterEnvelope_On": {
     "type": "boolean",
@@ -75,7 +80,8 @@
     "max": 60.0,
     "options": [],
     "unit": "s",
-    "decimals": 3
+    "decimals": 3,
+    "curve": "log"
   },
   "Voice_FilterEnvelope_Sustain": {
     "type": "number",
@@ -91,7 +97,8 @@
     "max": 22000.0,
     "options": [],
     "unit": "Hz",
-    "decimals": 1
+    "decimals": 1,
+    "curve": "log"
   },
   "Voice_Filter_FrequencyModulationAmounts_EnvelopeAmount": {
     "type": "number",
@@ -99,8 +106,7 @@
     "max": 100,
     "options": [],
     "decimals": 1,
-    "unit": "%",
-    "decimals": 1
+    "unit": "%"
   },
   "Voice_Filter_FrequencyModulationAmounts_LfoAmount": {
     "type": "number",
