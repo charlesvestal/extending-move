@@ -34,7 +34,7 @@ if not os.path.exists(DEFAULT_PRESET):
     DEFAULT_PRESET = os.path.join(
         "examples",
         "Track Presets",
-        "melodicSampler",
+        "Melodic Sampler",
         "Sampler.json",
     )
 
