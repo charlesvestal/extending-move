@@ -108,7 +108,18 @@ def get_drum_cell_samples(preset_path):
                         # Handle Ableton URI format
                         if sample_uri.startswith('ableton:/user-library/Samples/'):
                             # Convert ableton:/user-library/Samples/ to /data/UserData/UserLibrary/Samples/
-                            sample_path = sample_uri.replace('ableton:/user-library/Samples/', '/data/UserData/UserLibrary/Samples/')
+                            sample_path = sample_uri.replace(
+                                'ableton:/user-library/Samples/',
+                                '/data/UserData/UserLibrary/Samples/',
+                            )
+                        elif sample_uri.startswith('ableton:/packs/'):
+                            # Convert ableton:/packs/<pack>/ to /data/CoreLibrary/
+                            # Strip the 'ableton:/packs/<pack>/' prefix
+                            parts = sample_uri.split('/', 3)
+                            if len(parts) >= 4:
+                                sample_path = '/data/CoreLibrary/' + parts[3]
+                            else:
+                                sample_path = sample_uri.split('file://')[-1]
                         else:
                             # Fallback to original file:// handling
                             sample_path = sample_uri.split('file://')[-1]

@@ -2,6 +2,9 @@
 import os
 import urllib.parse
 import logging
+
+# Base directory for factory drum rack presets that should never be modified
+CORE_LIBRARY_DIR = "/data/CoreLibrary/Track Presets"
 from core.file_browser import generate_dir_html
 from handlers.base_handler import BaseHandler
 from core.drum_rack_inspector_handler import (
@@ -29,6 +32,13 @@ class DrumRackInspectorHandler(BaseHandler):
             'select_preset',
             filter_key='drumrack'
         )
+        core_li = (
+            '<li class="dir closed" data-path="Core Library">'
+            '<span>📁 Core Library</span>'
+            '<ul class="hidden"></ul></li>'
+        )
+        if browser_html.endswith('</ul>'):
+            browser_html = browser_html[:-5] + core_li + '</ul>'
         return {
             'file_browser_html': browser_html,
             'message': '',
@@ -67,7 +77,10 @@ class DrumRackInspectorHandler(BaseHandler):
                 return self.format_error_response(result['message'])
 
             logger.debug("Found samples: %s", result['samples'])
-            samples_html = self.generate_samples_html(result['samples'], preset_path)
+            is_core = preset_path.startswith(CORE_LIBRARY_DIR)
+            samples_html = self.generate_samples_html(
+                result['samples'], preset_path, editable=not is_core
+            )
 
             base_dir = "/data/UserData/UserLibrary/Track Presets"
             if not os.path.exists(base_dir) and os.path.exists("examples/Track Presets"):
@@ -80,10 +93,20 @@ class DrumRackInspectorHandler(BaseHandler):
                 'select_preset',
                 filter_key='drumrack'
             )
+            core_li = (
+                '<li class="dir closed" data-path="Core Library">'
+                '<span>📁 Core Library</span>'
+                '<ul class="hidden"></ul></li>'
+            )
+            if browser_html.endswith('</ul>'):
+                browser_html = browser_html[:-5] + core_li + '</ul>'
 
+            msg = result['message']
+            if is_core:
+                msg += ' (preview only)'
             return {
                 'file_browser_html': browser_html,
-                'message': result['message'],
+                'message': msg,
                 'samples_html': samples_html,
                 'selected_preset': preset_path,
                 'browser_root': base_dir,
@@ -98,8 +121,13 @@ class DrumRackInspectorHandler(BaseHandler):
         """Deprecated dropdown helper."""
         return ''
 
-    def generate_samples_html(self, samples, preset_path):
-        """Build the drum pad grid HTML."""
+    def generate_samples_html(self, samples, preset_path, editable=True):
+        """Build the drum pad grid HTML.
+
+        ``editable`` controls whether actions like Reverse or Time Stretch are
+        displayed. Core Library presets are read-only, so we set this to
+        ``False`` when rendering those presets.
+        """
         html = '<div class="drum-grid">'
         grid = [None] * 16
         for s in samples:
@@ -114,8 +142,16 @@ class DrumRackInspectorHandler(BaseHandler):
                 pad_num = pad_index + 1
                 sample = grid[pad_index]
                 cell = '<div class="drum-cell">'
-                if sample and sample.get('path') and sample['path'].startswith('/data/UserData/UserLibrary/Samples/'):
-                    web_path = '/samples/' + sample['path'].replace('/data/UserData/UserLibrary/Samples/Preset Samples/', '', 1)
+                if sample and sample.get('path'):
+                    path = sample['path']
+                    if path.startswith('/data/UserData/UserLibrary/'):
+                        rel = path[len('/data/UserData/UserLibrary/') :]
+                        web_path = '/files/user-library/' + rel
+                    elif path.startswith('/data/CoreLibrary/'):
+                        rel = path[len('/data/CoreLibrary/') :]
+                        web_path = '/files/core-library/' + rel
+                    else:
+                        web_path = '/files/user-library/' + path.lstrip('/')
                     web_path = urllib.parse.quote(web_path)
                     wf_id = f'waveform-{pad_num}'
                     cell += f'''<div class="pad-info"><span class="pad-number">Pad {pad_num}</span></div>
@@ -140,14 +176,15 @@ class DrumRackInspectorHandler(BaseHandler):
                     cell += '''
                           </div>
                           <div class="sample-actions">'''
-                    cell += f'''<form method="POST" action="/drum-rack-inspector" style="display:inline;">
-                                <input type="hidden" name="action" value="reverse_sample">
-                                <input type="hidden" name="sample_path" value="{sample['path']}">
-                                <input type="hidden" name="preset_path" value="{preset_path}">
-                                <input type="hidden" name="pad_number" value="{pad_num}">
-                                <button type="submit" class="reverse-button">Reverse</button>
-                              </form>'''
-                    cell += f'''<button type="button" class="time-stretch-button" data-sample-path="{sample['path']}" data-preset-path="{preset_path}" data-pad-number="{pad_num}" onclick="var modal = document.getElementById('timeStretchModal'); document.getElementById('ts_sample_path').value = this.getAttribute('data-sample-path'); document.getElementById('ts_preset_path').value = this.getAttribute('data-preset-path'); document.getElementById('ts_pad_number').value = this.getAttribute('data-pad-number'); modal.classList.remove('hidden');">Time Stretch</button>'''
+                    if editable:
+                        cell += f'''<form method="POST" action="/drum-rack-inspector" style="display:inline;">
+                                    <input type="hidden" name="action" value="reverse_sample">
+                                    <input type="hidden" name="sample_path" value="{sample['path']}">
+                                    <input type="hidden" name="preset_path" value="{preset_path}">
+                                    <input type="hidden" name="pad_number" value="{pad_num}">
+                                    <button type="submit" class="reverse-button">Reverse</button>
+                                  </form>'''
+                        cell += f'''<button type="button" class="time-stretch-button" data-sample-path="{sample['path']}" data-preset-path="{preset_path}" data-pad-number="{pad_num}" onclick="var modal = document.getElementById('timeStretchModal'); document.getElementById('ts_sample_path').value = this.getAttribute('data-sample-path'); document.getElementById('ts_preset_path').value = this.getAttribute('data-preset-path'); document.getElementById('ts_pad_number').value = this.getAttribute('data-pad-number'); modal.classList.remove('hidden');">Time Stretch</button>'''
                     cell += '</div></div>'
                 elif sample:
                     cell += f'<div class="pad-info"><span class="pad-number">Pad {pad_num}</span><span>No sample</span></div>'
@@ -164,6 +201,9 @@ class DrumRackInspectorHandler(BaseHandler):
         sample_path = form.getvalue('sample_path')
         preset_path = form.getvalue('preset_path')
         pad_number = form.getvalue('pad_number')
+
+        if preset_path and preset_path.startswith(CORE_LIBRARY_DIR):
+            return self.format_error_response('Core Library presets are read-only')
         bpm = form.getvalue('bpm')
         measures = form.getvalue('measures')
         preserve_pitch = form.getvalue('preserve_pitch') is not None
@@ -197,6 +237,13 @@ class DrumRackInspectorHandler(BaseHandler):
                 'select_preset',
                 filter_key='drumrack'
             )
+            core_li = (
+                '<li class="dir closed" data-path="Core Library">'
+                '<span>📁 Core Library</span>'
+                '<ul class="hidden"></ul></li>'
+            )
+            if browser_html.endswith('</ul>'):
+                browser_html = browser_html[:-5] + core_li + '</ul>'
             return {
                 'file_browser_html': browser_html,
                 'message': '',
@@ -258,7 +305,10 @@ class DrumRackInspectorHandler(BaseHandler):
         if not result['success']:
             return self.format_error_response(result['message'])
 
-        samples_html = self.generate_samples_html(result['samples'], preset_path)
+        is_core = preset_path.startswith(CORE_LIBRARY_DIR)
+        samples_html = self.generate_samples_html(
+            result['samples'], preset_path, editable=not is_core
+        )
 
         base_dir = "/data/UserData/UserLibrary/Track Presets"
         if not os.path.exists(base_dir) and os.path.exists("examples/Track Presets"):
@@ -271,6 +321,13 @@ class DrumRackInspectorHandler(BaseHandler):
             'select_preset',
             filter_key='drumrack'
         )
+        core_li = (
+            '<li class="dir closed" data-path="Core Library">'
+            '<span>📁 Core Library</span>'
+            '<ul class="hidden"></ul></li>'
+        )
+        if browser_html.endswith('</ul>'):
+            browser_html = browser_html[:-5] + core_li + '</ul>'
         return {
             'file_browser_html': browser_html,
             'message': f"Time-stretched sample created and loaded for pad {pad_number}! {ts_message} {update_message}",
@@ -284,6 +341,9 @@ class DrumRackInspectorHandler(BaseHandler):
         """Handle reversing a sample."""
         sample_path = form.getvalue('sample_path')
         preset_path = form.getvalue('preset_path')
+
+        if preset_path and preset_path.startswith(CORE_LIBRARY_DIR):
+            return self.format_error_response('Core Library presets are read-only')
 
         if not sample_path or not preset_path:
             return self.format_error_response("Missing sample or preset path")
@@ -331,7 +391,10 @@ class DrumRackInspectorHandler(BaseHandler):
             if not result['success']:
                 return self.format_error_response(result['message'])
 
-            samples_html = self.generate_samples_html(result['samples'], preset_path)
+            is_core = preset_path.startswith(CORE_LIBRARY_DIR)
+            samples_html = self.generate_samples_html(
+                result['samples'], preset_path, editable=not is_core
+            )
 
             base_dir = "/data/UserData/UserLibrary/Track Presets"
             if not os.path.exists(base_dir) and os.path.exists("examples/Track Presets"):
@@ -344,6 +407,13 @@ class DrumRackInspectorHandler(BaseHandler):
                 'select_preset',
                 filter_key='drumrack'
             )
+            core_li = (
+                '<li class="dir closed" data-path="Core Library">'
+                '<span>📁 Core Library</span>'
+                '<ul class="hidden"></ul></li>'
+            )
+            if browser_html.endswith('</ul>'):
+                browser_html = browser_html[:-5] + core_li + '</ul>'
             return {
                 'file_browser_html': browser_html,
                 'message': message,
@@ -362,6 +432,8 @@ class DrumRackInspectorHandler(BaseHandler):
         sample_path = form.getvalue('sample_path')
         preset_path = form.getvalue('preset_path')
         pad_number = form.getvalue('pad_number')
+        if preset_path and preset_path.startswith(CORE_LIBRARY_DIR):
+            return self.format_error_response('Core Library presets are read-only')
         if not sample_path or not preset_path or not pad_number:
             return self.format_error_response("Missing parameters")
 
@@ -377,7 +449,10 @@ class DrumRackInspectorHandler(BaseHandler):
         if not result['success']:
             return self.format_error_response(result['message'])
 
-        samples_html = self.generate_samples_html(result['samples'], preset_path)
+        is_core = preset_path.startswith(CORE_LIBRARY_DIR)
+        samples_html = self.generate_samples_html(
+            result['samples'], preset_path, editable=not is_core
+        )
 
         base_dir = "/data/UserData/UserLibrary/Track Presets"
         if not os.path.exists(base_dir) and os.path.exists("examples/Track Presets"):
@@ -390,6 +465,13 @@ class DrumRackInspectorHandler(BaseHandler):
             'select_preset',
             filter_key='drumrack'
         )
+        core_li = (
+            '<li class="dir closed" data-path="Core Library">'
+            '<span>📁 Core Library</span>'
+            '<ul class="hidden"></ul></li>'
+        )
+        if browser_html.endswith('</ul>'):
+            browser_html = browser_html[:-5] + core_li + '</ul>'
         return {
             'file_browser_html': browser_html,
             'message': 'Reverted to original sample',
