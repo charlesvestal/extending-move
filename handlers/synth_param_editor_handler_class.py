@@ -90,6 +90,9 @@ EXCLUDED_MACRO_PARAMS = {
     "Oscillator1_ShapeModSource",
     "PitchModulation_Source1",
     "PitchModulation_Source2",
+    "Global_Volume",
+    "Mixer_OscillatorGain1",
+    "Mixer_OscillatorGain2",
 }
 
 
