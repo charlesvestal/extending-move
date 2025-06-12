@@ -8,12 +8,15 @@ function initSlider(el){
   const step=parseFloat(el.dataset.step||1);
   const unit=el.dataset.unit||'';
   const defaultValue=el.dataset.default!==undefined?parseFloat(el.dataset.default):0;
+  const percentUnit=(unit==='%'||unit==='ct');
+  const baseScale=percentUnit && Math.abs(max)<=1 && Math.abs(min)<=1 ? 100 : 1;
+  const displayScale=parseFloat(el.dataset.displayScale||baseScale);
+  const shouldScale=displayScale!==1;
   function getStep(v){
-    return getPercentStep(v, unit, step, shouldScale);
+    return getPercentStep(v, unit, step, shouldScale, displayScale);
   }
   const decimals=parseInt(el.dataset.decimals||2,10);
-  const displayDecimalsDefault=(unit==='%'||unit==='ct')?0:decimals;
-  const shouldScale=(unit==='%'||unit==='ct') && Math.abs(max)<=1 && Math.abs(min)<=1;
+  const displayDecimalsDefault=percentUnit?0:decimals;
   let value=parseFloat(el.dataset.value||min);
   const centered=el.classList.contains('center')||el.dataset.centered==='true';
   const targetId=el.dataset.target;
@@ -29,10 +32,10 @@ function initSlider(el){
   label.className='rect-slider-label';
   el.appendChild(label);
   function getDisplayDecimals(v){
-    return getPercentDecimals(v, unit, displayDecimalsDefault, shouldScale);
+    return getPercentDecimals(v, unit, displayDecimalsDefault, shouldScale, displayScale);
   }
   function format(v){
-    let displayVal=shouldScale?v*100:v;
+    let displayVal=shouldScale?v*displayScale:v;
     let unitLabel=unit;
     if(unit==='Hz'){
       displayVal=Number(displayVal);

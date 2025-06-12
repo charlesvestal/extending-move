@@ -146,7 +146,9 @@
     "min": 0.0,
     "max": 0.1,
     "options": [],
-    "decimals": 3
+    "decimals": 3,
+    "unit": "%",
+    "display_scale": 1000
   },
   "Voice_Lfo_On": {
     "type": "boolean",
