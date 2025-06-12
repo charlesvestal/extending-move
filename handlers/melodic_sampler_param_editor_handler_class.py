@@ -410,12 +410,17 @@ class MelodicSamplerParamEditorHandler(BaseHandler):
                 param_items.pop(n, '') for n in names
             ) + '</div>'
 
-        voice_names = [
+        voice_names_row1 = [
             'Voice_PlaybackStart',
             'Voice_PlaybackLength',
-            'Voice_Transpose',
             'Voice_VelocityToVolume',
             'Volume',
+            'Voice_Gain'
+        ]
+
+        voice_names_row2 = [
+            'Voice_Transpose',
+            'Voice_Detune',
         ]
 
         filter_row1 = [
@@ -435,6 +440,7 @@ class MelodicSamplerParamEditorHandler(BaseHandler):
             'Voice_AmplitudeEnvelope_Decay',
             'Voice_AmplitudeEnvelope_Sustain',
             'Voice_AmplitudeEnvelope_Release',
+            'Voice_AmplitudeEnvelope_SustainMode',
         ]
         filt_env = [
             'Voice_FilterEnvelope_On',
@@ -454,7 +460,7 @@ class MelodicSamplerParamEditorHandler(BaseHandler):
 
         voice_panel = (
             '<div class="param-panel voice"><h3>Voice</h3>'
-            '<div class="param-items">' + row(voice_names) + '</div></div>'
+            '<div class="param-items">' + row(voice_names_row1) + row(voice_names_row2) + '</div></div>'
         )
         panels.append(voice_panel)
 
