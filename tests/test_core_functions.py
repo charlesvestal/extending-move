@@ -259,4 +259,5 @@ def test_get_melodic_sampler_sample(tmp_path):
     info = get_melodic_sampler_sample(str(preset_path))
     assert info["success"], info.get("message")
     assert info["sample_name"] == "test sample.wav"
+    assert info["sample_path"].endswith("test sample.wav")
 
