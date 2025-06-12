@@ -130,3 +130,20 @@ def test_get_samples_core_library_translation(tmp_path):
     sample = info["samples"][0]
     assert sample["path"].startswith("/data/CoreLibrary/")
     assert sample["path"].endswith("Snare 606.aif")
+
+
+def test_generate_samples_html_core_preview():
+    from handlers.drum_rack_inspector_handler_class import DrumRackInspectorHandler
+
+    handler = DrumRackInspectorHandler()
+    sample = {
+        "pad": 1,
+        "sample": "Kick",
+        "path": "/data/CoreLibrary/Samples/Kick.wav",
+        "playback_start": 0.0,
+        "playback_length": 1.0,
+    }
+
+    html = handler.generate_samples_html([sample], "/data/CoreLibrary/Track Presets/Kit.ablpreset", editable=False)
+    assert "reverse-button" not in html
+    assert "time-stretch-button" not in html
