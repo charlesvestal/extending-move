@@ -109,8 +109,21 @@ def _hash_file(path: Path) -> str | None:
     return h.hexdigest()
 
 
+def _fix_bin_permissions(root: Path) -> None:
+    """Ensure files in ``root/bin`` are executable."""
+    bin_dir = root / "bin"
+    if not bin_dir.exists():
+        return
+    for path in bin_dir.rglob("*"):
+        if path.is_file() or path.is_dir():
+            try:
+                path.chmod(0o755)
+            except Exception as exc:  # noqa: BLE001
+                print(f"Error setting permissions for {path}: {exc}", file=sys.stderr)
+
+
 def overlay_from_zip(content: bytes, root: Path) -> bool:
-    """Return True if requirements.txt changed."""
+    """Return ``True`` if ``requirements.txt`` changed."""
     with tempfile.TemporaryDirectory(dir=str(TMP_DIR_PATH)) as tmpdir:
         with zipfile.ZipFile(io.BytesIO(content)) as zf:
             zf.extractall(tmpdir)
@@ -118,6 +131,7 @@ def overlay_from_zip(content: bytes, root: Path) -> bool:
         old_hash = _hash_file(root / "requirements.txt")
         new_hash = _hash_file(extracted_root / "requirements.txt")
         shutil.copytree(extracted_root, root, dirs_exist_ok=True)
+    _fix_bin_permissions(root)
     return old_hash != new_hash
 
 
