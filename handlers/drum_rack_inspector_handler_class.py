@@ -29,6 +29,13 @@ class DrumRackInspectorHandler(BaseHandler):
             'select_preset',
             filter_key='drumrack'
         )
+        core_li = (
+            '<li class="dir closed" data-path="Core Library">'
+            '<span>📁 Core Library</span>'
+            '<ul class="hidden"></ul></li>'
+        )
+        if browser_html.endswith('</ul>'):
+            browser_html = browser_html[:-5] + core_li + '</ul>'
         return {
             'file_browser_html': browser_html,
             'message': '',
@@ -80,6 +87,13 @@ class DrumRackInspectorHandler(BaseHandler):
                 'select_preset',
                 filter_key='drumrack'
             )
+            core_li = (
+                '<li class="dir closed" data-path="Core Library">'
+                '<span>📁 Core Library</span>'
+                '<ul class="hidden"></ul></li>'
+            )
+            if browser_html.endswith('</ul>'):
+                browser_html = browser_html[:-5] + core_li + '</ul>'
 
             return {
                 'file_browser_html': browser_html,
@@ -114,8 +128,16 @@ class DrumRackInspectorHandler(BaseHandler):
                 pad_num = pad_index + 1
                 sample = grid[pad_index]
                 cell = '<div class="drum-cell">'
-                if sample and sample.get('path') and sample['path'].startswith('/data/UserData/UserLibrary/Samples/'):
-                    web_path = '/samples/' + sample['path'].replace('/data/UserData/UserLibrary/Samples/Preset Samples/', '', 1)
+                if sample and sample.get('path'):
+                    path = sample['path']
+                    if path.startswith('/data/UserData/UserLibrary/'):
+                        rel = path[len('/data/UserData/UserLibrary/') :]
+                        web_path = '/files/user-library/' + rel
+                    elif path.startswith('/data/CoreLibrary/'):
+                        rel = path[len('/data/CoreLibrary/') :]
+                        web_path = '/files/core-library/' + rel
+                    else:
+                        web_path = '/files/user-library/' + path.lstrip('/')
                     web_path = urllib.parse.quote(web_path)
                     wf_id = f'waveform-{pad_num}'
                     cell += f'''<div class="pad-info"><span class="pad-number">Pad {pad_num}</span></div>
@@ -197,6 +219,13 @@ class DrumRackInspectorHandler(BaseHandler):
                 'select_preset',
                 filter_key='drumrack'
             )
+            core_li = (
+                '<li class="dir closed" data-path="Core Library">'
+                '<span>📁 Core Library</span>'
+                '<ul class="hidden"></ul></li>'
+            )
+            if browser_html.endswith('</ul>'):
+                browser_html = browser_html[:-5] + core_li + '</ul>'
             return {
                 'file_browser_html': browser_html,
                 'message': '',
@@ -271,6 +300,13 @@ class DrumRackInspectorHandler(BaseHandler):
             'select_preset',
             filter_key='drumrack'
         )
+        core_li = (
+            '<li class="dir closed" data-path="Core Library">'
+            '<span>📁 Core Library</span>'
+            '<ul class="hidden"></ul></li>'
+        )
+        if browser_html.endswith('</ul>'):
+            browser_html = browser_html[:-5] + core_li + '</ul>'
         return {
             'file_browser_html': browser_html,
             'message': f"Time-stretched sample created and loaded for pad {pad_number}! {ts_message} {update_message}",
@@ -344,6 +380,13 @@ class DrumRackInspectorHandler(BaseHandler):
                 'select_preset',
                 filter_key='drumrack'
             )
+            core_li = (
+                '<li class="dir closed" data-path="Core Library">'
+                '<span>📁 Core Library</span>'
+                '<ul class="hidden"></ul></li>'
+            )
+            if browser_html.endswith('</ul>'):
+                browser_html = browser_html[:-5] + core_li + '</ul>'
             return {
                 'file_browser_html': browser_html,
                 'message': message,
@@ -390,6 +433,13 @@ class DrumRackInspectorHandler(BaseHandler):
             'select_preset',
             filter_key='drumrack'
         )
+        core_li = (
+            '<li class="dir closed" data-path="Core Library">'
+            '<span>📁 Core Library</span>'
+            '<ul class="hidden"></ul></li>'
+        )
+        if browser_html.endswith('</ul>'):
+            browser_html = browser_html[:-5] + core_li + '</ul>'
         return {
             'file_browser_html': browser_html,
             'message': 'Reverted to original sample',
