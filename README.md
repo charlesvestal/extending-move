@@ -18,27 +18,14 @@ Tools for extending the Ableton Move. This project provides a companion webserve
 
 Here’s what you can do with Extending Move:
 
-- **MIDI Upload**
+- **Set Restoration**
   - Upload and restore Move Sets (.ablbundle)
   - Choose target pad and color
 
-- **Sample Reversal**
-  - Create reversed versions of any WAV file
-  - Use reversed file in drum kit or sample presets
-    
-- **Drum Rack Inspector**
-  - View and download samples in a drum rack preset
-  - Reverse or time stretch samples to a target BPM and length with different algorithms for melodic or rhythmic content
-
-
-- **Drift Wavetable and melodicSampler Preset Editor**
+- **Drift, Wavetable and melodicSampler Preset Editor**
   - Modify any preset parameter value or create a preset from scratch
   - Manage macro knob assignments and preview their effect on mapped parameters in real time
   - Preview samples and see region and envelopes on melodicSampler presets
- 
-- **MIDI Import**
-  - Upload MIDI files to create new Melodic or Drum Sets
-  - New Sets created with either a default Drift or 808 kit for customization
 
 - **Chord Kit Generation**
   - Create chord variations from any WAV file
@@ -49,10 +36,17 @@ Here’s what you can do with Extending Move:
   - Auto-slice to even slices or transients
   - Create choke group configurations or use Gate and Drum kit style presets
 
-- **Manual Library Refresh**
-  - Accessible via ``move.local:<port>/refresh``
-  - Force refresh of Move's library cache
-  - Useful after manual file changes
+- **Drum Rack Inspector**
+  - View and download samples in a drum rack preset
+  - Reverse or time stretch samples to a target BPM and length with different algorithms for melodic or rhythmic content
+
+- **Sample Reversal**
+  - Create reversed versions of any WAV file
+  - Use reversed file in drum kit or sample presets    
+ 
+- **MIDI Import**
+  - Upload MIDI files to create new Melodic or Drum Sets
+  - New Sets created with either a default Drift or 808 kit for customization
 
 
 ## Contributors
