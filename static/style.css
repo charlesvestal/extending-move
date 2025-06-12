@@ -1186,3 +1186,14 @@ button#macro-add-param {
     width: 200px;
     height: 88px;
 }
+
+/* Page-specific opacity rules */
+.page-synth-params .macro-knob,
+.page-wavetable-params .macro-knob {
+    opacity: 1;
+}
+
+.page-synth-params .param-item.param-mapped,
+.page-wavetable-params .param-item.param-mapped {
+    opacity: 0.6;
+}

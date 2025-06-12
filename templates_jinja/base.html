@@ -6,7 +6,7 @@
     <title>Move - Extended</title>
     <link rel="stylesheet" href="{{ host_prefix }}/static/style.css">
 </head>
-<body>
+<body class="page-{{ active_tab }}">
     <h1 id="header">Move - Extended</h1>
     <nav class="tab">
         <a href="{{ host_prefix }}/restore" class="{% if active_tab == 'restore' %}active{% endif %}">Restore</a>
