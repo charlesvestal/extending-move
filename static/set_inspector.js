@@ -33,6 +33,7 @@ export function initSetInspector() {
   const envelopes = JSON.parse(dataDiv.dataset.envelopes || '[]');
   const region = parseFloat(dataDiv.dataset.region || '4');
   const loopStart = parseFloat(dataDiv.dataset.loopStart || '0');
+  const loopEnd = parseFloat(dataDiv.dataset.loopEnd || (loopStart + region));
   const paramRanges = JSON.parse(dataDiv.dataset.paramRanges || '{}');
   const canvas = document.getElementById('clipCanvas');
   const ctx = canvas.getContext('2d');
@@ -102,13 +103,18 @@ export function initSetInspector() {
     const noteRange = max - min + 1;
 
     ctx.strokeStyle = '#ddd';
-    for (let b = 0; b <= region; b++) {
-      const x = (b / region) * canvas.width;
+    const startBar = Math.floor(loopStart);
+    const endBar = Math.ceil(loopEnd);
+    for (let b = startBar; b <= endBar; b++) {
+      const x = ((b - loopStart) / region) * canvas.width;
       ctx.beginPath();
       ctx.lineWidth = b % 4 === 0 ? 2 : 1;
       ctx.moveTo(x, 0);
       ctx.lineTo(x, canvas.height);
       ctx.stroke();
+      ctx.fillStyle = '#000';
+      ctx.font = '10px sans-serif';
+      ctx.fillText(b.toString(), x + 2, 10);
     }
     ctx.lineWidth = 1;
 
