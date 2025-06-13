@@ -46,6 +46,7 @@ from handlers.update_handler_class import UpdateHandler, REPO
 from handlers.adsr_handler_class import AdsrHandler
 from handlers.cyc_env_handler_class import CycEnvHandler
 from handlers.lfo_handler_class import LfoHandler
+from handlers.set_inspector_handler_class import SetInspectorHandler
 from core.refresh_handler import refresh_library
 from core.file_browser import generate_dir_html
 
@@ -135,6 +136,7 @@ update_handler = UpdateHandler()
 adsr_handler = AdsrHandler()
 cyc_env_handler = CycEnvHandler()
 lfo_handler = LfoHandler()
+set_inspector_handler = SetInspectorHandler()
 
 
 @app.before_request
@@ -313,6 +315,33 @@ def reverse():
         browser_root=browser_root,
         browser_filter=browser_filter,
         active_tab="reverse",
+    )
+
+
+@app.route("/set-inspector", methods=["GET", "POST"])
+def set_inspector_route():
+    if request.method == "POST":
+        form = SimpleForm(request.form.to_dict())
+        result = set_inspector_handler.handle_post(form)
+    else:
+        result = set_inspector_handler.handle_get()
+    message = result.get("message")
+    message_type = result.get("message_type")
+    success = message_type != "error" if message_type else False
+    return render_template(
+        "set_inspector.html",
+        message=message,
+        success=success,
+        message_type=message_type,
+        file_browser_html=result.get("file_browser_html"),
+        selected_set=result.get("selected_set"),
+        clip_options=result.get("clip_options"),
+        selected_clip=result.get("selected_clip"),
+        notes=result.get("notes"),
+        envelopes=result.get("envelopes"),
+        region=result.get("region"),
+        browser_root=result.get("browser_root"),
+        active_tab="set-inspector",
     )
 
 
