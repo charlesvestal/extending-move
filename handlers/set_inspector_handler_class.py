@@ -6,8 +6,14 @@ from core.config import MSETS_DIRECTORY
 import os
 
 class SetInspectorHandler(BaseHandler):
-    def generate_pad_grid(self, used_ids, color_map):
-        """Return HTML for a 32-pad grid showing sets with colors."""
+    def generate_pad_grid(self, used_ids, color_map, name_map):
+        """Return HTML for a 32-pad grid showing sets with colors.
+
+        Args:
+            used_ids (set): Pad indices that contain sets.
+            color_map (dict): Mapping of pad index to pad color ID.
+            name_map (dict): Mapping of pad index to set name.
+        """
         cells = []
         for row in range(4):
             for col in range(8):
@@ -18,17 +24,25 @@ class SetInspectorHandler(BaseHandler):
                 disabled = '' if has_set else 'disabled'
                 color_id = color_map.get(idx)
                 style = f' style="background-color: {rgb_string(color_id)}"' if color_id else ''
+                name_attr = (
+                    f" data-name=\"{name_map.get(idx, '')}\"" if idx in name_map else ""
+                )
                 cells.append(
                     f'<input type="radio" id="inspect_pad_{num}" name="pad_index" value="{num}" {disabled}>'
-                    f'<label for="inspect_pad_{num}" class="pad-cell {status}"{style}></label>'
+                    f'<label for="inspect_pad_{num}" class="pad-cell {status}"{style}{name_attr}></label>'
                 )
         return '<div class="pad-grid">' + ''.join(cells) + '</div>'
 
     def handle_get(self):
         msets, ids = list_msets(return_free_ids=True)
         used = ids.get("used", set())
-        color_map = {int(m["mset_id"]): int(m["mset_color"]) for m in msets if str(m["mset_color"]).isdigit()}
-        pad_grid = self.generate_pad_grid(used, color_map)
+        color_map = {
+            int(m["mset_id"]): int(m["mset_color"])
+            for m in msets
+            if str(m["mset_color"]).isdigit()
+        }
+        name_map = {int(m["mset_id"]): m["mset_name"] for m in msets}
+        pad_grid = self.generate_pad_grid(used, color_map, name_map)
         return {
             "pad_grid": pad_grid,
             "message": "Select a set to inspect",
@@ -45,8 +59,13 @@ class SetInspectorHandler(BaseHandler):
         action = form.getvalue("action")
         msets, ids = list_msets(return_free_ids=True)
         used = ids.get("used", set())
-        color_map = {int(m["mset_id"]): int(m["mset_color"]) for m in msets if str(m["mset_color"]).isdigit()}
-        pad_grid = self.generate_pad_grid(used, color_map)
+        color_map = {
+            int(m["mset_id"]): int(m["mset_color"])
+            for m in msets
+            if str(m["mset_color"]).isdigit()
+        }
+        name_map = {int(m["mset_id"]): m["mset_name"] for m in msets}
+        pad_grid = self.generate_pad_grid(used, color_map, name_map)
 
         if action == "select_set":
             pad_val = form.getvalue("pad_index")

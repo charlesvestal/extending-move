@@ -1,4 +1,16 @@
 export function initSetInspector() {
+  // Show selected set name when choosing a pad
+  const grid = document.querySelector('#setSelectForm .pad-grid');
+  const nameSpan = document.getElementById('selected-set-name');
+  if (grid && nameSpan) {
+    grid.querySelectorAll('input[name="pad_index"]').forEach(radio => {
+      radio.addEventListener('change', () => {
+        const label = grid.querySelector(`label[for="${radio.id}"]`);
+        nameSpan.textContent = label?.dataset.name || '';
+      });
+    });
+  }
+
   const dataDiv = document.getElementById('clipData');
   if (!dataDiv) return;
   const notes = JSON.parse(dataDiv.dataset.notes || '[]');

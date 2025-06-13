@@ -5,10 +5,11 @@
   <p class="{{ message_type if message_type else ('success' if success else 'error') }}">{{ message }}</p>
 {% endif %}
 {% if not selected_set %}
-  <form method="post" action="{{ host_prefix }}/set-inspector" style="margin-bottom:1rem;">
+  <form id="setSelectForm" method="post" action="{{ host_prefix }}/set-inspector" style="margin-bottom:1rem;">
     <input type="hidden" name="action" value="select_set">
     {{ pad_grid | safe }}
     <button type="submit">Load Set</button>
+    <span id="selected-set-name" style="margin-left:1rem;"></span>
   </form>
 {% elif not selected_clip %}
   <form method="post" action="{{ host_prefix }}/set-inspector" style="margin-bottom:1rem;">
