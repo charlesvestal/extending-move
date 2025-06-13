@@ -1,0 +1,251 @@
+{
+  "Effect_EightBitFilterDecay": {
+    "type": "number",
+    "min": 5.0,
+    "max": 5.0,
+    "options": []
+  },
+  "Effect_EightBitResamplingRate": {
+    "type": "number",
+    "min": 14080.0,
+    "max": 14080.0,
+    "options": []
+  },
+  "Effect_FmAmount": {
+    "type": "number",
+    "min": 0.0,
+    "max": 0.0,
+    "options": []
+  },
+  "Effect_FmFrequency": {
+    "type": "number",
+    "min": 999.9998779296875,
+    "max": 999.9998779296875,
+    "options": []
+  },
+  "Effect_LoopLength": {
+    "type": "number",
+    "min": 0.30000001192092896,
+    "max": 0.30000001192092896,
+    "options": []
+  },
+  "Effect_LoopOffset": {
+    "type": "number",
+    "min": 0.0,
+    "max": 0.0,
+    "options": []
+  },
+  "Effect_NoiseAmount": {
+    "type": "number",
+    "min": 0.0,
+    "max": 0.0,
+    "options": []
+  },
+  "Effect_NoiseFrequency": {
+    "type": "number",
+    "min": 10000.0009765625,
+    "max": 10000.0009765625,
+    "options": []
+  },
+  "Effect_On": {
+    "type": "boolean",
+    "options": []
+  },
+  "Effect_PitchEnvelopeAmount": {
+    "type": "number",
+    "min": 0.0,
+    "max": 0.0,
+    "options": []
+  },
+  "Effect_PitchEnvelopeDecay": {
+    "type": "number",
+    "min": 0.29999998211860657,
+    "max": 0.29999998211860657,
+    "options": []
+  },
+  "Effect_PunchAmount": {
+    "type": "number",
+    "min": 0.0,
+    "max": 0.0,
+    "options": []
+  },
+  "Effect_PunchTime": {
+    "type": "number",
+    "min": 0.12015999853610992,
+    "max": 0.12015999853610992,
+    "options": []
+  },
+  "Effect_RingModAmount": {
+    "type": "number",
+    "min": 0.0,
+    "max": 0.0,
+    "options": []
+  },
+  "Effect_RingModFrequency": {
+    "type": "number",
+    "min": 999.9998168945312,
+    "max": 999.9998168945312,
+    "options": []
+  },
+  "Effect_StretchFactor": {
+    "type": "number",
+    "min": 1.0,
+    "max": 1.0,
+    "options": []
+  },
+  "Effect_StretchGrainSize": {
+    "type": "number",
+    "min": 0.09999999403953552,
+    "max": 0.09999999403953552,
+    "options": []
+  },
+  "Effect_SubOscAmount": {
+    "type": "number",
+    "min": 0.0,
+    "max": 0.0,
+    "options": []
+  },
+  "Effect_SubOscFrequency": {
+    "type": "number",
+    "min": 59.99999237060547,
+    "max": 59.99999237060547,
+    "options": []
+  },
+  "Effect_Type": {
+    "type": "enum",
+    "options": [
+      "Stretch"
+    ]
+  },
+  "Enabled": {
+    "type": "boolean",
+    "options": []
+  },
+  "NotePitchBend": {
+    "type": "boolean",
+    "options": []
+  },
+  "Pan": {
+    "type": "number",
+    "min": 0.0,
+    "max": 0.0,
+    "options": []
+  },
+  "Voice_Detune": {
+    "type": "number",
+    "min": 0.0,
+    "max": 0.0,
+    "options": []
+  },
+  "Voice_Envelope_Attack": {
+    "type": "number",
+    "min": 0.0010000000474974513,
+    "max": 0.0010000000474974513,
+    "options": []
+  },
+  "Voice_Envelope_Decay": {
+    "type": "number",
+    "min": 0.0010000000474974513,
+    "max": 0.05000000074505806,
+    "options": []
+  },
+  "Voice_Envelope_Hold": {
+    "type": "number",
+    "min": 0.6000000238418579,
+    "max": 60.0,
+    "options": []
+  },
+  "Voice_Envelope_Mode": {
+    "type": "enum",
+    "options": [
+      "A-H-D",
+      "A-S-R"
+    ]
+  },
+  "Voice_Filter_Frequency": {
+    "type": "number",
+    "min": 21999.990234375,
+    "max": 21999.990234375,
+    "options": []
+  },
+  "Voice_Filter_On": {
+    "type": "boolean",
+    "options": []
+  },
+  "Voice_Filter_PeakGain": {
+    "type": "number",
+    "min": 1.0,
+    "max": 1.0,
+    "options": []
+  },
+  "Voice_Filter_Resonance": {
+    "type": "number",
+    "min": 0.0,
+    "max": 0.0,
+    "options": []
+  },
+  "Voice_Filter_Type": {
+    "type": "enum",
+    "options": [
+      "Lowpass"
+    ]
+  },
+  "Voice_Gain": {
+    "type": "number",
+    "min": 1.0,
+    "max": 1.0,
+    "options": []
+  },
+  "Voice_ModulationAmount": {
+    "type": "number",
+    "min": 0.0,
+    "max": 0.0,
+    "options": []
+  },
+  "Voice_ModulationSource": {
+    "type": "enum",
+    "options": [
+      "Velocity"
+    ]
+  },
+  "Voice_ModulationTarget": {
+    "type": "enum",
+    "options": [
+      "Filter"
+    ]
+  },
+  "Voice_PitchToEnvelopeModulation": {
+    "type": "boolean",
+    "options": []
+  },
+  "Voice_PlaybackLength": {
+    "type": "number",
+    "min": 1.0,
+    "max": 1.0,
+    "options": []
+  },
+  "Voice_PlaybackStart": {
+    "type": "number",
+    "min": 0.0,
+    "max": 0.0,
+    "options": []
+  },
+  "Voice_Transpose": {
+    "type": "number",
+    "min": 0,
+    "max": 0,
+    "options": []
+  },
+  "Voice_VelocityToVolume": {
+    "type": "number",
+    "min": 0.3499999940395355,
+    "max": 0.3499999940395355,
+    "options": []
+  },
+  "Volume": {
+    "type": "number",
+    "min": -11.999999046325684,
+    "max": -11.999999046325684,
+    "options": []
+  }
+}
