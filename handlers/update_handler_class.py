@@ -185,7 +185,7 @@ class UpdateHandler(BaseHandler):
             resp = self.format_success_response(
                 "Restarting server...",
                 progress=["restarting server"],
-                restart_countdown=10,
+                restart_countdown=15,
             )
             resp.update(info)
             return resp
@@ -272,7 +272,7 @@ class UpdateHandler(BaseHandler):
                 "progress": progress,
                 "has_update": False,
                 "commits": [],
-                "restart_countdown": 10,
+                "restart_countdown": 15,
             }
         )
         return resp
