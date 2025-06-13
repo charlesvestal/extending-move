@@ -49,14 +49,24 @@ export function initSetInspector() {
     ctx.lineWidth = 1;
 
     const h = canvas.height / noteRange;
-    ctx.font = '10px sans-serif';
     for (let n = min; n <= max; n++) {
       const y = canvas.height - (n - min) * h;
       ctx.beginPath();
       ctx.moveTo(0, y);
       ctx.lineTo(canvas.width, y);
       ctx.stroke();
+    }
+  }
+
+  function drawLabels() {
+    const { min, max } = getVisibleRange();
+    const noteRange = max - min + 1;
+    const h = canvas.height / noteRange;
+    ctx.fillStyle = '#000';
+    ctx.font = '10px sans-serif';
+    for (let n = min; n <= max; n++) {
       if (n % 12 === 0) {
+        const y = canvas.height - (n - min) * h;
         const octave = Math.floor(n / 12) - 1;
         ctx.fillText(`C${octave}`, 2, y - 2);
       }
@@ -94,6 +104,7 @@ export function initSetInspector() {
   function draw() {
     drawGrid();
     drawNotes();
+    drawLabels();
     drawEnvelope();
   }
 
