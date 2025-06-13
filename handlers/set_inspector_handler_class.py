@@ -94,13 +94,20 @@ class SetInspectorHandler(BaseHandler):
 
         if action == "select_set":
             pad_val = form.getvalue("pad_index")
-            if not pad_val or not pad_val.isdigit():
+            set_path = form.getvalue("set_path")
+            if pad_val and pad_val.isdigit():
+                idx = int(pad_val) - 1
+                entry = next((m for m in msets if m.get("mset_id") == idx), None)
+                if not entry:
+                    return self.format_error_response("No set on selected pad", pad_grid=pad_grid)
+                set_path = os.path.join(
+                    MSETS_DIRECTORY,
+                    entry["uuid"],
+                    entry["mset_name"],
+                    "Song.abl",
+                )
+            if not set_path:
                 return self.format_error_response("No set selected", pad_grid=pad_grid)
-            idx = int(pad_val) - 1
-            entry = next((m for m in msets if m.get("mset_id") == idx), None)
-            if not entry:
-                return self.format_error_response("No set on selected pad", pad_grid=pad_grid)
-            set_path = os.path.join(MSETS_DIRECTORY, entry["uuid"], entry["mset_name"], "Song.abl")
             result = list_clips(set_path)
             if not result.get("success"):
                 return self.format_error_response(result.get("message"), pad_grid=pad_grid)
