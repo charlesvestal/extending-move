@@ -227,7 +227,12 @@ export function initSetInspector() {
       return;
     }
     const { x, y } = canvasPos(ev);
-    currentEnv.push({ time: (x / canvas.width) * region, value: 1 - y / canvas.height });
+    const t = (x / canvas.width) * region;
+    const v = 1 - y / canvas.height;
+    while (currentEnv.length && t <= currentEnv[currentEnv.length - 1].time) {
+      currentEnv.pop();
+    }
+    currentEnv.push({ time: t, value: v });
     draw();
     ev.preventDefault();
   }
