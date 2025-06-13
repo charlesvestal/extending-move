@@ -38,10 +38,12 @@ export function initSetInspector() {
   const ctx = canvas.getContext('2d');
   const showFull = document.getElementById('showFullClip');
 
-  const fullStart = regionInfo.start || 0;
-  const fullEnd = regionInfo.end !== undefined ? regionInfo.end : fullStart + baseRegion;
-  const loopStart = regionInfo.loop_start !== undefined ? regionInfo.loop_start : fullStart;
-  const loopEnd = regionInfo.loop_end !== undefined ? regionInfo.loop_end : fullEnd;
+  const regionStart = regionInfo.start ?? 0;
+  const regionEnd = regionInfo.end ?? regionStart + baseRegion;
+  const loopStart = regionInfo.loop_start ?? regionStart;
+  const loopEnd = regionInfo.loop_end ?? regionEnd;
+  const fullStart = Math.min(regionStart, loopStart);
+  const fullEnd = Math.max(regionEnd, loopEnd);
   const loopEnabled = regionInfo.loop_enabled !== undefined ? regionInfo.loop_enabled : true;
   let visibleStart = loopEnabled ? loopStart : fullStart;
   let visibleEnd = loopEnabled ? loopEnd : fullEnd;
