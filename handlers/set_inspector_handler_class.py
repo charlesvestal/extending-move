@@ -142,15 +142,18 @@ class SetInspectorHandler(BaseHandler):
             clip_grid = self.generate_clip_grid(clip_info.get("clips", []), selected=clip_val)
             envelopes = result.get("envelopes", [])
             param_map = result.get("param_map", {})
+
+            # Include all available parameters in the dropdown, not just those
+            # with envelope data
+            option_ids = sorted(param_map.keys())
             env_opts = "".join(
-                (
-                    f'<option value="{e.get("parameterId")}">'
-                    f'{param_map.get(e.get("parameterId"), e.get("parameterId"))}'
-                    f'</option>'
-                )
-                for e in envelopes
+                f'<option value="{pid}">{param_map.get(pid, pid)}</option>'
+                for pid in option_ids
             )
-            env_opts = '<option value="" disabled selected>-- Select Envelope --</option>' + env_opts
+            env_opts = (
+                '<option value="" disabled selected>-- Select Envelope --</option>'
+                + env_opts
+            )
             return {
                 "pad_grid": pad_grid,
                 "message": result.get("message"),
