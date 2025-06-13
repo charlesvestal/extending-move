@@ -144,11 +144,28 @@ class SetInspectorHandler(BaseHandler):
             clip_grid = self.generate_clip_grid(clip_info.get("clips", []), selected=clip_val)
             envelopes = result.get("envelopes", [])
             param_map = result.get("param_map", {})
+            param_meta = result.get("param_meta", {})
+
+            def _label(e):
+                meta = None
+                if "parameterId" in e:
+                    meta = param_meta.get(e["parameterId"])
+                if not meta and "parameterIdName" in e:
+                    meta = param_meta.get(e["parameterIdName"])
+                if meta:
+                    base = meta.get("deviceName") or ""
+                    if meta.get("padName"):
+                        return f"{base}: {meta['padName']}: {meta['name']}"
+                    return f"{base}: {meta['name']}"
+                key = e.get("parameterId") if "parameterId" in e else e.get("parameterIdName")
+                return param_map.get(key, str(key))
+
+            def _value(e):
+                return e.get("parameterId") if "parameterId" in e else e.get("parameterIdName")
+
             env_opts = "".join(
                 (
-                    f'<option value="{e.get("parameterId")}">'
-                    f'{param_map.get(e.get("parameterId"), e.get("parameterId"))}'
-                    f'</option>'
+                    f'<option value="{_value(e)}">{_label(e)}</option>'
                 )
                 for e in envelopes
             )
@@ -184,7 +201,11 @@ class SetInspectorHandler(BaseHandler):
                 breakpoints = json.loads(env_data)
             except Exception:
                 return self.format_error_response("Invalid envelope data", pad_grid=pad_grid)
-            result = save_envelope(set_path, track_idx, clip_idx, int(param_val), breakpoints)
+            if param_val.isdigit():
+                pid = int(param_val)
+            else:
+                pid = param_val
+            result = save_envelope(set_path, track_idx, clip_idx, pid, breakpoints)
             if not result.get("success"):
                 return self.format_error_response(result.get("message"), pad_grid=pad_grid)
             clip_info = list_clips(set_path)
@@ -192,11 +213,28 @@ class SetInspectorHandler(BaseHandler):
             clip_data = get_clip_data(set_path, track_idx, clip_idx)
             envelopes = clip_data.get("envelopes", [])
             param_map = clip_data.get("param_map", {})
+            param_meta = clip_data.get("param_meta", {})
+
+            def _label(e):
+                meta = None
+                if "parameterId" in e:
+                    meta = param_meta.get(e["parameterId"])
+                if not meta and "parameterIdName" in e:
+                    meta = param_meta.get(e["parameterIdName"])
+                if meta:
+                    base = meta.get("deviceName") or ""
+                    if meta.get("padName"):
+                        return f"{base}: {meta['padName']}: {meta['name']}"
+                    return f"{base}: {meta['name']}"
+                key = e.get("parameterId") if "parameterId" in e else e.get("parameterIdName")
+                return param_map.get(key, str(key))
+
+            def _value(e):
+                return e.get("parameterId") if "parameterId" in e else e.get("parameterIdName")
+
             env_opts = "".join(
                 (
-                    f'<option value="{e.get("parameterId")}">' +
-                    f'{param_map.get(e.get("parameterId"), e.get("parameterId"))}' +
-                    f'</option>'
+                    f'<option value="{_value(e)}">{_label(e)}</option>'
                 )
                 for e in envelopes
             )

@@ -8,6 +8,35 @@ from core.synth_preset_inspector_handler import (
 )
 
 
+def _scan_device(device: Dict[str, Any], meta: Dict[Any, Dict[str, str]], ctx: Dict[str, str] | None = None) -> None:
+    """Recursively build parameter metadata with device and pad context."""
+    if ctx is None:
+        ctx = {}
+    my_ctx = {**ctx, "deviceName": device.get("name")}
+
+    params = device.get("parameters", {})
+    if isinstance(params, dict):
+        for pname, val in params.items():
+            pid = val.get("id") if isinstance(val, dict) else None
+            entry = {
+                "name": pname,
+                "deviceName": my_ctx.get("deviceName"),
+                "padName": my_ctx.get("padName"),
+            }
+            if pid is not None:
+                meta[pid] = entry
+            meta[pname] = entry
+
+    kind = device.get("kind")
+    if kind in ("drumRack", "instrumentRack"):
+        for i, chain in enumerate(device.get("chains", [])):
+            pad_ctx = {**my_ctx}
+            if kind == "drumRack":
+                pad_ctx["padName"] = f"Pad{i+1}"
+            for child in chain.get("devices", []):
+                _scan_device(child, meta, pad_ctx)
+
+
 def _collect_param_ids(obj: Any, mapping: Dict[int, str]) -> None:
     """Recursively collect parameterId mappings from the given object."""
     if isinstance(obj, dict):
@@ -51,8 +80,14 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
         region = clip_obj.get("region", {}).get("end", 4.0)
         track_name = track_obj.get("name") or f"Track {track + 1}"
         clip_name = clip_obj.get("name") or f"Clip {clip + 1}"
-        param_map: Dict[int, str] = {}
-        _collect_param_ids(track_obj.get("devices", []), param_map)
+        param_meta: Dict[Any, Dict[str, str]] = {}
+        for dev in track_obj.get("devices", []):
+            _scan_device(dev, param_meta)
+        param_map: Dict[int, str] = {
+            k: v["name"]
+            for k, v in param_meta.items()
+            if isinstance(k, int)
+        }
 
         # Load parameter metadata from available instrument schemas
         schemas: Dict[str, Dict[str, Any]] = {}
@@ -82,6 +117,7 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
             "envelopes": envelopes,
             "region": region,
             "param_map": param_map,
+            "param_meta": param_meta,
             "param_ranges": param_ranges,
             "track_name": track_name,
             "clip_name": clip_name,
@@ -94,7 +130,7 @@ def save_envelope(
     set_path: str,
     track: int,
     clip: int,
-    parameter_id: int,
+    parameter_id: int | str,
     breakpoints: List[Dict[str, float]],
 ) -> Dict[str, Any]:
     """Update or create an envelope and write the set back to disk."""
@@ -107,11 +143,12 @@ def save_envelope(
         )
         envelopes = clip_obj.setdefault("envelopes", [])
         for env in envelopes:
-            if env.get("parameterId") == parameter_id:
+            if env.get("parameterId") == parameter_id or env.get("parameterIdName") == parameter_id:
                 env["breakpoints"] = breakpoints
                 break
         else:
-            envelopes.append({"parameterId": parameter_id, "breakpoints": breakpoints})
+            key = "parameterId" if isinstance(parameter_id, int) else "parameterIdName"
+            envelopes.append({key: parameter_id, "breakpoints": breakpoints})
 
         with open(set_path, "w") as f:
             json.dump(song, f, indent=2)
