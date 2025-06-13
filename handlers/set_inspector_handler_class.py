@@ -201,11 +201,13 @@ class SetInspectorHandler(BaseHandler):
                 for e in envelopes
             )
             env_opts = '<option value="" disabled selected>-- Select Envelope --</option>' + env_opts
+            set_name = os.path.basename(os.path.dirname(set_path))
             return {
                 "pad_grid": pad_grid,
                 "message": result.get("message"),
                 "message_type": "success",
                 "selected_set": set_path,
+                "set_name": set_name,
                 "clip_grid": clip_grid,
                 "clip_options": env_opts,
                 "selected_clip": clip_val,
@@ -213,6 +215,10 @@ class SetInspectorHandler(BaseHandler):
                 "envelopes": envelopes,
                 "region": clip_data.get("region", 4.0),
                 "param_ranges_json": json.dumps(clip_data.get("param_ranges", {})),
+                "track_index": track_idx,
+                "clip_index": clip_idx,
+                "track_name": clip_data.get("track_name"),
+                "clip_name": clip_data.get("clip_name"),
             }
         else:
             return self.format_error_response("Unknown action", pad_grid=pad_grid)
