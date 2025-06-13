@@ -117,11 +117,13 @@ class SetInspectorHandler(BaseHandler):
             if not result.get("success"):
                 return self.format_error_response(result.get("message"), pad_grid=pad_grid)
             clip_grid = self.generate_clip_grid(result.get("clips", []))
+            set_name = os.path.basename(os.path.dirname(set_path))
             return {
                 "pad_grid": pad_grid,
                 "message": result.get("message"),
                 "message_type": "success",
                 "selected_set": set_path,
+                "set_name": set_name,
                 "clip_grid": clip_grid,
                 "selected_clip": None,
                 "notes": [],
@@ -151,11 +153,13 @@ class SetInspectorHandler(BaseHandler):
                 for e in envelopes
             )
             env_opts = '<option value="" disabled selected>-- Select Envelope --</option>' + env_opts
+            set_name = os.path.basename(os.path.dirname(set_path))
             return {
                 "pad_grid": pad_grid,
                 "message": result.get("message"),
                 "message_type": "success",
                 "selected_set": set_path,
+                "set_name": set_name,
                 "clip_grid": clip_grid,
                 "clip_options": env_opts,
                 "selected_clip": clip_val,
@@ -163,6 +167,10 @@ class SetInspectorHandler(BaseHandler):
                 "envelopes": envelopes,
                 "region": result.get("region", 4.0),
                 "param_ranges_json": json.dumps(result.get("param_ranges", {})),
+                "track_index": track_idx,
+                "clip_index": clip_idx,
+                "track_name": result.get("track_name"),
+                "clip_name": result.get("clip_name"),
             }
         elif action == "save_envelope":
             set_path = form.getvalue("set_path")

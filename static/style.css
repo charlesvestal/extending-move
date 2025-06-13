@@ -428,6 +428,30 @@ select {
 .file-tree .dir.open > span::before { content: "\25BC"; display: inline-block; width: 1em; }
 .hidden { display: none; }
 .file-tree .dir, .file-tree .file-entry {margin-left: 10px;}
+.link-button {
+    background: none;
+    border: none;
+    padding: 0;
+    color: #0066cc;
+    text-decoration: underline;
+    cursor: pointer;
+    font: inherit;
+}
+
+nav.breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: transparent;
+}
+
+nav.breadcrumbs form {
+    display: inline;
+}
+
+.breadcrumbs .link-button:hover {
+    background-color: transparent;
+}
 .file-browser {
     max-height: 240px;
     overflow-y: auto;

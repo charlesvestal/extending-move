@@ -49,6 +49,8 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
         notes = clip_obj.get("notes", [])
         envelopes = clip_obj.get("envelopes", [])
         region = clip_obj.get("region", {}).get("end", 4.0)
+        track_name = track_obj.get("name") or f"Track {track + 1}"
+        clip_name = clip_obj.get("name") or f"Clip {clip + 1}"
         param_map: Dict[int, str] = {}
         _collect_param_ids(track_obj.get("devices", []), param_map)
 
@@ -81,6 +83,8 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
             "region": region,
             "param_map": param_map,
             "param_ranges": param_ranges,
+            "track_name": track_name,
+            "clip_name": clip_name,
         }
     except Exception as e:
         return {"success": False, "message": f"Failed to read clip: {e}"}
