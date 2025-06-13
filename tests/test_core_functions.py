@@ -293,3 +293,42 @@ def test_save_envelope(tmp_path):
     assert envs and envs[0]["parameterId"] == 1
     assert envs[0]["breakpoints"] == bps
 
+
+def test_get_clip_data_loop_region(tmp_path):
+    set_path = tmp_path / "set.abl"
+    song = {
+        "tracks": [
+            {
+                "kind": "midi",
+                "clipSlots": [
+                    {
+                        "clip": {
+                            "notes": [
+                                {"noteNumber": 60, "startTime": 1.0, "duration": 0.5, "velocity": 100.0, "offVelocity": 0.0},
+                                {"noteNumber": 61, "startTime": 2.5, "duration": 0.5, "velocity": 100.0, "offVelocity": 0.0},
+                                {"noteNumber": 62, "startTime": 5.5, "duration": 0.5, "velocity": 100.0, "offVelocity": 0.0},
+                            ],
+                            "envelopes": [
+                                {"parameterId": 2, "breakpoints": [{"time": 0.5, "value": 0}, {"time": 4.5, "value": 1}]}
+                            ],
+                            "region": {"start": 0.0, "end": 8.0, "loop": {"start": 2.0, "end": 6.0}},
+                        }
+                    }
+                ],
+            }
+        ]
+    }
+    set_path.write_text(json.dumps(song))
+
+    from core.set_inspector_handler import get_clip_data
+
+    data = get_clip_data(str(set_path), 0, 0)
+    assert data["success"], data.get("message")
+    assert data["region"] == 4.0
+    notes = data.get("notes", [])
+    assert [n["noteNumber"] for n in notes] == [61, 62]
+    assert notes[0]["startTime"] == 0.5
+    assert notes[1]["startTime"] == 3.5
+    envs = data.get("envelopes", [])
+    assert envs and envs[0]["breakpoints"] == [{"time": 2.5, "value": 1}]
+
