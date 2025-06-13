@@ -195,16 +195,21 @@ class SetInspectorHandler(BaseHandler):
             envelopes = clip_data.get("envelopes", [])
             param_map = clip_data.get("param_map", {})
             param_context = clip_data.get("param_context", {})
+            selected_pid = int(param_val)
             env_opts = "".join(
                 (
-                    f'<option value="{e.get("parameterId")}">' +
+                    f'<option value="{e.get("parameterId")}"' +
+                    (
+                        ' selected' if e.get("parameterId") == selected_pid else ''
+                    ) +
+                    '>' +
                     f'{param_context.get(e.get("parameterId"), "Track")}: ' +
                     f'{param_map.get(e.get("parameterId"), e.get("parameterId"))}' +
-                    f'</option>'
+                    '</option>'
                 )
                 for e in envelopes
             )
-            env_opts = '<option value="" disabled selected>-- Select Envelope --</option>' + env_opts
+            env_opts = '<option value="" disabled>-- Select Envelope --</option>' + env_opts
             set_name = os.path.basename(os.path.dirname(set_path))
             return {
                 "pad_grid": pad_grid,
