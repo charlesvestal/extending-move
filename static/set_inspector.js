@@ -362,9 +362,13 @@ export function initSetInspector() {
   if (saveForm) saveForm.addEventListener('submit', () => {
     envInput.value = JSON.stringify(currentEnv);
   });
-  updateLegend();
-  updateControls();
-  draw();
+  if (envSelect && envSelect.value) {
+    envSelect.dispatchEvent(new Event('change'));
+  } else {
+    updateLegend();
+    updateControls();
+    draw();
+  }
 }
 
 document.addEventListener('DOMContentLoaded', initSetInspector);
