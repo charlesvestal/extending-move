@@ -43,7 +43,9 @@ def list_clips(set_path: str) -> Dict[str, Any]:
                 if clip:
                     name = clip.get("name", f"Track {ti+1} Clip {ci+1}")
                     color = clip.get("color")
-                    clips.append({"track": ti, "clip": ci, "name": name, "color": color})
+                    clips.append(
+                        {"track": ti, "clip": ci, "name": name, "color": color}
+                    )
         return {"success": True, "message": "Clips loaded", "clips": clips}
     except Exception as e:
         return {"success": False, "message": f"Failed to read set: {e}"}
@@ -58,7 +60,14 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
         clip_obj = track_obj["clipSlots"][clip]["clip"]
         notes = clip_obj.get("notes", [])
         envelopes = clip_obj.get("envelopes", [])
-        region = clip_obj.get("region", {}).get("end", 4.0)
+        region_obj = clip_obj.get("region", {}) or {}
+        region_start = float(region_obj.get("start", 0.0))
+        region_end = float(region_obj.get("end", 4.0))
+        loop_obj = region_obj.get("loop", {}) or {}
+        loop_start = float(loop_obj.get("start", region_start))
+        loop_end = float(loop_obj.get("end", region_end))
+        loop_enabled = bool(loop_obj.get("isEnabled", False))
+        region = loop_end - loop_start if loop_enabled else region_end - region_start
         track_name = track_obj.get("name") or f"Track {track + 1}"
         clip_name = clip_obj.get("name") or f"Clip {clip + 1}"
         param_map: Dict[int, str] = {}
@@ -68,7 +77,11 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
 
         # Load parameter metadata from available instrument schemas
         schemas: Dict[str, Dict[str, Any]] = {}
-        for loader in (load_drift_schema, load_wavetable_schema, load_melodic_sampler_schema):
+        for loader in (
+            load_drift_schema,
+            load_wavetable_schema,
+            load_melodic_sampler_schema,
+        ):
             try:
                 schemas.update(loader() or {})
             except Exception:
@@ -112,6 +125,13 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
             "notes": notes,
             "envelopes": envelopes,
             "region": region,
+            "region_info": {
+                "start": region_start,
+                "end": region_end,
+                "loop_start": loop_start,
+                "loop_end": loop_end,
+                "loop_enabled": loop_enabled,
+            },
             "param_map": param_map,
             "param_context": param_context,
             "param_ranges": param_ranges,
@@ -134,9 +154,7 @@ def save_envelope(
         with open(set_path, "r") as f:
             song = json.load(f)
 
-        clip_obj = (
-            song["tracks"][track]["clipSlots"][clip]["clip"]
-        )
+        clip_obj = song["tracks"][track]["clipSlots"][clip]["clip"]
         envelopes = clip_obj.setdefault("envelopes", [])
         for env in envelopes:
             if env.get("parameterId") == parameter_id:

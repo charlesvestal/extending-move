@@ -1212,6 +1212,12 @@ button#macro-add-param {
     width:100%
 }
 
+.clip-canvas {
+    display: block;
+    width: 100%;
+    border: 1px solid #ccc;
+}
+
 .env-container {
     display: flex;
     align-items: top;

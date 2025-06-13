@@ -31,10 +31,36 @@ export function initSetInspector() {
   if (!dataDiv) return;
   const notes = JSON.parse(dataDiv.dataset.notes || '[]');
   const envelopes = JSON.parse(dataDiv.dataset.envelopes || '[]');
-  const region = parseFloat(dataDiv.dataset.region || '4');
+  const regionInfo = JSON.parse(dataDiv.dataset.regionInfo || '{}');
+  const baseRegion = parseFloat(dataDiv.dataset.region || '4');
   const paramRanges = JSON.parse(dataDiv.dataset.paramRanges || '{}');
   const canvas = document.getElementById('clipCanvas');
   const ctx = canvas.getContext('2d');
+  const showFull = document.getElementById('showFullClip');
+
+  const fullStart = regionInfo.start || 0;
+  const fullEnd = regionInfo.end !== undefined ? regionInfo.end : fullStart + baseRegion;
+  const loopStart = regionInfo.loop_start !== undefined ? regionInfo.loop_start : fullStart;
+  const loopEnd = regionInfo.loop_end !== undefined ? regionInfo.loop_end : fullEnd;
+  const loopEnabled = regionInfo.loop_enabled !== undefined ? regionInfo.loop_enabled : true;
+  let visibleStart = loopEnabled ? loopStart : fullStart;
+  let visibleEnd = loopEnabled ? loopEnd : fullEnd;
+  let region = visibleEnd - visibleStart;
+
+  canvas.width = canvas.clientWidth;
+
+  function updateRegionView() {
+    if (showFull && showFull.checked) {
+      visibleStart = fullStart;
+      visibleEnd = fullEnd;
+    } else {
+      visibleStart = loopEnabled ? loopStart : fullStart;
+      visibleEnd = loopEnabled ? loopEnd : fullEnd;
+    }
+    region = visibleEnd - visibleStart;
+    draw();
+  }
+  if (showFull) showFull.addEventListener('change', updateRegionView);
   const envSelect = document.getElementById('envelope_select');
   const legendDiv = document.getElementById('paramLegend');
   const editBtn = document.getElementById('editEnvBtn');
@@ -95,14 +121,24 @@ export function initSetInspector() {
     return { min, max };
   }
 
+  function timeToX(t) {
+    return ((t - visibleStart) / region) * canvas.width;
+  }
+
+  function xToTime(x) {
+    return (x / canvas.width) * region + visibleStart;
+  }
+
   function drawGrid() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     const { min, max } = getVisibleRange();
     const noteRange = max - min + 1;
 
     ctx.strokeStyle = '#ddd';
-    for (let b = 0; b <= region; b++) {
-      const x = (b / region) * canvas.width;
+    const startBeat = Math.floor(visibleStart);
+    const endBeat = Math.ceil(visibleEnd);
+    for (let b = startBeat; b <= endBeat; b++) {
+      const x = timeToX(b);
       ctx.beginPath();
       ctx.lineWidth = b % 4 === 0 ? 2 : 1;
       ctx.moveTo(x, 0);
@@ -110,6 +146,16 @@ export function initSetInspector() {
       ctx.stroke();
     }
     ctx.lineWidth = 1;
+
+    if (showFull && showFull.checked && loopEnabled) {
+      ctx.fillStyle = 'rgba(0,0,0,0.15)';
+      if (loopStart > fullStart) {
+        ctx.fillRect(0, 0, timeToX(loopStart), canvas.height);
+      }
+      if (loopEnd < fullEnd) {
+        ctx.fillRect(timeToX(loopEnd), 0, timeToX(fullEnd) - timeToX(loopEnd), canvas.height);
+      }
+    }
 
     const h = canvas.height / noteRange;
     for (let n = min; n <= max; n++) {
@@ -142,8 +188,11 @@ export function initSetInspector() {
     const h = canvas.height / noteRange;
     ctx.fillStyle = '#0074D9';
     notes.forEach(n => {
-      const x = (n.startTime / region) * canvas.width;
-      const w = (n.duration / region) * canvas.width;
+      const start = n.startTime;
+      const end = n.startTime + n.duration;
+      if (end < visibleStart || start > visibleEnd) return;
+      const x = timeToX(Math.max(start, visibleStart));
+      const w = ((Math.min(end, visibleEnd) - Math.max(start, visibleStart)) / region) * canvas.width;
       const y = canvas.height - (n.noteNumber - min + 1) * h;
       ctx.fillRect(x, y, w, h);
     });
@@ -164,7 +213,7 @@ export function initSetInspector() {
     ctx.beginPath();
     const needsScale = isNormalized(env);
     env.breakpoints.forEach((bp, i) => {
-      const x = (bp.time / region) * canvas.width;
+      const x = timeToX(bp.time);
       let v = bp.value;
       if (needsScale) {
         v = env.rangeMin + v * (env.rangeMax - env.rangeMin);
@@ -262,7 +311,7 @@ export function initSetInspector() {
     const env = editing ? (envInfo ? { ...envInfo, breakpoints: currentEnv } : { breakpoints: currentEnv }) : envInfo;
     if (!env || !env.breakpoints || !env.breakpoints.length) { valueDiv.textContent = ''; return; }
     const pos = canvasPos(ev);
-    const t = (pos.x / canvas.width) * region;
+    const t = xToTime(pos.x);
     let v = envValueAt(env.breakpoints, t);
     if (isNormalized(env)) {
       v = env.rangeMin + v * (env.rangeMax - env.rangeMin);
@@ -276,7 +325,7 @@ export function initSetInspector() {
     drawing = true;
     dirty = true;
     const { x, y } = canvasPos(ev);
-    const t = (x / canvas.width) * region;
+    const t = xToTime(x);
     const env = currentEnv.length ? currentEnv : (envInfo ? envInfo.breakpoints : []);
     const before = env.filter(bp => bp.time < t);
     tailEnv = env.filter(bp => bp.time > t);
@@ -299,7 +348,7 @@ export function initSetInspector() {
       return;
     }
     const { x, y } = canvasPos(ev);
-    const t = (x / canvas.width) * region;
+    const t = xToTime(x);
     let v;
     if (isNormalized(envInfo)) {
       v = 1 - y / canvas.height;
@@ -364,7 +413,7 @@ export function initSetInspector() {
   });
   updateLegend();
   updateControls();
-  draw();
+  updateRegionView();
 }
 
 document.addEventListener('DOMContentLoaded', initSetInspector);
