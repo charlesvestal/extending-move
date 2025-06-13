@@ -32,6 +32,7 @@ export function initSetInspector() {
   const notes = JSON.parse(dataDiv.dataset.notes || '[]');
   const envelopes = JSON.parse(dataDiv.dataset.envelopes || '[]');
   const region = parseFloat(dataDiv.dataset.region || '4');
+  const loopStart = parseFloat(dataDiv.dataset.loopStart || '0');
   const paramRanges = JSON.parse(dataDiv.dataset.paramRanges || '{}');
   const canvas = document.getElementById('clipCanvas');
   const ctx = canvas.getContext('2d');
@@ -142,7 +143,7 @@ export function initSetInspector() {
     const h = canvas.height / noteRange;
     ctx.fillStyle = '#0074D9';
     notes.forEach(n => {
-      const x = (n.startTime / region) * canvas.width;
+      const x = ((n.startTime - loopStart) / region) * canvas.width;
       const w = (n.duration / region) * canvas.width;
       const y = canvas.height - (n.noteNumber - min + 1) * h;
       ctx.fillRect(x, y, w, h);
@@ -164,7 +165,7 @@ export function initSetInspector() {
     ctx.beginPath();
     const needsScale = isNormalized(env);
     env.breakpoints.forEach((bp, i) => {
-      const x = (bp.time / region) * canvas.width;
+      const x = ((bp.time - loopStart) / region) * canvas.width;
       let v = bp.value;
       if (needsScale) {
         v = env.rangeMin + v * (env.rangeMax - env.rangeMin);
@@ -176,14 +177,14 @@ export function initSetInspector() {
     ctx.stroke();
   }
 
-  function envValueAt(bps, t) {
+  function envValueAt(bps, tAbs) {
     if (!bps.length) return 0;
-    if (t <= bps[0].time) return bps[0].value;
+    if (tAbs <= bps[0].time) return bps[0].value;
     for (let i = 1; i < bps.length; i++) {
-      if (t < bps[i].time) {
+      if (tAbs < bps[i].time) {
         const a = bps[i - 1];
         const b = bps[i];
-        const p = (t - a.time) / (b.time - a.time);
+        const p = (tAbs - a.time) / (b.time - a.time);
         return a.value + p * (b.value - a.value);
       }
     }
@@ -263,7 +264,7 @@ export function initSetInspector() {
     if (!env || !env.breakpoints || !env.breakpoints.length) { valueDiv.textContent = ''; return; }
     const pos = canvasPos(ev);
     const t = (pos.x / canvas.width) * region;
-    let v = envValueAt(env.breakpoints, t);
+    let v = envValueAt(env.breakpoints, t + loopStart);
     if (isNormalized(env)) {
       v = env.rangeMin + v * (env.rangeMax - env.rangeMin);
     }
@@ -277,17 +278,18 @@ export function initSetInspector() {
     dirty = true;
     const { x, y } = canvasPos(ev);
     const t = (x / canvas.width) * region;
+    const tAbs = t + loopStart;
     const env = currentEnv.length ? currentEnv : (envInfo ? envInfo.breakpoints : []);
-    const before = env.filter(bp => bp.time < t);
-    tailEnv = env.filter(bp => bp.time > t);
-    const startV = envValueAt(env, t);
+    const before = env.filter(bp => bp.time < tAbs);
+    tailEnv = env.filter(bp => bp.time > tAbs);
+    const startV = envValueAt(env, tAbs);
     let v0;
     if (isNormalized(envInfo)) {
       v0 = 1 - y / canvas.height;
     } else {
       v0 = envInfo.domainMax - (y / canvas.height) * (envInfo.domainMax - envInfo.domainMin);
     }
-    currentEnv = [...before, { time: t, value: startV }, { time: t, value: v0 }];
+    currentEnv = [...before, { time: tAbs, value: startV }, { time: tAbs, value: v0 }];
     updateControls();
     draw();
     ev.preventDefault();
@@ -306,13 +308,13 @@ export function initSetInspector() {
     } else {
       v = envInfo.domainMax - (y / canvas.height) * (envInfo.domainMax - envInfo.domainMin);
     }
-    while (tailEnv.length && tailEnv[0].time <= t) {
+    while (tailEnv.length && tailEnv[0].time <= tAbs) {
       tailEnv.shift();
     }
-    while (currentEnv.length && t < currentEnv[currentEnv.length - 1].time) {
+    while (currentEnv.length && tAbs < currentEnv[currentEnv.length - 1].time) {
       currentEnv.pop();
     }
-    currentEnv.push({ time: t, value: v });
+    currentEnv.push({ time: tAbs, value: v });
     draw();
     ev.preventDefault();
   }

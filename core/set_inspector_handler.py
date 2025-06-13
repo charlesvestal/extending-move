@@ -68,7 +68,11 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
         clip_obj = track_obj["clipSlots"][clip]["clip"]
         notes = clip_obj.get("notes", [])
         envelopes = clip_obj.get("envelopes", [])
-        region = clip_obj.get("region", {}).get("end", 4.0)
+        region_info = clip_obj.get("region", {})
+        loop_info = region_info.get("loop", {})
+        loop_start = loop_info.get("start", region_info.get("start", 0.0))
+        loop_end = loop_info.get("end", region_info.get("end", 4.0))
+        region = float(loop_end) - float(loop_start)
         track_name = _track_display_name(track_obj, track)
         clip_name = clip_obj.get("name") or f"Clip {clip + 1}"
         param_map: Dict[int, str] = {}
@@ -122,6 +126,7 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
             "notes": notes,
             "envelopes": envelopes,
             "region": region,
+            "loop_start": loop_start,
             "param_map": param_map,
             "param_context": param_context,
             "param_ranges": param_ranges,
