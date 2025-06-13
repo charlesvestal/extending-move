@@ -448,6 +448,10 @@ nav.breadcrumbs {
 nav.breadcrumbs form {
     display: inline;
 }
+
+.breadcrumbs .link-button:hover {
+    background-color: transparent;
+}
 .file-browser {
     max-height: 240px;
     overflow-y: auto;
