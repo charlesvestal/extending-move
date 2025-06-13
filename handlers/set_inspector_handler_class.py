@@ -7,13 +7,14 @@ import json
 import os
 
 class SetInspectorHandler(BaseHandler):
-    def generate_pad_grid(self, used_ids, color_map, name_map):
+    def generate_pad_grid(self, used_ids, color_map, name_map, selected_idx=None):
         """Return HTML for a 32-pad grid showing sets with colors.
 
         Args:
             used_ids (set): Pad indices that contain sets.
             color_map (dict): Mapping of pad index to pad color ID.
             name_map (dict): Mapping of pad index to set name.
+            selected_idx (int, optional): Pad index to mark as selected.
         """
         cells = []
         for row in range(4):
@@ -23,13 +24,14 @@ class SetInspectorHandler(BaseHandler):
                 has_set = idx in used_ids
                 status = 'occupied' if has_set else 'free'
                 disabled = '' if has_set else 'disabled'
+                checked = ' checked' if selected_idx is not None and idx == selected_idx else ''
                 color_id = color_map.get(idx)
                 style = f' style="background-color: {rgb_string(color_id)}"' if color_id else ''
                 name_attr = (
                     f" data-name=\"{name_map.get(idx, '')}\"" if idx in name_map else ""
                 )
                 cells.append(
-                    f'<input type="radio" id="inspect_pad_{num}" name="pad_index" value="{num}" {disabled}>'
+                    f'<input type="radio" id="inspect_pad_{num}" name="pad_index" value="{num}"{checked} {disabled}>'
                     f'<label for="inspect_pad_{num}" class="pad-cell {status}"{style}{name_attr}></label>'
                 )
         return '<div class="pad-grid">' + ''.join(cells) + '</div>'
@@ -70,6 +72,7 @@ class SetInspectorHandler(BaseHandler):
             if str(m["mset_color"]).isdigit()
         }
         name_map = {int(m["mset_id"]): m["mset_name"] for m in msets}
+        selected_idx = None
         pad_grid = self.generate_pad_grid(used, color_map, name_map)
         return {
             "pad_grid": pad_grid,
@@ -104,6 +107,7 @@ class SetInspectorHandler(BaseHandler):
                 idx = int(pad_val) - 1
                 entry = next((m for m in msets if m.get("mset_id") == idx), None)
                 if not entry:
+                    pad_grid = self.generate_pad_grid(used, color_map, name_map)
                     return self.format_error_response("No set on selected pad", pad_grid=pad_grid)
                 set_path = os.path.join(
                     MSETS_DIRECTORY,
@@ -111,13 +115,24 @@ class SetInspectorHandler(BaseHandler):
                     entry["mset_name"],
                     "Song.abl",
                 )
+                selected_idx = idx
+            elif set_path:
+                entry = next(
+                    (m for m in msets if os.path.join(MSETS_DIRECTORY, m["uuid"], m["mset_name"], "Song.abl") == set_path),
+                    None,
+                )
+                if entry:
+                    selected_idx = int(entry.get("mset_id"))
             if not set_path:
+                pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
                 return self.format_error_response("No set selected", pad_grid=pad_grid)
             result = list_clips(set_path)
             if not result.get("success"):
+                pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
                 return self.format_error_response(result.get("message"), pad_grid=pad_grid)
             clip_grid = self.generate_clip_grid(result.get("clips", []))
             set_name = os.path.basename(os.path.dirname(set_path))
+            pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
             return {
                 "pad_grid": pad_grid,
                 "message": result.get("message"),
@@ -135,10 +150,18 @@ class SetInspectorHandler(BaseHandler):
             set_path = form.getvalue("set_path")
             clip_val = form.getvalue("clip_select")
             if not set_path or not clip_val:
+                pad_grid = self.generate_pad_grid(used, color_map, name_map)
                 return self.format_error_response("Missing parameters", pad_grid=pad_grid)
+            entry = next(
+                (m for m in msets if os.path.join(MSETS_DIRECTORY, m["uuid"], m["mset_name"], "Song.abl") == set_path),
+                None,
+            )
+            if entry:
+                selected_idx = int(entry.get("mset_id"))
             track_idx, clip_idx = map(int, clip_val.split(":"))
             result = get_clip_data(set_path, track_idx, clip_idx)
             if not result.get("success"):
+                pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
                 return self.format_error_response(result.get("message"), pad_grid=pad_grid)
             clip_info = list_clips(set_path)
             clip_grid = self.generate_clip_grid(clip_info.get("clips", []), selected=clip_val)
@@ -156,6 +179,7 @@ class SetInspectorHandler(BaseHandler):
             )
             env_opts = '<option value="" disabled selected>-- Select Envelope --</option>' + env_opts
             set_name = os.path.basename(os.path.dirname(set_path))
+            pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
             return {
                 "pad_grid": pad_grid,
                 "message": result.get("message"),
@@ -180,14 +204,23 @@ class SetInspectorHandler(BaseHandler):
             param_val = form.getvalue("parameter_id")
             env_data = form.getvalue("envelope_data")
             if not (set_path and clip_val and param_val and env_data):
+                pad_grid = self.generate_pad_grid(used, color_map, name_map)
                 return self.format_error_response("Missing parameters", pad_grid=pad_grid)
+            entry = next(
+                (m for m in msets if os.path.join(MSETS_DIRECTORY, m["uuid"], m["mset_name"], "Song.abl") == set_path),
+                None,
+            )
+            if entry:
+                selected_idx = int(entry.get("mset_id"))
             track_idx, clip_idx = map(int, clip_val.split(":"))
             try:
                 breakpoints = json.loads(env_data)
             except Exception:
+                pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
                 return self.format_error_response("Invalid envelope data", pad_grid=pad_grid)
             result = save_envelope(set_path, track_idx, clip_idx, int(param_val), breakpoints)
             if not result.get("success"):
+                pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
                 return self.format_error_response(result.get("message"), pad_grid=pad_grid)
             clip_info = list_clips(set_path)
             clip_grid = self.generate_clip_grid(clip_info.get("clips", []), selected=clip_val)
@@ -211,6 +244,7 @@ class SetInspectorHandler(BaseHandler):
             )
             env_opts = '<option value="" disabled>-- Select Envelope --</option>' + env_opts
             set_name = os.path.basename(os.path.dirname(set_path))
+            pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
             return {
                 "pad_grid": pad_grid,
                 "message": result.get("message"),

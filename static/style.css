@@ -499,7 +499,26 @@ nav.breadcrumbs form {
 }
 
 .pad-grid label {
-	margin-bottom: 0;
+        margin-bottom: 0;
+}
+
+/* Miniature grid wrapper */
+.mini-grid {
+    width: 120px;
+    height: 40px;
+    overflow: hidden;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.mini-grid .pad-grid {
+    transform: scale(0.2);
+    transform-origin: top left;
+}
+
+.mini-grid input,
+.mini-grid label {
+    pointer-events: none;
 }
 
 
