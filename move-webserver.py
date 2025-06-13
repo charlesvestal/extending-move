@@ -337,6 +337,8 @@ def set_inspector_route():
         selected_set=result.get("selected_set"),
         clip_options=result.get("clip_options"),
         selected_clip=result.get("selected_clip"),
+        clip_grid=result.get("clip_grid"),
+        pad_grid=result.get("pad_grid"),
         notes=result.get("notes"),
         envelopes=result.get("envelopes"),
         region=result.get("region"),

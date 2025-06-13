@@ -8,32 +8,29 @@
   <div class="file-browser" data-root="{{ browser_root }}" data-action="{{ host_prefix }}/set-inspector" data-field="set_path" data-value="select_set">
     {{ file_browser_html | safe }}
   </div>
-{% elif not selected_clip %}
-  <form method="post" action="{{ host_prefix }}/set-inspector" style="margin-bottom:1rem;">
-    <input type="hidden" name="action" value="show_clip">
-    <input type="hidden" name="set_path" value="{{ selected_set }}">
-    <label for="clip_select">Clip:</label>
-    <select name="clip_select" id="clip_select">{{ clip_options | safe }}</select>
-    <button type="submit">Load Clip</button>
-  </form>
-  <form method="get" action="{{ host_prefix }}/set-inspector">
-    <button type="submit">Choose Another Set</button>
-  </form>
 {% else %}
-  <form method="post" action="{{ host_prefix }}/set-inspector" style="display:inline;">
-    <input type="hidden" name="action" value="select_set">
-    <input type="hidden" name="set_path" value="{{ selected_set }}">
-    <button type="submit">Choose Another Clip</button>
-  </form>
-  <form method="get" action="{{ host_prefix }}/set-inspector" style="margin-left:1rem; display:inline;">
-    <button type="submit">Choose Another Set</button>
-  </form>
-  <div style="margin-top:1rem;">
-    <label for="envelope_select">Envelope:</label>
-    <select id="envelope_select">{{ clip_options | safe }}</select>
-  </div>
-  <canvas id="clipCanvas" width="400" height="200" style="border:1px solid #ccc;margin-top:1rem;"></canvas>
-  <div id="clipData" data-notes='{{ notes | tojson }}' data-envelopes='{{ envelopes | tojson }}' data-region='{{ region }}'></div>
+  {{ pad_grid | safe }}
+  {{ clip_grid | safe }}
+  {% if not selected_clip %}
+    <form method="get" action="{{ host_prefix }}/set-inspector" style="margin-bottom:1rem;">
+      <button type="submit">Choose Another Set</button>
+    </form>
+  {% else %}
+    <form method="post" action="{{ host_prefix }}/set-inspector" style="display:inline;">
+      <input type="hidden" name="action" value="select_set">
+      <input type="hidden" name="set_path" value="{{ selected_set }}">
+      <button type="submit">Choose Another Clip</button>
+    </form>
+    <form method="get" action="{{ host_prefix }}/set-inspector" style="margin-left:1rem; display:inline;">
+      <button type="submit">Choose Another Set</button>
+    </form>
+    <div style="margin-top:1rem;">
+      <label for="envelope_select">Envelope:</label>
+      <select id="envelope_select">{{ clip_options | safe }}</select>
+    </div>
+    <canvas id="clipCanvas" width="400" height="200" style="border:1px solid #ccc;margin-top:1rem;"></canvas>
+    <div id="clipData" data-notes='{{ notes | tojson }}' data-envelopes='{{ envelopes | tojson }}' data-region='{{ region }}'></div>
+  {% endif %}
 {% endif %}
 {% endblock %}
 {% block scripts %}
