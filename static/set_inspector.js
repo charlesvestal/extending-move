@@ -46,7 +46,25 @@ export function initSetInspector() {
 
   let editing = false;
   let drawing = false;
+  let dirty = false;
   let currentEnv = [];
+
+  function updateControls() {
+    const hasEnv = envSelect && envSelect.value;
+    if (editBtn) {
+      editBtn.style.display = hasEnv && !editing ? '' : 'none';
+    }
+    if (saveForm) {
+      saveForm.style.display = hasEnv && editing ? 'inline' : 'none';
+    }
+    if (saveBtn) {
+      if (editing) {
+        saveBtn.disabled = !dirty;
+      } else {
+        saveBtn.disabled = true;
+      }
+    }
+  }
   if (legendDiv) {
     legendDiv.style.display = 'flex';
     legendDiv.style.flexDirection = 'column';
@@ -179,14 +197,16 @@ export function initSetInspector() {
   }
 
   if (envSelect) envSelect.addEventListener('change', () => {
-    updateLegend();
-    if (editing) {
-      const param = parseInt(envSelect.value);
-      const src = envelopes.find(e => e.parameterId === param);
-      currentEnv = src ? src.breakpoints.map(bp => ({ ...bp })) : [];
+    editing = false;
+    drawing = false;
+    dirty = false;
+    currentEnv = [];
+    if (envSelect.value) {
       paramInput.value = envSelect.value;
-      saveBtn.style.display = 'none';
     }
+    if (saveBtn) saveBtn.disabled = true;
+    updateLegend();
+    updateControls();
     draw();
   });
 
@@ -215,9 +235,11 @@ export function initSetInspector() {
   function startDraw(ev) {
     if (!editing) return;
     drawing = true;
+    dirty = true;
     currentEnv = [];
     const { x, y } = canvasPos(ev);
     currentEnv.push({ time: (x / canvas.width) * region, value: 1 - y / canvas.height });
+    updateControls();
     ev.preventDefault();
   }
 
@@ -240,7 +262,6 @@ export function initSetInspector() {
   function endDraw() {
     if (drawing) {
       drawing = false;
-      if (saveBtn) saveBtn.style.display = '';
     }
   }
 
@@ -255,13 +276,14 @@ export function initSetInspector() {
   if (editBtn) editBtn.addEventListener('click', () => {
     if (!envSelect.value) return;
     editing = true;
+    drawing = false;
+    dirty = false;
     const param = parseInt(envSelect.value);
     const src = envelopes.find(e => e.parameterId === param);
     currentEnv = src ? src.breakpoints.map(bp => ({ ...bp })) : [];
     paramInput.value = envSelect.value;
-    editBtn.style.display = 'none';
-    if (saveForm) saveForm.style.display = 'block';
-    saveBtn.style.display = 'none';
+    if (saveBtn) saveBtn.disabled = true;
+    updateControls();
     draw();
   });
 
@@ -269,6 +291,7 @@ export function initSetInspector() {
     envInput.value = JSON.stringify(currentEnv);
   });
   updateLegend();
+  updateControls();
   draw();
 }
 
