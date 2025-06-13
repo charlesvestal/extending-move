@@ -46,6 +46,7 @@ export function initSetInspector() {
 
   let editing = false;
   let drawing = false;
+  let dirty = false;
   let currentEnv = [];
 
   function updateControls() {
@@ -54,10 +55,14 @@ export function initSetInspector() {
       editBtn.style.display = hasEnv && !editing ? '' : 'none';
     }
     if (saveForm) {
-      saveForm.style.display = hasEnv ? 'block' : 'none';
+      saveForm.style.display = hasEnv && editing ? 'inline' : 'none';
     }
-    if (!hasEnv) {
-      saveBtn.disabled = true;
+    if (saveBtn) {
+      if (editing) {
+        saveBtn.disabled = !dirty;
+      } else {
+        saveBtn.disabled = true;
+      }
     }
   }
   if (legendDiv) {
@@ -193,10 +198,13 @@ export function initSetInspector() {
 
   if (envSelect) envSelect.addEventListener('change', () => {
     editing = false;
+    drawing = false;
+    dirty = false;
     currentEnv = [];
     if (envSelect.value) {
       paramInput.value = envSelect.value;
     }
+    if (saveBtn) saveBtn.disabled = true;
     updateLegend();
     updateControls();
     draw();
@@ -227,10 +235,11 @@ export function initSetInspector() {
   function startDraw(ev) {
     if (!editing) return;
     drawing = true;
+    dirty = true;
     currentEnv = [];
     const { x, y } = canvasPos(ev);
     currentEnv.push({ time: (x / canvas.width) * region, value: 1 - y / canvas.height });
-    if (saveBtn) saveBtn.disabled = false;
+    updateControls();
     ev.preventDefault();
   }
 
@@ -267,6 +276,8 @@ export function initSetInspector() {
   if (editBtn) editBtn.addEventListener('click', () => {
     if (!envSelect.value) return;
     editing = true;
+    drawing = false;
+    dirty = false;
     const param = parseInt(envSelect.value);
     const src = envelopes.find(e => e.parameterId === param);
     currentEnv = src ? src.breakpoints.map(bp => ({ ...bp })) : [];
