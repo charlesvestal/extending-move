@@ -3,6 +3,7 @@ from core.set_inspector_handler import list_clips, get_clip_data
 from core.list_msets_handler import list_msets
 from core.pad_colors import rgb_string
 from core.config import MSETS_DIRECTORY
+import json
 import os
 
 class SetInspectorHandler(BaseHandler):
@@ -78,6 +79,7 @@ class SetInspectorHandler(BaseHandler):
             "notes": [],
             "envelopes": [],
             "region": 4.0,
+            "param_ranges_json": "{}",
         }
 
     def handle_post(self, form):
@@ -122,6 +124,7 @@ class SetInspectorHandler(BaseHandler):
                 "notes": [],
                 "envelopes": [],
                 "region": 4.0,
+                "param_ranges_json": "{}",
             }
         elif action == "show_clip":
             set_path = form.getvalue("set_path")
@@ -156,6 +159,7 @@ class SetInspectorHandler(BaseHandler):
                 "notes": result.get("notes", []),
                 "envelopes": envelopes,
                 "region": result.get("region", 4.0),
+                "param_ranges_json": json.dumps(result.get("param_ranges", {})),
             }
         else:
             return self.format_error_response("Unknown action", pad_grid=pad_grid)

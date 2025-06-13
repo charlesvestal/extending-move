@@ -32,9 +32,11 @@ export function initSetInspector() {
   const notes = JSON.parse(dataDiv.dataset.notes || '[]');
   const envelopes = JSON.parse(dataDiv.dataset.envelopes || '[]');
   const region = parseFloat(dataDiv.dataset.region || '4');
+  const paramRanges = JSON.parse(dataDiv.dataset.paramRanges || '{}');
   const canvas = document.getElementById('clipCanvas');
   const ctx = canvas.getContext('2d');
   const envSelect = document.getElementById('envelope_select');
+  const legendDiv = document.getElementById('paramLegend');
 
   function getVisibleRange() {
     if (!notes.length) return { min: 60, max: 71 }; // default middle C octave
@@ -117,6 +119,27 @@ export function initSetInspector() {
     ctx.stroke();
   }
 
+  function updateLegend() {
+    if (!legendDiv) return;
+    if (!envSelect || !envSelect.value) {
+      legendDiv.textContent = '';
+      return;
+    }
+    const param = parseInt(envSelect.value);
+    const range = paramRanges[param];
+    if (!range || typeof range.min !== 'number' || typeof range.max !== 'number') {
+      legendDiv.textContent = '';
+      return;
+    }
+    const mid = (range.min + range.max) / 2;
+    const unit = range.unit ? ' ' + range.unit : '';
+    const fmt = v => Number(v).toFixed(2) + unit;
+    legendDiv.innerHTML =
+      `<div style="text-align:right;">${fmt(range.max)}</div>` +
+      `<div style="text-align:right;">${fmt(mid)}</div>` +
+      `<div style="text-align:right;">${fmt(range.min)}</div>`;
+  }
+
   function draw() {
     drawGrid();
     drawNotes();
@@ -124,7 +147,8 @@ export function initSetInspector() {
     drawEnvelope();
   }
 
-  if (envSelect) envSelect.addEventListener('change', draw);
+  if (envSelect) envSelect.addEventListener('change', () => { updateLegend(); draw(); });
+  updateLegend();
   draw();
 }
 
