@@ -7,17 +7,49 @@ from core.synth_preset_inspector_handler import (
     load_melodic_sampler_schema,
 )
 
+# Fallback ranges for well-known parameters
+DEFAULT_RANGE: Dict[str, Dict[str, float]] = {
+    "Voice_Transpose": {"min": -48, "max": 48},
+    "Voice_Filter_Frequency": {"min": 20, "max": 20000},
+}
 
-def _collect_param_ids(obj: Any, mapping: Dict[int, str]) -> None:
-    """Recursively collect parameterId mappings from the given object."""
-    if isinstance(obj, dict):
-        for key, val in obj.items():
-            if isinstance(val, dict) and "id" in val and isinstance(val["id"], int):
-                mapping[val["id"]] = val.get("customName") or key
-            _collect_param_ids(val, mapping)
-    elif isinstance(obj, list):
-        for item in obj:
-            _collect_param_ids(item, mapping)
+
+def _scan_device(
+    device: Dict[str, Any],
+    param_meta: Dict[int, Dict[str, Any]],
+    context: Dict[str, Any] | None = None,
+) -> None:
+    """Recursively scan a device collecting parameter metadata."""
+    ctx = {**(context or {}), "deviceName": device.get("name")}
+
+    for p_name, definition in device.get("parameters", {}).items():
+        if isinstance(definition, dict) and isinstance(definition.get("id"), int):
+            pid = definition["id"]
+            r_min = definition.get("rangeMin")
+            r_max = definition.get("rangeMax")
+            if r_min is None or r_max is None:
+                defaults = DEFAULT_RANGE.get(p_name)
+                if defaults:
+                    r_min = defaults.get("min") if r_min is None else r_min
+                    r_max = defaults.get("max") if r_max is None else r_max
+            param_meta[pid] = {
+                "id": pid,
+                "name": p_name,
+                "deviceName": ctx.get("deviceName"),
+                "padName": ctx.get("padName"),
+                "rangeMin": r_min,
+                "rangeMax": r_max,
+            }
+
+    if device.get("kind") in {"drumRack", "instrumentRack"}:
+        for idx, chain in enumerate(device.get("chains", [])):
+            sub_ctx = ctx.copy()
+            if device.get("kind") == "drumRack":
+                sub_ctx["padName"] = f"Pad{idx + 1}"
+            for sub in chain.get("devices", []):
+                _scan_device(sub, param_meta, sub_ctx)
+
+
 
 
 def list_clips(set_path: str) -> Dict[str, Any]:
@@ -51,8 +83,17 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
         region = clip_obj.get("region", {}).get("end", 4.0)
         track_name = track_obj.get("name") or f"Track {track + 1}"
         clip_name = clip_obj.get("name") or f"Clip {clip + 1}"
-        param_map: Dict[int, str] = {}
-        _collect_param_ids(track_obj.get("devices", []), param_map)
+        param_meta: Dict[int, Dict[str, Any]] = {}
+        for dev in track_obj.get("devices", []):
+            _scan_device(dev, param_meta)
+        param_map: Dict[int, str] = {
+            pid: (
+                f"{meta['padName']}: {meta['name']}"
+                if meta.get("padName")
+                else f"{meta.get('deviceName')}: {meta['name']}"
+            )
+            for pid, meta in param_meta.items()
+        }
 
         # Load parameter metadata from available instrument schemas
         schemas: Dict[str, Dict[str, Any]] = {}
@@ -63,8 +104,8 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
                 pass
 
         param_ranges: Dict[int, Dict[str, float]] = {}
-        for pid, name in param_map.items():
-            info = schemas.get(name)
+        for pid, meta in param_meta.items():
+            info = schemas.get(meta["name"])
             if not info:
                 continue
             min_v = info.get("min")
@@ -75,11 +116,28 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
                     "max": max_v,
                     "unit": info.get("unit"),
                 }
+
+        # Patch envelope data with additional metadata
+        patched_envs = []
+        for env in envelopes:
+            meta = param_meta.get(env.get("parameterId"))
+            if meta:
+                env = env.copy()
+                if env.get("rangeMin") is None and meta.get("rangeMin") is not None:
+                    env["rangeMin"] = meta["rangeMin"]
+                if env.get("rangeMax") is None and meta.get("rangeMax") is not None:
+                    env["rangeMax"] = meta["rangeMax"]
+                env["owner"] = (
+                    f"{meta['padName']}: {meta['name']}"
+                    if meta.get("padName")
+                    else f"{meta.get('deviceName')}: {meta['name']}"
+                )
+            patched_envs.append(env)
         return {
             "success": True,
             "message": "Clip loaded",
             "notes": notes,
-            "envelopes": envelopes,
+            "envelopes": patched_envs,
             "region": region,
             "param_map": param_map,
             "param_ranges": param_ranges,
@@ -102,16 +160,31 @@ def save_envelope(
         with open(set_path, "r") as f:
             song = json.load(f)
 
-        clip_obj = (
-            song["tracks"][track]["clipSlots"][clip]["clip"]
-        )
+        clip_obj = song["tracks"][track]["clipSlots"][clip]["clip"]
         envelopes = clip_obj.setdefault("envelopes", [])
+
+        # Collect metadata for labeling and ranges
+        param_meta: Dict[int, Dict[str, Any]] = {}
+        for dev in song["tracks"][track].get("devices", []):
+            _scan_device(dev, param_meta)
+        meta = param_meta.get(parameter_id)
+
+        env_data = {"parameterId": parameter_id, "breakpoints": breakpoints}
+        if meta:
+            if meta.get("rangeMin") is not None:
+                env_data["rangeMin"] = meta["rangeMin"]
+            if meta.get("rangeMax") is not None:
+                env_data["rangeMax"] = meta["rangeMax"]
+            env_data["owner"] = (
+                f"{meta['padName']}: {meta['name']}" if meta.get("padName") else f"{meta.get('deviceName')}: {meta['name']}"
+            )
+
         for env in envelopes:
             if env.get("parameterId") == parameter_id:
-                env["breakpoints"] = breakpoints
+                env.update(env_data)
                 break
         else:
-            envelopes.append({"parameterId": parameter_id, "breakpoints": breakpoints})
+            envelopes.append(env_data)
 
         with open(set_path, "w") as f:
             json.dump(song, f, indent=2)

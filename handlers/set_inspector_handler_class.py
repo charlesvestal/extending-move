@@ -147,7 +147,7 @@ class SetInspectorHandler(BaseHandler):
             env_opts = "".join(
                 (
                     f'<option value="{e.get("parameterId")}">'
-                    f'{param_map.get(e.get("parameterId"), e.get("parameterId"))}'
+                    f'{e.get("owner") or param_map.get(e.get("parameterId"), e.get("parameterId"))}'
                     f'</option>'
                 )
                 for e in envelopes
@@ -195,7 +195,7 @@ class SetInspectorHandler(BaseHandler):
             env_opts = "".join(
                 (
                     f'<option value="{e.get("parameterId")}">' +
-                    f'{param_map.get(e.get("parameterId"), e.get("parameterId"))}' +
+                    f'{e.get("owner") or param_map.get(e.get("parameterId"), e.get("parameterId"))}' +
                     f'</option>'
                 )
                 for e in envelopes
