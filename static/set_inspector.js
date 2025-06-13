@@ -43,8 +43,8 @@ export function initSetInspector() {
   const regionEnd = regionInfo.end ?? regionStart + baseRegion;
   const loopStart = regionInfo.loop_start ?? regionStart;
   const loopEnd = regionInfo.loop_end ?? regionEnd;
-  const fullStart = Math.min(regionStart, loopStart);
-  const fullEnd = Math.max(regionEnd, loopEnd);
+  const fullStart = 0;
+  const fullEnd = regionInfo.full_end ?? Math.max(regionEnd, loopEnd);
   const loopEnabled = regionInfo.loop_enabled !== undefined ? regionInfo.loop_enabled : true;
   let visibleStart = loopEnabled ? loopStart : fullStart;
   let visibleEnd = loopEnabled ? loopEnd : fullEnd;
@@ -56,16 +56,17 @@ export function initSetInspector() {
     if (showFull && showFull.checked) {
       visibleStart = fullStart;
       visibleEnd = fullEnd;
+      if (rangeMsg) {
+        rangeMsg.textContent = `Showing clip range of ${fullStart} to ${fullEnd}`;
+      }
     } else {
-      visibleStart = loopEnabled ? loopStart : fullStart;
-      visibleEnd = loopEnabled ? loopEnd : fullEnd;
+      visibleStart = loopEnabled ? loopStart : regionStart;
+      visibleEnd = loopEnabled ? loopEnd : regionEnd;
+      if (rangeMsg) {
+        rangeMsg.textContent = `Showing looped range of ${loopStart} to ${loopEnd}`;
+      }
     }
     region = visibleEnd - visibleStart;
-    if (rangeMsg) {
-      const start = showFull && showFull.checked ? fullStart : loopStart;
-      const end = showFull && showFull.checked ? fullEnd : loopEnd;
-      rangeMsg.textContent = `Showing looped range of ${start} to ${end}`;
-    }
     draw();
   }
   if (showFull) {

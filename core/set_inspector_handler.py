@@ -1,5 +1,6 @@
 import json
 import os
+import math
 from typing import Any, Dict, List
 from core.synth_preset_inspector_handler import (
     load_drift_schema,
@@ -68,6 +69,25 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
         loop_end = float(loop_obj.get("end", region_end))
         loop_enabled = bool(loop_obj.get("isEnabled", False))
         region = loop_end - loop_start if loop_enabled else region_end - region_start
+
+        last_time = 0.0
+        for note in notes:
+            try:
+                nt = float(note.get("startTime", 0.0)) + float(note.get("duration", 0.0))
+                if nt > last_time:
+                    last_time = nt
+            except Exception:
+                continue
+        for env in envelopes:
+            for bp in env.get("breakpoints", []):
+                try:
+                    t = float(bp.get("time", 0.0))
+                    if t > last_time:
+                        last_time = t
+                except Exception:
+                    continue
+        clip_end = max(region_end, loop_end, last_time)
+        full_end = math.ceil(clip_end / 4.0) * 4.0 if clip_end > 0 else 4.0
         track_name = track_obj.get("name") or f"Track {track + 1}"
         clip_name = clip_obj.get("name") or f"Clip {clip + 1}"
         param_map: Dict[int, str] = {}
@@ -131,6 +151,7 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
                 "loop_start": loop_start,
                 "loop_end": loop_end,
                 "loop_enabled": loop_enabled,
+                "full_end": full_end,
             },
             "param_map": param_map,
             "param_context": param_context,
