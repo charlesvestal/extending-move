@@ -37,6 +37,13 @@ export function initSetInspector() {
   const ctx = canvas.getContext('2d');
   const envSelect = document.getElementById('envelope_select');
   const legendDiv = document.getElementById('paramLegend');
+  if (legendDiv) {
+    legendDiv.style.display = 'flex';
+    legendDiv.style.flexDirection = 'column';
+    legendDiv.style.justifyContent = 'space-between';
+    legendDiv.style.alignItems = 'flex-end';
+    legendDiv.style.height = canvas.height + 'px';
+  }
 
   function getVisibleRange() {
     if (!notes.length) return { min: 60, max: 71 }; // default middle C octave
