@@ -13,11 +13,13 @@
     <span id="selected-set-name" style="margin-left:1rem;"></span>
   </form>
 {% elif not selected_clip %}
-  <nav class="breadcrumbs" style="margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;">
-    <form method="get" action="{{ host_prefix }}/set-inspector" style="display:inline;">
-      <button type="submit" class="link-button">{{ set_name }}</button>
-    </form>
-    <a href="{{ host_prefix }}/set-inspector" class="mini-grid">{{ pad_grid | safe }}</a>
+  <nav class="breadcrumbs" style="margin-bottom:1rem; display:flex; align-items:flex-end; gap:0.5rem;">
+    <div style="display:flex; flex-direction:column; align-items:center;">
+      <form method="get" action="{{ host_prefix }}/set-inspector" style="display:inline;">
+        <button type="submit" class="link-button">{{ set_name }}</button>
+      </form>
+      <a href="{{ host_prefix }}/set-inspector" class="mini-grid">{{ pad_grid | safe }}</a>
+    </div>
   </nav>
   <form id="clipSelectForm" method="post" action="{{ host_prefix }}/set-inspector" style="margin-bottom:1rem;">
     <input type="hidden" name="action" value="show_clip">
@@ -29,22 +31,26 @@
     <button type="submit">Choose Another Set</button>
   </form> -->
 {% else %}
-  <nav class="breadcrumbs" style="margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;">
-    <form method="get" action="{{ host_prefix }}/set-inspector" style="display:inline;">
-      <button type="submit" class="link-button">{{ set_name }}</button>
-    </form>
-    <a href="{{ host_prefix }}/set-inspector" class="mini-grid">{{ pad_grid | safe }}</a>
+  <nav class="breadcrumbs" style="margin-bottom:1rem; display:flex; align-items:flex-end; gap:0.5rem;">
+    <div style="display:flex; flex-direction:column; align-items:center;">
+      <form method="get" action="{{ host_prefix }}/set-inspector" style="display:inline;">
+        <button type="submit" class="link-button">{{ set_name }}</button>
+      </form>
+      <a href="{{ host_prefix }}/set-inspector" class="mini-grid">{{ pad_grid | safe }}</a>
+    </div>
     -
-    <form method="post" action="{{ host_prefix }}/set-inspector" style="display:inline;">
-      <input type="hidden" name="action" value="select_set">
-      <input type="hidden" name="set_path" value="{{ selected_set }}">
-      <button type="submit" class="link-button">Track {{ (track_index + 1) if track_index is not none else '?' }}: {{ track_name }}</button>
-    </form>
-    <form id="miniClipForm" method="post" action="{{ host_prefix }}/set-inspector" style="display:inline; margin:0;">
-      <input type="hidden" name="action" value="select_set">
-      <input type="hidden" name="set_path" value="{{ selected_set }}">
-      <button type="submit" class="mini-grid" style="border:none; background:none; padding:0;">{{ clip_grid | safe }}</button>
-    </form>
+    <div style="display:flex; flex-direction:column; align-items:center;">
+      <form method="post" action="{{ host_prefix }}/set-inspector" style="display:inline;">
+        <input type="hidden" name="action" value="select_set">
+        <input type="hidden" name="set_path" value="{{ selected_set }}">
+        <button type="submit" class="link-button">Track {{ (track_index + 1) if track_index is not none else '?' }}: {{ track_name }}</button>
+      </form>
+      <form id="miniClipForm" method="post" action="{{ host_prefix }}/set-inspector" style="display:inline; margin:0;">
+        <input type="hidden" name="action" value="select_set">
+        <input type="hidden" name="set_path" value="{{ selected_set }}">
+        <button type="submit" class="mini-grid" style="border:none; background:none; padding:0;">{{ clip_grid | safe }}</button>
+      </form>
+    </div>
     - Clip {{ (clip_index + 1) if clip_index is not none else '?' }}
   </nav>
   <!-- <form method="post" action="{{ host_prefix }}/set-inspector" style="display:inline;">
