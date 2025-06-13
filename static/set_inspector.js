@@ -48,6 +48,7 @@ export function initSetInspector() {
   let drawing = false;
   let dirty = false;
   let currentEnv = [];
+  let tailEnv = [];
 
   function updateControls() {
     const hasEnv = envSelect && envSelect.value;
@@ -236,9 +237,13 @@ export function initSetInspector() {
     if (!editing) return;
     drawing = true;
     dirty = true;
-    currentEnv = [];
     const { x, y } = canvasPos(ev);
-    currentEnv.push({ time: (x / canvas.width) * region, value: 1 - y / canvas.height });
+    const t = (x / canvas.width) * region;
+    const env = currentEnv.length ? currentEnv : (envelopes.find(e => e.parameterId === parseInt(envSelect.value))?.breakpoints || []);
+    const before = env.filter(bp => bp.time < t);
+    tailEnv = env.filter(bp => bp.time > t);
+    const startV = envValueAt(env, t);
+    currentEnv = [...before, { time: t, value: startV }, { time: t, value: 1 - y / canvas.height }];
     updateControls();
     ev.preventDefault();
   }
@@ -251,7 +256,10 @@ export function initSetInspector() {
     const { x, y } = canvasPos(ev);
     const t = (x / canvas.width) * region;
     const v = 1 - y / canvas.height;
-    while (currentEnv.length && t <= currentEnv[currentEnv.length - 1].time) {
+    while (tailEnv.length && tailEnv[0].time <= t) {
+      tailEnv.shift();
+    }
+    while (currentEnv.length && t < currentEnv[currentEnv.length - 1].time) {
       currentEnv.pop();
     }
     currentEnv.push({ time: t, value: v });
@@ -262,6 +270,9 @@ export function initSetInspector() {
   function endDraw() {
     if (drawing) {
       drawing = false;
+      currentEnv = currentEnv.concat(tailEnv);
+      tailEnv = [];
+      draw();
     }
   }
 
