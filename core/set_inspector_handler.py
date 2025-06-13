@@ -8,16 +8,26 @@ from core.synth_preset_inspector_handler import (
 )
 
 
-def _collect_param_ids(obj: Any, mapping: Dict[int, str]) -> None:
-    """Recursively collect parameterId mappings from the given object."""
+def _collect_param_ids(
+    obj: Any,
+    mapping: Dict[int, str],
+    context: Dict[int, str],
+    prefix: str = "Track",
+) -> None:
+    """Recursively collect parameterId mappings with track/pad context."""
     if isinstance(obj, dict):
+        if obj.get("kind") == "drumCell":
+            pad_num = _collect_param_ids.pad_counter[0]
+            _collect_param_ids.pad_counter[0] += 1
+            prefix = f"Pad{pad_num}"
         for key, val in obj.items():
             if isinstance(val, dict) and "id" in val and isinstance(val["id"], int):
                 mapping[val["id"]] = val.get("customName") or key
-            _collect_param_ids(val, mapping)
+                context[val["id"]] = prefix
+            _collect_param_ids(val, mapping, context, prefix)
     elif isinstance(obj, list):
         for item in obj:
-            _collect_param_ids(item, mapping)
+            _collect_param_ids(item, mapping, context, prefix)
 
 
 def list_clips(set_path: str) -> Dict[str, Any]:
@@ -52,7 +62,9 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
         track_name = track_obj.get("name") or f"Track {track + 1}"
         clip_name = clip_obj.get("name") or f"Clip {clip + 1}"
         param_map: Dict[int, str] = {}
-        _collect_param_ids(track_obj.get("devices", []), param_map)
+        param_context: Dict[int, str] = {}
+        _collect_param_ids.pad_counter = [1]
+        _collect_param_ids(track_obj.get("devices", []), param_map, param_context)
 
         # Load parameter metadata from available instrument schemas
         schemas: Dict[str, Dict[str, Any]] = {}
@@ -101,6 +113,7 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
             "envelopes": envelopes,
             "region": region,
             "param_map": param_map,
+            "param_context": param_context,
             "param_ranges": param_ranges,
             "track_name": track_name,
             "clip_name": clip_name,

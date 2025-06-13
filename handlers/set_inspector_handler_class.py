@@ -144,9 +144,11 @@ class SetInspectorHandler(BaseHandler):
             clip_grid = self.generate_clip_grid(clip_info.get("clips", []), selected=clip_val)
             envelopes = result.get("envelopes", [])
             param_map = result.get("param_map", {})
+            param_context = result.get("param_context", {})
             env_opts = "".join(
                 (
                     f'<option value="{e.get("parameterId")}">'
+                    f'{param_context.get(e.get("parameterId"), "Track")}: '
                     f'{param_map.get(e.get("parameterId"), e.get("parameterId"))}'
                     f'</option>'
                 )
@@ -192,9 +194,11 @@ class SetInspectorHandler(BaseHandler):
             clip_data = get_clip_data(set_path, track_idx, clip_idx)
             envelopes = clip_data.get("envelopes", [])
             param_map = clip_data.get("param_map", {})
+            param_context = clip_data.get("param_context", {})
             env_opts = "".join(
                 (
                     f'<option value="{e.get("parameterId")}">' +
+                    f'{param_context.get(e.get("parameterId"), "Track")}: ' +
                     f'{param_map.get(e.get("parameterId"), e.get("parameterId"))}' +
                     f'</option>'
                 )
