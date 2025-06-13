@@ -23,9 +23,9 @@
     {{ clip_grid | safe }}
     <span id="selected-clip-name" style="margin-left:1rem;"></span>
   </form>
-  <form method="get" action="{{ host_prefix }}/set-inspector" style="margin-bottom:1rem;">
+  <!-- <form method="get" action="{{ host_prefix }}/set-inspector" style="margin-bottom:1rem;">
     <button type="submit">Choose Another Set</button>
-  </form>
+  </form> -->
 {% else %}
   <nav class="breadcrumbs" style="margin-bottom:1rem;">
     <form method="get" action="{{ host_prefix }}/set-inspector" style="display:inline;">
@@ -39,14 +39,14 @@
     </form>
     - Clip {{ (clip_index + 1) if clip_index is not none else '?' }}
   </nav>
-  <form method="post" action="{{ host_prefix }}/set-inspector" style="display:inline;">
+  <!-- <form method="post" action="{{ host_prefix }}/set-inspector" style="display:inline;">
     <input type="hidden" name="action" value="select_set">
     <input type="hidden" name="set_path" value="{{ selected_set }}">
     <button type="submit">Back to Clips</button>
   </form>
   <form method="get" action="{{ host_prefix }}/set-inspector" style="margin-left:1rem; display:inline;">
     <button type="submit">Choose Another Set</button>
-  </form>
+  </form> -->
   <div style="margin-top:1rem; display:flex; align-items:center;">
     <label for="envelope_select">Envelope:</label>
     <select id="envelope_select">{{ clip_options | safe }}</select>
