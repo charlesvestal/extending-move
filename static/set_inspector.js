@@ -143,7 +143,13 @@ export function initSetInspector() {
   function drawEnvelope() {
     if (!envSelect || !envSelect.value) return;
     const param = parseInt(envSelect.value);
-    const env = editing ? { breakpoints: currentEnv } : envelopes.find(e => e.parameterId === param);
+    let env;
+    if (editing) {
+      const bps = drawing ? currentEnv.concat(tailEnv) : currentEnv;
+      env = { breakpoints: bps };
+    } else {
+      env = envelopes.find(e => e.parameterId === param);
+    }
     if (!env || !env.breakpoints.length) return;
     ctx.strokeStyle = '#FF4136';
     ctx.beginPath();
@@ -245,6 +251,7 @@ export function initSetInspector() {
     const startV = envValueAt(env, t);
     currentEnv = [...before, { time: t, value: startV }, { time: t, value: 1 - y / canvas.height }];
     updateControls();
+    draw();
     ev.preventDefault();
   }
 
