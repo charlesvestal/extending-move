@@ -229,11 +229,10 @@ export function initSetInspector() {
     const { x, y } = canvasPos(ev);
     const t = (x / canvas.width) * region;
     const v = 1 - y / canvas.height;
-    if (currentEnv.length && t <= currentEnv[currentEnv.length - 1].time) {
-      currentEnv[currentEnv.length - 1] = { time: t, value: v };
-    } else {
-      currentEnv.push({ time: t, value: v });
+    while (currentEnv.length && t <= currentEnv[currentEnv.length - 1].time) {
+      currentEnv.pop();
     }
+    currentEnv.push({ time: t, value: v });
     draw();
     ev.preventDefault();
   }
