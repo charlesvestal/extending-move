@@ -30,6 +30,16 @@ def _collect_param_ids(
             _collect_param_ids(item, mapping, context, prefix)
 
 
+def _track_display_name(track_obj: Dict[str, Any], idx: int) -> str:
+    """Return display name for a track using first device name."""
+    devices = track_obj.get("devices", [])
+    if devices and isinstance(devices, list):
+        first = devices[0]
+        if isinstance(first, dict) and first.get("name"):
+            return first.get("name")
+    return track_obj.get("name") or f"Track {idx + 1}"
+
+
 def list_clips(set_path: str) -> Dict[str, Any]:
     """Return list of clips in the set."""
     try:
@@ -59,7 +69,7 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
         notes = clip_obj.get("notes", [])
         envelopes = clip_obj.get("envelopes", [])
         region = clip_obj.get("region", {}).get("end", 4.0)
-        track_name = track_obj.get("name") or f"Track {track + 1}"
+        track_name = _track_display_name(track_obj, track)
         clip_name = clip_obj.get("name") or f"Clip {clip + 1}"
         param_map: Dict[int, str] = {}
         param_context: Dict[int, str] = {}
