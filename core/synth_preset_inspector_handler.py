@@ -519,6 +519,29 @@ def update_preset_parameter_mappings(preset_path, parameter_updates):
         # Load the preset file
         with open(preset_path, 'r') as f:
             preset_data = json.load(f)
+
+        # Load parameter metadata so we can fill in default ranges
+        schema = {}
+        for loader in (
+            load_drift_schema,
+            load_wavetable_schema,
+            load_melodic_sampler_schema,
+        ):
+            try:
+                schema.update(loader() or {})
+            except Exception:
+                continue
+
+        # Fill in default ranges from the schema
+        for info in parameter_updates.values():
+            pname = info.get("parameter")
+            if not pname:
+                continue
+            meta = schema.get(pname, {})
+            if (info.get("rangeMin") is None or info.get("rangeMin") == "") and "min" in meta:
+                info["rangeMin"] = meta["min"]
+            if (info.get("rangeMax") is None or info.get("rangeMax") == "") and "max" in meta:
+                info["rangeMax"] = meta["max"]
         
         # Track parameters that were updated
         updated_params = []
