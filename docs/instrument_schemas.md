@@ -2,7 +2,8 @@
 
 The project automatically extracts the available parameters for several Ableton Live instruments by scanning the preset JSON files under `core library files/`. For each instrument type the minimum and maximum numeric values observed are recorded along with possible enum options.
 
-Generated schema files can be found in `static/schemas/`:
+Generated schema files can be recreated using `utility-scripts/generate_instrument_schemas.py`.
+The resulting files are stored in `static/schemas/`:
 
 - `drift_schema.json`
 - `wavetable_schema.json`
