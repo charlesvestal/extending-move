@@ -86,6 +86,7 @@ class SetInspectorHandler(BaseHandler):
             "envelopes": [],
             "region": 4.0,
             "param_ranges_json": "{}",
+            "full_clip": False,
         }
 
     def handle_post(self, form):
@@ -145,10 +146,12 @@ class SetInspectorHandler(BaseHandler):
                 "envelopes": [],
                 "region": 4.0,
                 "param_ranges_json": "{}",
+                "full_clip": False,
             }
         elif action == "show_clip":
             set_path = form.getvalue("set_path")
             clip_val = form.getvalue("clip_select")
+            full_clip = form.getvalue("full_clip") == "1"
             if not set_path or not clip_val:
                 pad_grid = self.generate_pad_grid(used, color_map, name_map)
                 return self.format_error_response("Missing parameters", pad_grid=pad_grid)
@@ -159,7 +162,7 @@ class SetInspectorHandler(BaseHandler):
             if entry:
                 selected_idx = int(entry.get("mset_id"))
             track_idx, clip_idx = map(int, clip_val.split(":"))
-            result = get_clip_data(set_path, track_idx, clip_idx)
+            result = get_clip_data(set_path, track_idx, clip_idx, full_clip=full_clip)
             if not result.get("success"):
                 pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
                 return self.format_error_response(result.get("message"), pad_grid=pad_grid)
@@ -197,10 +200,12 @@ class SetInspectorHandler(BaseHandler):
                 "clip_index": clip_idx,
                 "track_name": result.get("track_name"),
                 "clip_name": result.get("clip_name"),
+                "full_clip": full_clip,
             }
         elif action == "save_envelope":
             set_path = form.getvalue("set_path")
             clip_val = form.getvalue("clip_select")
+            full_clip = form.getvalue("full_clip") == "1"
             param_val = form.getvalue("parameter_id")
             env_data = form.getvalue("envelope_data")
             if not (set_path and clip_val and param_val and env_data):
@@ -224,7 +229,7 @@ class SetInspectorHandler(BaseHandler):
                 return self.format_error_response(result.get("message"), pad_grid=pad_grid)
             clip_info = list_clips(set_path)
             clip_grid = self.generate_clip_grid(clip_info.get("clips", []), selected=clip_val)
-            clip_data = get_clip_data(set_path, track_idx, clip_idx)
+            clip_data = get_clip_data(set_path, track_idx, clip_idx, full_clip=full_clip)
             envelopes = clip_data.get("envelopes", [])
             param_map = clip_data.get("param_map", {})
             param_context = clip_data.get("param_context", {})
@@ -262,6 +267,7 @@ class SetInspectorHandler(BaseHandler):
                 "clip_index": clip_idx,
                 "track_name": clip_data.get("track_name"),
                 "clip_name": clip_data.get("clip_name"),
+                "full_clip": full_clip,
             }
         else:
             return self.format_error_response("Unknown action", pad_grid=pad_grid)

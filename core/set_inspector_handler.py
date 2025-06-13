@@ -59,8 +59,19 @@ def list_clips(set_path: str) -> Dict[str, Any]:
         return {"success": False, "message": f"Failed to read set: {e}"}
 
 
-def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
-    """Return notes and envelopes for the specified clip."""
+def get_clip_data(
+    set_path: str, track: int, clip: int, full_clip: bool = False
+) -> Dict[str, Any]:
+    """Return notes and envelopes for the specified clip.
+
+    Args:
+        set_path: Path to the .abl set file.
+        track: Track index to inspect.
+        clip: Clip index within the track.
+        full_clip: If True, return the entire clip contents. If False, only the
+            looped region will be returned and times will be relative to the
+            loop start.
+    """
     try:
         with open(set_path, "r") as f:
             song = json.load(f)
@@ -69,13 +80,20 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
         notes = clip_obj.get("notes", [])
         envelopes = clip_obj.get("envelopes", [])
         region_info = clip_obj.get("region", {})
-        region = region_info.get("end", 4.0)
+        region_start = region_info.get("start", 0.0)
+        region_end = region_info.get("end", 4.0)
         loop_info = region_info.get("loop", {})
-        loop_start = loop_info.get("start", 0.0)
-        loop_end = loop_info.get("end", region)
-        region_length = max(loop_end - loop_start, 0.0)
+        loop_start = loop_info.get("start", region_start)
+        loop_end = loop_info.get("end", region_end)
+
+        if full_clip:
+            region_length = max(region_end - region_start, 0.0)
+        else:
+            region_length = max(loop_end - loop_start, 0.0)
 
         def clip_note(note):
+            if full_clip:
+                return note.copy()
             start = note.get("startTime", 0.0)
             dur = note.get("duration", 0.0)
             end = start + dur
@@ -89,6 +107,9 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
             return new_note
 
         def clip_env(env):
+            if full_clip:
+                return {k: v if k != "breakpoints" else [bp.copy() for bp in v]
+                        for k, v in env.items()}
             new_env = env.copy()
             clipped = []
             for bp in env.get("breakpoints", []):

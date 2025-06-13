@@ -63,17 +63,27 @@
       <input type="hidden" name="action" value="save_envelope">
       <input type="hidden" name="set_path" value="{{ selected_set }}">
       <input type="hidden" name="clip_select" value="{{ selected_clip }}">
+      <input type="hidden" name="full_clip" value="{{ '1' if full_clip else '0' }}">
       <input type="hidden" name="parameter_id" id="parameter_id_input">
       <input type="hidden" name="envelope_data" id="envelope_data_input">
       <button id="saveEnvBtn" type="submit" disabled>Save Envelope</button>
     </form>
     <span id="envValue" style="margin-left:0.5rem; font-size:0.8em;"></span>
+    <form id="toggleClipForm" method="post" action="{{ host_prefix }}/set-inspector" style="margin-left:0.5rem;">
+      <input type="hidden" name="action" value="show_clip">
+      <input type="hidden" name="set_path" value="{{ selected_set }}">
+      <input type="hidden" name="clip_select" value="{{ selected_clip }}">
+      <label style="font-size:0.9em;">
+        <input type="checkbox" name="full_clip" value="1" {% if full_clip %}checked{% endif %} onchange="this.form.submit()">
+        Show entire clip
+      </label>
+    </form>
   </div>
   <div style="margin-top:1rem; display:flex; align-items:flex-start;">
     <canvas id="clipCanvas" width="400" height="200" style="border:1px solid #ccc;"></canvas>
     <div id="paramLegend" style="margin-left:0.5rem; font-size:10px; line-height:1.2; display:flex; flex-direction:column; justify-content:space-between; align-items:flex-end; height:200px;"></div>
   </div>
-  <div id="clipData" data-notes='{{ notes | tojson }}' data-envelopes='{{ envelopes | tojson }}' data-region='{{ region }}' data-param-ranges='{{ param_ranges_json | safe }}'></div>
+  <div id="clipData" data-notes='{{ notes | tojson }}' data-envelopes='{{ envelopes | tojson }}' data-region='{{ region }}' data-param-ranges='{{ param_ranges_json | safe }}' data-full='{{ 1 if full_clip else 0 }}'></div>
   {% endif %}
 {% endblock %}
 {% block scripts %}
