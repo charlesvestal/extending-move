@@ -86,7 +86,6 @@ class SetInspectorHandler(BaseHandler):
             "envelopes": [],
             "region": 4.0,
             "param_ranges_json": "{}",
-            "offset": 0.0,
             "full_clip": False,
         }
 
@@ -196,7 +195,6 @@ class SetInspectorHandler(BaseHandler):
                 "notes": result.get("notes", []),
                 "envelopes": envelopes,
                 "region": result.get("region", 4.0),
-                "offset": result.get("offset", 0.0),
                 "param_ranges_json": json.dumps(result.get("param_ranges", {})),
                 "track_index": track_idx,
                 "clip_index": clip_idx,
@@ -210,7 +208,6 @@ class SetInspectorHandler(BaseHandler):
             full_clip = form.getvalue("full_clip") == "1"
             param_val = form.getvalue("parameter_id")
             env_data = form.getvalue("envelope_data")
-            offset_val = float(form.getvalue("offset") or 0)
             if not (set_path and clip_val and param_val and env_data):
                 pad_grid = self.generate_pad_grid(used, color_map, name_map)
                 return self.format_error_response("Missing parameters", pad_grid=pad_grid)
@@ -226,9 +223,6 @@ class SetInspectorHandler(BaseHandler):
             except Exception:
                 pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
                 return self.format_error_response("Invalid envelope data", pad_grid=pad_grid)
-            for bp in breakpoints:
-                if "time" in bp:
-                    bp["time"] += offset_val
             result = save_envelope(set_path, track_idx, clip_idx, int(param_val), breakpoints)
             if not result.get("success"):
                 pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
@@ -268,7 +262,6 @@ class SetInspectorHandler(BaseHandler):
                 "notes": clip_data.get("notes", []),
                 "envelopes": envelopes,
                 "region": clip_data.get("region", 4.0),
-                "offset": clip_data.get("offset", 0.0),
                 "param_ranges_json": json.dumps(clip_data.get("param_ranges", {})),
                 "track_index": track_idx,
                 "clip_index": clip_idx,

@@ -325,7 +325,6 @@ def test_get_clip_data_loop_region(tmp_path):
     data = get_clip_data(str(set_path), 0, 0)
     assert data["success"], data.get("message")
     assert data["region"] == 4.0
-    assert data["offset"] == 2.0
     notes = data.get("notes", [])
     assert [n["noteNumber"] for n in notes] == [61, 62]
     assert notes[0]["startTime"] == 0.5
@@ -365,56 +364,9 @@ def test_get_clip_data_full_clip(tmp_path):
     data = get_clip_data(str(set_path), 0, 0, full_clip=True)
     assert data["success"], data.get("message")
     assert data["region"] == 8.0
-    assert data["offset"] == 0.0
     notes = data.get("notes", [])
     assert [n["noteNumber"] for n in notes] == [60, 61, 62]
     assert notes[0]["startTime"] == 1.0
     envs = data.get("envelopes", [])
     assert envs and envs[0]["breakpoints"] == [{"time": 0.5, "value": 0}, {"time": 4.5, "value": 1}]
-
-
-def test_get_clip_data_offset(tmp_path):
-    set_path = tmp_path / "set.abl"
-    song = {
-        "tracks": [
-            {
-                "kind": "midi",
-                "clipSlots": [
-                    {
-                        "clip": {
-                            "notes": [
-                                {"noteNumber": 60, "startTime": 9.0, "duration": 0.5, "velocity": 100.0, "offVelocity": 0.0},
-                                {"noteNumber": 61, "startTime": 11.0, "duration": 0.5, "velocity": 100.0, "offVelocity": 0.0},
-                                {"noteNumber": 62, "startTime": 13.0, "duration": 0.5, "velocity": 100.0, "offVelocity": 0.0},
-                                {"noteNumber": 63, "startTime": 15.0, "duration": 0.5, "velocity": 100.0, "offVelocity": 0.0},
-                            ],
-                            "envelopes": [
-                                {"parameterId": 2, "breakpoints": [{"time": 11.5, "value": 0}, {"time": 12.5, "value": 1}]}
-                            ],
-                            "region": {"start": 8.0, "end": 16.0, "loop": {"start": 10.0, "end": 14.0}},
-                        }
-                    }
-                ],
-            }
-        ]
-    }
-    set_path.write_text(json.dumps(song))
-
-    from core.set_inspector_handler import get_clip_data
-
-    data = get_clip_data(str(set_path), 0, 0)
-    assert data["success"]
-    assert data["region"] == 4.0
-    assert data["offset"] == 10.0
-    notes = data["notes"]
-    assert [n["noteNumber"] for n in notes] == [61, 62]
-    assert [n["startTime"] for n in notes] == [1.0, 3.0]
-    envs = data["envelopes"]
-    assert envs[0]["breakpoints"] == [{"time": 1.5, "value": 0}, {"time": 2.5, "value": 1}]
-
-    data2 = get_clip_data(str(set_path), 0, 0, full_clip=True)
-    assert data2["offset"] == 8.0
-    assert data2["region"] == 8.0
-    notes2 = [n["startTime"] for n in data2["notes"]]
-    assert notes2 == [1.0, 3.0, 5.0, 7.0]
 
