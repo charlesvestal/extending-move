@@ -1,5 +1,5 @@
 from handlers.base_handler import BaseHandler
-from core.set_inspector_handler import list_clips, get_clip_data
+from core.set_inspector_handler import list_clips, get_clip_data, save_envelope
 from core.list_msets_handler import list_msets
 from core.pad_colors import rgb_string
 from core.config import MSETS_DIRECTORY
@@ -163,6 +163,48 @@ class SetInspectorHandler(BaseHandler):
                 "envelopes": envelopes,
                 "region": result.get("region", 4.0),
                 "param_ranges_json": json.dumps(result.get("param_ranges", {})),
+            }
+        elif action == "save_envelope":
+            set_path = form.getvalue("set_path")
+            clip_val = form.getvalue("clip_select")
+            param_val = form.getvalue("parameter_id")
+            env_data = form.getvalue("envelope_data")
+            if not (set_path and clip_val and param_val and env_data):
+                return self.format_error_response("Missing parameters", pad_grid=pad_grid)
+            track_idx, clip_idx = map(int, clip_val.split(":"))
+            try:
+                breakpoints = json.loads(env_data)
+            except Exception:
+                return self.format_error_response("Invalid envelope data", pad_grid=pad_grid)
+            result = save_envelope(set_path, track_idx, clip_idx, int(param_val), breakpoints)
+            if not result.get("success"):
+                return self.format_error_response(result.get("message"), pad_grid=pad_grid)
+            clip_info = list_clips(set_path)
+            clip_grid = self.generate_clip_grid(clip_info.get("clips", []), selected=clip_val)
+            clip_data = get_clip_data(set_path, track_idx, clip_idx)
+            envelopes = clip_data.get("envelopes", [])
+            param_map = clip_data.get("param_map", {})
+            env_opts = "".join(
+                (
+                    f'<option value="{e.get("parameterId")}">' +
+                    f'{param_map.get(e.get("parameterId"), e.get("parameterId"))}' +
+                    f'</option>'
+                )
+                for e in envelopes
+            )
+            env_opts = '<option value="" disabled selected>-- Select Envelope --</option>' + env_opts
+            return {
+                "pad_grid": pad_grid,
+                "message": result.get("message"),
+                "message_type": "success",
+                "selected_set": set_path,
+                "clip_grid": clip_grid,
+                "clip_options": env_opts,
+                "selected_clip": clip_val,
+                "notes": clip_data.get("notes", []),
+                "envelopes": envelopes,
+                "region": clip_data.get("region", 4.0),
+                "param_ranges_json": json.dumps(clip_data.get("param_ranges", {})),
             }
         else:
             return self.format_error_response("Unknown action", pad_grid=pad_grid)

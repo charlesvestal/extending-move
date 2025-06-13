@@ -722,5 +722,14 @@ def test_set_inspector_post(client, monkeypatch):
     assert resp.status_code == 200
     assert b'ok' in resp.data
 
+    resp = client.post('/set-inspector', data={
+        'action': 'save_envelope',
+        'set_path': '/tmp/a.abl',
+        'clip_select': '0:0',
+        'parameter_id': '1',
+        'envelope_data': '[]'
+    })
+    assert resp.status_code == 200
+
 
 

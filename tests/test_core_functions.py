@@ -261,3 +261,35 @@ def test_get_melodic_sampler_sample(tmp_path):
     assert info["sample_name"] == "test sample.wav"
     assert info["sample_path"].endswith("test sample.wav")
 
+
+def test_save_envelope(tmp_path):
+    set_path = tmp_path / "set.abl"
+    song = {
+        "tracks": [
+            {
+                "kind": "midi",
+                "clipSlots": [
+                    {
+                        "clip": {
+                            "notes": [],
+                            "envelopes": [],
+                            "region": {"end": 4.0},
+                        }
+                    }
+                ],
+            }
+        ]
+    }
+    set_path.write_text(json.dumps(song))
+
+    from core.set_inspector_handler import save_envelope, get_clip_data
+
+    bps = [{"time": 0, "value": 0}, {"time": 1, "value": 1}]
+    result = save_envelope(str(set_path), 0, 0, 1, bps)
+    assert result["success"], result.get("message")
+
+    data = get_clip_data(str(set_path), 0, 0)
+    envs = data.get("envelopes", [])
+    assert envs and envs[0]["parameterId"] == 1
+    assert envs[0]["breakpoints"] == bps
+

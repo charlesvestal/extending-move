@@ -84,3 +84,34 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
         }
     except Exception as e:
         return {"success": False, "message": f"Failed to read clip: {e}"}
+
+
+def save_envelope(
+    set_path: str,
+    track: int,
+    clip: int,
+    parameter_id: int,
+    breakpoints: List[Dict[str, float]],
+) -> Dict[str, Any]:
+    """Update or create an envelope and write the set back to disk."""
+    try:
+        with open(set_path, "r") as f:
+            song = json.load(f)
+
+        clip_obj = (
+            song["tracks"][track]["clipSlots"][clip]["clip"]
+        )
+        envelopes = clip_obj.setdefault("envelopes", [])
+        for env in envelopes:
+            if env.get("parameterId") == parameter_id:
+                env["breakpoints"] = breakpoints
+                break
+        else:
+            envelopes.append({"parameterId": parameter_id, "breakpoints": breakpoints})
+
+        with open(set_path, "w") as f:
+            json.dump(song, f, indent=2)
+
+        return {"success": True, "message": "Envelope saved"}
+    except Exception as e:
+        return {"success": False, "message": f"Failed to save envelope: {e}"}

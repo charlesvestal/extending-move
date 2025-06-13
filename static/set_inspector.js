@@ -37,6 +37,16 @@ export function initSetInspector() {
   const ctx = canvas.getContext('2d');
   const envSelect = document.getElementById('envelope_select');
   const legendDiv = document.getElementById('paramLegend');
+  const editBtn = document.getElementById('editEnvBtn');
+  const saveForm = document.getElementById('saveEnvForm');
+  const saveBtn = document.getElementById('saveEnvBtn');
+  const paramInput = document.getElementById('parameter_id_input');
+  const envInput = document.getElementById('envelope_data_input');
+  const valueDiv = document.getElementById('envValue');
+
+  let editing = false;
+  let drawing = false;
+  let currentEnv = [];
   if (legendDiv) {
     legendDiv.style.display = 'flex';
     legendDiv.style.flexDirection = 'column';
@@ -114,8 +124,8 @@ export function initSetInspector() {
   function drawEnvelope() {
     if (!envSelect || !envSelect.value) return;
     const param = parseInt(envSelect.value);
-    const env = envelopes.find(e => e.parameterId === param);
-    if (!env) return;
+    const env = editing ? { breakpoints: currentEnv } : envelopes.find(e => e.parameterId === param);
+    if (!env || !env.breakpoints.length) return;
     ctx.strokeStyle = '#FF4136';
     ctx.beginPath();
     env.breakpoints.forEach((bp, i) => {
@@ -124,6 +134,20 @@ export function initSetInspector() {
       if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
     });
     ctx.stroke();
+  }
+
+  function envValueAt(bps, t) {
+    if (!bps.length) return 0;
+    if (t <= bps[0].time) return bps[0].value;
+    for (let i = 1; i < bps.length; i++) {
+      if (t < bps[i].time) {
+        const a = bps[i - 1];
+        const b = bps[i];
+        const p = (t - a.time) / (b.time - a.time);
+        return a.value + p * (b.value - a.value);
+      }
+    }
+    return bps[bps.length - 1].value;
   }
 
   function updateLegend() {
@@ -154,7 +178,91 @@ export function initSetInspector() {
     drawEnvelope();
   }
 
-  if (envSelect) envSelect.addEventListener('change', () => { updateLegend(); draw(); });
+  if (envSelect) envSelect.addEventListener('change', () => {
+    updateLegend();
+    if (editing) {
+      const param = parseInt(envSelect.value);
+      const src = envelopes.find(e => e.parameterId === param);
+      currentEnv = src ? src.breakpoints.map(bp => ({ ...bp })) : [];
+      paramInput.value = envSelect.value;
+      saveBtn.style.display = 'none';
+    }
+    draw();
+  });
+
+  function canvasPos(ev) {
+    const rect = canvas.getBoundingClientRect();
+    const x = (ev.touches ? ev.touches[0].clientX : ev.clientX) - rect.left;
+    const y = (ev.touches ? ev.touches[0].clientY : ev.clientY) - rect.top;
+    return { x, y };
+  }
+
+  function showValue(ev) {
+    if (!envSelect || !envSelect.value || !valueDiv) return;
+    const param = parseInt(envSelect.value);
+    const env = editing ? { breakpoints: currentEnv } : envelopes.find(e => e.parameterId === param);
+    if (!env || !env.breakpoints.length) { valueDiv.textContent = ''; return; }
+    const pos = canvasPos(ev);
+    const t = (pos.x / canvas.width) * region;
+    let v = envValueAt(env.breakpoints, t);
+    const range = paramRanges[param];
+    if (range && typeof range.min === 'number' && typeof range.max === 'number') {
+      v = range.min + v * (range.max - range.min);
+    }
+    valueDiv.textContent = v.toFixed(3);
+  }
+
+  function startDraw(ev) {
+    if (!editing) return;
+    drawing = true;
+    currentEnv = [];
+    const { x, y } = canvasPos(ev);
+    currentEnv.push({ time: (x / canvas.width) * region, value: 1 - y / canvas.height });
+    ev.preventDefault();
+  }
+
+  function continueDraw(ev) {
+    if (!drawing) {
+      showValue(ev);
+      return;
+    }
+    const { x, y } = canvasPos(ev);
+    currentEnv.push({ time: (x / canvas.width) * region, value: 1 - y / canvas.height });
+    draw();
+    ev.preventDefault();
+  }
+
+  function endDraw() {
+    if (drawing) {
+      drawing = false;
+      if (saveBtn) saveBtn.style.display = '';
+    }
+  }
+
+  canvas.addEventListener('mousedown', startDraw);
+  canvas.addEventListener('touchstart', startDraw);
+  canvas.addEventListener('mousemove', continueDraw);
+  canvas.addEventListener('touchmove', continueDraw);
+  canvas.addEventListener('mouseleave', () => { if (!drawing && valueDiv) valueDiv.textContent = ''; });
+  document.addEventListener('mouseup', endDraw);
+  document.addEventListener('touchend', endDraw);
+
+  if (editBtn) editBtn.addEventListener('click', () => {
+    if (!envSelect.value) return;
+    editing = true;
+    const param = parseInt(envSelect.value);
+    const src = envelopes.find(e => e.parameterId === param);
+    currentEnv = src ? src.breakpoints.map(bp => ({ ...bp })) : [];
+    paramInput.value = envSelect.value;
+    editBtn.style.display = 'none';
+    if (saveForm) saveForm.style.display = 'block';
+    saveBtn.style.display = 'none';
+    draw();
+  });
+
+  if (saveForm) saveForm.addEventListener('submit', () => {
+    envInput.value = JSON.stringify(currentEnv);
+  });
   updateLegend();
   draw();
 }
