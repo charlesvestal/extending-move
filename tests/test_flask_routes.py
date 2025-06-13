@@ -709,6 +709,7 @@ def test_set_inspector_post(client, monkeypatch):
             'message_type': 'success',
             'pad_grid': '<div class="pad-grid"></div>',
             'selected_set': '/tmp/a.abl',
+            'clip_grid': '<div class="pad-grid"></div>',
             'clip_options': '<option>1</option>',
             'selected_clip': '0:0',
             'notes': [],

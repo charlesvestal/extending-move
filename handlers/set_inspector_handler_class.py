@@ -33,6 +33,39 @@ class SetInspectorHandler(BaseHandler):
                 )
         return '<div class="pad-grid">' + ''.join(cells) + '</div>'
 
+    def generate_clip_grid(self, clips):
+        """Return HTML for an 32-cell grid showing clips by track.
+
+        Each row corresponds to a track (starting at 1) and each column to a
+        clip index within that track. Cells without clips are disabled.
+
+        Args:
+            clips (list): List of clip dictionaries with ``track`` and ``clip``
+                keys as returned by :func:`list_clips`.
+        """
+        # Organize clips by track and clip index for easy lookup
+        track_map = {}
+        for c in clips:
+            t = int(c.get("track", 0))
+            slot = int(c.get("clip", 0))
+            track_map.setdefault(t, {})[slot] = c.get("name", f"{t}:{slot}")
+
+        cells = []
+        for row in range(4):  # show up to 4 tracks
+            for col in range(8):  # show up to 8 clips per track
+                clip_name = track_map.get(row, {}).get(col)
+                disabled = "" if clip_name else "disabled"
+                status = "occupied" if clip_name else "free"
+                value = f"{row}:{col}" if clip_name else ""
+                label = clip_name if clip_name else ""
+                cell_id = f"clip_{row}_{col}"
+                cells.append(
+                    f'<input type="radio" id="{cell_id}" '
+                    f'name="clip_select" value="{value}" {disabled}>'
+                    f'<label for="{cell_id}" class="pad-cell {status}">{label}</label>'
+                )
+        return '<div class="pad-grid">' + ''.join(cells) + '</div>'
+
     def handle_get(self):
         msets, ids = list_msets(return_free_ids=True)
         used = ids.get("used", set())
@@ -79,17 +112,13 @@ class SetInspectorHandler(BaseHandler):
             result = list_clips(set_path)
             if not result.get("success"):
                 return self.format_error_response(result.get("message"), pad_grid=pad_grid)
-            options = "".join(
-                f'<option value="{c["track"]}:{c["clip"]}">{c["name"]}</option>'
-                for c in result.get("clips", [])
-            )
-            options = '<option value="" disabled selected>-- Select Clip --</option>' + options
+            clip_grid = self.generate_clip_grid(result.get("clips", []))
             return {
                 "pad_grid": pad_grid,
                 "message": result.get("message"),
                 "message_type": "success",
                 "selected_set": set_path,
-                "clip_options": options,
+                "clip_grid": clip_grid,
                 "selected_clip": None,
                 "notes": [],
                 "envelopes": [],

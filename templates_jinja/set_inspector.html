@@ -15,8 +15,7 @@
   <form method="post" action="{{ host_prefix }}/set-inspector" style="margin-bottom:1rem;">
     <input type="hidden" name="action" value="show_clip">
     <input type="hidden" name="set_path" value="{{ selected_set }}">
-    <label for="clip_select">Clip:</label>
-    <select name="clip_select" id="clip_select">{{ clip_options | safe }}</select>
+    {{ clip_grid | safe }}
     <button type="submit">Load Clip</button>
   </form>
   <form method="get" action="{{ host_prefix }}/set-inspector">
