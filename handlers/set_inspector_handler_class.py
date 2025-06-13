@@ -135,8 +135,13 @@ class SetInspectorHandler(BaseHandler):
             clip_info = list_clips(set_path)
             clip_grid = self.generate_clip_grid(clip_info.get("clips", []), selected=clip_val)
             envelopes = result.get("envelopes", [])
+            param_map = result.get("param_map", {})
             env_opts = "".join(
-                f'<option value="{e.get("parameterId")}">{e.get("parameterId")}</option>'
+                (
+                    f'<option value="{e.get("parameterId")}">'
+                    f'{param_map.get(e.get("parameterId"), e.get("parameterId"))}'
+                    f'</option>'
+                )
                 for e in envelopes
             )
             env_opts = '<option value="" disabled selected>-- Select Envelope --</option>' + env_opts
