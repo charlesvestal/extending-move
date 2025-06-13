@@ -11,14 +11,18 @@ export function initSetInspector() {
     });
   }
 
-  // Show selected clip name when choosing a clip
+  // Auto-load clip when a clip cell is clicked
   const clipGrid = document.querySelector('#clipSelectForm .pad-grid');
   const clipNameSpan = document.getElementById('selected-clip-name');
-  if (clipGrid && clipNameSpan) {
+  if (clipGrid) {
+    const form = document.getElementById('clipSelectForm');
     clipGrid.querySelectorAll('input[name="clip_select"]').forEach(radio => {
       radio.addEventListener('change', () => {
         const label = clipGrid.querySelector(`label[for="${radio.id}"]`);
-        clipNameSpan.textContent = label?.dataset.name || '';
+        if (clipNameSpan) {
+          clipNameSpan.textContent = label?.dataset.name || '';
+        }
+        form.submit();
       });
     });
   }
