@@ -32,6 +32,8 @@ export function initSetInspector() {
   const notes = JSON.parse(dataDiv.dataset.notes || '[]');
   const envelopes = JSON.parse(dataDiv.dataset.envelopes || '[]');
   const region = parseFloat(dataDiv.dataset.region || '4');
+  const loopStart = parseFloat(dataDiv.dataset.loopStart || '0');
+  const loopEnd = parseFloat(dataDiv.dataset.loopEnd || dataDiv.dataset.region || '4');
   const paramRanges = JSON.parse(dataDiv.dataset.paramRanges || '{}');
   const canvas = document.getElementById('clipCanvas');
   const ctx = canvas.getContext('2d');
@@ -119,6 +121,14 @@ export function initSetInspector() {
       ctx.lineTo(canvas.width, y);
       ctx.stroke();
     }
+  }
+
+  function shadeUnlooped() {
+    ctx.fillStyle = 'rgba(0,0,0,0.1)';
+    const ls = (loopStart / region) * canvas.width;
+    const le = (loopEnd / region) * canvas.width;
+    if (ls > 0) ctx.fillRect(0, 0, ls, canvas.height);
+    if (le < canvas.width) ctx.fillRect(le, 0, canvas.width - le, canvas.height);
   }
 
   function drawLabels() {
@@ -216,6 +226,7 @@ export function initSetInspector() {
 
   function draw() {
     drawGrid();
+    shadeUnlooped();
     drawNotes();
     drawLabels();
     drawEnvelope();

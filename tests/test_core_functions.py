@@ -292,4 +292,6 @@ def test_save_envelope(tmp_path):
     envs = data.get("envelopes", [])
     assert envs and envs[0]["parameterId"] == 1
     assert envs[0]["breakpoints"] == bps
+    assert data.get("loop_start") == 0.0
+    assert data.get("loop_end") == 4.0
 

@@ -144,6 +144,8 @@ class SetInspectorHandler(BaseHandler):
                 "notes": [],
                 "envelopes": [],
                 "region": 4.0,
+                "loop_start": 0.0,
+                "loop_end": 4.0,
                 "param_ranges_json": "{}",
             }
         elif action == "show_clip":
@@ -192,6 +194,8 @@ class SetInspectorHandler(BaseHandler):
                 "notes": result.get("notes", []),
                 "envelopes": envelopes,
                 "region": result.get("region", 4.0),
+                "loop_start": result.get("loop_start", 0.0),
+                "loop_end": result.get("loop_end", result.get("region", 4.0)),
                 "param_ranges_json": json.dumps(result.get("param_ranges", {})),
                 "track_index": track_idx,
                 "clip_index": clip_idx,
@@ -257,6 +261,8 @@ class SetInspectorHandler(BaseHandler):
                 "notes": clip_data.get("notes", []),
                 "envelopes": envelopes,
                 "region": clip_data.get("region", 4.0),
+                "loop_start": clip_data.get("loop_start", 0.0),
+                "loop_end": clip_data.get("loop_end", clip_data.get("region", 4.0)),
                 "param_ranges_json": json.dumps(clip_data.get("param_ranges", {})),
                 "track_index": track_idx,
                 "clip_index": clip_idx,
