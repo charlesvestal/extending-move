@@ -31,7 +31,9 @@ export function initSetInspector() {
   if (!dataDiv) return;
   const notes = JSON.parse(dataDiv.dataset.notes || '[]');
   const envelopes = JSON.parse(dataDiv.dataset.envelopes || '[]');
-  const region = parseFloat(dataDiv.dataset.region || '4');
+  let region = parseFloat(dataDiv.dataset.region || '4');
+  const loopLength = parseFloat(dataDiv.dataset.loopLength || dataDiv.dataset.region || '4');
+  const clipLength = parseFloat(dataDiv.dataset.clipLength || loopLength);
   const paramRanges = JSON.parse(dataDiv.dataset.paramRanges || '{}');
   const canvas = document.getElementById('clipCanvas');
   const ctx = canvas.getContext('2d');
@@ -43,6 +45,7 @@ export function initSetInspector() {
   const paramInput = document.getElementById('parameter_id_input');
   const envInput = document.getElementById('envelope_data_input');
   const valueDiv = document.getElementById('envValue');
+  const showEntireCb = document.getElementById('showEntireClip');
 
   let editing = false;
   let drawing = false;
@@ -50,6 +53,10 @@ export function initSetInspector() {
   let currentEnv = [];
   let tailEnv = [];
   let envInfo = null;
+
+  function setRegion() {
+    region = showEntireCb && showEntireCb.checked ? clipLength : loopLength;
+  }
 
   function isNormalized(env) {
     if (!env || !env.breakpoints || !env.breakpoints.length) return false;
@@ -81,6 +88,13 @@ export function initSetInspector() {
     legendDiv.style.justifyContent = 'space-between';
     legendDiv.style.alignItems = 'flex-end';
     legendDiv.style.height = canvas.height + 'px';
+  }
+
+  if (showEntireCb) {
+    showEntireCb.addEventListener('change', () => {
+      setRegion();
+      draw();
+    });
   }
 
   function getVisibleRange() {
@@ -363,10 +377,12 @@ export function initSetInspector() {
     envInput.value = JSON.stringify(currentEnv);
   });
   if (envSelect && envSelect.value) {
+    setRegion();
     envSelect.dispatchEvent(new Event('change'));
   } else {
     updateLegend();
     updateControls();
+    setRegion();
     draw();
   }
 }

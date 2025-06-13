@@ -716,6 +716,7 @@ def test_set_inspector_post(client, monkeypatch):
             'notes': [],
             'envelopes': [],
             'region': 4.0,
+            'clip_length': 4.0,
         }
     monkeypatch.setattr(move_webserver.set_inspector_handler, 'handle_post', fake_post)
     resp = client.post('/set-inspector', data={'action': 'select_set', 'pad_index': '1'})

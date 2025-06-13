@@ -73,7 +73,8 @@
     <canvas id="clipCanvas" width="400" height="200" style="border:1px solid #ccc;"></canvas>
     <div id="paramLegend" style="margin-left:0.5rem; font-size:10px; line-height:1.2; display:flex; flex-direction:column; justify-content:space-between; align-items:flex-end; height:200px;"></div>
   </div>
-  <div id="clipData" data-notes='{{ notes | tojson }}' data-envelopes='{{ envelopes | tojson }}' data-region='{{ region }}' data-param-ranges='{{ param_ranges_json | safe }}'></div>
+  <label style="margin-top:0.5rem; display:block;"><input type="checkbox" id="showEntireClip"> Show entire clip</label>
+  <div id="clipData" data-notes='{{ notes | tojson }}' data-envelopes='{{ envelopes | tojson }}' data-region='{{ region }}' data-loop-length='{{ region }}' data-clip-length='{{ clip_length }}' data-param-ranges='{{ param_ranges_json | safe }}'></div>
   {% endif %}
 {% endblock %}
 {% block scripts %}

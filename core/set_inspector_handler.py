@@ -68,7 +68,27 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
         clip_obj = track_obj["clipSlots"][clip]["clip"]
         notes = clip_obj.get("notes", [])
         envelopes = clip_obj.get("envelopes", [])
-        region = clip_obj.get("region", {}).get("end", 4.0)
+        region_info = clip_obj.get("region", {})
+        loop_end = (
+            region_info.get("loop", {}).get("end")
+            if isinstance(region_info.get("loop", {}).get("end"), (int, float))
+            else None
+        )
+        region = float(loop_end) if loop_end is not None else float(region_info.get("end", 4.0))
+
+        # Calculate clip length from 0.0 to the last bar containing any data
+        max_time = 0.0
+        for n in notes:
+            start = n.get("startTime", 0.0)
+            dur = n.get("duration", 0.0)
+            if isinstance(start, (int, float)) and isinstance(dur, (int, float)):
+                max_time = max(max_time, start + dur)
+        for env in envelopes:
+            for bp in env.get("breakpoints", []):
+                t = bp.get("time")
+                if isinstance(t, (int, float)):
+                    max_time = max(max_time, t)
+        clip_length = ((int(max_time / 4) + 1) * 4) if max_time > 0 else 4.0
         track_name = _track_display_name(track_obj, track)
         clip_name = clip_obj.get("name") or f"Clip {clip + 1}"
         param_map: Dict[int, str] = {}
@@ -122,6 +142,7 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
             "notes": notes,
             "envelopes": envelopes,
             "region": region,
+            "clip_length": clip_length,
             "param_map": param_map,
             "param_context": param_context,
             "param_ranges": param_ranges,
