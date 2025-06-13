@@ -691,16 +691,15 @@ def test_files_route_not_found(client, tmp_path, monkeypatch):
 def test_set_inspector_get(client, monkeypatch):
     def fake_get():
         return {
-            'file_browser_html': '<ul></ul>',
+            'pad_grid': '<div class="pad-grid"></div>',
             'message': '',
             'message_type': 'info',
             'selected_set': None,
-            'browser_root': '/tmp'
         }
     monkeypatch.setattr(move_webserver.set_inspector_handler, 'handle_get', fake_get)
     resp = client.get('/set-inspector')
     assert resp.status_code == 200
-    assert b'class="file-browser"' in resp.data
+    assert b'class="pad-grid"' in resp.data
 
 
 def test_set_inspector_post(client, monkeypatch):
@@ -708,17 +707,16 @@ def test_set_inspector_post(client, monkeypatch):
         return {
             'message': 'ok',
             'message_type': 'success',
-            'file_browser_html': None,
+            'pad_grid': '<div class="pad-grid"></div>',
             'selected_set': '/tmp/a.abl',
             'clip_options': '<option>1</option>',
             'selected_clip': '0:0',
             'notes': [],
             'envelopes': [],
             'region': 4.0,
-            'browser_root': None,
         }
     monkeypatch.setattr(move_webserver.set_inspector_handler, 'handle_post', fake_post)
-    resp = client.post('/set-inspector', data={'action': 'select_set', 'set_path': 'x'})
+    resp = client.post('/set-inspector', data={'action': 'select_set', 'pad_index': '1'})
     assert resp.status_code == 200
     assert b'ok' in resp.data
 

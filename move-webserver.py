@@ -333,14 +333,13 @@ def set_inspector_route():
         message=message,
         success=success,
         message_type=message_type,
-        file_browser_html=result.get("file_browser_html"),
+        pad_grid=result.get("pad_grid"),
         selected_set=result.get("selected_set"),
         clip_options=result.get("clip_options"),
         selected_clip=result.get("selected_clip"),
         notes=result.get("notes"),
         envelopes=result.get("envelopes"),
         region=result.get("region"),
-        browser_root=result.get("browser_root"),
         active_tab="set-inspector",
     )
 
