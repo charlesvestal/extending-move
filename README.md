@@ -40,6 +40,10 @@ Here’s what you can do with Extending Move:
   - View and download samples in a drum rack preset
   - Reverse or time stretch samples to a target BPM and length with different algorithms for melodic or rhythmic content
 
+- **Set Inspector**
+  - View notes and envelopes for sets and clips
+  - Edit envelopes and draw your own curves
+
 - **Sample Reversal**
   - Create reversed versions of any WAV file
   - Use reversed file in drum kit or sample presets    
