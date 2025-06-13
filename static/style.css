@@ -504,7 +504,7 @@ nav.breadcrumbs form {
 
 /* Miniature grid wrapper */
 .mini-grid {
-    width: 120px;
+    width: 90px;
     height: 40px;
     overflow: hidden;
     display: inline-block;
@@ -512,7 +512,7 @@ nav.breadcrumbs form {
 }
 
 .mini-grid .pad-grid {
-    transform: scale(0.2);
+    transform: scale(0.4);
     transform-origin: top left;
 }
 
