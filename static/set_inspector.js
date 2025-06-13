@@ -11,6 +11,22 @@ export function initSetInspector() {
     });
   }
 
+  // Auto-load clip when a clip cell is clicked
+  const clipGrid = document.querySelector('#clipSelectForm .pad-grid');
+  const clipNameSpan = document.getElementById('selected-clip-name');
+  if (clipGrid) {
+    const form = document.getElementById('clipSelectForm');
+    clipGrid.querySelectorAll('input[name="clip_select"]').forEach(radio => {
+      radio.addEventListener('change', () => {
+        const label = clipGrid.querySelector(`label[for="${radio.id}"]`);
+        if (clipNameSpan) {
+          clipNameSpan.textContent = label?.dataset.name || '';
+        }
+        form.submit();
+      });
+    });
+  }
+
   const dataDiv = document.getElementById('clipData');
   if (!dataDiv) return;
   const notes = JSON.parse(dataDiv.dataset.notes || '[]');
