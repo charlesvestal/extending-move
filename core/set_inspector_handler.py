@@ -1,6 +1,11 @@
 import json
 import os
 from typing import Any, Dict, List
+from core.synth_preset_inspector_handler import (
+    load_drift_schema,
+    load_wavetable_schema,
+    load_melodic_sampler_schema,
+)
 
 
 def _collect_param_ids(obj: Any, mapping: Dict[int, str]) -> None:
@@ -46,6 +51,28 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
         region = clip_obj.get("region", {}).get("end", 4.0)
         param_map: Dict[int, str] = {}
         _collect_param_ids(track_obj.get("devices", []), param_map)
+
+        # Load parameter metadata from available instrument schemas
+        schemas: Dict[str, Dict[str, Any]] = {}
+        for loader in (load_drift_schema, load_wavetable_schema, load_melodic_sampler_schema):
+            try:
+                schemas.update(loader() or {})
+            except Exception:
+                pass
+
+        param_ranges: Dict[int, Dict[str, float]] = {}
+        for pid, name in param_map.items():
+            info = schemas.get(name)
+            if not info:
+                continue
+            min_v = info.get("min")
+            max_v = info.get("max")
+            if isinstance(min_v, (int, float)) and isinstance(max_v, (int, float)):
+                param_ranges[pid] = {
+                    "min": min_v,
+                    "max": max_v,
+                    "unit": info.get("unit"),
+                }
         return {
             "success": True,
             "message": "Clip loaded",
@@ -53,6 +80,7 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
             "envelopes": envelopes,
             "region": region,
             "param_map": param_map,
+            "param_ranges": param_ranges,
         }
     except Exception as e:
         return {"success": False, "message": f"Failed to read clip: {e}"}
