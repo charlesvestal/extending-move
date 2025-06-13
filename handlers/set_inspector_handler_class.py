@@ -105,8 +105,13 @@ class SetInspectorHandler(BaseHandler):
             if not result.get("success"):
                 return self.format_error_response(result.get("message"), pad_grid=pad_grid)
             envelopes = result.get("envelopes", [])
+            param_map = result.get("param_map", {})
             env_opts = "".join(
-                f'<option value="{e.get("parameterId")}">{e.get("parameterId")}</option>'
+                (
+                    f'<option value="{e.get("parameterId")}">'
+                    f'{param_map.get(e.get("parameterId"), e.get("parameterId"))}'
+                    f'</option>'
+                )
                 for e in envelopes
             )
             env_opts = '<option value="" disabled selected>-- Select Envelope --</option>' + env_opts
