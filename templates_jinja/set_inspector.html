@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <h2>Set Inspector</h2>
+<p><em>Note: This will edit your sets, and a broken set can't be loaded. Back up your sets before making modifications!</em></p>
 {% if message %}
   <p class="{{ message_type if message_type else ('success' if success else 'error') }}">{{ message }}</p>
 {% endif %}
