@@ -60,17 +60,19 @@ def list_clips(set_path: str) -> Dict[str, Any]:
 
 
 def get_clip_data(
-    set_path: str, track: int, clip: int, full_clip: bool = False
+    set_path: str,
+    track: int,
+    clip: int,
+    full_clip: bool = False,
 ) -> Dict[str, Any]:
     """Return notes and envelopes for the specified clip.
 
     Args:
-        set_path: Path to the .abl set file.
+        set_path: Path to the ``.abl`` set file.
         track: Track index to inspect.
         clip: Clip index within the track.
-        full_clip: If True, return the entire clip contents. If False, only the
-            looped region will be returned and times will be relative to the
-            loop start.
+        full_clip: If ``True`` return the entire clip contents. Otherwise only
+            the looped region is returned.
     """
     try:
         with open(set_path, "r") as f:
@@ -88,36 +90,35 @@ def get_clip_data(
 
         if full_clip:
             region_length = max(region_end - region_start, 0.0)
+            offset = region_start
         else:
             region_length = max(loop_end - loop_start, 0.0)
+            offset = loop_start
 
         def clip_note(note):
-            if full_clip:
-                return note.copy()
             start = note.get("startTime", 0.0)
             dur = note.get("duration", 0.0)
             end = start + dur
-            if end <= loop_start or start >= loop_end:
-                return None
-            adj_start = max(start, loop_start) - loop_start
-            adj_end = min(end, loop_end) - loop_start
+            if not full_clip:
+                if end <= loop_start or start >= loop_end:
+                    return None
+                start = max(start, loop_start)
+                end = min(end, loop_end)
             new_note = note.copy()
-            new_note["startTime"] = adj_start
-            new_note["duration"] = max(0.0, adj_end - adj_start)
+            new_note["startTime"] = start - offset
+            new_note["duration"] = max(0.0, end - start)
             return new_note
 
         def clip_env(env):
-            if full_clip:
-                return {k: v if k != "breakpoints" else [bp.copy() for bp in v]
-                        for k, v in env.items()}
             new_env = env.copy()
             clipped = []
             for bp in env.get("breakpoints", []):
                 t = bp.get("time", 0.0)
-                if loop_start <= t <= loop_end:
-                    nbp = bp.copy()
-                    nbp["time"] = t - loop_start
-                    clipped.append(nbp)
+                if not full_clip and not (loop_start <= t <= loop_end):
+                    continue
+                nbp = bp.copy()
+                nbp["time"] = t - offset
+                clipped.append(nbp)
             new_env["breakpoints"] = clipped
             return new_env
 
@@ -176,6 +177,7 @@ def get_clip_data(
             "notes": notes,
             "envelopes": envelopes,
             "region": region_length,
+            "offset": offset,
             "param_map": param_map,
             "param_context": param_context,
             "param_ranges": param_ranges,

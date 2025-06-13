@@ -32,6 +32,7 @@ export function initSetInspector() {
   const notes = JSON.parse(dataDiv.dataset.notes || '[]');
   const envelopes = JSON.parse(dataDiv.dataset.envelopes || '[]');
   const region = parseFloat(dataDiv.dataset.region || '4');
+  const offset = parseFloat(dataDiv.dataset.offset || '0');
   const paramRanges = JSON.parse(dataDiv.dataset.paramRanges || '{}');
   const canvas = document.getElementById('clipCanvas');
   const ctx = canvas.getContext('2d');
@@ -360,6 +361,7 @@ export function initSetInspector() {
   });
 
   if (saveForm) saveForm.addEventListener('submit', () => {
+    saveForm.querySelector('input[name="offset"]').value = offset;
     envInput.value = JSON.stringify(currentEnv);
   });
   if (envSelect && envSelect.value) {
