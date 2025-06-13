@@ -37,6 +37,7 @@ export function initSetInspector() {
   const canvas = document.getElementById('clipCanvas');
   const ctx = canvas.getContext('2d');
   const showFull = document.getElementById('showFullClip');
+  const rangeMsg = document.getElementById('clipRangeMessage');
 
   const regionStart = regionInfo.start ?? 0;
   const regionEnd = regionInfo.end ?? regionStart + baseRegion;
@@ -60,6 +61,11 @@ export function initSetInspector() {
       visibleEnd = loopEnabled ? loopEnd : fullEnd;
     }
     region = visibleEnd - visibleStart;
+    if (rangeMsg) {
+      const start = showFull && showFull.checked ? fullStart : loopStart;
+      const end = showFull && showFull.checked ? fullEnd : loopEnd;
+      rangeMsg.textContent = `Showing looped range of ${start} to ${end}`;
+    }
     draw();
   }
   if (showFull) {
