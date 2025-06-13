@@ -1,0 +1,127 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "instrumentRack",
+  "name": "Ac Piano Upright",
+  "lockId": 1001,
+  "lockSeal": 2077242674,
+  "parameters": {
+    "Enabled": true,
+    "Macro0": 0.0,
+    "Macro1": 0.0,
+    "Macro2": 0.0,
+    "Macro3": 0.0,
+    "Macro4": 0.0,
+    "Macro5": 0.0,
+    "Macro6": 0.0,
+    "Macro7": 0.0
+  },
+  "chains": [
+    {
+      "name": "",
+      "color": 0,
+      "devices": [
+        {
+          "presetUri": null,
+          "kind": "melodicSampler",
+          "name": "Piano Upright",
+          "parameters": {
+            "Enabled": true,
+            "Voice_AmplitudeEnvelope_Attack": 0.00010000000149011613,
+            "Voice_AmplitudeEnvelope_Decay": 4.86493798828125,
+            "Voice_AmplitudeEnvelope_Release": 0.5999998779296876,
+            "Voice_AmplitudeEnvelope_Sustain": 0.10748888552188873,
+            "Voice_AmplitudeEnvelope_SustainMode": "Gate",
+            "Voice_Detune": 0.0,
+            "Voice_FilterEnvelope_Attack": 0.00010000000149011613,
+            "Voice_FilterEnvelope_Decay": 0.6,
+            "Voice_FilterEnvelope_On": true,
+            "Voice_FilterEnvelope_Release": 0.05,
+            "Voice_FilterEnvelope_Sustain": 0.0,
+            "Voice_Filter_Frequency": 22000.0,
+            "Voice_Filter_FrequencyModulationAmounts_EnvelopeAmount": 0,
+            "Voice_Filter_FrequencyModulationAmounts_LfoAmount": 0.0,
+            "Voice_Filter_On": true,
+            "Voice_Filter_Resonance": 0.0,
+            "Voice_Filter_Slope": "12",
+            "Voice_Filter_Type": "Lowpass",
+            "Voice_Gain": 1.0,
+            "Voice_Lfo_On": true,
+            "Voice_Lfo_Rate": 5.999998569488525,
+            "Voice_Lfo_Type": "Sine",
+            "Voice_PlaybackLength": 1.0,
+            "Voice_PlaybackStart": 0.0,
+            "Voice_Transpose": 0,
+            "Voice_VelocityToVolume": 0.3499999940395355,
+            "Volume": -17.0
+          },
+          "deviceData": {
+            "sampleUri": "ableton:/packs/abl-core-library/Samples/Notes/Upright%20Piano%20C3.aif"
+          }
+        },
+        {
+          "presetUri": null,
+          "kind": "channelEq",
+          "name": "",
+          "parameters": {
+            "Enabled": true,
+            "Gain": 1.0,
+            "HighShelfGain": 1.2637172937393188,
+            "HighpassOn": true,
+            "LowShelfGain": 0.7976469993591309,
+            "MidFrequency": 1500.0001220703125,
+            "MidGain": 1.0
+          },
+          "deviceData": {}
+        },
+        {
+          "presetUri": null,
+          "kind": "reverb",
+          "name": "",
+          "parameters": {
+            "AllPassGain": 0.6000000238418579,
+            "AllPassSize": 0.4000000059604645,
+            "BandFreq": 8544.5634765625,
+            "BandHighOn": false,
+            "BandLowOn": true,
+            "BandWidth": 5.761904716491699,
+            "ChorusOn": true,
+            "CutOn": true,
+            "DecayTime": 1000.0,
+            "DiffuseDelay": 0.5,
+            "EarlyReflectModDepth": 17.5,
+            "EarlyReflectModFreq": 0.2976999878883362,
+            "Enabled": true,
+            "FlatOn": true,
+            "FreezeOn": false,
+            "HighFilterType": "Shelf",
+            "MixDiffuse": 1.309004783630371,
+            "MixDirect": 0.14000000059604645,
+            "MixReflect": 1.0,
+            "PreDelay": 2.499999761581421,
+            "RoomSize": 51.81689453125,
+            "RoomType": "SuperEco",
+            "ShelfHiFreq": 1691.5751953125,
+            "ShelfHiGain": 0.4476190507411957,
+            "ShelfHighOn": true,
+            "ShelfLoFreq": 90.0,
+            "ShelfLoGain": 1.0,
+            "ShelfLowOn": true,
+            "SizeModDepth": 0.019999999552965164,
+            "SizeModFreq": 0.019999999552965164,
+            "SizeSmoothing": "Fast",
+            "SpinOn": true,
+            "StereoSeparation": 100.0
+          },
+          "deviceData": {}
+        }
+      ],
+      "mixer": {
+        "pan": 0.0,
+        "solo-cue": false,
+        "speakerOn": true,
+        "volume": 0.0,
+        "sends": []
+      }
+    }
+  ]
+}

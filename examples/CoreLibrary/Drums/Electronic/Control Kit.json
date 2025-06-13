@@ -1,0 +1,1358 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "instrumentRack",
+  "name": "Control Kit",
+  "lockId": 1001,
+  "lockSeal": -973461132,
+  "parameters": {
+    "Enabled": true,
+    "Macro0": 0.0,
+    "Macro1": 0.0,
+    "Macro2": 0.0,
+    "Macro3": 0.0,
+    "Macro4": 0.0,
+    "Macro5": 0.0,
+    "Macro6": 0.0,
+    "Macro7": 0.0
+  },
+  "chains": [
+    {
+      "name": "",
+      "color": 0,
+      "devices": [
+        {
+          "presetUri": null,
+          "kind": "drumRack",
+          "name": "Control Kit",
+          "lockId": 1001,
+          "lockSeal": 830049224,
+          "parameters": {
+            "Enabled": true,
+            "Macro0": 58.04296875,
+            "Macro1": 58.046875,
+            "Macro2": 58.046875,
+            "Macro3": 58.046875,
+            "Macro4": 58.046875,
+            "Macro5": 58.04296875,
+            "Macro6": 68.4609375,
+            "Macro7": 68.4609375
+          },
+          "chains": [
+            {
+              "name": "",
+              "color": 0,
+              "devices": [
+                {
+                  "presetUri": null,
+                  "kind": "drumCell",
+                  "name": "",
+                  "parameters": {
+                    "Effect_EightBitFilterDecay": 5.0,
+                    "Effect_EightBitResamplingRate": 14080.0,
+                    "Effect_FmAmount": 0.0,
+                    "Effect_FmFrequency": 999.9998779296875,
+                    "Effect_LoopLength": 0.30000001192092896,
+                    "Effect_LoopOffset": 0.0,
+                    "Effect_NoiseAmount": 0.0,
+                    "Effect_NoiseFrequency": 10000.0009765625,
+                    "Effect_On": true,
+                    "Effect_PitchEnvelopeAmount": 0.0,
+                    "Effect_PitchEnvelopeDecay": 0.29999998211860657,
+                    "Effect_PunchAmount": 0.0,
+                    "Effect_PunchTime": 0.12015999853610992,
+                    "Effect_RingModAmount": 0.0,
+                    "Effect_RingModFrequency": 999.9998168945313,
+                    "Effect_StretchFactor": 1.0,
+                    "Effect_StretchGrainSize": 0.09999999403953552,
+                    "Effect_SubOscAmount": 0.0,
+                    "Effect_SubOscFrequency": 59.99999237060547,
+                    "Effect_Type": "Sub Osc",
+                    "Enabled": true,
+                    "NotePitchBend": true,
+                    "Pan": 0.0,
+                    "Voice_Detune": 0.0,
+                    "Voice_Envelope_Attack": 0.00009999999747378752,
+                    "Voice_Envelope_Decay": 0.1727382093667984,
+                    "Voice_Envelope_Hold": 0.24494904279708862,
+                    "Voice_Envelope_Mode": "A-H-D",
+                    "Voice_Filter_Frequency": 21999.990234375,
+                    "Voice_Filter_On": true,
+                    "Voice_Filter_PeakGain": 1.0,
+                    "Voice_Filter_Resonance": 0.0,
+                    "Voice_Filter_Type": "Lowpass",
+                    "Voice_Gain": 1.0,
+                    "Voice_ModulationAmount": 0.0,
+                    "Voice_ModulationSource": "Velocity",
+                    "Voice_ModulationTarget": "Filter",
+                    "Voice_PitchToEnvelopeModulation": true,
+                    "Voice_PlaybackLength": 1.0,
+                    "Voice_PlaybackStart": 0.0,
+                    "Voice_Transpose": 0,
+                    "Voice_VelocityToVolume": 0.1953125,
+                    "Volume": -13.0
+                  },
+                  "deviceData": {
+                    "sampleUri": "ableton:/packs/abl-core-library/Samples/Drums/Kick/Kick%20Low%20Machine.wav"
+                  }
+                }
+              ],
+              "mixer": {
+                "pan": 0.0,
+                "solo-cue": false,
+                "speakerOn": true,
+                "volume": 0.0,
+                "sends": [
+                  {
+                    "isEnabled": true,
+                    "amount": -70.0
+                  }
+                ]
+              },
+              "drumZoneSettings": {
+                "receivingNote": 36,
+                "sendingNote": 60,
+                "chokeGroup": null
+              }
+            },
+            {
+              "name": "",
+              "color": 0,
+              "devices": [
+                {
+                  "presetUri": null,
+                  "kind": "drumCell",
+                  "name": "",
+                  "parameters": {
+                    "Effect_EightBitFilterDecay": 5.0,
+                    "Effect_EightBitResamplingRate": 14080.0,
+                    "Effect_FmAmount": 0.0,
+                    "Effect_FmFrequency": 999.9998779296875,
+                    "Effect_LoopLength": 0.30000001192092896,
+                    "Effect_LoopOffset": 0.0,
+                    "Effect_NoiseAmount": 0.0,
+                    "Effect_NoiseFrequency": 10000.0009765625,
+                    "Effect_On": true,
+                    "Effect_PitchEnvelopeAmount": 0.0,
+                    "Effect_PitchEnvelopeDecay": 0.29999998211860657,
+                    "Effect_PunchAmount": 0.0,
+                    "Effect_PunchTime": 0.12015999853610992,
+                    "Effect_RingModAmount": 0.0,
+                    "Effect_RingModFrequency": 999.9998168945313,
+                    "Effect_StretchFactor": 1.0,
+                    "Effect_StretchGrainSize": 0.09999999403953552,
+                    "Effect_SubOscAmount": 0.0,
+                    "Effect_SubOscFrequency": 59.99999237060547,
+                    "Effect_Type": "Punch",
+                    "Enabled": true,
+                    "NotePitchBend": true,
+                    "Pan": 0.0,
+                    "Voice_Detune": 0.0,
+                    "Voice_Envelope_Attack": 0.00009999999747378752,
+                    "Voice_Envelope_Decay": 0.04999999329447746,
+                    "Voice_Envelope_Hold": 0.6000000834465027,
+                    "Voice_Envelope_Mode": "A-H-D",
+                    "Voice_Filter_Frequency": 21999.990234375,
+                    "Voice_Filter_On": true,
+                    "Voice_Filter_PeakGain": 1.0,
+                    "Voice_Filter_Resonance": 0.0,
+                    "Voice_Filter_Type": "Lowpass",
+                    "Voice_Gain": 1.0,
+                    "Voice_ModulationAmount": 0.0,
+                    "Voice_ModulationSource": "Velocity",
+                    "Voice_ModulationTarget": "Filter",
+                    "Voice_PitchToEnvelopeModulation": true,
+                    "Voice_PlaybackLength": 0.0859375,
+                    "Voice_PlaybackStart": 0.0,
+                    "Voice_Transpose": 0,
+                    "Voice_VelocityToVolume": 0.30158731341362,
+                    "Volume": -15.999999046325684
+                  },
+                  "deviceData": {
+                    "sampleUri": "ableton:/packs/abl-core-library/Samples/Drums/Snare/Snare%20VB.wav"
+                  }
+                }
+              ],
+              "mixer": {
+                "pan": 0.0,
+                "solo-cue": false,
+                "speakerOn": true,
+                "volume": 0.0,
+                "sends": [
+                  {
+                    "isEnabled": true,
+                    "amount": -70.0
+                  }
+                ]
+              },
+              "drumZoneSettings": {
+                "receivingNote": 37,
+                "sendingNote": 60,
+                "chokeGroup": null
+              }
+            },
+            {
+              "name": "",
+              "color": 0,
+              "devices": [
+                {
+                  "presetUri": null,
+                  "kind": "drumCell",
+                  "name": "",
+                  "parameters": {
+                    "Effect_EightBitFilterDecay": 5.0,
+                    "Effect_EightBitResamplingRate": 14080.0,
+                    "Effect_FmAmount": 0.0,
+                    "Effect_FmFrequency": 999.9998779296875,
+                    "Effect_LoopLength": 0.30000001192092896,
+                    "Effect_LoopOffset": 0.0,
+                    "Effect_NoiseAmount": 0.0,
+                    "Effect_NoiseFrequency": 10000.0009765625,
+                    "Effect_On": true,
+                    "Effect_PitchEnvelopeAmount": 0.0,
+                    "Effect_PitchEnvelopeDecay": 0.29999998211860657,
+                    "Effect_PunchAmount": 0.0,
+                    "Effect_PunchTime": 0.12015999853610992,
+                    "Effect_RingModAmount": 0.0,
+                    "Effect_RingModFrequency": 999.9998168945313,
+                    "Effect_StretchFactor": 1.0,
+                    "Effect_StretchGrainSize": 0.09999999403953552,
+                    "Effect_SubOscAmount": 0.0,
+                    "Effect_SubOscFrequency": 59.99999237060547,
+                    "Effect_Type": "Punch",
+                    "Enabled": true,
+                    "NotePitchBend": true,
+                    "Pan": 0.0,
+                    "Voice_Detune": 0.0,
+                    "Voice_Envelope_Attack": 0.00009999999747378752,
+                    "Voice_Envelope_Decay": 2.173309087753296,
+                    "Voice_Envelope_Hold": 0.3000001013278961,
+                    "Voice_Envelope_Mode": "A-H-D",
+                    "Voice_Filter_Frequency": 21999.990234375,
+                    "Voice_Filter_On": true,
+                    "Voice_Filter_PeakGain": 1.0,
+                    "Voice_Filter_Resonance": 0.0,
+                    "Voice_Filter_Type": "Lowpass",
+                    "Voice_Gain": 1.0,
+                    "Voice_ModulationAmount": 0.0,
+                    "Voice_ModulationSource": "Velocity",
+                    "Voice_ModulationTarget": "Filter",
+                    "Voice_PitchToEnvelopeModulation": true,
+                    "Voice_PlaybackLength": 1.0,
+                    "Voice_PlaybackStart": 0.0,
+                    "Voice_Transpose": 0,
+                    "Voice_VelocityToVolume": 0.3499999940395355,
+                    "Volume": -16.799999237060547
+                  },
+                  "deviceData": {
+                    "sampleUri": "ableton:/packs/abl-core-library/Samples/Drums/Snare/Snare%20Hot.wav"
+                  }
+                }
+              ],
+              "mixer": {
+                "pan": 0.0,
+                "solo-cue": false,
+                "speakerOn": true,
+                "volume": 0.0,
+                "sends": [
+                  {
+                    "isEnabled": true,
+                    "amount": -70.0
+                  }
+                ]
+              },
+              "drumZoneSettings": {
+                "receivingNote": 38,
+                "sendingNote": 60,
+                "chokeGroup": null
+              }
+            },
+            {
+              "name": "",
+              "color": 0,
+              "devices": [
+                {
+                  "presetUri": null,
+                  "kind": "drumCell",
+                  "name": "",
+                  "parameters": {
+                    "Effect_EightBitFilterDecay": 5.0,
+                    "Effect_EightBitResamplingRate": 14080.0,
+                    "Effect_FmAmount": 0.0,
+                    "Effect_FmFrequency": 999.9998779296875,
+                    "Effect_LoopLength": 0.30000001192092896,
+                    "Effect_LoopOffset": 0.0,
+                    "Effect_NoiseAmount": 0.0,
+                    "Effect_NoiseFrequency": 10000.0009765625,
+                    "Effect_On": true,
+                    "Effect_PitchEnvelopeAmount": 0.0,
+                    "Effect_PitchEnvelopeDecay": 0.29999998211860657,
+                    "Effect_PunchAmount": 0.0,
+                    "Effect_PunchTime": 0.12015999853610992,
+                    "Effect_RingModAmount": 0.0,
+                    "Effect_RingModFrequency": 999.9998168945313,
+                    "Effect_StretchFactor": 1.0,
+                    "Effect_StretchGrainSize": 0.09999999403953552,
+                    "Effect_SubOscAmount": 0.0,
+                    "Effect_SubOscFrequency": 59.99999237060547,
+                    "Effect_Type": "Punch",
+                    "Enabled": true,
+                    "NotePitchBend": true,
+                    "Pan": 0.0,
+                    "Voice_Detune": 0.0,
+                    "Voice_Envelope_Attack": 0.00009999999747378752,
+                    "Voice_Envelope_Decay": 1.0560238361358643,
+                    "Voice_Envelope_Hold": 0.3000001013278961,
+                    "Voice_Envelope_Mode": "A-H-D",
+                    "Voice_Filter_Frequency": 21999.990234375,
+                    "Voice_Filter_On": true,
+                    "Voice_Filter_PeakGain": 1.0,
+                    "Voice_Filter_Resonance": 0.0,
+                    "Voice_Filter_Type": "Lowpass",
+                    "Voice_Gain": 1.0,
+                    "Voice_ModulationAmount": 0.0,
+                    "Voice_ModulationSource": "Velocity",
+                    "Voice_ModulationTarget": "Filter",
+                    "Voice_PitchToEnvelopeModulation": true,
+                    "Voice_PlaybackLength": 1.0,
+                    "Voice_PlaybackStart": 0.0,
+                    "Voice_Transpose": 0,
+                    "Voice_VelocityToVolume": 0.3499999940395355,
+                    "Volume": -14.799999237060547
+                  },
+                  "deviceData": {
+                    "sampleUri": "ableton:/packs/abl-core-library/Samples/Drums/Snare/Snare%20Trap%20Noise.wav"
+                  }
+                }
+              ],
+              "mixer": {
+                "pan": 0.0,
+                "solo-cue": false,
+                "speakerOn": true,
+                "volume": 0.0,
+                "sends": [
+                  {
+                    "isEnabled": true,
+                    "amount": -70.0
+                  }
+                ]
+              },
+              "drumZoneSettings": {
+                "receivingNote": 39,
+                "sendingNote": 60,
+                "chokeGroup": null
+              }
+            },
+            {
+              "name": "",
+              "color": 0,
+              "devices": [
+                {
+                  "presetUri": null,
+                  "kind": "drumCell",
+                  "name": "",
+                  "parameters": {
+                    "Effect_EightBitFilterDecay": 5.0,
+                    "Effect_EightBitResamplingRate": 14080.0,
+                    "Effect_FmAmount": 0.0,
+                    "Effect_FmFrequency": 999.9998779296875,
+                    "Effect_LoopLength": 0.30000001192092896,
+                    "Effect_LoopOffset": 0.0,
+                    "Effect_NoiseAmount": 0.0,
+                    "Effect_NoiseFrequency": 10000.0009765625,
+                    "Effect_On": true,
+                    "Effect_PitchEnvelopeAmount": 0.0,
+                    "Effect_PitchEnvelopeDecay": 0.29999998211860657,
+                    "Effect_PunchAmount": 0.0,
+                    "Effect_PunchTime": 0.12015999853610992,
+                    "Effect_RingModAmount": 0.0,
+                    "Effect_RingModFrequency": 999.9998168945313,
+                    "Effect_StretchFactor": 1.0,
+                    "Effect_StretchGrainSize": 0.09999999403953552,
+                    "Effect_SubOscAmount": 0.0,
+                    "Effect_SubOscFrequency": 59.99999237060547,
+                    "Effect_Type": "Punch",
+                    "Enabled": true,
+                    "NotePitchBend": true,
+                    "Pan": 0.0,
+                    "Voice_Detune": 0.0,
+                    "Voice_Envelope_Attack": 0.00009999999747378752,
+                    "Voice_Envelope_Decay": 2.1004297733306885,
+                    "Voice_Envelope_Hold": 0.3000001013278961,
+                    "Voice_Envelope_Mode": "A-H-D",
+                    "Voice_Filter_Frequency": 21999.990234375,
+                    "Voice_Filter_On": true,
+                    "Voice_Filter_PeakGain": 1.0,
+                    "Voice_Filter_Resonance": 0.0,
+                    "Voice_Filter_Type": "Lowpass",
+                    "Voice_Gain": 1.0,
+                    "Voice_ModulationAmount": 0.0,
+                    "Voice_ModulationSource": "Velocity",
+                    "Voice_ModulationTarget": "Filter",
+                    "Voice_PitchToEnvelopeModulation": true,
+                    "Voice_PlaybackLength": 1.0,
+                    "Voice_PlaybackStart": 0.0,
+                    "Voice_Transpose": 0,
+                    "Voice_VelocityToVolume": 0.3499999940395355,
+                    "Volume": -14.799999237060547
+                  },
+                  "deviceData": {
+                    "sampleUri": "ableton:/packs/abl-core-library/Samples/Drums/Snare/Snare%20808%20Slam.wav"
+                  }
+                }
+              ],
+              "mixer": {
+                "pan": 0.0,
+                "solo-cue": false,
+                "speakerOn": true,
+                "volume": 0.0,
+                "sends": [
+                  {
+                    "isEnabled": true,
+                    "amount": -70.0
+                  }
+                ]
+              },
+              "drumZoneSettings": {
+                "receivingNote": 40,
+                "sendingNote": 60,
+                "chokeGroup": null
+              }
+            },
+            {
+              "name": "",
+              "color": 0,
+              "devices": [
+                {
+                  "presetUri": null,
+                  "kind": "drumCell",
+                  "name": "",
+                  "parameters": {
+                    "Effect_EightBitFilterDecay": 5.0,
+                    "Effect_EightBitResamplingRate": 14080.0,
+                    "Effect_FmAmount": 0.0,
+                    "Effect_FmFrequency": 999.9998779296875,
+                    "Effect_LoopLength": 0.30000001192092896,
+                    "Effect_LoopOffset": 0.0,
+                    "Effect_NoiseAmount": 0.0,
+                    "Effect_NoiseFrequency": 10000.0009765625,
+                    "Effect_On": true,
+                    "Effect_PitchEnvelopeAmount": 0.0,
+                    "Effect_PitchEnvelopeDecay": 0.29999998211860657,
+                    "Effect_PunchAmount": 0.0,
+                    "Effect_PunchTime": 0.12015999853610992,
+                    "Effect_RingModAmount": 0.0,
+                    "Effect_RingModFrequency": 999.9998168945313,
+                    "Effect_StretchFactor": 1.0,
+                    "Effect_StretchGrainSize": 0.09999999403953552,
+                    "Effect_SubOscAmount": 0.0,
+                    "Effect_SubOscFrequency": 59.99999237060547,
+                    "Effect_Type": "Sub Osc",
+                    "Enabled": true,
+                    "NotePitchBend": true,
+                    "Pan": 0.0,
+                    "Voice_Detune": 0.0,
+                    "Voice_Envelope_Attack": 0.00009999999747378752,
+                    "Voice_Envelope_Decay": 8.787617683410645,
+                    "Voice_Envelope_Hold": 0.3000001013278961,
+                    "Voice_Envelope_Mode": "A-H-D",
+                    "Voice_Filter_Frequency": 21999.990234375,
+                    "Voice_Filter_On": true,
+                    "Voice_Filter_PeakGain": 1.0,
+                    "Voice_Filter_Resonance": 0.0,
+                    "Voice_Filter_Type": "Lowpass",
+                    "Voice_Gain": 1.0,
+                    "Voice_ModulationAmount": 0.0,
+                    "Voice_ModulationSource": "Velocity",
+                    "Voice_ModulationTarget": "Filter",
+                    "Voice_PitchToEnvelopeModulation": true,
+                    "Voice_PlaybackLength": 1.0,
+                    "Voice_PlaybackStart": 0.0,
+                    "Voice_Transpose": 0,
+                    "Voice_VelocityToVolume": 0.3499999940395355,
+                    "Volume": -14.799999237060547
+                  },
+                  "deviceData": {
+                    "sampleUri": "ableton:/packs/abl-core-library/Samples/Drums/Kick/Kick%20Sub%20Abyss.wav"
+                  }
+                }
+              ],
+              "mixer": {
+                "pan": 0.0,
+                "solo-cue": false,
+                "speakerOn": true,
+                "volume": 0.0,
+                "sends": [
+                  {
+                    "isEnabled": true,
+                    "amount": -70.0
+                  }
+                ]
+              },
+              "drumZoneSettings": {
+                "receivingNote": 41,
+                "sendingNote": 60,
+                "chokeGroup": null
+              }
+            },
+            {
+              "name": "",
+              "color": 0,
+              "devices": [
+                {
+                  "presetUri": null,
+                  "kind": "drumCell",
+                  "name": "",
+                  "parameters": {
+                    "Effect_EightBitFilterDecay": 5.0,
+                    "Effect_EightBitResamplingRate": 14080.0,
+                    "Effect_FmAmount": 0.0,
+                    "Effect_FmFrequency": 999.9998779296875,
+                    "Effect_LoopLength": 0.30000001192092896,
+                    "Effect_LoopOffset": 0.0,
+                    "Effect_NoiseAmount": 0.0,
+                    "Effect_NoiseFrequency": 10000.0009765625,
+                    "Effect_On": true,
+                    "Effect_PitchEnvelopeAmount": 0.0,
+                    "Effect_PitchEnvelopeDecay": 0.29999998211860657,
+                    "Effect_PunchAmount": 0.0,
+                    "Effect_PunchTime": 0.12015999853610992,
+                    "Effect_RingModAmount": 0.0,
+                    "Effect_RingModFrequency": 999.9998168945313,
+                    "Effect_StretchFactor": 1.0,
+                    "Effect_StretchGrainSize": 0.09999999403953552,
+                    "Effect_SubOscAmount": 0.0,
+                    "Effect_SubOscFrequency": 59.99999237060547,
+                    "Effect_Type": "Stretch",
+                    "Enabled": true,
+                    "NotePitchBend": true,
+                    "Pan": 0.0,
+                    "Voice_Detune": 0.0,
+                    "Voice_Envelope_Attack": 0.00009999999747378752,
+                    "Voice_Envelope_Decay": 0.006827795412391424,
+                    "Voice_Envelope_Hold": 3.6698853969573975,
+                    "Voice_Envelope_Mode": "A-H-D",
+                    "Voice_Filter_Frequency": 15248.916015625,
+                    "Voice_Filter_On": true,
+                    "Voice_Filter_PeakGain": 1.0,
+                    "Voice_Filter_Resonance": 0.5059523582458496,
+                    "Voice_Filter_Type": "Lowpass",
+                    "Voice_Gain": 1.0,
+                    "Voice_ModulationAmount": 0.0,
+                    "Voice_ModulationSource": "Velocity",
+                    "Voice_ModulationTarget": "Filter",
+                    "Voice_PitchToEnvelopeModulation": true,
+                    "Voice_PlaybackLength": 0.6015625,
+                    "Voice_PlaybackStart": 0.0,
+                    "Voice_Transpose": 0,
+                    "Voice_VelocityToVolume": 0.3499999940395355,
+                    "Volume": -23.514284133911133
+                  },
+                  "deviceData": {
+                    "sampleUri": "ableton:/packs/abl-core-library/Samples/Drums/Hihat/Hihat%20Closed%20Talk.wav"
+                  }
+                }
+              ],
+              "mixer": {
+                "pan": 0.0,
+                "solo-cue": false,
+                "speakerOn": true,
+                "volume": 0.0,
+                "sends": [
+                  {
+                    "isEnabled": true,
+                    "amount": -70.0
+                  }
+                ]
+              },
+              "drumZoneSettings": {
+                "receivingNote": 42,
+                "sendingNote": 60,
+                "chokeGroup": 1
+              }
+            },
+            {
+              "name": "",
+              "color": 0,
+              "devices": [
+                {
+                  "presetUri": null,
+                  "kind": "drumCell",
+                  "name": "",
+                  "parameters": {
+                    "Effect_EightBitFilterDecay": 5.0,
+                    "Effect_EightBitResamplingRate": 14080.0,
+                    "Effect_FmAmount": 0.0,
+                    "Effect_FmFrequency": 999.9998779296875,
+                    "Effect_LoopLength": 0.30000001192092896,
+                    "Effect_LoopOffset": 0.0,
+                    "Effect_NoiseAmount": 0.0,
+                    "Effect_NoiseFrequency": 10000.0009765625,
+                    "Effect_On": true,
+                    "Effect_PitchEnvelopeAmount": 0.0,
+                    "Effect_PitchEnvelopeDecay": 0.29999998211860657,
+                    "Effect_PunchAmount": 0.0,
+                    "Effect_PunchTime": 0.12015999853610992,
+                    "Effect_RingModAmount": 0.0,
+                    "Effect_RingModFrequency": 999.9998168945313,
+                    "Effect_StretchFactor": 1.0,
+                    "Effect_StretchGrainSize": 0.09999999403953552,
+                    "Effect_SubOscAmount": 0.0,
+                    "Effect_SubOscFrequency": 59.99999237060547,
+                    "Effect_Type": "Pitch Env",
+                    "Enabled": true,
+                    "NotePitchBend": true,
+                    "Pan": 0.078125,
+                    "Voice_Detune": 0.0,
+                    "Voice_Envelope_Attack": 0.00009999999747378752,
+                    "Voice_Envelope_Decay": 0.698453962802887,
+                    "Voice_Envelope_Hold": 0.3000001013278961,
+                    "Voice_Envelope_Mode": "A-H-D",
+                    "Voice_Filter_Frequency": 14566.041015625,
+                    "Voice_Filter_On": true,
+                    "Voice_Filter_PeakGain": 1.0,
+                    "Voice_Filter_Resonance": 0.0,
+                    "Voice_Filter_Type": "Lowpass",
+                    "Voice_Gain": 1.0,
+                    "Voice_ModulationAmount": 0.0,
+                    "Voice_ModulationSource": "Velocity",
+                    "Voice_ModulationTarget": "Filter",
+                    "Voice_PitchToEnvelopeModulation": true,
+                    "Voice_PlaybackLength": 1.0,
+                    "Voice_PlaybackStart": 0.0,
+                    "Voice_Transpose": 0,
+                    "Voice_VelocityToVolume": 0.3499999940395355,
+                    "Volume": -12.800000190734863
+                  },
+                  "deviceData": {
+                    "sampleUri": "ableton:/packs/abl-core-library/Samples/Drums/Conga/Conga%20808%20Prommer%201.wav"
+                  }
+                }
+              ],
+              "mixer": {
+                "pan": 0.0,
+                "solo-cue": false,
+                "speakerOn": true,
+                "volume": 0.0,
+                "sends": [
+                  {
+                    "isEnabled": true,
+                    "amount": -70.0
+                  }
+                ]
+              },
+              "drumZoneSettings": {
+                "receivingNote": 43,
+                "sendingNote": 60,
+                "chokeGroup": null
+              }
+            },
+            {
+              "name": "",
+              "color": 0,
+              "devices": [
+                {
+                  "presetUri": null,
+                  "kind": "drumCell",
+                  "name": "",
+                  "parameters": {
+                    "Effect_EightBitFilterDecay": 5.0,
+                    "Effect_EightBitResamplingRate": 14080.0,
+                    "Effect_FmAmount": 0.0,
+                    "Effect_FmFrequency": 999.9998779296875,
+                    "Effect_LoopLength": 0.30000001192092896,
+                    "Effect_LoopOffset": 0.0,
+                    "Effect_NoiseAmount": 0.0,
+                    "Effect_NoiseFrequency": 10000.0009765625,
+                    "Effect_On": true,
+                    "Effect_PitchEnvelopeAmount": 0.0,
+                    "Effect_PitchEnvelopeDecay": 0.29999998211860657,
+                    "Effect_PunchAmount": 0.0,
+                    "Effect_PunchTime": 0.12015999853610992,
+                    "Effect_RingModAmount": 0.0,
+                    "Effect_RingModFrequency": 999.9998168945313,
+                    "Effect_StretchFactor": 1.0,
+                    "Effect_StretchGrainSize": 0.09999999403953552,
+                    "Effect_SubOscAmount": 0.0,
+                    "Effect_SubOscFrequency": 59.99999237060547,
+                    "Effect_Type": "Pitch Env",
+                    "Enabled": true,
+                    "NotePitchBend": true,
+                    "Pan": -0.078125,
+                    "Voice_Detune": 0.0,
+                    "Voice_Envelope_Attack": 0.00009999999747378752,
+                    "Voice_Envelope_Decay": 1.4044690132141113,
+                    "Voice_Envelope_Hold": 0.3000001013278961,
+                    "Voice_Envelope_Mode": "A-H-D",
+                    "Voice_Filter_Frequency": 21999.990234375,
+                    "Voice_Filter_On": true,
+                    "Voice_Filter_PeakGain": 1.0,
+                    "Voice_Filter_Resonance": 0.0,
+                    "Voice_Filter_Type": "Lowpass",
+                    "Voice_Gain": 1.0,
+                    "Voice_ModulationAmount": 0.0,
+                    "Voice_ModulationSource": "Velocity",
+                    "Voice_ModulationTarget": "Filter",
+                    "Voice_PitchToEnvelopeModulation": true,
+                    "Voice_PlaybackLength": 1.0,
+                    "Voice_PlaybackStart": 0.0,
+                    "Voice_Transpose": 0,
+                    "Voice_VelocityToVolume": 0.3499999940395355,
+                    "Volume": -12.800000190734863
+                  },
+                  "deviceData": {
+                    "sampleUri": "ableton:/packs/abl-core-library/Samples/Drums/Tom/Tom%20808%20Mid%202.wav"
+                  }
+                }
+              ],
+              "mixer": {
+                "pan": 0.0,
+                "solo-cue": false,
+                "speakerOn": true,
+                "volume": 0.0,
+                "sends": [
+                  {
+                    "isEnabled": true,
+                    "amount": -70.0
+                  }
+                ]
+              },
+              "drumZoneSettings": {
+                "receivingNote": 45,
+                "sendingNote": 60,
+                "chokeGroup": null
+              }
+            },
+            {
+              "name": "",
+              "color": 0,
+              "devices": [
+                {
+                  "presetUri": null,
+                  "kind": "drumCell",
+                  "name": "",
+                  "parameters": {
+                    "Effect_EightBitFilterDecay": 5.0,
+                    "Effect_EightBitResamplingRate": 14080.0,
+                    "Effect_FmAmount": 0.0,
+                    "Effect_FmFrequency": 999.9998779296875,
+                    "Effect_LoopLength": 0.30000001192092896,
+                    "Effect_LoopOffset": 0.0,
+                    "Effect_NoiseAmount": 0.0,
+                    "Effect_NoiseFrequency": 10000.0009765625,
+                    "Effect_On": true,
+                    "Effect_PitchEnvelopeAmount": 0.0,
+                    "Effect_PitchEnvelopeDecay": 0.29999998211860657,
+                    "Effect_PunchAmount": 0.0,
+                    "Effect_PunchTime": 0.12015999853610992,
+                    "Effect_RingModAmount": 0.0,
+                    "Effect_RingModFrequency": 999.9998168945313,
+                    "Effect_StretchFactor": 1.0,
+                    "Effect_StretchGrainSize": 0.09999999403953552,
+                    "Effect_SubOscAmount": 0.0,
+                    "Effect_SubOscFrequency": 59.99999237060547,
+                    "Effect_Type": "Stretch",
+                    "Enabled": true,
+                    "NotePitchBend": true,
+                    "Pan": 0.0,
+                    "Voice_Detune": 0.0,
+                    "Voice_Envelope_Attack": 0.00009999999747378752,
+                    "Voice_Envelope_Decay": 7.379504680633545,
+                    "Voice_Envelope_Hold": 0.3000001013278961,
+                    "Voice_Envelope_Mode": "A-H-D",
+                    "Voice_Filter_Frequency": 21999.990234375,
+                    "Voice_Filter_On": true,
+                    "Voice_Filter_PeakGain": 1.0,
+                    "Voice_Filter_Resonance": 0.0,
+                    "Voice_Filter_Type": "Lowpass",
+                    "Voice_Gain": 1.0,
+                    "Voice_ModulationAmount": 0.0,
+                    "Voice_ModulationSource": "Velocity",
+                    "Voice_ModulationTarget": "Filter",
+                    "Voice_PitchToEnvelopeModulation": true,
+                    "Voice_PlaybackLength": 1.0,
+                    "Voice_PlaybackStart": 0.0,
+                    "Voice_Transpose": 0,
+                    "Voice_VelocityToVolume": 0.3499999940395355,
+                    "Volume": -15.800000190734863
+                  },
+                  "deviceData": {
+                    "sampleUri": "ableton:/packs/abl-core-library/Samples/Drums/Hihat/Hihat%20Open%20On%20Point.wav"
+                  }
+                }
+              ],
+              "mixer": {
+                "pan": 0.0,
+                "solo-cue": false,
+                "speakerOn": true,
+                "volume": 0.0,
+                "sends": [
+                  {
+                    "isEnabled": true,
+                    "amount": -70.0
+                  }
+                ]
+              },
+              "drumZoneSettings": {
+                "receivingNote": 46,
+                "sendingNote": 60,
+                "chokeGroup": 1
+              }
+            },
+            {
+              "name": "",
+              "color": 0,
+              "devices": [
+                {
+                  "presetUri": null,
+                  "kind": "drumCell",
+                  "name": "",
+                  "parameters": {
+                    "Effect_EightBitFilterDecay": 5.0,
+                    "Effect_EightBitResamplingRate": 14080.0,
+                    "Effect_FmAmount": 0.0,
+                    "Effect_FmFrequency": 999.9998779296875,
+                    "Effect_LoopLength": 0.30000001192092896,
+                    "Effect_LoopOffset": 0.0,
+                    "Effect_NoiseAmount": 0.0,
+                    "Effect_NoiseFrequency": 10000.0009765625,
+                    "Effect_On": true,
+                    "Effect_PitchEnvelopeAmount": 0.0,
+                    "Effect_PitchEnvelopeDecay": 0.29999998211860657,
+                    "Effect_PunchAmount": 0.0,
+                    "Effect_PunchTime": 0.12015999853610992,
+                    "Effect_RingModAmount": 0.0,
+                    "Effect_RingModFrequency": 999.9998168945313,
+                    "Effect_StretchFactor": 1.0,
+                    "Effect_StretchGrainSize": 0.09999999403953552,
+                    "Effect_SubOscAmount": 0.0,
+                    "Effect_SubOscFrequency": 59.99999237060547,
+                    "Effect_Type": "Stretch",
+                    "Enabled": true,
+                    "NotePitchBend": true,
+                    "Pan": 0.0,
+                    "Voice_Detune": 0.0,
+                    "Voice_Envelope_Attack": 0.00009999999747378752,
+                    "Voice_Envelope_Decay": 0.698453962802887,
+                    "Voice_Envelope_Hold": 0.3000001013278961,
+                    "Voice_Envelope_Mode": "A-H-D",
+                    "Voice_Filter_Frequency": 10569.537109375,
+                    "Voice_Filter_On": true,
+                    "Voice_Filter_PeakGain": 1.0,
+                    "Voice_Filter_Resonance": 0.3968254029750824,
+                    "Voice_Filter_Type": "Lowpass",
+                    "Voice_Gain": 1.0,
+                    "Voice_ModulationAmount": 0.0,
+                    "Voice_ModulationSource": "Velocity",
+                    "Voice_ModulationTarget": "Filter",
+                    "Voice_PitchToEnvelopeModulation": true,
+                    "Voice_PlaybackLength": 0.546875,
+                    "Voice_PlaybackStart": 0.203125,
+                    "Voice_Transpose": -2,
+                    "Voice_VelocityToVolume": 0.3499999940395355,
+                    "Volume": -13.085715293884277
+                  },
+                  "deviceData": {
+                    "sampleUri": "ableton:/packs/abl-core-library/Samples/Drums/Hihat/Hihat%20Closed%20Machine%20Trap.aif"
+                  }
+                }
+              ],
+              "mixer": {
+                "pan": 0.0,
+                "solo-cue": false,
+                "speakerOn": true,
+                "volume": 0.0,
+                "sends": [
+                  {
+                    "isEnabled": true,
+                    "amount": -70.0
+                  }
+                ]
+              },
+              "drumZoneSettings": {
+                "receivingNote": 44,
+                "sendingNote": 60,
+                "chokeGroup": 1
+              }
+            },
+            {
+              "name": "",
+              "color": 0,
+              "devices": [
+                {
+                  "presetUri": null,
+                  "kind": "drumCell",
+                  "name": "",
+                  "parameters": {
+                    "Effect_EightBitFilterDecay": 5.0,
+                    "Effect_EightBitResamplingRate": 14080.0,
+                    "Effect_FmAmount": 0.0,
+                    "Effect_FmFrequency": 999.9998779296875,
+                    "Effect_LoopLength": 0.30000001192092896,
+                    "Effect_LoopOffset": 0.0,
+                    "Effect_NoiseAmount": 0.0,
+                    "Effect_NoiseFrequency": 10000.0009765625,
+                    "Effect_On": true,
+                    "Effect_PitchEnvelopeAmount": 0.0,
+                    "Effect_PitchEnvelopeDecay": 0.29999998211860657,
+                    "Effect_PunchAmount": 0.0,
+                    "Effect_PunchTime": 0.12015999853610992,
+                    "Effect_RingModAmount": 0.0,
+                    "Effect_RingModFrequency": 999.9998168945313,
+                    "Effect_StretchFactor": 1.0,
+                    "Effect_StretchGrainSize": 0.09999999403953552,
+                    "Effect_SubOscAmount": 0.0,
+                    "Effect_SubOscFrequency": 59.99999237060547,
+                    "Effect_Type": "Pitch Env",
+                    "Enabled": true,
+                    "NotePitchBend": true,
+                    "Pan": 0.078125,
+                    "Voice_Detune": 0.0,
+                    "Voice_Envelope_Attack": 0.00009999999747378752,
+                    "Voice_Envelope_Decay": 3.3630285263061523,
+                    "Voice_Envelope_Hold": 0.3000001013278961,
+                    "Voice_Envelope_Mode": "A-H-D",
+                    "Voice_Filter_Frequency": 21999.990234375,
+                    "Voice_Filter_On": true,
+                    "Voice_Filter_PeakGain": 1.0,
+                    "Voice_Filter_Resonance": 0.0,
+                    "Voice_Filter_Type": "Lowpass",
+                    "Voice_Gain": 1.0,
+                    "Voice_ModulationAmount": 0.0,
+                    "Voice_ModulationSource": "Velocity",
+                    "Voice_ModulationTarget": "Filter",
+                    "Voice_PitchToEnvelopeModulation": true,
+                    "Voice_PlaybackLength": 1.0,
+                    "Voice_PlaybackStart": 0.0,
+                    "Voice_Transpose": 0,
+                    "Voice_VelocityToVolume": 0.3499999940395355,
+                    "Volume": -12.800000190734863
+                  },
+                  "deviceData": {
+                    "sampleUri": "ableton:/packs/abl-core-library/Samples/Drums/Conga/Conga%20808%20Prommer%202.wav"
+                  }
+                }
+              ],
+              "mixer": {
+                "pan": 0.0,
+                "solo-cue": false,
+                "speakerOn": true,
+                "volume": 0.0,
+                "sends": [
+                  {
+                    "isEnabled": true,
+                    "amount": -70.0
+                  }
+                ]
+              },
+              "drumZoneSettings": {
+                "receivingNote": 47,
+                "sendingNote": 60,
+                "chokeGroup": null
+              }
+            },
+            {
+              "name": "",
+              "color": 0,
+              "devices": [
+                {
+                  "presetUri": null,
+                  "kind": "drumCell",
+                  "name": "",
+                  "parameters": {
+                    "Effect_EightBitFilterDecay": 5.0,
+                    "Effect_EightBitResamplingRate": 14080.0,
+                    "Effect_FmAmount": 0.0,
+                    "Effect_FmFrequency": 999.9998779296875,
+                    "Effect_LoopLength": 0.30000001192092896,
+                    "Effect_LoopOffset": 0.0,
+                    "Effect_NoiseAmount": 0.0,
+                    "Effect_NoiseFrequency": 10000.0009765625,
+                    "Effect_On": true,
+                    "Effect_PitchEnvelopeAmount": 0.0,
+                    "Effect_PitchEnvelopeDecay": 0.29999998211860657,
+                    "Effect_PunchAmount": 0.0,
+                    "Effect_PunchTime": 0.12015999853610992,
+                    "Effect_RingModAmount": 0.0,
+                    "Effect_RingModFrequency": 999.9998168945313,
+                    "Effect_StretchFactor": 1.0,
+                    "Effect_StretchGrainSize": 0.09999999403953552,
+                    "Effect_SubOscAmount": 0.0,
+                    "Effect_SubOscFrequency": 59.99999237060547,
+                    "Effect_Type": "FM",
+                    "Enabled": true,
+                    "NotePitchBend": true,
+                    "Pan": -0.078125,
+                    "Voice_Detune": 0.0,
+                    "Voice_Envelope_Attack": 0.00009999999747378752,
+                    "Voice_Envelope_Decay": 2.824144124984741,
+                    "Voice_Envelope_Hold": 0.3000001013278961,
+                    "Voice_Envelope_Mode": "A-H-D",
+                    "Voice_Filter_Frequency": 21999.990234375,
+                    "Voice_Filter_On": true,
+                    "Voice_Filter_PeakGain": 1.0,
+                    "Voice_Filter_Resonance": 0.0,
+                    "Voice_Filter_Type": "Lowpass",
+                    "Voice_Gain": 1.5848958492279053,
+                    "Voice_ModulationAmount": 0.0,
+                    "Voice_ModulationSource": "Velocity",
+                    "Voice_ModulationTarget": "Filter",
+                    "Voice_PitchToEnvelopeModulation": true,
+                    "Voice_PlaybackLength": 0.5234375,
+                    "Voice_PlaybackStart": 0.1015625,
+                    "Voice_Transpose": 0,
+                    "Voice_VelocityToVolume": 0.1953125,
+                    "Volume": -15.999999046325684
+                  },
+                  "deviceData": {
+                    "sampleUri": "ableton:/packs/abl-core-library/Samples/Drums/FX%20Hit/FX%20Lighter%20Spark.wav"
+                  }
+                }
+              ],
+              "mixer": {
+                "pan": 0.0,
+                "solo-cue": false,
+                "speakerOn": true,
+                "volume": 0.0,
+                "sends": [
+                  {
+                    "isEnabled": true,
+                    "amount": -48.0
+                  }
+                ]
+              },
+              "drumZoneSettings": {
+                "receivingNote": 48,
+                "sendingNote": 60,
+                "chokeGroup": null
+              }
+            },
+            {
+              "name": "",
+              "color": 0,
+              "devices": [
+                {
+                  "presetUri": null,
+                  "kind": "drumCell",
+                  "name": "",
+                  "parameters": {
+                    "Effect_EightBitFilterDecay": 5.0,
+                    "Effect_EightBitResamplingRate": 14080.0,
+                    "Effect_FmAmount": 0.0,
+                    "Effect_FmFrequency": 999.9998779296875,
+                    "Effect_LoopLength": 0.30000001192092896,
+                    "Effect_LoopOffset": 0.0,
+                    "Effect_NoiseAmount": 0.0,
+                    "Effect_NoiseFrequency": 10000.0009765625,
+                    "Effect_On": true,
+                    "Effect_PitchEnvelopeAmount": 0.0,
+                    "Effect_PitchEnvelopeDecay": 0.29999998211860657,
+                    "Effect_PunchAmount": 0.0,
+                    "Effect_PunchTime": 0.12015999853610992,
+                    "Effect_RingModAmount": 0.0,
+                    "Effect_RingModFrequency": 999.9998168945313,
+                    "Effect_StretchFactor": 1.0,
+                    "Effect_StretchGrainSize": 0.09999999403953552,
+                    "Effect_SubOscAmount": 0.0,
+                    "Effect_SubOscFrequency": 59.99999237060547,
+                    "Effect_Type": "Pitch Env",
+                    "Enabled": true,
+                    "NotePitchBend": true,
+                    "Pan": 0.078125,
+                    "Voice_Detune": 0.0,
+                    "Voice_Envelope_Attack": 0.00009999999747378752,
+                    "Voice_Envelope_Decay": 1.6230075359344482,
+                    "Voice_Envelope_Hold": 0.3000001013278961,
+                    "Voice_Envelope_Mode": "A-H-D",
+                    "Voice_Filter_Frequency": 21999.990234375,
+                    "Voice_Filter_On": true,
+                    "Voice_Filter_PeakGain": 1.0,
+                    "Voice_Filter_Resonance": 0.0,
+                    "Voice_Filter_Type": "Lowpass",
+                    "Voice_Gain": 1.0,
+                    "Voice_ModulationAmount": 0.0,
+                    "Voice_ModulationSource": "Velocity",
+                    "Voice_ModulationTarget": "Filter",
+                    "Voice_PitchToEnvelopeModulation": true,
+                    "Voice_PlaybackLength": 0.109375,
+                    "Voice_PlaybackStart": 0.0,
+                    "Voice_Transpose": 2,
+                    "Voice_VelocityToVolume": 0.3499999940395355,
+                    "Volume": -22.942855834960938
+                  },
+                  "deviceData": {
+                    "sampleUri": "ableton:/packs/abl-core-library/Samples/Vocals/Vocal%20Chant%20Breath.wav"
+                  }
+                }
+              ],
+              "mixer": {
+                "pan": 0.0,
+                "solo-cue": false,
+                "speakerOn": true,
+                "volume": 0.0,
+                "sends": [
+                  {
+                    "isEnabled": true,
+                    "amount": -70.0
+                  }
+                ]
+              },
+              "drumZoneSettings": {
+                "receivingNote": 49,
+                "sendingNote": 60,
+                "chokeGroup": null
+              }
+            },
+            {
+              "name": "",
+              "color": 0,
+              "devices": [
+                {
+                  "presetUri": null,
+                  "kind": "drumCell",
+                  "name": "",
+                  "parameters": {
+                    "Effect_EightBitFilterDecay": 5.0,
+                    "Effect_EightBitResamplingRate": 14080.0,
+                    "Effect_FmAmount": 0.0,
+                    "Effect_FmFrequency": 999.9998779296875,
+                    "Effect_LoopLength": 0.30000001192092896,
+                    "Effect_LoopOffset": 0.0,
+                    "Effect_NoiseAmount": 0.0,
+                    "Effect_NoiseFrequency": 10000.0009765625,
+                    "Effect_On": true,
+                    "Effect_PitchEnvelopeAmount": 0.0,
+                    "Effect_PitchEnvelopeDecay": 0.29999998211860657,
+                    "Effect_PunchAmount": 0.0,
+                    "Effect_PunchTime": 0.12015999853610992,
+                    "Effect_RingModAmount": 0.0,
+                    "Effect_RingModFrequency": 999.9998168945313,
+                    "Effect_StretchFactor": 1.0,
+                    "Effect_StretchGrainSize": 0.09999999403953552,
+                    "Effect_SubOscAmount": 0.0,
+                    "Effect_SubOscFrequency": 59.99999237060547,
+                    "Effect_Type": "Punch",
+                    "Enabled": true,
+                    "NotePitchBend": true,
+                    "Pan": 0.0,
+                    "Voice_Detune": 0.0,
+                    "Voice_Envelope_Attack": 0.00009999999747378752,
+                    "Voice_Envelope_Decay": 4.004741191864014,
+                    "Voice_Envelope_Hold": 0.3000001013278961,
+                    "Voice_Envelope_Mode": "A-H-D",
+                    "Voice_Filter_Frequency": 21999.990234375,
+                    "Voice_Filter_On": true,
+                    "Voice_Filter_PeakGain": 1.0,
+                    "Voice_Filter_Resonance": 0.0,
+                    "Voice_Filter_Type": "Lowpass",
+                    "Voice_Gain": 1.0,
+                    "Voice_ModulationAmount": 0.0,
+                    "Voice_ModulationSource": "Velocity",
+                    "Voice_ModulationTarget": "Filter",
+                    "Voice_PitchToEnvelopeModulation": true,
+                    "Voice_PlaybackLength": 1.0,
+                    "Voice_PlaybackStart": 0.0,
+                    "Voice_Transpose": 0,
+                    "Voice_VelocityToVolume": 0.3499999940395355,
+                    "Volume": -14.799999237060547
+                  },
+                  "deviceData": {
+                    "sampleUri": "ableton:/packs/abl-core-library/Samples/Drums/Cymbal/Cymbal%20Grindage.wav"
+                  }
+                }
+              ],
+              "mixer": {
+                "pan": 0.0,
+                "solo-cue": false,
+                "speakerOn": true,
+                "volume": 0.0,
+                "sends": [
+                  {
+                    "isEnabled": true,
+                    "amount": -27.0
+                  }
+                ]
+              },
+              "drumZoneSettings": {
+                "receivingNote": 50,
+                "sendingNote": 60,
+                "chokeGroup": null
+              }
+            },
+            {
+              "name": "",
+              "color": 0,
+              "devices": [
+                {
+                  "presetUri": null,
+                  "kind": "drumCell",
+                  "name": "",
+                  "parameters": {
+                    "Effect_EightBitFilterDecay": 5.0,
+                    "Effect_EightBitResamplingRate": 14080.0,
+                    "Effect_FmAmount": 0.0,
+                    "Effect_FmFrequency": 999.9998779296875,
+                    "Effect_LoopLength": 0.30000001192092896,
+                    "Effect_LoopOffset": 0.0,
+                    "Effect_NoiseAmount": 0.0,
+                    "Effect_NoiseFrequency": 10000.0009765625,
+                    "Effect_On": true,
+                    "Effect_PitchEnvelopeAmount": 0.0,
+                    "Effect_PitchEnvelopeDecay": 0.29999998211860657,
+                    "Effect_PunchAmount": 0.0,
+                    "Effect_PunchTime": 0.12015999853610992,
+                    "Effect_RingModAmount": 0.0,
+                    "Effect_RingModFrequency": 999.9998168945313,
+                    "Effect_StretchFactor": 1.0,
+                    "Effect_StretchGrainSize": 0.09999999403953552,
+                    "Effect_SubOscAmount": 0.0,
+                    "Effect_SubOscFrequency": 59.99999237060547,
+                    "Effect_Type": "Punch",
+                    "Enabled": true,
+                    "NotePitchBend": true,
+                    "Pan": 0.0,
+                    "Voice_Detune": 0.0,
+                    "Voice_Envelope_Attack": 0.00009999999747378752,
+                    "Voice_Envelope_Decay": 10.753876686096191,
+                    "Voice_Envelope_Hold": 0.3000001013278961,
+                    "Voice_Envelope_Mode": "A-H-D",
+                    "Voice_Filter_Frequency": 21999.990234375,
+                    "Voice_Filter_On": true,
+                    "Voice_Filter_PeakGain": 1.0,
+                    "Voice_Filter_Resonance": 0.0,
+                    "Voice_Filter_Type": "Lowpass",
+                    "Voice_Gain": 1.0,
+                    "Voice_ModulationAmount": 0.0,
+                    "Voice_ModulationSource": "Velocity",
+                    "Voice_ModulationTarget": "Filter",
+                    "Voice_PitchToEnvelopeModulation": true,
+                    "Voice_PlaybackLength": 1.0,
+                    "Voice_PlaybackStart": 0.0,
+                    "Voice_Transpose": 0,
+                    "Voice_VelocityToVolume": 0.3499999940395355,
+                    "Volume": -14.799999237060547
+                  },
+                  "deviceData": {
+                    "sampleUri": "ableton:/packs/abl-core-library/Samples/Drums/Cymbal/Crash%20808%20Prommer.wav"
+                  }
+                }
+              ],
+              "mixer": {
+                "pan": 0.0,
+                "solo-cue": false,
+                "speakerOn": true,
+                "volume": 0.0,
+                "sends": [
+                  {
+                    "isEnabled": true,
+                    "amount": -24.799999237060547
+                  }
+                ]
+              },
+              "drumZoneSettings": {
+                "receivingNote": 51,
+                "sendingNote": 60,
+                "chokeGroup": null
+              }
+            }
+          ],
+          "returnChains": [
+            {
+              "name": "",
+              "color": 0,
+              "devices": [
+                {
+                  "presetUri": null,
+                  "kind": "reverb",
+                  "name": "",
+                  "parameters": {
+                    "AllPassGain": 0.9219444394111633,
+                    "AllPassSize": 0.7699999809265137,
+                    "BandFreq": 725.9819946289063,
+                    "BandHighOn": true,
+                    "BandLowOn": true,
+                    "BandWidth": 4.041666507720947,
+                    "ChorusOn": false,
+                    "CutOn": false,
+                    "DecayTime": 1279.609130859375,
+                    "DiffuseDelay": 0.2142857164144516,
+                    "EarlyReflectModDepth": 3.2428934574127197,
+                    "EarlyReflectModFreq": 0.1093868613243103,
+                    "Enabled": true,
+                    "FlatOn": false,
+                    "FreezeOn": false,
+                    "HighFilterType": "Shelf",
+                    "MixDiffuse": 1.995300054550171,
+                    "MixDirect": 1.0,
+                    "MixReflect": 1.792531132698059,
+                    "PreDelay": 7.023662090301514,
+                    "RoomSize": 9.320631980895996,
+                    "RoomType": "SuperEco",
+                    "ShelfHiFreq": 2536.816650390625,
+                    "ShelfHiGain": 0.5,
+                    "ShelfHighOn": true,
+                    "ShelfLoFreq": 670.7686157226563,
+                    "ShelfLoGain": 0.6166667342185974,
+                    "ShelfLowOn": true,
+                    "SizeModDepth": 0.15581557154655457,
+                    "SizeModFreq": 2.3727688789367676,
+                    "SizeSmoothing": "Fast",
+                    "SpinOn": true,
+                    "StereoSeparation": 91.42857360839844
+                  },
+                  "deviceData": {}
+                }
+              ],
+              "mixer": {
+                "pan": 0.0,
+                "solo-cue": false,
+                "speakerOn": true,
+                "volume": 0.0,
+                "sends": [
+                  {
+                    "isEnabled": false,
+                    "amount": -70.0
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "presetUri": null,
+          "kind": "saturator",
+          "name": "",
+          "parameters": {
+            "BaseDrive": -9.714286804199219,
+            "BassShaperThreshold": -50.0,
+            "ColorDepth": 0.0,
+            "ColorFrequency": 999.9998779296875,
+            "ColorOn": true,
+            "ColorWidth": 0.30000001192092896,
+            "DryWet": 1.0,
+            "Enabled": true,
+            "Oversampling": false,
+            "PostClip": "off",
+            "PostDrive": -9.428571701049805,
+            "PreDcFilter": false,
+            "PreDrive": 9.714282989501953,
+            "Type": "Soft Sine",
+            "WsCurve": 0.05000000074505806,
+            "WsDamp": 0.0,
+            "WsDepth": 0.0,
+            "WsDrive": 1.0,
+            "WsLin": 0.5,
+            "WsPeriod": 0.0
+          },
+          "deviceData": {}
+        }
+      ],
+      "mixer": {
+        "pan": 0.0,
+        "solo-cue": false,
+        "speakerOn": true,
+        "volume": 0.0,
+        "sends": []
+      }
+    }
+  ]
+}
