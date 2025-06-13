@@ -62,7 +62,10 @@ export function initSetInspector() {
     region = visibleEnd - visibleStart;
     draw();
   }
-  if (showFull) showFull.addEventListener('change', updateRegionView);
+  if (showFull) {
+    showFull.addEventListener('change', updateRegionView);
+    showFull.addEventListener('input', updateRegionView);
+  }
   const envSelect = document.getElementById('envelope_select');
   const legendDiv = document.getElementById('paramLegend');
   const editBtn = document.getElementById('editEnvBtn');
