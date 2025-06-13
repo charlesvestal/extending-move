@@ -20,32 +20,58 @@ export function initSetInspector() {
   const ctx = canvas.getContext('2d');
   const envSelect = document.getElementById('envelope_select');
 
+  function getVisibleRange() {
+    if (!notes.length) return { min: 60, max: 71 }; // default middle C octave
+    let min = Math.min(...notes.map(n => n.noteNumber));
+    let max = Math.max(...notes.map(n => n.noteNumber));
+    if (max - min < 11) {
+      const extra = 11 - (max - min);
+      min = Math.max(0, min - Math.floor(extra / 2));
+      max = Math.min(127, max + Math.ceil(extra / 2));
+    }
+    return { min, max };
+  }
+
   function drawGrid() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const { min, max } = getVisibleRange();
+    const noteRange = max - min + 1;
+
     ctx.strokeStyle = '#ddd';
     for (let b = 0; b <= region; b++) {
       const x = (b / region) * canvas.width;
       ctx.beginPath();
+      ctx.lineWidth = b % 4 === 0 ? 2 : 1;
       ctx.moveTo(x, 0);
       ctx.lineTo(x, canvas.height);
       ctx.stroke();
     }
-    for (let n = 0; n <= 127; n += 12) {
-      const y = canvas.height - (n / 127) * canvas.height;
+    ctx.lineWidth = 1;
+
+    const h = canvas.height / noteRange;
+    ctx.font = '10px sans-serif';
+    for (let n = min; n <= max; n++) {
+      const y = canvas.height - (n - min) * h;
       ctx.beginPath();
       ctx.moveTo(0, y);
       ctx.lineTo(canvas.width, y);
       ctx.stroke();
+      if (n % 12 === 0) {
+        const octave = Math.floor(n / 12) - 1;
+        ctx.fillText(`C${octave}`, 2, y - 2);
+      }
     }
   }
 
   function drawNotes() {
-    const h = canvas.height / 128;
+    const { min, max } = getVisibleRange();
+    const noteRange = max - min + 1;
+    const h = canvas.height / noteRange;
     ctx.fillStyle = '#0074D9';
     notes.forEach(n => {
       const x = (n.startTime / region) * canvas.width;
       const w = (n.duration / region) * canvas.width;
-      const y = canvas.height - (n.noteNumber + 1) * h;
+      const y = canvas.height - (n.noteNumber - min + 1) * h;
       ctx.fillRect(x, y, w, h);
     });
   }
