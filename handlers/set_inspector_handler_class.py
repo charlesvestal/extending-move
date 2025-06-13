@@ -40,7 +40,7 @@ class SetInspectorHandler(BaseHandler):
         max_track = max([c["track"] for c in clips], default=-1)
         max_clip = max([c["clip"] for c in clips], default=-1)
 
-        total_tracks = max(max_track + 1, 8)
+        total_tracks = max(max_track + 1, 4)
         total_clips = max(max_clip + 1, 8)
 
         cells = []
