@@ -71,10 +71,29 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
             max_v = info.get("max")
             if isinstance(min_v, (int, float)) and isinstance(max_v, (int, float)):
                 param_ranges[pid] = {
-                    "min": min_v,
-                    "max": max_v,
+                    "min": float(min_v),
+                    "max": float(max_v),
                     "unit": info.get("unit"),
                 }
+
+        # Attach range and domain info to envelopes
+        for env in envelopes:
+            pid = env.get("parameterId") or env.get("parameterIdName")
+            if pid in param_ranges:
+                env["rangeMin"] = param_ranges[pid]["min"]
+                env["rangeMax"] = param_ranges[pid]["max"]
+                if param_ranges[pid].get("unit"):
+                    env["unit"] = param_ranges[pid]["unit"]
+            else:
+                env["rangeMin"] = 0.0
+                env["rangeMax"] = 1.0
+            raw_vals = [bp.get("value", 0.0) for bp in env.get("breakpoints", [])]
+            if raw_vals and any(v < 0.0 or v > 1.0 for v in raw_vals):
+                env["domainMin"] = min(env["rangeMin"], min(raw_vals))
+                env["domainMax"] = max(env["rangeMax"], max(raw_vals))
+            else:
+                env["domainMin"] = env["rangeMin"]
+                env["domainMax"] = env["rangeMax"]
         return {
             "success": True,
             "message": "Clip loaded",
