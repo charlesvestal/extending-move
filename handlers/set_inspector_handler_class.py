@@ -33,6 +33,30 @@ class SetInspectorHandler(BaseHandler):
                 )
         return '<div class="pad-grid">' + ''.join(cells) + '</div>'
 
+    def generate_clip_grid(self, clips, selected=None):
+        """Return HTML for a grid of clips arranged by track."""
+        if not clips:
+            return '<div class="pad-grid"></div>'
+
+        max_track = max(c["track"] for c in clips)
+        max_clip = max(c["clip"] for c in clips)
+        cells = []
+        for track in range(max_track + 1):
+            for clip in range(max_clip + 1):
+                entry = next((c for c in clips if c["track"] == track and c["clip"] == clip), None)
+                value = f"{track}:{clip}"
+                checked = ' checked' if selected == value else ''
+                status = 'occupied' if entry else 'free'
+                disabled = '' if entry else 'disabled'
+                color_id = entry.get("color") if entry else None
+                style = f' style="background-color: {rgb_string(int(color_id))}"' if color_id else ''
+                name_attr = f' data-name="{entry.get("name", "")}"' if entry else ''
+                cells.append(
+                    f'<input type="radio" id="clip_{track}_{clip}" name="clip_select" value="{value}"{checked} {disabled}>'
+                    f'<label for="clip_{track}_{clip}" class="pad-cell {status}"{style}{name_attr}></label>'
+                )
+        return '<div class="pad-grid">' + ''.join(cells) + '</div>'
+
     def handle_get(self):
         msets, ids = list_msets(return_free_ids=True)
         used = ids.get("used", set())
@@ -48,6 +72,7 @@ class SetInspectorHandler(BaseHandler):
             "message": "Select a set to inspect",
             "message_type": "info",
             "selected_set": None,
+            "clip_grid": "",
             "clip_options": "",
             "selected_clip": None,
             "notes": [],
@@ -79,17 +104,13 @@ class SetInspectorHandler(BaseHandler):
             result = list_clips(set_path)
             if not result.get("success"):
                 return self.format_error_response(result.get("message"), pad_grid=pad_grid)
-            options = "".join(
-                f'<option value="{c["track"]}:{c["clip"]}">{c["name"]}</option>'
-                for c in result.get("clips", [])
-            )
-            options = '<option value="" disabled selected>-- Select Clip --</option>' + options
+            clip_grid = self.generate_clip_grid(result.get("clips", []))
             return {
                 "pad_grid": pad_grid,
                 "message": result.get("message"),
                 "message_type": "success",
                 "selected_set": set_path,
-                "clip_options": options,
+                "clip_grid": clip_grid,
                 "selected_clip": None,
                 "notes": [],
                 "envelopes": [],
@@ -104,6 +125,8 @@ class SetInspectorHandler(BaseHandler):
             result = get_clip_data(set_path, track_idx, clip_idx)
             if not result.get("success"):
                 return self.format_error_response(result.get("message"), pad_grid=pad_grid)
+            clip_info = list_clips(set_path)
+            clip_grid = self.generate_clip_grid(clip_info.get("clips", []), selected=clip_val)
             envelopes = result.get("envelopes", [])
             env_opts = "".join(
                 f'<option value="{e.get("parameterId")}">{e.get("parameterId")}</option>'
@@ -115,6 +138,7 @@ class SetInspectorHandler(BaseHandler):
                 "message": result.get("message"),
                 "message_type": "success",
                 "selected_set": set_path,
+                "clip_grid": clip_grid,
                 "clip_options": env_opts,
                 "selected_clip": clip_val,
                 "notes": result.get("notes", []),

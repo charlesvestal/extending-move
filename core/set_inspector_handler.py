@@ -15,7 +15,8 @@ def list_clips(set_path: str) -> Dict[str, Any]:
                 clip = slot.get("clip")
                 if clip:
                     name = clip.get("name", f"Track {ti+1} Clip {ci+1}")
-                    clips.append({"track": ti, "clip": ci, "name": name})
+                    color = clip.get("color")
+                    clips.append({"track": ti, "clip": ci, "name": name, "color": color})
         return {"success": True, "message": "Clips loaded", "clips": clips}
     except Exception as e:
         return {"success": False, "message": f"Failed to read set: {e}"}

@@ -11,6 +11,18 @@ export function initSetInspector() {
     });
   }
 
+  // Show selected clip name when choosing a clip
+  const clipGrid = document.querySelector('#clipSelectForm .pad-grid');
+  const clipNameSpan = document.getElementById('selected-clip-name');
+  if (clipGrid && clipNameSpan) {
+    clipGrid.querySelectorAll('input[name="clip_select"]').forEach(radio => {
+      radio.addEventListener('change', () => {
+        const label = clipGrid.querySelector(`label[for="${radio.id}"]`);
+        clipNameSpan.textContent = label?.dataset.name || '';
+      });
+    });
+  }
+
   const dataDiv = document.getElementById('clipData');
   if (!dataDiv) return;
   const notes = JSON.parse(dataDiv.dataset.notes || '[]');
