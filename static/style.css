@@ -437,6 +437,17 @@ select {
     cursor: pointer;
     font: inherit;
 }
+
+nav.breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: transparent;
+}
+
+nav.breadcrumbs form {
+    display: inline;
+}
 .file-browser {
     max-height: 240px;
     overflow-y: auto;
