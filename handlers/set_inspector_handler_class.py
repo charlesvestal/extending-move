@@ -34,16 +34,19 @@ class SetInspectorHandler(BaseHandler):
         return '<div class="pad-grid">' + ''.join(cells) + '</div>'
 
     def generate_clip_grid(self, clips, selected=None):
-        """Return HTML for a grid of clips arranged by track."""
-        if not clips:
-            return '<div class="pad-grid"></div>'
+        """Return HTML for an 8x8 grid of clips including empty slots."""
+        clip_map = {(c["track"], c["clip"]): c for c in clips}
 
-        max_track = max(c["track"] for c in clips)
-        max_clip = max(c["clip"] for c in clips)
+        max_track = max([c["track"] for c in clips], default=-1)
+        max_clip = max([c["clip"] for c in clips], default=-1)
+
+        total_tracks = max(max_track + 1, 4)
+        total_clips = max(max_clip + 1, 8)
+
         cells = []
-        for track in range(max_track + 1):
-            for clip in range(max_clip + 1):
-                entry = next((c for c in clips if c["track"] == track and c["clip"] == clip), None)
+        for track in range(total_tracks):
+            for clip in range(total_clips):
+                entry = clip_map.get((track, clip))
                 value = f"{track}:{clip}"
                 checked = ' checked' if selected == value else ''
                 status = 'occupied' if entry else 'free'
