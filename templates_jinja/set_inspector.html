@@ -38,7 +38,7 @@
       </form>
       <a href="{{ host_prefix }}/set-inspector" class="mini-grid">{{ pad_grid | safe }}</a>
     </div>
-    -
+    <span style="align-self:flex-end;">-</span>
     <div style="display:flex; flex-direction:column; align-items:center;">
       <form method="post" action="{{ host_prefix }}/set-inspector" style="display:inline;">
         <input type="hidden" name="action" value="select_set">
@@ -51,7 +51,7 @@
         <button type="submit" class="mini-grid" style="border:none; background:none; padding:0;">{{ clip_grid | safe }}</button>
       </form>
     </div>
-    - Clip {{ (clip_index + 1) if clip_index is not none else '?' }}
+    <span style="align-self:flex-end;">- Clip {{ (clip_index + 1) if clip_index is not none else '?' }}</span>
   </nav>
   <!-- <form method="post" action="{{ host_prefix }}/set-inspector" style="display:inline;">
     <input type="hidden" name="action" value="select_set">
