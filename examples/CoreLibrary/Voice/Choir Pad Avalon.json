@@ -1,0 +1,127 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "instrumentRack",
+  "name": "Choir Pad Avalon",
+  "lockId": 1001,
+  "lockSeal": 2077242674,
+  "parameters": {
+    "Enabled": true,
+    "Macro0": 0.0,
+    "Macro1": 0.0,
+    "Macro2": 0.0,
+    "Macro3": 0.0,
+    "Macro4": 0.0,
+    "Macro5": 0.0,
+    "Macro6": 0.0,
+    "Macro7": 0.0
+  },
+  "chains": [
+    {
+      "name": "",
+      "color": 0,
+      "devices": [
+        {
+          "presetUri": null,
+          "kind": "melodicSampler",
+          "name": "",
+          "parameters": {
+            "Enabled": true,
+            "Voice_AmplitudeEnvelope_Attack": 0.02085453987121582,
+            "Voice_AmplitudeEnvelope_Decay": 5.6788657226562504,
+            "Voice_AmplitudeEnvelope_Release": 0.9900001831054688,
+            "Voice_AmplitudeEnvelope_Sustain": 1.0,
+            "Voice_AmplitudeEnvelope_SustainMode": "Gate",
+            "Voice_Detune": 0.0,
+            "Voice_FilterEnvelope_Attack": 0.00010000000149011613,
+            "Voice_FilterEnvelope_Decay": 0.6,
+            "Voice_FilterEnvelope_On": true,
+            "Voice_FilterEnvelope_Release": 0.05,
+            "Voice_FilterEnvelope_Sustain": 0.0,
+            "Voice_Filter_Frequency": 22000.0,
+            "Voice_Filter_FrequencyModulationAmounts_EnvelopeAmount": 0,
+            "Voice_Filter_FrequencyModulationAmounts_LfoAmount": 0.0,
+            "Voice_Filter_On": true,
+            "Voice_Filter_Resonance": 0.0,
+            "Voice_Filter_Slope": "12",
+            "Voice_Filter_Type": "Lowpass",
+            "Voice_Gain": 1.0,
+            "Voice_Lfo_On": true,
+            "Voice_Lfo_Rate": 3.500000238418579,
+            "Voice_Lfo_Type": "Sine",
+            "Voice_PlaybackLength": 1.0,
+            "Voice_PlaybackStart": 0.0,
+            "Voice_Transpose": -12,
+            "Voice_VelocityToVolume": 0.3499999940395355,
+            "Volume": -7.0
+          },
+          "deviceData": {
+            "sampleUri": "ableton:/packs/abl-core-library/Samples/Vocals/Vocal%20Pad%20Avalon%20C4.wav"
+          }
+        },
+        {
+          "presetUri": null,
+          "kind": "channelEq",
+          "name": "",
+          "parameters": {
+            "Enabled": true,
+            "Gain": 1.0,
+            "HighShelfGain": 1.5964505672454834,
+            "HighpassOn": false,
+            "LowShelfGain": 0.9999999403953552,
+            "MidFrequency": 979.83154296875,
+            "MidGain": 0.7348672747612
+          },
+          "deviceData": {}
+        },
+        {
+          "presetUri": null,
+          "kind": "reverb",
+          "name": "",
+          "parameters": {
+            "AllPassGain": 0.7849444150924683,
+            "AllPassSize": 1.0,
+            "BandFreq": 844.8901977539063,
+            "BandHighOn": true,
+            "BandLowOn": true,
+            "BandWidth": 7.229166507720947,
+            "ChorusOn": false,
+            "CutOn": false,
+            "DecayTime": 6239.744140625,
+            "DiffuseDelay": 0.5,
+            "EarlyReflectModDepth": 2.0,
+            "EarlyReflectModFreq": 0.16887207329273224,
+            "Enabled": true,
+            "FlatOn": false,
+            "FreezeOn": false,
+            "HighFilterType": "Shelf",
+            "MixDiffuse": 1.2989338636398315,
+            "MixDirect": 0.2460317462682724,
+            "MixReflect": 1.1751354932785034,
+            "PreDelay": 23.870241165161133,
+            "RoomSize": 442.7644958496094,
+            "RoomType": "SuperEco",
+            "ShelfHiFreq": 4500.00146484375,
+            "ShelfHiGain": 1.0,
+            "ShelfHighOn": true,
+            "ShelfLoFreq": 90.00000762939453,
+            "ShelfLoGain": 1.0,
+            "ShelfLowOn": true,
+            "SizeModDepth": 0.019999999552965164,
+            "SizeModFreq": 0.020000001415610313,
+            "SizeSmoothing": "Fast",
+            "SpinOn": false,
+            "StereoSeparation": 120.0
+          },
+          "deviceData": {}
+        }
+      ],
+      "mixer": {
+        "pan": 0.0,
+        "solo-cue": false,
+        "speakerOn": true,
+        "volume": 0.0,
+        "sends": []
+      }
+    }
+  ]
+}
