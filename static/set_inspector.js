@@ -201,7 +201,7 @@ export function initSetInspector() {
     if (!envSelect || !envSelect.value || !valueDiv) return;
     const param = parseInt(envSelect.value);
     const env = editing ? { breakpoints: currentEnv } : envelopes.find(e => e.parameterId === param);
-    if (!env || !env.breakpoints.length) { valueDiv.textContent = ''; return; }
+    if (!env || !env.breakpoints.length) { valueDiv.textContent = ''; draw(); return; }
     const pos = canvasPos(ev);
     const t = (pos.x / canvas.width) * region;
     let v = envValueAt(env.breakpoints, t);
@@ -209,7 +209,16 @@ export function initSetInspector() {
     if (range && typeof range.min === 'number' && typeof range.max === 'number') {
       v = range.min + v * (range.max - range.min);
     }
-    valueDiv.textContent = v.toFixed(3);
+    const txt = v.toFixed(3);
+    valueDiv.textContent = txt;
+
+    draw();
+    ctx.save();
+    ctx.fillStyle = '#000';
+    ctx.font = '10px sans-serif';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText(txt, pos.x + 5, pos.y - 5);
+    ctx.restore();
   }
 
   function startDraw(ev) {
@@ -243,7 +252,10 @@ export function initSetInspector() {
   canvas.addEventListener('touchstart', startDraw);
   canvas.addEventListener('mousemove', continueDraw);
   canvas.addEventListener('touchmove', continueDraw);
-  canvas.addEventListener('mouseleave', () => { if (!drawing && valueDiv) valueDiv.textContent = ''; });
+  canvas.addEventListener('mouseleave', () => {
+    if (!drawing && valueDiv) valueDiv.textContent = '';
+    if (!drawing) draw();
+  });
   document.addEventListener('mouseup', endDraw);
   document.addEventListener('touchend', endDraw);
 
