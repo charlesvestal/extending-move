@@ -49,6 +49,15 @@ export function initSetInspector() {
   let dirty = false;
   let currentEnv = [];
   let tailEnv = [];
+  let envInfo = null;
+
+  function isNormalized(env) {
+    if (!env || !env.breakpoints || !env.breakpoints.length) return false;
+    const vals = env.breakpoints.map(b => b.value);
+    const minV = Math.min(...vals);
+    const maxV = Math.max(...vals);
+    return minV >= 0 && maxV <= 1 && (env.rangeMin !== 0 || env.rangeMax !== 1);
+  }
 
   function updateControls() {
     const hasEnv = envSelect && envSelect.value;
@@ -146,16 +155,22 @@ export function initSetInspector() {
     let env;
     if (editing) {
       const bps = drawing ? currentEnv.concat(tailEnv) : currentEnv;
-      env = { breakpoints: bps };
+      env = envInfo ? { ...envInfo, breakpoints: bps } : { breakpoints: bps };
     } else {
-      env = envelopes.find(e => e.parameterId === param);
+      env = envInfo;
     }
-    if (!env || !env.breakpoints.length) return;
+    if (!env || !env.breakpoints || !env.breakpoints.length) return;
     ctx.strokeStyle = '#FF4136';
     ctx.beginPath();
+    const needsScale = isNormalized(env);
     env.breakpoints.forEach((bp, i) => {
       const x = (bp.time / region) * canvas.width;
-      const y = canvas.height - bp.value * canvas.height;
+      let v = bp.value;
+      if (needsScale) {
+        v = env.rangeMin + v * (env.rangeMax - env.rangeMin);
+      }
+      const scale = env.domainMax - env.domainMin;
+      const y = canvas.height - ((v - env.domainMin) / scale) * canvas.height;
       if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
     });
     ctx.stroke();
@@ -182,18 +197,21 @@ export function initSetInspector() {
       return;
     }
     const param = parseInt(envSelect.value);
-    const range = paramRanges[param];
-    if (!range || typeof range.min !== 'number' || typeof range.max !== 'number') {
+    let range = envelopes.find(e => e.parameterId === param);
+    if (!range) range = paramRanges[param];
+    if (!range || typeof range.rangeMin === 'undefined' && typeof range.min === 'undefined') {
       legendDiv.textContent = '';
       return;
     }
-    const mid = (range.min + range.max) / 2;
+    const min = range.rangeMin !== undefined ? range.rangeMin : range.min;
+    const max = range.rangeMax !== undefined ? range.rangeMax : range.max;
     const unit = range.unit ? ' ' + range.unit : '';
+    const mid = (min + max) / 2;
     const fmt = v => Number(v).toFixed(2) + unit;
     legendDiv.innerHTML =
-      `<div style="text-align:right;">${fmt(range.max)}</div>` +
+      `<div style="text-align:right;">${fmt(max)}</div>` +
       `<div style="text-align:right;">${fmt(mid)}</div>` +
-      `<div style="text-align:right;">${fmt(range.min)}</div>`;
+      `<div style="text-align:right;">${fmt(min)}</div>`;
   }
 
   function draw() {
@@ -208,8 +226,22 @@ export function initSetInspector() {
     drawing = false;
     dirty = false;
     currentEnv = [];
+    envInfo = null;
     if (envSelect.value) {
-      paramInput.value = envSelect.value;
+      const pid = parseInt(envSelect.value);
+      paramInput.value = pid;
+      envInfo = envelopes.find(e => e.parameterId === pid);
+      if (!envInfo && paramRanges[pid]) {
+        const r = paramRanges[pid];
+        envInfo = {
+          rangeMin: r.min,
+          rangeMax: r.max,
+          domainMin: r.min,
+          domainMax: r.max,
+          unit: r.unit,
+          breakpoints: [],
+        };
+      }
     }
     if (saveBtn) saveBtn.disabled = true;
     updateLegend();
@@ -227,16 +259,16 @@ export function initSetInspector() {
   function showValue(ev) {
     if (!envSelect || !envSelect.value || !valueDiv) return;
     const param = parseInt(envSelect.value);
-    const env = editing ? { breakpoints: currentEnv } : envelopes.find(e => e.parameterId === param);
-    if (!env || !env.breakpoints.length) { valueDiv.textContent = ''; return; }
+    const env = editing ? (envInfo ? { ...envInfo, breakpoints: currentEnv } : { breakpoints: currentEnv }) : envInfo;
+    if (!env || !env.breakpoints || !env.breakpoints.length) { valueDiv.textContent = ''; return; }
     const pos = canvasPos(ev);
     const t = (pos.x / canvas.width) * region;
     let v = envValueAt(env.breakpoints, t);
-    const range = paramRanges[param];
-    if (range && typeof range.min === 'number' && typeof range.max === 'number') {
-      v = range.min + v * (range.max - range.min);
+    if (isNormalized(env)) {
+      v = env.rangeMin + v * (env.rangeMax - env.rangeMin);
     }
-    valueDiv.textContent = v.toFixed(3);
+    const unit = env.unit ? ' ' + env.unit : '';
+    valueDiv.textContent = v.toFixed(3) + unit;
   }
 
   function startDraw(ev) {
@@ -245,11 +277,17 @@ export function initSetInspector() {
     dirty = true;
     const { x, y } = canvasPos(ev);
     const t = (x / canvas.width) * region;
-    const env = currentEnv.length ? currentEnv : (envelopes.find(e => e.parameterId === parseInt(envSelect.value))?.breakpoints || []);
+    const env = currentEnv.length ? currentEnv : (envInfo ? envInfo.breakpoints : []);
     const before = env.filter(bp => bp.time < t);
     tailEnv = env.filter(bp => bp.time > t);
     const startV = envValueAt(env, t);
-    currentEnv = [...before, { time: t, value: startV }, { time: t, value: 1 - y / canvas.height }];
+    let v0;
+    if (isNormalized(envInfo)) {
+      v0 = 1 - y / canvas.height;
+    } else {
+      v0 = envInfo.domainMax - (y / canvas.height) * (envInfo.domainMax - envInfo.domainMin);
+    }
+    currentEnv = [...before, { time: t, value: startV }, { time: t, value: v0 }];
     updateControls();
     draw();
     ev.preventDefault();
@@ -262,7 +300,12 @@ export function initSetInspector() {
     }
     const { x, y } = canvasPos(ev);
     const t = (x / canvas.width) * region;
-    const v = 1 - y / canvas.height;
+    let v;
+    if (isNormalized(envInfo)) {
+      v = 1 - y / canvas.height;
+    } else {
+      v = envInfo.domainMax - (y / canvas.height) * (envInfo.domainMax - envInfo.domainMin);
+    }
     while (tailEnv.length && tailEnv[0].time <= t) {
       tailEnv.shift();
     }
@@ -296,10 +339,21 @@ export function initSetInspector() {
     editing = true;
     drawing = false;
     dirty = false;
-    const param = parseInt(envSelect.value);
-    const src = envelopes.find(e => e.parameterId === param);
-    currentEnv = src ? src.breakpoints.map(bp => ({ ...bp })) : [];
-    paramInput.value = envSelect.value;
+    const pid = parseInt(envSelect.value);
+    envInfo = envelopes.find(e => e.parameterId === pid);
+    if (!envInfo && paramRanges[pid]) {
+      const r = paramRanges[pid];
+      envInfo = {
+        rangeMin: r.min,
+        rangeMax: r.max,
+        domainMin: r.min,
+        domainMax: r.max,
+        unit: r.unit,
+        breakpoints: [],
+      };
+    }
+    currentEnv = envInfo ? envInfo.breakpoints.map(bp => ({ ...bp })) : [];
+    paramInput.value = pid;
     if (saveBtn) saveBtn.disabled = true;
     updateControls();
     draw();
