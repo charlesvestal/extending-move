@@ -63,6 +63,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 bgsrc:              {type:String, value:null, observer:'layout'},
                 cursorsrc:          {type:String, value:"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIj4NCjxwYXRoIGZpbGw9InJnYmEoMjU1LDEwMCwxMDAsMC44KSIgZD0iTTAsMSAyNCwxMiAwLDIzIHoiLz4NCjwvc3ZnPg0K"},
                 cursoroffset:       {type:Number, value:0},
+                showcursor:         {type:Boolean, value:true, observer:'toggleCursor'},
                 markstartsrc:       {type:String, value:"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij4NCjxwYXRoIGZpbGw9IiMwYzAiIGQ9Ik0wLDEgMjQsMSAwLDIzIHoiLz4NCjwvc3ZnPg0K"},
                 markstartoffset:    {type:Number, value:0},
                 markendsrc:         {type:String, value:"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij4NCjxwYXRoIGZpbGw9IiMwYzAiIGQ9Ik0wLDEgMjQsMSAyNCwyMyB6Ii8+DQo8L3N2Zz4NCg=="},
@@ -691,7 +692,13 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             this.kbimg.style.backgroundSize=(this.steph*12)+"px";
             this.layout();
             this.initialized=1;
+            this.toggleCursor();
             this.redraw();
+        };
+        this.toggleCursor=function(){
+            if(!this.cursorimg)
+                return;
+            this.cursorimg.style.display=this.showcursor?"block":"none";
         };
         this.setupImage=function(){
         };
@@ -1032,7 +1039,9 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             if(!this.initialized)
                 return;
             const cur=(this.cursor-this.xoffset)*this.stepw+this.yruler+this.kbwidth;
-            this.cursorimg.style.left=(cur+this.cursoroffset)+"px";
+            if(this.showcursor){
+                this.cursorimg.style.left=(cur+this.cursoroffset)+"px";
+            }
             const start=(this.markstart-this.xoffset)*this.stepw+this.yruler+this.kbwidth;
             this.markstartimg.style.left=(start+this.markstartoffset)+"px";
             const end=(this.markend-this.xoffset)*this.stepw+this.yruler+this.kbwidth;

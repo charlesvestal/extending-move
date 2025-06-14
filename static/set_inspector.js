@@ -67,6 +67,7 @@ export function initSetInspector() {
     if (!piano.hasAttribute('xrange')) piano.xrange = region * ticksPerBeat;
     if (!piano.hasAttribute('markstart')) piano.markstart = loopStart * ticksPerBeat;
     if (!piano.hasAttribute('markend')) piano.markend = loopEnd * ticksPerBeat;
+    piano.showcursor = false;
     const { min, max } = notes.length
       ? { min: Math.min(...notes.map(n => n.noteNumber)),
           max: Math.max(...notes.map(n => n.noteNumber)) }
