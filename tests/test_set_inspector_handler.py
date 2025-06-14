@@ -104,28 +104,30 @@ def test_pitch_conversion_roundtrip():
             "noteNumber": 36,
             "startTime": 0.0,
             "duration": 1.0,
-            "pitchBend": 170.6458282470703,
+            "automations": {"PitchBend": [{"time": 0.0, "value": 170.6458282470703}]},
         },
         {
             "noteNumber": 36,
             "startTime": 1.0,
             "duration": 1.0,
-            "pitchBend": -170.6458282470703,
+            "automations": {"PitchBend": [{"time": 0.0, "value": -170.6458282470703}]},
         },
     ]
     steps = sih.notes_to_pitch_steps(notes, 36)
     assert steps[0]["noteNumber"] == 37
     assert steps[1]["noteNumber"] == 35
     recon = sih.steps_to_pitch_notes(steps, 36)
-    assert abs(recon[0]["pitchBend"] - notes[0]["pitchBend"]) < 1e-6
-    assert abs(recon[1]["pitchBend"] - notes[1]["pitchBend"]) < 1e-6
+    orig0 = notes[0]["automations"]["PitchBend"][0]["value"]
+    orig1 = notes[1]["automations"]["PitchBend"][0]["value"]
+    assert abs(recon[0]["pitchBend"] - orig0) < 1e-6
+    assert abs(recon[1]["pitchBend"] - orig1) < 1e-6
 
 
 def test_pitch_bend_pad_detection():
     notes = [
-        {"noteNumber": 36, "pitchBend": 10.0},
-        {"noteNumber": 37, "pitchBend": 0.0},
-        {"noteNumber": 38, "pitchBend": -5.0},
+        {"noteNumber": 36, "automations": {"PitchBend": [{"time": 0.0, "value": 10.0}]}},
+        {"noteNumber": 37},
+        {"noteNumber": 38, "automations": {"PitchBend": [{"time": 0.0, "value": -5.0}]}},
     ]
     pads = sih.pitch_bend_pads(notes)
     assert pads == [36, 38]

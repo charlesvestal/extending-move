@@ -230,7 +230,14 @@ def notes_to_pitch_steps(
     for n in notes:
         if n.get("noteNumber") != pad_number:
             continue
-        pb = float(n.get("pitchBend", 0.0))
+        pb = float(
+            n.get(
+                "pitchBend",
+                n.get("automations", {}).get("PitchBend", [{"value": 0.0}])[0].get(
+                    "value", 0.0
+                ),
+            )
+        )
         pitch = 36 + pb / unit
         pitch_notes.append(
             {
@@ -263,6 +270,7 @@ def steps_to_pitch_notes(
                 "velocity": s.get("velocity", 100.0),
                 "offVelocity": s.get("offVelocity", 0.0),
                 "pitchBend": pb,
+                "automations": {"PitchBend": [{"time": 0.0, "value": pb}]},
             }
         )
     return notes
@@ -274,6 +282,16 @@ def pitch_bend_pads(notes: List[Dict[str, Any]]) -> List[int]:
     pads = {
         int(n.get("noteNumber"))
         for n in notes
-        if abs(float(n.get("pitchBend", 0.0))) > 0.0
+        if abs(
+            float(
+                n.get(
+                    "pitchBend",
+                    n.get("automations", {})
+                    .get("PitchBend", [{"value": 0.0}])[0]
+                    .get("value", 0.0),
+                )
+            )
+        )
+        > 0.0
     }
     return sorted(pads)

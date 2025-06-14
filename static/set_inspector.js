@@ -76,7 +76,7 @@ export function initSetInspector() {
       t: Math.round(n.startTime * ticksPerBeat),
       n: n.noteNumber,
       g: Math.round(n.duration * ticksPerBeat),
-      pb: n.pitchBend || 0
+      pb: n.pitchBend || ((n.automations?.PitchBend?.[0]?.value) ?? 0)
     }));
     if (!piano.hasAttribute('xrange')) piano.xrange = region * ticksPerBeat;
     if (!piano.hasAttribute('markstart')) piano.markstart = loopStart * ticksPerBeat;
@@ -423,7 +423,8 @@ export function initSetInspector() {
           duration: ev.g / ticksPerBeat,
           velocity: 100.0,
           offVelocity: 0.0,
-          pitchBend: pb
+          pitchBend: pb,
+          automations: { PitchBend: [{ time: 0.0, value: pb }] }
         };
       }));
     }
