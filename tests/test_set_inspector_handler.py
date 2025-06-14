@@ -22,23 +22,34 @@ def create_simple_set(path, with_params=False):
         "clipSlots": [{"clip": clip}],
     }
     if with_params:
-        track["devices"].append({
-            "kind": "drift",
-            "parameters": {"Osc1Gain": {"id": 1}}
-        })
-        clip["envelopes"].append({"parameterId": 1, "breakpoints": [{"time": 0.0, "value": 0.5}]})
+        track["devices"].append(
+            {"kind": "drift", "parameters": {"Osc1Gain": {"id": 1}}}
+        )
+        clip["envelopes"].append(
+            {"parameterId": 1, "breakpoints": [{"time": 0.0, "value": 0.5}]}
+        )
     song = {"tracks": [track]}
     Path(path).write_text(json.dumps(song))
 
 
 def test_generate_pad_grid():
     handler = SetInspectorHandler()
-    html = handler.generate_pad_grid({0, 31}, {0: 1, 31: 2}, {0: "A", 31: "B"}, selected_idx=31)
+    html = handler.generate_pad_grid(
+        {0, 31}, {0: 1, 31: 2}, {0: "A", 31: "B"}, selected_idx=31
+    )
     # Should create 32 cells with two occupied
     assert html.count('class="pad-cell occupied"') == 2
     assert html.count('name="pad_index"') == 32
     # Selected pad should have "checked" attribute
     assert 'inspect_pad_32" name="pad_index" value="32" checked' in html
+
+
+def test_generate_pad_grid_pitch_mark():
+    handler = SetInspectorHandler()
+    html = handler.generate_pad_grid(
+        {0}, {0: 1}, {0: "A"}, selected_idx=0, pitch_pads={36}
+    )
+    assert "pitch-mark" in html
 
 
 def test_generate_clip_grid():
@@ -70,7 +81,11 @@ def test_get_clip_data_param_ranges(monkeypatch, tmp_path):
     create_simple_set(set_path, with_params=True)
 
     # Provide simple schema for parameter range lookup
-    monkeypatch.setattr(sih, "load_drift_schema", lambda: {"Osc1Gain": {"min": 0.0, "max": 1.0, "unit": "pct"}})
+    monkeypatch.setattr(
+        sih,
+        "load_drift_schema",
+        lambda: {"Osc1Gain": {"min": 0.0, "max": 1.0, "unit": "pct"}},
+    )
     monkeypatch.setattr(sih, "load_wavetable_schema", lambda: {})
     monkeypatch.setattr(sih, "load_melodic_sampler_schema", lambda: {})
 
@@ -85,8 +100,18 @@ def test_get_clip_data_param_ranges(monkeypatch, tmp_path):
 
 def test_pitch_conversion_roundtrip():
     notes = [
-        {"noteNumber": 36, "startTime": 0.0, "duration": 1.0, "pitchBend": 170.6458282470703},
-        {"noteNumber": 36, "startTime": 1.0, "duration": 1.0, "pitchBend": -170.6458282470703},
+        {
+            "noteNumber": 36,
+            "startTime": 0.0,
+            "duration": 1.0,
+            "pitchBend": 170.6458282470703,
+        },
+        {
+            "noteNumber": 36,
+            "startTime": 1.0,
+            "duration": 1.0,
+            "pitchBend": -170.6458282470703,
+        },
     ]
     steps = sih.notes_to_pitch_steps(notes, 36)
     assert steps[0]["noteNumber"] == 37
@@ -94,3 +119,13 @@ def test_pitch_conversion_roundtrip():
     recon = sih.steps_to_pitch_notes(steps, 36)
     assert abs(recon[0]["pitchBend"] - notes[0]["pitchBend"]) < 1e-6
     assert abs(recon[1]["pitchBend"] - notes[1]["pitchBend"]) < 1e-6
+
+
+def test_pitch_bend_pad_detection():
+    notes = [
+        {"noteNumber": 36, "pitchBend": 10.0},
+        {"noteNumber": 37, "pitchBend": 0.0},
+        {"noteNumber": 38, "pitchBend": -5.0},
+    ]
+    pads = sih.pitch_bend_pads(notes)
+    assert pads == [36, 38]

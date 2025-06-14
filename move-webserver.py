@@ -350,6 +350,7 @@ def set_inspector_route():
         param_ranges_json=result.get("param_ranges_json", "{}"),
         pitch_mode=result.get("pitch_mode", False),
         pad_note=result.get("pad_note"),
+        pitch_pads=result.get("pitch_pads", []),
         active_tab="set-inspector",
     )
 

@@ -476,7 +476,8 @@ nav.breadcrumbs form {
     text-align: center;
     font-weight: 600;
     box-sizing: border-box;
-    aspect-ratio: 4 / 3; 
+    aspect-ratio: 4 / 3;
+    position: relative;
 }
 
 .pad-cell.free {
@@ -519,6 +520,29 @@ nav.breadcrumbs form {
 .mini-grid input,
 .mini-grid label {
     pointer-events: none;
+}
+
+.pitch-mark {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 0.8rem;
+}
+
+.pitch-pad-bar form {
+    display: inline;
+}
+
+.pitch-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0 2px;
+}
+
+.pitch-icon.active {
+    color: #0074D9;
 }
 
 

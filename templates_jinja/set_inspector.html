@@ -51,6 +51,29 @@
     </form>
     - Clip {{ (clip_index + 1) if clip_index is not none else '?' }}
   </nav>
+  {% if pitch_pads %}
+  <div class="pitch-pad-bar" style="margin-bottom:0.5rem;">
+    {% for p in pitch_pads %}
+    <form method="post" action="{{ host_prefix }}/set-inspector" style="display:inline;">
+      <input type="hidden" name="action" value="show_clip">
+      <input type="hidden" name="set_path" value="{{ selected_set }}">
+      <input type="hidden" name="clip_select" value="{{ selected_clip }}">
+      <input type="hidden" name="pitch_mode" value="true">
+      <input type="hidden" name="pad_note" value="{{ p }}">
+      <button type="submit" class="pitch-icon{% if pitch_mode and pad_note == p %} active{% endif %}" title="Edit pitch for pad {{ p - 35 }}">🎵</button>
+    </form>
+    {% endfor %}
+    {% if pitch_mode %}
+    <form method="post" action="{{ host_prefix }}/set-inspector" style="display:inline; margin-left:0.5rem;">
+      <input type="hidden" name="action" value="show_clip">
+      <input type="hidden" name="set_path" value="{{ selected_set }}">
+      <input type="hidden" name="clip_select" value="{{ selected_clip }}">
+      <input type="hidden" name="pitch_mode" value="false">
+      <button type="submit" class="pitch-icon">Back</button>
+    </form>
+    {% endif %}
+  </div>
+  {% endif %}
   <!-- <form method="post" action="{{ host_prefix }}/set-inspector" style="display:inline;">
     <input type="hidden" name="action" value="select_set">
     <input type="hidden" name="set_path" value="{{ selected_set }}">
@@ -86,7 +109,7 @@
     {% endif %}
     <button id="saveClipBtn" type="submit">Save Clip</button>
   </form>
-  <div id="clipData" data-notes='{{ notes | tojson }}' data-envelopes='{{ envelopes | tojson }}' data-region='{{ region | default(4.0) }}' data-loop-start='{{ loop_start | default(0.0) }}' data-loop-end='{{ loop_end | default(region) }}' data-param-ranges='{{ param_ranges_json | safe }}' data-pitch-mode='{{ pitch_mode | tojson }}' data-pad-note='{{ pad_note if pad_note is not none else '' }}'></div>
+  <div id="clipData" data-notes='{{ notes | tojson }}' data-envelopes='{{ envelopes | tojson }}' data-region='{{ region | default(4.0) }}' data-loop-start='{{ loop_start | default(0.0) }}' data-loop-end='{{ loop_end | default(region) }}' data-param-ranges='{{ param_ranges_json | safe }}' data-pitch-mode='{{ pitch_mode | tojson }}' data-pad-note='{{ pad_note if pad_note is not none else '' }}' data-pitch-pads='{{ pitch_pads | tojson }}'></div>
   {% endif %}
 {% endblock %}
 {% block scripts %}
