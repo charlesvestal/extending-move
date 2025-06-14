@@ -1,6 +1,7 @@
 import json
 import os
 import logging
+import math
 from typing import Any, Dict, List
 from core.synth_preset_inspector_handler import (
     load_drift_schema,
@@ -83,7 +84,7 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
             default=0.0,
         )
         detected_len = max(last_note_end, last_env_time)
-        detected_region_end = max(4.0, ((int(detected_len) // 4) + 1) * 4.0)
+        detected_region_end = max(4.0, math.ceil(detected_len / 4.0) * 4.0)
         logging.info(
             "Detected clip region 0.0-%.2f (last note %.2f, last envelope %.2f)",
             detected_region_end,
