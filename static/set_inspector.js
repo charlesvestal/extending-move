@@ -32,17 +32,34 @@ export function initSetInspector() {
   const notes = JSON.parse(dataDiv.dataset.notes || '[]');
   const envelopes = JSON.parse(dataDiv.dataset.envelopes || '[]');
   const region = parseFloat(dataDiv.dataset.region || '4');
+  const loopStart = parseFloat(dataDiv.dataset.loopStart || '0');
+  const loopEnd = parseFloat(dataDiv.dataset.loopEnd || String(region));
   const paramRanges = JSON.parse(dataDiv.dataset.paramRanges || '{}');
   const canvas = document.getElementById('clipCanvas');
   const ctx = canvas.getContext('2d');
+  const piano = document.getElementById('clipEditor');
+  const timebase = piano ? parseInt(piano.getAttribute('timebase') || '16', 10) : 16;
+  const xruler = piano ? parseInt(piano.getAttribute('xruler') || '24', 10) : 24;
+  const yruler = piano ? parseInt(piano.getAttribute('yruler') || '24', 10) : 24;
+  const kbwidth = piano ? parseInt(piano.getAttribute('kbwidth') || '40', 10) : 40;
+  const ticksPerBeat = timebase / 4;
+  if (piano && canvas) {
+    const w = parseInt(piano.getAttribute('width') || piano.clientWidth || 0, 10);
+    const h = parseInt(piano.getAttribute('height') || piano.clientHeight || 0, 10);
+    canvas.width = w - (yruler + kbwidth);
+    canvas.height = h - xruler;
+    canvas.style.left = `${yruler + kbwidth}px`;
+    canvas.style.top = `${xruler}px`;
+  }
   const envSelect = document.getElementById('envelope_select');
   const legendDiv = document.getElementById('paramLegend');
-  const editBtn = document.getElementById('editEnvBtn');
-  const saveForm = document.getElementById('saveEnvForm');
-  const saveBtn = document.getElementById('saveEnvBtn');
-  const paramInput = document.getElementById('parameter_id_input');
-  const envInput = document.getElementById('envelope_data_input');
   const valueDiv = document.getElementById('envValue');
+  const saveClipForm = document.getElementById('saveClipForm');
+  const notesInput = document.getElementById('clip_notes_input');
+  const envsInput = document.getElementById('clip_envelopes_input');
+  const regionInput = document.getElementById('region_end_input');
+  const loopStartInput = document.getElementById('loop_start_input');
+  const loopEndInput = document.getElementById('loop_end_input');
 
   let editing = false;
   let drawing = false;
@@ -50,6 +67,47 @@ export function initSetInspector() {
   let currentEnv = [];
   let tailEnv = [];
   let envInfo = null;
+
+  if (piano) {
+    if (!piano.sequence) piano.sequence = [];
+    piano.sequence = notes.map(n => ({
+      t: Math.round(n.startTime * ticksPerBeat),
+      n: n.noteNumber,
+      g: Math.round(n.duration * ticksPerBeat)
+    }));
+    if (!piano.hasAttribute('xrange')) piano.xrange = region * ticksPerBeat;
+    if (!piano.hasAttribute('markstart')) piano.markstart = loopStart * ticksPerBeat;
+    if (!piano.hasAttribute('markend')) piano.markend = loopEnd * ticksPerBeat;
+    piano.showcursor = false;
+    const { min, max } = notes.length
+      ? { min: Math.min(...notes.map(n => n.noteNumber)),
+          max: Math.max(...notes.map(n => n.noteNumber)) }
+      : { min: 60, max: 71 };
+    piano.yoffset = Math.max(0, min - 2);
+    piano.yrange = Math.max(12, max - min + 5);
+    if (piano.redraw) piano.redraw();
+
+    piano.addEventListener('dblclick', ev => {
+      const rect = piano.getBoundingClientRect();
+      const x = ev.clientX - rect.left;
+      const y = ev.clientY - rect.top;
+      if (y < piano.xruler) {
+        piano.xoffset = 0;
+        piano.xrange = region * ticksPerBeat;
+        if (piano.redraw) piano.redraw();
+        return;
+      }
+      if (x < piano.yruler + piano.kbwidth) {
+        const { min, max } = notes.length
+          ? { min: Math.min(...notes.map(n => n.noteNumber)),
+              max: Math.max(...notes.map(n => n.noteNumber)) }
+          : { min: 60, max: 71 };
+        piano.yoffset = Math.max(0, min - 2);
+        piano.yrange = Math.max(12, max - min + 5);
+        if (piano.redraw) piano.redraw();
+      }
+    });
+  }
 
   function isNormalized(env) {
     if (!env || !env.breakpoints || !env.breakpoints.length) return false;
@@ -59,20 +117,15 @@ export function initSetInspector() {
     return minV >= 0 && maxV <= 1 && (env.rangeMin !== 0 || env.rangeMax !== 1);
   }
 
+  const defaultEditMode = piano ? (piano.editmode || piano.getAttribute('editmode') || 'dragpoly') : 'dragpoly';
+
   function updateControls() {
-    const hasEnv = envSelect && envSelect.value;
-    if (editBtn) {
-      editBtn.style.display = hasEnv && !editing ? '' : 'none';
+    if (canvas) {
+      canvas.style.pointerEvents = editing ? 'auto' : 'none';
     }
-    if (saveForm) {
-      saveForm.style.display = hasEnv && editing ? 'inline' : 'none';
-    }
-    if (saveBtn) {
-      if (editing) {
-        saveBtn.disabled = !dirty;
-      } else {
-        saveBtn.disabled = true;
-      }
+    if (piano) {
+      piano.enable = true;
+      piano.editmode = editing ? '' : defaultEditMode;
     }
   }
   if (legendDiv) {
@@ -151,10 +204,12 @@ export function initSetInspector() {
 
   function drawEnvelope() {
     if (!envSelect || !envSelect.value) return;
-    const param = parseInt(envSelect.value);
     let env;
     if (editing) {
-      const bps = drawing ? currentEnv.concat(tailEnv) : currentEnv;
+      let bps = drawing ? currentEnv.concat(tailEnv) : currentEnv;
+      if (!bps.length && envInfo) {
+        bps = envInfo.breakpoints;
+      }
       env = envInfo ? { ...envInfo, breakpoints: bps } : { breakpoints: bps };
     } else {
       env = envInfo;
@@ -164,7 +219,9 @@ export function initSetInspector() {
     ctx.beginPath();
     const needsScale = isNormalized(env);
     env.breakpoints.forEach((bp, i) => {
-      const x = (bp.time / region) * canvas.width;
+      const x = piano
+        ? ((bp.time * ticksPerBeat - piano.xoffset) / piano.xrange) * canvas.width
+        : (bp.time / region) * canvas.width;
       let v = bp.value;
       if (needsScale) {
         v = env.rangeMin + v * (env.rangeMax - env.rangeMin);
@@ -215,21 +272,26 @@ export function initSetInspector() {
   }
 
   function draw() {
-    drawGrid();
-    drawNotes();
-    drawLabels();
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawEnvelope();
   }
 
+  if (piano && piano.redraw) {
+    const origRedraw = piano.redraw.bind(piano);
+    piano.redraw = function(...args) {
+      origRedraw(...args);
+      draw();
+    };
+  }
+
   if (envSelect) envSelect.addEventListener('change', () => {
-    editing = false;
     drawing = false;
     dirty = false;
     currentEnv = [];
     envInfo = null;
-    if (envSelect.value) {
+    editing = !!envSelect.value;
+    if (editing) {
       const pid = parseInt(envSelect.value);
-      paramInput.value = pid;
       envInfo = envelopes.find(e => e.parameterId === pid);
       if (!envInfo && paramRanges[pid]) {
         const r = paramRanges[pid];
@@ -243,7 +305,6 @@ export function initSetInspector() {
         };
       }
     }
-    if (saveBtn) saveBtn.disabled = true;
     updateLegend();
     updateControls();
     draw();
@@ -259,10 +320,20 @@ export function initSetInspector() {
   function showValue(ev) {
     if (!envSelect || !envSelect.value || !valueDiv) return;
     const param = parseInt(envSelect.value);
-    const env = editing ? (envInfo ? { ...envInfo, breakpoints: currentEnv } : { breakpoints: currentEnv }) : envInfo;
+    let env;
+    if (editing) {
+      let bps = currentEnv;
+      if (!bps.length && envInfo) {
+        bps = envInfo.breakpoints;
+      }
+      env = envInfo ? { ...envInfo, breakpoints: bps } : { breakpoints: bps };
+    } else {
+      env = envInfo;
+    }
     if (!env || !env.breakpoints || !env.breakpoints.length) { valueDiv.textContent = ''; return; }
     const pos = canvasPos(ev);
-    const t = (pos.x / canvas.width) * region;
+    const t = piano ? (piano.xoffset + (pos.x / canvas.width) * piano.xrange) / ticksPerBeat
+                    : (pos.x / canvas.width) * region;
     let v = envValueAt(env.breakpoints, t);
     if (isNormalized(env)) {
       v = env.rangeMin + v * (env.rangeMax - env.rangeMin);
@@ -276,7 +347,8 @@ export function initSetInspector() {
     drawing = true;
     dirty = true;
     const { x, y } = canvasPos(ev);
-    const t = (x / canvas.width) * region;
+    const t = piano ? (piano.xoffset + (x / canvas.width) * piano.xrange) / ticksPerBeat
+                    : (x / canvas.width) * region;
     const env = currentEnv.length ? currentEnv : (envInfo ? envInfo.breakpoints : []);
     const before = env.filter(bp => bp.time < t);
     tailEnv = env.filter(bp => bp.time > t);
@@ -299,7 +371,8 @@ export function initSetInspector() {
       return;
     }
     const { x, y } = canvasPos(ev);
-    const t = (x / canvas.width) * region;
+    const t = piano ? (piano.xoffset + (x / canvas.width) * piano.xrange) / ticksPerBeat
+                    : (x / canvas.width) * region;
     let v;
     if (isNormalized(envInfo)) {
       v = 1 - y / canvas.height;
@@ -334,33 +407,35 @@ export function initSetInspector() {
   document.addEventListener('mouseup', endDraw);
   document.addEventListener('touchend', endDraw);
 
-  if (editBtn) editBtn.addEventListener('click', () => {
-    if (!envSelect.value) return;
-    editing = true;
-    drawing = false;
-    dirty = false;
-    const pid = parseInt(envSelect.value);
-    envInfo = envelopes.find(e => e.parameterId === pid);
-    if (!envInfo && paramRanges[pid]) {
-      const r = paramRanges[pid];
-      envInfo = {
-        rangeMin: r.min,
-        rangeMax: r.max,
-        domainMin: r.min,
-        domainMax: r.max,
-        unit: r.unit,
-        breakpoints: [],
-      };
-    }
-    currentEnv = envInfo ? envInfo.breakpoints.map(bp => ({ ...bp })) : [];
-    paramInput.value = pid;
-    if (saveBtn) saveBtn.disabled = true;
-    updateControls();
-    draw();
-  });
 
-  if (saveForm) saveForm.addEventListener('submit', () => {
-    envInput.value = JSON.stringify(currentEnv);
+  if (saveClipForm) saveClipForm.addEventListener('submit', () => {
+    if (piano && notesInput) {
+      const seq = piano.sequence || [];
+      notesInput.value = JSON.stringify(seq.map(ev => ({
+        noteNumber: ev.n,
+        startTime: ev.t / ticksPerBeat,
+        duration: ev.g / ticksPerBeat,
+        velocity: 100.0,
+        offVelocity: 0.0
+      })));
+    }
+    if (envsInput) {
+      let envs = envelopes.map(e => ({ parameterId: e.parameterId, breakpoints: e.breakpoints }));
+      if (editing && envSelect && envSelect.value) {
+        const pid = parseInt(envSelect.value);
+        let bps = currentEnv;
+        if (!bps.length && envInfo) {
+          bps = envInfo.breakpoints;
+        }
+        const newEnv = { parameterId: pid, breakpoints: bps };
+        const idx = envs.findIndex(e => e.parameterId === pid);
+        if (idx >= 0) envs[idx] = newEnv; else envs.push(newEnv);
+      }
+      envsInput.value = JSON.stringify(envs);
+    }
+    if (regionInput) regionInput.value = (piano.xrange / ticksPerBeat).toFixed(6);
+    if (loopStartInput) loopStartInput.value = (piano.markstart / ticksPerBeat).toFixed(6);
+    if (loopEndInput) loopEndInput.value = (piano.markend / ticksPerBeat).toFixed(6);
   });
   if (envSelect && envSelect.value) {
     envSelect.dispatchEvent(new Event('change'));

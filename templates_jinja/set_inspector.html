@@ -58,24 +58,30 @@
   <div style="margin-top:1rem; display:flex; align-items:center;">
     <label for="envelope_select">Envelope:</label>
     <select id="envelope_select">{{ clip_options | safe }}</select>
-    <button id="editEnvBtn" type="button" style="margin-left:0.5rem; display:none;">Edit Envelope</button>
-    <form id="saveEnvForm" method="post" action="{{ host_prefix }}/set-inspector" style="margin-left:0.5rem; display:none;">
-      <input type="hidden" name="action" value="save_envelope">
-      <input type="hidden" name="set_path" value="{{ selected_set }}">
-      <input type="hidden" name="clip_select" value="{{ selected_clip }}">
-      <input type="hidden" name="parameter_id" id="parameter_id_input">
-      <input type="hidden" name="envelope_data" id="envelope_data_input">
-      <button id="saveEnvBtn" type="submit" disabled>Save Envelope</button>
-    </form>
     <span id="envValue" style="margin-left:0.5rem; font-size:0.8em;"></span>
   </div>
   <div style="margin-top:1rem; display:flex; align-items:flex-start;">
-    <canvas id="clipCanvas" width="400" height="200" style="border:1px solid #ccc;"></canvas>
-    <div id="paramLegend" style="margin-left:0.5rem; font-size:10px; line-height:1.2; display:flex; flex-direction:column; justify-content:space-between; align-items:flex-end; height:200px;"></div>
+    <div style="position:relative; width:900px; height:300px; border:1px solid #ccc;">
+      <webaudio-pianoroll id="clipEditor" width="900" height="300" editmode="dragpoly" wheelzoom="0" xscroll="1" yscroll="1" timebase="16" xrange="{{ (region | default(4.0)) * 4 }}" markstart="{{ (loop_start | default(0.0)) * 4 }}" markend="{{ (loop_end | default(region)) * 4 }}" showcursor="false"></webaudio-pianoroll>
+      <canvas id="clipCanvas" width="836" height="300" style="position:absolute; left:64px; top:0; pointer-events:none;"></canvas>
+    </div>
+    <div id="paramLegend" style="margin-left:0.5rem; font-size:10px; line-height:1.2; display:flex; flex-direction:column; justify-content:space-between; align-items:flex-end; height:300px;"></div>
   </div>
-  <div id="clipData" data-notes='{{ notes | tojson }}' data-envelopes='{{ envelopes | tojson }}' data-region='{{ region }}' data-param-ranges='{{ param_ranges_json | safe }}'></div>
+  <form id="saveClipForm" method="post" action="{{ host_prefix }}/set-inspector" style="margin-top:0.5rem;">
+    <input type="hidden" name="action" value="save_clip">
+    <input type="hidden" name="set_path" value="{{ selected_set }}">
+    <input type="hidden" name="clip_select" value="{{ selected_clip }}">
+    <input type="hidden" name="clip_notes" id="clip_notes_input">
+    <input type="hidden" name="clip_envelopes" id="clip_envelopes_input">
+    <input type="hidden" name="region_end" id="region_end_input">
+    <input type="hidden" name="loop_start" id="loop_start_input">
+    <input type="hidden" name="loop_end" id="loop_end_input">
+    <button id="saveClipBtn" type="submit">Save Clip</button>
+  </form>
+  <div id="clipData" data-notes='{{ notes | tojson }}' data-envelopes='{{ envelopes | tojson }}' data-region='{{ region | default(4.0) }}' data-loop-start='{{ loop_start | default(0.0) }}' data-loop-end='{{ loop_end | default(region) }}' data-param-ranges='{{ param_ranges_json | safe }}'></div>
   {% endif %}
 {% endblock %}
 {% block scripts %}
+<script src="{{ host_prefix }}/static/webaudio-pianoroll.js"></script>
 <script type="module" src="{{ host_prefix }}/static/set_inspector.js"></script>
 {% endblock %}
