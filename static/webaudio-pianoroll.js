@@ -99,6 +99,10 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
     height: 100%;
     overflow: hidden;
 }
+#wac-topbar {
+    text-align:right;
+    margin:0 0 2px 0;
+}
 #wac-pianoroll {
     cursor: pointer;
     margin:0;
@@ -121,10 +125,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
     cursor:pointer;
 }
 #wac-gridres{
-    position:absolute;
-    top:2px;
-    right:2px;
-    z-index:10;
+    margin-right:2px;
 }
 .marker{
     position: absolute;
@@ -143,6 +144,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
     background-position:left bottom;
 }
 </style>
+<div id="wac-topbar"><select id="wac-gridres"></select></div>
 <div class="wac-body" id="wac-body" touch-action="none">
 <canvas id="wac-pianoroll" touch-action="none" tabindex="0"></canvas>
 <div id="wac-kb"></div>
@@ -150,7 +152,6 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
 <img id="wac-markend" class="marker" src="${this.markendsrc}"/>
 <img id="wac-cursor" class="marker" src="${this.cursorsrc}"/>
 <div id="wac-menu">Delete</div>
-<select id="wac-gridres"></select>
 </div>`;
 
         this.sortSequence=function(){
@@ -672,8 +673,9 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             }
         };
         this.ready=function(){
-            this.body=root.children[1];
-            this.elem=root.childNodes[2];
+            this.topbar=root.querySelector('#wac-topbar');
+            this.body=root.querySelector('#wac-body');
+            this.elem=this.body;
             this.proll = this.elem.children[0];
             this.canvas = this.elem.children[0];
             this.kb = this.elem.children[1];
@@ -683,7 +685,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             this.markendimg=this.elem.children[3];
             this.cursorimg=this.elem.children[4];
             this.menu=this.elem.children[5];
-            this.gridselect=this.elem.children[6];
+            this.gridselect=this.topbar.querySelector('#wac-gridres');
             this.rcMenu={x:0, y:0, width:0, height:0};
             this.lastx=0;
             this.lasty=0;
