@@ -74,6 +74,7 @@ export function initSetInspector() {
     piano.yoffset = Math.max(0, min - 2);
     piano.yrange = Math.max(12, max - min + 5);
     if (piano.redraw) piano.redraw();
+    updateCanvasLayout();
   }
 
   function isNormalized(env) {
@@ -89,8 +90,33 @@ export function initSetInspector() {
       canvas.style.pointerEvents = editing ? 'auto' : 'none';
     }
     if (piano) {
-      piano.enable = !editing;
+      // Keep pianoroll interactions enabled so zoom and pan work even while
+      // editing envelopes. The overlay canvas captures note interactions.
+      piano.enable = true;
     }
+  }
+
+  function updateCanvasLayout() {
+    if (!piano || !canvas) return;
+    const xr = piano.xruler || parseInt(piano.getAttribute('xruler') || '0', 10);
+    const yr = piano.yruler || parseInt(piano.getAttribute('yruler') || '0', 10);
+    const kb = piano.kbwidth || parseInt(piano.getAttribute('kbwidth') || '0', 10);
+    canvas.width = piano.width - (yr + kb);
+    canvas.height = piano.height - xr;
+    canvas.style.left = `${yr + kb}px`;
+    canvas.style.top = `${xr}px`;
+    if (legendDiv) legendDiv.style.height = canvas.height + 'px';
+  }
+
+  let lastRange = piano ? piano.xrange : 0;
+  let lastOffset = piano ? piano.xoffset : 0;
+  function syncEnvelope() {
+    if (piano && (piano.xrange !== lastRange || piano.xoffset !== lastOffset)) {
+      draw();
+      lastRange = piano.xrange;
+      lastOffset = piano.xoffset;
+    }
+    requestAnimationFrame(syncEnvelope);
   }
   if (legendDiv) {
     legendDiv.style.display = 'flex';
@@ -118,8 +144,9 @@ export function initSetInspector() {
     const noteRange = max - min + 1;
 
     ctx.strokeStyle = '#ddd';
-    for (let b = 0; b <= region; b++) {
-      const x = (b / region) * canvas.width;
+    const beats = piano.xrange / ticksPerBeat;
+    for (let b = 0; b <= beats; b++) {
+      const x = (b / beats) * canvas.width;
       ctx.beginPath();
       ctx.lineWidth = b % 4 === 0 ? 2 : 1;
       ctx.moveTo(x, 0);
@@ -159,8 +186,8 @@ export function initSetInspector() {
     const h = canvas.height / noteRange;
     ctx.fillStyle = '#0074D9';
     notes.forEach(n => {
-      const x = (n.startTime / region) * canvas.width;
-      const w = (n.duration / region) * canvas.width;
+      const x = ((n.startTime - piano.xoffset) / piano.xrange) * canvas.width;
+      const w = (n.duration / piano.xrange) * canvas.width;
       const y = canvas.height - (n.noteNumber - min + 1) * h;
       ctx.fillRect(x, y, w, h);
     });
@@ -183,7 +210,7 @@ export function initSetInspector() {
     ctx.beginPath();
     const needsScale = isNormalized(env);
     env.breakpoints.forEach((bp, i) => {
-      const x = (bp.time / region) * canvas.width;
+      const x = ((bp.time - piano.xoffset) / piano.xrange) * canvas.width;
       let v = bp.value;
       if (needsScale) {
         v = env.rangeMin + v * (env.rangeMax - env.rangeMin);
@@ -286,7 +313,7 @@ export function initSetInspector() {
     }
     if (!env || !env.breakpoints || !env.breakpoints.length) { valueDiv.textContent = ''; return; }
     const pos = canvasPos(ev);
-    const t = (pos.x / canvas.width) * region;
+    const t = (pos.x / canvas.width) * piano.xrange + piano.xoffset;
     let v = envValueAt(env.breakpoints, t);
     if (isNormalized(env)) {
       v = env.rangeMin + v * (env.rangeMax - env.rangeMin);
@@ -300,7 +327,7 @@ export function initSetInspector() {
     drawing = true;
     dirty = true;
     const { x, y } = canvasPos(ev);
-    const t = (x / canvas.width) * region;
+    const t = (x / canvas.width) * piano.xrange + piano.xoffset;
     const env = currentEnv.length ? currentEnv : (envInfo ? envInfo.breakpoints : []);
     const before = env.filter(bp => bp.time < t);
     tailEnv = env.filter(bp => bp.time > t);
@@ -323,7 +350,7 @@ export function initSetInspector() {
       return;
     }
     const { x, y } = canvasPos(ev);
-    const t = (x / canvas.width) * region;
+    const t = (x / canvas.width) * piano.xrange + piano.xoffset;
     let v;
     if (isNormalized(envInfo)) {
       v = 1 - y / canvas.height;
@@ -395,6 +422,7 @@ export function initSetInspector() {
     updateControls();
     draw();
   }
+  syncEnvelope();
 }
 
 document.addEventListener('DOMContentLoaded', initSetInspector);
