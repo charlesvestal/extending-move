@@ -235,6 +235,11 @@ def save_clip(
             "end": loop_end,
             "isEnabled": True,
         }
+        clip_obj["loop"] = {
+            "start": loop_start,
+            "end": loop_end,
+            "isEnabled": True,
+        }
 
         with open(set_path, "w") as f:
             json.dump(song, f, indent=2)
