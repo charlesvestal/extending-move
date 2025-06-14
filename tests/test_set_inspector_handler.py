@@ -81,3 +81,16 @@ def test_get_clip_data_param_ranges(monkeypatch, tmp_path):
     assert data["param_ranges"][1]["max"] == 1.0
     env = data["envelopes"][0]
     assert env["rangeMin"] == 0.0 and env["rangeMax"] == 1.0
+
+
+def test_pitch_conversion_roundtrip():
+    notes = [
+        {"noteNumber": 36, "startTime": 0.0, "duration": 1.0, "pitchBend": 170.6458282470703},
+        {"noteNumber": 36, "startTime": 1.0, "duration": 1.0, "pitchBend": -170.6458282470703},
+    ]
+    steps = sih.notes_to_pitch_steps(notes, 36)
+    assert steps[0]["noteNumber"] == 37
+    assert steps[1]["noteNumber"] == 35
+    recon = sih.steps_to_pitch_notes(steps, 36)
+    assert abs(recon[0]["pitchBend"] - notes[0]["pitchBend"]) < 1e-6
+    assert abs(recon[1]["pitchBend"] - notes[1]["pitchBend"]) < 1e-6

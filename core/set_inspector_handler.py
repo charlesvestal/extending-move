@@ -200,3 +200,65 @@ def save_clip(
         return {"success": True, "message": "Clip saved"}
     except Exception as e:
         return {"success": False, "message": f"Failed to save clip: {e}"}
+
+
+def notes_to_pitch_steps(
+    notes: List[Dict[str, Any]],
+    pad_number: int,
+    unit: float = 170.6458282470703,
+) -> List[Dict[str, Any]]:
+    """Convert pitch bend notes for a pad into step-style notes.
+
+    Each note for the given ``pad_number`` is mapped to a melodic note starting
+    at C2 (MIDI 36) based on its ``pitchBend`` value. Notes for other pads are
+    ignored.
+
+    Args:
+        notes: List of note dictionaries from the clip.
+        pad_number: The MIDI note number of the drum pad.
+        unit: Number of pitch bend units per semitone.
+
+    Returns:
+        New list of notes with ``noteNumber`` set to the derived pitch and the
+        original ``pitchBend`` value preserved.
+    """
+    pitch_notes = []
+    for n in notes:
+        if n.get("noteNumber") != pad_number:
+            continue
+        pb = float(n.get("pitchBend", 0.0))
+        pitch = 36 + pb / unit
+        pitch_notes.append(
+            {
+                "noteNumber": int(round(pitch)),
+                "startTime": n.get("startTime", 0.0),
+                "duration": n.get("duration", 0.0),
+                "velocity": n.get("velocity", 100.0),
+                "offVelocity": n.get("offVelocity", 0.0),
+                "pitchBend": pb,
+            }
+        )
+    return pitch_notes
+
+
+def steps_to_pitch_notes(
+    steps: List[Dict[str, Any]],
+    pad_number: int,
+    unit: float = 170.6458282470703,
+) -> List[Dict[str, Any]]:
+    """Convert edited step notes back to drum pad pitch bend notes."""
+
+    notes = []
+    for s in steps:
+        pb = (float(s.get("noteNumber", 36)) - 36) * unit
+        notes.append(
+            {
+                "noteNumber": pad_number,
+                "startTime": s.get("startTime", 0.0),
+                "duration": s.get("duration", 0.0),
+                "velocity": s.get("velocity", 100.0),
+                "offVelocity": s.get("offVelocity", 0.0),
+                "pitchBend": pb,
+            }
+        )
+    return notes

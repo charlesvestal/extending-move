@@ -88,6 +88,8 @@ class SetInspectorHandler(BaseHandler):
             "loop_start": 0.0,
             "loop_end": 4.0,
             "param_ranges_json": "{}",
+            "pitch_mode": False,
+            "pad_note": None,
         }
 
     def handle_post(self, form):
@@ -149,10 +151,14 @@ class SetInspectorHandler(BaseHandler):
                 "loop_start": 0.0,
                 "loop_end": 4.0,
                 "param_ranges_json": "{}",
+                "pitch_mode": False,
+                "pad_note": None,
             }
         elif action == "show_clip":
             set_path = form.getvalue("set_path")
             clip_val = form.getvalue("clip_select")
+            pitch_mode = form.getvalue("pitch_mode") == "true"
+            pad_note_val = form.getvalue("pad_note")
             if not set_path or not clip_val:
                 pad_grid = self.generate_pad_grid(used, color_map, name_map)
                 return self.format_error_response("Missing parameters", pad_grid=pad_grid)
@@ -167,6 +173,9 @@ class SetInspectorHandler(BaseHandler):
             if not result.get("success"):
                 pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
                 return self.format_error_response(result.get("message"), pad_grid=pad_grid)
+            if pitch_mode and pad_note_val and pad_note_val.isdigit():
+                from core.set_inspector_handler import notes_to_pitch_steps
+                result["notes"] = notes_to_pitch_steps(result.get("notes", []), int(pad_note_val))
             clip_info = list_clips(set_path)
             clip_grid = self.generate_clip_grid(clip_info.get("clips", []), selected=clip_val)
             envelopes = result.get("envelopes", [])
@@ -203,12 +212,16 @@ class SetInspectorHandler(BaseHandler):
                 "clip_index": clip_idx,
                 "track_name": result.get("track_name"),
                 "clip_name": result.get("clip_name"),
+                "pitch_mode": pitch_mode,
+                "pad_note": int(pad_note_val) if pitch_mode and pad_note_val and pad_note_val.isdigit() else None,
             }
         elif action == "save_envelope":
             set_path = form.getvalue("set_path")
             clip_val = form.getvalue("clip_select")
             param_val = form.getvalue("parameter_id")
             env_data = form.getvalue("envelope_data")
+            pitch_mode = form.getvalue("pitch_mode") == "true"
+            pad_note_val = form.getvalue("pad_note")
             if not (set_path and clip_val and param_val and env_data):
                 pad_grid = self.generate_pad_grid(used, color_map, name_map)
                 return self.format_error_response("Missing parameters", pad_grid=pad_grid)
@@ -231,6 +244,9 @@ class SetInspectorHandler(BaseHandler):
             clip_info = list_clips(set_path)
             clip_grid = self.generate_clip_grid(clip_info.get("clips", []), selected=clip_val)
             clip_data = get_clip_data(set_path, track_idx, clip_idx)
+            if pitch_mode and pad_note_val and pad_note_val.isdigit():
+                from core.set_inspector_handler import notes_to_pitch_steps
+                clip_data["notes"] = notes_to_pitch_steps(clip_data.get("notes", []), int(pad_note_val))
             envelopes = clip_data.get("envelopes", [])
             param_map = clip_data.get("param_map", {})
             param_context = clip_data.get("param_context", {})
@@ -270,10 +286,14 @@ class SetInspectorHandler(BaseHandler):
                 "clip_index": clip_idx,
                 "track_name": clip_data.get("track_name"),
                 "clip_name": clip_data.get("clip_name"),
+                "pitch_mode": pitch_mode,
+                "pad_note": int(pad_note_val) if pitch_mode and pad_note_val and pad_note_val.isdigit() else None,
             }
         elif action == "save_clip":
             set_path = form.getvalue("set_path")
             clip_val = form.getvalue("clip_select")
+            pitch_mode = form.getvalue("pitch_mode") == "true"
+            pad_note_val = form.getvalue("pad_note")
             notes_data = form.getvalue("clip_notes")
             env_data = form.getvalue("clip_envelopes")
             region_val = form.getvalue("region_end")
@@ -306,6 +326,9 @@ class SetInspectorHandler(BaseHandler):
             except Exception:
                 pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
                 return self.format_error_response("Invalid clip data", pad_grid=pad_grid)
+            if pitch_mode and pad_note_val and pad_note_val.isdigit():
+                from core.set_inspector_handler import steps_to_pitch_notes
+                notes = steps_to_pitch_notes(notes, int(pad_note_val))
             from core.set_inspector_handler import save_clip
 
             result = save_clip(

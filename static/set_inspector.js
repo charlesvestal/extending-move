@@ -35,6 +35,8 @@ export function initSetInspector() {
   const loopStart = parseFloat(dataDiv.dataset.loopStart || '0');
   const loopEnd = parseFloat(dataDiv.dataset.loopEnd || String(region));
   const paramRanges = JSON.parse(dataDiv.dataset.paramRanges || '{}');
+  const pitchMode = dataDiv.dataset.pitchMode === 'true';
+  const padNote = parseInt(dataDiv.dataset.padNote || '0', 10);
   const canvas = document.getElementById('clipCanvas');
   const ctx = canvas.getContext('2d');
   const piano = document.getElementById('clipEditor');
@@ -73,7 +75,8 @@ export function initSetInspector() {
     piano.sequence = notes.map(n => ({
       t: Math.round(n.startTime * ticksPerBeat),
       n: n.noteNumber,
-      g: Math.round(n.duration * ticksPerBeat)
+      g: Math.round(n.duration * ticksPerBeat),
+      pb: n.pitchBend || 0
     }));
     if (!piano.hasAttribute('xrange')) piano.xrange = region * ticksPerBeat;
     if (!piano.hasAttribute('markstart')) piano.markstart = loopStart * ticksPerBeat;
@@ -411,13 +414,18 @@ export function initSetInspector() {
   if (saveClipForm) saveClipForm.addEventListener('submit', () => {
     if (piano && notesInput) {
       const seq = piano.sequence || [];
-      notesInput.value = JSON.stringify(seq.map(ev => ({
-        noteNumber: ev.n,
-        startTime: ev.t / ticksPerBeat,
-        duration: ev.g / ticksPerBeat,
-        velocity: 100.0,
-        offVelocity: 0.0
-      })));
+      notesInput.value = JSON.stringify(seq.map(ev => {
+        const noteNum = pitchMode ? padNote : ev.n;
+        const pb = pitchMode ? (ev.n - 36) * 170.6458282470703 : (ev.pb || 0);
+        return {
+          noteNumber: noteNum,
+          startTime: ev.t / ticksPerBeat,
+          duration: ev.g / ticksPerBeat,
+          velocity: 100.0,
+          offVelocity: 0.0,
+          pitchBend: pb
+        };
+      }));
     }
     if (envsInput) {
       let envs = envelopes.map(e => ({ parameterId: e.parameterId, breakpoints: e.breakpoints }));
