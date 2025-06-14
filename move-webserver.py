@@ -38,6 +38,7 @@ from handlers.wavetable_param_editor_handler_class import (
 from handlers.melodic_sampler_param_editor_handler_class import (
     MelodicSamplerParamEditorHandler,
 )
+from handlers.pitchbend_editor_handler_class import PitchbendEditorHandler
 from handlers.drum_rack_inspector_handler_class import DrumRackInspectorHandler
 from handlers.file_placer_handler_class import FilePlacerHandler
 from handlers.refresh_handler_class import RefreshHandler
@@ -128,6 +129,7 @@ synth_handler = SynthPresetInspectorHandler()
 synth_param_handler = SynthParamEditorHandler()
 wavetable_param_handler = WavetableParamEditorHandler()
 melodic_sampler_param_handler = MelodicSamplerParamEditorHandler()
+pitchbend_editor_handler = PitchbendEditorHandler()
 file_placer_handler = FilePlacerHandler()
 refresh_handler = RefreshHandler()
 drum_rack_handler = DrumRackInspectorHandler()
@@ -916,6 +918,26 @@ def pitch_shift_route():
     resp.headers["Content-Type"] = "audio/wav"
     resp.headers["Access-Control-Allow-Origin"] = "*"
     return resp
+
+@app.route("/pitchbend-edit", methods=["GET", "POST"])
+def pitchbend_edit_route():
+    if request.method == "POST":
+        form = SimpleForm(request.form.to_dict())
+        result = pitchbend_editor_handler.handle_post(form)
+    else:
+        result = pitchbend_editor_handler.handle_get()
+    message = result.get("message")
+    message_type = result.get("message_type")
+    success = message_type != "error" if message_type else False
+    notes = result.get("notes")
+    return render_template(
+        "pitchbend_edit.html",
+        message=message,
+        message_type=message_type,
+        success=success,
+        notes=notes,
+        active_tab="pitchbend-edit",
+    )
 
 
 @app.route("/detect-transients", methods=["POST"])

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Pitchbend Pad Editor</h2>
+{% if message %}
+  <p class="{{ message_type if message_type else ('success' if success else 'error') }}">{{ message }}</p>
+{% endif %}
+<form method="post">
+  <input type="hidden" name="action" value="display">
+  <label for="pad_number">Pad Note Number:</label>
+  <input type="number" id="pad_number" name="pad_number" value="46"><br>
+  <label for="notes_data">Notes JSON:</label><br>
+  <textarea id="notes_data" name="notes_data" rows="10" cols="60">{{ request.form.notes_data or '' }}</textarea><br>
+  <button type="submit">Display Notes</button>
+</form>
+{% if notes %}
+<h3>Notes</h3>
+<pre>{{ notes | tojson(indent=2) }}</pre>
+{% endif %}
+{% endblock %}

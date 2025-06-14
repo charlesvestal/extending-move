@@ -745,3 +745,9 @@ def test_set_inspector_post(client, monkeypatch):
 
 
 
+def test_pitchbend_edit_get(client):
+    resp = client.get('/pitchbend-edit')
+    assert resp.status_code == 200
+    assert b'Pitchbend Pad Editor' in resp.data
+
+
