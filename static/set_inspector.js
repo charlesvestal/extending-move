@@ -54,7 +54,9 @@ export function initSetInspector() {
   let viewLength = region;
   let panning = false;
   let panStartX = 0;
+  let panStartY = 0;
   let panStartView = 0;
+  let panStartNote = 0;
   let pinchStart = 0;
   let pinchView = 0;
   let pinchViewStart = 0;
@@ -92,7 +94,7 @@ export function initSetInspector() {
     legendDiv.style.height = canvas.height + 'px';
   }
 
-  function getVisibleRange() {
+  function calcInitialRange() {
     if (!notes.length) return { min: 60, max: 71 }; // default middle C octave
     let min = Math.min(...notes.map(n => n.noteNumber));
     let max = Math.max(...notes.map(n => n.noteNumber));
@@ -100,6 +102,24 @@ export function initSetInspector() {
       const extra = 11 - (max - min);
       min = Math.max(0, min - Math.floor(extra / 2));
       max = Math.min(127, max + Math.ceil(extra / 2));
+    }
+    return { min, max };
+  }
+
+  const baseRange = calcInitialRange();
+  let noteViewMin = baseRange.min;
+  const noteViewRange = baseRange.max - baseRange.min + 1;
+
+  function getVisibleRange() {
+    let min = Math.round(noteViewMin);
+    let max = min + noteViewRange - 1;
+    if (min < 0) {
+      min = 0;
+      max = min + noteViewRange - 1;
+    }
+    if (max > 127) {
+      max = 127;
+      min = max - noteViewRange + 1;
     }
     return { min, max };
   }
@@ -213,6 +233,8 @@ export function initSetInspector() {
     if (viewLength > region) viewLength = region;
     if (viewStart < 0) viewStart = 0;
     if (viewStart + viewLength > region) viewStart = region - viewLength;
+    if (noteViewMin < 0) noteViewMin = 0;
+    if (noteViewMin + noteViewRange - 1 > 127) noteViewMin = 127 - noteViewRange + 1;
   }
 
   function updateLegend() {
@@ -367,7 +389,9 @@ export function initSetInspector() {
     if (editing) { startDraw(ev); return; }
     panning = true;
     panStartX = ev.clientX;
+    panStartY = ev.clientY;
     panStartView = viewStart;
+    panStartNote = noteViewMin;
     ev.preventDefault();
   });
 
@@ -375,7 +399,9 @@ export function initSetInspector() {
     if (editing) { continueDraw(ev); return; }
     if (panning) {
       const dx = (ev.clientX - panStartX) / canvas.width * viewLength;
+      const dy = (ev.clientY - panStartY) / canvas.height * noteViewRange;
       viewStart = panStartView - dx;
+      noteViewMin = panStartNote - dy;
       clampView();
       draw();
     }
@@ -390,7 +416,9 @@ export function initSetInspector() {
     if (ev.touches.length === 1 && !editing) {
       panning = true;
       panStartX = ev.touches[0].clientX;
+      panStartY = ev.touches[0].clientY;
       panStartView = viewStart;
+      panStartNote = noteViewMin;
     } else if (ev.touches.length === 2) {
       panning = false;
       drawing = false;
@@ -420,7 +448,9 @@ export function initSetInspector() {
       viewStart = pinchCenter - ((pinchCenter - pinchViewStart) * (viewLength / pinchView));
     } else if (panning && ev.touches.length === 1) {
       const dx = (ev.touches[0].clientX - panStartX) / canvas.width * viewLength;
+      const dy = (ev.touches[0].clientY - panStartY) / canvas.height * noteViewRange;
       viewStart = panStartView - dx;
+      noteViewMin = panStartNote - dy;
     } else if (editing) {
       continueDraw(ev);
       return;
