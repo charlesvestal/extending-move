@@ -1,5 +1,6 @@
 import json
 import os
+import logging
 from typing import Any, Dict, List
 from core.synth_preset_inspector_handler import (
     load_drift_schema,
@@ -68,11 +69,39 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
         clip_obj = track_obj["clipSlots"][clip]["clip"]
         notes = clip_obj.get("notes", [])
         envelopes = clip_obj.get("envelopes", [])
+
+        # Determine clip length from notes/envelopes if region info is missing
+        last_note_end = max(
+            (n.get("startTime", 0.0) + n.get("duration", 0.0) for n in notes),
+            default=0.0,
+        )
+        last_env_time = max(
+            (
+                max((bp.get("time", 0.0) for bp in env.get("breakpoints", [])), default=0.0)
+                for env in envelopes
+            ),
+            default=0.0,
+        )
+        detected_len = max(last_note_end, last_env_time)
+        detected_region_end = max(4.0, ((int(detected_len) // 4) + 1) * 4.0)
+        logging.info(
+            "Detected clip region 0.0-%.2f (last note %.2f, last envelope %.2f)",
+            detected_region_end,
+            last_note_end,
+            last_env_time,
+        )
+
         region_info = clip_obj.get("region", {})
-        region_end = region_info.get("end", 4.0)
+        region_end = region_info.get("end", detected_region_end)
         loop_info = region_info.get("loop", {})
         loop_start = loop_info.get("start", 0.0)
         loop_end = loop_info.get("end", region_end)
+        logging.info(
+            "Clip region property: start=0.0 end=%.2f loop_start=%.2f loop_end=%.2f",
+            region_end,
+            loop_start,
+            loop_end,
+        )
 
         region_length = region_end
         track_name = _track_display_name(track_obj, track)
