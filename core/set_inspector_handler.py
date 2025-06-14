@@ -1,6 +1,80 @@
 import json
 import os
 from typing import Any, Dict, List
+
+PITCH_BEND_SCALE = 170.6458282470703
+
+def pitchbend_pads(notes: List[Dict[str, Any]]) -> List[int]:
+    """Return note numbers that contain PitchBend automation."""
+    pads = set()
+    for n in notes:
+        auto = n.get("automations", {}).get("PitchBend")
+        if auto:
+            pads.add(int(n.get("noteNumber", 0)))
+    return sorted(pads)
+
+
+def extract_pitch_notes(notes: List[Dict[str, Any]], pad: int) -> List[Dict[str, Any]]:
+    """Convert PitchBend automation for a pad into note events."""
+    pb_notes: List[Dict[str, Any]] = []
+    for n in notes:
+        if int(n.get("noteNumber")) != pad:
+            continue
+        for bp in n.get("automations", {}).get("PitchBend", []):
+            try:
+                val = float(bp.get("value", 0.0))
+                t = float(bp.get("time", 0.0))
+            except Exception:
+                continue
+            pitch = 36 + round(val / PITCH_BEND_SCALE)
+            pb_notes.append({
+                "noteNumber": pitch,
+                "startTime": n.get("startTime", 0.0) + t,
+                "duration": 0.01,
+                "velocity": n.get("velocity", 1.0),
+                "offVelocity": n.get("offVelocity", 0.0),
+            })
+    pb_notes.sort(key=lambda x: x["startTime"])
+    return pb_notes
+
+
+def apply_pitch_notes(
+    notes: List[Dict[str, Any]], pad: int, pb_notes: List[Dict[str, Any]]
+) -> List[Dict[str, Any]]:
+    """Apply edited pitch notes back to PitchBend automation."""
+    pb_notes = sorted(pb_notes, key=lambda n: n["startTime"])
+    remaining = list(pb_notes)
+    updated = []
+    for n in notes:
+        if int(n.get("noteNumber")) != pad:
+            updated.append(n)
+            continue
+        start = n.get("startTime", 0.0)
+        end = start + n.get("duration", 0.0)
+        bps = []
+        keep = []
+        for pb in remaining:
+            if pb["startTime"] < start - 1e-6:
+                continue
+            if pb["startTime"] > end + 1e-6:
+                keep.append(pb)
+                continue
+            bps.append({
+                "time": pb["startTime"] - start,
+                "value": (pb["noteNumber"] - 36) * PITCH_BEND_SCALE,
+            })
+        remaining = keep
+        if bps:
+            auto = n.setdefault("automations", {})
+            auto["PitchBend"] = bps
+        else:
+            if "automations" in n and "PitchBend" in n["automations"]:
+                n["automations"].pop("PitchBend")
+                if not n["automations"]:
+                    n.pop("automations")
+        updated.append(n)
+    updated.sort(key=lambda x: x.get("startTime", 0.0))
+    return updated
 from core.synth_preset_inspector_handler import (
     load_drift_schema,
     load_wavetable_schema,
@@ -68,6 +142,7 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
         clip_obj = track_obj["clipSlots"][clip]["clip"]
         notes = clip_obj.get("notes", [])
         envelopes = clip_obj.get("envelopes", [])
+        pb_pads = pitchbend_pads(notes)
         region_info = clip_obj.get("region", {})
         region_end = region_info.get("end", 4.0)
         loop_info = region_info.get("loop", {})
@@ -135,6 +210,7 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
             "param_ranges": param_ranges,
             "track_name": track_name,
             "clip_name": clip_name,
+            "pitch_pads": pb_pads,
         }
     except Exception as e:
         return {"success": False, "message": f"Failed to read clip: {e}"}

@@ -88,6 +88,7 @@ class SetInspectorHandler(BaseHandler):
             "loop_start": 0.0,
             "loop_end": 4.0,
             "param_ranges_json": "{}",
+            "pitch_pads": [],
         }
 
     def handle_post(self, form):
@@ -149,6 +150,7 @@ class SetInspectorHandler(BaseHandler):
                 "loop_start": 0.0,
                 "loop_end": 4.0,
                 "param_ranges_json": "{}",
+                "pitch_pads": [],
             }
         elif action == "show_clip":
             set_path = form.getvalue("set_path")
@@ -199,6 +201,7 @@ class SetInspectorHandler(BaseHandler):
                 "loop_start": result.get("loop_start", 0.0),
                 "loop_end": result.get("loop_end", 4.0),
                 "param_ranges_json": json.dumps(result.get("param_ranges", {})),
+                "pitch_pads": result.get("pitch_pads", []),
                 "track_index": track_idx,
                 "clip_index": clip_idx,
                 "track_name": result.get("track_name"),
@@ -266,6 +269,7 @@ class SetInspectorHandler(BaseHandler):
                 "loop_start": clip_data.get("loop_start", 0.0),
                 "loop_end": clip_data.get("loop_end", 4.0),
                 "param_ranges_json": json.dumps(clip_data.get("param_ranges", {})),
+                "pitch_pads": clip_data.get("pitch_pads", []),
                 "track_index": track_idx,
                 "clip_index": clip_idx,
                 "track_name": clip_data.get("track_name"),
@@ -354,6 +358,7 @@ class SetInspectorHandler(BaseHandler):
                 "loop_start": clip_data.get("loop_start", 0.0),
                 "loop_end": clip_data.get("loop_end", 4.0),
                 "param_ranges_json": json.dumps(clip_data.get("param_ranges", {})),
+                "pitch_pads": clip_data.get("pitch_pads", []),
                 "track_index": track_idx,
                 "clip_index": clip_idx,
                 "track_name": clip_data.get("track_name"),

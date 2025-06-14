@@ -60,6 +60,15 @@
     <select id="envelope_select">{{ clip_options | safe }}</select>
     <span id="envValue" style="margin-left:0.5rem; font-size:0.8em;"></span>
   </div>
+  <div style="margin-top:0.5rem; display:flex; align-items:center;">
+    <label for="pad_pitch_select">Pitch Pad:</label>
+    <select id="pad_pitch_select">
+      <option value="">Main Clip</option>
+      {% for p in pitch_pads %}
+        <option value="{{ p }}">{{ p }}</option>
+      {% endfor %}
+    </select>
+  </div>
   <div style="margin-top:1rem; display:flex; align-items:flex-start;">
     <div style="position:relative; width:900px; height:300px; border:1px solid #ccc;">
       <webaudio-pianoroll id="clipEditor" width="900" height="300" editmode="dragpoly" wheelzoom="0" xscroll="1" yscroll="1" timebase="16" xrange="{{ (region | default(4.0)) * 4 }}" markstart="{{ (loop_start | default(0.0)) * 4 }}" markend="{{ (loop_end | default(region)) * 4 }}" showcursor="false"></webaudio-pianoroll>
@@ -78,7 +87,7 @@
     <input type="hidden" name="loop_end" id="loop_end_input">
     <button id="saveClipBtn" type="submit">Save Clip</button>
   </form>
-  <div id="clipData" data-notes='{{ notes | tojson }}' data-envelopes='{{ envelopes | tojson }}' data-region='{{ region | default(4.0) }}' data-loop-start='{{ loop_start | default(0.0) }}' data-loop-end='{{ loop_end | default(region) }}' data-param-ranges='{{ param_ranges_json | safe }}'></div>
+  <div id="clipData" data-notes='{{ notes | tojson }}' data-envelopes='{{ envelopes | tojson }}' data-region='{{ region | default(4.0) }}' data-loop-start='{{ loop_start | default(0.0) }}' data-loop-end='{{ loop_end | default(region) }}' data-param-ranges='{{ param_ranges_json | safe }}' data-pitch-pads='{{ pitch_pads | default([]) | tojson }}'></div>
   {% endif %}
 {% endblock %}
 {% block scripts %}
