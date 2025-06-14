@@ -1,5 +1,11 @@
 from handlers.base_handler import BaseHandler
-from core.set_inspector_handler import list_clips, get_clip_data, save_envelope
+from core.set_inspector_handler import (
+    list_clips,
+    get_clip_data,
+    save_envelope,
+    get_pitchbend_pad_notes,
+    extract_pitchbend_notes,
+)
 from core.list_msets_handler import list_msets
 from core.pad_colors import rgb_string
 from core.config import MSETS_DIRECTORY
@@ -182,6 +188,10 @@ class SetInspectorHandler(BaseHandler):
                 for e in envelopes
             )
             env_opts = '<option value="">No Envelope</option>' + env_opts
+            pad_opts = "".join(
+                f'<option value="{p}">Pad {p}</option>'
+                for p in get_pitchbend_pad_notes(result.get("notes", []))
+            )
             set_name = os.path.basename(os.path.dirname(set_path))
             pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
             return {
@@ -203,6 +213,59 @@ class SetInspectorHandler(BaseHandler):
                 "clip_index": clip_idx,
                 "track_name": result.get("track_name"),
                 "clip_name": result.get("clip_name"),
+                "pad_note_options": pad_opts,
+                "pitch_mode": False,
+            }
+        elif action == "show_pitchbend":
+            set_path = form.getvalue("set_path")
+            clip_val = form.getvalue("clip_select")
+            pad_val = form.getvalue("pad_note")
+            if not (set_path and clip_val and pad_val):
+                pad_grid = self.generate_pad_grid(used, color_map, name_map)
+                return self.format_error_response("Missing parameters", pad_grid=pad_grid)
+            entry = next(
+                (m for m in msets if os.path.join(MSETS_DIRECTORY, m["uuid"], m["mset_name"], "Song.abl") == set_path),
+                None,
+            )
+            if entry:
+                selected_idx = int(entry.get("mset_id"))
+            track_idx, clip_idx = map(int, clip_val.split(":"))
+            clip_data = get_clip_data(set_path, track_idx, clip_idx)
+            if not clip_data.get("success"):
+                pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
+                return self.format_error_response(clip_data.get("message"), pad_grid=pad_grid)
+            pitch_notes = extract_pitchbend_notes(clip_data.get("notes", []), int(pad_val))
+            pitch_pads = get_pitchbend_pad_notes(clip_data.get("notes", []))
+            pad_opts = "".join(
+                f'<option value="{p}"' + (" selected" if p == int(pad_val) else "") + f'>Pad {p}</option>'
+                for p in pitch_pads
+            )
+            clip_info = list_clips(set_path)
+            clip_grid = self.generate_clip_grid(clip_info.get("clips", []), selected=clip_val)
+            set_name = os.path.basename(os.path.dirname(set_path))
+            pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
+            return {
+                "pad_grid": pad_grid,
+                "message": clip_data.get("message"),
+                "message_type": "success",
+                "selected_set": set_path,
+                "set_name": set_name,
+                "clip_grid": clip_grid,
+                "clip_options": '<option value="">No Envelope</option>',
+                "selected_clip": clip_val,
+                "notes": pitch_notes,
+                "envelopes": [],
+                "region": clip_data.get("region", 4.0),
+                "loop_start": clip_data.get("loop_start", 0.0),
+                "loop_end": clip_data.get("loop_end", 4.0),
+                "param_ranges_json": json.dumps(clip_data.get("param_ranges", {})),
+                "track_index": track_idx,
+                "clip_index": clip_idx,
+                "track_name": clip_data.get("track_name"),
+                "clip_name": clip_data.get("clip_name"),
+                "pad_note_options": pad_opts,
+                "pad_note": int(pad_val),
+                "pitch_mode": True,
             }
         elif action == "save_envelope":
             set_path = form.getvalue("set_path")

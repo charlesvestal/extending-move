@@ -35,6 +35,7 @@ export function initSetInspector() {
   const loopStart = parseFloat(dataDiv.dataset.loopStart || '0');
   const loopEnd = parseFloat(dataDiv.dataset.loopEnd || String(region));
   const paramRanges = JSON.parse(dataDiv.dataset.paramRanges || '{}');
+  const pitchMode = dataDiv.dataset.pitchMode === '1';
   const canvas = document.getElementById('clipCanvas');
   const ctx = canvas.getContext('2d');
   const piano = document.getElementById('clipEditor');
@@ -62,6 +63,11 @@ export function initSetInspector() {
   const loopStartInput = document.getElementById('loop_start_input');
   const loopEndInput = document.getElementById('loop_end_input');
 
+  if (pitchMode) {
+    if (envSelect) envSelect.disabled = true;
+    if (legendDiv) legendDiv.style.display = 'none';
+  }
+
   let editing = false;
   let drawing = false;
   let dirty = false;
@@ -72,7 +78,7 @@ export function initSetInspector() {
   let clipModified = false;
 
   function updateSaveButton() {
-    if (saveClipBtn) saveClipBtn.disabled = !clipModified;
+    if (saveClipBtn) saveClipBtn.disabled = pitchMode || !clipModified;
   }
 
   if (saveClipBtn) saveClipBtn.disabled = true;
@@ -127,6 +133,9 @@ export function initSetInspector() {
   }
 
   const defaultEditMode = piano ? (piano.editmode || piano.getAttribute('editmode') || 'dragpoly') : 'dragpoly';
+  if (pitchMode && piano) {
+    piano.editmode = '';
+  }
 
   function updateControls() {
     if (canvas) {

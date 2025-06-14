@@ -140,6 +140,49 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
         return {"success": False, "message": f"Failed to read clip: {e}"}
 
 
+PITCHBEND_STEP = 170.6458282470703
+PITCHBEND_BASE_NOTE = 36
+
+
+def get_pitchbend_pad_notes(notes: List[Dict[str, Any]]) -> List[int]:
+    """Return note numbers that contain PitchBend automation."""
+    pads = []
+    for n in notes:
+        if n.get("automations", {}).get("PitchBend"):
+            num = n.get("noteNumber")
+            if isinstance(num, int) and num not in pads:
+                pads.append(num)
+    return sorted(pads)
+
+
+def extract_pitchbend_notes(notes: List[Dict[str, Any]], pad: int) -> List[Dict[str, Any]]:
+    """Convert PitchBend automation for a pad into note-like objects."""
+    pb_notes: List[Dict[str, Any]] = []
+    for n in notes:
+        if n.get("noteNumber") != pad:
+            continue
+        events = n.get("automations", {}).get("PitchBend") or []
+        if not events:
+            continue
+        events = sorted(events, key=lambda e: e.get("time", 0.0))
+        for i, ev in enumerate(events):
+            start = n["startTime"] + float(ev.get("time", 0.0))
+            end_rel = events[i + 1].get("time", n["duration"]) if i + 1 < len(events) else n["duration"]
+            dur = max(0.0, float(end_rel) - float(ev.get("time", 0.0)))
+            semis = float(ev.get("value", 0.0)) / PITCHBEND_STEP
+            pitch = int(round(PITCHBEND_BASE_NOTE + semis))
+            pitch = max(0, min(127, pitch))
+            pb_notes.append({
+                "noteNumber": pitch,
+                "startTime": start,
+                "duration": dur,
+                "velocity": n.get("velocity", 1.0),
+                "offVelocity": n.get("offVelocity", 0.0),
+            })
+    pb_notes.sort(key=lambda x: x["startTime"])
+    return pb_notes
+
+
 def save_envelope(
     set_path: str,
     track: int,

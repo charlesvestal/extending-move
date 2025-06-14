@@ -60,6 +60,19 @@
     <select id="envelope_select">{{ clip_options | safe }}</select>
     <span id="envValue" style="margin-left:0.5rem; font-size:0.8em;"></span>
   </div>
+  {% if pad_note_options %}
+  <form id="pitchSelectForm" method="post" action="{{ host_prefix }}/set-inspector" style="margin-top:0.5rem;">
+    <input type="hidden" name="action" value="show_pitchbend">
+    <input type="hidden" name="set_path" value="{{ selected_set }}">
+    <input type="hidden" name="clip_select" value="{{ selected_clip }}">
+    <label for="pad_note_select">Pad:</label>
+    <select name="pad_note" id="pad_note_select">{{ pad_note_options | safe }}</select>
+    <button type="submit">View Pitch Bends</button>
+  </form>
+  {% endif %}
+  {% if pitch_mode %}
+  <p style="margin-top:0.5rem;"><em>Pitch bend view for Pad {{ pad_note }}. Saving disabled.</em></p>
+  {% endif %}
   <div style="margin-top:1rem; display:flex; align-items:flex-start;">
     <div style="position:relative; width:900px; height:300px; border:1px solid #ccc;">
       <webaudio-pianoroll id="clipEditor" width="900" height="300" editmode="dragpoly" wheelzoom="0" xscroll="1" yscroll="1" timebase="16" xrange="{{ (region | default(4.0)) * 4 }}" markstart="{{ (loop_start | default(0.0)) * 4 }}" markend="{{ (loop_end | default(region)) * 4 }}" showcursor="false"></webaudio-pianoroll>
@@ -76,9 +89,9 @@
     <input type="hidden" name="region_end" id="region_end_input">
     <input type="hidden" name="loop_start" id="loop_start_input">
     <input type="hidden" name="loop_end" id="loop_end_input">
-    <button id="saveClipBtn" type="submit">Save Clip</button>
+    <button id="saveClipBtn" type="submit"{% if pitch_mode %} disabled{% endif %}>Save Clip</button>
   </form>
-  <div id="clipData" data-notes='{{ notes | tojson }}' data-envelopes='{{ envelopes | tojson }}' data-region='{{ region | default(4.0) }}' data-loop-start='{{ loop_start | default(0.0) }}' data-loop-end='{{ loop_end | default(region) }}' data-param-ranges='{{ param_ranges_json | safe }}'></div>
+  <div id="clipData" data-notes='{{ notes | tojson }}' data-envelopes='{{ envelopes | tojson }}' data-region='{{ region | default(4.0) }}' data-loop-start='{{ loop_start | default(0.0) }}' data-loop-end='{{ loop_end | default(region) }}' data-param-ranges='{{ param_ranges_json | safe }}' data-pitch-mode='{{ 1 if pitch_mode else 0 }}'></div>
   {% endif %}
 {% endblock %}
 {% block scripts %}

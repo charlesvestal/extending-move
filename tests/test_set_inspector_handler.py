@@ -81,3 +81,31 @@ def test_get_clip_data_param_ranges(monkeypatch, tmp_path):
     assert data["param_ranges"][1]["max"] == 1.0
     env = data["envelopes"][0]
     assert env["rangeMin"] == 0.0 and env["rangeMax"] == 1.0
+
+
+def test_extract_pitchbend_notes():
+    notes = [{
+        "noteNumber": 40,
+        "startTime": 0.0,
+        "duration": 1.0,
+        "velocity": 1.0,
+        "offVelocity": 0.0,
+        "automations": {
+            "PitchBend": [
+                {"time": 0.0, "value": sih.PITCHBEND_STEP},
+                {"time": 0.5, "value": 0.0}
+            ]
+        }
+    }]
+    pb = sih.extract_pitchbend_notes(notes, 40)
+    assert len(pb) == 2
+    assert pb[0]["noteNumber"] == sih.PITCHBEND_BASE_NOTE + 1
+    assert abs(pb[1]["startTime"] - 0.5) < 1e-6
+
+
+def test_get_pitchbend_pad_notes():
+    notes = [
+        {"noteNumber": 38, "automations": {"PitchBend": [{"time": 0.0, "value": 0}]}}
+    ]
+    pads = sih.get_pitchbend_pad_notes(notes)
+    assert pads == [38]
