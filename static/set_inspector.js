@@ -56,6 +56,7 @@ export function initSetInspector() {
   const valueDiv = document.getElementById('envValue');
   const saveClipForm = document.getElementById('saveClipForm');
   const saveClipBtn = document.getElementById('saveClipBtn');
+  const gridSelect = document.getElementById('grid_sub_select');
   const notesInput = document.getElementById('clip_notes_input');
   const envsInput = document.getElementById('clip_envelopes_input');
   const regionInput = document.getElementById('region_end_input');
@@ -95,6 +96,28 @@ export function initSetInspector() {
     piano.yoffset = Math.max(0, min - 2);
     piano.yrange = Math.max(12, max - min + 5);
     if (piano.redraw) piano.redraw();
+
+    if (gridSelect) {
+      const noteTicks = val => {
+        switch (val) {
+          case '1/4': return timebase / 4;
+          case '1/8': return timebase / 8;
+          case '1/16': return timebase / 16;
+          case '1/32': return timebase / 32;
+          case '1/4t': return timebase / 6;
+          case '1/8t': return timebase / 12;
+          case '1/16t': return timebase / 24;
+          case '1/32t': return timebase / 48;
+          default: return 0;
+        }
+      };
+      const applyGrid = () => {
+        piano.subgrid = noteTicks(gridSelect.value);
+        if (piano.redraw) piano.redraw();
+      };
+      gridSelect.addEventListener('change', applyGrid);
+      applyGrid();
+    }
 
     piano.addEventListener('dblclick', ev => {
       const rect = piano.getBoundingClientRect();

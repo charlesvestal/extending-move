@@ -52,6 +52,8 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 collt:              {type:String, value:"#ccc"},
                 coldk:              {type:String, value:"#aaa"},
                 colgrid:            {type:String, value:"#666"},
+                colsubgrid:        {type:String, value:"#999"},
+                subgrid:           {type:Number, value:0},
                 colnote:            {type:String, value:"#f22"},
                 colnotesel:         {type:String, value:"#0f0"},
                 colnoteborder:      {type:String, value:"#000"},
@@ -1058,6 +1060,17 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 this.ctx.fillStyle=this.colgrid;
                 this.ctx.fillRect(this.yruler+this.kbwidth, ys|0, this.swidth,1);
             }
+            if(this.subgrid>0){
+                this.ctx.fillStyle=this.colsubgrid;
+                for(let t=0;;t+=this.grid/this.subgrid){
+                    if(Math.abs(t % this.grid) < 1e-6) continue;
+                    let x=this.stepw*(t-this.xoffset)+this.yruler+this.kbwidth;
+                    this.ctx.fillRect(x|0,this.xruler,1,this.sheight);
+                    if(x>=this.width)
+                        break;
+                }
+            }
+            this.ctx.fillStyle=this.colgrid;
             for(let t=0;;t+=this.grid){
                 let x=this.stepw*(t-this.xoffset)+this.yruler+this.kbwidth;
                 this.ctx.fillRect(x|0,this.xruler,1,this.sheight);
