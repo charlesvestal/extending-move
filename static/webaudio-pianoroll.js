@@ -800,7 +800,13 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 ev.stopPropagation();
                 return false;
             }
-            this.dragging={o:null,x:this.downpos.x,y:this.downpos.y,offsx:this.xoffset,offsy:this.yoffset};
+            if(this.downht.m=="x"){
+                this.dragging={o:"X",x0:this.downpos.x,y0:this.downpos.y,t:this.downht.t,off:this.xoffset,range:this.xrange};
+            }else if(this.downht.m=="y"){
+                this.dragging={o:"Y",x0:this.downpos.x,y0:this.downpos.y,n:this.downht.n,off:this.yoffset,range:this.yrange};
+            }else{
+                this.dragging={o:null,x:this.downpos.x,y:this.downpos.y,offsx:this.xoffset,offsy:this.yoffset};
+            }
             this.canvas.focus();
             switch(this.editmode){
             case "gridpoly":
@@ -879,6 +885,22 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 break;
             case "P":
                 this.cursor=Math.max(0,(this.dragging.m+(pos.x-this.dragging.x)/this.stepw+.5)|0);
+                break;
+            case "X":
+                var dy=this.dragging.y0-pos.y;
+                var dx=this.dragging.x0-pos.x;
+                var f=Math.pow(1.01,dy);
+                this.xrange=this.dragging.range/f;
+                this.xoffset=this.dragging.t-(this.dragging.t-this.dragging.off)/f;
+                this.xoffset+=dx*(this.xrange/this.width);
+                break;
+            case "Y":
+                var dx=this.dragging.x0-pos.x;
+                var dy=pos.y-this.dragging.y0;
+                var f=Math.pow(1.01,dx);
+                this.yrange=this.dragging.range/f;
+                this.yoffset=this.dragging.n-(this.dragging.n-this.dragging.off)/f;
+                this.yoffset+=dy*(this.yrange/this.height);
                 break;
             }
             switch(this.editmode){
