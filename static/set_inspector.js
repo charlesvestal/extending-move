@@ -162,10 +162,12 @@ export function initSetInspector() {
 
   function drawEnvelope() {
     if (!envSelect || !envSelect.value) return;
-    const param = parseInt(envSelect.value);
     let env;
     if (editing) {
-      const bps = drawing ? currentEnv.concat(tailEnv) : currentEnv;
+      let bps = drawing ? currentEnv.concat(tailEnv) : currentEnv;
+      if (!bps.length && envInfo) {
+        bps = envInfo.breakpoints;
+      }
       env = envInfo ? { ...envInfo, breakpoints: bps } : { breakpoints: bps };
     } else {
       env = envInfo;
@@ -266,7 +268,16 @@ export function initSetInspector() {
   function showValue(ev) {
     if (!envSelect || !envSelect.value || !valueDiv) return;
     const param = parseInt(envSelect.value);
-    const env = editing ? (envInfo ? { ...envInfo, breakpoints: currentEnv } : { breakpoints: currentEnv }) : envInfo;
+    let env;
+    if (editing) {
+      let bps = currentEnv;
+      if (!bps.length && envInfo) {
+        bps = envInfo.breakpoints;
+      }
+      env = envInfo ? { ...envInfo, breakpoints: bps } : { breakpoints: bps };
+    } else {
+      env = envInfo;
+    }
     if (!env || !env.breakpoints || !env.breakpoints.length) { valueDiv.textContent = ''; return; }
     const pos = canvasPos(ev);
     const t = (pos.x / canvas.width) * region;
@@ -357,7 +368,11 @@ export function initSetInspector() {
       let envs = envelopes.map(e => ({ parameterId: e.parameterId, breakpoints: e.breakpoints }));
       if (editing && envSelect && envSelect.value) {
         const pid = parseInt(envSelect.value);
-        const newEnv = { parameterId: pid, breakpoints: currentEnv };
+        let bps = currentEnv;
+        if (!bps.length && envInfo) {
+          bps = envInfo.breakpoints;
+        }
+        const newEnv = { parameterId: pid, breakpoints: bps };
         const idx = envs.findIndex(e => e.parameterId === pid);
         if (idx >= 0) envs[idx] = newEnv; else envs.push(newEnv);
       }
