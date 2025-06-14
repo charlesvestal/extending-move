@@ -1,5 +1,6 @@
 import json
 import os
+import math
 from typing import Any, Dict, List
 from core.synth_preset_inspector_handler import (
     load_drift_schema,
@@ -74,7 +75,16 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
         loop_start = loop_info.get("start", 0.0)
         loop_end = loop_info.get("end", region_end)
 
-        region_length = region_end
+        # Determine content length based on notes/envelopes
+        max_note_end = max(
+            (n.get("startTime", 0.0) + n.get("duration", 0.0)) for n in notes
+        ) if notes else 0.0
+        max_env_end = max(
+            (bp.get("time", 0.0) for env in envelopes for bp in env.get("breakpoints", [])),
+            default=0.0,
+        )
+        content_end = max(max_note_end, max_env_end)
+        region_length = max(4.0, math.ceil(content_end / 4.0) * 4.0)
         track_name = _track_display_name(track_obj, track)
         clip_name = clip_obj.get("name") or f"Clip {clip + 1}"
         param_map: Dict[int, str] = {}
@@ -127,7 +137,7 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
             "message": "Clip loaded",
             "notes": notes,
             "envelopes": envelopes,
-            "region": region_end,
+            "region": region_length,
             "loop_start": loop_start,
             "loop_end": loop_end,
             "param_map": param_map,
