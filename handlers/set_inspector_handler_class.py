@@ -177,7 +177,7 @@ class SetInspectorHandler(BaseHandler):
                 )
                 for e in envelopes
             )
-            env_opts = '<option value="" disabled selected>-- Select Envelope --</option>' + env_opts
+            env_opts = '<option value="">No Envelope</option>' + env_opts
             set_name = os.path.basename(os.path.dirname(set_path))
             pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
             return {
@@ -242,7 +242,7 @@ class SetInspectorHandler(BaseHandler):
                 )
                 for e in envelopes
             )
-            env_opts = '<option value="" disabled>-- Select Envelope --</option>' + env_opts
+            env_opts = '<option value="">No Envelope</option>' + env_opts
             set_name = os.path.basename(os.path.dirname(set_path))
             pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
             return {
@@ -305,7 +305,7 @@ class SetInspectorHandler(BaseHandler):
                 )
                 for e in envelopes
             )
-            env_opts = '<option value="" disabled selected>-- Select Envelope --</option>' + env_opts
+            env_opts = '<option value="">No Envelope</option>' + env_opts
             set_name = os.path.basename(os.path.dirname(set_path))
             pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
             return {

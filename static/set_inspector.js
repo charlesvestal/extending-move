@@ -270,6 +270,8 @@ export function initSetInspector() {
           breakpoints: [],
         };
       }
+    } else {
+      paramInput.value = '';
     }
     if (saveBtn) saveBtn.disabled = true;
     updateLegend();
