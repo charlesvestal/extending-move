@@ -98,6 +98,12 @@ export function initSetInspector() {
         saveBtn.disabled = true;
       }
     }
+    if (canvas) {
+      canvas.style.pointerEvents = editing ? 'auto' : 'none';
+    }
+    if (piano) {
+      piano.enable = !editing;
+    }
   }
   if (legendDiv) {
     legendDiv.style.display = 'flex';
