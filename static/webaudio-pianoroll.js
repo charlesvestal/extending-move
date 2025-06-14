@@ -854,6 +854,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             case null:
                 if(this.xscroll)
                     this.xoffset=this.dragging.offsx+(this.dragging.x-pos.x)*(this.xrange/this.width);
+                if(this.xoffset<0) this.xoffset=0;
                 if(this.yscroll)
                     this.yoffset=this.dragging.offsy+(pos.y-this.dragging.y)*(this.yrange/this.height);
                 break;
@@ -893,6 +894,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 this.xrange=this.dragging.range/f;
                 this.xoffset=this.dragging.t-(this.dragging.t-this.dragging.off)/f;
                 this.xoffset+=dx*(this.xrange/this.width);
+                if(this.xoffset<0) this.xoffset=0;
                 break;
             case "Y":
                 var dx=this.dragging.x0-pos.x;
@@ -988,6 +990,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                     this.xoffset=ht.t-(ht.t-this.xoffset)*1.2
                     this.xrange*=1.2;
                 }
+                if(this.xoffset<0) this.xoffset=0;
             }
             if((this.wheelzoomy||this.wheelzoom) && ht.m=="y"){
                 if(delta>0){
