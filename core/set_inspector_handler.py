@@ -200,3 +200,41 @@ def save_clip(
         return {"success": True, "message": "Clip saved"}
     except Exception as e:
         return {"success": False, "message": f"Failed to save clip: {e}"}
+
+# Pitchbend editing utilities
+PITCHBEND_SEMITONE = 170.6458282470703
+PITCHBEND_BASE_NOTE = 48  # C2
+
+def extract_pitch_edit_notes(notes: List[Dict[str, Any]], pad: int) -> List[Dict[str, Any]]:
+    """Return notes for pitch edit mode filtered to a drum pad.
+
+    Each note's pitch is derived from its PitchBend automation relative to C2.
+    Notes without PitchBend data are ignored.
+    """
+    result: List[Dict[str, Any]] = []
+    for n in notes:
+        if n.get("noteNumber") != pad:
+            continue
+        pitchbend = n.get("automations", {}).get("PitchBend")
+        if not pitchbend:
+            continue
+        val = pitchbend[0].get("value", 0.0)
+        pitch = PITCHBEND_BASE_NOTE + val / PITCHBEND_SEMITONE
+        result.append({
+            "noteNumber": round(pitch),
+            "startTime": n.get("startTime", 0.0),
+            "duration": n.get("duration", 0.0),
+            "velocity": n.get("velocity", 0.0),
+            "offVelocity": n.get("offVelocity", 0.0),
+        })
+    return result
+
+def apply_pitch_edit_changes(notes: List[Dict[str, Any]], pad: int, edits: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Apply pitch edit notes back to the original note objects."""
+    orig = [n for n in notes if n.get("noteNumber") == pad and n.get("automations", {}).get("PitchBend")]
+    for n, e in zip(orig, edits):
+        n["startTime"] = e.get("startTime", n.get("startTime"))
+        n["duration"] = e.get("duration", n.get("duration"))
+        pb = (e.get("noteNumber", PITCHBEND_BASE_NOTE) - PITCHBEND_BASE_NOTE) * PITCHBEND_SEMITONE
+        n.setdefault("automations", {})["PitchBend"] = [{"time": 0.0, "value": pb}]
+    return notes
