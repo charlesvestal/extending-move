@@ -73,7 +73,15 @@ export function initSetInspector() {
       : { min: 60, max: 71 };
     piano.yoffset = Math.max(0, min - 2);
     piano.yrange = Math.max(12, max - min + 5);
-    if (piano.redraw) piano.redraw();
+    if (piano.redraw) {
+      const origRedraw = piano.redraw.bind(piano);
+      piano.redraw = function(...args) {
+        const res = origRedraw(...args);
+        draw();
+        return res;
+      };
+      piano.redraw();
+    }
   }
 
   function isNormalized(env) {
@@ -179,11 +187,13 @@ export function initSetInspector() {
       env = envInfo;
     }
     if (!env || !env.breakpoints || !env.breakpoints.length) return;
+    const range = piano.xrange / ticksPerBeat;
+    const offset = piano.xoffset / ticksPerBeat;
     ctx.strokeStyle = '#FF4136';
     ctx.beginPath();
     const needsScale = isNormalized(env);
     env.breakpoints.forEach((bp, i) => {
-      const x = (bp.time / region) * canvas.width;
+      const x = ((bp.time - offset) / range) * canvas.width;
       let v = bp.value;
       if (needsScale) {
         v = env.rangeMin + v * (env.rangeMax - env.rangeMin);
@@ -286,7 +296,8 @@ export function initSetInspector() {
     }
     if (!env || !env.breakpoints || !env.breakpoints.length) { valueDiv.textContent = ''; return; }
     const pos = canvasPos(ev);
-    const t = (pos.x / canvas.width) * region;
+    const t = (pos.x / canvas.width) * (piano.xrange / ticksPerBeat) +
+              (piano.xoffset / ticksPerBeat);
     let v = envValueAt(env.breakpoints, t);
     if (isNormalized(env)) {
       v = env.rangeMin + v * (env.rangeMax - env.rangeMin);
@@ -300,7 +311,8 @@ export function initSetInspector() {
     drawing = true;
     dirty = true;
     const { x, y } = canvasPos(ev);
-    const t = (x / canvas.width) * region;
+    const t = (x / canvas.width) * (piano.xrange / ticksPerBeat) +
+              (piano.xoffset / ticksPerBeat);
     const env = currentEnv.length ? currentEnv : (envInfo ? envInfo.breakpoints : []);
     const before = env.filter(bp => bp.time < t);
     tailEnv = env.filter(bp => bp.time > t);
@@ -323,7 +335,8 @@ export function initSetInspector() {
       return;
     }
     const { x, y } = canvasPos(ev);
-    const t = (x / canvas.width) * region;
+    const t = (x / canvas.width) * (piano.xrange / ticksPerBeat) +
+              (piano.xoffset / ticksPerBeat);
     let v;
     if (isNormalized(envInfo)) {
       v = 1 - y / canvas.height;
