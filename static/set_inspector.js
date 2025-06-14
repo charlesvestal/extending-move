@@ -39,7 +39,18 @@ export function initSetInspector() {
   const ctx = canvas.getContext('2d');
   const piano = document.getElementById('clipEditor');
   const timebase = piano ? parseInt(piano.getAttribute('timebase') || '16', 10) : 16;
+  const xruler = piano ? parseInt(piano.getAttribute('xruler') || '24', 10) : 24;
+  const yruler = piano ? parseInt(piano.getAttribute('yruler') || '24', 10) : 24;
+  const kbwidth = piano ? parseInt(piano.getAttribute('kbwidth') || '40', 10) : 40;
   const ticksPerBeat = timebase / 4;
+  if (piano && canvas) {
+    const w = parseInt(piano.getAttribute('width') || piano.clientWidth || 0, 10);
+    const h = parseInt(piano.getAttribute('height') || piano.clientHeight || 0, 10);
+    canvas.width = w - (yruler + kbwidth);
+    canvas.height = h - xruler;
+    canvas.style.left = `${yruler + kbwidth}px`;
+    canvas.style.top = `${xruler}px`;
+  }
   const envSelect = document.getElementById('envelope_select');
   const legendDiv = document.getElementById('paramLegend');
   const valueDiv = document.getElementById('envValue');
@@ -105,12 +116,15 @@ export function initSetInspector() {
     return minV >= 0 && maxV <= 1 && (env.rangeMin !== 0 || env.rangeMax !== 1);
   }
 
+  const defaultEditMode = piano ? (piano.editmode || piano.getAttribute('editmode') || 'dragpoly') : 'dragpoly';
+
   function updateControls() {
     if (canvas) {
       canvas.style.pointerEvents = editing ? 'auto' : 'none';
     }
     if (piano) {
-      piano.enable = !editing;
+      piano.enable = true;
+      piano.editmode = editing ? '' : defaultEditMode;
     }
   }
   if (legendDiv) {
@@ -204,7 +218,9 @@ export function initSetInspector() {
     ctx.beginPath();
     const needsScale = isNormalized(env);
     env.breakpoints.forEach((bp, i) => {
-      const x = (bp.time / region) * canvas.width;
+      const x = piano
+        ? ((bp.time * ticksPerBeat - piano.xoffset) / piano.xrange) * canvas.width
+        : (bp.time / region) * canvas.width;
       let v = bp.value;
       if (needsScale) {
         v = env.rangeMin + v * (env.rangeMax - env.rangeMin);
@@ -259,6 +275,14 @@ export function initSetInspector() {
     drawEnvelope();
   }
 
+  if (piano && piano.redraw) {
+    const origRedraw = piano.redraw.bind(piano);
+    piano.redraw = function(...args) {
+      origRedraw(...args);
+      draw();
+    };
+  }
+
   if (envSelect) envSelect.addEventListener('change', () => {
     drawing = false;
     dirty = false;
@@ -307,7 +331,8 @@ export function initSetInspector() {
     }
     if (!env || !env.breakpoints || !env.breakpoints.length) { valueDiv.textContent = ''; return; }
     const pos = canvasPos(ev);
-    const t = (pos.x / canvas.width) * region;
+    const t = piano ? (piano.xoffset + (pos.x / canvas.width) * piano.xrange) / ticksPerBeat
+                    : (pos.x / canvas.width) * region;
     let v = envValueAt(env.breakpoints, t);
     if (isNormalized(env)) {
       v = env.rangeMin + v * (env.rangeMax - env.rangeMin);
@@ -321,7 +346,8 @@ export function initSetInspector() {
     drawing = true;
     dirty = true;
     const { x, y } = canvasPos(ev);
-    const t = (x / canvas.width) * region;
+    const t = piano ? (piano.xoffset + (x / canvas.width) * piano.xrange) / ticksPerBeat
+                    : (x / canvas.width) * region;
     const env = currentEnv.length ? currentEnv : (envInfo ? envInfo.breakpoints : []);
     const before = env.filter(bp => bp.time < t);
     tailEnv = env.filter(bp => bp.time > t);
@@ -344,7 +370,8 @@ export function initSetInspector() {
       return;
     }
     const { x, y } = canvasPos(ev);
-    const t = (x / canvas.width) * region;
+    const t = piano ? (piano.xoffset + (x / canvas.width) * piano.xrange) / ticksPerBeat
+                    : (x / canvas.width) * region;
     let v;
     if (isNormalized(envInfo)) {
       v = 1 - y / canvas.height;
