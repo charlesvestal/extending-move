@@ -35,6 +35,11 @@ export function initSetInspector() {
   const loopStart = parseFloat(dataDiv.dataset.loopStart || '0');
   const loopEnd = parseFloat(dataDiv.dataset.loopEnd || String(region));
   const paramRanges = JSON.parse(dataDiv.dataset.paramRanges || '{}');
+  const mpeMap = JSON.parse(dataDiv.dataset.mpeMap || '{}');
+  const subclipRoot = dataDiv.dataset.subclipRoot ? parseInt(dataDiv.dataset.subclipRoot) : null;
+  const mpeForm = document.getElementById('mpeForm');
+  const mpeRootInput = document.getElementById('mpe_root_note');
+  const mpeSidebar = document.getElementById('mpeSidebar');
   const canvas = document.getElementById('clipCanvas');
   const ctx = canvas.getContext('2d');
   const piano = document.getElementById('clipEditor');
@@ -285,11 +290,39 @@ export function initSetInspector() {
     drawEnvelope();
   }
 
+  function renderMpeIcons() {
+    if (!mpeSidebar) return;
+    mpeSidebar.innerHTML = '';
+    if (!piano || !Object.keys(mpeMap).length) return;
+    const { min, max } = getVisibleRange();
+    const noteRange = max - min + 1;
+    const h = canvas.height / noteRange;
+    Object.keys(mpeMap).forEach(nStr => {
+      const n = parseInt(nStr, 10);
+      const y = canvas.height - (n - min + 0.5) * h - xruler;
+      const icon = document.createElement('div');
+      icon.textContent = '🎵';
+      icon.style.position = 'absolute';
+      icon.style.left = '2px';
+      icon.style.top = `${y - 8}px`;
+      icon.style.cursor = 'pointer';
+      icon.addEventListener('click', () => {
+        if (mpeForm && mpeRootInput) {
+          mpeRootInput.value = n;
+          mpeForm.submit();
+        }
+      });
+      mpeSidebar.appendChild(icon);
+    });
+    mpeSidebar.style.pointerEvents = 'auto';
+  }
+
   if (piano && piano.redraw) {
     const origRedraw = piano.redraw.bind(piano);
     piano.redraw = function(...args) {
       origRedraw(...args);
       draw();
+      renderMpeIcons();
     };
   }
 
@@ -474,6 +507,7 @@ export function initSetInspector() {
     updateLegend();
     updateControls();
     draw();
+    renderMpeIcons();
   }
 }
 

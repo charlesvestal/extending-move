@@ -88,6 +88,8 @@ class SetInspectorHandler(BaseHandler):
             "loop_start": 0.0,
             "loop_end": 4.0,
             "param_ranges_json": "{}",
+            "pitch_bend_map_json": "{}",
+            "subclip_root": None,
         }
 
     def handle_post(self, form):
@@ -199,10 +201,71 @@ class SetInspectorHandler(BaseHandler):
                 "loop_start": result.get("loop_start", 0.0),
                 "loop_end": result.get("loop_end", 4.0),
                 "param_ranges_json": json.dumps(result.get("param_ranges", {})),
+                "pitch_bend_map_json": json.dumps(result.get("pitch_bend_map", {})),
+                "subclip_root": None,
                 "track_index": track_idx,
                 "clip_index": clip_idx,
                 "track_name": result.get("track_name"),
                 "clip_name": result.get("clip_name"),
+            }
+        elif action == "show_pitch_bend":
+            set_path = form.getvalue("set_path")
+            clip_val = form.getvalue("clip_select")
+            root_note_val = form.getvalue("root_note")
+            if not (set_path and clip_val and root_note_val):
+                pad_grid = self.generate_pad_grid(used, color_map, name_map)
+                return self.format_error_response("Missing parameters", pad_grid=pad_grid)
+            entry = next(
+                (m for m in msets if os.path.join(MSETS_DIRECTORY, m["uuid"], m["mset_name"], "Song.abl") == set_path),
+                None,
+            )
+            if entry:
+                selected_idx = int(entry.get("mset_id"))
+            track_idx, clip_idx = map(int, clip_val.split(":"))
+            clip_data = get_clip_data(set_path, track_idx, clip_idx)
+            if not clip_data.get("success"):
+                pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
+                return self.format_error_response(clip_data.get("message"), pad_grid=pad_grid)
+            mpe_map = clip_data.get("pitch_bend_map", {})
+            notes = mpe_map.get(int(root_note_val), [])
+            clip_info = list_clips(set_path)
+            clip_grid = self.generate_clip_grid(clip_info.get("clips", []), selected=clip_val)
+            envelopes = clip_data.get("envelopes", [])
+            param_map = clip_data.get("param_map", {})
+            param_context = clip_data.get("param_context", {})
+            env_opts = "".join(
+                (
+                    f'<option value="{e.get("parameterId")}">' +
+                    f'{param_context.get(e.get("parameterId"), "Track")}: ' +
+                    f'{param_map.get(e.get("parameterId"), e.get("parameterId"))}' +
+                    '</option>'
+                )
+                for e in envelopes
+            )
+            env_opts = '<option value="">No Envelope</option>' + env_opts
+            set_name = os.path.basename(os.path.dirname(set_path))
+            pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
+            return {
+                "pad_grid": pad_grid,
+                "message": clip_data.get("message"),
+                "message_type": "success",
+                "selected_set": set_path,
+                "set_name": set_name,
+                "clip_grid": clip_grid,
+                "clip_options": env_opts,
+                "selected_clip": clip_val,
+                "notes": notes,
+                "envelopes": envelopes,
+                "region": clip_data.get("region", 4.0),
+                "loop_start": clip_data.get("loop_start", 0.0),
+                "loop_end": clip_data.get("loop_end", 4.0),
+                "param_ranges_json": json.dumps(clip_data.get("param_ranges", {})),
+                "pitch_bend_map_json": json.dumps(mpe_map),
+                "subclip_root": int(root_note_val),
+                "track_index": track_idx,
+                "clip_index": clip_idx,
+                "track_name": clip_data.get("track_name"),
+                "clip_name": clip_data.get("clip_name"),
             }
         elif action == "save_envelope":
             set_path = form.getvalue("set_path")
@@ -266,6 +329,8 @@ class SetInspectorHandler(BaseHandler):
                 "loop_start": clip_data.get("loop_start", 0.0),
                 "loop_end": clip_data.get("loop_end", 4.0),
                 "param_ranges_json": json.dumps(clip_data.get("param_ranges", {})),
+                "pitch_bend_map_json": json.dumps(clip_data.get("pitch_bend_map", {})),
+                "subclip_root": None,
                 "track_index": track_idx,
                 "clip_index": clip_idx,
                 "track_name": clip_data.get("track_name"),
@@ -354,6 +419,8 @@ class SetInspectorHandler(BaseHandler):
                 "loop_start": clip_data.get("loop_start", 0.0),
                 "loop_end": clip_data.get("loop_end", 4.0),
                 "param_ranges_json": json.dumps(clip_data.get("param_ranges", {})),
+                "pitch_bend_map_json": json.dumps(clip_data.get("pitch_bend_map", {})),
+                "subclip_root": None,
                 "track_index": track_idx,
                 "clip_index": clip_idx,
                 "track_name": clip_data.get("track_name"),

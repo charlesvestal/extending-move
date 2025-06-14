@@ -521,6 +521,10 @@ nav.breadcrumbs form {
     pointer-events: none;
 }
 
+#mpeSidebar div {
+    font-size: 14px;
+}
+
 
 /* Small icon button for reverting samples */
 .sample-header .revert-button {

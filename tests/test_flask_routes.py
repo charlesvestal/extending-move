@@ -716,6 +716,8 @@ def test_set_inspector_post(client, monkeypatch):
             'notes': [],
             'envelopes': [],
             'region': 4.0,
+            'pitch_bend_map_json': '{}',
+            'subclip_root': None,
         }
     monkeypatch.setattr(move_webserver.set_inspector_handler, 'handle_post', fake_post)
     resp = client.post('/set-inspector', data={'action': 'select_set', 'pad_index': '1'})
@@ -740,6 +742,14 @@ def test_set_inspector_post(client, monkeypatch):
         'region_end': '4.0',
         'loop_start': '0.0',
         'loop_end': '4.0'
+    })
+    assert resp.status_code == 200
+
+    resp = client.post('/set-inspector', data={
+        'action': 'show_pitch_bend',
+        'set_path': '/tmp/a.abl',
+        'clip_select': '0:0',
+        'root_note': '36'
     })
     assert resp.status_code == 200
 

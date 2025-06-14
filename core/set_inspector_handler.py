@@ -59,6 +59,32 @@ def list_clips(set_path: str) -> Dict[str, Any]:
         return {"success": False, "message": f"Failed to read set: {e}"}
 
 
+def _extract_mpe_map(notes: List[Dict[str, Any]]) -> Dict[int, List[Dict[str, Any]]]:
+    """Return mapping of root note -> list of derived notes from pitch bend."""
+    mpe: Dict[int, List[Dict[str, Any]]] = {}
+    for n in notes:
+        pb = n.get("pitchBend")
+        if not pb:
+            continue
+        root = int(n.get("noteNumber", 0))
+        sub = []
+        if isinstance(pb, list):
+            for entry in pb:
+                try:
+                    sub.append({
+                        "noteNumber": int(entry.get("noteNumber", root)),
+                        "startTime": n.get("startTime", 0.0) + float(entry.get("time", 0.0)),
+                        "duration": float(entry.get("duration", n.get("duration", 0.0))),
+                        "velocity": float(entry.get("velocity", n.get("velocity", 100.0))),
+                        "offVelocity": float(entry.get("offVelocity", n.get("offVelocity", 0.0))),
+                    })
+                except Exception:
+                    continue
+        if sub:
+            mpe.setdefault(root, []).extend(sub)
+    return mpe
+
+
 def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
     """Return notes and envelopes for the specified clip."""
     try:
@@ -122,6 +148,8 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
             else:
                 env["domainMin"] = env["rangeMin"]
                 env["domainMax"] = env["rangeMax"]
+
+        mpe_map = _extract_mpe_map(notes)
         return {
             "success": True,
             "message": "Clip loaded",
@@ -133,6 +161,7 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
             "param_map": param_map,
             "param_context": param_context,
             "param_ranges": param_ranges,
+            "pitch_bend_map": mpe_map,
             "track_name": track_name,
             "clip_name": clip_name,
         }
