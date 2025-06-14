@@ -58,15 +58,6 @@
   <div style="margin-top:1rem; display:flex; align-items:center;">
     <label for="envelope_select">Envelope:</label>
     <select id="envelope_select">{{ clip_options | safe }}</select>
-    <button id="editEnvBtn" type="button" style="margin-left:0.5rem; display:none;">Edit Envelope</button>
-    <form id="saveEnvForm" method="post" action="{{ host_prefix }}/set-inspector" style="margin-left:0.5rem; display:none;">
-      <input type="hidden" name="action" value="save_envelope">
-      <input type="hidden" name="set_path" value="{{ selected_set }}">
-      <input type="hidden" name="clip_select" value="{{ selected_clip }}">
-      <input type="hidden" name="parameter_id" id="parameter_id_input">
-      <input type="hidden" name="envelope_data" id="envelope_data_input">
-      <button id="saveEnvBtn" type="submit" disabled>Save Envelope</button>
-    </form>
     <span id="envValue" style="margin-left:0.5rem; font-size:0.8em;"></span>
   </div>
   <div style="margin-top:1rem; display:flex; align-items:flex-start;">

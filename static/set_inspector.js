@@ -38,11 +38,6 @@ export function initSetInspector() {
   const piano = document.getElementById('clipEditor');
   const envSelect = document.getElementById('envelope_select');
   const legendDiv = document.getElementById('paramLegend');
-  const editBtn = document.getElementById('editEnvBtn');
-  const saveForm = document.getElementById('saveEnvForm');
-  const saveBtn = document.getElementById('saveEnvBtn');
-  const paramInput = document.getElementById('parameter_id_input');
-  const envInput = document.getElementById('envelope_data_input');
   const valueDiv = document.getElementById('envValue');
   const saveClipForm = document.getElementById('saveClipForm');
   const notesInput = document.getElementById('clip_notes_input');
@@ -84,20 +79,6 @@ export function initSetInspector() {
   }
 
   function updateControls() {
-    const hasEnv = envSelect && envSelect.value;
-    if (editBtn) {
-      editBtn.style.display = hasEnv && !editing ? '' : 'none';
-    }
-    if (saveForm) {
-      saveForm.style.display = hasEnv && editing ? 'inline' : 'none';
-    }
-    if (saveBtn) {
-      if (editing) {
-        saveBtn.disabled = !dirty;
-      } else {
-        saveBtn.disabled = true;
-      }
-    }
     if (canvas) {
       canvas.style.pointerEvents = editing ? 'auto' : 'none';
     }
@@ -250,14 +231,13 @@ export function initSetInspector() {
   }
 
   if (envSelect) envSelect.addEventListener('change', () => {
-    editing = false;
     drawing = false;
     dirty = false;
     currentEnv = [];
     envInfo = null;
-    if (envSelect.value) {
+    editing = !!envSelect.value;
+    if (editing) {
       const pid = parseInt(envSelect.value);
-      paramInput.value = pid;
       envInfo = envelopes.find(e => e.parameterId === pid);
       if (!envInfo && paramRanges[pid]) {
         const r = paramRanges[pid];
@@ -270,10 +250,7 @@ export function initSetInspector() {
           breakpoints: [],
         };
       }
-    } else {
-      paramInput.value = '';
     }
-    if (saveBtn) saveBtn.disabled = true;
     updateLegend();
     updateControls();
     draw();
@@ -364,34 +341,7 @@ export function initSetInspector() {
   document.addEventListener('mouseup', endDraw);
   document.addEventListener('touchend', endDraw);
 
-  if (editBtn) editBtn.addEventListener('click', () => {
-    if (!envSelect.value) return;
-    editing = true;
-    drawing = false;
-    dirty = false;
-    const pid = parseInt(envSelect.value);
-    envInfo = envelopes.find(e => e.parameterId === pid);
-    if (!envInfo && paramRanges[pid]) {
-      const r = paramRanges[pid];
-      envInfo = {
-        rangeMin: r.min,
-        rangeMax: r.max,
-        domainMin: r.min,
-        domainMax: r.max,
-        unit: r.unit,
-        breakpoints: [],
-      };
-    }
-    currentEnv = envInfo ? envInfo.breakpoints.map(bp => ({ ...bp })) : [];
-    paramInput.value = pid;
-    if (saveBtn) saveBtn.disabled = true;
-    updateControls();
-    draw();
-  });
 
-  if (saveForm) saveForm.addEventListener('submit', () => {
-    envInput.value = JSON.stringify(currentEnv);
-  });
   if (saveClipForm) saveClipForm.addEventListener('submit', () => {
     if (piano && notesInput) {
       const seq = piano.sequence || [];
