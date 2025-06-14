@@ -336,6 +336,15 @@ body.page-melodic-sampler .waveform-container {
     margin-bottom: 1rem;
 }
 
+/* Warning messages */
+.warning {
+    color: #856404;
+    padding: 0.75rem;
+    background-color: #fff3cd;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}
+
 .current-preset {
     font-weight: 500;
     margin-bottom: 1rem;

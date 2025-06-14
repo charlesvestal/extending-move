@@ -47,6 +47,9 @@
     </form>
     - Clip {{ (clip_index + 1) if clip_index is not none else '?' }}
   </nav>
+  {% if warning_message %}
+  <p class="warning">{{ warning_message }}</p>
+  {% endif %}
   <!-- <form method="post" action="{{ host_prefix }}/set-inspector" style="display:inline;">
     <input type="hidden" name="action" value="select_set">
     <input type="hidden" name="set_path" value="{{ selected_set }}">

@@ -183,6 +183,12 @@ class SetInspectorHandler(BaseHandler):
             )
             env_opts = '<option value="">No Envelope</option>' + env_opts
             set_name = os.path.basename(os.path.dirname(set_path))
+            warn_message = None
+            if "copy" not in set_name.lower():
+                warn_message = (
+                    "It looks like this isn't a copy of a Set! "
+                    "Are you sure you want to edit this?"
+                )
             pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
             return {
                 "pad_grid": pad_grid,
@@ -203,6 +209,7 @@ class SetInspectorHandler(BaseHandler):
                 "clip_index": clip_idx,
                 "track_name": result.get("track_name"),
                 "clip_name": result.get("clip_name"),
+                "warning_message": warn_message,
             }
         elif action == "save_envelope":
             set_path = form.getvalue("set_path")
@@ -250,6 +257,12 @@ class SetInspectorHandler(BaseHandler):
             )
             env_opts = '<option value="">No Envelope</option>' + env_opts
             set_name = os.path.basename(os.path.dirname(set_path))
+            warn_message = None
+            if "copy" not in set_name.lower():
+                warn_message = (
+                    "It looks like this isn't a copy of a Set! "
+                    "Are you sure you want to edit this?"
+                )
             pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
             return {
                 "pad_grid": pad_grid,
@@ -270,6 +283,7 @@ class SetInspectorHandler(BaseHandler):
                 "clip_index": clip_idx,
                 "track_name": clip_data.get("track_name"),
                 "clip_name": clip_data.get("clip_name"),
+                "warning_message": warn_message,
             }
         elif action == "save_clip":
             set_path = form.getvalue("set_path")
@@ -338,6 +352,12 @@ class SetInspectorHandler(BaseHandler):
             )
             env_opts = '<option value="">No Envelope</option>' + env_opts
             set_name = os.path.basename(os.path.dirname(set_path))
+            warn_message = None
+            if "copy" not in set_name.lower():
+                warn_message = (
+                    "It looks like this isn't a copy of a Set! "
+                    "Are you sure you want to edit this?"
+                )
             pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
             return {
                 "pad_grid": pad_grid,
@@ -358,6 +378,7 @@ class SetInspectorHandler(BaseHandler):
                 "clip_index": clip_idx,
                 "track_name": clip_data.get("track_name"),
                 "clip_name": clip_data.get("clip_name"),
+                "warning_message": warn_message,
             }
         else:
             return self.format_error_response("Unknown action", pad_grid=pad_grid)
