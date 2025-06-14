@@ -92,18 +92,25 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
         )
 
         region_info = clip_obj.get("region", {})
-        region_end = region_info.get("end", detected_region_end)
+        region_start_prop = region_info.get("start", 0.0)
+        region_end_prop = region_info.get("end", detected_region_end)
+        loop_info = region_info.get("loop", {})
+        loop_start_prop = loop_info.get("start", region_start_prop)
+        loop_end_prop = loop_info.get("end", region_end_prop)
+        logging.info(
+            "Clip region property: start=%.2f end=%.2f loop_start=%.2f loop_end=%.2f",
+            region_start_prop,
+            region_end_prop,
+            loop_start_prop,
+            loop_end_prop,
+        )
+
+        region_end = max(region_end_prop, detected_region_end)
 
         # Prefer explicit clip loop property if present, otherwise region.loop
-        loop_data = clip_obj.get("loop", region_info.get("loop", {}))
-        loop_start = loop_data.get("start", 0.0)
-        loop_end = loop_data.get("end", region_end)
-        logging.info(
-            "Clip region property: start=0.0 end=%.2f loop_start=%.2f loop_end=%.2f",
-            region_end,
-            loop_start,
-            loop_end,
-        )
+        loop_data = clip_obj.get("loop", loop_info)
+        loop_start = loop_data.get("start", loop_start_prop)
+        loop_end = loop_data.get("end", loop_end_prop)
 
         region_length = region_end
         track_name = _track_display_name(track_obj, track)
@@ -221,12 +228,9 @@ def save_clip(
         clip_obj["notes"] = notes
         clip_obj["envelopes"] = envelopes
         region_info = clip_obj.setdefault("region", {})
-        region_info["start"] = 0.0
-        region_info["end"] = region_end
-        region_info["loop"] = {"start": loop_start, "end": loop_end, "isEnabled": True}
-
-        # Mirror region.loop values in top-level loop property for compatibility
-        clip_obj["loop"] = {
+        region_info["start"] = loop_start
+        region_info["end"] = loop_end
+        region_info["loop"] = {
             "start": loop_start,
             "end": loop_end,
             "isEnabled": True,
