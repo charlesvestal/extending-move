@@ -64,6 +64,7 @@
     <div style="position:relative; width:900px; height:300px; border:1px solid #ccc;">
       <webaudio-pianoroll id="clipEditor" width="900" height="300" editmode="dragpoly" wheelzoom="0" xscroll="1" yscroll="1" timebase="16" xrange="{{ (region | default(4.0)) * 4 }}" markstart="{{ (loop_start | default(0.0)) * 4 }}" markend="{{ (loop_end | default(region)) * 4 }}" showcursor="false"></webaudio-pianoroll>
       <canvas id="clipCanvas" width="836" height="300" style="position:absolute; left:64px; top:0; pointer-events:none;"></canvas>
+      <div id="pitchIconContainer" style="position:absolute; left:0; top:0; width:64px; height:300px; pointer-events:none;"></div>
     </div>
     <div id="paramLegend" style="margin-left:0.5rem; font-size:10px; line-height:1.2; display:flex; flex-direction:column; justify-content:space-between; align-items:flex-end; height:300px;"></div>
   </div>
@@ -78,7 +79,7 @@
     <input type="hidden" name="loop_end" id="loop_end_input">
     <button id="saveClipBtn" type="submit">Save Clip</button>
   </form>
-  <div id="clipData" data-notes='{{ notes | tojson }}' data-envelopes='{{ envelopes | tojson }}' data-region='{{ region | default(4.0) }}' data-loop-start='{{ loop_start | default(0.0) }}' data-loop-end='{{ loop_end | default(region) }}' data-param-ranges='{{ param_ranges_json | safe }}'></div>
+  <div id="clipData" data-notes='{{ notes | tojson }}' data-envelopes='{{ envelopes | tojson }}' data-region='{{ region | default(4.0) }}' data-loop-start='{{ loop_start | default(0.0) }}' data-loop-end='{{ loop_end | default(region) }}' data-param-ranges='{{ param_ranges_json | safe }}' data-track-index='{{ track_index }}' data-clip-index='{{ clip_index }}' data-set-path='{{ selected_set }}'></div>
   {% endif %}
 {% endblock %}
 {% block scripts %}

@@ -29,12 +29,15 @@ export function initSetInspector() {
 
   const dataDiv = document.getElementById('clipData');
   if (!dataDiv) return;
-  const notes = JSON.parse(dataDiv.dataset.notes || '[]');
+  let notes = JSON.parse(dataDiv.dataset.notes || '[]');
   const envelopes = JSON.parse(dataDiv.dataset.envelopes || '[]');
   const region = parseFloat(dataDiv.dataset.region || '4');
   const loopStart = parseFloat(dataDiv.dataset.loopStart || '0');
   const loopEnd = parseFloat(dataDiv.dataset.loopEnd || String(region));
   const paramRanges = JSON.parse(dataDiv.dataset.paramRanges || '{}');
+  const setPath = dataDiv.dataset.setPath || '';
+  const trackIndex = dataDiv.dataset.trackIndex ? parseInt(dataDiv.dataset.trackIndex) : null;
+  const clipIndex = dataDiv.dataset.clipIndex ? parseInt(dataDiv.dataset.clipIndex) : null;
   const canvas = document.getElementById('clipCanvas');
   const ctx = canvas.getContext('2d');
   const piano = document.getElementById('clipEditor');
@@ -61,6 +64,10 @@ export function initSetInspector() {
   const regionInput = document.getElementById('region_end_input');
   const loopStartInput = document.getElementById('loop_start_input');
   const loopEndInput = document.getElementById('loop_end_input');
+  const iconContainer = document.getElementById('pitchIconContainer');
+
+  let notesBackup = [];
+  let pitchPad = null;
 
   let editing = false;
   let drawing = false;
@@ -75,19 +82,13 @@ export function initSetInspector() {
     if (saveClipBtn) saveClipBtn.disabled = !clipModified;
   }
 
-  if (saveClipBtn) saveClipBtn.disabled = true;
-
-  if (piano) {
-    if (!piano.sequence) piano.sequence = [];
+  function setPianoNotes() {
+    if (!piano) return;
     piano.sequence = notes.map(n => ({
       t: Math.round(n.startTime * ticksPerBeat),
       n: n.noteNumber,
       g: Math.round(n.duration * ticksPerBeat)
     }));
-    if (!piano.hasAttribute('xrange')) piano.xrange = region * ticksPerBeat;
-    if (!piano.hasAttribute('markstart')) piano.markstart = loopStart * ticksPerBeat;
-    if (!piano.hasAttribute('markend')) piano.markend = loopEnd * ticksPerBeat;
-    piano.showcursor = false;
     const { min, max } = notes.length
       ? { min: Math.min(...notes.map(n => n.noteNumber)),
           max: Math.max(...notes.map(n => n.noteNumber)) }
@@ -95,6 +96,74 @@ export function initSetInspector() {
     piano.yoffset = Math.max(0, min - 2);
     piano.yrange = Math.max(12, max - min + 5);
     if (piano.redraw) piano.redraw();
+  }
+
+  function refreshPitchIcons() {
+    if (!iconContainer || !piano) return;
+    iconContainer.innerHTML = '';
+    if (pitchPad !== null) {
+      const back = document.createElement('button');
+      back.className = 'pitch-icon';
+      back.style.top = '2px';
+      back.textContent = '↩';
+      back.addEventListener('click', exitPitchBend);
+      iconContainer.appendChild(back);
+      return;
+    }
+    const withPitch = new Set();
+    notes.forEach(n => {
+      if (n.automations && n.automations.PitchBend && n.automations.PitchBend.length) {
+        withPitch.add(n.noteNumber);
+      }
+    });
+    if (!withPitch.size) return;
+    const { min, max } = getVisibleRange();
+    const noteRange = max - min + 1;
+    const h = canvas.height / noteRange;
+    withPitch.forEach(nn => {
+      const icon = document.createElement('button');
+      icon.className = 'pitch-icon';
+      const y = canvas.height - (nn - min + 1) * h + (h - 16) / 2;
+      icon.style.top = `${xruler + y}px`;
+      icon.textContent = '♪';
+      icon.addEventListener('click', () => loadPitchBend(nn));
+      iconContainer.appendChild(icon);
+    });
+  }
+
+  async function loadPitchBend(nn) {
+    if (!setPath || trackIndex === null || clipIndex === null) return;
+    const url = `/get-pad-pitchbend?set_path=${encodeURIComponent(setPath)}&track=${trackIndex}&clip=${clipIndex}&note=${nn}`;
+    const resp = await fetch(url);
+    const data = await resp.json();
+    if (data.success) {
+      notesBackup = notes;
+      notes = data.notes;
+      pitchPad = nn;
+      setPianoNotes();
+      refreshPitchIcons();
+    } else {
+      alert(data.message || 'Failed');
+    }
+  }
+
+  function exitPitchBend() {
+    if (pitchPad === null) return;
+    notes = notesBackup;
+    pitchPad = null;
+    setPianoNotes();
+    refreshPitchIcons();
+  }
+
+  if (saveClipBtn) saveClipBtn.disabled = true;
+
+  if (piano) {
+    if (!piano.hasAttribute('xrange')) piano.xrange = region * ticksPerBeat;
+    if (!piano.hasAttribute('markstart')) piano.markstart = loopStart * ticksPerBeat;
+    if (!piano.hasAttribute('markend')) piano.markend = loopEnd * ticksPerBeat;
+    piano.showcursor = false;
+    setPianoNotes();
+    refreshPitchIcons();
 
     piano.addEventListener('dblclick', ev => {
       const rect = piano.getBoundingClientRect();
@@ -290,6 +359,7 @@ export function initSetInspector() {
     piano.redraw = function(...args) {
       origRedraw(...args);
       draw();
+      refreshPitchIcons();
     };
   }
 
@@ -474,6 +544,7 @@ export function initSetInspector() {
     updateLegend();
     updateControls();
     draw();
+    refreshPitchIcons();
   }
 }
 

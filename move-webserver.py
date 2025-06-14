@@ -23,6 +23,7 @@ import io
 import soundfile as sf
 import pyrubberband.pyrb as pyrb
 from core.time_stretch_handler import get_rubberband_binary
+from core.set_inspector_handler import get_pad_pitchbend_data
 from wsgiref.simple_server import make_server, WSGIServer
 from handlers.reverse_handler_class import ReverseHandler
 from handlers.restore_handler_class import RestoreHandler
@@ -916,6 +917,17 @@ def pitch_shift_route():
     resp.headers["Content-Type"] = "audio/wav"
     resp.headers["Access-Control-Allow-Origin"] = "*"
     return resp
+
+
+@app.route("/get-pad-pitchbend", methods=["GET"])
+def get_pad_pitchbend_route():
+    """Return pitch bend notes for a drum pad."""
+    set_path = request.args.get("set_path")
+    track = request.args.get("track", type=int)
+    clip = request.args.get("clip", type=int)
+    note = request.args.get("note", type=int)
+    result = get_pad_pitchbend_data(set_path, track, clip, note)
+    return jsonify(result)
 
 
 @app.route("/detect-transients", methods=["POST"])
