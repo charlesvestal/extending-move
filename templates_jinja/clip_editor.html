@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Clip Editor</h2>
+{% if message %}
+  <p class="{{ message_type }}">{{ message }}</p>
+{% endif %}
+<div style="display:flex; gap:0.5rem;">
+  <canvas id="piano" width="60" height="240" style="border:1px solid #ccc;"></canvas>
+  <div>
+    <canvas id="ruler" width="600" height="20" style="border:1px solid #ccc;"></canvas>
+    <canvas id="grid" width="600" height="240" style="border:1px solid #ccc;"></canvas>
+    <canvas id="velocity" width="600" height="80" style="border:1px solid #ccc;"></canvas>
+  </div>
+</div>
+<div id="clipData" data-notes='{{ notes | tojson }}' data-region='{{ region }}'></div>
+{% endblock %}
+{% block scripts %}
+<script type="module" src="{{ host_prefix }}/static/clip_editor.js"></script>
+{% endblock %}
+

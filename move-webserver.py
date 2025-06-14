@@ -47,6 +47,7 @@ from handlers.adsr_handler_class import AdsrHandler
 from handlers.cyc_env_handler_class import CycEnvHandler
 from handlers.lfo_handler_class import LfoHandler
 from handlers.set_inspector_handler_class import SetInspectorHandler
+from handlers.clip_editor_handler_class import ClipEditorHandler
 from core.refresh_handler import refresh_library
 from core.file_browser import generate_dir_html
 
@@ -137,6 +138,7 @@ adsr_handler = AdsrHandler()
 cyc_env_handler = CycEnvHandler()
 lfo_handler = LfoHandler()
 set_inspector_handler = SetInspectorHandler()
+clip_editor_handler = ClipEditorHandler()
 
 
 @app.before_request
@@ -415,6 +417,21 @@ def lfo_route():
         message_type=message_type,
         defaults=defaults,
         active_tab="lfo",
+    )
+
+
+@app.route("/clip-editor", methods=["GET"])
+def clip_editor_route():
+    result = clip_editor_handler.handle_get()
+    message = result.get("message")
+    message_type = result.get("message_type")
+    return render_template(
+        "clip_editor.html",
+        message=message,
+        message_type=message_type,
+        notes=result.get("notes", []),
+        region=result.get("region", 4.0),
+        active_tab="clip-editor",
     )
 
 
