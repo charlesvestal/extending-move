@@ -744,4 +744,32 @@ def test_set_inspector_post(client, monkeypatch):
     assert resp.status_code == 200
 
 
+def test_pitchbend_viewer_get(client):
+    resp = client.get('/pitchbend-viewer')
+    assert resp.status_code == 200
+    assert b'Pitch Bend Viewer' in resp.data
+
+
+def test_pitchbend_viewer_post(client, monkeypatch):
+    def fake_post(form):
+        return {
+            'message': 'ok',
+            'segments': [],
+            'set_path': '/tmp/a.abl',
+            'track_idx': 0,
+            'clip_idx': 0,
+            'pad_note': 36,
+        }
+    monkeypatch.setattr(move_webserver.pitch_bend_viewer_handler, 'handle_post', fake_post)
+    resp = client.post('/pitchbend-viewer', data={
+        'action': 'load',
+        'set_path': '/tmp/a.abl',
+        'track_idx': '0',
+        'clip_idx': '0',
+        'pad_note': '36'
+    })
+    assert resp.status_code == 200
+    assert b'ok' in resp.data
+
+
 

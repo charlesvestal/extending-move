@@ -47,6 +47,7 @@ from handlers.adsr_handler_class import AdsrHandler
 from handlers.cyc_env_handler_class import CycEnvHandler
 from handlers.lfo_handler_class import LfoHandler
 from handlers.set_inspector_handler_class import SetInspectorHandler
+from handlers.pitch_bend_viewer_handler_class import PitchBendViewerHandler
 from core.refresh_handler import refresh_library
 from core.file_browser import generate_dir_html
 
@@ -137,6 +138,7 @@ adsr_handler = AdsrHandler()
 cyc_env_handler = CycEnvHandler()
 lfo_handler = LfoHandler()
 set_inspector_handler = SetInspectorHandler()
+pitch_bend_viewer_handler = PitchBendViewerHandler()
 
 
 @app.before_request
@@ -349,6 +351,28 @@ def set_inspector_route():
         loop_end=result.get("loop_end", result.get("region")),
         param_ranges_json=result.get("param_ranges_json", "{}"),
         active_tab="set-inspector",
+    )
+
+
+@app.route("/pitchbend-viewer", methods=["GET", "POST"])
+def pitchbend_viewer_route():
+    if request.method == "POST":
+        form = SimpleForm(request.form.to_dict())
+        result = pitch_bend_viewer_handler.handle_post(form)
+    else:
+        result = pitch_bend_viewer_handler.handle_get()
+    message = result.get("message")
+    success = result.get("success", True)
+    return render_template(
+        "pitchbend_viewer.html",
+        message=message,
+        segments=result.get("segments"),
+        set_path=result.get("set_path"),
+        track_idx=result.get("track_idx"),
+        clip_idx=result.get("clip_idx"),
+        pad_note=result.get("pad_note"),
+        success=success,
+        active_tab="pitchbend-viewer",
     )
 
 
