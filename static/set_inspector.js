@@ -166,6 +166,14 @@ export function initSetInspector() {
     });
   }
 
+  function timeToX(t) {
+    return ((t * ticksPerBeat - piano.xoffset) / piano.xrange) * canvas.width;
+  }
+
+  function xToTime(x) {
+    return ((x / canvas.width) * piano.xrange + piano.xoffset) / ticksPerBeat;
+  }
+
   function drawEnvelope() {
     if (!envSelect || !envSelect.value) return;
     let env;
@@ -183,7 +191,7 @@ export function initSetInspector() {
     ctx.beginPath();
     const needsScale = isNormalized(env);
     env.breakpoints.forEach((bp, i) => {
-      const x = (bp.time / region) * canvas.width;
+      const x = timeToX(bp.time);
       let v = bp.value;
       if (needsScale) {
         v = env.rangeMin + v * (env.rangeMax - env.rangeMin);
@@ -286,7 +294,7 @@ export function initSetInspector() {
     }
     if (!env || !env.breakpoints || !env.breakpoints.length) { valueDiv.textContent = ''; return; }
     const pos = canvasPos(ev);
-    const t = (pos.x / canvas.width) * region;
+    const t = xToTime(pos.x);
     let v = envValueAt(env.breakpoints, t);
     if (isNormalized(env)) {
       v = env.rangeMin + v * (env.rangeMax - env.rangeMin);
@@ -300,7 +308,7 @@ export function initSetInspector() {
     drawing = true;
     dirty = true;
     const { x, y } = canvasPos(ev);
-    const t = (x / canvas.width) * region;
+    const t = xToTime(x);
     const env = currentEnv.length ? currentEnv : (envInfo ? envInfo.breakpoints : []);
     const before = env.filter(bp => bp.time < t);
     tailEnv = env.filter(bp => bp.time > t);
@@ -323,7 +331,7 @@ export function initSetInspector() {
       return;
     }
     const { x, y } = canvasPos(ev);
-    const t = (x / canvas.width) * region;
+    const t = xToTime(x);
     let v;
     if (isNormalized(envInfo)) {
       v = 1 - y / canvas.height;
