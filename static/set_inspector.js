@@ -64,9 +64,10 @@ export function initSetInspector() {
       n: n.noteNumber,
       g: Math.round(n.duration * ticksPerBeat)
     }));
-    if (!piano.hasAttribute('xrange')) piano.xrange = region * ticksPerBeat;
-    if (!piano.hasAttribute('markstart')) piano.markstart = loopStart * ticksPerBeat;
-    if (!piano.hasAttribute('markend')) piano.markend = loopEnd * ticksPerBeat;
+    // Always apply region and loop markers in case attributes weren't parsed
+    piano.xrange = region * ticksPerBeat;
+    piano.markstart = loopStart * ticksPerBeat;
+    piano.markend = loopEnd * ticksPerBeat;
     const { min, max } = notes.length
       ? { min: Math.min(...notes.map(n => n.noteNumber)),
           max: Math.max(...notes.map(n => n.noteNumber)) }
