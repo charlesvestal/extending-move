@@ -1,3 +1,5 @@
+import { PianoRoll } from './piano_roll.js';
+
 export function initSetInspector() {
   // Show selected set name when choosing a pad
   const grid = document.querySelector('#setSelectForm .pad-grid');
@@ -33,6 +35,7 @@ export function initSetInspector() {
   const envelopes = JSON.parse(dataDiv.dataset.envelopes || '[]');
   const region = parseFloat(dataDiv.dataset.region || '4');
   const paramRanges = JSON.parse(dataDiv.dataset.paramRanges || '{}');
+  const rollDiv = document.getElementById('pianoRoll');
   const canvas = document.getElementById('clipCanvas');
   const ctx = canvas.getContext('2d');
   const envSelect = document.getElementById('envelope_select');
@@ -50,6 +53,7 @@ export function initSetInspector() {
   let currentEnv = [];
   let tailEnv = [];
   let envInfo = null;
+  let pianoRoll = rollDiv ? new PianoRoll(rollDiv, { notes, region }) : null;
 
   function isNormalized(env) {
     if (!env || !env.breakpoints || !env.breakpoints.length) return false;
@@ -216,7 +220,7 @@ export function initSetInspector() {
 
   function draw() {
     drawGrid();
-    drawNotes();
+    if (pianoRoll) pianoRoll.draw();
     drawLabels();
     drawEnvelope();
   }

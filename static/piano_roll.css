@@ -1,0 +1,11 @@
+#pianoRoll {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+#pianoRoll .note {
+  position: absolute;
+  background: #0074D9;
+  opacity: 0.6;
+}

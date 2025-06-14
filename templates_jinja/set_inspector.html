@@ -1,4 +1,7 @@
 {% extends "base.html" %}
+{% block extra_head %}
+<link rel="stylesheet" href="{{ host_prefix }}/static/piano_roll.css">
+{% endblock %}
 {% block content %}
 <h2>Set Inspector</h2>
 <p><em>Note: This will edit your sets, and a broken set can't be loaded. Back up your sets before making modifications!</em></p>
@@ -70,7 +73,10 @@
     <span id="envValue" style="margin-left:0.5rem; font-size:0.8em;"></span>
   </div>
   <div style="margin-top:1rem; display:flex; align-items:flex-start;">
-    <canvas id="clipCanvas" width="400" height="200" style="border:1px solid #ccc;"></canvas>
+    <div id="pianoRollContainer" style="position:relative; width:400px; height:200px; border:1px solid #ccc;">
+      <div id="pianoRoll" style="width:100%; height:100%;"></div>
+      <canvas id="clipCanvas" width="400" height="200" style="position:absolute; left:0; top:0; pointer-events:none;"></canvas>
+    </div>
     <div id="paramLegend" style="margin-left:0.5rem; font-size:10px; line-height:1.2; display:flex; flex-direction:column; justify-content:space-between; align-items:flex-end; height:200px;"></div>
   </div>
   <div id="clipData" data-notes='{{ notes | tojson }}' data-envelopes='{{ envelopes | tojson }}' data-region='{{ region }}' data-param-ranges='{{ param_ranges_json | safe }}'></div>
