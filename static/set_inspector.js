@@ -38,6 +38,8 @@ export function initSetInspector() {
   const canvas = document.getElementById('clipCanvas');
   const ctx = canvas.getContext('2d');
   const piano = document.getElementById('clipEditor');
+  const pitchPadDiv = document.getElementById('pitchPadControls');
+  const exitPadBtn = document.getElementById('exitPadBtn');
   const timebase = piano ? parseInt(piano.getAttribute('timebase') || '16', 10) : 16;
   const xruler = piano ? parseInt(piano.getAttribute('xruler') || '24', 10) : 24;
   const yruler = piano ? parseInt(piano.getAttribute('yruler') || '24', 10) : 24;
@@ -62,6 +64,9 @@ export function initSetInspector() {
   const loopStartInput = document.getElementById('loop_start_input');
   const loopEndInput = document.getElementById('loop_end_input');
 
+  let originalNotes = null;
+  let inPadView = false;
+
   let editing = false;
   let drawing = false;
   let dirty = false;
@@ -79,22 +84,11 @@ export function initSetInspector() {
 
   if (piano) {
     if (!piano.sequence) piano.sequence = [];
-    piano.sequence = notes.map(n => ({
-      t: Math.round(n.startTime * ticksPerBeat),
-      n: n.noteNumber,
-      g: Math.round(n.duration * ticksPerBeat)
-    }));
+    refreshPiano();
     if (!piano.hasAttribute('xrange')) piano.xrange = region * ticksPerBeat;
     if (!piano.hasAttribute('markstart')) piano.markstart = loopStart * ticksPerBeat;
     if (!piano.hasAttribute('markend')) piano.markend = loopEnd * ticksPerBeat;
     piano.showcursor = false;
-    const { min, max } = notes.length
-      ? { min: Math.min(...notes.map(n => n.noteNumber)),
-          max: Math.max(...notes.map(n => n.noteNumber)) }
-      : { min: 60, max: 71 };
-    piano.yoffset = Math.max(0, min - 2);
-    piano.yrange = Math.max(12, max - min + 5);
-    if (piano.redraw) piano.redraw();
 
     piano.addEventListener('dblclick', ev => {
       const rect = piano.getBoundingClientRect();
@@ -283,6 +277,78 @@ export function initSetInspector() {
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawEnvelope();
+  }
+
+  function pitchPadsFromNotes(arr) {
+    const set = new Set();
+    arr.forEach(n => {
+      if (n.automations && n.automations.PitchBend && n.automations.PitchBend.length) {
+        set.add(n.noteNumber);
+      }
+    });
+    return Array.from(set).sort((a, b) => a - b);
+  }
+
+  function refreshPiano() {
+    if (!piano) return;
+    piano.sequence = notes.map(n => ({
+      t: Math.round(n.startTime * ticksPerBeat),
+      n: Math.round(n.noteNumber),
+      g: Math.round(n.duration * ticksPerBeat)
+    }));
+    const { min, max } = notes.length
+      ? { min: Math.min(...notes.map(n => n.noteNumber)),
+          max: Math.max(...notes.map(n => n.noteNumber)) }
+      : { min: 60, max: 71 };
+    piano.yoffset = Math.max(0, min - 2);
+    piano.yrange = Math.max(12, max - min + 5);
+    if (piano.redraw) piano.redraw();
+  }
+
+  function enterPitchPad(pad) {
+    if (!pitchPadDiv || inPadView) return;
+    originalNotes = JSON.parse(JSON.stringify(notes));
+    inPadView = true;
+    const tmp = [];
+    notes.forEach(n => {
+      if (n.noteNumber === pad && n.automations && n.automations.PitchBend) {
+        n.automations.PitchBend.forEach(pb => {
+          tmp.push({
+            noteNumber: 36 + pb.value / 170.6458282470703,
+            startTime: n.startTime + pb.time,
+            duration: 0.05,
+            velocity: 1.0,
+            offVelocity: 0.0
+          });
+        });
+      }
+    });
+    notes.length = 0;
+    notes.push(...tmp);
+    refreshPiano();
+    if (exitPadBtn) exitPadBtn.classList.remove('hidden');
+  }
+
+  function exitPitchPad() {
+    if (!inPadView || !originalNotes) return;
+    notes.length = 0;
+    notes.push(...originalNotes);
+    originalNotes = null;
+    inPadView = false;
+    refreshPiano();
+    if (exitPadBtn) exitPadBtn.classList.add('hidden');
+  }
+
+  function initPitchPads() {
+    if (!pitchPadDiv) return;
+    const pads = pitchPadsFromNotes(notes);
+    if (!pads.length) return;
+    pitchPadDiv.innerHTML = pads
+      .map(p => `<button data-pad="${p}" class="pitch-pad-btn">Pad ${p} \u266B</button>`)
+      .join(' ');
+    pitchPadDiv.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => enterPitchPad(parseInt(btn.dataset.pad)));
+    });
   }
 
   if (piano && piano.redraw) {
@@ -475,6 +541,9 @@ export function initSetInspector() {
     updateControls();
     draw();
   }
+
+  initPitchPads();
+  if (exitPadBtn) exitPadBtn.addEventListener('click', exitPitchPad);
 }
 
 document.addEventListener('DOMContentLoaded', initSetInspector);

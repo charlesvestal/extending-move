@@ -67,6 +67,8 @@
     </div>
     <div id="paramLegend" style="margin-left:0.5rem; font-size:10px; line-height:1.2; display:flex; flex-direction:column; justify-content:space-between; align-items:flex-end; height:300px;"></div>
   </div>
+  <div id="pitchPadControls" style="margin-top:0.5rem;"></div>
+  <button id="exitPadBtn" class="hidden" style="margin-top:0.5rem;">Back to Clip</button>
   <form id="saveClipForm" method="post" action="{{ host_prefix }}/set-inspector" style="margin-top:0.5rem;">
     <input type="hidden" name="action" value="save_clip">
     <input type="hidden" name="set_path" value="{{ selected_set }}">
