@@ -35,6 +35,7 @@ export function initSetInspector() {
   const paramRanges = JSON.parse(dataDiv.dataset.paramRanges || '{}');
   const canvas = document.getElementById('clipCanvas');
   const ctx = canvas.getContext('2d');
+  const piano = document.getElementById('clipEditor');
   const envSelect = document.getElementById('envelope_select');
   const legendDiv = document.getElementById('paramLegend');
   const editBtn = document.getElementById('editEnvBtn');
@@ -50,6 +51,26 @@ export function initSetInspector() {
   let currentEnv = [];
   let tailEnv = [];
   let envInfo = null;
+
+  if (piano) {
+    const ticksPerBeat = 4; // timebase 16 => 4 ticks per beat
+    piano.timebase = 16;
+    piano.editmode = 'dragpoly';
+    piano.xrange = region * ticksPerBeat;
+    piano.markend = region * ticksPerBeat;
+    const { min, max } = notes.length
+      ? { min: Math.min(...notes.map(n => n.noteNumber)),
+          max: Math.max(...notes.map(n => n.noteNumber)) }
+      : { min: 60, max: 71 };
+    piano.yoffset = Math.max(0, min - 2);
+    piano.yrange = Math.max(12, max - min + 5);
+    piano.sequence = notes.map(n => ({
+      t: Math.round(n.startTime * ticksPerBeat),
+      n: n.noteNumber,
+      g: Math.round(n.duration * ticksPerBeat)
+    }));
+    if (piano.redraw) piano.redraw();
+  }
 
   function isNormalized(env) {
     if (!env || !env.breakpoints || !env.breakpoints.length) return false;
@@ -215,9 +236,7 @@ export function initSetInspector() {
   }
 
   function draw() {
-    drawGrid();
-    drawNotes();
-    drawLabels();
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawEnvelope();
   }
 
