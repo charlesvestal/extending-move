@@ -52,6 +52,7 @@ export function initSetInspector() {
     canvas.style.top = `${xruler}px`;
   }
   const envSelect = document.getElementById('envelope_select');
+  const gridSelect = document.getElementById('grid_select');
   const legendDiv = document.getElementById('paramLegend');
   const valueDiv = document.getElementById('envValue');
   const saveClipForm = document.getElementById('saveClipForm');
@@ -70,6 +71,17 @@ export function initSetInspector() {
   let envInfo = null;
   let lastPid = envSelect && envSelect.value ? parseInt(envSelect.value) : null;
   let clipModified = false;
+  const gridValues = {
+    '1/4': 1,
+    '1/8': 0.5,
+    '1/16': 0.25,
+    '1/32': 0.125,
+    '1/4t': 2 / 3,
+    '1/8t': 1 / 3,
+    '1/6t': 1 / 6,
+    '1/32t': 1 / 12,
+  };
+  let gridChoice = gridSelect ? gridSelect.value : '1/16';
 
   function updateSaveButton() {
     if (saveClipBtn) saveClipBtn.disabled = !clipModified;
@@ -158,7 +170,6 @@ export function initSetInspector() {
   }
 
   function drawGrid() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
     const { min, max } = getVisibleRange();
     const noteRange = max - min + 1;
 
@@ -173,6 +184,20 @@ export function initSetInspector() {
     }
     ctx.lineWidth = 1;
 
+    const subBeat = gridValues[gridChoice];
+    if (subBeat && subBeat < 1) {
+      ctx.strokeStyle = '#eee';
+      for (let t = 0; t <= region; t += subBeat) {
+        if (Math.abs(t - Math.round(t)) < 1e-6) continue;
+        const x = (t / region) * canvas.width;
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+    }
+
+    ctx.strokeStyle = '#ddd';
     const h = canvas.height / noteRange;
     for (let n = min; n <= max; n++) {
       const y = canvas.height - (n - min) * h;
@@ -282,6 +307,7 @@ export function initSetInspector() {
 
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawGrid();
     drawEnvelope();
   }
 
@@ -329,6 +355,11 @@ export function initSetInspector() {
     }
     updateLegend();
     updateControls();
+    draw();
+  });
+
+  if (gridSelect) gridSelect.addEventListener('change', () => {
+    gridChoice = gridSelect.value;
     draw();
   });
 
@@ -475,6 +506,7 @@ export function initSetInspector() {
     updateControls();
     draw();
   }
+  if (gridSelect) gridSelect.dispatchEvent(new Event('change'));
 }
 
 document.addEventListener('DOMContentLoaded', initSetInspector);
