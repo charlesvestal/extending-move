@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Pad {{ pad_number }} Pitch Editor</h2>
+<nav class="breadcrumbs" style="margin-bottom:1rem;">
+  <form method="post" action="{{ host_prefix }}/set-inspector" style="display:inline;">
+    <input type="hidden" name="action" value="show_clip">
+    <input type="hidden" name="set_path" value="{{ selected_set }}">
+    <input type="hidden" name="clip_select" value="{{ track_index }}:{{ clip_index }}">
+    <button type="submit" class="link-button">&larr; Back to Clip</button>
+  </form>
+</nav>
+<div style="margin-top:1rem; display:flex; align-items:flex-start;">
+  <div style="position:relative; width:900px; height:300px; border:1px solid #ccc;">
+    <webaudio-pianoroll id="clipEditor" width="900" height="300" editmode="dragpoly" wheelzoom="0" xscroll="1" yscroll="1" timebase="16" xrange="{{ (region | default(4.0)) * 4 }}" markstart="{{ (loop_start | default(0.0)) * 4 }}" markend="{{ (loop_end | default(region)) * 4 }}" showcursor="false"></webaudio-pianoroll>
+    <canvas id="clipCanvas" width="836" height="300" style="position:absolute; left:64px; top:0; pointer-events:none;"></canvas>
+  </div>
+</div>
+<form id="saveClipForm" method="post" action="{{ host_prefix }}/pad-pitch" style="margin-top:0.5rem;">
+  <input type="hidden" name="set_path" value="{{ selected_set }}">
+  <input type="hidden" name="track_index" value="{{ track_index }}">
+  <input type="hidden" name="clip_index" value="{{ clip_index }}">
+  <input type="hidden" name="pad_number" value="{{ pad_number }}">
+  <input type="hidden" name="clip_notes" id="clip_notes_input">
+  <input type="hidden" name="region_end" id="region_end_input">
+  <input type="hidden" name="loop_start" id="loop_start_input">
+  <input type="hidden" name="loop_end" id="loop_end_input">
+  <button id="saveClipBtn" type="submit">Save Pad</button>
+</form>
+<div id="clipData" data-notes='{{ notes | tojson }}' data-envelopes='[]' data-region='{{ region | default(4.0) }}' data-loop-start='{{ loop_start | default(0.0) }}' data-loop-end='{{ loop_end | default(region) }}' data-param-ranges='{}'></div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ host_prefix }}/static/webaudio-pianoroll.js"></script>
+<script type="module" src="{{ host_prefix }}/static/set_inspector.js"></script>
+{% endblock %}

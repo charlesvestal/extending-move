@@ -3,6 +3,8 @@ from core.set_inspector_handler import list_clips, get_clip_data, save_envelope
 from core.list_msets_handler import list_msets
 from core.pad_colors import rgb_string
 from core.config import MSETS_DIRECTORY
+from core.pad_pitch_handler import pads_with_pitch
+from core.utils import midi_to_note_name
 import json
 import os
 
@@ -62,6 +64,24 @@ class SetInspectorHandler(BaseHandler):
                     f'<label for="clip_{track}_{clip}" class="pad-cell {status}"{style}{name_attr}></label>'
                 )
         return '<div class="pad-grid">' + ''.join(cells) + '</div>'
+
+    def generate_pad_list(self, notes, set_path, track_idx, clip_idx):
+        pads = pads_with_pitch(notes)
+        items = []
+        for pad in sorted(pads.keys()):
+            name = midi_to_note_name(pad)
+            icon = ' &#9835;' if pads[pad] else ''
+            items.append(
+                '<li>'
+                f'<form method="get" action="/pad-pitch" style="display:inline;">'
+                f'<input type="hidden" name="set_path" value="{set_path}">' \
+                f'<input type="hidden" name="track_index" value="{track_idx}">' \
+                f'<input type="hidden" name="clip_index" value="{clip_idx}">' \
+                f'<input type="hidden" name="pad_number" value="{pad}">' \
+                f'<button type="submit" class="link-button">{name}{icon}</button>'
+                '</form></li>'
+            )
+        return '<ul class="pad-list">' + ''.join(items) + '</ul>'
 
     def handle_get(self):
         msets, ids = list_msets(return_free_ids=True)
@@ -169,6 +189,7 @@ class SetInspectorHandler(BaseHandler):
                 return self.format_error_response(result.get("message"), pad_grid=pad_grid)
             clip_info = list_clips(set_path)
             clip_grid = self.generate_clip_grid(clip_info.get("clips", []), selected=clip_val)
+            pad_list = self.generate_pad_list(result.get("notes", []), set_path, track_idx, clip_idx)
             envelopes = result.get("envelopes", [])
             param_map = result.get("param_map", {})
             param_context = result.get("param_context", {})
@@ -194,6 +215,7 @@ class SetInspectorHandler(BaseHandler):
                 "clip_options": env_opts,
                 "selected_clip": clip_val,
                 "notes": result.get("notes", []),
+                "pad_list": pad_list,
                 "envelopes": envelopes,
                 "region": result.get("region", 4.0),
                 "loop_start": result.get("loop_start", 0.0),
@@ -234,6 +256,7 @@ class SetInspectorHandler(BaseHandler):
             envelopes = clip_data.get("envelopes", [])
             param_map = clip_data.get("param_map", {})
             param_context = clip_data.get("param_context", {})
+            pad_list = self.generate_pad_list(clip_data.get("notes", []), set_path, track_idx, clip_idx)
             selected_pid = int(param_val)
             env_opts = "".join(
                 (
@@ -261,6 +284,7 @@ class SetInspectorHandler(BaseHandler):
                 "clip_options": env_opts,
                 "selected_clip": clip_val,
                 "notes": clip_data.get("notes", []),
+                "pad_list": pad_list,
                 "envelopes": envelopes,
                 "region": clip_data.get("region", 4.0),
                 "loop_start": clip_data.get("loop_start", 0.0),
@@ -327,6 +351,7 @@ class SetInspectorHandler(BaseHandler):
             envelopes = clip_data.get("envelopes", [])
             param_map = clip_data.get("param_map", {})
             param_context = clip_data.get("param_context", {})
+            pad_list = self.generate_pad_list(clip_data.get("notes", []), set_path, track_idx, clip_idx)
             env_opts = "".join(
                 (
                     f'<option value="{e.get("parameterId")}">' +
@@ -349,6 +374,7 @@ class SetInspectorHandler(BaseHandler):
                 "clip_options": env_opts,
                 "selected_clip": clip_val,
                 "notes": clip_data.get("notes", []),
+                "pad_list": pad_list,
                 "envelopes": envelopes,
                 "region": clip_data.get("region", 4.0),
                 "loop_start": clip_data.get("loop_start", 0.0),

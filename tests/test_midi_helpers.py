@@ -8,6 +8,7 @@ from core.midi_pattern_generator import (
     create_scale_pattern,
     create_rhythm_pattern,
 )
+from core.utils import midi_to_note_name
 
 
 def test_note_name_to_midi_basic():
@@ -37,3 +38,9 @@ def test_create_rhythm_pattern_velocity_cycle():
     velocities = [n["velocity"] for n in pattern]
     assert velocities == [80, 100, 80, 100]
     assert [n["start"] for n in pattern] == [0, 0.5, 1.0, 1.5]
+
+
+def test_midi_to_note_name_roundtrip():
+    for n in [0, 12, 60, 73, 127]:
+        name = midi_to_note_name(n)
+        assert note_name_to_midi(name) == n

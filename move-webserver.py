@@ -47,6 +47,7 @@ from handlers.adsr_handler_class import AdsrHandler
 from handlers.cyc_env_handler_class import CycEnvHandler
 from handlers.lfo_handler_class import LfoHandler
 from handlers.set_inspector_handler_class import SetInspectorHandler
+from handlers.pad_pitch_handler_class import PadPitchHandler
 from core.refresh_handler import refresh_library
 from core.file_browser import generate_dir_html
 
@@ -137,6 +138,7 @@ adsr_handler = AdsrHandler()
 cyc_env_handler = CycEnvHandler()
 lfo_handler = LfoHandler()
 set_inspector_handler = SetInspectorHandler()
+pad_pitch_handler = PadPitchHandler()
 
 
 @app.before_request
@@ -343,11 +345,40 @@ def set_inspector_route():
         track_index=result.get("track_index"),
         clip_index=result.get("clip_index"),
         notes=result.get("notes"),
+        pad_list=result.get("pad_list"),
         envelopes=result.get("envelopes"),
         region=result.get("region"),
         loop_start=result.get("loop_start", 0.0),
         loop_end=result.get("loop_end", result.get("region")),
         param_ranges_json=result.get("param_ranges_json", "{}"),
+        active_tab="set-inspector",
+    )
+
+
+@app.route("/pad-pitch", methods=["GET", "POST"])
+def pad_pitch_route():
+    if request.method == "POST":
+        form = SimpleForm(request.form.to_dict())
+        result = pad_pitch_handler.handle_post(form)
+    else:
+        form = SimpleForm(request.args.to_dict())
+        result = pad_pitch_handler.handle_get(form)
+    message = result.get("message")
+    message_type = result.get("message_type")
+    success = message_type != "error" if message_type else False
+    return render_template(
+        "pad_pitch.html",
+        message=message,
+        success=success,
+        message_type=message_type,
+        selected_set=result.get("selected_set"),
+        track_index=result.get("track_index"),
+        clip_index=result.get("clip_index"),
+        pad_number=result.get("pad_number"),
+        notes=result.get("notes"),
+        region=result.get("region"),
+        loop_start=result.get("loop_start"),
+        loop_end=result.get("loop_end"),
         active_tab="set-inspector",
     )
 
