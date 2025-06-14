@@ -55,6 +55,7 @@ export function initSetInspector() {
   const legendDiv = document.getElementById('paramLegend');
   const valueDiv = document.getElementById('envValue');
   const saveClipForm = document.getElementById('saveClipForm');
+  const saveClipBtn = document.getElementById('saveClipBtn');
   const notesInput = document.getElementById('clip_notes_input');
   const envsInput = document.getElementById('clip_envelopes_input');
   const regionInput = document.getElementById('region_end_input');
@@ -67,6 +68,14 @@ export function initSetInspector() {
   let currentEnv = [];
   let tailEnv = [];
   let envInfo = null;
+  let lastPid = envSelect && envSelect.value ? parseInt(envSelect.value) : null;
+  let clipModified = false;
+
+  function updateSaveButton() {
+    if (saveClipBtn) saveClipBtn.disabled = !clipModified;
+  }
+
+  if (saveClipBtn) saveClipBtn.disabled = true;
 
   if (piano) {
     if (!piano.sequence) piano.sequence = [];
@@ -285,13 +294,26 @@ export function initSetInspector() {
   }
 
   if (envSelect) envSelect.addEventListener('change', () => {
+    if (lastPid !== null) {
+      let bps = currentEnv;
+      if (!bps.length && envInfo) bps = envInfo.breakpoints;
+      const idx = envelopes.findIndex(e => e.parameterId === lastPid);
+      const newEnv = { parameterId: lastPid, breakpoints: bps };
+      if (idx >= 0) envelopes[idx] = { ...envelopes[idx], breakpoints: bps };
+      else envelopes.push(newEnv);
+      if (dirty || currentEnv.length) {
+        clipModified = true;
+        updateSaveButton();
+      }
+    }
     drawing = false;
     dirty = false;
     currentEnv = [];
     envInfo = null;
     editing = !!envSelect.value;
+    lastPid = envSelect.value ? parseInt(envSelect.value) : null;
     if (editing) {
-      const pid = parseInt(envSelect.value);
+      const pid = lastPid;
       envInfo = envelopes.find(e => e.parameterId === pid);
       if (!envInfo && paramRanges[pid]) {
         const r = paramRanges[pid];
@@ -309,6 +331,11 @@ export function initSetInspector() {
     updateControls();
     draw();
   });
+
+  if (piano) {
+    piano.addEventListener('mouseup', () => { clipModified = true; updateSaveButton(); });
+    piano.addEventListener('touchend', () => { clipModified = true; updateSaveButton(); });
+  }
 
   function canvasPos(ev) {
     const rect = canvas.getBoundingClientRect();
@@ -346,6 +373,8 @@ export function initSetInspector() {
     if (!editing) return;
     drawing = true;
     dirty = true;
+    clipModified = true;
+    updateSaveButton();
     const { x, y } = canvasPos(ev);
     const t = piano ? (piano.xoffset + (x / canvas.width) * piano.xrange) / ticksPerBeat
                     : (x / canvas.width) * region;
@@ -436,6 +465,8 @@ export function initSetInspector() {
     if (regionInput) regionInput.value = (piano.xrange / ticksPerBeat).toFixed(6);
     if (loopStartInput) loopStartInput.value = (piano.markstart / ticksPerBeat).toFixed(6);
     if (loopEndInput) loopEndInput.value = (piano.markend / ticksPerBeat).toFixed(6);
+    clipModified = false;
+    updateSaveButton();
   });
   if (envSelect && envSelect.value) {
     envSelect.dispatchEvent(new Event('change'));
