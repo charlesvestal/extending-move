@@ -200,3 +200,41 @@ def save_clip(
         return {"success": True, "message": "Clip saved"}
     except Exception as e:
         return {"success": False, "message": f"Failed to save clip: {e}"}
+
+def get_pad_pitchbend_data(
+    set_path: str,
+    track: int,
+    clip: int,
+    note_number: int,
+    base_note: int = 36,
+) -> Dict[str, Any]:
+    """Extract pitch bend automation for a pad and convert to note list.
+
+    This converts pitch bend values to MIDI note numbers relative to
+    ``base_note``. Each semitone offset is represented by a value of
+    ``170.6458282470703``.
+    """
+    try:
+        with open(set_path, "r") as f:
+            song = json.load(f)
+        notes = song["tracks"][track]["clipSlots"][clip]["clip"].get("notes", [])
+        bend_notes: List[Dict[str, Any]] = []
+        for n in notes:
+            if n.get("noteNumber") != note_number:
+                continue
+            bends = n.get("automations", {}).get("PitchBend", [])
+            for bp in bends:
+                t = n.get("startTime", 0.0) + bp.get("time", 0.0)
+                semis = bp.get("value", 0.0) / 170.6458282470703
+                pitch = base_note + int(round(semis))
+                bend_notes.append({
+                    "noteNumber": pitch,
+                    "startTime": t,
+                    "duration": 0.001,
+                    "velocity": 1.0,
+                    "offVelocity": 0.0,
+                })
+        bend_notes.sort(key=lambda x: x["startTime"])
+        return {"success": True, "message": "Pitch bend extracted", "notes": bend_notes}
+    except Exception as e:
+        return {"success": False, "message": f"Failed to extract pitchbend: {e}"}

@@ -374,3 +374,46 @@ def test_save_clip(tmp_path):
     assert data["loop_start"] == 0.0
     assert data["loop_end"] == 4.0
 
+ 
+
+
+def test_get_pad_pitchbend_data(tmp_path):
+    set_path = tmp_path / "set.abl"
+    song = {
+        "tracks": [
+            {
+                "kind": "midi",
+                "clipSlots": [
+                    {
+                        "clip": {
+                            "notes": [
+                                {
+                                    "noteNumber": 40,
+                                    "startTime": 0.0,
+                                    "duration": 0.5,
+                                    "velocity": 1.0,
+                                    "offVelocity": 0.0,
+                                    "automations": {
+                                        "PitchBend": [
+                                            {"time": 0.0, "value": 0.0},
+                                            {"time": 0.25, "value": 170.6458282470703},
+                                        ]
+                                    },
+                                }
+                            ],
+                            "envelopes": [],
+                            "region": {"end": 1.0},
+                        }
+                    }
+                ],
+            }
+        ]
+    }
+    set_path.write_text(json.dumps(song))
+
+    from core.set_inspector_handler import get_pad_pitchbend_data
+
+    result = get_pad_pitchbend_data(str(set_path), 0, 0, 40)
+    assert result["success"], result.get("message")
+    pitches = [n["noteNumber"] for n in result.get("notes", [])]
+    assert pitches == [36, 37]
