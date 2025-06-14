@@ -34,7 +34,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 yrange:             {type:Number, value:16, observer:'layout'},
                 xoffset:            {type:Number, value:0, observer:'layout'},
                 yoffset:            {type:Number, value:60, observer:'layout'},
-                grid:               {type:Number, value:4},
+                grid:               {type:Number, value:1},
                 snap:               {type:Number, value:1},
                 wheelzoom:          {type:Number, value:0},
                 wheelzoomx:         {type:Number, value:0},
@@ -77,6 +77,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             },
         };
         this.defineprop();
+        this.grid = this.snap = this.timebase * 0.0625;
         root.innerHTML =
 `<style>
 .pianoroll{
@@ -119,6 +120,12 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
     border-radius: 4px;
     cursor:pointer;
 }
+#wac-gridres{
+    position:absolute;
+    top:2px;
+    right:2px;
+    z-index:10;
+}
 .marker{
     position: absolute;
     left:0px;
@@ -143,6 +150,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
 <img id="wac-markend" class="marker" src="${this.markendsrc}"/>
 <img id="wac-cursor" class="marker" src="${this.cursorsrc}"/>
 <div id="wac-menu">Delete</div>
+<select id="wac-gridres"></select>
 </div>`;
 
         this.sortSequence=function(){
@@ -625,23 +633,23 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 this.dragging={o:"G",m:"0"};
             }
             else if(ht.m=="s"&&ht.t>=0){
-                const pt=Math.floor(ht.t);
+                const pt=((ht.t/this.snap)|0)*this.snap;
                 if(this.editmode=="gridmono")
-                    this.delAreaNote(pt,1,ht.i);
-                this.addNote(pt,ht.n|0,1,this.defvelo);
+                    this.delAreaNote(pt,this.snap,ht.i);
+                this.addNote(pt,ht.n|0,this.snap,this.defvelo);
                 this.dragging={o:"G",m:"1"};
             }
         };
         this.editGridMove=function(pos){
             const ht=this.hitTest(pos);
-            if(this.dragging.o=="G"){
+            if(this.dragging.o=="G"){ 
                 switch(this.dragging.m){
                 case "1":
-                    const px=Math.floor(ht.t);
+                    const px=((ht.t/this.snap)|0)*this.snap;
                     if(ht.m=="s"){
                         if(this.editmode=="gridmono")
-                            this.delAreaNote(px,1,ht.i);
-                        this.addNote(px,ht.n|0,1,this.defvelo);
+                            this.delAreaNote(px,this.snap,ht.i);
+                        this.addNote(px,ht.n|0,this.snap,this.defvelo);
                     }
                     break;
                 case "0":
@@ -674,6 +682,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             this.markendimg=this.elem.children[3];
             this.cursorimg=this.elem.children[4];
             this.menu=this.elem.children[5];
+            this.gridselect=this.elem.children[6];
             this.rcMenu={x:0, y:0, width:0, height:0};
             this.lastx=0;
             this.lasty=0;
@@ -686,6 +695,8 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             this.setListener(this.markstartimg,true);
             this.setListener(this.cursorimg,true);
             this.setListener(this.menu,false);
+            this.gridselect.addEventListener('change',this.changeResolution.bind(this));
+            this.populateGridSelect();
             this.sequence=[];
             this.dragging={o:null};
             this.kbimg.style.height=this.sheight+"px";
@@ -699,6 +710,40 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             if(!this.cursorimg)
                 return;
             this.cursorimg.style.display=this.showcursor?"block":"none";
+        };
+        this.populateGridSelect=function(){
+            const opts=[
+                ["8 bars", this.timebase*8],
+                ["4 bars", this.timebase*4],
+                ["2 bars", this.timebase*2],
+                ["1 bar", this.timebase],
+                ["1/2",   this.timebase*0.5],
+                ["1/4",   this.timebase*0.25],
+                ["1/4t",  this.timebase/3],
+                ["1/8",   this.timebase*0.125],
+                ["1/8t",  this.timebase/6],
+                ["1/16",  this.timebase*0.0625],
+                ["1/16t", this.timebase/12],
+                ["1/32",  this.timebase*0.03125],
+                ["1/32t", this.timebase/24],
+            ];
+            this.gridselect.innerHTML="";
+            for(const [n,v] of opts){
+                const o=document.createElement("option");
+                o.textContent=n;
+                o.value=v;
+                if(Math.abs(v-this.grid)<1e-6)
+                    o.selected=true;
+                this.gridselect.appendChild(o);
+            }
+        };
+        this.changeResolution=function(){
+            const v=parseFloat(this.gridselect.value);
+            if(!isNaN(v)){
+                this.snap=v;
+                this.grid=v;
+                this.redraw();
+            }
         };
         this.setupImage=function(){
         };
@@ -1047,6 +1092,23 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             const end=(this.markend-this.xoffset)*this.stepw+this.yruler+this.kbwidth;
             this.markendimg.style.left=(end+this.markendoffset)+"px";
         };
+        this.subGridDiv=function(){
+            const g=this.grid;
+            const tb=this.timebase;
+            const e=1e-6;
+            if(g>=tb) return 4;
+            if(Math.abs(g-tb/2)<e) return 2;
+            if(Math.abs(g-tb/3)<e) return 3;
+            if(Math.abs(g-tb/4)<e) return 4;
+            if(Math.abs(g-tb/6)<e) return 3;
+            if(Math.abs(g-tb/8)<e) return 2;
+            if(Math.abs(g-tb/12)<e) return 3;
+            if(Math.abs(g-tb/16)<e) return 2;
+            if(Math.abs(g-tb/24)<e) return 3;
+            if(Math.abs(g-tb/32)<e) return 2;
+            if(Math.abs(g-tb/48)<e) return 3;
+            return 2;
+        };
         this.redrawGrid=function(){
             for(let y=0;y<128;++y){
                 if(this.semiflag[y%12]&1)
@@ -1063,6 +1125,18 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 this.ctx.fillRect(x|0,this.xruler,1,this.sheight);
                 if(x>=this.width)
                     break;
+            }
+            const div=this.subGridDiv();
+            if(div>1){
+                this.ctx.fillStyle="rgba(0,0,0,0.1)";
+                const step=this.grid/div;
+                for(let t=0;;t+=step){
+                    if(Math.abs(t%this.grid)<1e-6) continue;
+                    let x=this.stepw*(t-this.xoffset)+this.yruler+this.kbwidth;
+                    this.ctx.fillRect(x|0,this.xruler,1,this.sheight);
+                    if(x>=this.width)
+                        break;
+                }
             }
         };
         this.semiflag=[6,1,0,1,0,2,1,0,1,0,1,0];
