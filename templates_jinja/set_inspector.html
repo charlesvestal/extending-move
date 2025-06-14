@@ -76,6 +76,14 @@
     </div>
     <div id="paramLegend" style="margin-left:0.5rem; font-size:10px; line-height:1.2; display:flex; flex-direction:column; justify-content:space-between; align-items:flex-end; height:200px;"></div>
   </div>
+  <form id="saveClipForm" method="post" action="{{ host_prefix }}/set-inspector" style="margin-top:0.5rem;">
+    <input type="hidden" name="action" value="save_clip">
+    <input type="hidden" name="set_path" value="{{ selected_set }}">
+    <input type="hidden" name="clip_select" value="{{ selected_clip }}">
+    <input type="hidden" name="clip_notes" id="clip_notes_input">
+    <input type="hidden" name="clip_envelopes" id="clip_envelopes_input">
+    <button id="saveClipBtn" type="submit">Save Clip</button>
+  </form>
   <div id="clipData" data-notes='{{ notes | tojson }}' data-envelopes='{{ envelopes | tojson }}' data-region='{{ region }}' data-param-ranges='{{ param_ranges_json | safe }}'></div>
   {% endif %}
 {% endblock %}

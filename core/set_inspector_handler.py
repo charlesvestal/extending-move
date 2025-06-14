@@ -194,3 +194,27 @@ def save_envelope(
         return {"success": True, "message": "Envelope saved"}
     except Exception as e:
         return {"success": False, "message": f"Failed to save envelope: {e}"}
+
+
+def save_clip(
+    set_path: str,
+    track: int,
+    clip: int,
+    notes: List[Dict[str, Any]],
+    envelopes: List[Dict[str, Any]],
+) -> Dict[str, Any]:
+    """Replace notes and envelopes for a clip and write back to disk."""
+    try:
+        with open(set_path, "r") as f:
+            song = json.load(f)
+
+        clip_obj = song["tracks"][track]["clipSlots"][clip]["clip"]
+        clip_obj["notes"] = notes
+        clip_obj["envelopes"] = envelopes
+
+        with open(set_path, "w") as f:
+            json.dump(song, f, indent=2)
+
+        return {"success": True, "message": "Clip saved"}
+    except Exception as e:
+        return {"success": False, "message": f"Failed to save clip: {e}"}

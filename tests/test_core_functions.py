@@ -332,3 +332,37 @@ def test_get_clip_data_loop_region(tmp_path):
     envs = data.get("envelopes", [])
     assert envs and envs[0]["breakpoints"] == [{"time": 2.5, "value": 1}]
 
+
+def test_save_clip(tmp_path):
+    set_path = tmp_path / "set.abl"
+    song = {
+        "tracks": [
+            {
+                "kind": "midi",
+                "clipSlots": [
+                    {
+                        "clip": {
+                            "notes": [],
+                            "envelopes": [],
+                            "region": {"end": 4.0},
+                        }
+                    }
+                ],
+            }
+        ]
+    }
+    set_path.write_text(json.dumps(song))
+
+    from core.set_inspector_handler import save_clip, get_clip_data
+
+    notes = [{"noteNumber": 60, "startTime": 0.0, "duration": 1.0, "velocity": 100.0, "offVelocity": 0.0}]
+    envs = [{"parameterId": 1, "breakpoints": [{"time": 0.0, "value": 0.5}]}]
+    result = save_clip(str(set_path), 0, 0, notes, envs)
+    assert result["success"], result.get("message")
+
+    data = get_clip_data(str(set_path), 0, 0)
+    assert data["notes"] == notes
+    saved_envs = data.get("envelopes", [])
+    assert saved_envs and saved_envs[0]["parameterId"] == 1
+    assert saved_envs[0]["breakpoints"] == envs[0]["breakpoints"]
+

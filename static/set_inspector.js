@@ -44,6 +44,10 @@ export function initSetInspector() {
   const paramInput = document.getElementById('parameter_id_input');
   const envInput = document.getElementById('envelope_data_input');
   const valueDiv = document.getElementById('envValue');
+  const saveClipForm = document.getElementById('saveClipForm');
+  const notesInput = document.getElementById('clip_notes_input');
+  const envsInput = document.getElementById('clip_envelopes_input');
+  const ticksPerBeat = 4; // timebase 16 => 4 ticks per beat
 
   let editing = false;
   let drawing = false;
@@ -53,7 +57,6 @@ export function initSetInspector() {
   let envInfo = null;
 
   if (piano) {
-    const ticksPerBeat = 4; // timebase 16 => 4 ticks per beat
     piano.timebase = 16;
     piano.editmode = 'dragpoly';
     piano.xrange = region * ticksPerBeat;
@@ -380,6 +383,28 @@ export function initSetInspector() {
 
   if (saveForm) saveForm.addEventListener('submit', () => {
     envInput.value = JSON.stringify(currentEnv);
+  });
+  if (saveClipForm) saveClipForm.addEventListener('submit', () => {
+    if (piano && notesInput) {
+      const seq = piano.sequence || [];
+      notesInput.value = JSON.stringify(seq.map(ev => ({
+        noteNumber: ev.n,
+        startTime: ev.t / ticksPerBeat,
+        duration: ev.g / ticksPerBeat,
+        velocity: 100.0,
+        offVelocity: 0.0
+      })));
+    }
+    if (envsInput) {
+      let envs = envelopes.map(e => ({ parameterId: e.parameterId, breakpoints: e.breakpoints }));
+      if (editing && envSelect && envSelect.value) {
+        const pid = parseInt(envSelect.value);
+        const newEnv = { parameterId: pid, breakpoints: currentEnv };
+        const idx = envs.findIndex(e => e.parameterId === pid);
+        if (idx >= 0) envs[idx] = newEnv; else envs.push(newEnv);
+      }
+      envsInput.value = JSON.stringify(envs);
+    }
   });
   if (envSelect && envSelect.value) {
     envSelect.dispatchEvent(new Event('change'));
