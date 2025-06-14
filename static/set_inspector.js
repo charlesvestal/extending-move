@@ -40,6 +40,12 @@ export function initSetInspector() {
   const piano = document.getElementById('clipEditor');
   const timebase = piano ? parseInt(piano.getAttribute('timebase') || '16', 10) : 16;
   const ticksPerBeat = timebase / 4;
+  function viewStartBeat() {
+    return piano ? piano.xoffset / ticksPerBeat : 0;
+  }
+  function viewRangeBeat() {
+    return piano ? piano.xrange / ticksPerBeat : region;
+  }
   const envSelect = document.getElementById('envelope_select');
   const legendDiv = document.getElementById('paramLegend');
   const valueDiv = document.getElementById('envValue');
@@ -74,6 +80,11 @@ export function initSetInspector() {
     piano.yoffset = Math.max(0, min - 2);
     piano.yrange = Math.max(12, max - min + 5);
     if (piano.redraw) piano.redraw();
+    if (piano.layout) {
+      const origLayout = piano.layout.bind(piano);
+      piano.layout = (...args) => { const r = origLayout(...args); draw(); return r; };
+    }
+    draw();
   }
 
   function isNormalized(env) {
@@ -89,7 +100,7 @@ export function initSetInspector() {
       canvas.style.pointerEvents = editing ? 'auto' : 'none';
     }
     if (piano) {
-      piano.enable = !editing;
+      piano.enable = true;
     }
   }
   if (legendDiv) {
@@ -118,8 +129,10 @@ export function initSetInspector() {
     const noteRange = max - min + 1;
 
     ctx.strokeStyle = '#ddd';
-    for (let b = 0; b <= region; b++) {
-      const x = (b / region) * canvas.width;
+    const start = viewStartBeat();
+    const end = start + viewRangeBeat();
+    for (let b = Math.floor(start); b <= end; b++) {
+      const x = ((b - start) / viewRangeBeat()) * canvas.width;
       ctx.beginPath();
       ctx.lineWidth = b % 4 === 0 ? 2 : 1;
       ctx.moveTo(x, 0);
@@ -158,9 +171,11 @@ export function initSetInspector() {
     const noteRange = max - min + 1;
     const h = canvas.height / noteRange;
     ctx.fillStyle = '#0074D9';
+    const start = viewStartBeat();
+    const range = viewRangeBeat();
     notes.forEach(n => {
-      const x = (n.startTime / region) * canvas.width;
-      const w = (n.duration / region) * canvas.width;
+      const x = ((n.startTime - start) / range) * canvas.width;
+      const w = (n.duration / range) * canvas.width;
       const y = canvas.height - (n.noteNumber - min + 1) * h;
       ctx.fillRect(x, y, w, h);
     });
@@ -182,8 +197,10 @@ export function initSetInspector() {
     ctx.strokeStyle = '#FF4136';
     ctx.beginPath();
     const needsScale = isNormalized(env);
+    const start = viewStartBeat();
+    const range = viewRangeBeat();
     env.breakpoints.forEach((bp, i) => {
-      const x = (bp.time / region) * canvas.width;
+      const x = ((bp.time - start) / range) * canvas.width;
       let v = bp.value;
       if (needsScale) {
         v = env.rangeMin + v * (env.rangeMax - env.rangeMin);
@@ -286,7 +303,7 @@ export function initSetInspector() {
     }
     if (!env || !env.breakpoints || !env.breakpoints.length) { valueDiv.textContent = ''; return; }
     const pos = canvasPos(ev);
-    const t = (pos.x / canvas.width) * region;
+    const t = viewStartBeat() + (pos.x / canvas.width) * viewRangeBeat();
     let v = envValueAt(env.breakpoints, t);
     if (isNormalized(env)) {
       v = env.rangeMin + v * (env.rangeMax - env.rangeMin);
@@ -300,7 +317,7 @@ export function initSetInspector() {
     drawing = true;
     dirty = true;
     const { x, y } = canvasPos(ev);
-    const t = (x / canvas.width) * region;
+    const t = viewStartBeat() + (x / canvas.width) * viewRangeBeat();
     const env = currentEnv.length ? currentEnv : (envInfo ? envInfo.breakpoints : []);
     const before = env.filter(bp => bp.time < t);
     tailEnv = env.filter(bp => bp.time > t);
@@ -323,7 +340,7 @@ export function initSetInspector() {
       return;
     }
     const { x, y } = canvasPos(ev);
-    const t = (x / canvas.width) * region;
+    const t = viewStartBeat() + (x / canvas.width) * viewRangeBeat();
     let v;
     if (isNormalized(envInfo)) {
       v = 1 - y / canvas.height;
