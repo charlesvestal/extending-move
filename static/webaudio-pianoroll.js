@@ -1093,23 +1093,6 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             const end=(this.markend-this.xoffset)*this.stepw+this.yruler+this.kbwidth;
             this.markendimg.style.left=(end+this.markendoffset)+"px";
         };
-        this.subGridDiv=function(){
-            const g=this.grid;
-            const tb=this.timebase;
-            const e=1e-6;
-            if(g>=tb) return 4;
-            if(Math.abs(g-tb/2)<e) return 2;
-            if(Math.abs(g-tb/3)<e) return 3;
-            if(Math.abs(g-tb/4)<e) return 4;
-            if(Math.abs(g-tb/6)<e) return 3;
-            if(Math.abs(g-tb/8)<e) return 2;
-            if(Math.abs(g-tb/12)<e) return 3;
-            if(Math.abs(g-tb/16)<e) return 2;
-            if(Math.abs(g-tb/24)<e) return 3;
-            if(Math.abs(g-tb/32)<e) return 2;
-            if(Math.abs(g-tb/48)<e) return 3;
-            return 2;
-        };
         this.redrawGrid=function(){
             for(let y=0;y<128;++y){
                 if(this.semiflag[y%12]&1)
@@ -1121,33 +1104,30 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 this.ctx.fillStyle=this.colgrid;
                 this.ctx.fillRect(this.yruler+this.kbwidth, ys|0, this.swidth,1);
             }
-            for(let t=0;;t+=this.grid){
-                let x=this.stepw*(t-this.xoffset)+this.yruler+this.kbwidth;
-                this.ctx.fillRect(x|0,this.xruler,1,this.sheight);
-                if(x>=this.width)
-                    break;
-            }
-            const div=this.subGridDiv();
-            if(div>1){
-                this.ctx.fillStyle="rgba(0,0,0,0.1)";
-                const step=this.grid/div;
-                for(let t=0;;t+=step){
-                    if(Math.abs(t%this.grid)<1e-6) continue;
-                    let x=this.stepw*(t-this.xoffset)+this.yruler+this.kbwidth;
-                    this.ctx.fillRect(x|0,this.xruler,1,this.sheight);
-                    if(x>=this.width)
-                        break;
-                }
-            }
             const quarter=this.timebase*0.25;
-            if(this.grid < quarter){
-                this.ctx.fillStyle=this.colgrid;
-                for(let t=0;;t+=quarter){
-                    let x=this.stepw*(t-this.xoffset)+this.yruler+this.kbwidth;
-                    this.ctx.fillRect((x|0)-1,this.xruler,2,this.sheight);
-                    if(x>=this.width)
-                        break;
-                }
+            let start=Math.floor(this.xoffset/quarter)*quarter;
+            for(let t=start, i=Math.floor(start/quarter);;t+=quarter,++i){
+                let x=this.stepw*(t-this.xoffset)+this.yruler+this.kbwidth;
+                let w=this.stepw*quarter;
+                if(x>this.width) break;
+                this.ctx.fillStyle=(i%2)?"rgba(0,0,0,0.05)":"rgba(0,0,0,0.1)";
+                this.ctx.fillRect(x|0,this.xruler,w,this.sheight);
+            }
+
+            const gstart=Math.floor(this.xoffset/this.grid)*this.grid;
+            this.ctx.fillStyle=this.colgrid;
+            for(let t=gstart;;t+=this.grid){
+                let x=this.stepw*(t-this.xoffset)+this.yruler+this.kbwidth;
+                if(x>=this.width) break;
+                this.ctx.fillRect(x|0,this.xruler,1,this.sheight);
+            }
+
+            const mstart=Math.floor(this.xoffset/this.timebase)*this.timebase;
+            this.ctx.fillStyle="#000";
+            for(let t=mstart;;t+=this.timebase){
+                let x=this.stepw*(t-this.xoffset)+this.yruler+this.kbwidth;
+                if(x>=this.width) break;
+                this.ctx.fillRect((x|0)-1,this.xruler,2,this.sheight);
             }
         };
         this.semiflag=[6,1,0,1,0,2,1,0,1,0,1,0];
