@@ -50,6 +50,15 @@ export function initSetInspector() {
   let currentEnv = [];
   let tailEnv = [];
   let envInfo = null;
+  let viewStart = 0;
+  let viewLength = region;
+  let panning = false;
+  let panStartX = 0;
+  let panStartView = 0;
+  let pinchStart = 0;
+  let pinchView = 0;
+  let pinchViewStart = 0;
+  let pinchCenter = 0;
 
   function isNormalized(env) {
     if (!env || !env.breakpoints || !env.breakpoints.length) return false;
@@ -100,9 +109,12 @@ export function initSetInspector() {
     const { min, max } = getVisibleRange();
     const noteRange = max - min + 1;
 
+    const visibleEnd = viewStart + viewLength;
     ctx.strokeStyle = '#ddd';
-    for (let b = 0; b <= region; b++) {
-      const x = (b / region) * canvas.width;
+    const startBeat = Math.floor(viewStart);
+    const endBeat = Math.ceil(visibleEnd);
+    for (let b = startBeat; b <= endBeat; b++) {
+      const x = ((b - viewStart) / viewLength) * canvas.width;
       ctx.beginPath();
       ctx.lineWidth = b % 4 === 0 ? 2 : 1;
       ctx.moveTo(x, 0);
@@ -141,9 +153,13 @@ export function initSetInspector() {
     const noteRange = max - min + 1;
     const h = canvas.height / noteRange;
     ctx.fillStyle = '#0074D9';
+    const visibleEnd = viewStart + viewLength;
     notes.forEach(n => {
-      const x = (n.startTime / region) * canvas.width;
-      const w = (n.duration / region) * canvas.width;
+      const start = Math.max(n.startTime, viewStart);
+      const end = Math.min(n.startTime + n.duration, visibleEnd);
+      if (end <= viewStart || start >= visibleEnd) return;
+      const x = ((start - viewStart) / viewLength) * canvas.width;
+      const w = ((end - start) / viewLength) * canvas.width;
       const y = canvas.height - (n.noteNumber - min + 1) * h;
       ctx.fillRect(x, y, w, h);
     });
@@ -163,8 +179,10 @@ export function initSetInspector() {
     ctx.strokeStyle = '#FF4136';
     ctx.beginPath();
     const needsScale = isNormalized(env);
+    const visibleEnd = viewStart + viewLength;
     env.breakpoints.forEach((bp, i) => {
-      const x = (bp.time / region) * canvas.width;
+      if (bp.time < viewStart || bp.time > visibleEnd) return;
+      const x = ((bp.time - viewStart) / viewLength) * canvas.width;
       let v = bp.value;
       if (needsScale) {
         v = env.rangeMin + v * (env.rangeMax - env.rangeMin);
@@ -188,6 +206,13 @@ export function initSetInspector() {
       }
     }
     return bps[bps.length - 1].value;
+  }
+
+  function clampView() {
+    if (viewLength < region / 32) viewLength = region / 32;
+    if (viewLength > region) viewLength = region;
+    if (viewStart < 0) viewStart = 0;
+    if (viewStart + viewLength > region) viewStart = region - viewLength;
   }
 
   function updateLegend() {
@@ -262,7 +287,7 @@ export function initSetInspector() {
     const env = editing ? (envInfo ? { ...envInfo, breakpoints: currentEnv } : { breakpoints: currentEnv }) : envInfo;
     if (!env || !env.breakpoints || !env.breakpoints.length) { valueDiv.textContent = ''; return; }
     const pos = canvasPos(ev);
-    const t = (pos.x / canvas.width) * region;
+    const t = viewStart + (pos.x / canvas.width) * viewLength;
     let v = envValueAt(env.breakpoints, t);
     if (isNormalized(env)) {
       v = env.rangeMin + v * (env.rangeMax - env.rangeMin);
@@ -276,7 +301,7 @@ export function initSetInspector() {
     drawing = true;
     dirty = true;
     const { x, y } = canvasPos(ev);
-    const t = (x / canvas.width) * region;
+    const t = viewStart + (x / canvas.width) * viewLength;
     const env = currentEnv.length ? currentEnv : (envInfo ? envInfo.breakpoints : []);
     const before = env.filter(bp => bp.time < t);
     tailEnv = env.filter(bp => bp.time > t);
@@ -299,7 +324,7 @@ export function initSetInspector() {
       return;
     }
     const { x, y } = canvasPos(ev);
-    const t = (x / canvas.width) * region;
+    const t = viewStart + (x / canvas.width) * viewLength;
     let v;
     if (isNormalized(envInfo)) {
       v = 1 - y / canvas.height;
@@ -326,13 +351,96 @@ export function initSetInspector() {
     }
   }
 
-  canvas.addEventListener('mousedown', startDraw);
-  canvas.addEventListener('touchstart', startDraw);
-  canvas.addEventListener('mousemove', continueDraw);
-  canvas.addEventListener('touchmove', continueDraw);
-  canvas.addEventListener('mouseleave', () => { if (!drawing && valueDiv) valueDiv.textContent = ''; });
-  document.addEventListener('mouseup', endDraw);
-  document.addEventListener('touchend', endDraw);
+  canvas.addEventListener('wheel', ev => {
+    const rect = canvas.getBoundingClientRect();
+    const x = ev.clientX - rect.left;
+    const center = viewStart + (x / canvas.width) * viewLength;
+    const scale = Math.exp(ev.deltaY * 0.001);
+    viewLength *= scale;
+    viewStart = center - (x / canvas.width) * viewLength;
+    clampView();
+    draw();
+    ev.preventDefault();
+  });
+
+  canvas.addEventListener('mousedown', ev => {
+    if (editing) { startDraw(ev); return; }
+    panning = true;
+    panStartX = ev.clientX;
+    panStartView = viewStart;
+    ev.preventDefault();
+  });
+
+  canvas.addEventListener('mousemove', ev => {
+    if (editing) { continueDraw(ev); return; }
+    if (panning) {
+      const dx = (ev.clientX - panStartX) / canvas.width * viewLength;
+      viewStart = panStartView - dx;
+      clampView();
+      draw();
+    }
+  });
+
+  document.addEventListener('mouseup', ev => {
+    if (panning) { panning = false; }
+    endDraw();
+  });
+
+  canvas.addEventListener('touchstart', ev => {
+    if (ev.touches.length === 1 && !editing) {
+      panning = true;
+      panStartX = ev.touches[0].clientX;
+      panStartView = viewStart;
+    } else if (ev.touches.length === 2) {
+      panning = false;
+      drawing = false;
+      pinchStart = Math.hypot(
+        ev.touches[0].clientX - ev.touches[1].clientX,
+        ev.touches[0].clientY - ev.touches[1].clientY
+      );
+      pinchView = viewLength;
+      pinchViewStart = viewStart;
+      const rect = canvas.getBoundingClientRect();
+      const midX = ((ev.touches[0].clientX + ev.touches[1].clientX) / 2) - rect.left;
+      pinchCenter = viewStart + (midX / canvas.width) * viewLength;
+    } else {
+      startDraw(ev);
+    }
+    ev.preventDefault();
+  });
+
+  canvas.addEventListener('touchmove', ev => {
+    if (ev.touches.length === 2 && pinchStart) {
+      const newDist = Math.hypot(
+        ev.touches[0].clientX - ev.touches[1].clientX,
+        ev.touches[0].clientY - ev.touches[1].clientY
+      );
+      const scale = pinchStart / newDist;
+      viewLength = pinchView * scale;
+      viewStart = pinchCenter - ((pinchCenter - pinchViewStart) * (viewLength / pinchView));
+    } else if (panning && ev.touches.length === 1) {
+      const dx = (ev.touches[0].clientX - panStartX) / canvas.width * viewLength;
+      viewStart = panStartView - dx;
+    } else if (editing) {
+      continueDraw(ev);
+      return;
+    }
+    clampView();
+    draw();
+    ev.preventDefault();
+  });
+
+  document.addEventListener('touchend', ev => {
+    if (ev.touches.length === 0) {
+      panning = false;
+      pinchStart = 0;
+      endDraw();
+    }
+  });
+
+  canvas.addEventListener('mouseleave', () => {
+    if (!drawing && valueDiv) valueDiv.textContent = '';
+  });
 
   if (editBtn) editBtn.addEventListener('click', () => {
     if (!envSelect.value) return;
