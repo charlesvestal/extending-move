@@ -374,3 +374,54 @@ def test_save_clip(tmp_path):
     assert data["loop_start"] == 0.0
     assert data["loop_end"] == 4.0
 
+
+
+def test_save_clip_preserves_structure_template(tmp_path):
+    src = Path("examples/Sets/midi_template.abl")
+    dst = tmp_path / "template_copy.abl"
+    dst.write_text(src.read_text())
+
+    from core.set_inspector_handler import save_clip, get_clip_data
+
+    notes = [{"noteNumber": 64, "startTime": 0.0, "duration": 0.5, "velocity": 90.0, "offVelocity": 0.0}]
+    envs = []
+    result = save_clip(str(dst), 0, 0, notes, envs, 4.0, 0.0, 4.0)
+    assert result["success"], result.get("message")
+
+    data = json.loads(dst.read_text())
+    assert data.get("$schema") == "http://tech.ableton.com/schema/song/1.5.1/song.json"
+    clip = data["tracks"][0]["clipSlots"][0]["clip"]
+    assert clip["notes"] == notes
+    assert clip["envelopes"] == envs
+    assert clip["region"]["end"] == 4.0
+    assert clip["region"]["loop"]["start"] == 0.0
+    assert clip["region"]["loop"]["end"] == 4.0
+
+    clip_data = get_clip_data(str(dst), 0, 0)
+    assert clip_data["success"], clip_data.get("message")
+    assert clip_data["notes"] == notes
+
+
+def test_save_clip_preserves_structure_automation(tmp_path):
+    src = Path("examples/Sets/automation.abl")
+    dst = tmp_path / "automation_copy.abl"
+    dst.write_text(src.read_text())
+
+    from core.set_inspector_handler import save_clip, get_clip_data
+
+    notes = [{"noteNumber": 72, "startTime": 0.0, "duration": 1.0, "velocity": 120.0, "offVelocity": 0.0}]
+    envs = [{"parameterId": 2, "breakpoints": [{"time": 0.0, "value": 0.1}, {"time": 1.0, "value": 0.9}]}]
+    result = save_clip(str(dst), 0, 0, notes, envs, 4.0, 0.0, 4.0)
+    assert result["success"], result.get("message")
+
+    data = json.loads(dst.read_text())
+    clip = data["tracks"][0]["clipSlots"][0]["clip"]
+    assert clip["notes"] == notes
+    assert clip["envelopes"] == envs
+    assert "stepEditorScrollPosition" in clip
+
+    clip_data = get_clip_data(str(dst), 0, 0)
+    assert clip_data["success"], clip_data.get("message")
+    assert clip_data["notes"] == notes
+    assert clip_data["envelopes"][0]["parameterId"] == 2
+
