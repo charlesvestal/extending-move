@@ -1,5 +1,6 @@
 import json
 import os
+import math
 from typing import Any, Dict, List
 from core.synth_preset_inspector_handler import (
     load_drift_schema,
@@ -69,12 +70,28 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
         notes = clip_obj.get("notes", [])
         envelopes = clip_obj.get("envelopes", [])
         region_info = clip_obj.get("region", {})
-        region_end = region_info.get("end", 4.0)
+        region_end_saved = region_info.get("end", 4.0)
         loop_info = region_info.get("loop", {})
         loop_start = loop_info.get("start", 0.0)
-        loop_end = loop_info.get("end", region_end)
+        loop_end = loop_info.get("end", region_end_saved)
 
-        region_length = region_end
+        # Determine visible region based on last note/envelope event, rounded up
+        # to the next 4-beat bar. This shows the actual content length rather
+        # than the saved region length.
+        last_event = 0.0
+        for n in notes:
+            end = (n.get("startTime") or 0.0) + (n.get("duration") or 0.0)
+            if end > last_event:
+                last_event = end
+        for env in envelopes:
+            for bp in env.get("breakpoints", []):
+                t = bp.get("time", 0.0)
+                if t > last_event:
+                    last_event = t
+        if last_event > 0:
+            region_end = max(4.0, math.ceil(last_event / 4.0) * 4.0)
+        else:
+            region_end = 4.0
         track_name = _track_display_name(track_obj, track)
         clip_name = clip_obj.get("name") or f"Clip {clip + 1}"
         param_map: Dict[int, str] = {}

@@ -338,6 +338,40 @@ def test_get_clip_data_loop_region(tmp_path):
     ]
 
 
+def test_get_clip_data_detected_region(tmp_path):
+    set_path = tmp_path / "set.abl"
+    song = {
+        "tracks": [
+            {
+                "kind": "midi",
+                "clipSlots": [
+                    {
+                        "clip": {
+                            "notes": [
+                                {"noteNumber": 60, "startTime": 1.0, "duration": 0.5, "velocity": 100.0, "offVelocity": 0.0},
+                                {"noteNumber": 61, "startTime": 6.25, "duration": 0.25, "velocity": 100.0, "offVelocity": 0.0},
+                            ],
+                            "envelopes": [],
+                            "region": {"start": 0.0, "end": 16.0, "loop": {"start": 4.0, "end": 12.0}},
+                        }
+                    }
+                ],
+            }
+        ]
+    }
+    set_path.write_text(json.dumps(song))
+
+    from core.set_inspector_handler import get_clip_data
+
+    data = get_clip_data(str(set_path), 0, 0)
+    assert data["success"], data.get("message")
+    # Last note ends at 6.5 -> next 4-beat bar is 8.0
+    assert data["region"] == 8.0
+    # Loop values should reflect saved loop
+    assert data["loop_start"] == 4.0
+    assert data["loop_end"] == 12.0
+
+
 def test_save_clip(tmp_path):
     set_path = tmp_path / "set.abl"
     song = {
