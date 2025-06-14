@@ -38,6 +38,8 @@ export function initSetInspector() {
   const canvas = document.getElementById('clipCanvas');
   const ctx = canvas.getContext('2d');
   const piano = document.getElementById('clipEditor');
+  const timebase = piano ? parseInt(piano.getAttribute('timebase') || '16', 10) : 16;
+  const ticksPerBeat = timebase / 4;
   const envSelect = document.getElementById('envelope_select');
   const legendDiv = document.getElementById('paramLegend');
   const valueDiv = document.getElementById('envValue');
@@ -47,7 +49,6 @@ export function initSetInspector() {
   const regionInput = document.getElementById('region_end_input');
   const loopStartInput = document.getElementById('loop_start_input');
   const loopEndInput = document.getElementById('loop_end_input');
-  const ticksPerBeat = 4; // timebase 16 => 4 ticks per beat
 
   let editing = false;
   let drawing = false;
@@ -57,22 +58,21 @@ export function initSetInspector() {
   let envInfo = null;
 
   if (piano) {
-    piano.timebase = 16;
-    piano.editmode = 'dragpoly';
-    piano.xrange = region * ticksPerBeat;
-    piano.markstart = loopStart * ticksPerBeat;
-    piano.markend = loopEnd * ticksPerBeat;
+    if (!piano.sequence) piano.sequence = [];
+    piano.sequence = notes.map(n => ({
+      t: Math.round(n.startTime * ticksPerBeat),
+      n: n.noteNumber,
+      g: Math.round(n.duration * ticksPerBeat)
+    }));
+    if (!piano.hasAttribute('xrange')) piano.xrange = region * ticksPerBeat;
+    if (!piano.hasAttribute('markstart')) piano.markstart = loopStart * ticksPerBeat;
+    if (!piano.hasAttribute('markend')) piano.markend = loopEnd * ticksPerBeat;
     const { min, max } = notes.length
       ? { min: Math.min(...notes.map(n => n.noteNumber)),
           max: Math.max(...notes.map(n => n.noteNumber)) }
       : { min: 60, max: 71 };
     piano.yoffset = Math.max(0, min - 2);
     piano.yrange = Math.max(12, max - min + 5);
-    piano.sequence = notes.map(n => ({
-      t: Math.round(n.startTime * ticksPerBeat),
-      n: n.noteNumber,
-      g: Math.round(n.duration * ticksPerBeat)
-    }));
     if (piano.redraw) piano.redraw();
   }
 
