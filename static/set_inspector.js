@@ -57,16 +57,16 @@ export function initSetInspector() {
   let tailEnv = [];
   let envInfo = null;
 
-  if (piano) {
-    if (!piano.sequence) piano.sequence = [];
-    piano.sequence = notes.map(n => ({
-      t: Math.round(n.startTime * ticksPerBeat),
-      n: n.noteNumber,
-      g: Math.round(n.duration * ticksPerBeat)
-    }));
-    if (!piano.hasAttribute('xrange')) piano.xrange = region * ticksPerBeat;
-    if (!piano.hasAttribute('markstart')) piano.markstart = loopStart * ticksPerBeat;
-    if (!piano.hasAttribute('markend')) piano.markend = loopEnd * ticksPerBeat;
+    if (piano) {
+      if (!piano.sequence) piano.sequence = [];
+      piano.sequence = notes.map(n => ({
+        t: Math.round(n.startTime * ticksPerBeat),
+        n: n.noteNumber,
+        g: Math.round(n.duration * ticksPerBeat)
+      }));
+      if (!piano.hasAttribute('xrange')) piano.xrange = region * ticksPerBeat;
+      piano.markstart = loopStart * ticksPerBeat;
+      piano.markend = loopEnd * ticksPerBeat;
     const { min, max } = notes.length
       ? { min: Math.min(...notes.map(n => n.noteNumber)),
           max: Math.max(...notes.map(n => n.noteNumber)) }
