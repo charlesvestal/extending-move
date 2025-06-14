@@ -107,10 +107,19 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
 
         region_end = max(region_end_prop, detected_region_end)
 
-        # Prefer explicit clip loop property if present, otherwise region.loop
-        loop_data = clip_obj.get("loop", loop_info)
-        loop_start = loop_data.get("start", loop_start_prop)
-        loop_end = loop_data.get("end", loop_end_prop)
+        # Prefer loop information from the region block; fall back to clip-level
+        # loop settings only when region.loop is missing
+        loop_data = loop_info if loop_info else clip_obj.get("loop", {})
+        loop_start = loop_data.get("start", region_start_prop)
+        loop_end = loop_data.get("end", region_end_prop)
+
+        logging.info(
+            "Using region %.2f-%.2f, loop %.2f-%.2f",
+            region_start_prop,
+            region_end,
+            loop_start,
+            loop_end,
+        )
 
         region_length = region_end
         track_name = _track_display_name(track_obj, track)
