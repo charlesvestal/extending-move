@@ -74,6 +74,13 @@ export function initSetInspector() {
     piano.yoffset = Math.max(0, min - 2);
     piano.yrange = Math.max(12, max - min + 5);
     if (piano.redraw) piano.redraw();
+
+    if (canvas) {
+      canvas.width = piano.width - piano.yruler - piano.kbwidth;
+      canvas.height = piano.height - piano.xruler;
+      canvas.style.left = (piano.yruler + piano.kbwidth) + 'px';
+      canvas.style.top = piano.xruler + 'px';
+    }
   }
 
   function isNormalized(env) {
@@ -89,8 +96,21 @@ export function initSetInspector() {
       canvas.style.pointerEvents = editing ? 'auto' : 'none';
     }
     if (piano) {
-      piano.enable = !editing;
+      // Keep the pianoroll active so the rulers can handle zoom and pan
+      piano.enable = true;
     }
+  }
+
+  function timeToX(t) {
+    const offsetBeats = piano.xoffset / ticksPerBeat;
+    const rangeBeats = piano.xrange / ticksPerBeat;
+    return ((t - offsetBeats) / rangeBeats) * canvas.width;
+  }
+
+  function xToTime(x) {
+    const offsetBeats = piano.xoffset / ticksPerBeat;
+    const rangeBeats = piano.xrange / ticksPerBeat;
+    return offsetBeats + (x / canvas.width) * rangeBeats;
   }
   if (legendDiv) {
     legendDiv.style.display = 'flex';
@@ -118,8 +138,10 @@ export function initSetInspector() {
     const noteRange = max - min + 1;
 
     ctx.strokeStyle = '#ddd';
-    for (let b = 0; b <= region; b++) {
-      const x = (b / region) * canvas.width;
+    const rangeBeats = piano.xrange / ticksPerBeat;
+    const offsetBeats = piano.xoffset / ticksPerBeat;
+    for (let b = Math.floor(offsetBeats); b <= offsetBeats + rangeBeats; b++) {
+      const x = timeToX(b);
       ctx.beginPath();
       ctx.lineWidth = b % 4 === 0 ? 2 : 1;
       ctx.moveTo(x, 0);
@@ -159,8 +181,8 @@ export function initSetInspector() {
     const h = canvas.height / noteRange;
     ctx.fillStyle = '#0074D9';
     notes.forEach(n => {
-      const x = (n.startTime / region) * canvas.width;
-      const w = (n.duration / region) * canvas.width;
+      const x = timeToX(n.startTime);
+      const w = (n.duration / (piano.xrange / ticksPerBeat)) * canvas.width;
       const y = canvas.height - (n.noteNumber - min + 1) * h;
       ctx.fillRect(x, y, w, h);
     });
@@ -183,7 +205,7 @@ export function initSetInspector() {
     ctx.beginPath();
     const needsScale = isNormalized(env);
     env.breakpoints.forEach((bp, i) => {
-      const x = (bp.time / region) * canvas.width;
+      const x = timeToX(bp.time);
       let v = bp.value;
       if (needsScale) {
         v = env.rangeMin + v * (env.rangeMax - env.rangeMin);
@@ -286,7 +308,7 @@ export function initSetInspector() {
     }
     if (!env || !env.breakpoints || !env.breakpoints.length) { valueDiv.textContent = ''; return; }
     const pos = canvasPos(ev);
-    const t = (pos.x / canvas.width) * region;
+    const t = xToTime(pos.x);
     let v = envValueAt(env.breakpoints, t);
     if (isNormalized(env)) {
       v = env.rangeMin + v * (env.rangeMax - env.rangeMin);
@@ -300,7 +322,7 @@ export function initSetInspector() {
     drawing = true;
     dirty = true;
     const { x, y } = canvasPos(ev);
-    const t = (x / canvas.width) * region;
+    const t = xToTime(x);
     const env = currentEnv.length ? currentEnv : (envInfo ? envInfo.breakpoints : []);
     const before = env.filter(bp => bp.time < t);
     tailEnv = env.filter(bp => bp.time > t);
@@ -323,7 +345,7 @@ export function initSetInspector() {
       return;
     }
     const { x, y } = canvasPos(ev);
-    const t = (x / canvas.width) * region;
+    const t = xToTime(x);
     let v;
     if (isNormalized(envInfo)) {
       v = 1 - y / canvas.height;
