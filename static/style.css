@@ -532,6 +532,19 @@ nav.breadcrumbs form {
     cursor: pointer;
 }
 
+.pitch-icon {
+    position: absolute;
+    left: 2px;
+    width: 12px;
+    height: 12px;
+    padding: 0;
+    border: none;
+    background: none;
+    font-size: 12px;
+    line-height: 12px;
+    cursor: pointer;
+}
+
 
 /* Knob interface layout */
 #knob-container {

@@ -38,6 +38,8 @@ export function initSetInspector() {
   const canvas = document.getElementById('clipCanvas');
   const ctx = canvas.getContext('2d');
   const piano = document.getElementById('clipEditor');
+  const pitchNotes = JSON.parse(dataDiv.dataset.pitchbendNotes || '[]');
+  const pitchPad = dataDiv.dataset.pitchPad ? parseInt(dataDiv.dataset.pitchPad) : null;
   const timebase = piano ? parseInt(piano.getAttribute('timebase') || '16', 10) : 16;
   const xruler = piano ? parseInt(piano.getAttribute('xruler') || '24', 10) : 24;
   const yruler = piano ? parseInt(piano.getAttribute('yruler') || '24', 10) : 24;
@@ -77,12 +79,38 @@ export function initSetInspector() {
 
   if (saveClipBtn) saveClipBtn.disabled = true;
 
+  function updatePitchIcons() {
+    if (!piano) return;
+    const kb = piano.querySelector('#wac-kb');
+    const openForm = document.getElementById('openPitchForm');
+    const noteInput = document.getElementById('pitch_note_input');
+    if (!kb || !openForm || !noteInput) return;
+    kb.querySelectorAll('.pitch-icon').forEach(el => el.remove());
+    if (!pitchNotes.length) return;
+    const h = parseInt(piano.getAttribute('height') || '300', 10);
+    const steph = (h - piano.xruler) / piano.yrange;
+    pitchNotes.forEach(n => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'pitch-icon';
+      btn.textContent = '\u266A';
+      const y = h - (n - piano.yoffset + 0.5) * steph;
+      btn.style.top = `${y - 6}px`;
+      btn.style.left = '2px';
+      btn.addEventListener('click', () => {
+        noteInput.value = n;
+        openForm.submit();
+      });
+      kb.appendChild(btn);
+    });
+  }
+
   if (piano) {
     if (!piano.sequence) piano.sequence = [];
     piano.sequence = notes.map(n => ({
       t: Math.round(n.startTime * ticksPerBeat),
       n: n.noteNumber,
-      g: Math.round(n.duration * ticksPerBeat)
+      g: Math.max(1, Math.round(n.duration * ticksPerBeat))
     }));
     if (!piano.hasAttribute('xrange')) piano.xrange = region * ticksPerBeat;
     if (!piano.hasAttribute('markstart')) piano.markstart = loopStart * ticksPerBeat;
@@ -95,6 +123,13 @@ export function initSetInspector() {
     piano.yoffset = Math.max(0, min - 2);
     piano.yrange = Math.max(12, max - min + 5);
     if (piano.redraw) piano.redraw();
+
+    // Add pitch bend icons to keyboard
+    const kb = piano.querySelector('#wac-kb');
+    const openForm = document.getElementById('openPitchForm');
+    const noteInput = document.getElementById('pitch_note_input');
+
+    updatePitchIcons();
 
     piano.addEventListener('dblclick', ev => {
       const rect = piano.getBoundingClientRect();
@@ -290,6 +325,7 @@ export function initSetInspector() {
     piano.redraw = function(...args) {
       origRedraw(...args);
       draw();
+      if (typeof updatePitchIcons === 'function') updatePitchIcons();
     };
   }
 

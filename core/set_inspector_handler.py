@@ -67,6 +67,13 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
         track_obj = song["tracks"][track]
         clip_obj = track_obj["clipSlots"][clip]["clip"]
         notes = clip_obj.get("notes", [])
+        pitchbend_notes = sorted(
+            {
+                n.get("noteNumber")
+                for n in notes
+                if n.get("automations", {}).get("PitchBend")
+            }
+        )
         envelopes = clip_obj.get("envelopes", [])
         region_info = clip_obj.get("region", {})
         region_end = region_info.get("end", 4.0)
@@ -126,6 +133,7 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
             "success": True,
             "message": "Clip loaded",
             "notes": notes,
+            "pitchbend_notes": pitchbend_notes,
             "envelopes": envelopes,
             "region": region_end,
             "loop_start": loop_start,
@@ -200,3 +208,73 @@ def save_clip(
         return {"success": True, "message": "Clip saved"}
     except Exception as e:
         return {"success": False, "message": f"Failed to save clip: {e}"}
+
+def get_pad_pitchbend_data(
+    set_path: str,
+    track: int,
+    clip: int,
+    note_number: int,
+    base_note: int = 36,
+) -> Dict[str, Any]:
+    """Extract pitch bend automation for a pad and convert to note list.
+
+    This converts pitch bend values to MIDI note numbers relative to
+    ``base_note``. Each semitone offset is represented by a value of
+    ``170.6458282470703``.
+    """
+    try:
+        with open(set_path, "r") as f:
+            song = json.load(f)
+        notes = song["tracks"][track]["clipSlots"][clip]["clip"].get("notes", [])
+        bend_notes: List[Dict[str, Any]] = []
+        for n in notes:
+            if n.get("noteNumber") != note_number:
+                continue
+            bends = n.get("automations", {}).get("PitchBend", [])
+            for bp in bends:
+                t = n.get("startTime", 0.0) + bp.get("time", 0.0)
+                semis = bp.get("value", 0.0) / 170.6458282470703
+                pitch = base_note + int(round(semis))
+                bend_notes.append({
+                    "noteNumber": pitch,
+                    "startTime": t,
+                    "duration": 0.001,
+                    "velocity": 1.0,
+                    "offVelocity": 0.0,
+                })
+        bend_notes.sort(key=lambda x: x["startTime"])
+        return {"success": True, "message": "Pitch bend extracted", "notes": bend_notes}
+    except Exception as e:
+        return {"success": False, "message": f"Failed to extract pitchbend: {e}"}
+
+
+def save_pad_pitchbend_data(
+    set_path: str,
+    track: int,
+    clip: int,
+    note_number: int,
+    bend_notes: List[Dict[str, Any]],
+    base_note: int = 36,
+) -> Dict[str, Any]:
+    """Update pitch bend automation for a pad using note list."""
+    try:
+        with open(set_path, "r") as f:
+            song = json.load(f)
+        clip_obj = song["tracks"][track]["clipSlots"][clip]["clip"]
+        notes = clip_obj.get("notes", [])
+        target = next((n for n in notes if n.get("noteNumber") == note_number), None)
+        if not target:
+            return {"success": False, "message": "Pad note not found"}
+        start = target.get("startTime", 0.0)
+        bends = []
+        for bn in bend_notes:
+            semi = bn.get("noteNumber", base_note) - base_note
+            value = semi * 170.6458282470703
+            bends.append({"time": bn.get("startTime", 0.0) - start, "value": value})
+        bends.sort(key=lambda x: x["time"])
+        target.setdefault("automations", {})["PitchBend"] = bends
+        with open(set_path, "w") as f:
+            json.dump(song, f, indent=2)
+        return {"success": True, "message": "Pitch bend saved"}
+    except Exception as e:
+        return {"success": False, "message": f"Failed to save pitchbend: {e}"}

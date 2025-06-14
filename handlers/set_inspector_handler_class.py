@@ -1,5 +1,11 @@
 from handlers.base_handler import BaseHandler
-from core.set_inspector_handler import list_clips, get_clip_data, save_envelope
+from core.set_inspector_handler import (
+    list_clips,
+    get_clip_data,
+    save_envelope,
+    get_pad_pitchbend_data,
+    save_pad_pitchbend_data,
+)
 from core.list_msets_handler import list_msets
 from core.pad_colors import rgb_string
 from core.config import MSETS_DIRECTORY
@@ -194,6 +200,7 @@ class SetInspectorHandler(BaseHandler):
                 "clip_options": env_opts,
                 "selected_clip": clip_val,
                 "notes": result.get("notes", []),
+                "pitchbend_notes": result.get("pitchbend_notes", []),
                 "envelopes": envelopes,
                 "region": result.get("region", 4.0),
                 "loop_start": result.get("loop_start", 0.0),
@@ -203,6 +210,55 @@ class SetInspectorHandler(BaseHandler):
                 "clip_index": clip_idx,
                 "track_name": result.get("track_name"),
                 "clip_name": result.get("clip_name"),
+                "pitch_pad": None,
+            }
+        elif action == "open_pitchbend":
+            set_path = form.getvalue("set_path")
+            clip_val = form.getvalue("clip_select")
+            note_val = form.getvalue("note_number")
+            if not (set_path and clip_val and note_val):
+                pad_grid = self.generate_pad_grid(used, color_map, name_map)
+                return self.format_error_response("Missing parameters", pad_grid=pad_grid)
+            entry = next(
+                (m for m in msets if os.path.join(MSETS_DIRECTORY, m["uuid"], m["mset_name"], "Song.abl") == set_path),
+                None,
+            )
+            if entry:
+                selected_idx = int(entry.get("mset_id"))
+            track_idx, clip_idx = map(int, clip_val.split(":"))
+            pb_result = get_pad_pitchbend_data(set_path, track_idx, clip_idx, int(note_val))
+            if not pb_result.get("success"):
+                pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
+                return self.format_error_response(pb_result.get("message"), pad_grid=pad_grid)
+            clip_result = get_clip_data(set_path, track_idx, clip_idx)
+            clip_grid = self.generate_clip_grid(
+                list_clips(set_path).get("clips", []), selected=clip_val
+            )
+            envelopes = []
+            env_opts = '<option value="">No Envelope</option>'
+            set_name = os.path.basename(os.path.dirname(set_path))
+            pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
+            return {
+                "pad_grid": pad_grid,
+                "message": pb_result.get("message"),
+                "message_type": "success",
+                "selected_set": set_path,
+                "set_name": set_name,
+                "clip_grid": clip_grid,
+                "clip_options": env_opts,
+                "selected_clip": clip_val,
+                "notes": pb_result.get("notes", []),
+                "pitchbend_notes": clip_result.get("pitchbend_notes", []),
+                "envelopes": envelopes,
+                "region": clip_result.get("region", 4.0),
+                "loop_start": clip_result.get("loop_start", 0.0),
+                "loop_end": clip_result.get("loop_end", 4.0),
+                "param_ranges_json": json.dumps(clip_result.get("param_ranges", {})),
+                "track_index": track_idx,
+                "clip_index": clip_idx,
+                "track_name": clip_result.get("track_name"),
+                "clip_name": clip_result.get("clip_name"),
+                "pitch_pad": int(note_val),
             }
         elif action == "save_envelope":
             set_path = form.getvalue("set_path")
@@ -261,6 +317,7 @@ class SetInspectorHandler(BaseHandler):
                 "clip_options": env_opts,
                 "selected_clip": clip_val,
                 "notes": clip_data.get("notes", []),
+                "pitchbend_notes": clip_data.get("pitchbend_notes", []),
                 "envelopes": envelopes,
                 "region": clip_data.get("region", 4.0),
                 "loop_start": clip_data.get("loop_start", 0.0),
@@ -270,6 +327,7 @@ class SetInspectorHandler(BaseHandler):
                 "clip_index": clip_idx,
                 "track_name": clip_data.get("track_name"),
                 "clip_name": clip_data.get("clip_name"),
+                "pitch_pad": None,
             }
         elif action == "save_clip":
             set_path = form.getvalue("set_path")
@@ -358,6 +416,56 @@ class SetInspectorHandler(BaseHandler):
                 "clip_index": clip_idx,
                 "track_name": clip_data.get("track_name"),
                 "clip_name": clip_data.get("clip_name"),
+            }
+        elif action == "save_pitchbend":
+            set_path = form.getvalue("set_path")
+            clip_val = form.getvalue("clip_select")
+            note_val = form.getvalue("note_number")
+            notes_data = form.getvalue("clip_notes")
+            if not (set_path and clip_val and note_val and notes_data is not None):
+                pad_grid = self.generate_pad_grid(used, color_map, name_map)
+                return self.format_error_response("Missing parameters", pad_grid=pad_grid)
+            entry = next(
+                (m for m in msets if os.path.join(MSETS_DIRECTORY, m["uuid"], m["mset_name"], "Song.abl") == set_path),
+                None,
+            )
+            if entry:
+                selected_idx = int(entry.get("mset_id"))
+            track_idx, clip_idx = map(int, clip_val.split(":"))
+            try:
+                notes = json.loads(notes_data)
+            except Exception:
+                pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
+                return self.format_error_response("Invalid note data", pad_grid=pad_grid)
+            result = save_pad_pitchbend_data(set_path, track_idx, clip_idx, int(note_val), notes)
+            if not result.get("success"):
+                pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
+                return self.format_error_response(result.get("message"), pad_grid=pad_grid)
+            pb_result = get_pad_pitchbend_data(set_path, track_idx, clip_idx, int(note_val))
+            clip_data = get_clip_data(set_path, track_idx, clip_idx)
+            clip_grid = self.generate_clip_grid(list_clips(set_path).get("clips", []), selected=clip_val)
+            pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
+            return {
+                "pad_grid": pad_grid,
+                "message": result.get("message"),
+                "message_type": "success",
+                "selected_set": set_path,
+                "set_name": os.path.basename(os.path.dirname(set_path)),
+                "clip_grid": clip_grid,
+                "clip_options": '<option value="">No Envelope</option>',
+                "selected_clip": clip_val,
+                "notes": pb_result.get("notes", []),
+                "pitchbend_notes": clip_data.get("pitchbend_notes", []),
+                "envelopes": [],
+                "region": clip_data.get("region", 4.0),
+                "loop_start": clip_data.get("loop_start", 0.0),
+                "loop_end": clip_data.get("loop_end", 4.0),
+                "param_ranges_json": json.dumps(clip_data.get("param_ranges", {})),
+                "track_index": track_idx,
+                "clip_index": clip_idx,
+                "track_name": clip_data.get("track_name"),
+                "clip_name": clip_data.get("clip_name"),
+                "pitch_pad": int(note_val),
             }
         else:
             return self.format_error_response("Unknown action", pad_grid=pad_grid)
