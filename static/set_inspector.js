@@ -54,6 +54,7 @@ export function initSetInspector() {
   const envSelect = document.getElementById('envelope_select');
   const legendDiv = document.getElementById('paramLegend');
   const valueDiv = document.getElementById('envValue');
+  const gridSelect = document.getElementById('grid_select');
   const saveClipForm = document.getElementById('saveClipForm');
   const saveClipBtn = document.getElementById('saveClipBtn');
   const notesInput = document.getElementById('clip_notes_input');
@@ -116,6 +117,32 @@ export function initSetInspector() {
         if (piano.redraw) piano.redraw();
       }
     });
+    if (gridSelect) {
+      const gridMap = {
+        '8 bars': timebase * 8,
+        '4 bars': timebase * 4,
+        '2 bars': timebase * 2,
+        '1 bar': timebase,
+        '1/2': timebase / 2,
+        '1/4': timebase / 4,
+        '1/4t': timebase / 6,
+        '1/8': timebase / 8,
+        '1/8t': timebase / 12,
+        '1/16': timebase / 16,
+        '1/16t': timebase / 24,
+        '1/32': timebase / 32,
+        '1/32t': timebase / 48,
+      };
+      const applyGrid = () => {
+        const v = gridSelect.value;
+        const snap = gridMap[v] || timebase / 16;
+        piano.subgrid = snap;
+        piano.snap = snap;
+        if (piano.redraw) piano.redraw();
+      };
+      gridSelect.addEventListener('change', applyGrid);
+      applyGrid();
+    }
   }
 
   function isNormalized(env) {

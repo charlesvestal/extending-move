@@ -59,6 +59,22 @@
     <label for="envelope_select">Envelope:</label>
     <select id="envelope_select">{{ clip_options | safe }}</select>
     <span id="envValue" style="margin-left:0.5rem; font-size:0.8em;"></span>
+    <label for="grid_select" style="margin-left:1rem;">Grid:</label>
+    <select id="grid_select">
+      <option value="8 bars">8 bars</option>
+      <option value="4 bars">4 bars</option>
+      <option value="2 bars">2 bars</option>
+      <option value="1 bar">1 bar</option>
+      <option value="1/2">1/2</option>
+      <option value="1/4">1/4</option>
+      <option value="1/4t">1/4t</option>
+      <option value="1/8">1/8</option>
+      <option value="1/8t">1/8t</option>
+      <option value="1/16" selected>1/16</option>
+      <option value="1/16t">1/16t</option>
+      <option value="1/32">1/32</option>
+      <option value="1/32t">1/32t</option>
+    </select>
   </div>
   <div style="margin-top:1rem; display:flex; align-items:flex-start;">
     <div style="position:relative; width:900px; height:300px; border:1px solid #ccc;">

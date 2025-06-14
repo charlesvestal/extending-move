@@ -42,6 +42,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 xscroll:            {type:Number, value:0},
                 yscroll:            {type:Number, value:0},
                 gridnoteratio:      {type:Number, value:0.5, observer:'updateTimer'},
+                subgrid:            {type:Number, value:0},
                 xruler:             {type:Number, value:24, observer:'layout'},
                 yruler:             {type:Number, value:24, observer:'layout'},
                 octadj:             {type:Number, value:-1},
@@ -1057,6 +1058,23 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 this.ctx.fillRect(this.yruler+this.kbwidth, ys|0, this.swidth,-this.steph);
                 this.ctx.fillStyle=this.colgrid;
                 this.ctx.fillRect(this.yruler+this.kbwidth, ys|0, this.swidth,1);
+            }
+            if(this.subgrid>0){
+                this.ctx.strokeStyle=this.colgrid;
+                this.ctx.globalAlpha=0.4;
+                this.ctx.setLineDash([2,4]);
+                for(let t=0;;t+=this.subgrid){
+                    if(Math.abs(t%this.grid)<1e-6) continue;
+                    let x=this.stepw*(t-this.xoffset)+this.yruler+this.kbwidth;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(x|0,this.xruler);
+                    this.ctx.lineTo(x|0,this.height);
+                    this.ctx.stroke();
+                    if(x>=this.width)
+                        break;
+                }
+                this.ctx.setLineDash([]);
+                this.ctx.globalAlpha=1.0;
             }
             for(let t=0;;t+=this.grid){
                 let x=this.stepw*(t-this.xoffset)+this.yruler+this.kbwidth;
