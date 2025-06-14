@@ -559,8 +559,8 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             else if(ht.m=="s"&&ht.t>=0){
                 this.clearSel();
                 var t=((ht.t/this.snap)|0)*this.snap;
-                this.sequence.push({t:t, n:ht.n|0, g:1, f:1});
-                this.dragging={o:"D",m:"E",i:this.sequence.length-1, t:t, g:1, ev:[{t:t,g:1,ev:this.sequence[this.sequence.length-1]}]};
+                this.sequence.push({t:t, n:ht.n|0, g:this.grid, f:1});
+                this.dragging={o:"D",m:"E",i:this.sequence.length-1, t:t, g:this.grid, ev:[{t:t,g:this.grid,ev:this.sequence[this.sequence.length-1]}]};
                 this.redraw();
             }
         };
@@ -620,7 +620,8 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                     break;
                 case "N":
                     ev=this.sequence[this.dragging.i];
-                    this.moveSelectedNote((ht.t-this.dragging.t)|0, (ht.n|0)-this.dragging.n);
+                    const dt=Math.round((ht.t-this.dragging.t)/this.snap)*this.snap;
+                    this.moveSelectedNote(dt, (ht.n|0)-this.dragging.n);
                     this.redraw();
                     break;
                 }
@@ -635,8 +636,8 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             else if(ht.m=="s"&&ht.t>=0){
                 const pt=((ht.t/this.snap)|0)*this.snap;
                 if(this.editmode=="gridmono")
-                    this.delAreaNote(pt,this.snap,ht.i);
-                this.addNote(pt,ht.n|0,this.snap,this.defvelo);
+                    this.delAreaNote(pt,this.grid,ht.i);
+                this.addNote(pt,ht.n|0,this.grid,this.defvelo);
                 this.dragging={o:"G",m:"1"};
             }
         };
@@ -648,8 +649,8 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                     const px=((ht.t/this.snap)|0)*this.snap;
                     if(ht.m=="s"){
                         if(this.editmode=="gridmono")
-                            this.delAreaNote(px,this.snap,ht.i);
-                        this.addNote(px,ht.n|0,this.snap,this.defvelo);
+                            this.delAreaNote(px,this.grid,ht.i);
+                        this.addNote(px,ht.n|0,this.grid,this.defvelo);
                     }
                     break;
                 case "0":
