@@ -57,6 +57,13 @@ export function initSetInspector() {
   let tailEnv = [];
   let envInfo = null;
 
+  function applyMarkers() {
+    piano.xrange = region * ticksPerBeat;
+    piano.markstart = loopStart * ticksPerBeat;
+    piano.markend = loopEnd * ticksPerBeat;
+    if (piano.redraw) piano.redraw();
+  }
+
   if (piano) {
     if (!piano.sequence) piano.sequence = [];
     piano.sequence = notes.map(n => ({
@@ -64,17 +71,23 @@ export function initSetInspector() {
       n: n.noteNumber,
       g: Math.round(n.duration * ticksPerBeat)
     }));
-    // Always apply region and loop markers in case attributes weren't parsed
-    piano.xrange = region * ticksPerBeat;
-    piano.markstart = loopStart * ticksPerBeat;
-    piano.markend = loopEnd * ticksPerBeat;
     const { min, max } = notes.length
       ? { min: Math.min(...notes.map(n => n.noteNumber)),
           max: Math.max(...notes.map(n => n.noteNumber)) }
       : { min: 60, max: 71 };
     piano.yoffset = Math.max(0, min - 2);
     piano.yrange = Math.max(12, max - min + 5);
-    if (piano.redraw) piano.redraw();
+    if (piano.initialized) {
+      applyMarkers();
+    } else {
+      requestAnimationFrame(function waitForInit() {
+        if (piano.initialized) {
+          applyMarkers();
+        } else {
+          requestAnimationFrame(waitForInit);
+        }
+      });
+    }
   }
 
   function isNormalized(env) {
@@ -396,6 +409,20 @@ export function initSetInspector() {
     updateControls();
     draw();
   }
+
+  // Expose helper for debugging marker placement
+  window.verifyLoopMarkers = function () {
+    if (!piano) {
+      console.log('No piano roll element');
+      return;
+    }
+    console.log('Loaded clip region', region, 'loop', loopStart, loopEnd);
+    console.log('Piano roll props', {
+      xrange: piano.xrange / ticksPerBeat,
+      markstart: piano.markstart / ticksPerBeat,
+      markend: piano.markend / ticksPerBeat,
+    });
+  };
 }
 
 document.addEventListener('DOMContentLoaded', initSetInspector);
