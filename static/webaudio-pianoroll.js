@@ -122,15 +122,17 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
 }
 #wac-gridres{
     position:absolute;
-    top:2px;
-    right:2px;
+    top:30px;
+    right:5px;
     z-index:10;
+    opacity: 0.6;
 }
 .marker{
     position: absolute;
     left:0px;
     top:0px;
     cursor:ew-resize;
+    opacity: 0.6;
 }
 #wac-kb{
     position:absolute;
