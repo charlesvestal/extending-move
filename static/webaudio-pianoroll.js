@@ -800,7 +800,16 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 ev.stopPropagation();
                 return false;
             }
-            this.dragging={o:null,x:this.downpos.x,y:this.downpos.y,offsx:this.xoffset,offsy:this.yoffset};
+            this.dragging={o:null,
+                x:this.downpos.x,
+                y:this.downpos.y,
+                offsx:this.xoffset,
+                offsy:this.yoffset,
+                xr:this.xrange,
+                yr:this.yrange,
+                t:this.downht.t,
+                n:this.downht.n,
+                axis:(this.downht.m=="x"?"x":(this.downht.m=="y"?"y":null))};
             this.canvas.focus();
             switch(this.editmode){
             case "gridpoly":
@@ -846,10 +855,28 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             const ht=this.hitTest(pos);
             switch(this.dragging.o){
             case null:
-                if(this.xscroll)
-                    this.xoffset=this.dragging.offsx+(this.dragging.x-pos.x)*(this.xrange/this.width);
-                if(this.yscroll)
-                    this.yoffset=this.dragging.offsy+(pos.y-this.dragging.y)*(this.yrange/this.height);
+                if(this.dragging.axis=="x"){
+                    const dx=pos.x-this.dragging.x;
+                    const dy=pos.y-this.dragging.y;
+                    const pan=this.dragging.offsx-dx*(this.dragging.xr/this.width);
+                    const factor=Math.pow(1.2,dy/30);
+                    this.xrange=this.dragging.xr*factor;
+                    this.xoffset=this.dragging.t-(this.dragging.t-pan)*factor;
+                }
+                else if(this.dragging.axis=="y"){
+                    const dx=pos.x-this.dragging.x;
+                    const dy=pos.y-this.dragging.y;
+                    const pan=this.dragging.offsy+dy*(this.dragging.yr/this.height);
+                    const factor=Math.pow(1.2,dx/30);
+                    this.yrange=this.dragging.yr*factor;
+                    this.yoffset=this.dragging.n-(this.dragging.n-pan)*factor;
+                }
+                else {
+                    if(this.xscroll)
+                        this.xoffset=this.dragging.offsx+(this.dragging.x-pos.x)*(this.xrange/this.width);
+                    if(this.yscroll)
+                        this.yoffset=this.dragging.offsy+(pos.y-this.dragging.y)*(this.yrange/this.height);
+                }
                 break;
             case "m":
                 if(ht.m=="m"){
