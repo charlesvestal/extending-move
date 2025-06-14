@@ -338,6 +338,49 @@ def test_get_clip_data_loop_region(tmp_path):
     ]
 
 
+def test_get_clip_data_pitch_bend(tmp_path):
+    set_path = tmp_path / "set.abl"
+    song = {
+        "tracks": [
+            {
+                "kind": "midi",
+                "clipSlots": [
+                    {
+                        "clip": {
+                            "notes": [
+                                {
+                                    "noteNumber": 40,
+                                    "startTime": 0.0,
+                                    "duration": 0.5,
+                                    "velocity": 1.0,
+                                    "offVelocity": 0.0,
+                                    "automations": {
+                                        "PitchBend": [
+                                            {"time": 0.0, "value": 170.6458282470703},
+                                            {"time": 0.25, "value": 0.0},
+                                        ]
+                                    },
+                                }
+                            ],
+                            "envelopes": [],
+                            "region": {"end": 1.0},
+                        }
+                    }
+                ],
+            }
+        ]
+    }
+    set_path.write_text(json.dumps(song))
+    from core.set_inspector_handler import get_clip_data
+
+    data = get_clip_data(str(set_path), 0, 0)
+    bends = data.get("pitch_bends", {})
+    assert 40 in bends
+    pb = bends[40][0]
+    assert abs(pb["bends"][0]["value"] - 1.0) < 1e-6
+    assert abs(pb["bends"][1]["time"] - 0.25) < 1e-6
+
+
 def test_save_clip(tmp_path):
     set_path = tmp_path / "set.abl"
     song = {

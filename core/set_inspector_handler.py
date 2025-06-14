@@ -67,6 +67,26 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
         track_obj = song["tracks"][track]
         clip_obj = track_obj["clipSlots"][clip]["clip"]
         notes = clip_obj.get("notes", [])
+        pitch_bends: Dict[int, List[Dict[str, Any]]] = {}
+        for n in notes:
+            pb_list = n.get("automations", {}).get("PitchBend")
+            if not pb_list:
+                continue
+            pad = int(n.get("noteNumber", 0))
+            bends = [
+                {
+                    "time": n.get("startTime", 0.0) + bp.get("time", 0.0),
+                    "value": bp.get("value", 0.0) / 170.6458282470703,
+                }
+                for bp in pb_list
+            ]
+            pitch_bends.setdefault(pad, []).append(
+                {
+                    "startTime": n.get("startTime", 0.0),
+                    "duration": n.get("duration", 0.0),
+                    "bends": bends,
+                }
+            )
         envelopes = clip_obj.get("envelopes", [])
         region_info = clip_obj.get("region", {})
         region_end = region_info.get("end", 4.0)
@@ -126,6 +146,7 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
             "success": True,
             "message": "Clip loaded",
             "notes": notes,
+            "pitch_bends": pitch_bends,
             "envelopes": envelopes,
             "region": region_end,
             "loop_start": loop_start,
