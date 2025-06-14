@@ -108,6 +108,7 @@ export function initSetInspector() {
       noteFormat: 'MIDI',
       zoom: region,
       resolution: 4,
+      renderer: 'Renderer',
       noteData,
     });
     pianoRoll.view.style.position = 'absolute';
