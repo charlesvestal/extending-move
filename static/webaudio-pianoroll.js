@@ -100,9 +100,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
     overflow: hidden;
 }
 #wac-topbar {
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
+    text-align:right;
     margin:0 0 2px 0;
 }
 #wac-pianoroll {
@@ -146,7 +144,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
     background-position:left bottom;
 }
 </style>
-<div id="wac-topbar"><div id="wac-envelope"></div><select id="wac-gridres"></select></div>
+<div id="wac-topbar"><select id="wac-gridres"></select></div>
 <div class="wac-body" id="wac-body" touch-action="none">
 <canvas id="wac-pianoroll" touch-action="none" tabindex="0"></canvas>
 <div id="wac-kb"></div>
@@ -688,7 +686,6 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             this.cursorimg=this.elem.children[4];
             this.menu=this.elem.children[5];
             this.gridselect=this.topbar.querySelector('#wac-gridres');
-            this.envcontainer=this.topbar.querySelector('#wac-envelope');
             this.rcMenu={x:0, y:0, width:0, height:0};
             this.lastx=0;
             this.lasty=0;

@@ -51,15 +51,9 @@ export function initSetInspector() {
     canvas.style.left = `${yruler + kbwidth}px`;
     canvas.style.top = `${xruler}px`;
   }
-  const envSection = document.getElementById('envelope_section');
   const envSelect = document.getElementById('envelope_select');
   const legendDiv = document.getElementById('paramLegend');
   const valueDiv = document.getElementById('envValue');
-
-  if (piano && envSection) {
-    const tb = piano.querySelector('#wac-topbar');
-    if (tb) tb.prepend(envSection);
-  }
   const saveClipForm = document.getElementById('saveClipForm');
   const notesInput = document.getElementById('clip_notes_input');
   const envsInput = document.getElementById('clip_envelopes_input');
