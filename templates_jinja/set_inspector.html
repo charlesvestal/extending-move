@@ -60,6 +60,19 @@
     <select id="envelope_select">{{ clip_options | safe }}</select>
     <span id="envValue" style="margin-left:0.5rem; font-size:0.8em;"></span>
   </div>
+  <div style="margin-top:0.5rem;">
+    <label for="grid_select">Grid:</label>
+    <select id="grid_select">
+      <option value="1/4">1/4</option>
+      <option value="1/8">1/8</option>
+      <option value="1/16" selected>1/16</option>
+      <option value="1/32">1/32</option>
+      <option value="1/4t">1/4t</option>
+      <option value="1/8t">1/8t</option>
+      <option value="1/6t">1/6t</option>
+      <option value="1/32t">1/32t</option>
+    </select>
+  </div>
   <div style="margin-top:1rem; display:flex; align-items:flex-start;">
     <div style="position:relative; width:900px; height:300px; border:1px solid #ccc;">
       <webaudio-pianoroll id="clipEditor" width="900" height="300" editmode="dragpoly" wheelzoom="0" xscroll="1" yscroll="1" timebase="16" xrange="{{ (region | default(4.0)) * 4 }}" markstart="{{ (loop_start | default(0.0)) * 4 }}" markend="{{ (loop_end | default(region)) * 4 }}" showcursor="false"></webaudio-pianoroll>

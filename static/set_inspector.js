@@ -52,6 +52,7 @@ export function initSetInspector() {
     canvas.style.top = `${xruler}px`;
   }
   const envSelect = document.getElementById('envelope_select');
+  const gridSelect = document.getElementById('grid_select');
   const legendDiv = document.getElementById('paramLegend');
   const valueDiv = document.getElementById('envValue');
   const saveClipForm = document.getElementById('saveClipForm');
@@ -331,6 +332,28 @@ export function initSetInspector() {
     updateControls();
     draw();
   });
+
+  if (gridSelect && piano) {
+    const divToTicks = val => {
+      switch (val) {
+        case '1/4': return 4;
+        case '1/8': return 2;
+        case '1/16': return 1;
+        case '1/32': return 0.5;
+        case '1/4t': return (4 * 2) / 3;
+        case '1/8t': return (4 * 1) / 3;
+        case '1/6t': return 4 / 6;
+        case '1/32t': return 4 / 12;
+        default: return 1;
+      }
+    };
+    const updateGrid = () => {
+      piano.subgrid = divToTicks(gridSelect.value);
+      if (piano.redraw) piano.redraw();
+    };
+    gridSelect.addEventListener('change', updateGrid);
+    updateGrid();
+  }
 
   if (piano) {
     piano.addEventListener('mouseup', () => { clipModified = true; updateSaveButton(); });

@@ -35,6 +35,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 xoffset:            {type:Number, value:0, observer:'layout'},
                 yoffset:            {type:Number, value:60, observer:'layout'},
                 grid:               {type:Number, value:4},
+                subgrid:            {type:Number, value:1},
                 snap:               {type:Number, value:1},
                 wheelzoom:          {type:Number, value:0},
                 wheelzoomx:         {type:Number, value:0},
@@ -52,6 +53,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 collt:              {type:String, value:"#ccc"},
                 coldk:              {type:String, value:"#aaa"},
                 colgrid:            {type:String, value:"#666"},
+                colsubgrid:         {type:String, value:"#bbb"},
                 colnote:            {type:String, value:"#f22"},
                 colnotesel:         {type:String, value:"#0f0"},
                 colnoteborder:      {type:String, value:"#000"},
@@ -1060,9 +1062,20 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             }
             for(let t=0;;t+=this.grid){
                 let x=this.stepw*(t-this.xoffset)+this.yruler+this.kbwidth;
+                this.ctx.fillStyle=this.colgrid;
                 this.ctx.fillRect(x|0,this.xruler,1,this.sheight);
                 if(x>=this.width)
                     break;
+            }
+            if(this.subgrid>0){
+                for(let t=0;;t+=this.subgrid){
+                    if(Math.abs(t % this.grid) < 1e-6) continue;
+                    let x=this.stepw*(t-this.xoffset)+this.yruler+this.kbwidth;
+                    this.ctx.fillStyle=this.colsubgrid;
+                    this.ctx.fillRect(x|0,this.xruler,1,this.sheight);
+                    if(x>=this.width)
+                        break;
+                }
             }
         };
         this.semiflag=[6,1,0,1,0,2,1,0,1,0,1,0];
