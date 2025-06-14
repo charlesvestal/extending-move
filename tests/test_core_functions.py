@@ -324,13 +324,18 @@ def test_get_clip_data_loop_region(tmp_path):
 
     data = get_clip_data(str(set_path), 0, 0)
     assert data["success"], data.get("message")
-    assert data["region"] == 4.0
+    assert data["region"] == 8.0
+    assert data["loop_start"] == 2.0
+    assert data["loop_end"] == 6.0
     notes = data.get("notes", [])
-    assert [n["noteNumber"] for n in notes] == [61, 62]
-    assert notes[0]["startTime"] == 0.5
-    assert notes[1]["startTime"] == 3.5
+    assert [n["noteNumber"] for n in notes] == [60, 61, 62]
+    assert notes[0]["startTime"] == 1.0
+    assert notes[1]["startTime"] == 2.5
     envs = data.get("envelopes", [])
-    assert envs and envs[0]["breakpoints"] == [{"time": 2.5, "value": 1}]
+    assert envs and envs[0]["breakpoints"] == [
+        {"time": 0.5, "value": 0},
+        {"time": 4.5, "value": 1},
+    ]
 
 
 def test_save_clip(tmp_path):
@@ -357,7 +362,7 @@ def test_save_clip(tmp_path):
 
     notes = [{"noteNumber": 60, "startTime": 0.0, "duration": 1.0, "velocity": 100.0, "offVelocity": 0.0}]
     envs = [{"parameterId": 1, "breakpoints": [{"time": 0.0, "value": 0.5}]}]
-    result = save_clip(str(set_path), 0, 0, notes, envs)
+    result = save_clip(str(set_path), 0, 0, notes, envs, 4.0, 0.0, 4.0)
     assert result["success"], result.get("message")
 
     data = get_clip_data(str(set_path), 0, 0)
@@ -365,4 +370,7 @@ def test_save_clip(tmp_path):
     saved_envs = data.get("envelopes", [])
     assert saved_envs and saved_envs[0]["parameterId"] == 1
     assert saved_envs[0]["breakpoints"] == envs[0]["breakpoints"]
+    assert data["region"] == 4.0
+    assert data["loop_start"] == 0.0
+    assert data["loop_end"] == 4.0
 

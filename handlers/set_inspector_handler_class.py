@@ -85,6 +85,8 @@ class SetInspectorHandler(BaseHandler):
             "notes": [],
             "envelopes": [],
             "region": 4.0,
+            "loop_start": 0.0,
+            "loop_end": 4.0,
             "param_ranges_json": "{}",
         }
 
@@ -144,6 +146,8 @@ class SetInspectorHandler(BaseHandler):
                 "notes": [],
                 "envelopes": [],
                 "region": 4.0,
+                "loop_start": 0.0,
+                "loop_end": 4.0,
                 "param_ranges_json": "{}",
             }
         elif action == "show_clip":
@@ -192,6 +196,8 @@ class SetInspectorHandler(BaseHandler):
                 "notes": result.get("notes", []),
                 "envelopes": envelopes,
                 "region": result.get("region", 4.0),
+                "loop_start": result.get("loop_start", 0.0),
+                "loop_end": result.get("loop_end", 4.0),
                 "param_ranges_json": json.dumps(result.get("param_ranges", {})),
                 "track_index": track_idx,
                 "clip_index": clip_idx,
@@ -257,6 +263,8 @@ class SetInspectorHandler(BaseHandler):
                 "notes": clip_data.get("notes", []),
                 "envelopes": envelopes,
                 "region": clip_data.get("region", 4.0),
+                "loop_start": clip_data.get("loop_start", 0.0),
+                "loop_end": clip_data.get("loop_end", 4.0),
                 "param_ranges_json": json.dumps(clip_data.get("param_ranges", {})),
                 "track_index": track_idx,
                 "clip_index": clip_idx,
@@ -268,7 +276,18 @@ class SetInspectorHandler(BaseHandler):
             clip_val = form.getvalue("clip_select")
             notes_data = form.getvalue("clip_notes")
             env_data = form.getvalue("clip_envelopes")
-            if not (set_path and clip_val and notes_data is not None and env_data is not None):
+            region_val = form.getvalue("region_end")
+            loop_start_val = form.getvalue("loop_start")
+            loop_end_val = form.getvalue("loop_end")
+            if not (
+                set_path
+                and clip_val
+                and notes_data is not None
+                and env_data is not None
+                and region_val is not None
+                and loop_start_val is not None
+                and loop_end_val is not None
+            ):
                 pad_grid = self.generate_pad_grid(used, color_map, name_map)
                 return self.format_error_response("Missing parameters", pad_grid=pad_grid)
             entry = next(
@@ -281,12 +300,24 @@ class SetInspectorHandler(BaseHandler):
             try:
                 notes = json.loads(notes_data)
                 envelopes = json.loads(env_data)
+                region_end = float(region_val)
+                loop_start = float(loop_start_val)
+                loop_end = float(loop_end_val)
             except Exception:
                 pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
                 return self.format_error_response("Invalid clip data", pad_grid=pad_grid)
             from core.set_inspector_handler import save_clip
 
-            result = save_clip(set_path, track_idx, clip_idx, notes, envelopes)
+            result = save_clip(
+                set_path,
+                track_idx,
+                clip_idx,
+                notes,
+                envelopes,
+                region_end,
+                loop_start,
+                loop_end,
+            )
             if not result.get("success"):
                 pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
                 return self.format_error_response(result.get("message"), pad_grid=pad_grid)
@@ -320,6 +351,8 @@ class SetInspectorHandler(BaseHandler):
                 "notes": clip_data.get("notes", []),
                 "envelopes": envelopes,
                 "region": clip_data.get("region", 4.0),
+                "loop_start": clip_data.get("loop_start", 0.0),
+                "loop_end": clip_data.get("loop_end", 4.0),
                 "param_ranges_json": json.dumps(clip_data.get("param_ranges", {})),
                 "track_index": track_idx,
                 "clip_index": clip_idx,

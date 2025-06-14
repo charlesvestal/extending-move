@@ -69,39 +69,12 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
         notes = clip_obj.get("notes", [])
         envelopes = clip_obj.get("envelopes", [])
         region_info = clip_obj.get("region", {})
-        region = region_info.get("end", 4.0)
+        region_end = region_info.get("end", 4.0)
         loop_info = region_info.get("loop", {})
         loop_start = loop_info.get("start", 0.0)
-        loop_end = loop_info.get("end", region)
-        region_length = max(loop_end - loop_start, 0.0)
+        loop_end = loop_info.get("end", region_end)
 
-        def clip_note(note):
-            start = note.get("startTime", 0.0)
-            dur = note.get("duration", 0.0)
-            end = start + dur
-            if end <= loop_start or start >= loop_end:
-                return None
-            adj_start = max(start, loop_start) - loop_start
-            adj_end = min(end, loop_end) - loop_start
-            new_note = note.copy()
-            new_note["startTime"] = adj_start
-            new_note["duration"] = max(0.0, adj_end - adj_start)
-            return new_note
-
-        def clip_env(env):
-            new_env = env.copy()
-            clipped = []
-            for bp in env.get("breakpoints", []):
-                t = bp.get("time", 0.0)
-                if loop_start <= t <= loop_end:
-                    nbp = bp.copy()
-                    nbp["time"] = t - loop_start
-                    clipped.append(nbp)
-            new_env["breakpoints"] = clipped
-            return new_env
-
-        notes = [cn for n in notes if (cn := clip_note(n))]
-        envelopes = [clip_env(e) for e in envelopes]
+        region_length = region_end
         track_name = _track_display_name(track_obj, track)
         clip_name = clip_obj.get("name") or f"Clip {clip + 1}"
         param_map: Dict[int, str] = {}
@@ -154,7 +127,9 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
             "message": "Clip loaded",
             "notes": notes,
             "envelopes": envelopes,
-            "region": region_length,
+            "region": region_end,
+            "loop_start": loop_start,
+            "loop_end": loop_end,
             "param_map": param_map,
             "param_context": param_context,
             "param_ranges": param_ranges,
@@ -202,8 +177,11 @@ def save_clip(
     clip: int,
     notes: List[Dict[str, Any]],
     envelopes: List[Dict[str, Any]],
+    region_end: float,
+    loop_start: float,
+    loop_end: float,
 ) -> Dict[str, Any]:
-    """Replace notes and envelopes for a clip and write back to disk."""
+    """Replace notes/envelopes and update region/loop settings."""
     try:
         with open(set_path, "r") as f:
             song = json.load(f)
@@ -211,6 +189,10 @@ def save_clip(
         clip_obj = song["tracks"][track]["clipSlots"][clip]["clip"]
         clip_obj["notes"] = notes
         clip_obj["envelopes"] = envelopes
+        region_info = clip_obj.setdefault("region", {})
+        region_info["start"] = 0.0
+        region_info["end"] = region_end
+        region_info["loop"] = {"start": loop_start, "end": loop_end}
 
         with open(set_path, "w") as f:
             json.dump(song, f, indent=2)

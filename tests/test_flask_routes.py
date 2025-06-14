@@ -736,7 +736,10 @@ def test_set_inspector_post(client, monkeypatch):
         'set_path': '/tmp/a.abl',
         'clip_select': '0:0',
         'clip_notes': '[]',
-        'clip_envelopes': '[]'
+        'clip_envelopes': '[]',
+        'region_end': '4.0',
+        'loop_start': '0.0',
+        'loop_end': '4.0'
     })
     assert resp.status_code == 200
 

@@ -32,6 +32,8 @@ export function initSetInspector() {
   const notes = JSON.parse(dataDiv.dataset.notes || '[]');
   const envelopes = JSON.parse(dataDiv.dataset.envelopes || '[]');
   const region = parseFloat(dataDiv.dataset.region || '4');
+  const loopStart = parseFloat(dataDiv.dataset.loopStart || '0');
+  const loopEnd = parseFloat(dataDiv.dataset.loopEnd || String(region));
   const paramRanges = JSON.parse(dataDiv.dataset.paramRanges || '{}');
   const canvas = document.getElementById('clipCanvas');
   const ctx = canvas.getContext('2d');
@@ -42,6 +44,9 @@ export function initSetInspector() {
   const saveClipForm = document.getElementById('saveClipForm');
   const notesInput = document.getElementById('clip_notes_input');
   const envsInput = document.getElementById('clip_envelopes_input');
+  const regionInput = document.getElementById('region_end_input');
+  const loopStartInput = document.getElementById('loop_start_input');
+  const loopEndInput = document.getElementById('loop_end_input');
   const ticksPerBeat = 4; // timebase 16 => 4 ticks per beat
 
   let editing = false;
@@ -55,7 +60,8 @@ export function initSetInspector() {
     piano.timebase = 16;
     piano.editmode = 'dragpoly';
     piano.xrange = region * ticksPerBeat;
-    piano.markend = region * ticksPerBeat;
+    piano.markstart = loopStart * ticksPerBeat;
+    piano.markend = loopEnd * ticksPerBeat;
     const { min, max } = notes.length
       ? { min: Math.min(...notes.map(n => n.noteNumber)),
           max: Math.max(...notes.map(n => n.noteNumber)) }
@@ -378,6 +384,9 @@ export function initSetInspector() {
       }
       envsInput.value = JSON.stringify(envs);
     }
+    if (regionInput) regionInput.value = (piano.xrange / ticksPerBeat).toFixed(6);
+    if (loopStartInput) loopStartInput.value = (piano.markstart / ticksPerBeat).toFixed(6);
+    if (loopEndInput) loopEndInput.value = (piano.markend / ticksPerBeat).toFixed(6);
   });
   if (envSelect && envSelect.value) {
     envSelect.dispatchEvent(new Event('change'));
