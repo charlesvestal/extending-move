@@ -74,6 +74,27 @@ export function initSetInspector() {
     piano.yoffset = Math.max(0, min - 2);
     piano.yrange = Math.max(12, max - min + 5);
     if (piano.redraw) piano.redraw();
+
+    piano.addEventListener('dblclick', ev => {
+      const rect = piano.getBoundingClientRect();
+      const x = ev.clientX - rect.left;
+      const y = ev.clientY - rect.top;
+      if (y < piano.xruler) {
+        piano.xoffset = 0;
+        piano.xrange = region * ticksPerBeat;
+        if (piano.redraw) piano.redraw();
+        return;
+      }
+      if (x < piano.yruler + piano.kbwidth) {
+        const { min, max } = notes.length
+          ? { min: Math.min(...notes.map(n => n.noteNumber)),
+              max: Math.max(...notes.map(n => n.noteNumber)) }
+          : { min: 60, max: 71 };
+        piano.yoffset = Math.max(0, min - 2);
+        piano.yrange = Math.max(12, max - min + 5);
+        if (piano.redraw) piano.redraw();
+      }
+    });
   }
 
   function isNormalized(env) {
