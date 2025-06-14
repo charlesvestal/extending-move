@@ -34,7 +34,11 @@ export function initSetInspector() {
   const region = parseFloat(dataDiv.dataset.region || '4');
   const paramRanges = JSON.parse(dataDiv.dataset.paramRanges || '{}');
   const canvas = document.getElementById('clipCanvas');
-  const ctx = canvas.getContext('2d');
+  const container = document.getElementById('pianoRollContainer');
+  let ctx = null;
+  if (canvas) {
+    ctx = canvas.getContext('2d');
+  }
   const envSelect = document.getElementById('envelope_select');
   const legendDiv = document.getElementById('paramLegend');
   const editBtn = document.getElementById('editEnvBtn');
@@ -83,70 +87,33 @@ export function initSetInspector() {
     legendDiv.style.height = canvas.height + 'px';
   }
 
-  function getVisibleRange() {
-    if (!notes.length) return { min: 60, max: 71 }; // default middle C octave
-    let min = Math.min(...notes.map(n => n.noteNumber));
-    let max = Math.max(...notes.map(n => n.noteNumber));
-    if (max - min < 11) {
-      const extra = 11 - (max - min);
-      min = Math.max(0, min - Math.floor(extra / 2));
-      max = Math.min(127, max + Math.ceil(extra / 2));
-    }
-    return { min, max };
+  function toTransport(t) {
+    const bar = Math.floor(t / 4);
+    const q = Math.floor(t % 4);
+    const s = Math.round((t - bar * 4 - q) * 4);
+    return `${bar}:${q}:${s}`;
   }
 
-  function drawGrid() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const { min, max } = getVisibleRange();
-    const noteRange = max - min + 1;
-
-    ctx.strokeStyle = '#ddd';
-    for (let b = 0; b <= region; b++) {
-      const x = (b / region) * canvas.width;
-      ctx.beginPath();
-      ctx.lineWidth = b % 4 === 0 ? 2 : 1;
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, canvas.height);
-      ctx.stroke();
-    }
-    ctx.lineWidth = 1;
-
-    const h = canvas.height / noteRange;
-    for (let n = min; n <= max; n++) {
-      const y = canvas.height - (n - min) * h;
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(canvas.width, y);
-      ctx.stroke();
-    }
+  function toDuration(d) {
+    if (!d) return 4;
+    return Math.max(1, Math.round(4 / d));
   }
 
-  function drawLabels() {
-    const { min, max } = getVisibleRange();
-    const noteRange = max - min + 1;
-    const h = canvas.height / noteRange;
-    ctx.fillStyle = '#000';
-    ctx.font = '10px sans-serif';
-    for (let n = min; n <= max; n++) {
-      if (n % 12 === 0) {
-        const y = canvas.height - (n - min) * h;
-        const octave = Math.floor(n / 12) - 1;
-        ctx.fillText(`C${octave}`, 2, y - 2);
-      }
-    }
-  }
-
-  function drawNotes() {
-    const { min, max } = getVisibleRange();
-    const noteRange = max - min + 1;
-    const h = canvas.height / noteRange;
-    ctx.fillStyle = '#0074D9';
-    notes.forEach(n => {
-      const x = (n.startTime / region) * canvas.width;
-      const w = (n.duration / region) * canvas.width;
-      const y = canvas.height - (n.noteNumber - min + 1) * h;
-      ctx.fillRect(x, y, w, h);
+  let pianoRoll = null;
+  if (container && window.pixiPianoRoll) {
+    const noteData = notes.map(n => [toTransport(n.startTime), n.noteNumber, toDuration(n.duration)]);
+    pianoRoll = pixiPianoRoll({
+      width: canvas.width,
+      height: canvas.height,
+      noteFormat: 'MIDI',
+      zoom: region,
+      resolution: 4,
+      noteData,
     });
+    pianoRoll.view.style.position = 'absolute';
+    pianoRoll.view.style.left = '0';
+    pianoRoll.view.style.top = '0';
+    container.insertBefore(pianoRoll.view, canvas);
   }
 
   function drawEnvelope() {
@@ -215,9 +182,6 @@ export function initSetInspector() {
   }
 
   function draw() {
-    drawGrid();
-    drawNotes();
-    drawLabels();
     drawEnvelope();
   }
 
