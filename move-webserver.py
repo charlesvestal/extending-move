@@ -345,6 +345,8 @@ def set_inspector_route():
         notes=result.get("notes"),
         envelopes=result.get("envelopes"),
         region=result.get("region"),
+        loop_start=result.get("loop_start", 0.0),
+        loop_end=result.get("loop_end", result.get("region")),
         param_ranges_json=result.get("param_ranges_json", "{}"),
         active_tab="set-inspector",
     )
