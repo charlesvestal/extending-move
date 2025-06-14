@@ -800,6 +800,18 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 ev.stopPropagation();
                 return false;
             }
+            if(this.downht.m=="x"){
+                this.dragging={o:"HX",x:this.downpos.x,y:this.downpos.y,offsx:this.xoffset,xrange:this.xrange,t:this.downht.t};
+                ev.preventDefault();
+                ev.stopPropagation();
+                return false;
+            }
+            if(this.downht.m=="y"){
+                this.dragging={o:"HY",x:this.downpos.x,y:this.downpos.y,offsy:this.yoffset,yrange:this.yrange,n:this.downht.n};
+                ev.preventDefault();
+                ev.stopPropagation();
+                return false;
+            }
             this.dragging={o:null,x:this.downpos.x,y:this.downpos.y,offsx:this.xoffset,offsy:this.yoffset};
             this.canvas.focus();
             switch(this.editmode){
@@ -850,6 +862,24 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                     this.xoffset=this.dragging.offsx+(this.dragging.x-pos.x)*(this.xrange/this.width);
                 if(this.yscroll)
                     this.yoffset=this.dragging.offsy+(pos.y-this.dragging.y)*(this.yrange/this.height);
+                break;
+            case "HX":
+                var dx = pos.x - this.dragging.x;
+                var dy = pos.y - this.dragging.y;
+                var f = Math.pow(1.01, dy);
+                var xr = this.dragging.xrange * f;
+                var xo = this.dragging.t - (this.dragging.t - this.dragging.offsx)*f;
+                this.xrange = xr;
+                this.xoffset = xo - dx * (xr/this.width);
+                break;
+            case "HY":
+                var dx = pos.x - this.dragging.x;
+                var dy = pos.y - this.dragging.y;
+                var f = Math.pow(1.01, dx);
+                var yr = this.dragging.yrange * f;
+                var yo = this.dragging.n - (this.dragging.n - this.dragging.offsy)*f;
+                this.yrange = yr;
+                this.yoffset = yo + dy * (yr/this.height);
                 break;
             case "m":
                 if(ht.m=="m"){
