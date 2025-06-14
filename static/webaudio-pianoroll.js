@@ -946,7 +946,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 var dy=this.dragging.y0-pos.y;
                 var dx=this.dragging.x0-pos.x;
                 var dz=Math.abs(dy)>5?(dy>0?dy-5:dy+5):0;
-                var f=Math.pow(1.01,dz/2);
+                var f=Math.pow(1.01,-dz/2);
                 this.xrange=this.dragging.range/f;
                 this.xoffset=this.dragging.t-(this.dragging.t-this.dragging.off)/f;
                 this.xoffset+=dx*(this.xrange/this.width);
@@ -956,7 +956,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 var dx=this.dragging.x0-pos.x;
                 var dy=pos.y-this.dragging.y0;
                 var dz=Math.abs(dx)>5?(dx>0?dx-5:dx+5):0;
-                var f=Math.pow(1.01,dz/2);
+                var f=Math.pow(1.01,-dz/2);
                 this.yrange=this.dragging.range/f;
                 this.yoffset=this.dragging.n-(this.dragging.n-this.dragging.off)/f;
                 this.yoffset+=dy*(this.yrange/this.height);
