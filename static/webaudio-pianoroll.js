@@ -800,6 +800,19 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 ev.stopPropagation();
                 return false;
             }
+
+            if(this.downht.m=="x"){
+                this.dragging={o:"HX",x:this.downpos.x,y:this.downpos.y,t:this.downht.t,offsx:this.xoffset,xrange:this.xrange};
+                ev.preventDefault();
+                ev.stopPropagation();
+                return false;
+            }
+            if(this.downht.m=="y"){
+                this.dragging={o:"HY",x:this.downpos.x,y:this.downpos.y,n:this.downht.n,offsy:this.yoffset,yrange:this.yrange};
+                ev.preventDefault();
+                ev.stopPropagation();
+                return false;
+            }
             this.dragging={o:null,x:this.downpos.x,y:this.downpos.y,offsx:this.xoffset,offsy:this.yoffset};
             this.canvas.focus();
             switch(this.editmode){
@@ -850,6 +863,28 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                     this.xoffset=this.dragging.offsx+(this.dragging.x-pos.x)*(this.xrange/this.width);
                 if(this.yscroll)
                     this.yoffset=this.dragging.offsy+(pos.y-this.dragging.y)*(this.yrange/this.height);
+                break;
+            case "HX":
+                var dx = pos.x - this.dragging.x;
+                var dy = pos.y - this.dragging.y;
+                if(Math.abs(dy) > Math.abs(dx)){
+                    var f = Math.pow(1.01, dy);
+                    this.xoffset = this.dragging.t - (this.dragging.t - this.dragging.offsx) * f;
+                    this.xrange = this.dragging.xrange * f;
+                }else{
+                    this.xoffset=this.dragging.offsx+(this.dragging.x-pos.x)*(this.xrange/this.width);
+                }
+                break;
+            case "HY":
+                var dx = pos.x - this.dragging.x;
+                var dy = pos.y - this.dragging.y;
+                if(Math.abs(dx) > Math.abs(dy)){
+                    var f = Math.pow(1.01, dx);
+                    this.yoffset = this.dragging.n - (this.dragging.n - this.dragging.offsy) * f;
+                    this.yrange = this.dragging.yrange * f;
+                }else{
+                    this.yoffset=this.dragging.offsy+(pos.y-this.dragging.y)*(this.yrange/this.height);
+                }
                 break;
             case "m":
                 if(ht.m=="m"){
