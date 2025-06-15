@@ -67,6 +67,59 @@ export function initSetInspector() {
   const regionInput = document.getElementById('region_end_input');
   const loopStartInput = document.getElementById('loop_start_input');
   const loopEndInput = document.getElementById('loop_end_input');
+  const undoBtn = document.getElementById('undoBtn');
+  const redoBtn = document.getElementById('redoBtn');
+
+  const undoStack = [];
+  const redoStack = [];
+
+  function snapshot() {
+    return {
+      notes: piano ? (piano.sequence || []).map(ev => ({ ...ev })) : [],
+      envelopes: JSON.parse(JSON.stringify(envelopes)),
+      region: piano ? piano.xrange / ticksPerBeat : region,
+      loopStart: piano ? piano.markstart / ticksPerBeat : loopStart,
+      loopEnd: piano ? piano.markend / ticksPerBeat : loopEnd,
+      envSelect: envSelect ? envSelect.value : ''
+    };
+  }
+
+  function applyState(state) {
+    if (!state) return;
+    envelopes.splice(0, envelopes.length, ...JSON.parse(JSON.stringify(state.envelopes)));
+    if (piano) {
+      piano.sequence = state.notes.map(ev => ({ ...ev }));
+      piano.xrange = state.region * ticksPerBeat;
+      piano.markstart = state.loopStart * ticksPerBeat;
+      piano.markend = state.loopEnd * ticksPerBeat;
+      if (piano.redraw) piano.redraw();
+    }
+    if (envSelect) {
+      envSelect.value = state.envSelect;
+      envSelect.dispatchEvent(new Event('change'));
+    }
+    draw();
+  }
+
+  function pushUndo() {
+    undoStack.push(snapshot());
+    if (undoStack.length > 100) undoStack.shift();
+    redoStack.length = 0;
+  }
+
+  function undo() {
+    if (!undoStack.length) return;
+    redoStack.push(snapshot());
+    const state = undoStack.pop();
+    applyState(state);
+  }
+
+  function redo() {
+    if (!redoStack.length) return;
+    undoStack.push(snapshot());
+    const state = redoStack.pop();
+    applyState(state);
+  }
 
   let editing = false;
   let drawing = false;
@@ -408,6 +461,7 @@ export function initSetInspector() {
 
   function startDraw(ev) {
     if (!editing) return;
+    pushUndo();
     drawing = true;
     dirty = true;
     const { x, y } = canvasPos(ev);
@@ -496,6 +550,7 @@ export function initSetInspector() {
     ev.preventDefault();
   }
   function startVel(ev) {
+    pushUndo();
     velDragging = true;
     updateVel(ev);
   }
@@ -519,6 +574,39 @@ export function initSetInspector() {
     document.addEventListener('mouseup', endVel);
     document.addEventListener('touchend', endVel);
   }
+
+  if (piano && piano.canvas) {
+    const noteStart = () => { if (!editing) pushUndo(); };
+    piano.canvas.addEventListener('mousedown', noteStart, true);
+    piano.canvas.addEventListener('touchstart', noteStart, true);
+    const markStart = piano.querySelector('#wac-markstart');
+    const markEnd = piano.querySelector('#wac-markend');
+    if (markStart) {
+      markStart.addEventListener('mousedown', noteStart, true);
+      markStart.addEventListener('touchstart', noteStart, true);
+    }
+    if (markEnd) {
+      markEnd.addEventListener('mousedown', noteStart, true);
+      markEnd.addEventListener('touchstart', noteStart, true);
+    }
+    piano.canvas.addEventListener('keydown', ev => {
+      const codes = [8, 46, 37, 39, 38, 40, 68, 81];
+      if (codes.includes(ev.keyCode)) pushUndo();
+    });
+  }
+
+  if (undoBtn) undoBtn.addEventListener('click', undo);
+  if (redoBtn) redoBtn.addEventListener('click', redo);
+
+  document.addEventListener('keydown', ev => {
+    if ((ev.ctrlKey || ev.metaKey) && !ev.shiftKey && ev.key === 'z') {
+      undo();
+      ev.preventDefault();
+    } else if ((ev.ctrlKey || ev.metaKey) && (ev.key === 'y' || (ev.shiftKey && ev.key === 'z'))) {
+      redo();
+      ev.preventDefault();
+    }
+  });
 
 
   if (saveClipForm) saveClipForm.addEventListener('submit', () => {
@@ -557,6 +645,7 @@ export function initSetInspector() {
     updateControls();
     draw();
   }
+  pushUndo();
 }
 
 document.addEventListener('DOMContentLoaded', initSetInspector);
