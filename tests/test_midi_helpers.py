@@ -5,6 +5,7 @@ sys.path.append(str(Path(__file__).resolve().parents[1]))
 
 from core.midi_pattern_generator import (
     note_name_to_midi,
+    midi_to_note_name,
     create_scale_pattern,
     create_rhythm_pattern,
 )
@@ -22,6 +23,20 @@ def test_note_name_to_midi_invalid():
         note_name_to_midi("H2")
     with pytest.raises(ValueError):
         note_name_to_midi("C?")
+
+
+def test_midi_to_note_name_basic():
+    assert midi_to_note_name(60) == "C4"
+    assert midi_to_note_name(75) == "D#5"
+    assert midi_to_note_name(58) == "A#3"
+
+
+def test_midi_to_note_name_invalid():
+    import pytest
+    with pytest.raises(ValueError):
+        midi_to_note_name(-1)
+    with pytest.raises(ValueError):
+        midi_to_note_name(128)
 
 
 def test_create_scale_pattern_descending():

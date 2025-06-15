@@ -36,6 +36,8 @@ export function initSetInspector() {
   const loopEnd = parseFloat(dataDiv.dataset.loopEnd || String(region));
   const paramRanges = JSON.parse(dataDiv.dataset.paramRanges || '{}');
   const pitchPads = JSON.parse(dataDiv.dataset.pitchpads || '[]');
+  const PITCH_BASE = 48; // C3
+  const PITCH_SCALE = 170.6458282470703; // units per semitone
   const canvas = document.getElementById('clipCanvas');
   const ctx = canvas.getContext('2d');
   const velCanvas = document.getElementById('velocityCanvas');
@@ -96,7 +98,7 @@ export function initSetInspector() {
     const padNotes = baseNotes.filter(n => n.noteNumber === pad);
     piano.sequence = padNotes.map(n => ({
       t: Math.round(n.startTime * ticksPerBeat),
-      n: Math.round(36 + (n.pitchBend || 0) / 170.6458282470703),
+      n: Math.round(PITCH_BASE + (n.pitchBend || 0) / PITCH_SCALE),
       g: Math.round(n.duration * ticksPerBeat),
       v: Math.round(n.velocity || 100),
       pb: n.pitchBend || 0
@@ -562,7 +564,7 @@ export function initSetInspector() {
         duration: ev.g / ticksPerBeat,
         velocity: ev.v ?? 100.0,
         offVelocity: 0.0,
-        pitchBend: (ev.n - 36) * 170.6458282470703
+        pitchBend: (ev.n - PITCH_BASE) * PITCH_SCALE
       }));
       baseNotes = others.concat(newPad);
     } else {

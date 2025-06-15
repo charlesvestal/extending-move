@@ -1,6 +1,7 @@
 from handlers.base_handler import BaseHandler
 from core.set_inspector_handler import list_clips, get_clip_data, save_envelope
 from core.list_msets_handler import list_msets
+from core.midi_pattern_generator import midi_to_note_name
 from core.pad_colors import rgb_string
 from core.config import MSETS_DIRECTORY
 import json
@@ -188,7 +189,7 @@ class SetInspectorHandler(BaseHandler):
             env_opts = '<option value="">No Envelope</option>' + env_opts
             pitch_pad_nums = sorted({n.get("noteNumber") for n in result.get("notes", []) if "pitchBend" in n})
             pitch_pad_opts = ''.join(
-                f'<option value="{num}">Note {num}</option>'
+                f'<option value="{num}">{midi_to_note_name(num)}</option>'
                 for num in pitch_pad_nums
             )
             pitch_pad_opts = '<option value="">Normal Notes</option>' + pitch_pad_opts
@@ -263,7 +264,7 @@ class SetInspectorHandler(BaseHandler):
             env_opts = '<option value="">No Envelope</option>' + env_opts
             pitch_pad_nums = sorted({n.get("noteNumber") for n in clip_data.get("notes", []) if "pitchBend" in n})
             pitch_pad_opts = ''.join(
-                f'<option value="{num}">Note {num}</option>'
+                f'<option value="{num}">{midi_to_note_name(num)}</option>'
                 for num in pitch_pad_nums
             )
             pitch_pad_opts = '<option value="">Normal Notes</option>' + pitch_pad_opts
@@ -359,7 +360,7 @@ class SetInspectorHandler(BaseHandler):
             env_opts = '<option value="">No Envelope</option>' + env_opts
             pitch_pad_nums = sorted({n.get("noteNumber") for n in clip_data.get("notes", []) if "pitchBend" in n})
             pitch_pad_opts = ''.join(
-                f'<option value="{num}">Note {num}</option>'
+                f'<option value="{num}">{midi_to_note_name(num)}</option>'
                 for num in pitch_pad_nums
             )
             pitch_pad_opts = '<option value="">Normal Notes</option>' + pitch_pad_opts

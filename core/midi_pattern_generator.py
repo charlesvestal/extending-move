@@ -145,8 +145,19 @@ def note_name_to_midi(note_name: str) -> int:
     
     # Calculate MIDI number (C4 = 60)
     midi_number = (octave + 1) * 12 + note_map[base_note] + offset
-    
+
     return midi_number
+
+
+def midi_to_note_name(midi_number: int) -> str:
+    """Convert MIDI number to note name using sharps for accidentals."""
+    if not 0 <= midi_number <= 127:
+        raise ValueError(f"Invalid MIDI number: {midi_number}")
+
+    note_names = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+    name = note_names[midi_number % 12]
+    octave = midi_number // 12 - 1
+    return f"{name}{octave}"
 
 def create_c_major_downbeats(beats: int = 4) -> List[Dict[str, Any]]:
     """
