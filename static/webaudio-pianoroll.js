@@ -580,13 +580,14 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
 
         this.randomFillRow=function(note){
             for(let i=this.sequence.length-1;i>=0;--i){
-                if(this.sequence[i].n===note)
+                const ev=this.sequence[i];
+                if(ev.n===note && ev.t>=this.markstart && ev.t<this.markend)
                     this.sequence.splice(i,1);
             }
-            const steps=Math.floor(this.xrange/this.grid);
+            const steps=Math.floor((this.markend-this.markstart)/this.grid);
             for(let s=0;s<steps;++s){
                 if(Math.random()<0.5){
-                    const t=s*this.grid;
+                    const t=this.markstart+s*this.grid;
                     this.addNote(t,note,this.grid,this.defvelo);
                 }
             }
@@ -1045,6 +1046,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                     break;
                 case "s":
                     this.menuGlobal=true;
+                    this.clearSel();
                     this.menuDelete.classList.add('disabled');
                     this.popMenu(this.downpos);
                     this.dragging={o:"m"};
@@ -1084,6 +1086,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                     break;
                 case "s":
                     this.menuGlobal=true;
+                    this.clearSel();
                     this.menuDelete.classList.add('disabled');
                     this.popMenu(this.downpos);
                     this.dragging={o:"m"};
