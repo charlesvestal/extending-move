@@ -889,6 +889,8 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 this.snap=v;
                 this.grid=v;
                 this.redraw();
+                // Return focus to the piano roll so keyboard shortcuts work
+                this.canvas.focus();
             }
         };
         this.setupImage=function(){
