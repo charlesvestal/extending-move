@@ -245,12 +245,13 @@ export function initSetInspector() {
     if (!velCanvas || !vctx || !piano) return;
     vctx.clearRect(0, 0, velCanvas.width, velCanvas.height);
     const seq = piano.sequence || [];
-    const barWidth = Math.max(2, (piano.grid || piano.snap) * (velCanvas.width / piano.xrange) * 0.8);
+    const barWidth = Math.max(2,
+      (piano.grid || piano.snap) * (velCanvas.width / piano.xrange) * 0.8);
     seq.forEach(ev => {
       const x = ((ev.t - piano.xoffset) / piano.xrange) * velCanvas.width;
       const h = ((ev.v || 100) / 127) * velCanvas.height;
       vctx.fillStyle = ev.f ? piano.colnotesel : piano.colnote;
-      vctx.fillRect(x - barWidth / 2, velCanvas.height - h, barWidth, h);
+      vctx.fillRect(x, velCanvas.height - h, barWidth, h);
     });
   }
 
@@ -428,23 +429,37 @@ export function initSetInspector() {
     const y = (ev.touches ? ev.touches[0].clientY : ev.clientY) - rect.top;
     return { x, y };
   }
-  function noteAtX(x) {
+  function notesAtX(x) {
     const seq = piano.sequence || [];
-    const barWidth = Math.max(2, (piano.grid || piano.snap) * (velCanvas.width / piano.xrange) * 0.8);
+    const barWidth = Math.max(2,
+      (piano.grid || piano.snap) * (velCanvas.width / piano.xrange) * 0.8);
+    const list = [];
     for (let i = 0; i < seq.length; i++) {
-      const ev = seq[i];
-      const ex = ((ev.t - piano.xoffset) / piano.xrange) * velCanvas.width;
-      if (x >= ex - barWidth / 2 && x <= ex + barWidth / 2) return i;
+      const ex = ((seq[i].t - piano.xoffset) / piano.xrange) * velCanvas.width;
+      if (x >= ex && x <= ex + barWidth) list.push(i);
     }
-    return -1;
+    return list;
   }
   function updateVel(ev) {
     if (!velDragging) return;
     const { x, y } = velPos(ev);
-    const idx = noteAtX(x);
-    if (idx >= 0) {
-      const v = Math.max(1, Math.min(127, Math.round(127 - (y / velCanvas.height) * 127)));
-      piano.sequence[idx].v = v;
+    const indices = notesAtX(x);
+    if (indices.length) {
+      const v = Math.max(1,
+        Math.min(127, Math.round(127 - (y / velCanvas.height) * 127)));
+      const selCount = piano.sequence.filter(ev => ev.f).length;
+      const targets =
+        selCount && indices.some(i => piano.sequence[i].f)
+          ? indices.filter(i => piano.sequence[i].f)
+          : indices;
+      if (selCount === 1) {
+        const only = piano.sequence.findIndex(ev => ev.f);
+        if (indices.includes(only)) {
+          piano.sequence[only].v = v;
+        }
+      } else {
+        targets.forEach(i => { piano.sequence[i].v = v; });
+      }
       drawVelocity();
     }
     ev.preventDefault();
