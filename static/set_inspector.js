@@ -37,6 +37,7 @@ export function initSetInspector() {
   const loopStart = parseFloat(dataDiv.dataset.loopStart || '0');
   const loopEnd = parseFloat(dataDiv.dataset.loopEnd || String(region));
   const paramRanges = JSON.parse(dataDiv.dataset.paramRanges || '{}');
+  const drumMode = dataDiv.dataset.drumMode === '1' || dataDiv.dataset.drumMode === 'true';
   const canvas = document.getElementById('clipCanvas');
   const ctx = canvas.getContext('2d');
   const velCanvas = document.getElementById('velocityCanvas');
@@ -70,6 +71,25 @@ export function initSetInspector() {
   const loopStartInput = document.getElementById('loop_start_input');
   const loopEndInput = document.getElementById('loop_end_input');
 
+  function truncateOverlaps(seq) {
+    const byRow = {};
+    seq.sort((a, b) => a.t - b.t || a.n - b.n);
+    seq.forEach(ev => {
+      if (!byRow[ev.n]) byRow[ev.n] = [];
+      byRow[ev.n].push(ev);
+    });
+    Object.values(byRow).forEach(list => {
+      list.sort((a, b) => a.t - b.t);
+      for (let i = 0; i < list.length - 1; i++) {
+        const cur = list[i];
+        const next = list[i + 1];
+        if (cur.t + cur.g > next.t) {
+          cur.g = Math.max(0, next.t - cur.t);
+        }
+      }
+    });
+  }
+
   let editing = false;
   let drawing = false;
   let dirty = false;
@@ -92,6 +112,18 @@ export function initSetInspector() {
       a: n.automations || null
 
     }));
+    if (drumMode) {
+      truncateOverlaps(piano.sequence);
+      notes.length = 0;
+      piano.sequence.forEach(ev => {
+        notes.push({
+          noteNumber: ev.n,
+          startTime: ev.t / ticksPerBeat,
+          duration: ev.g / ticksPerBeat,
+          velocity: ev.v
+        });
+      });
+    }
     recomputeOverlay();
     if (piano.setHighlightRow) piano.setHighlightRow(null);
     if (!piano.hasAttribute('xrange')) piano.xrange = region * ticksPerBeat;
@@ -395,6 +427,7 @@ export function initSetInspector() {
   if (piano && piano.redraw) {
     const origRedraw = piano.redraw.bind(piano);
     piano.redraw = function(...args) {
+      if (drumMode) truncateOverlaps(this.sequence);
       let bak = null;
       if (overlayActive) {
         bak = this.sequence;
@@ -656,6 +689,7 @@ export function initSetInspector() {
         });
       });
       piano.sortSequence();
+      if (drumMode) truncateOverlaps(piano.sequence);
       notes.length = 0;
       piano.sequence.forEach(ev => {
         notes.push({
@@ -713,6 +747,7 @@ export function initSetInspector() {
   if (saveClipForm) saveClipForm.addEventListener('submit', () => {
     if (piano && notesInput) {
       const seq = piano.sequence || [];
+      if (drumMode) truncateOverlaps(seq);
       notesInput.value = JSON.stringify(seq.map(ev => {
         const note = {
           noteNumber: ev.n,

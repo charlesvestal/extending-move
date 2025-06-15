@@ -54,7 +54,9 @@ def list_clips(set_path: str) -> Dict[str, Any]:
                 if clip:
                     name = clip.get("name", f"Track {ti+1} Clip {ci+1}")
                     color = clip.get("color")
-                    clips.append({"track": ti, "clip": ci, "name": name, "color": color})
+                    clips.append(
+                        {"track": ti, "clip": ci, "name": name, "color": color}
+                    )
         return {"success": True, "message": "Clips loaded", "clips": clips}
     except Exception as e:
         return {"success": False, "message": f"Failed to read set: {e}"}
@@ -76,6 +78,21 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
         loop_end = loop_info.get("end", region_end)
 
         region_length = region_end
+
+        def _has_drum_rack(obj: Any) -> bool:
+            if isinstance(obj, dict):
+                if obj.get("kind") == "drumRack":
+                    return True
+                for v in obj.values():
+                    if _has_drum_rack(v):
+                        return True
+            elif isinstance(obj, list):
+                for item in obj:
+                    if _has_drum_rack(item):
+                        return True
+            return False
+
+        is_drum_rack = _has_drum_rack(track_obj.get("devices", []))
         track_name = _track_display_name(track_obj, track)
         clip_name = clip_obj.get("name") or f"Clip {clip + 1}"
         param_map: Dict[int, str] = {}
@@ -85,7 +102,11 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
 
         # Load parameter metadata from available instrument schemas
         schemas: Dict[str, Dict[str, Any]] = {}
-        for loader in (load_drift_schema, load_wavetable_schema, load_melodic_sampler_schema):
+        for loader in (
+            load_drift_schema,
+            load_wavetable_schema,
+            load_melodic_sampler_schema,
+        ):
             try:
                 schemas.update(loader() or {})
             except Exception:
@@ -136,6 +157,7 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
             "param_ranges": param_ranges,
             "track_name": track_name,
             "clip_name": clip_name,
+            "is_drum_rack": is_drum_rack,
         }
     except Exception as e:
         return {"success": False, "message": f"Failed to read clip: {e}"}
@@ -153,9 +175,7 @@ def save_envelope(
         with open(set_path, "r") as f:
             song = json.load(f)
 
-        clip_obj = (
-            song["tracks"][track]["clipSlots"][clip]["clip"]
-        )
+        clip_obj = song["tracks"][track]["clipSlots"][clip]["clip"]
         envelopes = clip_obj.setdefault("envelopes", [])
         for env in envelopes:
             if env.get("parameterId") == parameter_id:

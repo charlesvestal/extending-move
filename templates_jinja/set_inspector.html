@@ -75,6 +75,9 @@
     <span id="envValue" style="margin-left:0.5rem; font-size:0.8em;"></span>
     <label for="note_draw_toggle" style="margin-left:1rem;">Draw Notes</label>
     <input id="note_draw_toggle" type="checkbox">
+    {% if is_drum_rack %}
+    <span style="margin-left:1rem; font-weight:bold;">Drum mode</span>
+    {% endif %}
   </div>
   <small>Right click to select or transform, use arrow keys to nudge.</small>
   <div style="margin-top:1rem; display:flex; align-items:flex-start;">
@@ -110,7 +113,7 @@
   </form>
   {% endif %}
   <p>Current version: {{ current_ts }}</p>
-  <div id="clipData" data-notes='{{ notes | tojson }}' data-envelopes='{{ envelopes | tojson }}' data-region='{{ region | default(4.0) }}' data-loop-start='{{ loop_start | default(0.0) }}' data-loop-end='{{ loop_end | default(region) }}' data-param-ranges='{{ param_ranges_json | safe }}'></div>
+  <div id="clipData" data-notes='{{ notes | tojson }}' data-envelopes='{{ envelopes | tojson }}' data-region='{{ region | default(4.0) }}' data-loop-start='{{ loop_start | default(0.0) }}' data-loop-end='{{ loop_end | default(region) }}' data-param-ranges='{{ param_ranges_json | safe }}' data-drum-mode='{{ 1 if is_drum_rack else 0 }}'></div>
   <style>
     .modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:1000; }
     .modal.hidden { display:none; }
