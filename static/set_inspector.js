@@ -339,18 +339,17 @@ export function initSetInspector() {
 
   function drawGhostNotes() {
     if (!ghostNotes.length || !piano) return;
-    const { min, max } = getVisibleRange();
-    const noteRange = max - min + 1;
-    const h = canvas.height / noteRange;
+    const stepw = canvas.width / piano.xrange;
+    const steph = canvas.height / piano.yrange;
     ctx.save();
     ctx.globalAlpha = 0.6;
     ctx.fillStyle = '#0074D9';
     ghostNotes.forEach(n => {
       const t = n.startTime * ticksPerBeat;
-      const x = ((t - piano.xoffset) / piano.xrange) * canvas.width;
-      const w = (n.duration * ticksPerBeat / piano.xrange) * canvas.width;
-      const y = canvas.height - (n.noteNumber - min + 1) * h;
-      ctx.fillRect(x, y, w, h);
+      const x = (t - piano.xoffset) * stepw;
+      const w = n.duration * ticksPerBeat * stepw;
+      const y = canvas.height - (n.noteNumber - piano.yoffset) * steph;
+      ctx.fillRect(x, y - steph, w, steph);
     });
     ctx.restore();
   }
