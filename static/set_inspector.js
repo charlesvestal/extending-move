@@ -85,7 +85,26 @@ export function initSetInspector() {
     return (p - BEND_BASE_NOTE) * BEND_UNITS_PER_SEMITONE;
   }
 
-  const pitchNotes = [...new Set(allNotes.filter(n => n.pitchBend !== undefined).map(n => n.noteNumber))].sort((a,b)=>a-b);
+  function getPitchBend(n) {
+    if (typeof n.pitchBend !== 'undefined') return n.pitchBend;
+    if (n.automations && Array.isArray(n.automations.PitchBend) && n.automations.PitchBend.length) {
+      return n.automations.PitchBend[0].value;
+    }
+    return undefined;
+  }
+
+  function setPitchBend(n, val) {
+    if (!n.automations) n.automations = {};
+    n.automations.PitchBend = [{ time: 0.0, value: val }];
+    n.pitchBend = val;
+  }
+
+  allNotes.forEach(n => {
+    const pb = getPitchBend(n);
+    if (pb !== undefined) n.pitchBend = pb;
+  });
+
+  const pitchNotes = [...new Set(allNotes.filter(n => getPitchBend(n) !== undefined).map(n => n.noteNumber))].sort((a,b)=>a-b);
   if (pitchSelect) {
     pitchSelect.innerHTML = '<option value="">No Pitch</option>' +
       pitchNotes.map(n => `<option value="${n}">${noteName(n)}</option>`).join('');
@@ -106,10 +125,10 @@ export function initSetInspector() {
     if (!piano.sequence) piano.sequence = [];
     let seq;
     if (pitchMode && activePad !== null) {
-      seq = allNotes.filter(n => n.noteNumber === activePad && n.pitchBend !== undefined)
+      seq = allNotes.filter(n => n.noteNumber === activePad && getPitchBend(n) !== undefined)
         .map(n => ({
           t: Math.round(n.startTime * ticksPerBeat),
-          n: Math.round(pitchFromBend(n.pitchBend)),
+          n: Math.round(pitchFromBend(getPitchBend(n))),
           g: Math.round(n.duration * ticksPerBeat),
           v: Math.round(n.velocity || 100)
         }));
@@ -258,12 +277,12 @@ export function initSetInspector() {
     const h = canvas.height / noteRange;
     ctx.fillStyle = '#0074D9';
     const src = pitchMode && activePad !== null
-      ? allNotes.filter(n => n.noteNumber === activePad && n.pitchBend !== undefined)
+      ? allNotes.filter(n => n.noteNumber === activePad && getPitchBend(n) !== undefined)
       : allNotes;
     src.forEach(n => {
       const x = (n.startTime / region) * canvas.width;
       const w = (n.duration / region) * canvas.width;
-      const note = pitchMode && n.pitchBend !== undefined ? pitchFromBend(n.pitchBend) : n.noteNumber;
+      const note = pitchMode && getPitchBend(n) !== undefined ? pitchFromBend(getPitchBend(n)) : n.noteNumber;
       const y = canvas.height - (note - min + 1) * h;
       ctx.fillRect(x, y, w, h);
     });
@@ -557,15 +576,18 @@ export function initSetInspector() {
     if (piano && notesInput) {
       const seq = piano.sequence || [];
       if (pitchMode && activePad !== null) {
-        const other = allNotes.filter(n => n.noteNumber !== activePad || n.pitchBend === undefined);
-        const padNotes = seq.map(ev => ({
-          noteNumber: activePad,
-          startTime: ev.t / ticksPerBeat,
-          duration: ev.g / ticksPerBeat,
-          velocity: ev.v ?? 100.0,
-          offVelocity: 0.0,
-          pitchBend: bendFromPitch(ev.n)
-        }));
+        const other = allNotes.filter(n => n.noteNumber !== activePad || getPitchBend(n) === undefined);
+        const padNotes = seq.map(ev => {
+          const note = {
+            noteNumber: activePad,
+            startTime: ev.t / ticksPerBeat,
+            duration: ev.g / ticksPerBeat,
+            velocity: ev.v ?? 100.0,
+            offVelocity: 0.0,
+          };
+          setPitchBend(note, bendFromPitch(ev.n));
+          return note;
+        });
         notesInput.value = JSON.stringify([...other, ...padNotes]);
       } else {
         notesInput.value = JSON.stringify(seq.map(ev => ({
