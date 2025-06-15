@@ -1384,12 +1384,12 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 const t=bar*this.timebase;
                 const x=this.stepw*(t-this.xoffset)+this.yruler+this.kbwidth;
                 if(x>=this.width) break;
+                this.ctx.fillStyle=gridRes>=1.0?"#a0a0a0":"#000";
+                this.ctx.fillRect((x|0)-1,this.xruler,2,this.sheight);
                 if(gridRes>1.0 && bar%gridRes===0){
                     this.ctx.fillStyle="#e0e0e0";
                     this.ctx.fillRect(x|0,this.xruler,1,this.sheight);
                 }
-                this.ctx.fillStyle=gridRes>=1.0?"#a0a0a0":"#000";
-                this.ctx.fillRect((x|0)-1,this.xruler,2,this.sheight);
             }
         };
         this.semiflag=[6,1,0,1,0,2,1,0,1,0,1,0];
