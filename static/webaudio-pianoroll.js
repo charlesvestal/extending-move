@@ -158,11 +158,11 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
 <img id="wac-markend" class="marker" src="${this.markendsrc}"/>
 <img id="wac-cursor" class="marker" src="${this.cursorsrc}"/>
 <div id="wac-menu">
-<div data-action="delete">Delete</div>
+<div data-action="delete">Delete (Del)</div>
 <div data-action="duplicate">Duplicate</div>
 <div data-action="double">×2 duration</div>
 <div data-action="half">÷2 duration</div>
-<div data-action="quantize">Quantize to grid</div>
+<div data-action="quantize">Quantize to grid (Q)</div>
 <div data-action="velocity">Velocity...</div>
 </div>
 <select id="wac-gridres"></select>
@@ -555,7 +555,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
         };
 
         this.adjustVelocitySelectedNotes=function(v){
-            if(isNaN(v)) return;
+            if(isNaN(v) || v < 1 || v > 127) return;
             for(const ev of this.sequence){
                 if(ev.f)
                     ev.v=v;
@@ -909,6 +909,11 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             case 40://down
                 this.transposeSelectedNotes(-1);
                 this.sortSequence();
+                this.redraw();
+                e.preventDefault();
+                break;
+            case 81://q - quantize
+                this.quantizeSelectedNotes();
                 this.redraw();
                 e.preventDefault();
                 break;
