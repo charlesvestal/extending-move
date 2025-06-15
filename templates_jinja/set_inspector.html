@@ -110,6 +110,26 @@
   {% endif %}
   <p>Current version: {{ current_ts }}</p>
   <div id="clipData" data-notes='{{ notes | tojson }}' data-envelopes='{{ envelopes | tojson }}' data-region='{{ region | default(4.0) }}' data-loop-start='{{ loop_start | default(0.0) }}' data-loop-end='{{ loop_end | default(region) }}' data-param-ranges='{{ param_ranges_json | safe }}'></div>
+  <style>
+    .modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:1000; }
+    .modal.hidden { display:none; }
+    .modal-content { background:#fff; padding:20px; border-radius:4px; position:relative; z-index:1001; }
+    .modal-close { position:absolute; top:10px; right:10px; cursor:pointer; }
+    #euclidModal label { display:block; margin-bottom:0.5rem; }
+    #euclidModal input[type="number"] { width:4rem; }
+  </style>
+  <div id="euclidModal" class="modal hidden">
+    <div class="modal-content">
+      <span class="modal-close">&times;</span>
+      <label>Loop length: <input type="number" id="euclid_length" min="1" max="64"></label>
+      <label>Pulses: <input type="number" id="euclid_pulses" min="1" max="64"></label>
+      <label>Rotate: <input type="number" id="euclid_rotate" min="0" max="63" value="0"></label>
+      <div style="margin-top:0.5rem;">
+        <button id="euclid_ok" type="button">OK</button>
+        <button id="euclid_cancel" type="button">Cancel</button>
+      </div>
+    </div>
+  </div>
   {% endif %}
 {% endblock %}
 {% block scripts %}

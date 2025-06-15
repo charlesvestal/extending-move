@@ -166,6 +166,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
 <div data-action="double">×2 duration</div>
 <div data-action="half">÷2 duration</div>
 <div data-action="quantize">Quantize to grid (Q)</div>
+<div data-action="euclid">Euclidean fill...</div>
 <!-- <div data-action="velocity">Velocity...</div> -->
 </div>
 <select id="wac-gridres"></select>
@@ -1240,6 +1241,9 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                         break;
                     case 'quantize':
                         this.quantizeSelectedNotes();
+                        break;
+                    case 'euclid':
+                        this.dispatchEvent(new CustomEvent('euclidfill', { detail: { row: this.downht.n|0 } }));
                         break;
                     case 'velocity':
                         const v=parseInt(prompt('Velocity (1-127):','100'),10);
