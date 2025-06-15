@@ -29,7 +29,8 @@ export function initSetInspector() {
 
   const dataDiv = document.getElementById('clipData');
   if (!dataDiv) return;
-  const notes = JSON.parse(dataDiv.dataset.notes || '[]');
+  const allNotes = JSON.parse(dataDiv.dataset.notes || '[]');
+  let notes = allNotes.slice();
   const envelopes = JSON.parse(dataDiv.dataset.envelopes || '[]');
   const region = parseFloat(dataDiv.dataset.region || '4');
   const loopStart = parseFloat(dataDiv.dataset.loopStart || '0');
@@ -45,6 +46,8 @@ export function initSetInspector() {
   const yruler = piano ? parseInt(piano.getAttribute('yruler') || '24', 10) : 24;
   const kbwidth = piano ? parseInt(piano.getAttribute('kbwidth') || '40', 10) : 40;
   const ticksPerBeat = timebase / 4;
+  const BEND_UNITS_PER_SEMITONE = 170.6458282470703;
+  const BEND_BASE_NOTE = 60; // C3 when pitch bend = 0
   if (piano && canvas) {
     const w = parseInt(piano.getAttribute('width') || piano.clientWidth || 0, 10);
     const h = parseInt(piano.getAttribute('height') || piano.clientHeight || 0, 10);
@@ -59,6 +62,7 @@ export function initSetInspector() {
     }
   }
   const envSelect = document.getElementById('envelope_select');
+  const pitchSelect = document.getElementById('pitch_select');
   const legendDiv = document.getElementById('paramLegend');
   const valueDiv = document.getElementById('envValue');
   const saveClipForm = document.getElementById('saveClipForm');
@@ -68,33 +72,74 @@ export function initSetInspector() {
   const loopStartInput = document.getElementById('loop_start_input');
   const loopEndInput = document.getElementById('loop_end_input');
 
+  const NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+  function noteName(num) {
+    const name = NOTE_NAMES[num % 12] || 'C';
+    const oct = Math.floor(num / 12) - 1;
+    return name + oct;
+  }
+  function pitchFromBend(pb) {
+    return BEND_BASE_NOTE + pb / BEND_UNITS_PER_SEMITONE;
+  }
+  function bendFromPitch(p) {
+    return (p - BEND_BASE_NOTE) * BEND_UNITS_PER_SEMITONE;
+  }
+
+  const pitchNotes = [...new Set(allNotes.filter(n => n.pitchBend !== undefined).map(n => n.noteNumber))].sort((a,b)=>a-b);
+  if (pitchSelect) {
+    pitchSelect.innerHTML = '<option value="">No Pitch</option>' +
+      pitchNotes.map(n => `<option value="${n}">${noteName(n)}</option>`).join('');
+  }
+
   let editing = false;
   let drawing = false;
   let dirty = false;
   let currentEnv = [];
   let tailEnv = [];
   let envInfo = null;
+  let pitchMode = false;
+  let activePad = null;
+  let currentSeq = [];
 
-  if (piano) {
+  function refreshPiano() {
+    if (!piano) return;
     if (!piano.sequence) piano.sequence = [];
-    piano.sequence = notes.map(n => ({
-      t: Math.round(n.startTime * ticksPerBeat),
-      n: n.noteNumber,
-      g: Math.round(n.duration * ticksPerBeat),
-      v: Math.round(n.velocity || 100)
-
-    }));
+    let seq;
+    if (pitchMode && activePad !== null) {
+      seq = allNotes.filter(n => n.noteNumber === activePad && n.pitchBend !== undefined)
+        .map(n => ({
+          t: Math.round(n.startTime * ticksPerBeat),
+          n: Math.round(pitchFromBend(n.pitchBend)),
+          g: Math.round(n.duration * ticksPerBeat),
+          v: Math.round(n.velocity || 100)
+        }));
+      piano.colnote = '#0074D9';
+    } else {
+      seq = allNotes.map(n => ({
+        t: Math.round(n.startTime * ticksPerBeat),
+        n: n.noteNumber,
+        g: Math.round(n.duration * ticksPerBeat),
+        v: Math.round(n.velocity || 100)
+      }));
+      piano.colnote = '#f22';
+    }
+    piano.sequence = seq;
+    currentSeq = seq;
     if (!piano.hasAttribute('xrange')) piano.xrange = region * ticksPerBeat;
     if (!piano.hasAttribute('markstart')) piano.markstart = loopStart * ticksPerBeat;
     if (!piano.hasAttribute('markend')) piano.markend = loopEnd * ticksPerBeat;
     piano.showcursor = false;
-    const { min, max } = notes.length
-      ? { min: Math.min(...notes.map(n => n.noteNumber)),
-          max: Math.max(...notes.map(n => n.noteNumber)) }
+    const { min, max } = seq.length
+      ? { min: Math.min(...seq.map(ev => ev.n)),
+          max: Math.max(...seq.map(ev => ev.n)) }
       : { min: 60, max: 71 };
     piano.yoffset = Math.max(0, min - 2);
     piano.yrange = Math.max(12, max - min + 5);
     if (piano.redraw) piano.redraw();
+  }
+
+  if (piano) {
+    refreshPiano();
 
     piano.addEventListener('dblclick', ev => {
       const rect = piano.getBoundingClientRect();
@@ -107,9 +152,9 @@ export function initSetInspector() {
         return;
       }
       if (x < piano.yruler + piano.kbwidth) {
-        const { min, max } = notes.length
-          ? { min: Math.min(...notes.map(n => n.noteNumber)),
-              max: Math.max(...notes.map(n => n.noteNumber)) }
+        const { min, max } = currentSeq.length
+          ? { min: Math.min(...currentSeq.map(e => e.n)),
+              max: Math.max(...currentSeq.map(e => e.n)) }
           : { min: 60, max: 71 };
         piano.yoffset = Math.max(0, min - 2);
         piano.yrange = Math.max(12, max - min + 5);
@@ -154,9 +199,10 @@ export function initSetInspector() {
   }
 
   function getVisibleRange() {
-    if (!notes.length) return { min: 60, max: 71 }; // default middle C octave
-    let min = Math.min(...notes.map(n => n.noteNumber));
-    let max = Math.max(...notes.map(n => n.noteNumber));
+    const seq = currentSeq.length ? currentSeq : [];
+    if (!seq.length) return { min: 60, max: 71 }; // default middle C octave
+    let min = Math.min(...seq.map(ev => ev.n));
+    let max = Math.max(...seq.map(ev => ev.n));
     if (max - min < 11) {
       const extra = 11 - (max - min);
       min = Math.max(0, min - Math.floor(extra / 2));
@@ -211,10 +257,14 @@ export function initSetInspector() {
     const noteRange = max - min + 1;
     const h = canvas.height / noteRange;
     ctx.fillStyle = '#0074D9';
-    notes.forEach(n => {
+    const src = pitchMode && activePad !== null
+      ? allNotes.filter(n => n.noteNumber === activePad && n.pitchBend !== undefined)
+      : allNotes;
+    src.forEach(n => {
       const x = (n.startTime / region) * canvas.width;
       const w = (n.duration / region) * canvas.width;
-      const y = canvas.height - (n.noteNumber - min + 1) * h;
+      const note = pitchMode && n.pitchBend !== undefined ? pitchFromBend(n.pitchBend) : n.noteNumber;
+      const y = canvas.height - (note - min + 1) * h;
       ctx.fillRect(x, y, w, h);
     });
   }
@@ -345,6 +395,14 @@ export function initSetInspector() {
     }
     updateLegend();
     updateControls();
+    draw();
+  });
+
+  if (pitchSelect) pitchSelect.addEventListener('change', () => {
+    activePad = pitchSelect.value ? parseInt(pitchSelect.value, 10) : null;
+    pitchMode = activePad !== null;
+    refreshPiano();
+    drawVelocity();
     draw();
   });
 
@@ -498,13 +556,26 @@ export function initSetInspector() {
   if (saveClipForm) saveClipForm.addEventListener('submit', () => {
     if (piano && notesInput) {
       const seq = piano.sequence || [];
-      notesInput.value = JSON.stringify(seq.map(ev => ({
-        noteNumber: ev.n,
-        startTime: ev.t / ticksPerBeat,
-        duration: ev.g / ticksPerBeat,
-        velocity: ev.v ?? 100.0,
-        offVelocity: 0.0
-      })));
+      if (pitchMode && activePad !== null) {
+        const other = allNotes.filter(n => n.noteNumber !== activePad || n.pitchBend === undefined);
+        const padNotes = seq.map(ev => ({
+          noteNumber: activePad,
+          startTime: ev.t / ticksPerBeat,
+          duration: ev.g / ticksPerBeat,
+          velocity: ev.v ?? 100.0,
+          offVelocity: 0.0,
+          pitchBend: bendFromPitch(ev.n)
+        }));
+        notesInput.value = JSON.stringify([...other, ...padNotes]);
+      } else {
+        notesInput.value = JSON.stringify(seq.map(ev => ({
+          noteNumber: ev.n,
+          startTime: ev.t / ticksPerBeat,
+          duration: ev.g / ticksPerBeat,
+          velocity: ev.v ?? 100.0,
+          offVelocity: 0.0
+        })));
+      }
     }
     if (envsInput) {
       let envs = envelopes.map(e => ({ parameterId: e.parameterId, breakpoints: e.breakpoints }));
