@@ -190,6 +190,14 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
         this.updateTimer=function(){
             this.tick2time=4*60/this.tempo/this.timebase;
         };
+        this.clampYRange=function(){
+            if(this._yrange>128)
+                this._yrange=128;
+            if(this._yoffset<0)
+                this._yoffset=0;
+            if(this._yoffset+this._yrange>128)
+                this._yoffset=128-this._yrange;
+        };
         this.play=function(actx,playcallback,tick){
             function Interval(){
                 const current=this.actx.currentTime;
@@ -1314,6 +1322,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
         this.layout=function(){
             if(typeof(this.kbwidth)=="undefined")
                 return;
+            this.clampYRange();
             const proll = this.proll;
             const bodystyle = this.body.style;
             if(this.bgsrc)
