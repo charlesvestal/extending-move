@@ -166,6 +166,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
 <div data-action="double">×2 duration</div>
 <div data-action="half">÷2 duration</div>
 <div data-action="quantize">Quantize to grid (Q)</div>
+<div data-action="randomfill">Random fill row</div>
 <!-- <div data-action="velocity">Velocity...</div> -->
 </div>
 <select id="wac-gridres"></select>
@@ -563,6 +564,22 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 if(ev.f)
                     ev.v=v;
             }
+            this.redraw();
+        };
+
+        this.randomFillRow=function(note){
+            for(let i=this.sequence.length-1;i>=0;--i){
+                if(this.sequence[i].n===note)
+                    this.sequence.splice(i,1);
+            }
+            const steps=Math.floor(this.xrange/this.grid);
+            for(let s=0;s<steps;++s){
+                if(Math.random()<0.5){
+                    const t=s*this.grid;
+                    this.addNote(t,note,this.grid,this.defvelo);
+                }
+            }
+            this.sortSequence();
             this.redraw();
         };
         this.moveSelectedNote=function(dt,dn){
@@ -1232,6 +1249,9 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                         break;
                     case 'quantize':
                         this.quantizeSelectedNotes();
+                        break;
+                    case 'randomfill':
+                        this.randomFillRow(this.downht.n|0);
                         break;
                     case 'velocity':
                         const v=parseInt(prompt('Velocity (1-127):','100'),10);
