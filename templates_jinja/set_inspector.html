@@ -47,6 +47,13 @@
     </form>
     - Clip {{ (clip_index + 1) if clip_index is not none else '?' }}
   </nav>
+  <form id="pitchPadForm" method="post" action="{{ host_prefix }}/set-inspector" style="margin-bottom:1rem; display:inline;">
+    <input type="hidden" name="action" value="show_clip">
+    <input type="hidden" name="set_path" value="{{ selected_set }}">
+    <input type="hidden" name="clip_select" value="{{ selected_clip }}">
+    <label for="pitch_pad_select">Note View:</label>
+    <select id="pitch_pad_select" name="pitch_pad">{{ pitch_opts | safe }}</select>
+  </form>
   <!-- <form method="post" action="{{ host_prefix }}/set-inspector" style="display:inline;">
     <input type="hidden" name="action" value="select_set">
     <input type="hidden" name="set_path" value="{{ selected_set }}">
@@ -71,6 +78,7 @@
     <input type="hidden" name="action" value="save_clip">
     <input type="hidden" name="set_path" value="{{ selected_set }}">
     <input type="hidden" name="clip_select" value="{{ selected_clip }}">
+    <input type="hidden" name="pitch_pad" id="pitch_pad_input" value="{{ pitch_pad if pitch_pad is not none else '' }}">
     <input type="hidden" name="clip_notes" id="clip_notes_input">
     <input type="hidden" name="clip_envelopes" id="clip_envelopes_input">
     <input type="hidden" name="region_end" id="region_end_input">
@@ -78,7 +86,7 @@
     <input type="hidden" name="loop_end" id="loop_end_input">
     <button id="saveClipBtn" type="submit">Save Clip</button>
   </form>
-  <div id="clipData" data-notes='{{ notes | tojson }}' data-envelopes='{{ envelopes | tojson }}' data-region='{{ region | default(4.0) }}' data-loop-start='{{ loop_start | default(0.0) }}' data-loop-end='{{ loop_end | default(region) }}' data-param-ranges='{{ param_ranges_json | safe }}'></div>
+  <div id="clipData" data-notes='{{ notes | tojson }}' data-envelopes='{{ envelopes | tojson }}' data-region='{{ region | default(4.0) }}' data-loop-start='{{ loop_start | default(0.0) }}' data-loop-end='{{ loop_end | default(region) }}' data-param-ranges='{{ param_ranges_json | safe }}' data-pitch-pad='{{ pitch_pad if pitch_pad is not none else '' }}'></div>
   {% endif %}
 {% endblock %}
 {% block scripts %}

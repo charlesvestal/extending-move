@@ -43,6 +43,9 @@ No new data structures are introduced. Each note already stores PitchBend automa
 * Changes persist in the original note data.
 * The mode acts as a filtered view scoped to a single pad.
 
+## UI Access
+When a clip is loaded in the Set Inspector, a "Note View" dropdown appears. The options include **Clip Notes** (default) and each pad that contains PitchBend data. Selecting a pad switches the piano roll into PitchBend Editing Mode for that pad.
+
 ## Suggested Implementation
 ```javascript
 const semitone = 170.6458282470703;
