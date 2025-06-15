@@ -737,7 +737,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
         };
         this.editGridMove=function(pos){
             const ht=this.hitTest(pos);
-            if(this.dragging.o=="G"){ 
+            if(this.dragging.o=="G"){
                 switch(this.dragging.m){
                 case "1":
                     const px=((ht.t/this.snap)|0)*this.snap;
@@ -752,6 +752,27 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                         this.delNote(ht.i);
                     break;
                 }
+            }
+        };
+        this.editDrawDown=function(pos){
+            const ht=this.hitTest(pos);
+            if(ht.t>=0){
+                const pt=((ht.t/this.snap)|0)*this.snap;
+                if(this.editmode=="drawmono")
+                    this.delAreaNote(pt,this.grid,ht.i);
+                if(ht.m=="s")
+                    this.addNote(pt,ht.n|0,this.grid,this.defvelo);
+                this.dragging={o:"W"};
+            }
+        };
+        this.editDrawMove=function(pos){
+            const ht=this.hitTest(pos);
+            if(this.dragging.o=="W"&&ht.t>=0){
+                const px=((ht.t/this.snap)|0)*this.snap;
+                if(this.editmode=="drawmono")
+                    this.delAreaNote(px,this.grid,ht.i);
+                if(ht.m=="s")
+                    this.addNote(px,ht.n|0,this.grid,this.defvelo);
             }
         };
         this.setListener=function(el,mode){
@@ -1015,6 +1036,10 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             case "gridmono":
                 this.editGridDown(this.downpos);
                 break;
+            case "drawpoly":
+            case "drawmono":
+                this.editDrawDown(this.downpos);
+                break;
             case "dragpoly":
             case "dragmono":
                 this.editDragDown(this.downpos);
@@ -1116,6 +1141,10 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             case "gridpoly":
             case "gridmono":
                 this.editGridMove(pos);
+                break;
+            case "drawpoly":
+            case "drawmono":
+                this.editDrawMove(pos);
                 break;
             case "dragpoly":
             case "dragmono":

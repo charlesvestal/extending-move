@@ -126,7 +126,7 @@ export function initSetInspector() {
     return minV >= 0 && maxV <= 1 && (env.rangeMin !== 0 || env.rangeMax !== 1);
   }
 
-  const defaultEditMode = piano ? (piano.editmode || piano.getAttribute('editmode') || 'dragpoly') : 'dragpoly';
+  const defaultEditMode = piano ? (piano.editmode || piano.getAttribute('editmode') || 'drawpoly') : 'drawpoly';
 
   function updateControls() {
     if (canvas) {

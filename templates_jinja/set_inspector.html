@@ -62,7 +62,7 @@
   </div>
   <div style="margin-top:1rem; display:flex; align-items:flex-start;">
     <div style="position:relative; width:900px; height:360px; border:1px solid #ccc;">
-      <webaudio-pianoroll id="clipEditor" width="900" height="300" editmode="dragpoly" wheelzoom="0" xscroll="1" yscroll="1" timebase="16" xrange="{{ (region | default(4.0)) * 4 }}" markstart="{{ (loop_start | default(0.0)) * 4 }}" markend="{{ (loop_end | default(region)) * 4 }}" showcursor="false"></webaudio-pianoroll>
+      <webaudio-pianoroll id="clipEditor" width="900" height="300" editmode="drawpoly" wheelzoom="0" xscroll="1" yscroll="1" timebase="16" xrange="{{ (region | default(4.0)) * 4 }}" markstart="{{ (loop_start | default(0.0)) * 4 }}" markend="{{ (loop_end | default(region)) * 4 }}" showcursor="false"></webaudio-pianoroll>
       <canvas id="clipCanvas" width="836" height="300" style="position:absolute; left:64px; top:0; pointer-events:none;"></canvas>
       <canvas id="velocityCanvas" width="836" height="60" style="position:absolute; left:64px; top:300px;"></canvas>
     </div>
