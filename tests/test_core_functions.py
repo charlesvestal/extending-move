@@ -362,7 +362,7 @@ def test_save_clip(tmp_path):
 
     notes = [{"noteNumber": 60, "startTime": 0.0, "duration": 1.0, "velocity": 100.0, "offVelocity": 0.0}]
     envs = [{"parameterId": 1, "breakpoints": [{"time": 0.0, "value": 0.5}]}]
-    result = save_clip(str(set_path), 0, 0, notes, envs, 4.0, 0.0, 4.0)
+    result = save_clip(str(set_path), 0, 0, notes, envs, None, 4.0, 0.0, 4.0)
     assert result["success"], result.get("message")
 
     data = get_clip_data(str(set_path), 0, 0)

@@ -81,3 +81,40 @@ def test_get_clip_data_param_ranges(monkeypatch, tmp_path):
     assert data["param_ranges"][1]["max"] == 1.0
     env = data["envelopes"][0]
     assert env["rangeMin"] == 0.0 and env["rangeMax"] == 1.0
+
+
+def test_pitch_bend_extraction_and_save(tmp_path):
+    set_path = tmp_path / "set.abl"
+    clip = {
+        "name": "Clip1",
+        "notes": [
+            {
+                "noteNumber": 36,
+                "startTime": 0.0,
+                "duration": 1.0,
+                "velocity": 100.0,
+                "offVelocity": 0.0,
+                "pitchBend": [{"time": 0.0, "value": 0.0}, {"time": 0.5, "value": 1.0}],
+            }
+        ],
+        "envelopes": [],
+        "region": {"end": 4.0},
+    }
+    track = {
+        "name": "Drums",
+        "devices": [{"kind": "drumRack"}],
+        "clipSlots": [{"clip": clip}],
+    }
+    song = {"tracks": [track]}
+    set_path.write_text(json.dumps(song))
+
+    data = sih.get_clip_data(str(set_path), 0, 0)
+    assert data["is_drum_rack"]
+    pn = data.get("pitch_notes", [])
+    assert pn and pn[0]["noteNumber"] == 36
+
+    new_pitch = [{"noteNumber": 36, "breakpoints": [{"time": 0.0, "value": -0.5}]}]
+    save_res = sih.save_clip(str(set_path), 0, 0, clip["notes"], [], new_pitch, 4.0, 0.0, 4.0)
+    assert save_res["success"], save_res.get("message")
+    data2 = sih.get_clip_data(str(set_path), 0, 0)
+    assert data2.get("pitch_notes", [])[0]["breakpoints"][0]["value"] == -0.5

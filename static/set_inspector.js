@@ -31,6 +31,8 @@ export function initSetInspector() {
   if (!dataDiv) return;
   const notes = JSON.parse(dataDiv.dataset.notes || '[]');
   const envelopes = JSON.parse(dataDiv.dataset.envelopes || '[]');
+  const pitchNotes = JSON.parse(dataDiv.dataset.pitchNotes || '[]');
+  const isDrumRack = dataDiv.dataset.isDrumRack === 'True' || dataDiv.dataset.isDrumRack === 'true';
   const region = parseFloat(dataDiv.dataset.region || '4');
   const loopStart = parseFloat(dataDiv.dataset.loopStart || '0');
   const loopEnd = parseFloat(dataDiv.dataset.loopEnd || String(region));
@@ -59,11 +61,13 @@ export function initSetInspector() {
     }
   }
   const envSelect = document.getElementById('envelope_select');
+  const pitchSelect = document.getElementById('pitch_select');
   const legendDiv = document.getElementById('paramLegend');
   const valueDiv = document.getElementById('envValue');
   const saveClipForm = document.getElementById('saveClipForm');
   const notesInput = document.getElementById('clip_notes_input');
   const envsInput = document.getElementById('clip_envelopes_input');
+  const pitchInput = document.getElementById('pitch_notes_input');
   const regionInput = document.getElementById('region_end_input');
   const loopStartInput = document.getElementById('loop_start_input');
   const loopEndInput = document.getElementById('loop_end_input');
@@ -74,6 +78,9 @@ export function initSetInspector() {
   let currentEnv = [];
   let tailEnv = [];
   let envInfo = null;
+  const pitchMap = {};
+  pitchNotes.forEach(pn => { pitchMap[pn.noteNumber] = pn.breakpoints; });
+  let editingPitch = null;
 
   if (piano) {
     if (!piano.sequence) piano.sequence = [];
@@ -353,6 +360,8 @@ export function initSetInspector() {
     dirty = false;
     currentEnv = [];
     envInfo = null;
+    editingPitch = null;
+    if (pitchSelect) pitchSelect.value = '';
     editing = !!envSelect.value;
     if (editing) {
       const pid = parseInt(envSelect.value);
@@ -374,6 +383,29 @@ export function initSetInspector() {
     draw();
   });
 
+  if (pitchSelect) pitchSelect.addEventListener('change', () => {
+    drawing = false;
+    dirty = false;
+    currentEnv = [];
+    envInfo = null;
+    if (envSelect) envSelect.value = '';
+    editingPitch = pitchSelect.value ? parseInt(pitchSelect.value) : null;
+    editing = editingPitch !== null;
+    if (editingPitch !== null) {
+      envInfo = {
+        rangeMin: -1,
+        rangeMax: 1,
+        domainMin: -1,
+        domainMax: 1,
+        unit: 'st',
+        breakpoints: pitchMap[editingPitch] || []
+      };
+    }
+    updateLegend();
+    updateControls();
+    draw();
+  });
+
   function canvasPos(ev) {
     const rect = canvas.getBoundingClientRect();
     const x = (ev.touches ? ev.touches[0].clientX : ev.clientX) - rect.left;
@@ -382,8 +414,9 @@ export function initSetInspector() {
   }
 
   function showValue(ev) {
-    if (!envSelect || !envSelect.value || !valueDiv) return;
-    const param = parseInt(envSelect.value);
+    if (!valueDiv) return;
+    if (!editing && !envInfo) { valueDiv.textContent = ''; return; }
+    const param = editingPitch !== null ? editingPitch : (envSelect ? parseInt(envSelect.value) : null);
     let env;
     if (editing) {
       let bps = currentEnv;
@@ -546,11 +579,22 @@ export function initSetInspector() {
       }
       envsInput.value = JSON.stringify(envs);
     }
+    if (pitchInput) {
+      if (editingPitch !== null) {
+        let bps = currentEnv;
+        if (!bps.length && envInfo) bps = envInfo.breakpoints;
+        pitchMap[editingPitch] = bps;
+      }
+      const out = Object.entries(pitchMap).map(([n, b]) => ({ noteNumber: parseInt(n), breakpoints: b }));
+      pitchInput.value = JSON.stringify(out);
+    }
     if (regionInput) regionInput.value = (piano.xrange / ticksPerBeat).toFixed(6);
     if (loopStartInput) loopStartInput.value = (piano.markstart / ticksPerBeat).toFixed(6);
     if (loopEndInput) loopEndInput.value = (piano.markend / ticksPerBeat).toFixed(6);
   });
-  if (envSelect && envSelect.value) {
+  if (pitchSelect && pitchSelect.value) {
+    pitchSelect.dispatchEvent(new Event('change'));
+  } else if (envSelect && envSelect.value) {
     envSelect.dispatchEvent(new Event('change'));
   } else {
     updateLegend();

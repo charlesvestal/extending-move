@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Iterable
 from core.set_backup_handler import backup_set, write_latest_timestamp
 from core.synth_preset_inspector_handler import (
     load_drift_schema,
@@ -41,6 +41,20 @@ def _track_display_name(track_obj: Dict[str, Any], idx: int) -> str:
     return track_obj.get("name") or f"Track {idx + 1}"
 
 
+def _has_drum_rack(devices: Iterable[Any]) -> bool:
+    """Recursively search devices for a drum rack."""
+    for dev in devices or []:
+        if not isinstance(dev, dict):
+            continue
+        if dev.get("kind") == "drumRack":
+            return True
+        if _has_drum_rack(dev.get("devices")):
+            return True
+        if _has_drum_rack(dev.get("chains")):
+            return True
+    return False
+
+
 def list_clips(set_path: str) -> Dict[str, Any]:
     """Return list of clips in the set."""
     try:
@@ -68,6 +82,13 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
         track_obj = song["tracks"][track]
         clip_obj = track_obj["clipSlots"][clip]["clip"]
         notes = clip_obj.get("notes", [])
+        pitch_notes = []
+        for n in notes:
+            if isinstance(n, dict) and n.get("pitchBend"):
+                pitch_notes.append({
+                    "noteNumber": n.get("noteNumber"),
+                    "breakpoints": n.get("pitchBend", []),
+                })
         envelopes = clip_obj.get("envelopes", [])
         region_info = clip_obj.get("region", {})
         region_end = region_info.get("end", 4.0)
@@ -77,6 +98,7 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
 
         region_length = region_end
         track_name = _track_display_name(track_obj, track)
+        is_drum_rack = _has_drum_rack(track_obj.get("devices", []))
         clip_name = clip_obj.get("name") or f"Clip {clip + 1}"
         param_map: Dict[int, str] = {}
         param_context: Dict[int, str] = {}
@@ -136,6 +158,8 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
             "param_ranges": param_ranges,
             "track_name": track_name,
             "clip_name": clip_name,
+            "is_drum_rack": is_drum_rack,
+            "pitch_notes": pitch_notes,
         }
     except Exception as e:
         return {"success": False, "message": f"Failed to read clip: {e}"}
@@ -180,6 +204,7 @@ def save_clip(
     clip: int,
     notes: List[Dict[str, Any]],
     envelopes: List[Dict[str, Any]],
+    pitch_notes: List[Dict[str, Any]] | None,
     region_end: float,
     loop_start: float,
     loop_end: float,
@@ -191,6 +216,13 @@ def save_clip(
 
         clip_obj = song["tracks"][track]["clipSlots"][clip]["clip"]
         clip_obj["notes"] = notes
+        if pitch_notes is not None:
+            pn_map = {pn.get("noteNumber"): pn.get("breakpoints", []) for pn in pitch_notes}
+            for n in clip_obj["notes"]:
+                if n.get("noteNumber") in pn_map:
+                    n["pitchBend"] = pn_map[n.get("noteNumber")]
+                elif "pitchBend" in n:
+                    del n["pitchBend"]
         clip_obj["envelopes"] = envelopes
         region_info = clip_obj.setdefault("region", {})
         region_info["start"] = 0.0

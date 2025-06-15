@@ -76,6 +76,17 @@
     <label for="note_draw_toggle" style="margin-left:1rem;">Draw Notes</label>
     <input id="note_draw_toggle" type="checkbox">
   </div>
+  {% if is_drum_rack %}
+  <div style="margin-top:0.5rem; display:flex; align-items:center; gap:0.5rem;">
+    <label for="pitch_select">Pitch Pad:</label>
+    <select id="pitch_select">
+      <option value="">None</option>
+      {% for pn in pitch_notes %}
+        <option value="{{ pn.noteNumber }}">{{ pn.noteNumber }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  {% endif %}
   <div style="margin-top:1rem; display:flex; align-items:flex-start;">
     <div style="position:relative; width:900px; height:360px; border:1px solid #ccc;">
       <webaudio-pianoroll id="clipEditor" width="900" height="300" editmode="dragpoly" wheelzoom="0" xscroll="1" yscroll="1" timebase="16" xrange="{{ (region | default(4.0)) * 4 }}" markstart="{{ (loop_start | default(0.0)) * 4 }}" markend="{{ (loop_end | default(region)) * 4 }}" showcursor="false"></webaudio-pianoroll>
@@ -90,6 +101,7 @@
     <input type="hidden" name="clip_select" value="{{ selected_clip }}">
     <input type="hidden" name="clip_notes" id="clip_notes_input">
     <input type="hidden" name="clip_envelopes" id="clip_envelopes_input">
+    <input type="hidden" name="pitch_notes" id="pitch_notes_input">
     <input type="hidden" name="region_end" id="region_end_input">
     <input type="hidden" name="loop_start" id="loop_start_input">
     <input type="hidden" name="loop_end" id="loop_end_input">
@@ -109,7 +121,7 @@
   </form>
   {% endif %}
   <p>Current version: {{ current_ts }}</p>
-  <div id="clipData" data-notes='{{ notes | tojson }}' data-envelopes='{{ envelopes | tojson }}' data-region='{{ region | default(4.0) }}' data-loop-start='{{ loop_start | default(0.0) }}' data-loop-end='{{ loop_end | default(region) }}' data-param-ranges='{{ param_ranges_json | safe }}'></div>
+  <div id="clipData" data-notes='{{ notes | tojson }}' data-envelopes='{{ envelopes | tojson }}' data-pitch-notes='{{ pitch_notes | tojson }}' data-is-drum-rack='{{ is_drum_rack }}' data-region='{{ region | default(4.0) }}' data-loop-start='{{ loop_start | default(0.0) }}' data-loop-end='{{ loop_end | default(region) }}' data-param-ranges='{{ param_ranges_json | safe }}'></div>
   {% endif %}
 {% endblock %}
 {% block scripts %}
