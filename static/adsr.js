@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const h = canvas.height;
     ctx.clearRect(0, 0, w, h);
     ctx.beginPath();
+    ctx.lineWidth = 2;
     ctx.moveTo(0, h - i * h);
     let x = (a / total) * w;
     ctx.lineTo(x, h - p * h);
@@ -31,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const relStart = w - (r / total) * w;
     ctx.lineTo(relStart, h - s * h);
     ctx.lineTo(w, h - f * h);
-    ctx.strokeStyle = '#f00';
+    ctx.strokeStyle = '#FFA500';
     ctx.stroke();
   }
 

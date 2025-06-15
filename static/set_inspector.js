@@ -232,7 +232,8 @@ export function initSetInspector() {
       env = envInfo;
     }
     if (!env || !env.breakpoints || !env.breakpoints.length) return;
-    ctx.strokeStyle = '#FF4136';
+    ctx.strokeStyle = '#FFA500';
+    ctx.lineWidth = 2;
     ctx.beginPath();
     const needsScale = isNormalized(env);
     env.breakpoints.forEach((bp, i) => {
