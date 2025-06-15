@@ -885,7 +885,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 if(e.shiftKey)
                     this.moveSelectedNoteNoSnap(-1/this.stepw,0);
                 else
-                    this.moveSelectedNote(-this.grid,0);
+                    this.moveSelectedNoteNoSnap(-this.grid,0);
                 this.sortSequence();
                 this.redraw();
                 e.preventDefault();
@@ -895,7 +895,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 if(e.shiftKey)
                     this.moveSelectedNoteNoSnap(1/this.stepw,0);
                 else
-                    this.moveSelectedNote(this.grid,0);
+                    this.moveSelectedNoteNoSnap(this.grid,0);
                 this.sortSequence();
                 this.redraw();
                 e.preventDefault();
