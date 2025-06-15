@@ -43,6 +43,9 @@ Here’s what you can do with Extending Move:
 - **Set Inspector**
   - View notes and envelopes for sets and clips
   - Edit envelopes and draw your own curves
+- **Clip Editor**
+  - Modify clip notes and envelopes in a piano roll
+  - Adjust region length and loop points
 
 - **Sample Reversal**
   - Create reversed versions of any WAV file

@@ -455,6 +455,16 @@ This feature replaces the old macro editor. It combines macro management and par
 - Template: `templates_jinja/synth_params.html`
 
 Use the route `/synth-params` and add a link in `base.html` with `active_tab="synth-params"`.
+### Example: Clip Editor
+
+The Set Inspector includes a clip editor based on a piano roll interface. It allows editing MIDI notes, automation envelopes and loop regions.
+
+- Core: `core/set_inspector_handler.py`
+- Web Handler: `handlers/set_inspector_handler_class.py`
+- Template: `templates_jinja/set_inspector.html`
+
+Use the route `/set-inspector` and add a link in `base.html` with `active_tab="set-inspector"`.
+
 
 ## Best Practices
 
