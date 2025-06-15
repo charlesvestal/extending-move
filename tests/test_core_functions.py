@@ -37,27 +37,26 @@ def test_reverse_wav_file(tmp_path):
 def test_detect_transients(tmp_path):
     sr = 22050
     data = np.zeros(sr)
-    data[int(0.1 * sr):int(0.1 * sr) + 100] = 1.0
-    data[int(0.6 * sr):int(0.6 * sr) + 100] = 1.0
+    data[int(0.1 * sr) : int(0.1 * sr) + 100] = 1.0
+    data[int(0.6 * sr) : int(0.6 * sr) + 100] = 1.0
     wav_path = tmp_path / "impulses.wav"
     sf.write(wav_path, data, sr)
 
     regions = detect_transients(str(wav_path), max_slices=None, delta=0.2)
     assert len(regions) >= 2
-    assert regions[0]['start'] <= regions[0]['end']
+    assert regions[0]["start"] <= regions[0]["end"]
 
 
 def test_generate_pattern_set(tmp_path):
     pattern = create_c_major_downbeats(1)
 
     result = generate_pattern_set("TestSet", pattern, output_dir=str(tmp_path))
-    assert result['success'], result.get('message')
+    assert result["success"], result.get("message")
     output_path = os.path.join(tmp_path, "TestSet.abl")
     assert os.path.exists(output_path)
     with open(output_path) as f:
         data = json.load(f)
     assert isinstance(data, dict)
-
 
 
 def test_generate_dir_html(tmp_path):
@@ -75,8 +74,8 @@ def test_generate_dir_html(tmp_path):
         filter_key="wav",
     )
     assert 'data-path="sub"' in html
-    assert 'a.wav' in html
-    assert 'b.txt' not in html
+    assert "a.wav" in html
+    assert "b.txt" not in html
 
     # Adding a new file should invalidate the cache automatically
     (tmp_path / "new.wav").write_text("x")
@@ -88,7 +87,7 @@ def test_generate_dir_html(tmp_path):
         "select",
         filter_key="wav",
     )
-    assert 'new.wav' in html2
+    assert "new.wav" in html2
 
 
 def test_time_stretch_wav(tmp_path, monkeypatch):
@@ -100,6 +99,7 @@ def test_time_stretch_wav(tmp_path, monkeypatch):
     sf.write(inp, data, sr)
 
     from core import time_stretch_handler
+
     monkeypatch.setattr(time_stretch_handler, "refresh_library", lambda: (True, "ok"))
 
     success, msg, path = time_stretch_wav(str(inp), 2.0, str(outp))
@@ -123,13 +123,9 @@ def test_update_parameter_values(tmp_path):
         data = f.read()
     assert data.endswith(b"\n")
     preset = json.loads(data)
-    val = (
-        preset["chains"][0]
-        ["devices"][0]
-        ["chains"][0]
-        ["devices"][0]
-        ["parameters"]["Oscillator1_Shape"]["value"]
-    )
+    val = preset["chains"][0]["devices"][0]["chains"][0]["devices"][0]["parameters"][
+        "Oscillator1_Shape"
+    ]["value"]
     assert abs(val - 0.5) < 1e-6
 
 
@@ -137,6 +133,7 @@ def test_update_macro_values(tmp_path):
     src = Path("examples/Track Presets/Drift/Analog Shape - Core.json")
     dest = tmp_path / "out.ablpreset"
     from core.synth_param_editor_handler import update_macro_values
+
     result = update_macro_values(str(src), {0: "64.5"}, str(dest))
     assert result["success"], result.get("message")
     with open(dest, "rb") as f:
@@ -246,7 +243,9 @@ def test_get_melodic_sampler_sample(tmp_path):
                 "devices": [
                     {
                         "kind": "melodicSampler",
-                        "deviceData": {"sampleUri": "ableton:/user-library/Samples/test%20sample.wav"},
+                        "deviceData": {
+                            "sampleUri": "ableton:/user-library/Samples/test%20sample.wav"
+                        },
                     }
                 ]
             }
@@ -304,14 +303,42 @@ def test_get_clip_data_loop_region(tmp_path):
                     {
                         "clip": {
                             "notes": [
-                                {"noteNumber": 60, "startTime": 1.0, "duration": 0.5, "velocity": 100.0, "offVelocity": 0.0},
-                                {"noteNumber": 61, "startTime": 2.5, "duration": 0.5, "velocity": 100.0, "offVelocity": 0.0},
-                                {"noteNumber": 62, "startTime": 5.5, "duration": 0.5, "velocity": 100.0, "offVelocity": 0.0},
+                                {
+                                    "noteNumber": 60,
+                                    "startTime": 1.0,
+                                    "duration": 0.5,
+                                    "velocity": 100.0,
+                                    "offVelocity": 0.0,
+                                },
+                                {
+                                    "noteNumber": 61,
+                                    "startTime": 2.5,
+                                    "duration": 0.5,
+                                    "velocity": 100.0,
+                                    "offVelocity": 0.0,
+                                },
+                                {
+                                    "noteNumber": 62,
+                                    "startTime": 5.5,
+                                    "duration": 0.5,
+                                    "velocity": 100.0,
+                                    "offVelocity": 0.0,
+                                },
                             ],
                             "envelopes": [
-                                {"parameterId": 2, "breakpoints": [{"time": 0.5, "value": 0}, {"time": 4.5, "value": 1}]}
+                                {
+                                    "parameterId": 2,
+                                    "breakpoints": [
+                                        {"time": 0.5, "value": 0},
+                                        {"time": 4.5, "value": 1},
+                                    ],
+                                }
                             ],
-                            "region": {"start": 0.0, "end": 8.0, "loop": {"start": 2.0, "end": 6.0}},
+                            "region": {
+                                "start": 0.0,
+                                "end": 8.0,
+                                "loop": {"start": 2.0, "end": 6.0},
+                            },
                         }
                     }
                 ],
@@ -338,6 +365,27 @@ def test_get_clip_data_loop_region(tmp_path):
     ]
 
 
+def test_get_clip_data_drum_mode(tmp_path):
+    set_path = tmp_path / "set.abl"
+    song = {
+        "tracks": [
+            {
+                "kind": "midi",
+                "devices": [{"kind": "drumRack"}],
+                "clipSlots": [
+                    {"clip": {"notes": [], "envelopes": [], "region": {"end": 4.0}}}
+                ],
+            }
+        ]
+    }
+    set_path.write_text(json.dumps(song))
+
+    from core.set_inspector_handler import get_clip_data
+
+    data = get_clip_data(str(set_path), 0, 0)
+    assert data["is_drum_rack"] is True
+
+
 def test_save_clip(tmp_path):
     set_path = tmp_path / "set.abl"
     song = {
@@ -360,7 +408,15 @@ def test_save_clip(tmp_path):
 
     from core.set_inspector_handler import save_clip, get_clip_data
 
-    notes = [{"noteNumber": 60, "startTime": 0.0, "duration": 1.0, "velocity": 100.0, "offVelocity": 0.0}]
+    notes = [
+        {
+            "noteNumber": 60,
+            "startTime": 0.0,
+            "duration": 1.0,
+            "velocity": 100.0,
+            "offVelocity": 0.0,
+        }
+    ]
     envs = [{"parameterId": 1, "breakpoints": [{"time": 0.0, "value": 0.5}]}]
     result = save_clip(str(set_path), 0, 0, notes, envs, 4.0, 0.0, 4.0)
     assert result["success"], result.get("message")
@@ -373,4 +429,3 @@ def test_save_clip(tmp_path):
     assert data["region"] == 4.0
     assert data["loop_start"] == 0.0
     assert data["loop_end"] == 4.0
-
