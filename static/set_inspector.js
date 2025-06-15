@@ -36,6 +36,7 @@ export function initSetInspector() {
   const loopStart = parseFloat(dataDiv.dataset.loopStart || '0');
   const loopEnd = parseFloat(dataDiv.dataset.loopEnd || String(region));
   const paramRanges = JSON.parse(dataDiv.dataset.paramRanges || '{}');
+  const isDrumRack = dataDiv.dataset.isDrumRack === 'true';
   const canvas = document.getElementById('clipCanvas');
   const ctx = canvas.getContext('2d');
   const velCanvas = document.getElementById('velocityCanvas');
@@ -48,6 +49,7 @@ export function initSetInspector() {
   const ticksPerBeat = timebase / 4;
   const BEND_UNITS_PER_SEMITONE = 170.6458282470703;
   const BEND_BASE_NOTE = 60; // C3 when pitch bend = 0
+  const PAD_START_NOTE = 36; // C2
   if (piano && canvas) {
     const w = parseInt(piano.getAttribute('width') || piano.clientWidth || 0, 10);
     const h = parseInt(piano.getAttribute('height') || piano.clientHeight || 0, 10);
@@ -90,7 +92,7 @@ export function initSetInspector() {
     if (n.automations && Array.isArray(n.automations.PitchBend) && n.automations.PitchBend.length) {
       return n.automations.PitchBend[0].value;
     }
-    return undefined;
+    return 0.0;
   }
 
   function setPitchBend(n, val) {
@@ -100,14 +102,16 @@ export function initSetInspector() {
   }
 
   allNotes.forEach(n => {
-    const pb = getPitchBend(n);
-    if (pb !== undefined) n.pitchBend = pb;
+    n.pitchBend = getPitchBend(n);
   });
 
-  const pitchNotes = [...new Set(allNotes.filter(n => getPitchBend(n) !== undefined).map(n => n.noteNumber))].sort((a,b)=>a-b);
-  if (pitchSelect) {
-    pitchSelect.innerHTML = '<option value="">No Pitch</option>' +
-      pitchNotes.map(n => `<option value="${n}">${noteName(n)}</option>`).join('');
+  if (pitchSelect && isDrumRack) {
+    const opts = ['<option value="">No Pitch</option>'];
+    for (let i = 0; i < 16; i++) {
+      const n = PAD_START_NOTE + i;
+      opts.push(`<option value="${n}">Pad ${i + 1} (${noteName(n)})</option>`);
+    }
+    pitchSelect.innerHTML = opts.join('');
   }
 
   let editing = false;
@@ -125,7 +129,7 @@ export function initSetInspector() {
     if (!piano.sequence) piano.sequence = [];
     let seq;
     if (pitchMode && activePad !== null) {
-      seq = allNotes.filter(n => n.noteNumber === activePad && getPitchBend(n) !== undefined)
+      seq = allNotes.filter(n => n.noteNumber === activePad)
         .map(n => ({
           t: Math.round(n.startTime * ticksPerBeat),
           n: Math.round(pitchFromBend(getPitchBend(n))),
@@ -277,12 +281,12 @@ export function initSetInspector() {
     const h = canvas.height / noteRange;
     ctx.fillStyle = '#0074D9';
     const src = pitchMode && activePad !== null
-      ? allNotes.filter(n => n.noteNumber === activePad && getPitchBend(n) !== undefined)
+      ? allNotes.filter(n => n.noteNumber === activePad)
       : allNotes;
     src.forEach(n => {
       const x = (n.startTime / region) * canvas.width;
       const w = (n.duration / region) * canvas.width;
-      const note = pitchMode && getPitchBend(n) !== undefined ? pitchFromBend(getPitchBend(n)) : n.noteNumber;
+      const note = pitchMode ? pitchFromBend(getPitchBend(n)) : n.noteNumber;
       const y = canvas.height - (note - min + 1) * h;
       ctx.fillRect(x, y, w, h);
     });
@@ -433,25 +437,51 @@ export function initSetInspector() {
     return { x, y };
   }
 
-  function pitchClick(ev) {
-    if (!pitchMode || activePad === null) return;
-    const pos = canvasPos(ev);
-    const t = piano
-      ? (piano.xoffset + (pos.x / canvas.width) * piano.xrange) / ticksPerBeat
-      : (pos.x / canvas.width) * region;
-    const note = allNotes.find(n =>
-      n.noteNumber === activePad && getPitchBend(n) !== undefined &&
-      t >= n.startTime && t < n.startTime + n.duration);
-    if (!note) return;
+  let pitchDragging = false;
+  let pitchDragNote = null;
+
+  function updatePitchFromPos(pos) {
+    if (!pitchDragNote) return;
     const { min, max } = getVisibleRange();
     const noteRange = max - min + 1;
     const h = canvas.height / noteRange;
     let newPitch = min + (canvas.height - pos.y) / h - 1;
     newPitch = Math.max(0, Math.min(127, Math.round(newPitch)));
-    setPitchBend(note, bendFromPitch(newPitch));
+    setPitchBend(pitchDragNote, bendFromPitch(newPitch));
     refreshPiano();
     drawVelocity();
     draw();
+  }
+
+  function startPitchDrag(ev) {
+    if (!pitchMode || activePad === null) return;
+    const pos = canvasPos(ev);
+    const t = piano
+      ? (piano.xoffset + (pos.x / canvas.width) * piano.xrange) / ticksPerBeat
+      : (pos.x / canvas.width) * region;
+    const note = allNotes.find(
+      n => n.noteNumber === activePad && t >= n.startTime && t < n.startTime + n.duration
+    );
+    if (!note) return;
+    pitchDragNote = note;
+    pitchDragging = true;
+    updatePitchFromPos(pos);
+    ev.preventDefault();
+  }
+
+  function continuePitchDrag(ev) {
+    if (!pitchDragging) {
+      showValue(ev);
+      return;
+    }
+    const pos = canvasPos(ev);
+    updatePitchFromPos(pos);
+    ev.preventDefault();
+  }
+
+  function endPitchDrag() {
+    pitchDragging = false;
+    pitchDragNote = null;
   }
 
   function showValue(ev) {
@@ -577,18 +607,18 @@ export function initSetInspector() {
   }
 
   canvas.addEventListener('mousedown', ev => {
-    if (pitchMode && !editing) { pitchClick(ev); }
+    if (pitchMode && !editing) { startPitchDrag(ev); }
     else startDraw(ev);
   });
   canvas.addEventListener('touchstart', ev => {
-    if (pitchMode && !editing) { pitchClick(ev); }
+    if (pitchMode && !editing) { startPitchDrag(ev); }
     else startDraw(ev);
   });
-  canvas.addEventListener('mousemove', continueDraw);
-  canvas.addEventListener('touchmove', continueDraw);
+  canvas.addEventListener('mousemove', ev => { if (pitchMode) continuePitchDrag(ev); else continueDraw(ev); });
+  canvas.addEventListener('touchmove', ev => { if (pitchMode) continuePitchDrag(ev); else continueDraw(ev); });
   canvas.addEventListener('mouseleave', () => { if (!drawing && valueDiv) valueDiv.textContent = ''; });
-  document.addEventListener('mouseup', endDraw);
-  document.addEventListener('touchend', endDraw);
+  document.addEventListener('mouseup', () => { endDraw(); endPitchDrag(); });
+  document.addEventListener('touchend', () => { endDraw(); endPitchDrag(); });
 
   if (velCanvas) {
     velCanvas.addEventListener('mousedown', startVel);
@@ -604,7 +634,7 @@ export function initSetInspector() {
     if (piano && notesInput) {
       const seq = piano.sequence || [];
       if (pitchMode && activePad !== null) {
-        const other = allNotes.filter(n => n.noteNumber !== activePad || getPitchBend(n) === undefined);
+        const other = allNotes.filter(n => n.noteNumber !== activePad);
         const padNotes = seq.map(ev => {
           const note = {
             noteNumber: activePad,
@@ -630,7 +660,7 @@ export function initSetInspector() {
             n.noteNumber === note.noteNumber &&
             Math.abs(n.startTime - note.startTime) < 1e-4 &&
             Math.abs(n.duration - note.duration) < 1e-4);
-          if (match && getPitchBend(match) !== undefined) {
+          if (match) {
             setPitchBend(note, getPitchBend(match));
           }
           return note;

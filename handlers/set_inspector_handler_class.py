@@ -203,6 +203,7 @@ class SetInspectorHandler(BaseHandler):
                 "clip_index": clip_idx,
                 "track_name": result.get("track_name"),
                 "clip_name": result.get("clip_name"),
+                "is_drum_rack": result.get("is_drum_rack", False),
             }
         elif action == "save_envelope":
             set_path = form.getvalue("set_path")
@@ -270,6 +271,7 @@ class SetInspectorHandler(BaseHandler):
                 "clip_index": clip_idx,
                 "track_name": clip_data.get("track_name"),
                 "clip_name": clip_data.get("clip_name"),
+                "is_drum_rack": clip_data.get("is_drum_rack", False),
             }
         elif action == "save_clip":
             set_path = form.getvalue("set_path")
@@ -358,6 +360,7 @@ class SetInspectorHandler(BaseHandler):
                 "clip_index": clip_idx,
                 "track_name": clip_data.get("track_name"),
                 "clip_name": clip_data.get("clip_name"),
+                "is_drum_rack": clip_data.get("is_drum_rack", False),
             }
         else:
             return self.format_error_response("Unknown action", pad_grid=pad_grid)
