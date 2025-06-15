@@ -696,6 +696,7 @@ def test_set_inspector_get(client, monkeypatch):
             'message': '',
             'message_type': 'info',
             'selected_set': None,
+            'current_ts': '2025-01-01 00:00:00',
         }
     monkeypatch.setattr(move_webserver.set_inspector_handler, 'handle_get', fake_get)
     resp = client.get('/set-inspector')
@@ -716,11 +717,13 @@ def test_set_inspector_post(client, monkeypatch):
             'notes': [],
             'envelopes': [],
             'region': 4.0,
+            'current_ts': '2025-01-02 00:00:00',
         }
     monkeypatch.setattr(move_webserver.set_inspector_handler, 'handle_post', fake_post)
     resp = client.post('/set-inspector', data={'action': 'select_set', 'pad_index': '1'})
     assert resp.status_code == 200
     assert b'ok' in resp.data
+    assert b'2025-01-02 00:00:00' in resp.data
 
     resp = client.post('/set-inspector', data={
         'action': 'save_envelope',

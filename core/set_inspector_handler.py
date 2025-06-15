@@ -1,7 +1,7 @@
 import json
 import os
 from typing import Any, Dict, List
-from core.set_backup_handler import backup_set
+from core.set_backup_handler import backup_set, write_latest_timestamp
 from core.synth_preset_inspector_handler import (
     load_drift_schema,
     load_wavetable_schema,
@@ -167,6 +167,7 @@ def save_envelope(
         backup_set(set_path)
         with open(set_path, "w") as f:
             json.dump(song, f, indent=2)
+        write_latest_timestamp(set_path)
 
         return {"success": True, "message": "Envelope saved"}
     except Exception as e:
@@ -199,6 +200,7 @@ def save_clip(
         backup_set(set_path)
         with open(set_path, "w") as f:
             json.dump(song, f, indent=2)
+        write_latest_timestamp(set_path)
 
         return {"success": True, "message": "Clip saved"}
     except Exception as e:
