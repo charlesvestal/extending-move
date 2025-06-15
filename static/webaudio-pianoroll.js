@@ -572,7 +572,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             for(let i=0;i<l;++i){
                 const ev=this.sequence[i];
                 if(ev.f){
-                    ev.t=(((ev.ot+dt)/this.snap+.5)|0)*this.snap;
+                    ev.t=Math.max(0, ev.ot + dt);
                     ev.n=ev.on+dn;
                 }
             }
