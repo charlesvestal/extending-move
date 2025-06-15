@@ -421,7 +421,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
         this.hitTest=function(pos){
             const ht={t:0,n:0,i:-1,m:" "};
             const l=this.sequence.length;
-            if(pos.t==this.menu){
+            if(this.menu.contains(pos.t)){
                 ht.m="m";
                 return ht;
             }
@@ -863,6 +863,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             this.menu=this.elem.children[5];
             this.menuDelete=this.menu.children[0];
             this.menuGlobal=false;
+            this.menuNoteRow=0;
             this.gridselect=this.elem.children[6];
             this.rcMenu={x:0, y:0, width:0, height:0};
             this.lastx=0;
@@ -1041,6 +1042,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 case "E":
                     this.menuGlobal=false;
                     this.menuDelete.classList.remove('disabled');
+                    this.menuNoteRow=this.downht.n|0;
                     this.popMenu(this.downpos);
                     this.dragging={o:"m"};
                     break;
@@ -1048,6 +1050,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                     this.menuGlobal=true;
                     this.clearSel();
                     this.menuDelete.classList.add('disabled');
+                    this.menuNoteRow=this.downht.n|0;
                     this.popMenu(this.downpos);
                     this.dragging={o:"m"};
                     break;
@@ -1062,6 +1065,23 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 e = ev.touches[0];
             else
                 e = ev;
+
+            if(this.menu.style.display=="block" && !this.menu.contains(e.target)){
+                this.menu.style.display="none";
+                this.rcMenu={x:0,y:0,width:0,height:0};
+                this.menuDelete.classList.remove('disabled');
+                this.menuGlobal=false;
+                window.removeEventListener('mousemove',this.bindpointermove,false);
+                window.removeEventListener('touchend',this.bindcancel,false);
+                window.removeEventListener('mouseup',this.bindcancel,false);
+            }
+
+            if(this.menu.style.display=="block" && this.menu.contains(e.target)){
+                this.downpos=this.getPos(e);
+                this.downht={m:"m"};
+                this.dragging={o:"m"};
+                return;
+            }
             this.rcTarget=this.canvas.getBoundingClientRect();
             this.downpos=this.getPos(e);
             this.downht=this.hitTest(this.downpos);
@@ -1081,12 +1101,14 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 case "E":
                     this.menuGlobal=false;
                     this.menuDelete.classList.remove('disabled');
+                    this.menuNoteRow=this.downht.n|0;
                     this.popMenu(this.downpos);
                     this.dragging={o:"m"};
                     break;
                 case "s":
                     this.menuGlobal=true;
                     this.clearSel();
+                    this.menuNoteRow=this.downht.n|0;
                     this.dragging={o:"A",p:this.downpos,p2:this.downpos,t1:this.downht.t,n1:this.downht.n,right:true};
                     break;
                 default:
@@ -1286,7 +1308,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                         this.quantizeSelectedNotes();
                         break;
                     case 'randomfill':
-                        this.randomFillRow(this.downht.n|0);
+                        this.randomFillRow(this.menuNoteRow);
                         break;
                     case 'velocity':
                         const v=parseInt(prompt('Velocity (1-127):','100'),10);
@@ -1302,6 +1324,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 const moved=Math.abs(this.dragging.p.x-pos.x)+Math.abs(this.dragging.p.y-pos.y);
                 if(this.dragging.right && moved<4){
                     this.menuDelete.classList.add('disabled');
+                    this.menuNoteRow=this.dragging.n1|0;
                     this.popMenu(this.dragging.p);
                     this.dragging={o:"m"};
                     this.menuGlobal=true;
