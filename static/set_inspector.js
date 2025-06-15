@@ -247,12 +247,16 @@ export function initSetInspector() {
     const seq = piano.sequence || [];
     const barWidth = Math.max(2,
       (piano.grid || piano.snap) * (velCanvas.width / piano.xrange) * 0.8);
-    seq.forEach(ev => {
+
+    const drawBar = ev => {
       const x = ((ev.t - piano.xoffset) / piano.xrange) * velCanvas.width;
       const h = ((ev.v || 100) / 127) * velCanvas.height;
       vctx.fillStyle = ev.f ? piano.colnotesel : piano.colnote;
       vctx.fillRect(x, velCanvas.height - h, barWidth, h);
-    });
+    };
+
+    seq.filter(ev => !ev.f).forEach(drawBar);
+    seq.filter(ev => ev.f).forEach(drawBar);
   }
 
   function envValueAt(bps, t) {
