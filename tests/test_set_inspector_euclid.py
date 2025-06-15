@@ -15,3 +15,4 @@ def test_euclid_modal_present():
     assert 'wac-kb-highlight' in js
     inspector = INSPECTOR_JS.read_text()
     assert 'globalAlpha = 0.6' in inspector
+    assert 'piano.editmode = overlayActive ?' in inspector

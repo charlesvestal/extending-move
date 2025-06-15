@@ -700,7 +700,7 @@ export function initSetInspector() {
         }
         recomputeOverlay();
         if (piano) {
-          piano.enable = !overlayActive;
+          piano.editmode = overlayActive ? '' : defaultEditMode;
           if (piano.setHighlightRow) piano.setHighlightRow(overlayActive ? overlayRow : null);
           piano.redraw();
         }
