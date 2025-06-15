@@ -82,6 +82,7 @@ export function initSetInspector() {
       n: n.noteNumber,
       g: Math.round(n.duration * ticksPerBeat),
       v: Math.round(n.velocity || 100)
+
     }));
     if (!piano.hasAttribute('xrange')) piano.xrange = region * ticksPerBeat;
     if (!piano.hasAttribute('markstart')) piano.markstart = loopStart * ticksPerBeat;
