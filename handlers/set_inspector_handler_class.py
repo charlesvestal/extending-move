@@ -1,5 +1,12 @@
 from handlers.base_handler import BaseHandler
-from core.set_inspector_handler import list_clips, get_clip_data, save_envelope
+from core.set_inspector_handler import (
+    list_clips,
+    get_clip_data,
+    save_envelope,
+    save_clip,
+    extract_pitch_edit_notes,
+    apply_pitch_edit_changes,
+)
 from core.list_msets_handler import list_msets
 from core.pad_colors import rgb_string
 from core.config import MSETS_DIRECTORY
@@ -172,7 +179,6 @@ class SetInspectorHandler(BaseHandler):
             pitch_pad_val = form.getvalue("pitch_pad")
             pitch_pad = int(pitch_pad_val) if pitch_pad_val and pitch_pad_val.isdigit() else None
             notes = result.get("notes", [])
-            from core.set_inspector_handler import extract_pitch_edit_notes
             pitch_pads = sorted(
                 {
                     n.get("noteNumber")
@@ -327,7 +333,6 @@ class SetInspectorHandler(BaseHandler):
                 return self.format_error_response("Invalid clip data", pad_grid=pad_grid)
             pitch_pad_val = form.getvalue("pitch_pad")
             pitch_pad = int(pitch_pad_val) if pitch_pad_val and pitch_pad_val.isdigit() else None
-            from core.set_inspector_handler import save_clip, get_clip_data, apply_pitch_edit_changes
             if pitch_pad is not None:
                 clip_data = get_clip_data(set_path, track_idx, clip_idx)
                 if clip_data.get("success"):
@@ -352,7 +357,6 @@ class SetInspectorHandler(BaseHandler):
             envelopes = clip_data.get("envelopes", [])
             param_map = clip_data.get("param_map", {})
             param_context = clip_data.get("param_context", {})
-            from core.set_inspector_handler import extract_pitch_edit_notes
             pitch_pads = sorted(
                 {
                     n.get("noteNumber")
