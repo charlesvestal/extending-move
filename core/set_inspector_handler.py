@@ -92,7 +92,10 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
                         return True
             return False
 
-        is_drum_rack = _has_drum_rack(track_obj.get("devices", []))
+        # Some sets wrap the drum rack inside instrument racks or other
+        # containers. Search the entire track object for any device of kind
+        # "drumRack" so drum mode works reliably.
+        is_drum_rack = _has_drum_rack(track_obj)
         track_name = _track_display_name(track_obj, track)
         clip_name = clip_obj.get("name") or f"Clip {clip + 1}"
         param_map: Dict[int, str] = {}
