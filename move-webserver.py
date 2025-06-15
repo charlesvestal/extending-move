@@ -349,6 +349,7 @@ def set_inspector_route():
         loop_end=result.get("loop_end", result.get("region")),
         param_ranges_json=result.get("param_ranges_json", "{}"),
         backups=result.get("backups", []),
+        current_ts=result.get("current_ts"),
         active_tab="set-inspector",
     )
 
