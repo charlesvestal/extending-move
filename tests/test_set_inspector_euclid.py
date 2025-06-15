@@ -8,6 +8,7 @@ INSPECTOR_JS = Path(__file__).resolve().parents[1] / 'static' / 'set_inspector.j
 def test_euclid_modal_present():
     html = TEMPLATE.read_text()
     assert 'id="euclidModal"' in html
+    assert 'id="euclid_repeat"' in html
     js = SCRIPT.read_text()
     assert 'data-action="euclid"' in js
     inspector = INSPECTOR_JS.read_text()

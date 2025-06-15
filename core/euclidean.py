@@ -26,8 +26,12 @@ def apply_euclidean_fill(
     pulses: int,
     rotate: int,
     grid: float,
+    repeat: bool = False,
 ) -> List[Dict[str, Any]]:
-    """Return new notes list with Euclidean pattern applied to the given row."""
+    """Return new notes list with Euclidean pattern applied to the given row.
+
+    If ``repeat`` is True, the generated pattern is repeated until ``loop_end``.
+    """
     onsets = euclidean_rhythm(steps, pulses, rotate)
     new_notes = [
         n
@@ -37,17 +41,25 @@ def apply_euclidean_fill(
             and loop_start <= n.get("startTime", 0) < loop_end
         )
     ]
-    for step in onsets:
-        start = loop_start + step * grid
-        new_notes.append(
-            {
-                "noteNumber": note_number,
-                "startTime": start,
-                "duration": grid,
-                "velocity": 100,
-                "offVelocity": 0,
-            }
-        )
+    pattern_len = steps * grid
+    base = 0.0
+    while True:
+        for step in onsets:
+            start = loop_start + base + step * grid
+            if start >= loop_end:
+                break
+            new_notes.append(
+                {
+                    "noteNumber": note_number,
+                    "startTime": start,
+                    "duration": grid,
+                    "velocity": 100,
+                    "offVelocity": 0,
+                }
+            )
+        if not repeat or loop_start + base + pattern_len >= loop_end:
+            break
+        base += pattern_len
     new_notes.sort(key=lambda x: x["startTime"])
     return new_notes
 
