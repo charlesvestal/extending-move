@@ -89,6 +89,8 @@ class SetInspectorHandler(BaseHandler):
             "selected_clip": None,
             "notes": [],
             "envelopes": [],
+            "pitch_notes": [],
+            "is_drum_rack": False,
             "region": 4.0,
             "loop_start": 0.0,
             "loop_end": 4.0,
@@ -179,6 +181,8 @@ class SetInspectorHandler(BaseHandler):
             clip_info = list_clips(set_path)
             clip_grid = self.generate_clip_grid(clip_info.get("clips", []), selected=clip_val)
             envelopes = result.get("envelopes", [])
+            pitch_notes = result.get("pitch_notes", [])
+            is_drum_rack = result.get("is_drum_rack")
             param_map = result.get("param_map", {})
             param_context = result.get("param_context", {})
             env_opts = "".join(
@@ -205,6 +209,8 @@ class SetInspectorHandler(BaseHandler):
                 "selected_clip": clip_val,
                 "notes": result.get("notes", []),
                 "envelopes": envelopes,
+                "pitch_notes": pitch_notes,
+                "is_drum_rack": is_drum_rack,
                 "region": result.get("region", 4.0),
                 "loop_start": result.get("loop_start", 0.0),
                 "loop_end": result.get("loop_end", 4.0),
@@ -245,6 +251,8 @@ class SetInspectorHandler(BaseHandler):
             backups = list_backups(set_path)
             clip_data = get_clip_data(set_path, track_idx, clip_idx)
             envelopes = clip_data.get("envelopes", [])
+            pitch_notes = clip_data.get("pitch_notes", [])
+            is_drum_rack = clip_data.get("is_drum_rack")
             param_map = clip_data.get("param_map", {})
             param_context = clip_data.get("param_context", {})
             selected_pid = int(param_val)
@@ -275,6 +283,8 @@ class SetInspectorHandler(BaseHandler):
                 "selected_clip": clip_val,
                 "notes": clip_data.get("notes", []),
                 "envelopes": envelopes,
+                "pitch_notes": pitch_notes,
+                "is_drum_rack": is_drum_rack,
                 "region": clip_data.get("region", 4.0),
                 "loop_start": clip_data.get("loop_start", 0.0),
                 "loop_end": clip_data.get("loop_end", 4.0),
@@ -294,6 +304,7 @@ class SetInspectorHandler(BaseHandler):
             region_val = form.getvalue("region_end")
             loop_start_val = form.getvalue("loop_start")
             loop_end_val = form.getvalue("loop_end")
+            pitch_data = form.getvalue("pitch_notes")
             if not (
                 set_path
                 and clip_val
@@ -315,6 +326,7 @@ class SetInspectorHandler(BaseHandler):
             try:
                 notes = json.loads(notes_data)
                 envelopes = json.loads(env_data)
+                pitch_notes = json.loads(pitch_data) if pitch_data else None
                 region_end = float(region_val)
                 loop_start = float(loop_start_val)
                 loop_end = float(loop_end_val)
@@ -329,6 +341,7 @@ class SetInspectorHandler(BaseHandler):
                 clip_idx,
                 notes,
                 envelopes,
+                pitch_notes,
                 region_end,
                 loop_start,
                 loop_end,
@@ -341,6 +354,8 @@ class SetInspectorHandler(BaseHandler):
             backups = list_backups(set_path)
             clip_data = get_clip_data(set_path, track_idx, clip_idx)
             envelopes = clip_data.get("envelopes", [])
+            pitch_notes = clip_data.get("pitch_notes", [])
+            is_drum_rack = clip_data.get("is_drum_rack")
             param_map = clip_data.get("param_map", {})
             param_context = clip_data.get("param_context", {})
             env_opts = "".join(
@@ -366,6 +381,8 @@ class SetInspectorHandler(BaseHandler):
                 "selected_clip": clip_val,
                 "notes": clip_data.get("notes", []),
                 "envelopes": envelopes,
+                "pitch_notes": pitch_notes,
+                "is_drum_rack": is_drum_rack,
                 "region": clip_data.get("region", 4.0),
                 "loop_start": clip_data.get("loop_start", 0.0),
                 "loop_end": clip_data.get("loop_end", 4.0),

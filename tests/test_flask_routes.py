@@ -711,13 +711,24 @@ def test_set_inspector_post(client, monkeypatch):
             'message_type': 'success',
             'pad_grid': '<div class="pad-grid"></div>',
             'selected_set': '/tmp/a.abl',
+            'set_name': 'Test',
             'clip_grid': '<div class="pad-grid"></div>',
             'clip_options': '<option>1</option>',
             'selected_clip': '0:0',
             'notes': [],
             'envelopes': [],
+            'pitch_notes': [],
+            'is_drum_rack': False,
+            'param_ranges_json': '{}',
+            'loop_start': 0.0,
+            'loop_end': 4.0,
             'region': 4.0,
             'current_ts': '2025-01-02 00:00:00',
+            'backups': [],
+            'track_index': 0,
+            'clip_index': 0,
+            'track_name': 'T',
+            'clip_name': 'C'
         }
     monkeypatch.setattr(move_webserver.set_inspector_handler, 'handle_post', fake_post)
     resp = client.post('/set-inspector', data={'action': 'select_set', 'pad_index': '1'})

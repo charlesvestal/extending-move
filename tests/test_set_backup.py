@@ -51,7 +51,7 @@ def test_save_clip_and_envelope_create_backups(tmp_path):
     set_path = tmp_path / "Song.abl"
     create_simple_set(set_path)
 
-    save_clip(str(set_path), 0, 0, [], [], 4.0, 0.0, 4.0)
+    save_clip(str(set_path), 0, 0, [], [], None, 4.0, 0.0, 4.0)
     latest1 = (set_path.parent / "backups" / "latest.txt").read_text().strip()
     backups = list_backups(str(set_path))
     assert len(backups) == 1

@@ -344,6 +344,8 @@ def set_inspector_route():
         clip_index=result.get("clip_index"),
         notes=result.get("notes"),
         envelopes=result.get("envelopes"),
+        pitch_notes=result.get("pitch_notes", []),
+        is_drum_rack=result.get("is_drum_rack", False),
         region=result.get("region"),
         loop_start=result.get("loop_start", 0.0),
         loop_end=result.get("loop_end", result.get("region")),
