@@ -13,3 +13,8 @@ def test_euclid_modal_present():
     assert 'data-action="euclid"' in js
     inspector = INSPECTOR_JS.read_text()
     assert 'globalAlpha = 0.6' in inspector
+
+
+def test_shift_click_selection():
+    js = SCRIPT.read_text()
+    assert 'shiftSelect' in js
