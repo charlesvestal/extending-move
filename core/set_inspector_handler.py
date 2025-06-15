@@ -41,6 +41,43 @@ def _track_display_name(track_obj: Dict[str, Any], idx: int) -> str:
     return track_obj.get("name") or f"Track {idx + 1}"
 
 
+def track_has_drum_rack(track_obj: Dict[str, Any]) -> bool:
+    """Return True if the track's device chain contains a drum rack."""
+
+    def contains_drum(devices: List[Dict[str, Any]]) -> bool:
+        for dev in devices or []:
+            if not isinstance(dev, dict):
+                continue
+            kind = dev.get("kind")
+            if kind == "drumRack":
+                return True
+            if contains_drum(dev.get("devices", [])):
+                return True
+            for chain in dev.get("chains", []):
+                if contains_drum(chain.get("devices", [])):
+                    return True
+        return False
+
+    return contains_drum(track_obj.get("devices", []))
+
+
+def enforce_drum_mode(notes: List[Dict[str, Any]]) -> None:
+    """Truncate overlapping notes on the same MIDI key."""
+
+    by_pitch: Dict[int, List[Dict[str, Any]]] = {}
+    for n in notes:
+        by_pitch.setdefault(int(n.get("noteNumber", 0)), []).append(n)
+
+    for row in by_pitch.values():
+        row.sort(key=lambda x: x.get("startTime", 0.0))
+        for i in range(len(row) - 1):
+            a = row[i]
+            b = row[i + 1]
+            a_end = a.get("startTime", 0.0) + a.get("duration", 0.0)
+            if a_end > b.get("startTime", 0.0):
+                a["duration"] = max(0.0, b.get("startTime", 0.0) - a.get("startTime", 0.0))
+
+
 def list_clips(set_path: str) -> Dict[str, Any]:
     """Return list of clips in the set."""
     try:
@@ -74,6 +111,9 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
         loop_info = region_info.get("loop", {})
         loop_start = loop_info.get("start", 0.0)
         loop_end = loop_info.get("end", region_end)
+        drum_mode = track_has_drum_rack(track_obj)
+        if drum_mode:
+            enforce_drum_mode(notes)
 
         region_length = region_end
         track_name = _track_display_name(track_obj, track)
@@ -134,6 +174,7 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
             "param_map": param_map,
             "param_context": param_context,
             "param_ranges": param_ranges,
+            "drum_mode": drum_mode,
             "track_name": track_name,
             "clip_name": clip_name,
         }

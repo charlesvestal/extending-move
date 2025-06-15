@@ -37,6 +37,7 @@ export function initSetInspector() {
   const loopStart = parseFloat(dataDiv.dataset.loopStart || '0');
   const loopEnd = parseFloat(dataDiv.dataset.loopEnd || String(region));
   const paramRanges = JSON.parse(dataDiv.dataset.paramRanges || '{}');
+  const drumMode = dataDiv.dataset.drumMode === 'true';
   const canvas = document.getElementById('clipCanvas');
   const ctx = canvas.getContext('2d');
   const velCanvas = document.getElementById('velocityCanvas');
@@ -92,6 +93,8 @@ export function initSetInspector() {
       a: n.automations || null
 
     }));
+    piano.drummode = drumMode;
+    if (piano.sortSequence) piano.sortSequence();
     recomputeOverlay();
     if (piano.setHighlightRow) piano.setHighlightRow(null);
     if (!piano.hasAttribute('xrange')) piano.xrange = region * ticksPerBeat;
