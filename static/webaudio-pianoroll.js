@@ -75,6 +75,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 preload:            {type:Number, value:1.0},
                 tempo:              {type:Number, value:120, observer:'updateTimer'},
                 enable:             {type:Boolean, value:true},
+                drummode:          {type:Boolean, value:false},
             },
         };
         this.defineprop();
@@ -178,8 +179,23 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
 <select id="wac-gridres"></select>
 </div>`;
 
+        this.enforceDrumMode=function(){
+            if(!this.drummode) return;
+            const rows={};
+            for(const ev of this.sequence){
+                (rows[ev.n]=rows[ev.n]||[]).push(ev);
+            }
+            for(const n in rows){
+                const list=rows[n].sort((a,b)=>a.t-b.t);
+                for(let i=0;i<list.length-1;i++){
+                    const A=list[i],B=list[i+1];
+                    if(A.t+A.g>B.t) A.g=Math.max(0,B.t-A.t);
+                }
+            }
+        };
         this.sortSequence=function(){
             this.sequence.sort((x,y)=>{return x.t-y.t;});
+            this.enforceDrumMode();
         };
         this.findNextEv=function(tick){
             for(let i=0;i<this.sequence.length;++i){
