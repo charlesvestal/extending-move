@@ -702,8 +702,6 @@ export function initSetInspector() {
         if (piano) {
           piano.enable = !overlayActive;
           if (piano.setHighlightRow) piano.setHighlightRow(overlayActive ? overlayRow : null);
-          const item = piano.menu.querySelector('[data-action="pitchoverlay"]');
-          if (item) item.textContent = overlayActive ? 'Hide Pitch-Bend as Notes' : 'Show Pitch-Bend as Notes';
           piano.redraw();
         }
         draw();

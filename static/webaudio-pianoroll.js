@@ -151,6 +151,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
     top:0px;
     width:100px;
     height:100%;
+    cursor:pointer;
     background: repeat-y;
     background-size:100% calc(100%*12/16);
     background-position:left bottom;
@@ -172,7 +173,6 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
 <div data-action="quantize">Quantize to grid (Q)</div>
 <div data-action="euclid">Euclidean fill...</div>
 <div data-action="randomfill">Random fill row</div>
-<div data-action="pitchoverlay">Show Pitch-Bend as Notes</div>
 <!-- <div data-action="velocity">Velocity...</div> -->
 </div>
 <select id="wac-gridres"></select>
@@ -868,6 +868,13 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             this.ctx=this.canvas.getContext("2d");
             this.kbimg=this.elem.children[1];
             this.kbhl=this.kbimg.firstElementChild;
+            this.kbimg.addEventListener('click',e=>{
+                this.rcTarget=this.canvas.getBoundingClientRect();
+                const pos=this.getPos(e);
+                const ht=this.hitTest(pos);
+                if(ht.m==='y')
+                    this.dispatchEvent(new CustomEvent('pitchoverlay',{detail:{row:ht.n|0}}));
+            });
             this.markstartimg=this.elem.children[2];
             this.markendimg=this.elem.children[3];
             this.cursorimg=this.elem.children[4];
@@ -1050,10 +1057,6 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
         this.popMenu=function(pos){
             const s=this.menu.style;
             s.display="block";
-            const item=this.menu.querySelector('[data-action="pitchoverlay"]');
-            if(item){
-                item.textContent=this.highlightRow!==null?'Hide Pitch-Bend as Notes':'Show Pitch-Bend as Notes';
-            }
             let top=pos.y+8;
             let left=pos.x+8;
             s.top=top+"px";
@@ -1351,9 +1354,6 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                         break;
                     case 'randomfill':
                         this.randomFillRow(this.menuNoteRow);
-                        break;
-                    case 'pitchoverlay':
-                        this.dispatchEvent(new CustomEvent('pitchoverlay', { detail: { row: this.menuNoteRow } }));
                         break;
                     case 'velocity':
                         const v=parseInt(prompt('Velocity (1-127):','100'),10);
