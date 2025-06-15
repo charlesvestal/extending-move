@@ -12,5 +12,6 @@ def test_euclid_modal_present():
     js = SCRIPT.read_text()
     assert 'data-action="euclid"' in js
     assert 'data-action="pitchoverlay"' in js
+    assert 'wac-kb-highlight' in js
     inspector = INSPECTOR_JS.read_text()
     assert 'globalAlpha = 0.6' in inspector

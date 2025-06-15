@@ -158,7 +158,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
 </style>
 <div class="wac-body" id="wac-body" touch-action="none">
 <canvas id="wac-pianoroll" touch-action="none" tabindex="0"></canvas>
-<div id="wac-kb"></div>
+<div id="wac-kb"><div id="wac-kb-highlight" style="position:absolute;left:0;right:0;background:#00ffff80;display:none;pointer-events:none;"></div></div>
 <img id="wac-markstart" class="marker" src="${this.markstartsrc}"/>
 <img id="wac-markend" class="marker" src="${this.markendsrc}"/>
 <img id="wac-cursor" class="marker" src="${this.cursorsrc}"/>
@@ -867,6 +867,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             this.canvas.addEventListener('blur', ()=>{ this.hasFocus = false; this.redraw(); });
             this.ctx=this.canvas.getContext("2d");
             this.kbimg=this.elem.children[1];
+            this.kbhl=this.kbimg.firstElementChild;
             this.markstartimg=this.elem.children[2];
             this.markendimg=this.elem.children[3];
             this.cursorimg=this.elem.children[4];
@@ -878,6 +879,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             this.rcMenu={x:0, y:0, width:0, height:0};
             this.lastx=0;
             this.lasty=0;
+            this.highlightRow=null;
             this.canvas.addEventListener('mousemove',this.mousemove.bind(this),false);
             this.canvas.addEventListener('keydown',this.keydown.bind(this),false);
             this.canvas.addEventListener('DOMMouseScroll',this.wheel.bind(this),false);
@@ -902,6 +904,23 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             if(!this.cursorimg)
                 return;
             this.cursorimg.style.display=this.showcursor?"block":"none";
+        };
+
+        this.updateKbHighlight=function(){
+            if(!this.kbhl) return;
+            if(this.highlightRow===null||this.highlightRow===undefined){
+                this.kbhl.style.display='none';
+                return;
+            }
+            const top=this.sheight-(this.highlightRow-this.yoffset+1)*this.steph;
+            this.kbhl.style.top=top+'px';
+            this.kbhl.style.height=this.steph+'px';
+            this.kbhl.style.display='block';
+        };
+
+        this.setHighlightRow=function(n){
+            this.highlightRow=n;
+            this.updateKbHighlight();
         };
         this.populateGridSelect=function(){
             const opts=[
@@ -1031,6 +1050,10 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
         this.popMenu=function(pos){
             const s=this.menu.style;
             s.display="block";
+            const item=this.menu.querySelector('[data-action="pitchoverlay"]');
+            if(item){
+                item.textContent=this.highlightRow!==null?'Hide Pitch-Bend as Notes':'Show Pitch-Bend as Notes';
+            }
             let top=pos.y+8;
             let left=pos.x+8;
             s.top=top+"px";
@@ -1444,6 +1467,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             this.swidth-=this.kbwidth;
             this.sheight=proll.height-this.xruler;
             this.redraw();
+            this.updateKbHighlight();
         };
         this.redrawMarker=function(){
             if(!this.initialized)
@@ -1614,6 +1638,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             this.redrawXRuler();
             this.redrawMarker();
             this.redrawAreaSel();
+            this.updateKbHighlight();
         };
         this.ready();
     }

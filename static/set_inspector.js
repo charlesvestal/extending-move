@@ -93,6 +93,7 @@ export function initSetInspector() {
 
     }));
     recomputeOverlay();
+    if (piano.setHighlightRow) piano.setHighlightRow(null);
     if (!piano.hasAttribute('xrange')) piano.xrange = region * ticksPerBeat;
     if (!piano.hasAttribute('markstart')) piano.markstart = loopStart * ticksPerBeat;
     if (!piano.hasAttribute('markend')) piano.markend = loopEnd * ticksPerBeat;
@@ -394,7 +395,14 @@ export function initSetInspector() {
   if (piano && piano.redraw) {
     const origRedraw = piano.redraw.bind(piano);
     piano.redraw = function(...args) {
+      let bak = null;
+      if (overlayActive) {
+        bak = this.sequence;
+        this.sequence = [];
+      }
       origRedraw(...args);
+      if (bak) this.sequence = bak;
+      if (this.updateKbHighlight) this.updateKbHighlight();
       draw();
     };
   }
@@ -691,6 +699,13 @@ export function initSetInspector() {
           overlayRow = e.detail.row;
         }
         recomputeOverlay();
+        if (piano) {
+          piano.enable = !overlayActive;
+          if (piano.setHighlightRow) piano.setHighlightRow(overlayActive ? overlayRow : null);
+          const item = piano.menu.querySelector('[data-action="pitchoverlay"]');
+          if (item) item.textContent = overlayActive ? 'Hide Pitch-Bend as Notes' : 'Show Pitch-Bend as Notes';
+          piano.redraw();
+        }
         draw();
       });
     }
