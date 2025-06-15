@@ -1343,6 +1343,8 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 this.menuDelete.classList.remove('disabled');
                 this.menuGlobal=false;
                 this.redraw();
+                // Ensure keyboard shortcuts continue working after a menu action
+                this.canvas.focus();
             }
             if(this.dragging.o=="A"){
                 const moved=Math.abs(this.dragging.p.x-pos.x)+Math.abs(this.dragging.p.y-pos.y);
