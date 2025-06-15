@@ -59,3 +59,14 @@ def test_overlay_generation():
     assert ov['duration'] == 0.5
     assert ov['noteNumber'] == result['BASE_NOTE'] + 2
     assert ov['eventIndex'] == 1
+
+
+def test_overlay_default_value():
+    notes = [
+        {'n': 50, 't': 0, 'g': 96},
+        {'n': 50, 't': 96, 'g': 96, 'a': {'PitchBend': [{'time': 0, 'value': 0}]}}
+    ]
+    result = run_node(notes, 50)
+    assert len(result['overlay']) == 2
+    assert result['overlay'][0]['noteNumber'] == result['BASE_NOTE']
+    assert result['overlay'][0]['eventIndex'] == 0
