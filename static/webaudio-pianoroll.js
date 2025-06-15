@@ -54,6 +54,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 colgrid:            {type:String, value:"#666"},
                 colnote:            {type:String, value:"#f22"},
                 colnotesel:         {type:String, value:"#0f0"},
+                colnoteselinactive: {type:String, value:"#0b0"},
                 colnoteborder:      {type:String, value:"#000"},
                 colnoteselborder:   {type:String, value:"#fff"},
                 colrulerbg:         {type:String, value:"#666"},
@@ -771,6 +772,9 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             this.proll = this.elem.children[0];
             this.canvas = this.elem.children[0];
             this.kb = this.elem.children[1];
+            this.hasFocus = false;
+            this.canvas.addEventListener('focus', ()=>{ this.hasFocus = true; this.redraw(); });
+            this.canvas.addEventListener('blur', ()=>{ this.hasFocus = false; this.redraw(); });
             this.ctx=this.canvas.getContext("2d");
             this.kbimg=this.elem.children[1];
             this.markstartimg=this.elem.children[2];
@@ -1389,8 +1393,9 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             const l=this.sequence.length;
             for(let s=0; s<l; ++s){
                 const ev=this.sequence[s];
-                if(ev.f)
-                    this.ctx.fillStyle=this.colnotesel;
+                if(ev.f){
+                    this.ctx.fillStyle = this.hasFocus ? this.colnotesel : this.colnoteselinactive;
+                }
                 else
                     this.ctx.fillStyle=this.colnote;
                 w=ev.g*this.stepw;
