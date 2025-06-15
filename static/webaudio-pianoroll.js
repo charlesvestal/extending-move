@@ -1323,7 +1323,8 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                         this.quantizeSelectedNotes();
                         break;
                     case 'euclid':
-                        this.dispatchEvent(new CustomEvent('euclidfill', { detail: { row: this.downht.n|0 } }));
+                        this.dispatchEvent(new CustomEvent('euclidfill', { detail: { row: this.menuNoteRow } }));
+                        break;
                     case 'randomfill':
                         this.randomFillRow(this.menuNoteRow);
                         break;
