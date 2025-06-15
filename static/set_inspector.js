@@ -336,8 +336,27 @@ export function initSetInspector() {
       `<div style="text-align:right;">${fmt(min)}</div>`;
   }
 
+  function drawGhostNotes() {
+    if (!ghostNotes.length || !piano) return;
+    const { min, max } = getVisibleRange();
+    const noteRange = max - min + 1;
+    const h = canvas.height / noteRange;
+    ctx.save();
+    ctx.globalAlpha = 0.6;
+    ctx.fillStyle = '#0074D9';
+    ghostNotes.forEach(n => {
+      const t = n.startTime * ticksPerBeat;
+      const x = ((t - piano.xoffset) / piano.xrange) * canvas.width;
+      const w = (n.duration * ticksPerBeat / piano.xrange) * canvas.width;
+      const y = canvas.height - (n.noteNumber - min + 1) * h;
+      ctx.fillRect(x, y, w, h);
+    });
+    ctx.restore();
+  }
+
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawGhostNotes();
     drawEnvelope();
     drawVelocity();
   }
