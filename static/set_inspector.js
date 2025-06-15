@@ -547,6 +547,7 @@ export function initSetInspector() {
   const lenInput = document.getElementById('euclid_length');
   const pulsesInput = document.getElementById('euclid_pulses');
   const rotateInput = document.getElementById('euclid_rotate');
+  const repeatBox = document.getElementById('euclid_repeat');
   if (euclidModal) {
     const okBtn = document.getElementById('euclid_ok');
     const cancelBtn = document.getElementById('euclid_cancel');
@@ -559,15 +560,24 @@ export function initSetInspector() {
       const rot = Math.max(0, Math.min(parseInt(rotateInput.value), steps - 1));
       const row = parseInt(euclidModal.dataset.row || '60');
       const ons = euclideanRhythm(steps, pulses, rot);
-      ons.forEach(st => {
-        ghostNotes.push({
-          noteNumber: row,
-          startTime: (piano.markstart + st * piano.grid) / ticksPerBeat,
-          duration: piano.grid / ticksPerBeat,
-          velocity: 100,
-          offVelocity: 0
+      const repeat = repeatBox && repeatBox.checked;
+      const startT = piano.markstart;
+      const endT = piano.markend;
+      const patLen = steps * piano.grid;
+      for (let base = 0; ; base += patLen) {
+        ons.forEach(st => {
+          const t = startT + base + st * piano.grid;
+          if (t >= endT) return;
+          ghostNotes.push({
+            noteNumber: row,
+            startTime: t / ticksPerBeat,
+            duration: piano.grid / ticksPerBeat,
+            velocity: 100,
+            offVelocity: 0
+          });
         });
-      });
+        if (!repeat || startT + base + patLen >= endT) break;
+      }
       draw();
     }
 
@@ -577,7 +587,7 @@ export function initSetInspector() {
       timer = setTimeout(updatePreview, 150);
     }
 
-    [lenInput, pulsesInput, rotateInput].forEach(el => el && el.addEventListener('input', debounced));
+    [lenInput, pulsesInput, rotateInput, repeatBox].forEach(el => el && el.addEventListener('input', debounced));
 
     function openModal(row) {
       euclidModal.dataset.row = row;
@@ -585,6 +595,7 @@ export function initSetInspector() {
       lenInput.value = steps;
       pulsesInput.value = Math.max(1, Math.min(Math.floor(steps / 2), steps));
       rotateInput.value = 0;
+      if (repeatBox) repeatBox.checked = false;
       removedNotes = piano.sequence.filter(ev => ev.n === row && ev.t >= piano.markstart && ev.t < piano.markend);
       if (removedNotes.length) {
         piano.sequence = piano.sequence.filter(ev => !removedNotes.includes(ev));
@@ -601,9 +612,9 @@ export function initSetInspector() {
       piano.sequence = piano.sequence.filter(ev => !(ev.n === row && ev.t >= startT && ev.t < endT));
       ghostNotes.forEach(n => {
         piano.sequence.push({
-          t: Math.round(n.startTime * ticksPerBeat),
+          t: n.startTime * ticksPerBeat,
           n: row,
-          g: Math.round(n.duration * ticksPerBeat),
+          g: n.duration * ticksPerBeat,
           v: n.velocity
         });
       });
