@@ -5,7 +5,7 @@ export function computeOverlayNotes(sequence, selectedRow, ticksPerBeat) {
   const overlay = [];
   if (selectedRow === null || selectedRow === undefined) return overlay;
   if (!sequence || !ticksPerBeat) return overlay;
-  sequence.forEach(ev => {
+  sequence.forEach((ev, idx) => {
     if (ev.n !== selectedRow) return;
     const pb = ev.a && ev.a.PitchBend;
     if (!pb || !pb.length) return;
@@ -16,7 +16,8 @@ export function computeOverlayNotes(sequence, selectedRow, ticksPerBeat) {
     overlay.push({
       noteNumber: viz,
       startTime: ev.t / ticksPerBeat,
-      duration: ev.g / ticksPerBeat
+      duration: ev.g / ticksPerBeat,
+      eventIndex: idx
     });
   });
   return overlay;
