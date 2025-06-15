@@ -1345,6 +1345,9 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             this.markendimg.style.left=(end+this.markendoffset)+"px";
         };
         this.redrawGrid=function(){
+            const gridRes = this.grid / this.timebase;
+            const showSub = gridRes < 1.0;
+
             for(let y=0;y<128;++y){
                 if(this.semiflag[y%12]&1)
                     this.ctx.fillStyle=this.coldk;
@@ -1355,26 +1358,29 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 this.ctx.fillStyle=this.colgrid;
                 this.ctx.fillRect(this.yruler+this.kbwidth, ys|0, this.swidth,1);
             }
-            const quarter=this.timebase*0.25;
-            let start=Math.floor(this.xoffset/quarter)*quarter;
-            for(let t=start, i=Math.floor(start/quarter);;t+=quarter,++i){
-                let x=this.stepw*(t-this.xoffset)+this.yruler+this.kbwidth;
-                let w=this.stepw*quarter;
-                if(x>this.width) break;
-                this.ctx.fillStyle=(i%2)?"rgba(0,0,0,0.05)":"rgba(0,0,0,0.1)";
-                this.ctx.fillRect(x|0,this.xruler,w,this.sheight);
-            }
 
-            const gstart=Math.floor(this.xoffset/this.grid)*this.grid;
-            this.ctx.fillStyle=this.colgrid;
-            for(let t=gstart;;t+=this.grid){
-                let x=this.stepw*(t-this.xoffset)+this.yruler+this.kbwidth;
-                if(x>=this.width) break;
-                this.ctx.fillRect(x|0,this.xruler,1,this.sheight);
+            if(showSub){
+                const quarter=this.timebase*0.25;
+                let start=Math.floor(this.xoffset/quarter)*quarter;
+                for(let t=start, i=Math.floor(start/quarter);;t+=quarter,++i){
+                    let x=this.stepw*(t-this.xoffset)+this.yruler+this.kbwidth;
+                    let w=this.stepw*quarter;
+                    if(x>this.width) break;
+                    this.ctx.fillStyle=(i%2)?"rgba(0,0,0,0.05)":"rgba(0,0,0,0.1)";
+                    this.ctx.fillRect(x|0,this.xruler,w,this.sheight);
+                }
+
+                const gstart=Math.floor(this.xoffset/this.grid)*this.grid;
+                this.ctx.fillStyle=this.colgrid;
+                for(let t=gstart;;t+=this.grid){
+                    let x=this.stepw*(t-this.xoffset)+this.yruler+this.kbwidth;
+                    if(x>=this.width) break;
+                    this.ctx.fillRect(x|0,this.xruler,1,this.sheight);
+                }
             }
 
             const mstart=Math.floor(this.xoffset/this.timebase)*this.timebase;
-            this.ctx.fillStyle="#000";
+            this.ctx.fillStyle = gridRes >= 1.0 ? "#a0a0a0" : "#000";
             for(let t=mstart;;t+=this.timebase){
                 let x=this.stepw*(t-this.xoffset)+this.yruler+this.kbwidth;
                 if(x>=this.width) break;

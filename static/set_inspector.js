@@ -268,6 +268,22 @@ export function initSetInspector() {
 
     seq.filter(ev => !ev.f).forEach(drawBar);
     seq.filter(ev => ev.f).forEach(drawBar);
+
+    const gridRes = (piano.grid || 0) / piano.timebase;
+    if (gridRes >= 1.0) {
+      vctx.strokeStyle = '#a0a0a0';
+      vctx.lineWidth = 2;
+      const mstart = Math.floor(piano.xoffset / piano.timebase) * piano.timebase;
+      for (let t = mstart;; t += piano.timebase) {
+        const x = ((t - piano.xoffset) / piano.xrange) * velCanvas.width;
+        if (x >= velCanvas.width) break;
+        vctx.beginPath();
+        vctx.moveTo(x, 0);
+        vctx.lineTo(x, velCanvas.height);
+        vctx.stroke();
+      }
+      vctx.lineWidth = 1;
+    }
   }
 
   function envValueAt(bps, t) {
