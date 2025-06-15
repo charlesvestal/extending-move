@@ -25,6 +25,19 @@
     {{ clip_grid | safe }}
     <span id="selected-clip-name" style="margin-left:1rem;"></span>
   </form>
+  {% if backups %}
+  <form method="post" action="{{ host_prefix }}/set-inspector" style="margin-bottom:1rem;">
+    <input type="hidden" name="action" value="restore_backup">
+    <input type="hidden" name="set_path" value="{{ selected_set }}">
+    <label for="backup_select">Restore backup:</label>
+    <select name="backup_file" id="backup_select">
+      {% for b in backups %}
+        <option value="{{ b.name }}">{{ b.display }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit">Restore</button>
+  </form>
+  {% endif %}
   <!-- <form method="get" action="{{ host_prefix }}/set-inspector" style="margin-bottom:1rem;">
     <button type="submit">Choose Another Set</button>
   </form> -->
@@ -81,6 +94,19 @@
     <input type="hidden" name="loop_end" id="loop_end_input">
     <button id="saveClipBtn" type="submit">Save Clip</button>
   </form>
+  {% if backups %}
+  <form method="post" action="{{ host_prefix }}/set-inspector" style="margin-top:0.5rem;">
+    <input type="hidden" name="action" value="restore_backup">
+    <input type="hidden" name="set_path" value="{{ selected_set }}">
+    <label for="backup_select2">Restore backup:</label>
+    <select name="backup_file" id="backup_select2">
+      {% for b in backups %}
+        <option value="{{ b.name }}">{{ b.display }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit">Restore</button>
+  </form>
+  {% endif %}
   <div id="clipData" data-notes='{{ notes | tojson }}' data-envelopes='{{ envelopes | tojson }}' data-region='{{ region | default(4.0) }}' data-loop-start='{{ loop_start | default(0.0) }}' data-loop-end='{{ loop_end | default(region) }}' data-param-ranges='{{ param_ranges_json | safe }}'></div>
   {% endif %}
 {% endblock %}
