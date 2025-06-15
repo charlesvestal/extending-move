@@ -6,7 +6,12 @@ BACKUP_EXT = '.ablbak'
 
 
 def backup_set(set_path: str) -> str:
-    """Create a timestamped backup of the given set file and keep last 10."""
+    """Create a timestamped backup of the given set file and keep last 10.
+
+    The backup is created *before* the new version is written. The timestamp
+    used for the backup is also stored in ``latest.txt`` inside the backups
+    directory so the currently active version can be identified easily.
+    """
     if not os.path.isfile(set_path):
         raise FileNotFoundError(f"{set_path} not found")
 
@@ -16,6 +21,10 @@ def backup_set(set_path: str) -> str:
     backup_name = os.path.basename(set_path) + f'.{timestamp}' + BACKUP_EXT
     backup_path = os.path.join(backup_dir, backup_name)
     shutil.copy2(set_path, backup_path)
+
+    latest_file = os.path.join(backup_dir, "latest.txt")
+    with open(latest_file, "w") as f:
+        f.write(timestamp)
 
     backups = sorted(
         [f for f in os.listdir(backup_dir) if f.endswith(BACKUP_EXT)],

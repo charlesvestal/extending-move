@@ -3,7 +3,13 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 
 import json
-from core.set_backup_handler import backup_set, list_backups, restore_backup
+import os
+from core.set_backup_handler import (
+    BACKUP_EXT,
+    backup_set,
+    list_backups,
+    restore_backup,
+)
 from core.set_inspector_handler import save_clip, save_envelope
 
 
@@ -26,7 +32,10 @@ def test_backup_and_restore(tmp_path):
     # create multiple backups
     for i in range(11):
         set_file.write_text(f"version{i}")
-        backup_set(str(set_file))
+        bpath = backup_set(str(set_file))
+        latest = (set_file.parent / "backups" / "latest.txt").read_text().strip()
+        ts = os.path.basename(bpath).split(".")[-2]
+        assert latest == ts
     backups = list_backups(str(set_file))
     assert len(backups) == 10
     latest = backups[0]['name']
@@ -41,9 +50,13 @@ def test_save_clip_and_envelope_create_backups(tmp_path):
     create_simple_set(set_path)
 
     save_clip(str(set_path), 0, 0, [], [], 4.0, 0.0, 4.0)
+    latest1 = (set_path.parent / "backups" / "latest.txt").read_text().strip()
     backups = list_backups(str(set_path))
     assert len(backups) == 1
+    assert any(b['name'].endswith(latest1 + BACKUP_EXT) for b in backups)
 
     save_envelope(str(set_path), 0, 0, 1, [])
+    latest2 = (set_path.parent / "backups" / "latest.txt").read_text().strip()
     backups = list_backups(str(set_path))
     assert len(backups) == 2
+    assert any(b['name'].endswith(latest2 + BACKUP_EXT) for b in backups)
