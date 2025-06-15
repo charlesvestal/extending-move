@@ -52,6 +52,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 collt:              {type:String, value:"#ccc"},
                 coldk:              {type:String, value:"#aaa"},
                 colgrid:            {type:String, value:"#666"},
+                colbar:             {type:String, value:"#999"},
                 colnote:            {type:String, value:"#f22"},
                 colnotesel:         {type:String, value:"#0f0"},
                 colnoteselinactive: {type:String, value:"#0b0"},
@@ -1372,11 +1373,12 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             }
 
             const mstart=Math.floor(this.xoffset/this.timebase)*this.timebase;
-            this.ctx.fillStyle="#000";
+            const barIsGrid = this.grid >= this.timebase;
+            this.ctx.fillStyle = barIsGrid ? this.colgrid : this.colbar;
             for(let t=mstart;;t+=this.timebase){
                 let x=this.stepw*(t-this.xoffset)+this.yruler+this.kbwidth;
                 if(x>=this.width) break;
-                this.ctx.fillRect((x|0)-1,this.xruler,2,this.sheight);
+                this.ctx.fillRect((x|0)-1,this.xruler,barIsGrid ? 2 : 2,this.sheight);
             }
         };
         this.semiflag=[6,1,0,1,0,2,1,0,1,0,1,0];
