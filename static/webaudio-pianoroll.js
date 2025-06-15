@@ -1040,11 +1040,6 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 case "N":
                 case "B":
                 case "E":
-                case "n":
-                    if(this.downht.m=="n"){
-                        this.clearSel();
-                        this.sequence[this.downht.i].f=1;
-                    }
                     this.menuGlobal=false;
                     this.menuDelete.classList.remove('disabled');
                     this.menuNoteRow=this.downht.n|0;
@@ -1110,11 +1105,6 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 case "N":
                 case "B":
                 case "E":
-                case "n":
-                    if(this.downht.m=="n"){
-                        this.clearSel();
-                        this.sequence[this.downht.i].f=1;
-                    }
                     this.menuGlobal=false;
                     this.menuDelete.classList.remove('disabled');
                     this.menuNoteRow=this.downht.n|0;
