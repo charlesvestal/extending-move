@@ -577,6 +577,37 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 }
             }
         };
+        this.moveSelectedNoteNoSnap=function(dt,dn){
+            const l=this.sequence.length;
+            for(let i=0;i<l;++i){
+                const ev=this.sequence[i];
+                if(ev.f){
+                    ev.t=Math.max(0,ev.t+dt);
+                    ev.n=ev.n+dn;
+                }
+            }
+        };
+        this.transposeSelectedNotes=function(dn){
+            const l=this.sequence.length;
+            for(let i=0;i<l;++i){
+                const ev=this.sequence[i];
+                if(ev.f)
+                    ev.n=ev.n+dn;
+            }
+        };
+        this.selectAllNotes=function(){
+            for(const ev of this.sequence)
+                ev.f=1;
+        };
+        this.saveSelState=function(){
+            for(const ev of this.sequence){
+                if(ev.f){
+                    ev.on=ev.n;
+                    ev.ot=ev.t;
+                    ev.og=ev.g;
+                }
+            }
+        };
         this.clearSel=function(){
             const l=this.sequence.length;
             for(let i=0;i<l;++i){
@@ -836,10 +867,50 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             return false;
         };
         this.keydown=function(e){
+            if((e.keyCode===65) && (e.ctrlKey||e.metaKey)){
+                this.selectAllNotes();
+                this.redraw();
+                e.preventDefault();
+                return;
+            }
             switch(e.keyCode){
+            case 8:
             case 46://delNote
                 this.delSelectedNote();
                 this.redraw();
+                e.preventDefault();
+                break;
+            case 37://left
+                this.saveSelState();
+                if(e.shiftKey)
+                    this.moveSelectedNoteNoSnap(-1/this.stepw,0);
+                else
+                    this.moveSelectedNote(-this.grid,0);
+                this.sortSequence();
+                this.redraw();
+                e.preventDefault();
+                break;
+            case 39://right
+                this.saveSelState();
+                if(e.shiftKey)
+                    this.moveSelectedNoteNoSnap(1/this.stepw,0);
+                else
+                    this.moveSelectedNote(this.grid,0);
+                this.sortSequence();
+                this.redraw();
+                e.preventDefault();
+                break;
+            case 38://up
+                this.transposeSelectedNotes(1);
+                this.sortSequence();
+                this.redraw();
+                e.preventDefault();
+                break;
+            case 40://down
+                this.transposeSelectedNotes(-1);
+                this.sortSequence();
+                this.redraw();
+                e.preventDefault();
                 break;
             }
         };
