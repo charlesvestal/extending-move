@@ -160,7 +160,9 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
 <img id="wac-cursor" class="marker" src="${this.cursorsrc}"/>
 <div id="wac-menu">
 <div data-action="delete">Delete (Del)</div>
-<div data-action="duplicate">Duplicate</div>
+<div data-action="duplicate">Duplicate (D)</div>
+<div data-action="reverse">Reverse</div>
+<div data-action="invert">Invert</div>
 <div data-action="double">×2 duration</div>
 <div data-action="half">÷2 duration</div>
 <div data-action="quantize">Quantize to grid (Q)</div>
@@ -596,6 +598,30 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                     ev.n=ev.n+dn;
             }
         };
+
+        this.reverseSelectedNotes=function(){
+            const sel=this.selectedNotes();
+            if(!sel.length) return;
+            const start=Math.min(...sel.map(o=>o.ev.t));
+            const end=Math.max(...sel.map(o=>o.ev.t+o.ev.g));
+            for(const {ev} of sel){
+                ev.t=start+end-(ev.t+ev.g);
+            }
+            this.sortSequence();
+            this.redraw();
+        };
+
+        this.invertSelectedNotes=function(){
+            const sel=this.selectedNotes();
+            if(!sel.length) return;
+            const minN=Math.min(...sel.map(o=>o.ev.n));
+            const maxN=Math.max(...sel.map(o=>o.ev.n));
+            for(const {ev} of sel){
+                ev.n=minN+maxN-ev.n;
+            }
+            this.sortSequence();
+            this.redraw();
+        };
         this.selectAllNotes=function(){
             for(const ev of this.sequence)
                 ev.f=1;
@@ -905,15 +931,25 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 e.preventDefault();
                 break;
             case 38://up
-                this.transposeSelectedNotes(1);
+                if(e.shiftKey)
+                    this.transposeSelectedNotes(12);
+                else
+                    this.transposeSelectedNotes(1);
                 this.sortSequence();
                 this.redraw();
                 e.preventDefault();
                 break;
             case 40://down
-                this.transposeSelectedNotes(-1);
+                if(e.shiftKey)
+                    this.transposeSelectedNotes(-12);
+                else
+                    this.transposeSelectedNotes(-1);
                 this.sortSequence();
                 this.redraw();
+                e.preventDefault();
+                break;
+            case 68://d - duplicate
+                this.duplicateSelectedNotes();
                 e.preventDefault();
                 break;
             case 81://q - quantize
@@ -1150,6 +1186,12 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                         break;
                     case 'duplicate':
                         this.duplicateSelectedNotes();
+                        break;
+                    case 'reverse':
+                        this.reverseSelectedNotes();
+                        break;
+                    case 'invert':
+                        this.invertSelectedNotes();
                         break;
                     case 'double':
                         this.changeDurationSelectedNotes(2);
