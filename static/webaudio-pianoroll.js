@@ -163,7 +163,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
 <div data-action="double">×2 duration</div>
 <div data-action="half">÷2 duration</div>
 <div data-action="quantize">Quantize to grid (Q)</div>
-<div data-action="velocity">Velocity...</div>
+<!-- <div data-action="velocity">Velocity...</div> -->
 </div>
 <select id="wac-gridres"></select>
 </div>`;
