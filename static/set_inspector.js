@@ -601,9 +601,9 @@ export function initSetInspector() {
       piano.sequence = piano.sequence.filter(ev => !(ev.n === row && ev.t >= startT && ev.t < endT));
       ghostNotes.forEach(n => {
         piano.sequence.push({
-          t: Math.round(n.startTime * ticksPerBeat),
+          t: n.startTime * ticksPerBeat,
           n: row,
-          g: Math.round(n.duration * ticksPerBeat),
+          g: n.duration * ticksPerBeat,
           v: n.velocity
         });
       });
