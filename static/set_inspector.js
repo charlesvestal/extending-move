@@ -126,7 +126,15 @@ export function initSetInspector() {
     return minV >= 0 && maxV <= 1 && (env.rangeMin !== 0 || env.rangeMax !== 1);
   }
 
-  const defaultEditMode = piano ? (piano.editmode || piano.getAttribute('editmode') || 'drawpoly') : 'drawpoly';
+  let defaultEditMode = piano ? (piano.editmode || piano.getAttribute('editmode') || 'dragpoly') : 'dragpoly';
+  const drawToggle = document.getElementById('note_draw_toggle');
+  if (drawToggle) {
+    drawToggle.checked = defaultEditMode.startsWith('draw');
+    drawToggle.addEventListener('change', () => {
+      defaultEditMode = drawToggle.checked ? 'drawpoly' : 'dragpoly';
+      updateControls();
+    });
+  }
 
   function updateControls() {
     if (canvas) {

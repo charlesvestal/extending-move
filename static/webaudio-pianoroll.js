@@ -997,7 +997,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                     this.dragging={o:"m"};
                     break;
                 default:
-                    if(this.editmode=="dragmono"||this.editmode=="dragpoly")
+                    if(this.editmode=="dragmono"||this.editmode=="dragpoly"||this.editmode=="drawmono"||this.editmode=="drawpoly")
                         this.dragging={o:"A",p:this.downpos,p2:this.downpos,t1:this.downht.t,n1:this.downht.n};
                     break;
                 }

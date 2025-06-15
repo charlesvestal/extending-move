@@ -55,14 +55,16 @@
   <form method="get" action="{{ host_prefix }}/set-inspector" style="margin-left:1rem; display:inline;">
     <button type="submit">Choose Another Set</button>
   </form> -->
-  <div style="margin-top:1rem; display:flex; align-items:center;">
+  <div style="margin-top:1rem; display:flex; align-items:center; gap:0.5rem;">
     <label for="envelope_select">Envelope:</label>
     <select id="envelope_select">{{ clip_options | safe }}</select>
     <span id="envValue" style="margin-left:0.5rem; font-size:0.8em;"></span>
+    <label for="note_draw_toggle" style="margin-left:1rem;">Draw Notes</label>
+    <input id="note_draw_toggle" type="checkbox">
   </div>
   <div style="margin-top:1rem; display:flex; align-items:flex-start;">
     <div style="position:relative; width:900px; height:360px; border:1px solid #ccc;">
-      <webaudio-pianoroll id="clipEditor" width="900" height="300" editmode="drawpoly" wheelzoom="0" xscroll="1" yscroll="1" timebase="16" xrange="{{ (region | default(4.0)) * 4 }}" markstart="{{ (loop_start | default(0.0)) * 4 }}" markend="{{ (loop_end | default(region)) * 4 }}" showcursor="false"></webaudio-pianoroll>
+      <webaudio-pianoroll id="clipEditor" width="900" height="300" editmode="dragpoly" wheelzoom="0" xscroll="1" yscroll="1" timebase="16" xrange="{{ (region | default(4.0)) * 4 }}" markstart="{{ (loop_start | default(0.0)) * 4 }}" markend="{{ (loop_end | default(region)) * 4 }}" showcursor="false"></webaudio-pianoroll>
       <canvas id="clipCanvas" width="836" height="300" style="position:absolute; left:64px; top:0; pointer-events:none;"></canvas>
       <canvas id="velocityCanvas" width="836" height="60" style="position:absolute; left:64px; top:300px;"></canvas>
     </div>
