@@ -123,6 +123,9 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
     padding:2px 10px;
     cursor:pointer;
 }
+#wac-menu div:hover {
+    background:#ff6;
+}
 #wac-gridres{
     position:absolute;
     top:30px;
@@ -513,22 +516,31 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
         };
 
         this.duplicateSelectedNotes=function(){
-            const copies=[];
-            for(const ev of this.sequence){
-                if(ev.f)
-                    copies.push({...ev});
-            }
+            const sel=this.selectedNotes();
+            if(!sel.length) return;
+            // compute offset to append copy after last selected note
+            const start=Math.min(...sel.map(o=>o.ev.t));
+            const end=Math.max(...sel.map(o=>o.ev.t+o.ev.g));
+            const offset=end-start;
+            const copies=sel.map(o=>({
+                ...o.ev,
+                t:o.ev.t+offset,
+                f:1
+            }));
             this.sequence=this.sequence.concat(copies);
             this.sortSequence();
             this.redraw();
         };
 
         this.changeDurationSelectedNotes=function(factor){
-            for(const ev of this.sequence){
-                if(ev.f){
-                    ev.g=Math.max(1,Math.round(ev.g*factor));
-                }
+            const sel=this.selectedNotes();
+            if(!sel.length) return;
+            const start=Math.min(...sel.map(o=>o.ev.t));
+            for(const {ev} of sel){
+                ev.t=start+Math.round((ev.t-start)*factor);
+                ev.g=Math.max(1,Math.round(ev.g*factor));
             }
+            this.sortSequence();
             this.redraw();
         };
 
@@ -834,9 +846,17 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
         this.popMenu=function(pos){
             const s=this.menu.style;
             s.display="block";
-            s.top=(pos.y+8)+"px";
-            s.left=(pos.x+8)+"px";
+            let top=pos.y+8;
+            let left=pos.x+8;
+            s.top=top+"px";
+            s.left=left+"px";
             this.rcMenu=this.menu.getBoundingClientRect();
+            const bodyRect=this.elem.getBoundingClientRect();
+            if(this.rcMenu.bottom>bodyRect.bottom){
+                top=Math.max(0,top-(this.rcMenu.bottom-bodyRect.bottom));
+                s.top=top+"px";
+                this.rcMenu=this.menu.getBoundingClientRect();
+            }
         };
         this.longtapcountup=function(){
             if(++this.longtapcount >= 18){
