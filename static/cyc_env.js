@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const h = canvas.height;
     ctx.clearRect(0, 0, w, h);
     ctx.beginPath();
+    ctx.lineWidth = 2;
     const steps = 100;
     const peakPos = Math.min(Math.max((tilt - 0.2) / 0.8, 0), 1);
     const riseEnd = peakPos * (1 - hold);
@@ -45,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.lineTo(x, yPix);
       }
     }
-    ctx.strokeStyle = '#f00';
+    ctx.strokeStyle = '#FFA500';
     ctx.stroke();
   }
 

@@ -33,6 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const h = canvas.height;
     ctx.clearRect(0, 0, w, h);
     ctx.beginPath();
+    ctx.lineWidth = 2;
 
     const minRate = parseFloat(rateEl.min || '0');
     const maxRate = parseFloat(rateEl.max || '1');
@@ -50,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const y = h - val * h;
       if (i === 0) ctx.moveTo(i, y); else ctx.lineTo(i, y);
     }
-    ctx.strokeStyle = '#f00';
+    ctx.strokeStyle = '#FFA500';
     ctx.stroke();
   }
 
