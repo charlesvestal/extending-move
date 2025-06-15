@@ -81,6 +81,11 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
         is_drum_rack = _has_drum_rack(track_obj.get("devices", []))
         clip_obj = track_obj["clipSlots"][clip]["clip"]
         notes = clip_obj.get("notes", [])
+        pitch_notes = sorted({
+            n.get("noteNumber")
+            for n in notes
+            if n.get("automations", {}).get("PitchBend")
+        })
         envelopes = clip_obj.get("envelopes", [])
         region_info = clip_obj.get("region", {})
         region_end = region_info.get("end", 4.0)
@@ -140,6 +145,7 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
             "success": True,
             "message": "Clip loaded",
             "notes": notes,
+            "pitch_notes": pitch_notes,
             "envelopes": envelopes,
             "region": region_end,
             "loop_start": loop_start,
