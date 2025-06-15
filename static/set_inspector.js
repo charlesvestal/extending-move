@@ -106,16 +106,12 @@ export function initSetInspector() {
   });
 
   if (pitchSelect && isDrumRack) {
-    const pads = Array.from(new Set(
-      allNotes
-        .filter(n => n.automations && Array.isArray(n.automations.PitchBend) && n.automations.PitchBend.length)
-        .map(n => n.noteNumber)
-    )).sort((a, b) => a - b);
     const opts = ['<option value="">No Pitch</option>'];
-    pads.forEach(n => {
-      const pad = n - PAD_START_NOTE + 1;
+    for (let i = 0; i < 16; i++) {
+      const n = PAD_START_NOTE + i;
+      const pad = i + 1;
       opts.push(`<option value="${n}">Pad ${pad} (${noteName(n)})</option>`);
-    });
+    }
     pitchSelect.innerHTML = opts.join('');
   }
 
