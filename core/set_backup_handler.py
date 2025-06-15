@@ -1,6 +1,7 @@
 import os
 import shutil
 from datetime import datetime
+from typing import Optional
 
 BACKUP_EXT = '.ablbak'
 
@@ -37,6 +38,21 @@ def backup_set(set_path: str) -> str:
         except Exception:
             pass
     return backup_path
+
+
+def get_current_timestamp(set_path: str) -> Optional[str]:
+    """Return human-readable timestamp of the currently saved version."""
+    backup_dir = os.path.join(os.path.dirname(set_path), "backups")
+    latest_file = os.path.join(backup_dir, "latest.txt")
+    if not os.path.isfile(latest_file):
+        return None
+    try:
+        with open(latest_file) as f:
+            ts = f.read().strip()
+        dt = datetime.strptime(ts, "%Y%m%dT%H%M%S%f")
+        return dt.strftime("%Y-%m-%d %H:%M:%S")
+    except Exception:
+        return None
 
 
 def list_backups(set_path: str):

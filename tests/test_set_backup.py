@@ -4,11 +4,13 @@ sys.path.append(str(Path(__file__).resolve().parents[1]))
 
 import json
 import os
+from datetime import datetime
 from core.set_backup_handler import (
     BACKUP_EXT,
     backup_set,
     list_backups,
     restore_backup,
+    get_current_timestamp,
 )
 from core.set_inspector_handler import save_clip, save_envelope
 
@@ -60,3 +62,13 @@ def test_save_clip_and_envelope_create_backups(tmp_path):
     backups = list_backups(str(set_path))
     assert len(backups) == 2
     assert any(b['name'].endswith(latest2 + BACKUP_EXT) for b in backups)
+
+
+def test_get_current_timestamp(tmp_path):
+    set_path = tmp_path / "Song.abl"
+    create_simple_set(set_path)
+
+    bpath = backup_set(str(set_path))
+    ts = os.path.basename(bpath).split(".")[-2]
+    expected = datetime.strptime(ts, "%Y%m%dT%H%M%S%f").strftime("%Y-%m-%d %H:%M:%S")
+    assert get_current_timestamp(str(set_path)) == expected

@@ -1,7 +1,11 @@
 from handlers.base_handler import BaseHandler
 from core.set_inspector_handler import list_clips, get_clip_data, save_envelope
 from core.list_msets_handler import list_msets
-from core.set_backup_handler import list_backups, restore_backup
+from core.set_backup_handler import (
+    list_backups,
+    restore_backup,
+    get_current_timestamp,
+)
 from core.pad_colors import rgb_string
 from core.config import MSETS_DIRECTORY
 import json
@@ -153,6 +157,7 @@ class SetInspectorHandler(BaseHandler):
                 "loop_end": 4.0,
                 "param_ranges_json": "{}",
                 "backups": backups,
+                "current_ts": get_current_timestamp(set_path),
             }
         elif action == "show_clip":
             set_path = form.getvalue("set_path")
@@ -209,6 +214,7 @@ class SetInspectorHandler(BaseHandler):
                 "track_name": result.get("track_name"),
                 "clip_name": result.get("clip_name"),
                 "backups": backups,
+                "current_ts": get_current_timestamp(set_path),
             }
         elif action == "save_envelope":
             set_path = form.getvalue("set_path")
@@ -278,6 +284,7 @@ class SetInspectorHandler(BaseHandler):
                 "track_name": clip_data.get("track_name"),
                 "clip_name": clip_data.get("clip_name"),
                 "backups": backups,
+                "current_ts": get_current_timestamp(set_path),
             }
         elif action == "save_clip":
             set_path = form.getvalue("set_path")
@@ -368,6 +375,7 @@ class SetInspectorHandler(BaseHandler):
                 "track_name": clip_data.get("track_name"),
                 "clip_name": clip_data.get("clip_name"),
                 "backups": backups,
+                "current_ts": get_current_timestamp(set_path),
             }
         elif action == "restore_backup":
             set_path = form.getvalue("set_path")
@@ -407,6 +415,7 @@ class SetInspectorHandler(BaseHandler):
                 "loop_end": 4.0,
                 "param_ranges_json": "{}",
                 "backups": backups,
+                "current_ts": get_current_timestamp(set_path),
             }
         else:
             return self.format_error_response("Unknown action", pad_grid=pad_grid)

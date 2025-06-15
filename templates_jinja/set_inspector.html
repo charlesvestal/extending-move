@@ -38,6 +38,7 @@
     <button type="submit">Restore</button>
   </form>
   {% endif %}
+  <p>Current version: {{ current_ts }}</p>
   <!-- <form method="get" action="{{ host_prefix }}/set-inspector" style="margin-bottom:1rem;">
     <button type="submit">Choose Another Set</button>
   </form> -->
@@ -107,6 +108,7 @@
     <button type="submit">Restore</button>
   </form>
   {% endif %}
+  <p>Current version: {{ current_ts }}</p>
   <div id="clipData" data-notes='{{ notes | tojson }}' data-envelopes='{{ envelopes | tojson }}' data-region='{{ region | default(4.0) }}' data-loop-start='{{ loop_start | default(0.0) }}' data-loop-end='{{ loop_end | default(region) }}' data-param-ranges='{{ param_ranges_json | safe }}'></div>
   {% endif %}
 {% endblock %}
