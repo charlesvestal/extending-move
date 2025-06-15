@@ -11,6 +11,7 @@ from core.set_backup_handler import (
     list_backups,
     restore_backup,
     get_current_timestamp,
+    write_latest_timestamp,
 )
 from core.set_inspector_handler import save_clip, save_envelope
 
@@ -34,16 +35,15 @@ def test_backup_and_restore(tmp_path):
     # create multiple backups
     for i in range(11):
         set_file.write_text(f"version{i}")
-        bpath = backup_set(str(set_file))
-        latest = (set_file.parent / "backups" / "latest.txt").read_text().strip()
-        ts = os.path.basename(bpath).split(".")[-2]
-        assert latest == ts
+        backup_set(str(set_file))
     backups = list_backups(str(set_file))
     assert len(backups) == 10
     latest = backups[0]['name']
     # corrupt file then restore
     set_file.write_text("corrupt")
     assert restore_backup(str(set_file), latest)
+    restored_ts = latest.split(".")[-2]
+    assert (set_file.parent / "backups" / "latest.txt").read_text().strip() == restored_ts
     assert set_file.read_text() != "corrupt"
 
 
@@ -55,20 +55,25 @@ def test_save_clip_and_envelope_create_backups(tmp_path):
     latest1 = (set_path.parent / "backups" / "latest.txt").read_text().strip()
     backups = list_backups(str(set_path))
     assert len(backups) == 1
-    assert any(b['name'].endswith(latest1 + BACKUP_EXT) for b in backups)
+    backup_ts1 = backups[0]['name'].split(".")[-2]
+    assert backup_ts1 != latest1
 
     save_envelope(str(set_path), 0, 0, 1, [])
     latest2 = (set_path.parent / "backups" / "latest.txt").read_text().strip()
     backups = list_backups(str(set_path))
     assert len(backups) == 2
-    assert any(b['name'].endswith(latest2 + BACKUP_EXT) for b in backups)
+    backup_ts2 = backups[0]['name'].split(".")[-2]
+    assert latest2 != backup_ts2
+    assert latest1 != latest2
 
 
 def test_get_current_timestamp(tmp_path):
     set_path = tmp_path / "Song.abl"
     create_simple_set(set_path)
+    mtime_expected = datetime.fromtimestamp(os.path.getmtime(set_path)).strftime("%Y-%m-%d %H:%M:%S")
+    assert get_current_timestamp(str(set_path)) == mtime_expected
 
-    bpath = backup_set(str(set_path))
-    ts = os.path.basename(bpath).split(".")[-2]
+    ts = datetime.now().strftime("%Y%m%dT%H%M%S%f")
+    write_latest_timestamp(str(set_path), ts)
     expected = datetime.strptime(ts, "%Y%m%dT%H%M%S%f").strftime("%Y-%m-%d %H:%M:%S")
     assert get_current_timestamp(str(set_path)) == expected
