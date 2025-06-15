@@ -1087,9 +1087,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 case "s":
                     this.menuGlobal=true;
                     this.clearSel();
-                    this.menuDelete.classList.add('disabled');
-                    this.popMenu(this.downpos);
-                    this.dragging={o:"m"};
+                    this.dragging={o:"A",p:this.downpos,p2:this.downpos,t1:this.downht.t,n1:this.downht.n,right:true};
                     break;
                 default:
                     if(this.editmode=="dragmono"||this.editmode=="dragpoly"||this.editmode=="drawmono"||this.editmode=="drawpoly")
@@ -1301,9 +1299,19 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 this.redraw();
             }
             if(this.dragging.o=="A"){
-                this.selAreaNote(this.dragging.t1,this.dragging.t2,this.dragging.n1,this.dragging.n2);
-                this.dragging={o:null};
-                this.redraw();
+                const moved=Math.abs(this.dragging.p.x-pos.x)+Math.abs(this.dragging.p.y-pos.y);
+                if(this.dragging.right && moved<4){
+                    this.menuDelete.classList.add('disabled');
+                    this.popMenu(this.dragging.p);
+                    this.dragging={o:"m"};
+                    this.menuGlobal=true;
+                    this.redraw();
+                    return false;
+                }else{
+                    this.selAreaNote(this.dragging.t1,this.dragging.t2,this.dragging.n1,this.dragging.n2);
+                    this.dragging={o:null};
+                    this.redraw();
+                }
             }
 //            if(this.dragging.o=="D"){
                 if(this.editmode=="dragmono"){
