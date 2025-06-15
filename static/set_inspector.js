@@ -76,6 +76,9 @@ export function initSetInspector() {
   let tailEnv = [];
   let envInfo = null;
   let ghostNotes = [];
+  let overlayNotes = [];
+  let overlayRow = null;
+  let overlayActive = false;
   let removedNotes = [];
 
   if (piano) {
@@ -88,6 +91,7 @@ export function initSetInspector() {
       a: n.automations || null
 
     }));
+    recomputeOverlay();
     if (!piano.hasAttribute('xrange')) piano.xrange = region * ticksPerBeat;
     if (!piano.hasAttribute('markstart')) piano.markstart = loopStart * ticksPerBeat;
     if (!piano.hasAttribute('markend')) piano.markend = loopEnd * ticksPerBeat;
@@ -314,6 +318,29 @@ export function initSetInspector() {
     return bps[bps.length - 1].value;
   }
 
+  const BASE_NOTE = 36;
+  const SEMI_UNIT = 170.6458282470703;
+
+  function recomputeOverlay() {
+    overlayNotes = [];
+    if (!overlayActive || overlayRow === null || !piano) return;
+    const seq = piano.sequence || [];
+    seq.forEach(ev => {
+      if (ev.n !== overlayRow) return;
+      const pb = ev.a && ev.a.PitchBend;
+      if (!pb || !pb.length) return;
+      const value = pb[0].value;
+      const semis = Math.round(value / SEMI_UNIT);
+      const viz = BASE_NOTE + semis;
+      if (viz < 0 || viz > 127) return;
+      overlayNotes.push({
+        noteNumber: viz,
+        startTime: ev.t / ticksPerBeat,
+        duration: ev.g / ticksPerBeat
+      });
+    });
+  }
+
   function updateLegend() {
     if (!legendDiv) return;
     if (!envSelect || !envSelect.value) {
@@ -355,9 +382,27 @@ export function initSetInspector() {
     ctx.restore();
   }
 
+  function drawOverlayNotes() {
+    if (!overlayActive || !overlayNotes.length || !piano) return;
+    const stepw = canvas.width / piano.xrange;
+    const steph = canvas.height / piano.yrange;
+    ctx.save();
+    ctx.globalAlpha = 0.5;
+    ctx.fillStyle = '#00ffff';
+    overlayNotes.forEach(n => {
+      const t = n.startTime * ticksPerBeat;
+      const x = (t - piano.xoffset) * stepw;
+      const w = n.duration * ticksPerBeat * stepw;
+      const y = canvas.height - (n.noteNumber - piano.yoffset) * steph;
+      ctx.fillRect(x, y - steph, w, steph);
+    });
+    ctx.restore();
+  }
+
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawGhostNotes();
+    drawOverlayNotes();
     drawEnvelope();
     drawVelocity();
   }
@@ -653,6 +698,17 @@ export function initSetInspector() {
 
     if (piano) {
       piano.addEventListener('euclidfill', e => openModal(e.detail.row));
+      piano.addEventListener('pitchoverlay', e => {
+        if (overlayActive && overlayRow === e.detail.row) {
+          overlayActive = false;
+          overlayRow = null;
+        } else {
+          overlayActive = true;
+          overlayRow = e.detail.row;
+        }
+        recomputeOverlay();
+        draw();
+      });
     }
   }
 

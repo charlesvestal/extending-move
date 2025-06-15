@@ -11,5 +11,6 @@ def test_euclid_modal_present():
     assert 'id="euclid_repeat"' in html
     js = SCRIPT.read_text()
     assert 'data-action="euclid"' in js
+    assert 'data-action="pitchoverlay"' in js
     inspector = INSPECTOR_JS.read_text()
     assert 'globalAlpha = 0.6' in inspector
