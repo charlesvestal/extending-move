@@ -2,7 +2,22 @@ import sys
 from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 
+import json
 from core.set_backup_handler import backup_set, list_backups, restore_backup
+from core.set_inspector_handler import save_clip, save_envelope
+
+
+def create_simple_set(path):
+    """Create a minimal Ableton set for saving tests."""
+    clip = {
+        "name": "Clip1",
+        "notes": [],
+        "envelopes": [],
+        "region": {"end": 4.0},
+    }
+    track = {"name": "Track1", "devices": [], "clipSlots": [{"clip": clip}]}
+    song = {"tracks": [track]}
+    Path(path).write_text(json.dumps(song))
 
 
 def test_backup_and_restore(tmp_path):
@@ -19,3 +34,16 @@ def test_backup_and_restore(tmp_path):
     set_file.write_text("corrupt")
     assert restore_backup(str(set_file), latest)
     assert set_file.read_text() != "corrupt"
+
+
+def test_save_clip_and_envelope_create_backups(tmp_path):
+    set_path = tmp_path / "Song.abl"
+    create_simple_set(set_path)
+
+    save_clip(str(set_path), 0, 0, [], [], 4.0, 0.0, 4.0)
+    backups = list_backups(str(set_path))
+    assert len(backups) == 1
+
+    save_envelope(str(set_path), 0, 0, 1, [])
+    backups = list_backups(str(set_path))
+    assert len(backups) == 2

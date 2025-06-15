@@ -165,7 +165,6 @@ def save_envelope(
             envelopes.append({"parameterId": parameter_id, "breakpoints": breakpoints})
 
         backup_set(set_path)
-        backup_set(set_path)
         with open(set_path, "w") as f:
             json.dump(song, f, indent=2)
 
@@ -197,6 +196,7 @@ def save_clip(
         region_info["end"] = region_end
         region_info["loop"] = {"start": loop_start, "end": loop_end}
 
+        backup_set(set_path)
         with open(set_path, "w") as f:
             json.dump(song, f, indent=2)
 
