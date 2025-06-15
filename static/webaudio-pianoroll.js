@@ -159,7 +159,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
 <img id="wac-cursor" class="marker" src="${this.cursorsrc}"/>
 <div id="wac-menu">
 <div data-action="delete">Delete (Del)</div>
-<div data-action="duplicate">Duplicate</div>
+<div data-action="duplicate">Duplicate (D)</div>
 <div data-action="reverse">Reverse</div>
 <div data-action="invert">Invert</div>
 <div data-action="double">×2 duration</div>
