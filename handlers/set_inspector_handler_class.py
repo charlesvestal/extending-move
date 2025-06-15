@@ -81,6 +81,8 @@ class SetInspectorHandler(BaseHandler):
             "selected_set": None,
             "clip_grid": "",
             "clip_options": "",
+            "pitch_pad_options": "",
+            "pitch_pad_numbers": "[]",
             "selected_clip": None,
             "notes": [],
             "envelopes": [],
@@ -142,6 +144,8 @@ class SetInspectorHandler(BaseHandler):
                 "selected_set": set_path,
                 "set_name": set_name,
                 "clip_grid": clip_grid,
+                "pitch_pad_options": "",
+                "pitch_pad_numbers": "[]",
                 "selected_clip": None,
                 "notes": [],
                 "envelopes": [],
@@ -182,6 +186,12 @@ class SetInspectorHandler(BaseHandler):
                 for e in envelopes
             )
             env_opts = '<option value="">No Envelope</option>' + env_opts
+            pitch_pad_nums = sorted({n.get("noteNumber") for n in result.get("notes", []) if "pitchBend" in n})
+            pitch_pad_opts = ''.join(
+                f'<option value="{num}">Note {num}</option>'
+                for num in pitch_pad_nums
+            )
+            pitch_pad_opts = '<option value="">Normal Notes</option>' + pitch_pad_opts
             set_name = os.path.basename(os.path.dirname(set_path))
             pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
             return {
@@ -192,6 +202,8 @@ class SetInspectorHandler(BaseHandler):
                 "set_name": set_name,
                 "clip_grid": clip_grid,
                 "clip_options": env_opts,
+                "pitch_pad_options": pitch_pad_opts,
+                "pitch_pad_numbers": json.dumps(pitch_pad_nums),
                 "selected_clip": clip_val,
                 "notes": result.get("notes", []),
                 "envelopes": envelopes,
@@ -249,6 +261,12 @@ class SetInspectorHandler(BaseHandler):
                 for e in envelopes
             )
             env_opts = '<option value="">No Envelope</option>' + env_opts
+            pitch_pad_nums = sorted({n.get("noteNumber") for n in clip_data.get("notes", []) if "pitchBend" in n})
+            pitch_pad_opts = ''.join(
+                f'<option value="{num}">Note {num}</option>'
+                for num in pitch_pad_nums
+            )
+            pitch_pad_opts = '<option value="">Normal Notes</option>' + pitch_pad_opts
             set_name = os.path.basename(os.path.dirname(set_path))
             pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
             return {
@@ -259,6 +277,8 @@ class SetInspectorHandler(BaseHandler):
                 "set_name": set_name,
                 "clip_grid": clip_grid,
                 "clip_options": env_opts,
+                "pitch_pad_options": pitch_pad_opts,
+                "pitch_pad_numbers": json.dumps(pitch_pad_nums),
                 "selected_clip": clip_val,
                 "notes": clip_data.get("notes", []),
                 "envelopes": envelopes,
@@ -337,6 +357,12 @@ class SetInspectorHandler(BaseHandler):
                 for e in envelopes
             )
             env_opts = '<option value="">No Envelope</option>' + env_opts
+            pitch_pad_nums = sorted({n.get("noteNumber") for n in clip_data.get("notes", []) if "pitchBend" in n})
+            pitch_pad_opts = ''.join(
+                f'<option value="{num}">Note {num}</option>'
+                for num in pitch_pad_nums
+            )
+            pitch_pad_opts = '<option value="">Normal Notes</option>' + pitch_pad_opts
             set_name = os.path.basename(os.path.dirname(set_path))
             pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
             return {
@@ -347,6 +373,8 @@ class SetInspectorHandler(BaseHandler):
                 "set_name": set_name,
                 "clip_grid": clip_grid,
                 "clip_options": env_opts,
+                "pitch_pad_options": pitch_pad_opts,
+                "pitch_pad_numbers": json.dumps(pitch_pad_nums),
                 "selected_clip": clip_val,
                 "notes": clip_data.get("notes", []),
                 "envelopes": envelopes,

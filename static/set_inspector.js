@@ -29,12 +29,13 @@ export function initSetInspector() {
 
   const dataDiv = document.getElementById('clipData');
   if (!dataDiv) return;
-  const notes = JSON.parse(dataDiv.dataset.notes || '[]');
+  let baseNotes = JSON.parse(dataDiv.dataset.notes || '[]');
   const envelopes = JSON.parse(dataDiv.dataset.envelopes || '[]');
   const region = parseFloat(dataDiv.dataset.region || '4');
   const loopStart = parseFloat(dataDiv.dataset.loopStart || '0');
   const loopEnd = parseFloat(dataDiv.dataset.loopEnd || String(region));
   const paramRanges = JSON.parse(dataDiv.dataset.paramRanges || '{}');
+  const pitchPads = JSON.parse(dataDiv.dataset.pitchpads || '[]');
   const canvas = document.getElementById('clipCanvas');
   const ctx = canvas.getContext('2d');
   const velCanvas = document.getElementById('velocityCanvas');
@@ -59,6 +60,7 @@ export function initSetInspector() {
     }
   }
   const envSelect = document.getElementById('envelope_select');
+  const pitchPadSelect = document.getElementById('pitch_pad_select');
   const legendDiv = document.getElementById('paramLegend');
   const valueDiv = document.getElementById('envValue');
   const saveClipForm = document.getElementById('saveClipForm');
@@ -67,6 +69,9 @@ export function initSetInspector() {
   const regionInput = document.getElementById('region_end_input');
   const loopStartInput = document.getElementById('loop_start_input');
   const loopEndInput = document.getElementById('loop_end_input');
+  if (pitchPadSelect && pitchPads.length === 0) {
+    pitchPadSelect.disabled = true;
+  }
 
   let editing = false;
   let drawing = false;
@@ -74,27 +79,63 @@ export function initSetInspector() {
   let currentEnv = [];
   let tailEnv = [];
   let envInfo = null;
+  let pitchMode = false;
+  let activePad = null;
 
-  if (piano) {
-    if (!piano.sequence) piano.sequence = [];
-    piano.sequence = notes.map(n => ({
+  function loadNormalSequence() {
+    piano.sequence = baseNotes.map(n => ({
       t: Math.round(n.startTime * ticksPerBeat),
       n: n.noteNumber,
       g: Math.round(n.duration * ticksPerBeat),
-      v: Math.round(n.velocity || 100)
-
+      v: Math.round(n.velocity || 100),
+      pb: n.pitchBend || 0
     }));
+  }
+
+  function loadPitchSequence(pad) {
+    const padNotes = baseNotes.filter(n => n.noteNumber === pad);
+    piano.sequence = padNotes.map(n => ({
+      t: Math.round(n.startTime * ticksPerBeat),
+      n: Math.round(36 + (n.pitchBend || 0) / 170.6458282470703),
+      g: Math.round(n.duration * ticksPerBeat),
+      v: Math.round(n.velocity || 100),
+      pb: n.pitchBend || 0
+    }));
+  }
+
+  function updateRange() {
+    const seq = piano.sequence || [];
+    const { min, max } = seq.length
+      ? { min: Math.min(...seq.map(ev => ev.n)),
+          max: Math.max(...seq.map(ev => ev.n)) }
+      : { min: 60, max: 71 };
+    piano.yoffset = Math.max(0, min - 2);
+    piano.yrange = Math.max(12, max - min + 5);
+  }
+
+  function refreshPiano() {
+    if (pitchMode && activePad !== null) {
+      loadPitchSequence(activePad);
+      piano.colnote = '#0074D9';
+      piano.colnotesel = '#00A1FF';
+      piano.colnoteselinactive = '#0074D9';
+    } else {
+      loadNormalSequence();
+      piano.colnote = '#f22';
+      piano.colnotesel = '#0f0';
+      piano.colnoteselinactive = '#0b0';
+    }
+    updateRange();
+    if (piano.redraw) piano.redraw();
+  }
+
+  if (piano) {
+    if (!piano.sequence) piano.sequence = [];
+    refreshPiano();
     if (!piano.hasAttribute('xrange')) piano.xrange = region * ticksPerBeat;
     if (!piano.hasAttribute('markstart')) piano.markstart = loopStart * ticksPerBeat;
     if (!piano.hasAttribute('markend')) piano.markend = loopEnd * ticksPerBeat;
     piano.showcursor = false;
-    const { min, max } = notes.length
-      ? { min: Math.min(...notes.map(n => n.noteNumber)),
-          max: Math.max(...notes.map(n => n.noteNumber)) }
-      : { min: 60, max: 71 };
-    piano.yoffset = Math.max(0, min - 2);
-    piano.yrange = Math.max(12, max - min + 5);
-    if (piano.redraw) piano.redraw();
 
     piano.addEventListener('dblclick', ev => {
       const rect = piano.getBoundingClientRect();
@@ -107,9 +148,12 @@ export function initSetInspector() {
         return;
       }
       if (x < piano.yruler + piano.kbwidth) {
-        const { min, max } = notes.length
-          ? { min: Math.min(...notes.map(n => n.noteNumber)),
-              max: Math.max(...notes.map(n => n.noteNumber)) }
+        const src = pitchMode && activePad !== null
+          ? baseNotes.filter(n => n.noteNumber === activePad)
+          : baseNotes;
+        const { min, max } = src.length
+          ? { min: Math.min(...src.map(n => n.noteNumber)),
+              max: Math.max(...src.map(n => n.noteNumber)) }
           : { min: 60, max: 71 };
         piano.yoffset = Math.max(0, min - 2);
         piano.yrange = Math.max(12, max - min + 5);
@@ -154,9 +198,10 @@ export function initSetInspector() {
   }
 
   function getVisibleRange() {
-    if (!notes.length) return { min: 60, max: 71 }; // default middle C octave
-    let min = Math.min(...notes.map(n => n.noteNumber));
-    let max = Math.max(...notes.map(n => n.noteNumber));
+    const seq = piano.sequence || [];
+    if (!seq.length) return { min: 60, max: 71 };
+    let min = Math.min(...seq.map(ev => ev.n));
+    let max = Math.max(...seq.map(ev => ev.n));
     if (max - min < 11) {
       const extra = 11 - (max - min);
       min = Math.max(0, min - Math.floor(extra / 2));
@@ -210,11 +255,11 @@ export function initSetInspector() {
     const { min, max } = getVisibleRange();
     const noteRange = max - min + 1;
     const h = canvas.height / noteRange;
-    ctx.fillStyle = '#0074D9';
-    notes.forEach(n => {
-      const x = (n.startTime / region) * canvas.width;
-      const w = (n.duration / region) * canvas.width;
-      const y = canvas.height - (n.noteNumber - min + 1) * h;
+    ctx.fillStyle = piano.colnote;
+    (piano.sequence || []).forEach(ev => {
+      const x = (ev.t / ticksPerBeat / region) * canvas.width;
+      const w = (ev.g / ticksPerBeat / region) * canvas.width;
+      const y = canvas.height - (ev.n - min + 1) * h;
       ctx.fillRect(x, y, w, h);
     });
   }
@@ -345,6 +390,19 @@ export function initSetInspector() {
     }
     updateLegend();
     updateControls();
+    draw();
+  });
+
+  if (pitchPadSelect) pitchPadSelect.addEventListener('change', () => {
+    syncBaseFromSequence();
+    if (pitchPadSelect.value) {
+      pitchMode = true;
+      activePad = parseInt(pitchPadSelect.value);
+    } else {
+      pitchMode = false;
+      activePad = null;
+    }
+    refreshPiano();
     draw();
   });
 
@@ -494,17 +552,36 @@ export function initSetInspector() {
     document.addEventListener('touchend', endVel);
   }
 
-
-  if (saveClipForm) saveClipForm.addEventListener('submit', () => {
-    if (piano && notesInput) {
-      const seq = piano.sequence || [];
-      notesInput.value = JSON.stringify(seq.map(ev => ({
+  function syncBaseFromSequence() {
+    const seq = piano.sequence || [];
+    if (pitchMode && activePad !== null) {
+      const others = baseNotes.filter(n => n.noteNumber !== activePad);
+      const newPad = seq.map(ev => ({
+        noteNumber: activePad,
+        startTime: ev.t / ticksPerBeat,
+        duration: ev.g / ticksPerBeat,
+        velocity: ev.v ?? 100.0,
+        offVelocity: 0.0,
+        pitchBend: (ev.n - 36) * 170.6458282470703
+      }));
+      baseNotes = others.concat(newPad);
+    } else {
+      baseNotes = seq.map(ev => ({
         noteNumber: ev.n,
         startTime: ev.t / ticksPerBeat,
         duration: ev.g / ticksPerBeat,
         velocity: ev.v ?? 100.0,
-        offVelocity: 0.0
-      })));
+        offVelocity: 0.0,
+        pitchBend: ev.pb || 0
+      }));
+    }
+  }
+
+
+  if (saveClipForm) saveClipForm.addEventListener('submit', () => {
+    if (piano && notesInput) {
+      syncBaseFromSequence();
+      notesInput.value = JSON.stringify(baseNotes);
     }
     if (envsInput) {
       let envs = envelopes.map(e => ({ parameterId: e.parameterId, breakpoints: e.breakpoints }));
