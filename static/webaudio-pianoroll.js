@@ -1295,6 +1295,12 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 clearInterval(this.longtaptimer);
             const pos=this.getPos(e);
             if(this.dragging.o=="m"){
+                // Ignore right-button release to allow standard context menu behaviour
+                if(e && e.button===2){
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    return false;
+                }
                 this.menu.style.display="none";
                 this.rcMenu={x:0,y:0,width:0,height:0};
                 if(pos.t && this.menu.contains(pos.t)){
@@ -1337,6 +1343,8 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 this.menuDelete.classList.remove('disabled');
                 this.menuGlobal=false;
                 this.redraw();
+                // Ensure keyboard shortcuts continue working after a menu action
+                this.canvas.focus();
             }
             if(this.dragging.o=="A"){
                 const moved=Math.abs(this.dragging.p.x-pos.x)+Math.abs(this.dragging.p.y-pos.y);
