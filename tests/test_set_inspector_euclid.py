@@ -16,3 +16,8 @@ def test_euclid_modal_present():
     inspector = INSPECTOR_JS.read_text()
     assert 'globalAlpha = 0.6' in inspector
     assert 'piano.editmode = overlayActive ?' in inspector
+
+
+def test_shift_click_selection():
+    js = SCRIPT.read_text()
+    assert 'shiftSelect' in js

@@ -1,6 +1,7 @@
 import os
 import zipfile
 import re
+import shutil
 import subprocess
 import uuid
 import logging
@@ -107,3 +108,69 @@ def restore_ablbundle(ablbundle_path, mset_restoreid, mset_restorecolor):
     
     logging.info(f"Successfully restored {ablbundle_path} to {uuid_dir}")
     return {"success": True, "message": f"Successfully restored {mset_name} to pad {mset_restoreid}"} # with color {mset_restorecolor}"}
+
+
+def restore_abl(abl_path, mset_restoreid, mset_restorecolor):
+    """Restore a raw Ableton set (.abl) to the device.
+
+    This mirrors :func:`restore_ablbundle` but operates on a single ``.abl`` file
+    instead of a zipped bundle.
+    """
+    if not os.path.exists(abl_path):
+        return {"success": False, "message": f"Error: {abl_path} does not exist."}
+
+    free_ids = list_msets_free()
+    if not (MSET_INDEX_RANGE[0] <= mset_restoreid <= MSET_INDEX_RANGE[1]):
+        return {"success": False, "message": f"Invalid set index {mset_restoreid}. Must be between {MSET_INDEX_RANGE[0]} and {MSET_INDEX_RANGE[1]}."}
+    if mset_restoreid not in free_ids:
+        return {"success": False, "message": f"Invalid set index {mset_restoreid}. ID already in use."}
+    if not (MSET_COLOR_RANGE[0] <= mset_restorecolor <= MSET_COLOR_RANGE[1]):
+        return {"success": False, "message": f"Invalid set color {mset_restorecolor}. Must be between {MSET_COLOR_RANGE[0]} and {MSET_COLOR_RANGE[1]}."}
+
+    mset_uuid = str(uuid.uuid4())
+    uuid_dir = os.path.join(MSETS_DIRECTORY, mset_uuid)
+    os.makedirs(uuid_dir, exist_ok=True)
+
+    abl_filename = os.path.basename(abl_path)
+    mset_name, _ = os.path.splitext(abl_filename)
+    mset_name_encoded = urllib.parse.quote(mset_name)
+    mset_folder = os.path.join(uuid_dir, mset_name)
+
+    if os.path.exists(mset_folder):
+        return {"success": False, "message": f"Error: Set folder {mset_folder} already exists. Choose a different ID."}
+
+    os.makedirs(mset_folder, exist_ok=True)
+    song_abl_path = os.path.join(mset_folder, "Song.abl")
+    try:
+        shutil.copy(abl_path, song_abl_path)
+    except Exception as e:
+        return {"success": False, "message": f"Error copying set file: {e}"}
+
+    if not os.path.exists(song_abl_path):
+        return {"success": False, "message": "Error copying set file."}
+
+    with open(song_abl_path, "r", encoding="utf-8") as file:
+        content = file.read()
+
+    content = re.sub(
+        r'(\"sampleUri\"\s*:\s*\")Samples/([^\"]+)',
+        rf'\1{MSET_ABLETON_URI}/{mset_uuid}/{mset_name_encoded}/Samples/\2',
+        content,
+    )
+
+    with open(song_abl_path, "w", encoding="utf-8") as file:
+        file.write(content)
+
+    last_modified_timestamp = datetime.fromtimestamp(os.path.getmtime(song_abl_path), tz=timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+    try:
+        subprocess.run(["chown", "-R", "ableton:users", uuid_dir], check=True)
+        subprocess.run(["setfattr", "-n", "user.song-index", "-v", str(mset_restoreid), uuid_dir], check=True)
+        subprocess.run(["setfattr", "-n", "user.song-color", "-v", str(mset_restorecolor), uuid_dir], check=True)
+        subprocess.run(["setfattr", "-n", "user.last-modified-time", "-v", last_modified_timestamp, uuid_dir], check=True)
+        subprocess.run(["setfattr", "-n", "user.was-externally-modified", "-v", "false", uuid_dir], check=True)
+        subprocess.run(["setfattr", "-n", "user.local-cloud-state", "-v", "notSynced", uuid_dir], check=True)
+    except subprocess.CalledProcessError as e:
+        return {"success": False, "message": f"Error setting attributes: {e}"}
+
+    logging.info(f"Successfully restored {abl_path} to {uuid_dir}")
+    return {"success": True, "message": f"Successfully restored {mset_name} to pad {mset_restoreid}"}

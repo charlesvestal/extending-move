@@ -19,7 +19,7 @@ Tools for extending the Ableton Move. This project provides a companion webserve
 Here’s what you can do with Extending Move:
 
 - **Set Restoration**
-  - Upload and restore Move Sets (.ablbundle)
+  - Upload and restore Move Sets (.ablbundle or .abl)
   - Choose target pad and color
 
 - **Drift, Wavetable and melodicSampler Preset Editor**
