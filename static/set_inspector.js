@@ -1,4 +1,5 @@
 import { euclideanRhythm } from "./euclid.js";
+import { computeOverlayNotes } from "./pitchbend_overlay.js";
 export function initSetInspector() {
   // Show selected set name when choosing a pad
   const grid = document.querySelector('#setSelectForm .pad-grid');
@@ -76,6 +77,9 @@ export function initSetInspector() {
   let tailEnv = [];
   let envInfo = null;
   let ghostNotes = [];
+  let overlayNotes = [];
+  let overlayRow = null;
+  let overlayActive = false;
   let removedNotes = [];
 
   if (piano) {
@@ -88,6 +92,8 @@ export function initSetInspector() {
       a: n.automations || null
 
     }));
+    recomputeOverlay();
+    if (piano.setHighlightRow) piano.setHighlightRow(null);
     if (!piano.hasAttribute('xrange')) piano.xrange = region * ticksPerBeat;
     if (!piano.hasAttribute('markstart')) piano.markstart = loopStart * ticksPerBeat;
     if (!piano.hasAttribute('markend')) piano.markend = loopEnd * ticksPerBeat;
@@ -314,6 +320,12 @@ export function initSetInspector() {
     return bps[bps.length - 1].value;
   }
 
+  function recomputeOverlay() {
+    overlayNotes = [];
+    if (!overlayActive || overlayRow === null || !piano) return;
+    overlayNotes = computeOverlayNotes(piano.sequence || [], overlayRow, ticksPerBeat);
+  }
+
   function updateLegend() {
     if (!legendDiv) return;
     if (!envSelect || !envSelect.value) {
@@ -355,9 +367,27 @@ export function initSetInspector() {
     ctx.restore();
   }
 
+  function drawOverlayNotes() {
+    if (!overlayActive || !overlayNotes.length || !piano) return;
+    const stepw = canvas.width / piano.xrange;
+    const steph = canvas.height / piano.yrange;
+    ctx.save();
+    ctx.globalAlpha = 0.5;
+    ctx.fillStyle = '#00ffff';
+    overlayNotes.forEach(n => {
+      const t = n.startTime * ticksPerBeat;
+      const x = (t - piano.xoffset) * stepw;
+      const w = n.duration * ticksPerBeat * stepw;
+      const y = canvas.height - (n.noteNumber - piano.yoffset) * steph;
+      ctx.fillRect(x, y - steph, w, steph);
+    });
+    ctx.restore();
+  }
+
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawGhostNotes();
+    drawOverlayNotes();
     drawEnvelope();
     drawVelocity();
   }
@@ -365,7 +395,14 @@ export function initSetInspector() {
   if (piano && piano.redraw) {
     const origRedraw = piano.redraw.bind(piano);
     piano.redraw = function(...args) {
+      let bak = null;
+      if (overlayActive) {
+        bak = this.sequence;
+        this.sequence = [];
+      }
       origRedraw(...args);
+      if (bak) this.sequence = bak;
+      if (this.updateKbHighlight) this.updateKbHighlight();
       draw();
     };
   }
@@ -653,6 +690,22 @@ export function initSetInspector() {
 
     if (piano) {
       piano.addEventListener('euclidfill', e => openModal(e.detail.row));
+      piano.addEventListener('pitchoverlay', e => {
+        if (overlayActive && overlayRow === e.detail.row) {
+          overlayActive = false;
+          overlayRow = null;
+        } else {
+          overlayActive = true;
+          overlayRow = e.detail.row;
+        }
+        recomputeOverlay();
+        if (piano) {
+          piano.editmode = overlayActive ? '' : defaultEditMode;
+          if (piano.setHighlightRow) piano.setHighlightRow(overlayActive ? overlayRow : null);
+          piano.redraw();
+        }
+        draw();
+      });
     }
   }
 
