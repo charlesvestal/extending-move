@@ -1,4 +1,5 @@
 import { euclideanRhythm } from "./euclid.js";
+import { computeOverlayNotes } from "./pitchbend_overlay.js";
 export function initSetInspector() {
   // Show selected set name when choosing a pad
   const grid = document.querySelector('#setSelectForm .pad-grid');
@@ -318,27 +319,10 @@ export function initSetInspector() {
     return bps[bps.length - 1].value;
   }
 
-  const BASE_NOTE = 36;
-  const SEMI_UNIT = 170.6458282470703;
-
   function recomputeOverlay() {
     overlayNotes = [];
     if (!overlayActive || overlayRow === null || !piano) return;
-    const seq = piano.sequence || [];
-    seq.forEach(ev => {
-      if (ev.n !== overlayRow) return;
-      const pb = ev.a && ev.a.PitchBend;
-      if (!pb || !pb.length) return;
-      const value = pb[0].value;
-      const semis = Math.round(value / SEMI_UNIT);
-      const viz = BASE_NOTE + semis;
-      if (viz < 0 || viz > 127) return;
-      overlayNotes.push({
-        noteNumber: viz,
-        startTime: ev.t / ticksPerBeat,
-        duration: ev.g / ticksPerBeat
-      });
-    });
+    overlayNotes = computeOverlayNotes(piano.sequence || [], overlayRow, ticksPerBeat);
   }
 
   function updateLegend() {
