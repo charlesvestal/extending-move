@@ -48,14 +48,23 @@ export function initSetInspector() {
   if (piano && canvas) {
     const w = parseInt(piano.getAttribute('width') || piano.clientWidth || 0, 10);
     const h = parseInt(piano.getAttribute('height') || piano.clientHeight || 0, 10);
-    canvas.width = w - (yruler + kbwidth);
-    canvas.height = h - xruler;
+    const ratio = window.devicePixelRatio || 1;
+    canvas.width = (w - (yruler + kbwidth)) * ratio;
+    canvas.height = (h - xruler) * ratio;
     canvas.style.left = `${yruler + kbwidth}px`;
     canvas.style.top = `${xruler}px`;
+    canvas.style.width = `${w - (yruler + kbwidth)}px`;
+    canvas.style.height = `${h - xruler}px`;
+    ctx.scale(ratio, ratio);
     if (velCanvas && vctx) {
-      velCanvas.width = canvas.width;
+      const vh = parseInt(velCanvas.getAttribute('height') || velCanvas.clientHeight || 0, 10);
+      velCanvas.width = (w - (yruler + kbwidth)) * ratio;
+      velCanvas.height = vh * ratio;
       velCanvas.style.left = `${yruler + kbwidth}px`;
       velCanvas.style.top = `${h}px`;
+      velCanvas.style.width = `${w - (yruler + kbwidth)}px`;
+      velCanvas.style.height = `${vh}px`;
+      vctx.scale(ratio, ratio);
     }
   }
   const envSelect = document.getElementById('envelope_select');
