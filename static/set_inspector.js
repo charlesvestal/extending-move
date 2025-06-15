@@ -76,6 +76,7 @@ export function initSetInspector() {
   let tailEnv = [];
   let envInfo = null;
   let ghostNotes = [];
+  let removedNotes = [];
 
   if (piano) {
     if (!piano.sequence) piano.sequence = [];
@@ -584,6 +585,11 @@ export function initSetInspector() {
       lenInput.value = steps;
       pulsesInput.value = Math.max(1, Math.min(Math.floor(steps / 2), steps));
       rotateInput.value = 0;
+      removedNotes = piano.sequence.filter(ev => ev.n === row && ev.t >= piano.markstart && ev.t < piano.markend);
+      if (removedNotes.length) {
+        piano.sequence = piano.sequence.filter(ev => !removedNotes.includes(ev));
+        piano.redraw();
+      }
       euclidModal.classList.remove('hidden');
       updatePreview();
     }
@@ -612,14 +618,21 @@ export function initSetInspector() {
         });
       });
       ghostNotes = [];
+      removedNotes = [];
       if (piano.redraw) piano.redraw();
       euclidModal.classList.add('hidden');
     }
 
     function cancel() {
       ghostNotes = [];
+      if (removedNotes.length) {
+        piano.sequence = piano.sequence.concat(removedNotes);
+        piano.sortSequence();
+        removedNotes = [];
+      }
       euclidModal.classList.add('hidden');
-      draw();
+      if (piano.redraw) piano.redraw();
+      else draw();
     }
 
     if (okBtn) okBtn.addEventListener('click', apply);
