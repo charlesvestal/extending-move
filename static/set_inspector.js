@@ -80,6 +80,7 @@ export function initSetInspector() {
   let overlayNotes = [];
   let overlayRow = null;
   let overlayActive = false;
+  let overlayDrag = null;
   let removedNotes = [];
 
   if (piano) {
@@ -148,11 +149,15 @@ export function initSetInspector() {
 
   function updateControls() {
     if (canvas) {
-      canvas.style.pointerEvents = editing ? 'auto' : 'none';
+      canvas.style.pointerEvents = (editing || overlayActive) ? 'auto' : 'none';
     }
     if (piano) {
       piano.enable = true;
-      piano.editmode = editing ? '' : defaultEditMode;
+      if (overlayActive) {
+        piano.editmode = '';
+      } else {
+        piano.editmode = editing ? '' : defaultEditMode;
+      }
     }
   }
   if (legendDiv) {
@@ -466,7 +471,7 @@ export function initSetInspector() {
   }
 
   function startDraw(ev) {
-    if (!editing) return;
+    if (!editing || overlayActive) return;
     drawing = true;
     dirty = true;
     const { x, y } = canvasPos(ev);
@@ -489,7 +494,7 @@ export function initSetInspector() {
   }
 
   function continueDraw(ev) {
-    if (!drawing) {
+    if (!drawing || overlayActive) {
       showValue(ev);
       return;
     }
@@ -562,6 +567,56 @@ export function initSetInspector() {
     velDragging = false;
   }
 
+  function overlayHit({x, y}) {
+    if (!overlayActive || !overlayNotes.length || !piano) return -1;
+    const stepw = canvas.width / piano.xrange;
+    const steph = canvas.height / piano.yrange;
+    for (let i = overlayNotes.length - 1; i >= 0; i--) {
+      const n = overlayNotes[i];
+      const t = n.startTime * ticksPerBeat;
+      const left = (t - piano.xoffset) * stepw;
+      const width = n.duration * ticksPerBeat * stepw;
+      const top = canvas.height - (n.noteNumber - piano.yoffset) * steph;
+      const bottom = top - steph;
+      if (x >= left && x <= left + width && y >= bottom && y <= top) return i;
+    }
+    return -1;
+  }
+
+  function startOverlayDrag(ev) {
+    if (!overlayActive) return;
+    const pos = canvasPos(ev);
+    const idx = overlayHit(pos);
+    if (idx < 0) return;
+    overlayDrag = { index: idx, startY: pos.y,
+      startNote: overlayNotes[idx].noteNumber };
+    ev.preventDefault();
+  }
+
+  function continueOverlayDrag(ev) {
+    if (!overlayDrag) return;
+    const pos = canvasPos(ev);
+    const steph = canvas.height / piano.yrange;
+    const diff = overlayDrag.startY - pos.y;
+    const semis = Math.round(diff / steph);
+    const note = Math.max(0, Math.min(127,
+        overlayDrag.startNote + semis));
+    const on = overlayNotes[overlayDrag.index];
+    if (note !== on.noteNumber) {
+      on.noteNumber = note;
+      const seqEv = piano.sequence[on.eventIndex];
+      if (!seqEv.a) seqEv.a = {};
+      if (!seqEv.a.PitchBend) seqEv.a.PitchBend = [{ time: 0, value: 0 }];
+      seqEv.a.PitchBend[0].value = (note - BASE_NOTE) * SEMI_UNIT;
+      draw();
+    }
+    ev.preventDefault();
+  }
+
+  function endOverlayDrag() {
+    overlayDrag = null;
+  }
+
   canvas.addEventListener('mousedown', startDraw);
   canvas.addEventListener('touchstart', startDraw);
   canvas.addEventListener('mousemove', continueDraw);
@@ -569,6 +624,13 @@ export function initSetInspector() {
   canvas.addEventListener('mouseleave', () => { if (!drawing && valueDiv) valueDiv.textContent = ''; });
   document.addEventListener('mouseup', endDraw);
   document.addEventListener('touchend', endDraw);
+
+  canvas.addEventListener('mousedown', startOverlayDrag);
+  canvas.addEventListener('touchstart', startOverlayDrag);
+  canvas.addEventListener('mousemove', continueOverlayDrag);
+  canvas.addEventListener('touchmove', continueOverlayDrag);
+  document.addEventListener('mouseup', endOverlayDrag);
+  document.addEventListener('touchend', endOverlayDrag);
 
   if (velCanvas) {
     velCanvas.addEventListener('mousedown', startVel);
@@ -704,6 +766,7 @@ export function initSetInspector() {
           if (piano.setHighlightRow) piano.setHighlightRow(overlayActive ? overlayRow : null);
           piano.redraw();
         }
+        updateControls();
         draw();
       });
     }

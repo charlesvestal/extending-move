@@ -25,6 +25,7 @@ def test_basic_semitones():
     }]
     result = run_node(notes, 37)
     assert result['overlay'][0]['noteNumber'] == result['BASE_NOTE']
+    assert result['overlay'][0]['eventIndex'] == 0
 
     notes[0]['a']['PitchBend'][0]['value'] = result['SEMI_UNIT']
     result = run_node(notes, 37)
@@ -57,3 +58,4 @@ def test_overlay_generation():
     assert ov['startTime'] == 0.5
     assert ov['duration'] == 0.5
     assert ov['noteNumber'] == result['BASE_NOTE'] + 2
+    assert ov['eventIndex'] == 1
