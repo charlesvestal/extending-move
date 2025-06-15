@@ -81,3 +81,35 @@ def test_get_clip_data_param_ranges(monkeypatch, tmp_path):
     assert data["param_ranges"][1]["max"] == 1.0
     env = data["envelopes"][0]
     assert env["rangeMin"] == 0.0 and env["rangeMax"] == 1.0
+
+
+def test_set_round_trip_no_changes(tmp_path):
+    """Loading and saving demo sets without edits should not alter them."""
+    demo_dir = Path("examples/Sets/Move")
+    for src in demo_dir.glob("*.abl"):
+        original = src.read_bytes()
+        dest = tmp_path / src.name
+        dest.write_bytes(original)
+
+        with open(dest) as f:
+            song = json.load(f)
+
+        for ti, track in enumerate(song.get("tracks", [])):
+            for ci, slot in enumerate(track.get("clipSlots", [])):
+                if not slot.get("clip"):
+                    continue
+                data = sih.get_clip_data(str(dest), ti, ci)
+                assert data["success"], data.get("message")
+                result = sih.save_clip(
+                    str(dest),
+                    ti,
+                    ci,
+                    data["notes"],
+                    data["envelopes"],
+                    data["region"],
+                    data["loop_start"],
+                    data["loop_end"],
+                )
+                assert result["success"], result.get("message")
+
+        assert dest.read_bytes() == original

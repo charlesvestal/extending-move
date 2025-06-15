@@ -191,11 +191,17 @@ def save_clip(
 
         clip_obj = song["tracks"][track]["clipSlots"][clip]["clip"]
         clip_obj["notes"] = notes
+        for env in envelopes:
+            for key in ("rangeMin", "rangeMax", "domainMin", "domainMax", "unit"):
+                env.pop(key, None)
         clip_obj["envelopes"] = envelopes
         region_info = clip_obj.setdefault("region", {})
-        region_info["start"] = 0.0
+        region_info["start"] = region_info.get("start", 0.0)
         region_info["end"] = region_end
-        region_info["loop"] = {"start": loop_start, "end": loop_end}
+        loop_info = region_info.get("loop", {})
+        loop_info["start"] = loop_start
+        loop_info["end"] = loop_end
+        region_info["loop"] = loop_info
 
         backup_set(set_path)
         with open(set_path, "w") as f:
