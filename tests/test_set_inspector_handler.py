@@ -94,7 +94,7 @@ def test_pitch_bend_extraction_and_save(tmp_path):
                 "duration": 1.0,
                 "velocity": 100.0,
                 "offVelocity": 0.0,
-                "pitchBend": [{"time": 0.0, "value": 0.0}, {"time": 0.5, "value": 1.0}],
+                "automations": {"PitchBend": [{"time": 0.0, "value": 0.0}, {"time": 0.5, "value": 1.0}]},
             }
         ],
         "envelopes": [],
