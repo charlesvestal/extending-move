@@ -65,6 +65,10 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
         with open(set_path, "r") as f:
             song = json.load(f)
         track_obj = song["tracks"][track]
+        is_drum_rack = any(
+            isinstance(d, dict) and d.get("kind") == "drumRack"
+            for d in track_obj.get("devices", [])
+        )
         clip_obj = track_obj["clipSlots"][clip]["clip"]
         notes = clip_obj.get("notes", [])
         envelopes = clip_obj.get("envelopes", [])
@@ -133,6 +137,7 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
             "param_map": param_map,
             "param_context": param_context,
             "param_ranges": param_ranges,
+            "is_drum_rack": is_drum_rack,
             "track_name": track_name,
             "clip_name": clip_name,
         }

@@ -58,8 +58,10 @@
   <div style="margin-top:1rem; display:flex; align-items:center; gap:0.5rem;">
     <label for="envelope_select">Envelope:</label>
     <select id="envelope_select">{{ clip_options | safe }}</select>
-    <label for="pitch_select" style="margin-left:1rem;">Pitch Note:</label>
+    {% if is_drum_rack %}
+    <label for="pitch_select" style="margin-left:1rem;">Pitch Pad:</label>
     <select id="pitch_select"></select>
+    {% endif %}
     <span id="envValue" style="margin-left:0.5rem; font-size:0.8em;"></span>
     <label for="note_draw_toggle" style="margin-left:1rem;">Draw Notes</label>
     <input id="note_draw_toggle" type="checkbox">
@@ -83,7 +85,7 @@
     <input type="hidden" name="loop_end" id="loop_end_input">
     <button id="saveClipBtn" type="submit">Save Clip</button>
   </form>
-  <div id="clipData" data-notes='{{ notes | tojson }}' data-envelopes='{{ envelopes | tojson }}' data-region='{{ region | default(4.0) }}' data-loop-start='{{ loop_start | default(0.0) }}' data-loop-end='{{ loop_end | default(region) }}' data-param-ranges='{{ param_ranges_json | safe }}'></div>
+  <div id="clipData" data-notes='{{ notes | tojson }}' data-envelopes='{{ envelopes | tojson }}' data-region='{{ region | default(4.0) }}' data-loop-start='{{ loop_start | default(0.0) }}' data-loop-end='{{ loop_end | default(region) }}' data-param-ranges='{{ param_ranges_json | safe }}' data-is-drum-rack='{{ "true" if is_drum_rack else "false" }}'></div>
   {% endif %}
 {% endblock %}
 {% block scripts %}
