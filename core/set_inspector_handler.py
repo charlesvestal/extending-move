@@ -84,10 +84,15 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
         notes = clip_obj.get("notes", [])
         pitch_notes = []
         for n in notes:
-            if isinstance(n, dict) and n.get("pitchBend"):
+            if not isinstance(n, dict):
+                continue
+            pb = None
+            if isinstance(n.get("automations"), dict):
+                pb = n["automations"].get("PitchBend")
+            if pb:
                 pitch_notes.append({
                     "noteNumber": n.get("noteNumber"),
-                    "breakpoints": n.get("pitchBend", []),
+                    "breakpoints": pb,
                 })
         envelopes = clip_obj.get("envelopes", [])
         region_info = clip_obj.get("region", {})
@@ -219,10 +224,12 @@ def save_clip(
         if pitch_notes is not None:
             pn_map = {pn.get("noteNumber"): pn.get("breakpoints", []) for pn in pitch_notes}
             for n in clip_obj["notes"]:
-                if n.get("noteNumber") in pn_map:
-                    n["pitchBend"] = pn_map[n.get("noteNumber")]
-                elif "pitchBend" in n:
-                    del n["pitchBend"]
+                num = n.get("noteNumber")
+                if num in pn_map:
+                    auto = n.setdefault("automations", {})
+                    auto["PitchBend"] = pn_map[num]
+                elif isinstance(n.get("automations"), dict) and "PitchBend" in n["automations"]:
+                    del n["automations"]["PitchBend"]
         clip_obj["envelopes"] = envelopes
         region_info = clip_obj.setdefault("region", {})
         region_info["start"] = 0.0
