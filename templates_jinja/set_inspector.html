@@ -95,6 +95,10 @@
     <input type="hidden" name="loop_end" id="loop_end_input">
     <button id="saveClipBtn" type="submit">Save Clip</button>
   </form>
+  <div style="margin-top:0.5rem;">
+    <button id="undoBtn" type="button">Undo</button>
+    <button id="redoBtn" type="button" style="margin-left:0.5rem;">Redo</button>
+  </div>
   {% if backups %}
   <form method="post" action="{{ host_prefix }}/set-inspector" style="margin-top:0.5rem;">
     <input type="hidden" name="action" value="restore_backup">
