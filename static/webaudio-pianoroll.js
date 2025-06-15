@@ -1286,9 +1286,9 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 clearInterval(this.longtaptimer);
             const pos=this.getPos(e);
             if(this.dragging.o=="m"){
+                this.menu.style.display="none";
+                this.rcMenu={x:0,y:0,width:0,height:0};
                 if(pos.t && this.menu.contains(pos.t)){
-                    this.menu.style.display="none";
-                    this.rcMenu={x:0,y:0,width:0,height:0};
                     const act=pos.t.dataset.action;
                     switch(act){
                     case 'delete':
@@ -1321,10 +1321,10 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                         this.adjustVelocitySelectedNotes(v);
                         break;
                     }
-                    this.menuDelete.classList.remove('disabled');
-                    this.menuGlobal=false;
-                    this.redraw();
                 }
+                this.menuDelete.classList.remove('disabled');
+                this.menuGlobal=false;
+                this.redraw();
             }
             if(this.dragging.o=="A"){
                 const moved=Math.abs(this.dragging.p.x-pos.x)+Math.abs(this.dragging.p.y-pos.y);
