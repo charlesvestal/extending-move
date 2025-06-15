@@ -2,7 +2,7 @@ import os
 import logging
 from handlers.base_handler import BaseHandler
 from core.list_msets_handler import list_msets
-from core.restore_handler import restore_ablbundle
+from core.restore_handler import restore_ablbundle, restore_abl
 from core.pad_colors import PAD_COLORS, PAD_COLOR_LABELS, rgb_string
 import json
 
@@ -43,7 +43,11 @@ class RestoreHandler(BaseHandler):
 
     def handle_post(self, form):
         """
-        Handles POST requests to restore an uploaded .ablbundle file.
+        Handles POST requests to restore an uploaded set file.
+
+        The upload can be either a ``.ablbundle`` archive or a raw ``.abl`` set
+        file. The correct restore routine is chosen based on the file
+        extension.
         """
         valid, error_response = self.validate_action(form, "restore_ablbundle")
         if not valid:
@@ -110,7 +114,10 @@ class RestoreHandler(BaseHandler):
             return error_response
 
         try:
-            result = restore_ablbundle(filepath, pad_selected, pad_color)
+            if filepath.lower().endswith('.ablbundle'):
+                result = restore_ablbundle(filepath, pad_selected, pad_color)
+            else:
+                result = restore_abl(filepath, pad_selected, pad_color)
             self.cleanup_upload(filepath)
             if result["success"]:
                 # Add 1 to pad_selected for display since we subtracted 1 earlier
