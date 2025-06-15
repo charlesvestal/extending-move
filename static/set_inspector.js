@@ -81,7 +81,8 @@ export function initSetInspector() {
       t: Math.round(n.startTime * ticksPerBeat),
       n: n.noteNumber,
       g: Math.round(n.duration * ticksPerBeat),
-      v: Math.round(n.velocity || 100)
+      v: Math.round(n.velocity || 100),
+      a: n.automations || null
 
     }));
     if (!piano.hasAttribute('xrange')) piano.xrange = region * ticksPerBeat;
@@ -524,13 +525,17 @@ export function initSetInspector() {
   if (saveClipForm) saveClipForm.addEventListener('submit', () => {
     if (piano && notesInput) {
       const seq = piano.sequence || [];
-      notesInput.value = JSON.stringify(seq.map(ev => ({
-        noteNumber: ev.n,
-        startTime: ev.t / ticksPerBeat,
-        duration: ev.g / ticksPerBeat,
-        velocity: ev.v ?? 100.0,
-        offVelocity: 0.0
-      })));
+      notesInput.value = JSON.stringify(seq.map(ev => {
+        const note = {
+          noteNumber: ev.n,
+          startTime: ev.t / ticksPerBeat,
+          duration: ev.g / ticksPerBeat,
+          velocity: ev.v ?? 100.0,
+          offVelocity: 0.0
+        };
+        if (ev.a) note.automations = ev.a;
+        return note;
+      }));
     }
     if (envsInput) {
       let envs = envelopes.map(e => ({ parameterId: e.parameterId, breakpoints: e.breakpoints }));
