@@ -37,6 +37,8 @@ export function initSetInspector() {
   const paramRanges = JSON.parse(dataDiv.dataset.paramRanges || '{}');
   const canvas = document.getElementById('clipCanvas');
   const ctx = canvas.getContext('2d');
+  const velCanvas = document.getElementById('velocityCanvas');
+  const vctx = velCanvas ? velCanvas.getContext('2d') : null;
   const piano = document.getElementById('clipEditor');
   const timebase = piano ? parseInt(piano.getAttribute('timebase') || '16', 10) : 16;
   const xruler = piano ? parseInt(piano.getAttribute('xruler') || '24', 10) : 24;
@@ -50,6 +52,11 @@ export function initSetInspector() {
     canvas.height = h - xruler;
     canvas.style.left = `${yruler + kbwidth}px`;
     canvas.style.top = `${xruler}px`;
+    if (velCanvas && vctx) {
+      velCanvas.width = canvas.width;
+      velCanvas.style.left = `${yruler + kbwidth}px`;
+      velCanvas.style.top = `${h}px`;
+    }
   }
   const envSelect = document.getElementById('envelope_select');
   const legendDiv = document.getElementById('paramLegend');
@@ -73,7 +80,8 @@ export function initSetInspector() {
     piano.sequence = notes.map(n => ({
       t: Math.round(n.startTime * ticksPerBeat),
       n: n.noteNumber,
-      g: Math.round(n.duration * ticksPerBeat)
+      g: Math.round(n.duration * ticksPerBeat),
+      v: Math.round(n.velocity || 100)
     }));
     if (!piano.hasAttribute('xrange')) piano.xrange = region * ticksPerBeat;
     if (!piano.hasAttribute('markstart')) piano.markstart = loopStart * ticksPerBeat;
@@ -233,6 +241,19 @@ export function initSetInspector() {
     ctx.stroke();
   }
 
+  function drawVelocity() {
+    if (!velCanvas || !vctx || !piano) return;
+    vctx.clearRect(0, 0, velCanvas.width, velCanvas.height);
+    const seq = piano.sequence || [];
+    const barWidth = Math.max(2, (piano.grid || piano.snap) * (velCanvas.width / piano.xrange) * 0.8);
+    seq.forEach(ev => {
+      const x = ((ev.t - piano.xoffset) / piano.xrange) * velCanvas.width;
+      const h = ((ev.v || 100) / 127) * velCanvas.height;
+      vctx.fillStyle = ev.f ? piano.colnotesel : piano.colnote;
+      vctx.fillRect(x - barWidth / 2, velCanvas.height - h, barWidth, h);
+    });
+  }
+
   function envValueAt(bps, t) {
     if (!bps.length) return 0;
     if (t <= bps[0].time) return bps[0].value;
@@ -274,6 +295,7 @@ export function initSetInspector() {
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawEnvelope();
+    drawVelocity();
   }
 
   if (piano && piano.redraw) {
@@ -399,6 +421,42 @@ export function initSetInspector() {
     }
   }
 
+  let velDragging = false;
+  function velPos(ev) {
+    const rect = velCanvas.getBoundingClientRect();
+    const x = (ev.touches ? ev.touches[0].clientX : ev.clientX) - rect.left;
+    const y = (ev.touches ? ev.touches[0].clientY : ev.clientY) - rect.top;
+    return { x, y };
+  }
+  function noteAtX(x) {
+    const seq = piano.sequence || [];
+    const barWidth = Math.max(2, (piano.grid || piano.snap) * (velCanvas.width / piano.xrange) * 0.8);
+    for (let i = 0; i < seq.length; i++) {
+      const ev = seq[i];
+      const ex = ((ev.t - piano.xoffset) / piano.xrange) * velCanvas.width;
+      if (x >= ex - barWidth / 2 && x <= ex + barWidth / 2) return i;
+    }
+    return -1;
+  }
+  function updateVel(ev) {
+    if (!velDragging) return;
+    const { x, y } = velPos(ev);
+    const idx = noteAtX(x);
+    if (idx >= 0) {
+      const v = Math.max(1, Math.min(127, Math.round(127 - (y / velCanvas.height) * 127)));
+      piano.sequence[idx].v = v;
+      drawVelocity();
+    }
+    ev.preventDefault();
+  }
+  function startVel(ev) {
+    velDragging = true;
+    updateVel(ev);
+  }
+  function endVel() {
+    velDragging = false;
+  }
+
   canvas.addEventListener('mousedown', startDraw);
   canvas.addEventListener('touchstart', startDraw);
   canvas.addEventListener('mousemove', continueDraw);
@@ -406,6 +464,15 @@ export function initSetInspector() {
   canvas.addEventListener('mouseleave', () => { if (!drawing && valueDiv) valueDiv.textContent = ''; });
   document.addEventListener('mouseup', endDraw);
   document.addEventListener('touchend', endDraw);
+
+  if (velCanvas) {
+    velCanvas.addEventListener('mousedown', startVel);
+    velCanvas.addEventListener('touchstart', startVel);
+    velCanvas.addEventListener('mousemove', updateVel);
+    velCanvas.addEventListener('touchmove', updateVel);
+    document.addEventListener('mouseup', endVel);
+    document.addEventListener('touchend', endVel);
+  }
 
 
   if (saveClipForm) saveClipForm.addEventListener('submit', () => {
@@ -415,7 +482,7 @@ export function initSetInspector() {
         noteNumber: ev.n,
         startTime: ev.t / ticksPerBeat,
         duration: ev.g / ticksPerBeat,
-        velocity: 100.0,
+        velocity: ev.v !== undefined ? ev.v : 100.0,
         offVelocity: 0.0
       })));
     }
