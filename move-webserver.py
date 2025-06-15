@@ -343,11 +343,13 @@ def set_inspector_route():
         track_index=result.get("track_index"),
         clip_index=result.get("clip_index"),
         notes=result.get("notes"),
+        pitch_notes=result.get("pitch_notes", []),
         envelopes=result.get("envelopes"),
         region=result.get("region"),
         loop_start=result.get("loop_start", 0.0),
         loop_end=result.get("loop_end", result.get("region")),
         param_ranges_json=result.get("param_ranges_json", "{}"),
+        is_drum_rack=result.get("is_drum_rack", False),
         active_tab="set-inspector",
     )
 

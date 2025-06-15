@@ -81,3 +81,40 @@ def test_get_clip_data_param_ranges(monkeypatch, tmp_path):
     assert data["param_ranges"][1]["max"] == 1.0
     env = data["envelopes"][0]
     assert env["rangeMin"] == 0.0 and env["rangeMax"] == 1.0
+
+
+def test_get_clip_data_pitch_notes(tmp_path):
+    set_path = tmp_path / "set.abl"
+    clip = {
+        "name": "Clip1",
+        "notes": [
+            {
+                "noteNumber": 36,
+                "startTime": 0.0,
+                "duration": 0.5,
+                "velocity": 100.0,
+                "offVelocity": 0.0,
+                "automations": {"PitchBend": [{"time": 0.0, "value": 100.0}]},
+            },
+            {
+                "noteNumber": 38,
+                "startTime": 0.5,
+                "duration": 0.5,
+                "velocity": 100.0,
+                "offVelocity": 0.0,
+            },
+        ],
+        "envelopes": [],
+        "region": {"end": 4.0},
+    }
+    track = {
+        "name": "Track1",
+        "devices": [{"kind": "drumRack"}],
+        "clipSlots": [{"clip": clip}],
+    }
+    song = {"tracks": [track]}
+    set_path.write_text(json.dumps(song))
+
+    data = sih.get_clip_data(str(set_path), 0, 0)
+    assert data["is_drum_rack"]
+    assert data["pitch_notes"] == [36]

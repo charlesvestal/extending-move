@@ -30,7 +30,7 @@ export function initSetInspector() {
   const dataDiv = document.getElementById('clipData');
   if (!dataDiv) return;
   const allNotes = JSON.parse(dataDiv.dataset.notes || '[]');
-  let notes = allNotes.slice();
+  const pitchNotes = JSON.parse(dataDiv.dataset.pitchNotes || '[]');
   const envelopes = JSON.parse(dataDiv.dataset.envelopes || '[]');
   const region = parseFloat(dataDiv.dataset.region || '4');
   const loopStart = parseFloat(dataDiv.dataset.loopStart || '0');
@@ -105,14 +105,15 @@ export function initSetInspector() {
     n.pitchBend = getPitchBend(n);
   });
 
-  if (pitchSelect && isDrumRack) {
+  if (pitchSelect && isDrumRack && pitchNotes.length) {
     const opts = ['<option value="">No Pitch</option>'];
-    for (let i = 0; i < 16; i++) {
-      const n = PAD_START_NOTE + i;
-      const pad = i + 1;
+    pitchNotes.forEach(n => {
+      const pad = n - PAD_START_NOTE + 1;
       opts.push(`<option value="${n}">Pad ${pad} (${noteName(n)})</option>`);
-    }
+    });
     pitchSelect.innerHTML = opts.join('');
+  } else if (pitchSelect) {
+    pitchSelect.style.display = 'none';
   }
 
   let editing = false;
