@@ -46,6 +46,7 @@ Here’s what you can do with Extending Move:
 - **Clip Editor**
   - Modify clip notes and envelopes in a piano roll
   - Adjust region length and loop points
+  - Crisp rendering on high-DPI screens
 
 - **Sample Reversal**
   - Create reversed versions of any WAV file
