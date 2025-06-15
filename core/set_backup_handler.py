@@ -50,7 +50,10 @@ def list_backups(set_path: str):
 
 def restore_backup(set_path: str, backup_name: str) -> bool:
     """Restore the specified backup over the set file."""
-    backup_dir = os.path.join(os.path.dirname(set_path), 'backups')
+    backup_dir = os.path.join(os.path.dirname(set_path), "backups")
+    # Prevent path traversal by only allowing base names
+    if os.path.basename(backup_name) != backup_name:
+        return False
     backup_path = os.path.join(backup_dir, backup_name)
     if not os.path.isfile(backup_path):
         return False
