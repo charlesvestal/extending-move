@@ -202,11 +202,11 @@ export function initSetInspector() {
 
   function updateControls() {
     if (canvas) {
-      canvas.style.pointerEvents = editing ? 'auto' : 'none';
+      canvas.style.pointerEvents = (editing || pitchMode) ? 'auto' : 'none';
     }
     if (piano) {
       piano.enable = true;
-      piano.editmode = editing ? '' : defaultEditMode;
+      piano.editmode = editing || pitchMode ? '' : defaultEditMode;
     }
   }
   if (legendDiv) {
@@ -423,6 +423,7 @@ export function initSetInspector() {
     refreshPiano();
     drawVelocity();
     draw();
+    updateControls();
   });
 
   function canvasPos(ev) {
@@ -430,6 +431,27 @@ export function initSetInspector() {
     const x = (ev.touches ? ev.touches[0].clientX : ev.clientX) - rect.left;
     const y = (ev.touches ? ev.touches[0].clientY : ev.clientY) - rect.top;
     return { x, y };
+  }
+
+  function pitchClick(ev) {
+    if (!pitchMode || activePad === null) return;
+    const pos = canvasPos(ev);
+    const t = piano
+      ? (piano.xoffset + (pos.x / canvas.width) * piano.xrange) / ticksPerBeat
+      : (pos.x / canvas.width) * region;
+    const note = allNotes.find(n =>
+      n.noteNumber === activePad && getPitchBend(n) !== undefined &&
+      t >= n.startTime && t < n.startTime + n.duration);
+    if (!note) return;
+    const { min, max } = getVisibleRange();
+    const noteRange = max - min + 1;
+    const h = canvas.height / noteRange;
+    let newPitch = min + (canvas.height - pos.y) / h - 1;
+    newPitch = Math.max(0, Math.min(127, Math.round(newPitch)));
+    setPitchBend(note, bendFromPitch(newPitch));
+    refreshPiano();
+    drawVelocity();
+    draw();
   }
 
   function showValue(ev) {
@@ -554,8 +576,14 @@ export function initSetInspector() {
     velDragging = false;
   }
 
-  canvas.addEventListener('mousedown', startDraw);
-  canvas.addEventListener('touchstart', startDraw);
+  canvas.addEventListener('mousedown', ev => {
+    if (pitchMode && !editing) { pitchClick(ev); }
+    else startDraw(ev);
+  });
+  canvas.addEventListener('touchstart', ev => {
+    if (pitchMode && !editing) { pitchClick(ev); }
+    else startDraw(ev);
+  });
   canvas.addEventListener('mousemove', continueDraw);
   canvas.addEventListener('touchmove', continueDraw);
   canvas.addEventListener('mouseleave', () => { if (!drawing && valueDiv) valueDiv.textContent = ''; });
@@ -590,13 +618,23 @@ export function initSetInspector() {
         });
         notesInput.value = JSON.stringify([...other, ...padNotes]);
       } else {
-        notesInput.value = JSON.stringify(seq.map(ev => ({
-          noteNumber: ev.n,
-          startTime: ev.t / ticksPerBeat,
-          duration: ev.g / ticksPerBeat,
-          velocity: ev.v ?? 100.0,
-          offVelocity: 0.0
-        })));
+        notesInput.value = JSON.stringify(seq.map(ev => {
+          const note = {
+            noteNumber: ev.n,
+            startTime: ev.t / ticksPerBeat,
+            duration: ev.g / ticksPerBeat,
+            velocity: ev.v ?? 100.0,
+            offVelocity: 0.0
+          };
+          const match = allNotes.find(n =>
+            n.noteNumber === note.noteNumber &&
+            Math.abs(n.startTime - note.startTime) < 1e-4 &&
+            Math.abs(n.duration - note.duration) < 1e-4);
+          if (match && getPitchBend(match) !== undefined) {
+            setPitchBend(note, getPitchBend(match));
+          }
+          return note;
+        }));
       }
     }
     if (envsInput) {
