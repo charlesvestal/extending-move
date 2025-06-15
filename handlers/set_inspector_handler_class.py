@@ -169,6 +169,23 @@ class SetInspectorHandler(BaseHandler):
                 return self.format_error_response(result.get("message"), pad_grid=pad_grid)
             clip_info = list_clips(set_path)
             clip_grid = self.generate_clip_grid(clip_info.get("clips", []), selected=clip_val)
+            pitch_pad_val = form.getvalue("pitch_pad")
+            pitch_pad = int(pitch_pad_val) if pitch_pad_val and pitch_pad_val.isdigit() else None
+            notes = result.get("notes", [])
+            from core.set_inspector_handler import extract_pitch_edit_notes
+            pitch_pads = sorted(
+                {
+                    n.get("noteNumber")
+                    for n in notes
+                    if n.get("automations", {}).get("PitchBend")
+                }
+            )
+            if pitch_pad is not None:
+                notes = extract_pitch_edit_notes(notes, pitch_pad)
+            pitch_opts = "<option value=''>Clip Notes</option>" + "".join(
+                f"<option value='{pad}'" + (" selected" if pad == pitch_pad else "") + f">Pad {pad}</option>"
+                for pad in pitch_pads
+            )
             envelopes = result.get("envelopes", [])
             param_map = result.get("param_map", {})
             param_context = result.get("param_context", {})
@@ -193,7 +210,7 @@ class SetInspectorHandler(BaseHandler):
                 "clip_grid": clip_grid,
                 "clip_options": env_opts,
                 "selected_clip": clip_val,
-                "notes": result.get("notes", []),
+                "notes": notes,
                 "envelopes": envelopes,
                 "region": result.get("region", 4.0),
                 "loop_start": result.get("loop_start", 0.0),
@@ -203,6 +220,8 @@ class SetInspectorHandler(BaseHandler):
                 "clip_index": clip_idx,
                 "track_name": result.get("track_name"),
                 "clip_name": result.get("clip_name"),
+                "pitch_opts": pitch_opts,
+                "pitch_pad": pitch_pad,
             }
         elif action == "save_envelope":
             set_path = form.getvalue("set_path")
@@ -306,8 +325,14 @@ class SetInspectorHandler(BaseHandler):
             except Exception:
                 pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
                 return self.format_error_response("Invalid clip data", pad_grid=pad_grid)
-            from core.set_inspector_handler import save_clip
-
+            pitch_pad_val = form.getvalue("pitch_pad")
+            pitch_pad = int(pitch_pad_val) if pitch_pad_val and pitch_pad_val.isdigit() else None
+            from core.set_inspector_handler import save_clip, get_clip_data, apply_pitch_edit_changes
+            if pitch_pad is not None:
+                clip_data = get_clip_data(set_path, track_idx, clip_idx)
+                if clip_data.get("success"):
+                    notes = apply_pitch_edit_changes(clip_data.get("notes", []), pitch_pad, notes)
+            
             result = save_clip(
                 set_path,
                 track_idx,
@@ -327,6 +352,18 @@ class SetInspectorHandler(BaseHandler):
             envelopes = clip_data.get("envelopes", [])
             param_map = clip_data.get("param_map", {})
             param_context = clip_data.get("param_context", {})
+            from core.set_inspector_handler import extract_pitch_edit_notes
+            pitch_pads = sorted(
+                {
+                    n.get("noteNumber")
+                    for n in clip_data.get("notes", [])
+                    if n.get("automations", {}).get("PitchBend")
+                }
+            )
+            pitch_opts = "<option value=''>Clip Notes</option>" + "".join(
+                f"<option value='{pad}'" + (" selected" if pad == pitch_pad else "") + f">Pad {pad}</option>"
+                for pad in pitch_pads
+            )
             env_opts = "".join(
                 (
                     f'<option value="{e.get("parameterId")}">' +
@@ -348,7 +385,7 @@ class SetInspectorHandler(BaseHandler):
                 "clip_grid": clip_grid,
                 "clip_options": env_opts,
                 "selected_clip": clip_val,
-                "notes": clip_data.get("notes", []),
+                "notes": notes if pitch_pad is None else extract_pitch_edit_notes(notes, pitch_pad),
                 "envelopes": envelopes,
                 "region": clip_data.get("region", 4.0),
                 "loop_start": clip_data.get("loop_start", 0.0),
@@ -358,6 +395,8 @@ class SetInspectorHandler(BaseHandler):
                 "clip_index": clip_idx,
                 "track_name": clip_data.get("track_name"),
                 "clip_name": clip_data.get("clip_name"),
+                "pitch_opts": pitch_opts,
+                "pitch_pad": pitch_pad,
             }
         else:
             return self.format_error_response("Unknown action", pad_grid=pad_grid)

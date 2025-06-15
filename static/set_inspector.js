@@ -27,6 +27,15 @@ export function initSetInspector() {
     });
   }
 
+  const pitchPadForm = document.getElementById('pitchPadForm');
+  const pitchPadSelect = document.getElementById('pitch_pad_select');
+  const pitchPadInput = document.getElementById('pitch_pad_input');
+  if (pitchPadForm && pitchPadSelect) {
+    pitchPadSelect.addEventListener('change', () => {
+      pitchPadForm.submit();
+    });
+  }
+
   const dataDiv = document.getElementById('clipData');
   if (!dataDiv) return;
   const notes = JSON.parse(dataDiv.dataset.notes || '[]');
@@ -436,6 +445,7 @@ export function initSetInspector() {
     if (regionInput) regionInput.value = (piano.xrange / ticksPerBeat).toFixed(6);
     if (loopStartInput) loopStartInput.value = (piano.markstart / ticksPerBeat).toFixed(6);
     if (loopEndInput) loopEndInput.value = (piano.markend / ticksPerBeat).toFixed(6);
+    if (pitchPadInput && pitchPadSelect) pitchPadInput.value = pitchPadSelect.value;
   });
   if (envSelect && envSelect.value) {
     envSelect.dispatchEvent(new Event('change'));
