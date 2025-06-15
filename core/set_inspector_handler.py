@@ -8,6 +8,19 @@ from core.synth_preset_inspector_handler import (
 )
 
 
+def _has_drum_rack(obj: Any) -> bool:
+    """Recursively search for a drum rack device."""
+    if isinstance(obj, dict):
+        if obj.get("kind") == "drumRack":
+            return True
+        for key in ("devices", "chains"):
+            if key in obj and _has_drum_rack(obj[key]):
+                return True
+    elif isinstance(obj, list):
+        return any(_has_drum_rack(item) for item in obj)
+    return False
+
+
 def _collect_param_ids(
     obj: Any,
     mapping: Dict[int, str],
@@ -65,10 +78,7 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
         with open(set_path, "r") as f:
             song = json.load(f)
         track_obj = song["tracks"][track]
-        is_drum_rack = any(
-            isinstance(d, dict) and d.get("kind") == "drumRack"
-            for d in track_obj.get("devices", [])
-        )
+        is_drum_rack = _has_drum_rack(track_obj.get("devices", []))
         clip_obj = track_obj["clipSlots"][clip]["clip"]
         notes = clip_obj.get("notes", [])
         envelopes = clip_obj.get("envelopes", [])
