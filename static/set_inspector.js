@@ -1,3 +1,4 @@
+import { euclideanRhythm } from "./euclid.js";
 export function initSetInspector() {
   // Show selected set name when choosing a pad
   const grid = document.querySelector('#setSelectForm .pad-grid');
@@ -74,6 +75,7 @@ export function initSetInspector() {
   let currentEnv = [];
   let tailEnv = [];
   let envInfo = null;
+  let ghostNotes = [];
 
   if (piano) {
     if (!piano.sequence) piano.sequence = [];
@@ -518,6 +520,97 @@ export function initSetInspector() {
     velCanvas.addEventListener('touchmove', updateVel);
     document.addEventListener('mouseup', endVel);
     document.addEventListener('touchend', endVel);
+  }
+
+  // Euclidean fill modal setup
+  const euclidModal = document.getElementById('euclidModal');
+  const lenInput = document.getElementById('euclid_length');
+  const pulsesInput = document.getElementById('euclid_pulses');
+  const rotateInput = document.getElementById('euclid_rotate');
+  if (euclidModal) {
+    const okBtn = document.getElementById('euclid_ok');
+    const cancelBtn = document.getElementById('euclid_cancel');
+    const closeBtn = euclidModal.querySelector('.modal-close');
+
+    function updatePreview() {
+      ghostNotes = [];
+      const steps = Math.max(1, Math.min(parseInt(lenInput.value), 64));
+      const pulses = Math.max(1, Math.min(parseInt(pulsesInput.value), steps));
+      const rot = Math.max(0, Math.min(parseInt(rotateInput.value), steps - 1));
+      const row = parseInt(euclidModal.dataset.row || '60');
+      const ons = euclideanRhythm(steps, pulses, rot);
+      ons.forEach(st => {
+        ghostNotes.push({
+          noteNumber: row,
+          startTime: (piano.markstart + st * piano.grid) / ticksPerBeat,
+          duration: piano.grid / ticksPerBeat,
+          velocity: 100,
+          offVelocity: 0
+        });
+      });
+      draw();
+    }
+
+    let timer = null;
+    function debounced() {
+      clearTimeout(timer);
+      timer = setTimeout(updatePreview, 150);
+    }
+
+    [lenInput, pulsesInput, rotateInput].forEach(el => el && el.addEventListener('input', debounced));
+
+    function openModal(row) {
+      euclidModal.dataset.row = row;
+      const steps = Math.round((piano.markend - piano.markstart) / piano.grid);
+      lenInput.value = steps;
+      pulsesInput.value = Math.max(1, Math.min(Math.floor(steps / 2), steps));
+      rotateInput.value = 0;
+      euclidModal.classList.remove('hidden');
+      updatePreview();
+    }
+
+    function apply() {
+      const row = parseInt(euclidModal.dataset.row || '60');
+      const startT = piano.markstart;
+      const endT = piano.markend;
+      piano.sequence = piano.sequence.filter(ev => !(ev.n === row && ev.t >= startT && ev.t < endT));
+      ghostNotes.forEach(n => {
+        piano.sequence.push({
+          t: Math.round(n.startTime * ticksPerBeat),
+          n: row,
+          g: Math.round(n.duration * ticksPerBeat),
+          v: n.velocity
+        });
+      });
+      piano.sortSequence();
+      notes.length = 0;
+      piano.sequence.forEach(ev => {
+        notes.push({
+          noteNumber: ev.n,
+          startTime: ev.t / ticksPerBeat,
+          duration: ev.g / ticksPerBeat,
+          velocity: ev.v
+        });
+      });
+      ghostNotes = [];
+      if (piano.redraw) piano.redraw();
+      euclidModal.classList.add('hidden');
+    }
+
+    function cancel() {
+      ghostNotes = [];
+      euclidModal.classList.add('hidden');
+      draw();
+    }
+
+    if (okBtn) okBtn.addEventListener('click', apply);
+    if (cancelBtn) cancelBtn.addEventListener('click', cancel);
+    if (closeBtn) closeBtn.addEventListener('click', cancel);
+    window.addEventListener('click', e => { if (e.target === euclidModal) cancel(); });
+
+    if (piano) {
+      piano.addEventListener('euclidfill', e => openModal(e.detail.row));
+    }
   }
 
 
