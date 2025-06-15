@@ -73,7 +73,8 @@ export function initSetInspector() {
     piano.sequence = notes.map(n => ({
       t: Math.round(n.startTime * ticksPerBeat),
       n: n.noteNumber,
-      g: Math.round(n.duration * ticksPerBeat)
+      g: Math.round(n.duration * ticksPerBeat),
+      v: n.velocity || 100
     }));
     if (!piano.hasAttribute('xrange')) piano.xrange = region * ticksPerBeat;
     if (!piano.hasAttribute('markstart')) piano.markstart = loopStart * ticksPerBeat;
@@ -415,7 +416,7 @@ export function initSetInspector() {
         noteNumber: ev.n,
         startTime: ev.t / ticksPerBeat,
         duration: ev.g / ticksPerBeat,
-        velocity: 100.0,
+        velocity: ev.v ?? 100.0,
         offVelocity: 0.0
       })));
     }
