@@ -252,7 +252,9 @@ export function initSetInspector() {
     const drawBar = ev => {
       const x = ((ev.t - piano.xoffset) / piano.xrange) * velCanvas.width;
       const h = ((ev.v || 100) / 127) * velCanvas.height;
-      vctx.fillStyle = ev.f ? piano.colnotesel : piano.colnote;
+      vctx.fillStyle = ev.f
+        ? (piano.hasFocus ? piano.colnotesel : piano.colnoteselinactive)
+        : piano.colnote;
       vctx.fillRect(x, velCanvas.height - h, barWidth, h);
     };
 
