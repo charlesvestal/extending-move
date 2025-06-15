@@ -692,9 +692,15 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             }
             return obj;
         };
-        this.editDragDown=function(pos){
+        this.editDragDown=function(pos, shiftSelect){
             const ht=this.hitTest(pos);
             let ev;
+            if(shiftSelect && (ht.m=="N" || ht.m=="n")){
+                ev=this.sequence[ht.i];
+                ev.f = !ev.f;
+                this.redraw();
+                return;
+            }
             if(ht.m=="N"){
                 ev=this.sequence[ht.i];
                 this.dragging={o:"D",m:"N",i:ht.i,t:ht.t,n:ev.n,dt:ht.t-ev.t};
@@ -1172,7 +1178,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 break;
             case "dragpoly":
             case "dragmono":
-                this.editDragDown(this.downpos);
+                this.editDragDown(this.downpos, e.shiftKey);
                 break;
             }
             this.press = 1;
