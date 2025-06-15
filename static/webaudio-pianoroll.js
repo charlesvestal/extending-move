@@ -127,6 +127,10 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
 #wac-menu div:hover {
     background:#ff6;
 }
+.disabled{
+    opacity:0.5;
+    pointer-events:none;
+}
 #wac-gridres{
     position:absolute;
     top:30px;
@@ -520,7 +524,9 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
         };
 
         this.duplicateSelectedNotes=function(){
-            const sel=this.selectedNotes();
+            let sel=this.selectedNotes();
+            if(this.menuGlobal || !sel.length)
+                sel=this.sequence.map((ev,i)=>({i:i,ev:ev,t:ev.t,g:ev.g}));
             if(!sel.length) return;
             // compute offset to append copy after last selected note
             const start=Math.min(...sel.map(o=>o.ev.t));
@@ -537,7 +543,9 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
         };
 
         this.changeDurationSelectedNotes=function(factor){
-            const sel=this.selectedNotes();
+            let sel=this.selectedNotes();
+            if(this.menuGlobal || !sel.length)
+                sel=this.sequence.map(ev=>({ev:ev}));
             if(!sel.length) return;
             const start=Math.min(...sel.map(o=>o.ev.t));
             for(const {ev} of sel){
@@ -549,10 +557,13 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
         };
 
         this.quantizeSelectedNotes=function(){
-            for(const ev of this.sequence){
-                if(ev.f){
+            const sel=this.selectedNotes();
+            if(this.menuGlobal || !sel.length){
+                for(const ev of this.sequence)
                     ev.t=Math.round(ev.t/this.grid)*this.grid;
-                }
+            }else{
+                for(const {ev} of sel)
+                    ev.t=Math.round(ev.t/this.grid)*this.grid;
             }
             this.sortSequence();
             this.redraw();
@@ -617,7 +628,9 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
         };
 
         this.reverseSelectedNotes=function(){
-            const sel=this.selectedNotes();
+            let sel=this.selectedNotes();
+            if(this.menuGlobal || !sel.length)
+                sel=this.sequence.map(ev=>({ev:ev}));
             if(!sel.length) return;
             const start=Math.min(...sel.map(o=>o.ev.t));
             const end=Math.max(...sel.map(o=>o.ev.t+o.ev.g));
@@ -629,8 +642,10 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
         };
 
         this.invertSelectedNotes=function(){
-            const sel=this.selectedNotes();
-            if(!sel.length) return;
+        let sel=this.selectedNotes();
+        if(this.menuGlobal || !sel.length)
+            sel=this.sequence.map(ev=>({ev:ev}));
+        if(!sel.length) return;
             const minN=Math.min(...sel.map(o=>o.ev.n));
             const maxN=Math.max(...sel.map(o=>o.ev.n));
             for(const {ev} of sel){
@@ -845,6 +860,8 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             this.markendimg=this.elem.children[3];
             this.cursorimg=this.elem.children[4];
             this.menu=this.elem.children[5];
+            this.menuDelete=this.menu.children[0];
+            this.menuGlobal=false;
             this.gridselect=this.elem.children[6];
             this.rcMenu={x:0, y:0, width:0, height:0};
             this.lastx=0;
@@ -1021,6 +1038,14 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 case "N":
                 case "B":
                 case "E":
+                    this.menuGlobal=false;
+                    this.menuDelete.classList.remove('disabled');
+                    this.popMenu(this.downpos);
+                    this.dragging={o:"m"};
+                    break;
+                case "s":
+                    this.menuGlobal=true;
+                    this.menuDelete.classList.add('disabled');
                     this.popMenu(this.downpos);
                     this.dragging={o:"m"};
                     break;
@@ -1052,6 +1077,14 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 case "N":
                 case "B":
                 case "E":
+                    this.menuGlobal=false;
+                    this.menuDelete.classList.remove('disabled');
+                    this.popMenu(this.downpos);
+                    this.dragging={o:"m"};
+                    break;
+                case "s":
+                    this.menuGlobal=true;
+                    this.menuDelete.classList.add('disabled');
                     this.popMenu(this.downpos);
                     this.dragging={o:"m"};
                     break;
@@ -1230,7 +1263,8 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                     const act=pos.t.dataset.action;
                     switch(act){
                     case 'delete':
-                        this.delSelectedNote();
+                        if(!this.menuGlobal)
+                            this.delSelectedNote();
                         break;
                     case 'duplicate':
                         this.duplicateSelectedNotes();
@@ -1259,6 +1293,8 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                         break;
                     }
                 }
+                this.menuDelete.classList.remove('disabled');
+                this.menuGlobal=false;
                 this.redraw();
             }
             if(this.dragging.o=="A"){
