@@ -448,24 +448,14 @@ export function initSetInspector() {
     if (!velDragging) return;
     const { x, y } = velPos(ev);
     const indices = notesAtX(x);
-    if (indices.length) {
-      const v = Math.max(1,
-        Math.min(127, Math.round(127 - (y / velCanvas.height) * 127)));
-      const selCount = piano.sequence.filter(ev => ev.f).length;
-      const targets =
-        selCount && indices.some(i => piano.sequence[i].f)
-          ? indices.filter(i => piano.sequence[i].f)
-          : indices;
-      if (selCount === 1) {
-        const only = piano.sequence.findIndex(ev => ev.f);
-        if (indices.includes(only)) {
-          piano.sequence[only].v = v;
-        }
-      } else {
-        targets.forEach(i => { piano.sequence[i].v = v; });
-      }
-      drawVelocity();
-    }
+    if (!indices.length) return;
+    const v = Math.max(1,
+      Math.min(127, Math.round(127 - (y / velCanvas.height) * 127)));
+    const anySel = piano.sequence.some(ev => ev.f);
+    const selected = indices.filter(i => piano.sequence[i].f);
+    const targets = anySel && selected.length ? selected : indices;
+    targets.forEach(i => { piano.sequence[i].v = v; });
+    drawVelocity();
     ev.preventDefault();
   }
   function startVel(ev) {
@@ -501,7 +491,7 @@ export function initSetInspector() {
         noteNumber: ev.n,
         startTime: ev.t / ticksPerBeat,
         duration: ev.g / ticksPerBeat,
-        velocity: ev.v !== undefined ? ev.v : 100.0,
+        velocity: ev.v ?? 100.0,
         offVelocity: 0.0
       })));
     }
