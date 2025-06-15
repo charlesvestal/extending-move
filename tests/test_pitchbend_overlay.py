@@ -9,7 +9,7 @@ def run_node(notes, row, ticks=96):
     script = f"""
 import {{computeOverlayNotes, BASE_NOTE, SEMI_UNIT}} from 'file://{JS_PATH.as_posix()}';
 const notes = {json.dumps(notes)};
-const result = computeOverlayNotes(notes, {row}, {ticks});
+const result = computeOverlayNotes(notes, {row}, {ticks}, undefined, false);
 console.log(JSON.stringify({{'overlay': result, 'BASE_NOTE': BASE_NOTE, 'SEMI_UNIT': SEMI_UNIT}}));
 """
     proc = subprocess.run(['node', '--input-type=module', '-e', script], capture_output=True, text=True, check=True)

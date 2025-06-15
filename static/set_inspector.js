@@ -1,5 +1,5 @@
 import { euclideanRhythm } from "./euclid.js";
-import { computeOverlayNotes } from "./pitchbend_overlay.js";
+import { computeOverlayNotes, BASE_NOTE, SEMI_UNIT } from "./pitchbend_overlay.js";
 export function initSetInspector() {
   // Show selected set name when choosing a pad
   const grid = document.querySelector('#setSelectForm .pad-grid');
@@ -80,6 +80,9 @@ export function initSetInspector() {
   let overlayNotes = [];
   let overlayRow = null;
   let overlayActive = false;
+  const pitchOverrides = {};
+  let draggingId = null;
+  let nextId = 1;
   let removedNotes = [];
 
   if (piano) {
@@ -89,8 +92,8 @@ export function initSetInspector() {
       n: n.noteNumber,
       g: Math.round(n.duration * ticksPerBeat),
       v: Math.round(n.velocity || 100),
-      a: n.automations || null
-
+      a: n.automations || null,
+      id: nextId++
     }));
     recomputeOverlay();
     if (piano.setHighlightRow) piano.setHighlightRow(null);
@@ -148,11 +151,11 @@ export function initSetInspector() {
 
   function updateControls() {
     if (canvas) {
-      canvas.style.pointerEvents = editing ? 'auto' : 'none';
+      canvas.style.pointerEvents = (editing || overlayActive) ? 'auto' : 'none';
     }
     if (piano) {
       piano.enable = true;
-      piano.editmode = editing ? '' : defaultEditMode;
+      piano.editmode = overlayActive ? '' : (editing ? '' : defaultEditMode);
     }
   }
   if (legendDiv) {
@@ -320,10 +323,13 @@ export function initSetInspector() {
     return bps[bps.length - 1].value;
   }
 
-  function recomputeOverlay() {
+  function recomputeOverlay(seed = false) {
     overlayNotes = [];
     if (!overlayActive || overlayRow === null || !piano) return;
-    overlayNotes = computeOverlayNotes(piano.sequence || [], overlayRow, ticksPerBeat);
+    (piano.sequence || []).forEach(ev => {
+      if (ev.id === undefined) ev.id = nextId++;
+    });
+    overlayNotes = computeOverlayNotes(piano.sequence || [], overlayRow, ticksPerBeat, pitchOverrides, seed);
   }
 
   function updateLegend() {
@@ -562,6 +568,60 @@ export function initSetInspector() {
     velDragging = false;
   }
 
+  function pixelYToNoteRow(y) {
+    const steph = canvas.height / piano.yrange;
+    return piano.yoffset + (canvas.height - y) / steph;
+  }
+
+  function overlayHit(pos) {
+    const stepw = canvas.width / piano.xrange;
+    const steph = canvas.height / piano.yrange;
+    for (const n of overlayNotes) {
+      const t = n.startTime * ticksPerBeat;
+      const x = (t - piano.xoffset) * stepw;
+      const w = n.duration * ticksPerBeat * stepw;
+      const y = canvas.height - (n.noteNumber - piano.yoffset) * steph;
+      if (pos.x >= x && pos.x <= x + w && pos.y >= y - steph && pos.y <= y) {
+        return n;
+      }
+    }
+    return null;
+  }
+
+  function startOverlayDrag(ev) {
+    if (!overlayActive) return;
+    const hit = overlayHit(canvasPos(ev));
+    if (hit) {
+      draggingId = hit.id;
+      ev.preventDefault();
+    }
+  }
+
+  function moveOverlayDrag(ev) {
+    if (draggingId === null) return;
+    const pos = canvasPos(ev);
+    const raw = pixelYToNoteRow(pos.y) - BASE_NOTE;
+    const min = -BASE_NOTE;
+    const max = 127 - BASE_NOTE;
+    const newSemis = Math.max(min, Math.min(Math.round(raw), max));
+    const note = overlayNotes.find(o => o.id === draggingId);
+    if (note) {
+      note.semitone = newSemis;
+      note.noteNumber = BASE_NOTE + newSemis;
+      requestAnimationFrame(draw);
+    }
+    ev.preventDefault();
+  }
+
+  function endOverlayDrag() {
+    if (draggingId === null) return;
+    const note = overlayNotes.find(o => o.id === draggingId);
+    if (note) {
+      pitchOverrides[draggingId] = note.semitone;
+    }
+    draggingId = null;
+  }
+
   canvas.addEventListener('mousedown', startDraw);
   canvas.addEventListener('touchstart', startDraw);
   canvas.addEventListener('mousemove', continueDraw);
@@ -569,6 +629,13 @@ export function initSetInspector() {
   canvas.addEventListener('mouseleave', () => { if (!drawing && valueDiv) valueDiv.textContent = ''; });
   document.addEventListener('mouseup', endDraw);
   document.addEventListener('touchend', endDraw);
+
+  canvas.addEventListener('mousedown', startOverlayDrag);
+  canvas.addEventListener('touchstart', startOverlayDrag);
+  canvas.addEventListener('mousemove', moveOverlayDrag);
+  canvas.addEventListener('touchmove', moveOverlayDrag);
+  document.addEventListener('mouseup', endOverlayDrag);
+  document.addEventListener('touchend', endOverlayDrag);
 
   if (velCanvas) {
     velCanvas.addEventListener('mousedown', startVel);
@@ -698,7 +765,7 @@ export function initSetInspector() {
           overlayActive = true;
           overlayRow = e.detail.row;
         }
-        recomputeOverlay();
+        recomputeOverlay(true);
         if (piano) {
           piano.editmode = overlayActive ? '' : defaultEditMode;
           if (piano.setHighlightRow) piano.setHighlightRow(overlayActive ? overlayRow : null);
@@ -713,6 +780,19 @@ export function initSetInspector() {
   if (saveClipForm) saveClipForm.addEventListener('submit', () => {
     if (piano && notesInput) {
       const seq = piano.sequence || [];
+      if (Object.keys(pitchOverrides).length) {
+        for (const [oid, semis] of Object.entries(pitchOverrides)) {
+          const ev = seq.find(e => String(e.id) === oid);
+          if (!ev) continue;
+          if (!ev.a) ev.a = {};
+          const val = semis * SEMI_UNIT;
+          if (!ev.a.PitchBend || !ev.a.PitchBend.length) {
+            ev.a.PitchBend = [{ time: 0, value: val }];
+          } else {
+            ev.a.PitchBend[0] = { time: 0, value: val };
+          }
+        }
+      }
       notesInput.value = JSON.stringify(seq.map(ev => {
         const note = {
           noteNumber: ev.n,
