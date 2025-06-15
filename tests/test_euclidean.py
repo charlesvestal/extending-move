@@ -21,3 +21,10 @@ def test_apply_fill_overwrites_only_row():
     assert any(n["noteNumber"] == 61 for n in new_notes)
     starts = [n["startTime"] for n in new_notes if n["noteNumber"] == 60]
     assert starts == [0.25, 0.75]
+
+
+def test_repeat_in_loop():
+    notes = []
+    new_notes = apply_euclidean_fill(notes, 60, 0.0, 4.0, 5, 2, 0, 0.25, repeat=True)
+    starts = [n["startTime"] for n in new_notes if n["noteNumber"] == 60]
+    assert starts == [0.5, 1.0, 1.75, 2.25, 3.0, 3.5]
