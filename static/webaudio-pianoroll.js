@@ -1314,6 +1314,13 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
         this.layout=function(){
             if(typeof(this.kbwidth)=="undefined")
                 return;
+            // Limit the vertical zoom so it never exceeds the MIDI note range
+            // and stays within 0-127.
+            const MAX_NOTES = 128;
+            if(this._yrange > MAX_NOTES) this._yrange = MAX_NOTES;
+            if(this._yoffset < 0) this._yoffset = 0;
+            if(this._yoffset > 127) this._yoffset = 127;
+            if(this._yrange > this._yoffset) this._yrange = this._yoffset;
             const proll = this.proll;
             const bodystyle = this.body.style;
             if(this.bgsrc)
