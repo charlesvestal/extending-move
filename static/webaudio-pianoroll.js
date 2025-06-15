@@ -127,6 +127,10 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
 #wac-menu div:hover {
     background:#ff6;
 }
+.disabled{
+    opacity:0.5;
+    pointer-events:none;
+}
 #wac-gridres{
     position:absolute;
     top:30px;
@@ -166,6 +170,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
 <div data-action="double">×2 duration</div>
 <div data-action="half">÷2 duration</div>
 <div data-action="quantize">Quantize to grid (Q)</div>
+<div data-action="randomfill">Random fill row</div>
 <!-- <div data-action="velocity">Velocity...</div> -->
 </div>
 <select id="wac-gridres"></select>
@@ -424,7 +429,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
         this.hitTest=function(pos){
             const ht={t:0,n:0,i:-1,m:" "};
             const l=this.sequence.length;
-            if(pos.t==this.menu){
+            if(this.menu.contains(pos.t)){
                 ht.m="m";
                 return ht;
             }
@@ -527,7 +532,9 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
         };
 
         this.duplicateSelectedNotes=function(){
-            const sel=this.selectedNotes();
+            let sel=this.selectedNotes();
+            if(this.menuGlobal || !sel.length)
+                sel=this.sequence.map((ev,i)=>({i:i,ev:ev,t:ev.t,g:ev.g}));
             if(!sel.length) return;
             // compute offset to append copy after last selected note
             const start=Math.min(...sel.map(o=>o.ev.t));
@@ -544,7 +551,9 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
         };
 
         this.changeDurationSelectedNotes=function(factor){
-            const sel=this.selectedNotes();
+            let sel=this.selectedNotes();
+            if(this.menuGlobal || !sel.length)
+                sel=this.sequence.map(ev=>({ev:ev}));
             if(!sel.length) return;
             const start=Math.min(...sel.map(o=>o.ev.t));
             for(const {ev} of sel){
@@ -556,10 +565,13 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
         };
 
         this.quantizeSelectedNotes=function(){
-            for(const ev of this.sequence){
-                if(ev.f){
+            const sel=this.selectedNotes();
+            if(this.menuGlobal || !sel.length){
+                for(const ev of this.sequence)
                     ev.t=Math.round(ev.t/this.grid)*this.grid;
-                }
+            }else{
+                for(const {ev} of sel)
+                    ev.t=Math.round(ev.t/this.grid)*this.grid;
             }
             this.sortSequence();
             this.redraw();
@@ -571,6 +583,23 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 if(ev.f)
                     ev.v=v;
             }
+            this.redraw();
+        };
+
+        this.randomFillRow=function(note){
+            for(let i=this.sequence.length-1;i>=0;--i){
+                const ev=this.sequence[i];
+                if(ev.n===note && ev.t>=this.markstart && ev.t<this.markend)
+                    this.sequence.splice(i,1);
+            }
+            const steps=Math.floor((this.markend-this.markstart)/this.grid);
+            for(let s=0;s<steps;++s){
+                if(Math.random()<0.5){
+                    const t=this.markstart+s*this.grid;
+                    this.addNote(t,note,this.grid,this.defvelo);
+                }
+            }
+            this.sortSequence();
             this.redraw();
         };
         this.moveSelectedNote=function(dt,dn){
@@ -608,7 +637,9 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
         };
 
         this.reverseSelectedNotes=function(){
-            const sel=this.selectedNotes();
+            let sel=this.selectedNotes();
+            if(this.menuGlobal || !sel.length)
+                sel=this.sequence.map(ev=>({ev:ev}));
             if(!sel.length) return;
             const start=Math.min(...sel.map(o=>o.ev.t));
             const end=Math.max(...sel.map(o=>o.ev.t+o.ev.g));
@@ -620,8 +651,10 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
         };
 
         this.invertSelectedNotes=function(){
-            const sel=this.selectedNotes();
-            if(!sel.length) return;
+        let sel=this.selectedNotes();
+        if(this.menuGlobal || !sel.length)
+            sel=this.sequence.map(ev=>({ev:ev}));
+        if(!sel.length) return;
             const minN=Math.min(...sel.map(o=>o.ev.n));
             const maxN=Math.max(...sel.map(o=>o.ev.n));
             for(const {ev} of sel){
@@ -836,6 +869,9 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             this.markendimg=this.elem.children[3];
             this.cursorimg=this.elem.children[4];
             this.menu=this.elem.children[5];
+            this.menuDelete=this.menu.children[0];
+            this.menuGlobal=false;
+            this.menuNoteRow=0;
             this.gridselect=this.elem.children[6];
             this.rcMenu={x:0, y:0, width:0, height:0};
             this.lastx=0;
@@ -1012,6 +1048,22 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 case "N":
                 case "B":
                 case "E":
+                case "n":
+                    if(this.downht.m=="n"){
+                        this.clearSel();
+                        this.sequence[this.downht.i].f=1;
+                    }
+                    this.menuGlobal=false;
+                    this.menuDelete.classList.remove('disabled');
+                    this.menuNoteRow=this.downht.n|0;
+                    this.popMenu(this.downpos);
+                    this.dragging={o:"m"};
+                    break;
+                case "s":
+                    this.menuGlobal=true;
+                    this.clearSel();
+                    this.menuDelete.classList.add('disabled');
+                    this.menuNoteRow=this.downht.n|0;
                     this.popMenu(this.downpos);
                     this.dragging={o:"m"};
                     break;
@@ -1026,6 +1078,29 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 e = ev.touches[0];
             else
                 e = ev;
+
+            if(this.menu.style.display=="block" && !this.menu.contains(e.target)){
+                this.menu.style.display="none";
+                this.rcMenu={x:0,y:0,width:0,height:0};
+                this.menuDelete.classList.remove('disabled');
+                this.menuGlobal=false;
+                window.removeEventListener('mousemove',this.bindpointermove,false);
+                window.removeEventListener('touchend',this.bindcancel,false);
+                window.removeEventListener('mouseup',this.bindcancel,false);
+                if(e.button==2||e.ctrlKey){
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    window.addEventListener("contextmenu",this.bindcontextmenu);
+                    return;
+                }
+            }
+
+            if(this.menu.style.display=="block" && this.menu.contains(e.target)){
+                this.downpos=this.getPos(e);
+                this.downht={m:"m"};
+                this.dragging={o:"m"};
+                return;
+            }
             this.rcTarget=this.canvas.getBoundingClientRect();
             this.downpos=this.getPos(e);
             this.downht=this.hitTest(this.downpos);
@@ -1043,8 +1118,22 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 case "N":
                 case "B":
                 case "E":
+                case "n":
+                    if(this.downht.m=="n"){
+                        this.clearSel();
+                        this.sequence[this.downht.i].f=1;
+                    }
+                    this.menuGlobal=false;
+                    this.menuDelete.classList.remove('disabled');
+                    this.menuNoteRow=this.downht.n|0;
                     this.popMenu(this.downpos);
                     this.dragging={o:"m"};
+                    break;
+                case "s":
+                    this.menuGlobal=true;
+                    this.clearSel();
+                    this.menuNoteRow=this.downht.n|0;
+                    this.dragging={o:"A",p:this.downpos,p2:this.downpos,t1:this.downht.t,n1:this.downht.n,right:true};
                     break;
                 default:
                     if(this.editmode=="dragmono"||this.editmode=="dragpoly"||this.editmode=="drawmono"||this.editmode=="drawpoly")
@@ -1215,13 +1304,14 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 clearInterval(this.longtaptimer);
             const pos=this.getPos(e);
             if(this.dragging.o=="m"){
-                this.menu.style.display="none";
-                this.rcMenu={x:0,y:0,width:0,height:0};
                 if(pos.t && this.menu.contains(pos.t)){
+                    this.menu.style.display="none";
+                    this.rcMenu={x:0,y:0,width:0,height:0};
                     const act=pos.t.dataset.action;
                     switch(act){
                     case 'delete':
-                        this.delSelectedNote();
+                        if(!this.menuGlobal)
+                            this.delSelectedNote();
                         break;
                     case 'duplicate':
                         this.duplicateSelectedNotes();
@@ -1241,18 +1331,34 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                     case 'quantize':
                         this.quantizeSelectedNotes();
                         break;
+                    case 'randomfill':
+                        this.randomFillRow(this.menuNoteRow);
+                        break;
                     case 'velocity':
                         const v=parseInt(prompt('Velocity (1-127):','100'),10);
                         this.adjustVelocitySelectedNotes(v);
                         break;
                     }
+                    this.menuDelete.classList.remove('disabled');
+                    this.menuGlobal=false;
+                    this.redraw();
                 }
-                this.redraw();
             }
             if(this.dragging.o=="A"){
-                this.selAreaNote(this.dragging.t1,this.dragging.t2,this.dragging.n1,this.dragging.n2);
-                this.dragging={o:null};
-                this.redraw();
+                const moved=Math.abs(this.dragging.p.x-pos.x)+Math.abs(this.dragging.p.y-pos.y);
+                if(this.dragging.right && moved<4){
+                    this.menuDelete.classList.add('disabled');
+                    this.menuNoteRow=this.dragging.n1|0;
+                    this.popMenu(this.dragging.p);
+                    this.dragging={o:"m"};
+                    this.menuGlobal=true;
+                    this.redraw();
+                    return false;
+                }else{
+                    this.selAreaNote(this.dragging.t1,this.dragging.t2,this.dragging.n1,this.dragging.n2);
+                    this.dragging={o:null};
+                    this.redraw();
+                }
             }
 //            if(this.dragging.o=="D"){
                 if(this.editmode=="dragmono"){
