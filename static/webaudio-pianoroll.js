@@ -1074,6 +1074,8 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 window.removeEventListener('mousemove',this.bindpointermove,false);
                 window.removeEventListener('touchend',this.bindcancel,false);
                 window.removeEventListener('mouseup',this.bindcancel,false);
+                if(e.button==2||e.ctrlKey)
+                    return;
             }
 
             if(this.menu.style.display=="block" && this.menu.contains(e.target)){
