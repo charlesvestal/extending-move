@@ -1379,11 +1379,16 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 }
             }
 
-            const mstart=Math.floor(this.xoffset/this.timebase)*this.timebase;
-            this.ctx.fillStyle = gridRes >= 1.0 ? "#a0a0a0" : "#000";
-            for(let t=mstart;;t+=this.timebase){
-                let x=this.stepw*(t-this.xoffset)+this.yruler+this.kbwidth;
+            const startBar=Math.floor(this.xoffset/this.timebase);
+            for(let bar=startBar;;++bar){
+                const t=bar*this.timebase;
+                const x=this.stepw*(t-this.xoffset)+this.yruler+this.kbwidth;
                 if(x>=this.width) break;
+                if(gridRes>1.0 && bar%gridRes===0){
+                    this.ctx.fillStyle="#e0e0e0";
+                    this.ctx.fillRect(x|0,this.xruler,1,this.sheight);
+                }
+                this.ctx.fillStyle=gridRes>=1.0?"#a0a0a0":"#000";
                 this.ctx.fillRect((x|0)-1,this.xruler,2,this.sheight);
             }
         };

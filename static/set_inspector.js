@@ -271,12 +271,21 @@ export function initSetInspector() {
 
     const gridRes = (piano.grid || 0) / piano.timebase;
     if (gridRes >= 1.0) {
-      vctx.strokeStyle = '#a0a0a0';
-      vctx.lineWidth = 2;
-      const mstart = Math.floor(piano.xoffset / piano.timebase) * piano.timebase;
-      for (let t = mstart;; t += piano.timebase) {
+      const startBar = Math.floor(piano.xoffset / piano.timebase);
+      for (let bar = startBar;; ++bar) {
+        const t = bar * piano.timebase;
         const x = ((t - piano.xoffset) / piano.xrange) * velCanvas.width;
         if (x >= velCanvas.width) break;
+        if (gridRes > 1.0 && bar % gridRes === 0) {
+          vctx.strokeStyle = '#e0e0e0';
+          vctx.lineWidth = 1;
+          vctx.beginPath();
+          vctx.moveTo(x, 0);
+          vctx.lineTo(x, velCanvas.height);
+          vctx.stroke();
+        }
+        vctx.strokeStyle = '#a0a0a0';
+        vctx.lineWidth = 2;
         vctx.beginPath();
         vctx.moveTo(x, 0);
         vctx.lineTo(x, velCanvas.height);
