@@ -1,6 +1,7 @@
 from handlers.base_handler import BaseHandler
 from core.set_inspector_handler import list_clips, get_clip_data, save_envelope
 from core.list_msets_handler import list_msets
+from core.set_backup_handler import list_backups, restore_backup
 from core.pad_colors import rgb_string
 from core.config import MSETS_DIRECTORY
 import json
@@ -88,6 +89,7 @@ class SetInspectorHandler(BaseHandler):
             "loop_start": 0.0,
             "loop_end": 4.0,
             "param_ranges_json": "{}",
+            "backups": [],
         }
 
     def handle_post(self, form):
@@ -135,6 +137,7 @@ class SetInspectorHandler(BaseHandler):
             clip_grid = self.generate_clip_grid(result.get("clips", []))
             set_name = os.path.basename(os.path.dirname(set_path))
             pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
+            backups = list_backups(set_path)
             return {
                 "pad_grid": pad_grid,
                 "message": result.get("message"),
@@ -149,6 +152,7 @@ class SetInspectorHandler(BaseHandler):
                 "loop_start": 0.0,
                 "loop_end": 4.0,
                 "param_ranges_json": "{}",
+                "backups": backups,
             }
         elif action == "show_clip":
             set_path = form.getvalue("set_path")
@@ -184,6 +188,7 @@ class SetInspectorHandler(BaseHandler):
             env_opts = '<option value="">No Envelope</option>' + env_opts
             set_name = os.path.basename(os.path.dirname(set_path))
             pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
+            backups = list_backups(set_path)
             return {
                 "pad_grid": pad_grid,
                 "message": result.get("message"),
@@ -203,6 +208,7 @@ class SetInspectorHandler(BaseHandler):
                 "clip_index": clip_idx,
                 "track_name": result.get("track_name"),
                 "clip_name": result.get("clip_name"),
+                "backups": backups,
             }
         elif action == "save_envelope":
             set_path = form.getvalue("set_path")
@@ -230,6 +236,7 @@ class SetInspectorHandler(BaseHandler):
                 return self.format_error_response(result.get("message"), pad_grid=pad_grid)
             clip_info = list_clips(set_path)
             clip_grid = self.generate_clip_grid(clip_info.get("clips", []), selected=clip_val)
+            backups = list_backups(set_path)
             clip_data = get_clip_data(set_path, track_idx, clip_idx)
             envelopes = clip_data.get("envelopes", [])
             param_map = clip_data.get("param_map", {})
@@ -270,6 +277,7 @@ class SetInspectorHandler(BaseHandler):
                 "clip_index": clip_idx,
                 "track_name": clip_data.get("track_name"),
                 "clip_name": clip_data.get("clip_name"),
+                "backups": backups,
             }
         elif action == "save_clip":
             set_path = form.getvalue("set_path")
@@ -323,6 +331,7 @@ class SetInspectorHandler(BaseHandler):
                 return self.format_error_response(result.get("message"), pad_grid=pad_grid)
             clip_info = list_clips(set_path)
             clip_grid = self.generate_clip_grid(clip_info.get("clips", []), selected=clip_val)
+            backups = list_backups(set_path)
             clip_data = get_clip_data(set_path, track_idx, clip_idx)
             envelopes = clip_data.get("envelopes", [])
             param_map = clip_data.get("param_map", {})
@@ -358,6 +367,46 @@ class SetInspectorHandler(BaseHandler):
                 "clip_index": clip_idx,
                 "track_name": clip_data.get("track_name"),
                 "clip_name": clip_data.get("clip_name"),
+                "backups": backups,
+            }
+        elif action == "restore_backup":
+            set_path = form.getvalue("set_path")
+            backup_name = form.getvalue("backup_file")
+            if not set_path or not backup_name:
+                pad_grid = self.generate_pad_grid(used, color_map, name_map)
+                return self.format_error_response("Missing parameters", pad_grid=pad_grid)
+            entry = next(
+                (m for m in msets if os.path.join(MSETS_DIRECTORY, m["uuid"], m["mset_name"], "Song.abl") == set_path),
+                None,
+            )
+            if entry:
+                selected_idx = int(entry.get("mset_id"))
+            if not restore_backup(set_path, backup_name):
+                pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
+                return self.format_error_response("Backup not found", pad_grid=pad_grid)
+            result = list_clips(set_path)
+            if not result.get("success"):
+                pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
+                return self.format_error_response(result.get("message"), pad_grid=pad_grid)
+            clip_grid = self.generate_clip_grid(result.get("clips", []))
+            set_name = os.path.basename(os.path.dirname(set_path))
+            pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
+            backups = list_backups(set_path)
+            return {
+                "pad_grid": pad_grid,
+                "message": "Backup restored",
+                "message_type": "success",
+                "selected_set": set_path,
+                "set_name": set_name,
+                "clip_grid": clip_grid,
+                "selected_clip": None,
+                "notes": [],
+                "envelopes": [],
+                "region": 4.0,
+                "loop_start": 0.0,
+                "loop_end": 4.0,
+                "param_ranges_json": "{}",
+                "backups": backups,
             }
         else:
             return self.format_error_response("Unknown action", pad_grid=pad_grid)

@@ -1,6 +1,7 @@
 import json
 import os
 from typing import Any, Dict, List
+from core.set_backup_handler import backup_set
 from core.synth_preset_inspector_handler import (
     load_drift_schema,
     load_wavetable_schema,
@@ -163,6 +164,7 @@ def save_envelope(
         else:
             envelopes.append({"parameterId": parameter_id, "breakpoints": breakpoints})
 
+        backup_set(set_path)
         with open(set_path, "w") as f:
             json.dump(song, f, indent=2)
 
@@ -194,6 +196,7 @@ def save_clip(
         region_info["end"] = region_end
         region_info["loop"] = {"start": loop_start, "end": loop_end}
 
+        backup_set(set_path)
         with open(set_path, "w") as f:
             json.dump(song, f, indent=2)
 
