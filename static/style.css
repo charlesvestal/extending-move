@@ -1263,3 +1263,9 @@ button#macro-add-param {
 .page-wavetable-params .param-item.param-mapped {
     opacity: 0.6;
 }
+
+#note_draw_toggle {
+    background-color: transparent;
+    padding: 0px;
+    margin-top: 0px;
+}
