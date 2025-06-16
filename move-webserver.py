@@ -47,6 +47,7 @@ from handlers.adsr_handler_class import AdsrHandler
 from handlers.cyc_env_handler_class import CycEnvHandler
 from handlers.lfo_handler_class import LfoHandler
 from handlers.set_inspector_handler_class import SetInspectorHandler
+from handlers.euclid_generator_handler_class import EuclidGeneratorHandler
 from core.refresh_handler import refresh_library
 from core.file_browser import generate_dir_html
 
@@ -137,6 +138,7 @@ adsr_handler = AdsrHandler()
 cyc_env_handler = CycEnvHandler()
 lfo_handler = LfoHandler()
 set_inspector_handler = SetInspectorHandler()
+euclid_generator_handler = EuclidGeneratorHandler()
 
 
 @app.before_request
@@ -352,6 +354,29 @@ def set_inspector_route():
         backups=result.get("backups", []),
         current_ts=result.get("current_ts"),
         active_tab="set-inspector",
+    )
+
+
+@app.route("/euclid-generator", methods=["GET", "POST"])
+def euclid_generator_route():
+    if request.method == "POST":
+        form = SimpleForm(request.form.to_dict())
+        result = euclid_generator_handler.handle_post(form)
+    else:
+        result = euclid_generator_handler.handle_get()
+    message = result.get("message")
+    message_type = result.get("message_type")
+    success = message_type != "error" if message_type else False
+    return render_template(
+        "euclid_generator.html",
+        message=message,
+        success=success,
+        message_type=message_type,
+        set_path=result.get("set_path"),
+        track_index=result.get("track_index"),
+        clip_index=result.get("clip_index"),
+        copy_track_index=result.get("copy_track_index"),
+        active_tab="euclid-generator",
     )
 
 
