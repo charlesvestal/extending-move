@@ -776,8 +776,6 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                             ev.g = list[i].g + dt;
                             if(ev.g <= 0)
                                 ev.g = 1;
-                            if(this.editmove=="dragmono")
-                                this.delAreaNote(ev.t,ev.g);
                         }
 
                     }
@@ -793,8 +791,6 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                             ev.g = list[i].g - dt;
                             if(ev.g <= 0)
                                 ev.g = 1;
-                            if(this.editmove=="dragmono")
-                                this.delAreaNote(ev.t,ev.g);
                         }
 
                     }
@@ -1422,14 +1418,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 }
             }
 //            if(this.dragging.o=="D"){
-                if(this.editmode=="dragmono"){
-                    for(let ii=this.sequence.length-1;ii>=0;--ii){
-                        const ev=this.sequence[ii];
-                        if(ev && ev.f){
-                            this.delAreaNote(ev.t,ev.g,ii);
-                        }
-                    }
-                }
+                this.truncateOverlaps();
                 this.redraw();
 //            }
             this.dragging={o:null};
