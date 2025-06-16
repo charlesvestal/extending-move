@@ -54,7 +54,6 @@
       <input type="hidden" name="set_path" value="{{ selected_set }}">
       <button type="submit" class="link-button">Track {{ (track_index + 1) if track_index is not none else '?' }}: {{ track_name }}</button>
     </form>
-    {% if drum_track %}<span style="margin-left:0.5rem;">Drum track</span>{% endif %}
     <form id="miniClipForm" method="post" action="{{ host_prefix }}/set-inspector" style="display:inline; margin:0;">
       <input type="hidden" name="action" value="select_set">
       <input type="hidden" name="set_path" value="{{ selected_set }}">
@@ -77,7 +76,7 @@
     <label for="note_draw_toggle" style="margin-left:1rem;">Draw Notes</label>
     <input id="note_draw_toggle" type="checkbox">
   </div>
-  <small>Right click to select or transform, use arrow keys to nudge.</small>
+  <small>Right click to select or transform, use arrow keys to nudge. {% if drum_track %}<strong>Drum track detected.</strong> Notes cannot overlap.{% endif %}</small>
   <div style="margin-top:1rem; display:flex; align-items:flex-start;">
     <div style="position:relative; width:900px; height:360px; border:1px solid #ccc;">
       <webaudio-pianoroll id="clipEditor" width="900" height="300" editmode="dragpoly" wheelzoom="0" xscroll="1" yscroll="1" timebase="16" xrange="{{ (region | default(4.0)) * 4 }}" markstart="{{ (loop_start | default(0.0)) * 4 }}" markend="{{ (loop_end | default(region)) * 4 }}" showcursor="false"></webaudio-pianoroll>
