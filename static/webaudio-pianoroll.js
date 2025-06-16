@@ -29,7 +29,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 width:              {type:Number, value:640, observer:'layout'},
                 height:             {type:Number, value:320, observer:'layout'},
                 timebase:           {type:Number, value:16, observer:'layout'},
-                editmode:           {type:String, value:"dragpoly"},
+                editmode:           {type:String, value:"dragpoly", observer:'updateCursor'},
                 xrange:             {type:Number, value:16, observer:'layout'},
                 yrange:             {type:Number, value:16, observer:'layout'},
                 xoffset:            {type:Number, value:0, observer:'layout'},
@@ -76,6 +76,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 tempo:              {type:Number, value:120, observer:'updateTimer'},
                 enable:             {type:Boolean, value:true},
                 drumtrack:          {type:Boolean, value:false},
+                pencilsrc:          {type:String, value:"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBkPSJNMyAxNy4yNVYyMWgzLjc1TDE3LjgxIDkuOTRsLTMuNzUtMy43NUwzIDE3LjI1ek0yMC43MSA3LjA0YTEuMDAzIDEuMDAzIDAgMCAwIDAtMS40MmwtMi4zNC0yLjM0Yy0uMzktLjM5LTEuMDItLjM5LTEuNDEgMGwtMS44MyAxLjgzIDMuNzUgMy43NSAxLjgzLTEuODJ6Ii8+PC9zdmc+"},
             },
         };
         this.defineprop();
@@ -181,6 +182,29 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
 
         this.sortSequence=function(){
             this.sequence.sort((x,y)=>{return x.t-y.t;});
+        };
+        this.applyOverlapRules=function(active){
+            if(!this.drumtrack) return;
+            const actList=Array.isArray(active)?active:[active];
+            for(const note of actList){
+                if(!note) continue;
+                const start=note.t;
+                const end=note.t+note.g;
+                for(let i=this.sequence.length-1;i>=0;--i){
+                    const ev=this.sequence[i];
+                    if(ev===note||ev.n!==note.n) continue;
+                    const s=ev.t, e=ev.t+ev.g;
+                    if(e>start && s<end){
+                        if(s>=start){
+                            this.sequence.splice(i,1);
+                        }else{
+                            ev.g=start-s;
+                            if(ev.g<=0) this.sequence.splice(i,1);
+                        }
+                    }
+                }
+            }
+            this.sortSequence();
         };
         this.truncateOverlaps=function(){
             if(!this.drumtrack) return;
@@ -499,7 +523,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             if(t>=0 && n>=0 && n<128){
                 const ev={t:t,c:0x90,n:n,g:g,v:v,f:f};
                 this.sequence.push(ev);
-                this.sortSequence();
+                this.applyOverlapRules(ev);
                 this.truncateOverlaps();
                 this.redraw();
                 return ev;
@@ -776,8 +800,6 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                             ev.g = list[i].g + dt;
                             if(ev.g <= 0)
                                 ev.g = 1;
-                            if(this.editmove=="dragmono")
-                                this.delAreaNote(ev.t,ev.g);
                         }
 
                     }
@@ -793,8 +815,6 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                             ev.g = list[i].g - dt;
                             if(ev.g <= 0)
                                 ev.g = 1;
-                            if(this.editmove=="dragmono")
-                                this.delAreaNote(ev.t,ev.g);
                         }
 
                     }
@@ -864,8 +884,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 const pt=((ht.t/this.snap)|0)*this.snap;
                 if(this.editmode=="drawmono")
                     this.delAreaNote(pt,this.grid,ht.i);
-                if(ht.m=="s")
-                    this.addNote(pt,ht.n|0,this.grid,this.defvelo);
+                this.addNote(pt,ht.n|0,this.grid,this.defvelo);
                 this.dragging={o:"W"};
             }
         };
@@ -875,8 +894,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 const px=((ht.t/this.snap)|0)*this.snap;
                 if(this.editmode=="drawmono")
                     this.delAreaNote(px,this.grid,ht.i);
-                if(ht.m=="s")
-                    this.addNote(px,ht.n|0,this.grid,this.defvelo);
+                this.addNote(px,ht.n|0,this.grid,this.defvelo);
             }
         };
         this.setListener=function(el,mode){
@@ -939,12 +957,22 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             this.layout();
             this.initialized=1;
             this.toggleCursor();
+            this.updateCursor();
             this.redraw();
         };
         this.toggleCursor=function(){
             if(!this.cursorimg)
                 return;
             this.cursorimg.style.display=this.showcursor?"block":"none";
+        };
+
+        this.updateCursor=function(){
+            if(!this.canvas)
+                return;
+            if(String(this.editmode).startsWith('draw'))
+                this.canvas.style.cursor='url('+this.pencilsrc+') 0 23, pointer';
+            else
+                this.canvas.style.cursor='pointer';
         };
 
         this.updateKbHighlight=function(){
@@ -1252,9 +1280,10 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                     case "E": this.canvas.style.cursor="e-resize"; break;
                     case "B": this.canvas.style.cursor="w-resize"; break;
                     case "N": this.canvas.style.cursor="move"; break;
-                    case "n": this.canvas.style.cursor="pointer"; break;
-                    case "s": this.canvas.style.cursor="pointer"; break;
-                    }
+                    default:
+                        this.updateCursor();
+                        break;
+                }
                 }
         };
         this.pointermove=function(ev) {
@@ -1423,17 +1452,16 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                     this.redraw();
                 }
             }
-//            if(this.dragging.o=="D"){
-                if(this.editmode=="dragmono"){
-                    for(let ii=this.sequence.length-1;ii>=0;--ii){
-                        const ev=this.sequence[ii];
-                        if(ev && ev.f){
-                            this.delAreaNote(ev.t,ev.g,ii);
-                        }
-                    }
-                }
+            if(this.dragging.o=="D"){
+                let active=null;
+                if(this.dragging.ev)
+                    active=this.dragging.ev.map(o=>o.ev);
+                else if(typeof this.dragging.i=="number")
+                    active=this.sequence[this.dragging.i];
+                this.applyOverlapRules(active);
+                this.truncateOverlaps();
                 this.redraw();
-//            }
+            }
             this.dragging={o:null};
             if(this.press){
                 this.sortSequence();
