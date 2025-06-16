@@ -747,4 +747,37 @@ def test_set_inspector_post(client, monkeypatch):
     assert resp.status_code == 200
 
 
+def test_euclid_generator_get(client, monkeypatch):
+    def fake_get():
+        return {
+            'message': 'hello',
+            'message_type': 'info',
+            'set_path': '',
+            'track_index': 0,
+            'clip_index': 0,
+            'copy_track_index': 0,
+        }
+    monkeypatch.setattr(move_webserver.euclid_generator_handler, 'handle_get', fake_get)
+    resp = client.get('/euclid-generator')
+    assert resp.status_code == 200
+    assert b'Euclidean Generator' in resp.data
+    assert b'name="track_index"' in resp.data
+
+
+def test_euclid_generator_post(client, monkeypatch):
+    def fake_post(form):
+        return {
+            'message': 'done',
+            'message_type': 'success',
+            'set_path': '/tmp/a.abl',
+            'track_index': 0,
+            'clip_index': 0,
+            'copy_track_index': 0,
+        }
+    monkeypatch.setattr(move_webserver.euclid_generator_handler, 'handle_post', fake_post)
+    resp = client.post('/euclid-generator', data={'action': 'generate'})
+    assert resp.status_code == 200
+    assert b'done' in resp.data
+
+
 

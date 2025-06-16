@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Euclidean Generator</h2>
+{% if message %}
+  <p class="{{ message_type }}">{{ message }}</p>
+{% endif %}
+<form method="post" action="{{ host_prefix }}/euclid-generator">
+  <input type="hidden" name="action" value="generate">
+  <label>Set Path <input type="text" name="set_path" value="{{ set_path }}" required></label><br>
+  <label>Track Index <input type="number" name="track_index" value="{{ track_index }}" min="0"></label>
+  <label>Clip Index <input type="number" name="clip_index" value="{{ clip_index }}" min="0"></label>
+  <label>Copy From Track <input type="number" name="copy_track_index" value="{{ copy_track_index }}" min="0"></label>
+  <div class="euclid-grid">
+    {% for i in range(16) %}
+    <div class="row">
+      <span>{{ i }}</span>
+      <label>Pulses <input type="number" name="pulses_{{ i }}" min="0" max="16" value="0"></label>
+      <label>Rotate <input type="number" name="rotate_{{ i }}" min="0" max="15" value="0"></label>
+    </div>
+    {% endfor %}
+  </div>
+  <button type="submit">Generate</button>
+</form>
+{% endblock %}
+{% block scripts %}{% endblock %}
