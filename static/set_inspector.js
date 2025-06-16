@@ -37,6 +37,7 @@ export function initSetInspector() {
   const loopStart = parseFloat(dataDiv.dataset.loopStart || '0');
   const loopEnd = parseFloat(dataDiv.dataset.loopEnd || String(region));
   const paramRanges = JSON.parse(dataDiv.dataset.paramRanges || '{}');
+  const isDrumTrack = dataDiv.dataset.drumTrack === 'true';
   const canvas = document.getElementById('clipCanvas');
   const ctx = canvas.getContext('2d');
   const velCanvas = document.getElementById('velocityCanvas');
@@ -155,6 +156,30 @@ export function initSetInspector() {
       piano.enable = true;
       piano.editmode = editing ? '' : defaultEditMode;
     }
+  }
+
+  function truncateOverlaps() {
+    if (!isDrumTrack || !piano) return;
+    const seq = piano.sequence || [];
+    const byPitch = {};
+    seq.forEach(ev => {
+      (byPitch[ev.n] = byPitch[ev.n] || []).push(ev);
+    });
+    let out = [];
+    Object.values(byPitch).forEach(list => {
+      list.sort((a, b) => a.t - b.t);
+      for (let i = 0; i < list.length - 1; i++) {
+        const cur = list[i];
+        const nxt = list[i + 1];
+        if (cur.t + cur.g > nxt.t) {
+          cur.g = nxt.t - cur.t;
+        }
+      }
+      out = out.concat(list.filter(ev => ev.g > 0));
+    });
+    out.sort((a, b) => a.t - b.t);
+    piano.sequence = out;
+    piano.redraw();
   }
   if (legendDiv) {
     legendDiv.style.display = 'flex';
@@ -616,6 +641,12 @@ export function initSetInspector() {
   document.addEventListener('mouseup', endDraw);
   document.addEventListener('touchend', endDraw);
 
+  function endEdit() {
+    truncateOverlaps();
+  }
+  document.addEventListener('mouseup', endEdit);
+  document.addEventListener('touchend', endEdit);
+
   canvas.addEventListener('mousedown', startOverlayDrag);
   canvas.addEventListener('touchstart', startOverlayDrag, { passive: false });
   canvas.addEventListener('mousemove', dragOverlay);
@@ -720,6 +751,7 @@ export function initSetInspector() {
       });
       ghostNotes = [];
       removedNotes = [];
+      truncateOverlaps();
       if (piano.redraw) piano.redraw();
       euclidModal.classList.add('hidden');
     }
