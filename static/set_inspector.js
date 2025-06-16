@@ -609,25 +609,25 @@ export function initSetInspector() {
   }
 
   canvas.addEventListener('mousedown', startDraw);
-  canvas.addEventListener('touchstart', startDraw);
+  canvas.addEventListener('touchstart', startDraw, { passive: false });
   canvas.addEventListener('mousemove', continueDraw);
-  canvas.addEventListener('touchmove', continueDraw);
+  canvas.addEventListener('touchmove', continueDraw, { passive: false });
   canvas.addEventListener('mouseleave', () => { if (!drawing && valueDiv) valueDiv.textContent = ''; });
   document.addEventListener('mouseup', endDraw);
   document.addEventListener('touchend', endDraw);
 
   canvas.addEventListener('mousedown', startOverlayDrag);
-  canvas.addEventListener('touchstart', startOverlayDrag);
+  canvas.addEventListener('touchstart', startOverlayDrag, { passive: false });
   canvas.addEventListener('mousemove', dragOverlay);
-  canvas.addEventListener('touchmove', dragOverlay);
+  canvas.addEventListener('touchmove', dragOverlay, { passive: false });
   document.addEventListener('mouseup', endOverlayDrag);
   document.addEventListener('touchend', endOverlayDrag);
 
   if (velCanvas) {
     velCanvas.addEventListener('mousedown', startVel);
-    velCanvas.addEventListener('touchstart', startVel);
+    velCanvas.addEventListener('touchstart', startVel, { passive: false });
     velCanvas.addEventListener('mousemove', updateVel);
-    velCanvas.addEventListener('touchmove', updateVel);
+    velCanvas.addEventListener('touchmove', updateVel, { passive: false });
     document.addEventListener('mouseup', endVel);
     document.addEventListener('touchend', endVel);
   }
