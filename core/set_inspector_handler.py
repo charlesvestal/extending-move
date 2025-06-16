@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 from core.set_backup_handler import backup_set, write_latest_timestamp
 from core.synth_preset_inspector_handler import (
     load_drift_schema,
@@ -50,6 +50,27 @@ def _contains_drum_rack(obj: Any) -> bool:
     if isinstance(obj, list):
         return any(_contains_drum_rack(item) for item in obj)
     return False
+
+
+def _truncate_overlap_notes(notes: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Ensure notes for each pitch do not overlap."""
+    by_pitch: Dict[int, List[Tuple[int, Dict[str, Any]]]] = {}
+    for idx, n in enumerate(notes):
+        by_pitch.setdefault(n.get("noteNumber"), []).append((idx, n))
+
+    remove: set[int] = set()
+    for pitch_notes in by_pitch.values():
+        pitch_notes.sort(key=lambda p: float(p[1].get("startTime", 0.0)))
+        for i in range(len(pitch_notes) - 1):
+            _, cur = pitch_notes[i]
+            _, nxt = pitch_notes[i + 1]
+            end = float(cur.get("startTime", 0.0)) + float(cur.get("duration", 0.0))
+            if end > float(nxt.get("startTime", 0.0)):
+                cur["duration"] = float(nxt.get("startTime", 0.0)) - float(cur.get("startTime", 0.0))
+                if cur["duration"] <= 0:
+                    remove.add(id(cur))
+    result = [n for n in notes if id(n) not in remove and float(n.get("duration", 0.0)) > 0]
+    return result
 
 
 def list_clips(set_path: str) -> Dict[str, Any]:
@@ -202,7 +223,12 @@ def save_clip(
         with open(set_path, "r") as f:
             song = json.load(f)
 
-        clip_obj = song["tracks"][track]["clipSlots"][clip]["clip"]
+        track_obj = song["tracks"][track]
+        clip_obj = track_obj["clipSlots"][clip]["clip"]
+
+        if _contains_drum_rack(track_obj.get("devices", [])):
+            notes = _truncate_overlap_notes(notes)
+
         clip_obj["notes"] = notes
         for env in envelopes:
             for key in ("rangeMin", "rangeMax", "domainMin", "domainMax", "unit"):
