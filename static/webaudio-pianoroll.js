@@ -673,8 +673,9 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
         this.expandProbability=function(percent){
             const maxBars=8;
             const ticksPerBar=this.timebase;
-            const regionBars=this.markend/ticksPerBar;
-            const loopsToGen=Math.floor(maxBars/regionBars);
+            const regionBars=(this.markend-this.markstart)/ticksPerBar;
+            const startBar=this.markstart/ticksPerBar;
+            const loopsToGen=Math.floor((maxBars-startBar)/regionBars);
             if(loopsToGen<1){
                 alert('Loop length too long for 8 bars');
                 return;
@@ -691,14 +692,16 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             });
             this.sequence.sort((a,b)=>a.t-b.t);
             this.truncateOverlaps();
+            this.markend=this.markstart+loopsToGen*regionBars*ticksPerBar;
             this.redraw();
         };
 
         this.expandEveryN=function(N,offset){
             const maxBars=8;
             const ticksPerBar=this.timebase;
-            const regionBars=this.markend/ticksPerBar;
-            const loopsToGen=Math.floor(maxBars/regionBars);
+            const regionBars=(this.markend-this.markstart)/ticksPerBar;
+            const startBar=this.markstart/ticksPerBar;
+            const loopsToGen=Math.floor((maxBars-startBar)/regionBars);
             if(loopsToGen<1){
                 alert('Loop length too long for 8 bars');
                 return;
@@ -714,6 +717,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             });
             this.sequence.sort((a,b)=>a.t-b.t);
             this.truncateOverlaps();
+            this.markend=this.markstart+loopsToGen*regionBars*ticksPerBar;
             this.redraw();
         };
         this.moveSelectedNote=function(dt,dn){
