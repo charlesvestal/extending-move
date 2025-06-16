@@ -1,5 +1,5 @@
 import { euclideanRhythm } from "./euclid.js";
-import { computeOverlayNotes } from "./pitchbend_overlay.js";
+import { computeOverlayNotes, noteNumberToPitchbend } from "./pitchbend_overlay.js";
 export function initSetInspector() {
   // Show selected set name when choosing a pad
   const grid = document.querySelector('#setSelectForm .pad-grid');
@@ -80,6 +80,7 @@ export function initSetInspector() {
   let overlayNotes = [];
   let overlayRow = null;
   let overlayActive = false;
+  let overlayDragging = null;
   let removedNotes = [];
 
   if (piano) {
@@ -148,7 +149,7 @@ export function initSetInspector() {
 
   function updateControls() {
     if (canvas) {
-      canvas.style.pointerEvents = editing ? 'auto' : 'none';
+      canvas.style.pointerEvents = (editing || overlayActive) ? 'auto' : 'none';
     }
     if (piano) {
       piano.enable = true;
@@ -562,19 +563,71 @@ export function initSetInspector() {
     velDragging = false;
   }
 
+  function overlayNoteAt(x, y) {
+    if (!overlayActive || !overlayNotes.length || !piano) return -1;
+    const stepw = canvas.width / piano.xrange;
+    const steph = canvas.height / piano.yrange;
+    for (let i = 0; i < overlayNotes.length; i++) {
+      const n = overlayNotes[i];
+      const t = n.startTime * ticksPerBeat;
+      const x0 = (t - piano.xoffset) * stepw;
+      const w = n.duration * ticksPerBeat * stepw;
+      const y0 = canvas.height - (n.noteNumber - piano.yoffset) * steph;
+      if (x >= x0 && x <= x0 + w && y <= y0 && y >= y0 - steph) return i;
+    }
+    return -1;
+  }
+
+  function startOverlayDrag(ev) {
+    if (!overlayActive) return;
+    const { x, y } = canvasPos(ev);
+    const idx = overlayNoteAt(x, y);
+    if (idx < 0) return;
+    overlayDragging = idx;
+    ev.preventDefault();
+  }
+
+  function dragOverlay(ev) {
+    if (overlayDragging === null) return;
+    const { y } = canvasPos(ev);
+    const steph = canvas.height / piano.yrange;
+    let note = piano.yoffset + Math.floor((canvas.height - y) / steph);
+    note = Math.max(0, Math.min(127, note));
+    const seqIdx = overlayNotes[overlayDragging].index;
+    const evObj = piano.sequence[seqIdx];
+    if (!evObj.a) evObj.a = {};
+    if (!evObj.a.PitchBend) evObj.a.PitchBend = [{ time: 0, value: 0 }];
+    evObj.a.PitchBend[0].value = noteNumberToPitchbend(note);
+    recomputeOverlay();
+    if (piano.redraw) piano.redraw();
+    else draw();
+    ev.preventDefault();
+  }
+
+  function endOverlayDrag() {
+    overlayDragging = null;
+  }
+
   canvas.addEventListener('mousedown', startDraw);
-  canvas.addEventListener('touchstart', startDraw);
+  canvas.addEventListener('touchstart', startDraw, { passive: false });
   canvas.addEventListener('mousemove', continueDraw);
-  canvas.addEventListener('touchmove', continueDraw);
+  canvas.addEventListener('touchmove', continueDraw, { passive: false });
   canvas.addEventListener('mouseleave', () => { if (!drawing && valueDiv) valueDiv.textContent = ''; });
   document.addEventListener('mouseup', endDraw);
   document.addEventListener('touchend', endDraw);
 
+  canvas.addEventListener('mousedown', startOverlayDrag);
+  canvas.addEventListener('touchstart', startOverlayDrag, { passive: false });
+  canvas.addEventListener('mousemove', dragOverlay);
+  canvas.addEventListener('touchmove', dragOverlay, { passive: false });
+  document.addEventListener('mouseup', endOverlayDrag);
+  document.addEventListener('touchend', endOverlayDrag);
+
   if (velCanvas) {
     velCanvas.addEventListener('mousedown', startVel);
-    velCanvas.addEventListener('touchstart', startVel);
+    velCanvas.addEventListener('touchstart', startVel, { passive: false });
     velCanvas.addEventListener('mousemove', updateVel);
-    velCanvas.addEventListener('touchmove', updateVel);
+    velCanvas.addEventListener('touchmove', updateVel, { passive: false });
     document.addEventListener('mouseup', endVel);
     document.addEventListener('touchend', endVel);
   }
@@ -698,6 +751,8 @@ export function initSetInspector() {
           overlayActive = true;
           overlayRow = e.detail.row;
         }
+        // Ensure overlay canvas captures events when active
+        updateControls();
         recomputeOverlay();
         if (piano) {
           piano.editmode = overlayActive ? '' : defaultEditMode;
