@@ -18,6 +18,19 @@ console.log(JSON.stringify({{'overlay': result, 'BASE_NOTE': BASE_NOTE, 'SEMI_UN
     return json.loads(proc.stdout)
 
 
+def run_edit(note, new_note_number):
+    """Return note after applying pitchbend edit using JS constants."""
+    script = f"""
+import {{noteNumberToPitchbend}} from 'file://{JS_PATH.as_posix()}';
+let note = {json.dumps(note)};
+if (!note.a) note.a = {{}};
+note.a.PitchBend = [{{time: 0, value: noteNumberToPitchbend({new_note_number})}}];
+console.log(JSON.stringify(note));
+"""
+    proc = subprocess.run(['node', '--input-type=module', '-e', script], capture_output=True, text=True, check=True)
+    return json.loads(proc.stdout)
+
+
 def test_basic_semitones():
     notes = [{
         'n': 37,
@@ -65,3 +78,28 @@ def test_overlay_generation():
 def test_pitch_conversion():
     result = run_node([], 0, expr='BASE_NOTE + 2')
     assert abs(result['pitch'] - 2 * result['SEMI_UNIT']) < 1e-6
+
+
+def test_edit_replaces_automation_and_preserves_others():
+    note = {
+        'n': 60,
+        't': 0,
+        'g': 96,
+        'a': {
+            'PitchBend': [
+                {'time': 0, 'value': 123},
+                {'time': 0.5, 'value': 456},
+            ],
+            'Pressure': [
+                {'time': 0.25, 'value': 0.8}
+            ]
+        }
+    }
+    edited = run_edit(note, 62)
+    assert 'Pressure' in edited['a']
+    assert edited['a']['Pressure'] == note['a']['Pressure']
+    pb = edited['a'].get('PitchBend')
+    assert isinstance(pb, list) and len(pb) == 1
+    assert pb[0]['time'] == 0
+    result = run_node([], 0, expr='BASE_NOTE + 26')
+    assert abs(pb[0]['value'] - result['pitch']) < 1e-6

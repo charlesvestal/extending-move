@@ -626,8 +626,7 @@ export function initSetInspector() {
     const seqIdx = overlayNotes[overlayDragging].index;
     const evObj = piano.sequence[seqIdx];
     if (!evObj.a) evObj.a = {};
-    if (!evObj.a.PitchBend) evObj.a.PitchBend = [{ time: 0, value: 0 }];
-    evObj.a.PitchBend[0].value = noteNumberToPitchbend(note);
+    evObj.a.PitchBend = [{ time: 0, value: noteNumberToPitchbend(note) }];
     recomputeOverlay();
     if (piano.redraw) piano.redraw();
     else draw();

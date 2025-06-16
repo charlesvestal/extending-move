@@ -113,3 +113,61 @@ def test_set_round_trip_no_changes(tmp_path):
                 assert result["success"], result.get("message")
 
         assert dest.read_bytes() == original
+
+
+def test_pitchbend_edit_preserves_other_automations(tmp_path):
+    set_path = tmp_path / "set.abl"
+    create_simple_set(set_path)
+
+    with open(set_path) as f:
+        song = json.load(f)
+
+    clip = song["tracks"][0]["clipSlots"][0]["clip"]
+    clip["notes"] = [
+        {
+            "noteNumber": 60,
+            "startTime": 0.0,
+            "duration": 1.0,
+            "velocity": 100.0,
+            "offVelocity": 0.0,
+            "automations": {
+                "PitchBend": [
+                    {"time": 0.0, "value": 100.0},
+                    {"time": 0.5, "value": -100.0},
+                ],
+                "Pressure": [{"time": 0.25, "value": 0.5}],
+            },
+        }
+    ]
+
+    with open(set_path, "w") as f:
+        json.dump(song, f)
+
+    data = sih.get_clip_data(str(set_path), 0, 0)
+    assert data["success"], data.get("message")
+    notes = data["notes"]
+    assert notes and notes[0]["noteNumber"] == 60
+
+    val = (62 - 36) * 170.6458282470703
+    notes[0]["automations"]["PitchBend"] = [{"time": 0.0, "value": val}]
+
+    result = sih.save_clip(
+        str(set_path),
+        0,
+        0,
+        notes,
+        data["envelopes"],
+        data["region"],
+        data["loop_start"],
+        data["loop_end"],
+    )
+    assert result["success"], result.get("message")
+
+    with open(set_path) as f:
+        saved = json.load(f)
+    saved_note = saved["tracks"][0]["clipSlots"][0]["clip"]["notes"][0]
+    assert "Pressure" in saved_note["automations"]
+    assert saved_note["automations"]["Pressure"] == [{"time": 0.25, "value": 0.5}]
+    pb = saved_note["automations"]["PitchBend"]
+    assert len(pb) == 1 and pb[0]["time"] == 0.0
+    assert abs(pb[0]["value"] - val) < 1e-6
