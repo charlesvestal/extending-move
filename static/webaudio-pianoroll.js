@@ -29,7 +29,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 width:              {type:Number, value:640, observer:'layout'},
                 height:             {type:Number, value:320, observer:'layout'},
                 timebase:           {type:Number, value:16, observer:'layout'},
-                editmode:           {type:String, value:"dragpoly"},
+                editmode:           {type:String, value:"dragpoly", observer:'updateCursor'},
                 xrange:             {type:Number, value:16, observer:'layout'},
                 yrange:             {type:Number, value:16, observer:'layout'},
                 xoffset:            {type:Number, value:0, observer:'layout'},
@@ -76,6 +76,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 tempo:              {type:Number, value:120, observer:'updateTimer'},
                 enable:             {type:Boolean, value:true},
                 drumtrack:          {type:Boolean, value:false},
+                pencilsrc:          {type:String, value:"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBkPSJNMyAxNy4yNVYyMWgzLjc1TDE3LjgxIDkuOTRsLTMuNzUtMy43NUwzIDE3LjI1ek0yMC43MSA3LjA0YTEuMDAzIDEuMDAzIDAgMCAwIDAtMS40MmwtMi4zNC0yLjM0Yy0uMzktLjM5LTEuMDItLjM5LTEuNDEgMGwtMS44MyAxLjgzIDMuNzUgMy43NSAxLjgzLTEuODJ6Ii8+PC9zdmc+"},
             },
         };
         this.defineprop();
@@ -956,12 +957,22 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             this.layout();
             this.initialized=1;
             this.toggleCursor();
+            this.updateCursor();
             this.redraw();
         };
         this.toggleCursor=function(){
             if(!this.cursorimg)
                 return;
             this.cursorimg.style.display=this.showcursor?"block":"none";
+        };
+
+        this.updateCursor=function(){
+            if(!this.canvas)
+                return;
+            if(String(this.editmode).startsWith('draw'))
+                this.canvas.style.cursor='url('+this.pencilsrc+') 0 24, pointer';
+            else
+                this.canvas.style.cursor='pointer';
         };
 
         this.updateKbHighlight=function(){

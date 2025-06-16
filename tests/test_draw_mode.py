@@ -14,6 +14,10 @@ def test_draw_mode_truncates_on_drumtracks():
     snippet = js[down_idx:down_idx + 200]
     assert 'if(ht.m=="s")' not in snippet
 
+    # cursor should use pencil in draw mode
+    assert 'pencilsrc:' in js
+    assert 'observer:\'updateCursor\'' in js
+
 
 def test_note_mode_overwrites_on_drag():
     js = SCRIPT.read_text()
