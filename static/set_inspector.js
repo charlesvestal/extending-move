@@ -149,7 +149,7 @@ export function initSetInspector() {
 
   function updateControls() {
     if (canvas) {
-      canvas.style.pointerEvents = editing ? 'auto' : 'none';
+      canvas.style.pointerEvents = (editing || overlayActive) ? 'auto' : 'none';
     }
     if (piano) {
       piano.enable = true;
@@ -751,6 +751,8 @@ export function initSetInspector() {
           overlayActive = true;
           overlayRow = e.detail.row;
         }
+        // Ensure overlay canvas captures events when active
+        updateControls();
         recomputeOverlay();
         if (piano) {
           piano.editmode = overlayActive ? '' : defaultEditMode;
