@@ -395,8 +395,14 @@ export function initSetInspector() {
   if (piano && piano.redraw) {
     const origRedraw = piano.redraw.bind(piano);
     piano.redraw = function(...args) {
+      let bak = null;
+      if (overlayActive) {
+        bak = this.sequence;
+        this.sequence = [];
+      }
       origRedraw(...args);
       if (overlayActive) recomputeOverlay();
+      if (bak) this.sequence = bak;
       if (this.updateKbHighlight) this.updateKbHighlight();
       draw();
     };
