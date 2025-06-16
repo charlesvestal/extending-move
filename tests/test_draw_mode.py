@@ -17,6 +17,7 @@ def test_draw_mode_truncates_on_drumtracks():
     # cursor should use pencil in draw mode
     assert 'pencilsrc:' in js
     assert 'observer:\'updateCursor\'' in js
+    assert '0 23, pointer' in js
 
 
 def test_note_mode_overwrites_on_drag():

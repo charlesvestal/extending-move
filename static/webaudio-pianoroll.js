@@ -970,7 +970,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             if(!this.canvas)
                 return;
             if(String(this.editmode).startsWith('draw'))
-                this.canvas.style.cursor='url('+this.pencilsrc+') 0 24, pointer';
+                this.canvas.style.cursor='url('+this.pencilsrc+') 0 23, pointer';
             else
                 this.canvas.style.cursor='pointer';
         };
