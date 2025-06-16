@@ -1,6 +1,7 @@
 import json
 import os
 from typing import Any, Dict, List, Tuple
+from core.trig_conditions import apply_trig_conditions
 from core.set_backup_handler import backup_set, write_latest_timestamp
 from core.synth_preset_inspector_handler import (
     load_drift_schema,
@@ -228,6 +229,10 @@ def save_clip(
 
         if _contains_drum_rack(track_obj.get("devices", [])):
             notes = _truncate_overlap_notes(notes)
+
+        notes, region_end, loop_end = apply_trig_conditions(
+            notes, loop_start, loop_end, region_end
+        )
 
         clip_obj["notes"] = notes
         for env in envelopes:

@@ -175,6 +175,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
 <div data-action="quantize">Quantize to grid (Q)</div>
 <div data-action="euclid">Euclidean fill...</div>
 <div data-action="randomfill">Random fill row</div>
+<div data-action="trigcond">Trig Condition...</div>
 <!-- <div data-action="velocity">Velocity...</div> -->
 </div>
 <select id="wac-gridres"></select>
@@ -1423,6 +1424,9 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                         break;
                     case 'randomfill':
                         this.randomFillRow(this.menuNoteRow);
+                        break;
+                    case 'trigcond':
+                        this.dispatchEvent(new CustomEvent('trigcondition', { detail: { row: this.menuNoteRow } }));
                         break;
                     case 'velocity':
                         const v=parseInt(prompt('Velocity (1-127):','100'),10);
