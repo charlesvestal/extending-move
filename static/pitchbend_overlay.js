@@ -1,3 +1,9 @@
+/**
+ * Helper functions for the pitch bend overlay displayed in the clip editor.
+ *
+ * ``BASE_NOTE`` and ``SEMI_UNIT`` mirror the values used by Ableton Live to
+ * convert between pitch bend values and semitone offsets.
+ */
 export const BASE_NOTE = 36;
 export const SEMI_UNIT = 170.6458282470703;
 
@@ -6,6 +12,7 @@ export function noteNumberToPitchbend(n) {
 }
 
 export function computeOverlayNotes(sequence, selectedRow, ticksPerBeat) {
+  // Generate an array of note objects visualising pitch bend edits.
   const overlay = [];
   if (selectedRow === null || selectedRow === undefined) return overlay;
   if (!sequence || !ticksPerBeat) return overlay;

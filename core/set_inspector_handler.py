@@ -1,12 +1,21 @@
 import json
 import os
 from typing import Any, Dict, List, Tuple
+
 from core.set_backup_handler import backup_set, write_latest_timestamp
 from core.synth_preset_inspector_handler import (
     load_drift_schema,
     load_wavetable_schema,
     load_melodic_sampler_schema,
 )
+
+"""Helper utilities for the Set Inspector clip editor.
+
+This module exposes functions for reading and modifying Ableton Live set files.
+The clip editor in the web UI relies on these helpers to list clips, fetch note
+and envelope data, and write any edits back to disk.  It also contains logic to
+detect drum tracks and truncate overlapping notes when necessary.
+"""
 
 
 def _collect_param_ids(
@@ -15,7 +24,12 @@ def _collect_param_ids(
     context: Dict[int, str],
     prefix: str = "Track",
 ) -> None:
-    """Recursively collect parameterId mappings with track/pad context."""
+    """Recursively collect parameter identifiers from a device tree.
+
+    ``mapping`` maps ``parameterId`` integers to their display names while
+    ``context`` stores the track or pad name where the parameter originated.
+    Drum rack pads are automatically numbered to provide meaningful context.
+    """
     if isinstance(obj, dict):
         if obj.get("kind") == "drumCell":
             pad_num = _collect_param_ids.pad_counter[0]
@@ -32,7 +46,12 @@ def _collect_param_ids(
 
 
 def _track_display_name(track_obj: Dict[str, Any], idx: int) -> str:
-    """Return display name for a track using first device name."""
+    """Return a human friendly name for ``track_obj``.
+
+    If the track's first device has a ``name`` field that value is preferred;
+    otherwise the track's own ``name`` is returned or a fallback like
+    ``"Track 1"`` when missing.
+    """
     devices = track_obj.get("devices", [])
     if devices and isinstance(devices, list):
         first = devices[0]
@@ -42,7 +61,12 @@ def _track_display_name(track_obj: Dict[str, Any], idx: int) -> str:
 
 
 def _contains_drum_rack(obj: Any) -> bool:
-    """Recursively check if a track's devices include a drumRack."""
+    """Return ``True`` if ``obj`` contains a drum rack device.
+
+    The device tree for tracks is nested (racks contain chains which contain
+    devices).  This helper walks the structure and detects any ``kind`` set to
+    ``"drumRack"``.
+    """
     if isinstance(obj, dict):
         if obj.get("kind") == "drumRack":
             return True
@@ -53,7 +77,11 @@ def _contains_drum_rack(obj: Any) -> bool:
 
 
 def _truncate_overlap_notes(notes: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """Ensure notes for each pitch do not overlap."""
+    """Remove note overlaps within a single pitch class.
+
+    Notes in drum tracks must never overlap.  This function shortens or removes
+    notes so that, for any given pitch, events are strictly sequential.
+    """
     by_pitch: Dict[int, List[Tuple[int, Dict[str, Any]]]] = {}
     for idx, n in enumerate(notes):
         by_pitch.setdefault(n.get("noteNumber"), []).append((idx, n))

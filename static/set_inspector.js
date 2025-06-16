@@ -1,3 +1,13 @@
+/**
+ * Main client side logic for the clip editor used by the Set Inspector.
+ *
+ * Features provided by this script:
+ *   - Shift‑click note selection and drag editing (via webaudio-pianoroll)
+ *   - Euclidean rhythm preview/fill modal
+ *   - Pitch bend overlay for quick transposition preview
+ *   - Drum track aware note truncation to avoid overlaps
+ *   - Velocity editing and envelope drawing
+ */
 import { euclideanRhythm } from "./euclid.js";
 import { computeOverlayNotes, noteNumberToPitchbend } from "./pitchbend_overlay.js";
 export function initSetInspector() {
