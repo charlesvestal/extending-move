@@ -862,10 +862,11 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             const ht=this.hitTest(pos);
             if(ht.t>=0){
                 const pt=((ht.t/this.snap)|0)*this.snap;
-                if(this.editmode=="drawmono")
+                if(this.drumtrack)
+                    this.delAreaNote(pt,this.grid,-1);
+                else if(this.editmode=="drawmono")
                     this.delAreaNote(pt,this.grid,ht.i);
-                if(ht.m=="s")
-                    this.addNote(pt,ht.n|0,this.grid,this.defvelo);
+                this.addNote(pt,ht.n|0,this.grid,this.defvelo);
                 this.dragging={o:"W"};
             }
         };
@@ -873,10 +874,11 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             const ht=this.hitTest(pos);
             if(this.dragging.o=="W"&&ht.t>=0){
                 const px=((ht.t/this.snap)|0)*this.snap;
-                if(this.editmode=="drawmono")
+                if(this.drumtrack)
+                    this.delAreaNote(px,this.grid,-1);
+                else if(this.editmode=="drawmono")
                     this.delAreaNote(px,this.grid,ht.i);
-                if(ht.m=="s")
-                    this.addNote(px,ht.n|0,this.grid,this.defvelo);
+                this.addNote(px,ht.n|0,this.grid,this.defvelo);
             }
         };
         this.setListener=function(el,mode){
