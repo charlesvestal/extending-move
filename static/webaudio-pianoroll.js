@@ -132,6 +132,27 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
     opacity:0.5;
     pointer-events:none;
 }
+#probability-modal, #everyn-modal {
+    /* Modal styling borrowed from templates */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+.modal-content{
+    background:#fff;
+    padding:20px;
+    border-radius:4px;
+    position: relative;
+    z-index:1001;
+}
+.modal.hidden{display:none;}
 #wac-gridres{
     position:absolute;
     top:30px;
@@ -174,9 +195,28 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
 <div data-action="quantize">Quantize to grid (Q)</div>
 <div data-action="euclid">Euclidean fill...</div>
 <div data-action="randomfill">Random fill row</div>
+<div data-action="probability">Probability…</div>
+<div data-action="everyn">Every Nᵗʰ Loop…</div>
 <!-- <div data-action="velocity">Velocity...</div> -->
 </div>
 <select id="wac-gridres"></select>
+<div id="probability-modal" class="modal hidden">
+  <div class="modal-content">
+    <label>Probability <input type="number" id="prob-input" min="0" max="100"></label> %
+    <p>Selected notes will be expanded up to 8 bars.</p>
+    <button id="prob-ok" type="button">OK</button>
+    <button id="prob-cancel" type="button">Cancel</button>
+  </div>
+</div>
+<div id="everyn-modal" class="modal hidden">
+  <div class="modal-content">
+    <label>Every N <input type="number" id="everyn-input" min="1"></label>
+    <label>Offset <input type="number" id="offset-input" min="0" value="0"></label>
+    <p>Selected notes will be expanded up to 8 bars.</p>
+    <button id="everyn-ok" type="button">OK</button>
+    <button id="everyn-cancel" type="button">Cancel</button>
+  </div>
+</div>
 </div>`;
 
         this.sortSequence=function(){
@@ -630,6 +670,53 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             this.truncateOverlaps();
             this.redraw();
         };
+
+        this.expandProbability=function(percent){
+            const maxBars=8;
+            const ticksPerBar=this.timebase;
+            const regionBars=this.markend/ticksPerBar;
+            const loopsToGen=Math.floor(maxBars/regionBars);
+            if(loopsToGen<1){
+                alert('Loop length too long for 8 bars');
+                return;
+            }
+            const p=percent/100;
+            const templates=this.sequence.filter(ev=>ev.condition?.type==='probability');
+            this.sequence=this.sequence.filter(ev=>!ev.condition);
+            templates.forEach(ev0=>{
+                for(let k=0;k<loopsToGen;k++){
+                    if(Math.random()<p){
+                        this.sequence.push({...ev0,t:ev0.t+k*regionBars*ticksPerBar,f:0});
+                    }
+                }
+            });
+            this.sequence.sort((a,b)=>a.t-b.t);
+            this.truncateOverlaps();
+            this.redraw();
+        };
+
+        this.expandEveryN=function(N,offset){
+            const maxBars=8;
+            const ticksPerBar=this.timebase;
+            const regionBars=this.markend/ticksPerBar;
+            const loopsToGen=Math.floor(maxBars/regionBars);
+            if(loopsToGen<1){
+                alert('Loop length too long for 8 bars');
+                return;
+            }
+            const templates=this.sequence.filter(ev=>ev.condition?.type==='everyn');
+            this.sequence=this.sequence.filter(ev=>!ev.condition);
+            templates.forEach(ev0=>{
+                for(let k=0;k<loopsToGen;k++){
+                    if((k-offset)%N===0){
+                        this.sequence.push({...ev0,t:ev0.t+k*regionBars*ticksPerBar,f:0});
+                    }
+                }
+            });
+            this.sequence.sort((a,b)=>a.t-b.t);
+            this.truncateOverlaps();
+            this.redraw();
+        };
         this.moveSelectedNote=function(dt,dn){
             const l=this.sequence.length;
             for(let i=0;i<l;++i){
@@ -914,9 +1001,42 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             this.cursorimg=this.elem.children[4];
             this.menu=this.elem.children[5];
             this.menuDelete=this.menu.children[0];
+            this.menu.querySelector('[data-action="probability"]').addEventListener('click',()=>this.showProbabilityModal());
+            this.menu.querySelector('[data-action="everyn"]').addEventListener('click',()=>this.showEveryNModal());
             this.menuGlobal=false;
             this.menuNoteRow=0;
             this.gridselect=this.elem.children[6];
+            this.probModal=this.elem.children[7];
+            this.everynModal=this.elem.children[8];
+            this.probInput=this.probModal.querySelector('#prob-input');
+            this.everynInput=this.everynModal.querySelector('#everyn-input');
+            this.offsetInput=this.everynModal.querySelector('#offset-input');
+            this.probModal.querySelector('#prob-ok').addEventListener('click',()=>{
+                const val=parseFloat(this.probInput.value);
+                for(const ev of this.sequence){
+                    if(ev.f) ev.condition={type:'probability',value:val,offset:0};
+                }
+                this.expandProbability(val);
+                this.probModal.classList.add('hidden');
+            });
+            this.probModal.querySelector('#prob-cancel').addEventListener('click',()=>{
+                this.probModal.classList.add('hidden');
+            });
+            window.addEventListener('click',e=>{if(e.target===this.probModal)this.probModal.classList.add('hidden');});
+
+            this.everynModal.querySelector('#everyn-ok').addEventListener('click',()=>{
+                const N=parseInt(this.everynInput.value);
+                const off=parseInt(this.offsetInput.value)||0;
+                for(const ev of this.sequence){
+                    if(ev.f) ev.condition={type:'everyn',value:N,offset:off};
+                }
+                this.expandEveryN(N,off);
+                this.everynModal.classList.add('hidden');
+            });
+            this.everynModal.querySelector('#everyn-cancel').addEventListener('click',()=>{
+                this.everynModal.classList.add('hidden');
+            });
+            window.addEventListener('click',e=>{if(e.target===this.everynModal)this.everynModal.classList.add('hidden');});
             this.rcMenu={x:0, y:0, width:0, height:0};
             this.lastx=0;
             this.lasty=0;
@@ -945,6 +1065,21 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             if(!this.cursorimg)
                 return;
             this.cursorimg.style.display=this.showcursor?"block":"none";
+        };
+
+        this.showProbabilityModal=function(){
+            if(this.probModal){
+                this.probInput.value = this.probInput.value || 100;
+                this.probModal.classList.remove('hidden');
+            }
+        };
+
+        this.showEveryNModal=function(){
+            if(this.everynModal){
+                this.everynInput.value = this.everynInput.value || 1;
+                this.offsetInput.value = this.offsetInput.value || 0;
+                this.everynModal.classList.remove('hidden');
+            }
         };
 
         this.updateKbHighlight=function(){
