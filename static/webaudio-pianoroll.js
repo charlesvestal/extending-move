@@ -182,6 +182,29 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
         this.sortSequence=function(){
             this.sequence.sort((x,y)=>{return x.t-y.t;});
         };
+        this.applyOverlapRules=function(active){
+            if(!this.drumtrack) return;
+            const actList=Array.isArray(active)?active:[active];
+            for(const note of actList){
+                if(!note) continue;
+                const start=note.t;
+                const end=note.t+note.g;
+                for(let i=this.sequence.length-1;i>=0;--i){
+                    const ev=this.sequence[i];
+                    if(ev===note||ev.n!==note.n) continue;
+                    const s=ev.t, e=ev.t+ev.g;
+                    if(e>start && s<end){
+                        if(s>=start){
+                            this.sequence.splice(i,1);
+                        }else{
+                            ev.g=start-s;
+                            if(ev.g<=0) this.sequence.splice(i,1);
+                        }
+                    }
+                }
+            }
+            this.sortSequence();
+        };
         this.truncateOverlaps=function(){
             if(!this.drumtrack) return;
             const byPitch={};
@@ -499,7 +522,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             if(t>=0 && n>=0 && n<128){
                 const ev={t:t,c:0x90,n:n,g:g,v:v,f:f};
                 this.sequence.push(ev);
-                this.sortSequence();
+                this.applyOverlapRules(ev);
                 this.truncateOverlaps();
                 this.redraw();
                 return ev;
@@ -1417,10 +1440,16 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                     this.redraw();
                 }
             }
-//            if(this.dragging.o=="D"){
+            if(this.dragging.o=="D"){
+                let active=null;
+                if(this.dragging.ev)
+                    active=this.dragging.ev.map(o=>o.ev);
+                else if(typeof this.dragging.i=="number")
+                    active=this.sequence[this.dragging.i];
+                this.applyOverlapRules(active);
                 this.truncateOverlaps();
                 this.redraw();
-//            }
+            }
             this.dragging={o:null};
             if(this.press){
                 this.sortSequence();

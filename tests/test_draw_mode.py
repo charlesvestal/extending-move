@@ -20,3 +20,4 @@ def test_note_mode_overwrites_on_drag():
     # overlapping notes should be truncated via truncateOverlaps
     assert 'delAreaNote(ev.t,ev.g,ii)' not in js
     assert 'truncateOverlaps();' in js
+    assert 'applyOverlapRules(' in js
