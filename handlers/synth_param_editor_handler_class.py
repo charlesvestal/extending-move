@@ -207,15 +207,6 @@ class SynthParamEditorHandler(BaseHandler):
                 return self.format_error_response(result['message'])
             preset_path = result['path']
 
-            macro_updates = {}
-            for i in range(8):
-                val = form.getvalue(f'macro_{i}_value')
-                if val is not None:
-                    macro_updates[i] = val
-            macro_result = update_macro_values(preset_path, macro_updates, preset_path)
-            if not macro_result['success']:
-                return self.format_error_response(macro_result['message'])
-
             macros_data_str = form.getvalue('macros_data')
             if macros_data_str:
                 try:
@@ -225,8 +216,33 @@ class SynthParamEditorHandler(BaseHandler):
             else:
                 macros_data = []
 
+            path_map = {m.get('index'): m.get('path') for m in macros_data}
+
+            macro_updates = {}
+            for i in range(8):
+                val = form.getvalue(f'macro_{i}_value')
+                if val is not None:
+                    upd = {'value': val}
+                    if path_map.get(i) is not None:
+                        upd['path'] = path_map[i]
+                    macro_updates[i] = upd
+
+            macro_result = update_macro_values(preset_path, macro_updates, preset_path)
+            if not macro_result['success']:
+                return self.format_error_response(macro_result['message'])
+
+
             # Update macro names
-            name_updates = {m.get('index'): m.get('name') for m in macros_data}
+            name_updates = {}
+            for m in macros_data:
+                idx = m.get('index')
+                if idx is None:
+                    continue
+                name_updates[idx] = {
+                    'name': m.get('name'),
+                    'path': m.get('path'),
+                }
+
             name_result = update_preset_macro_names(preset_path, name_updates)
             if not name_result['success']:
                 return self.format_error_response(name_result['message'])

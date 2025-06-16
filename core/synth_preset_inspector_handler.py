@@ -292,6 +292,7 @@ def extract_macro_information(preset_path):
                 for key, value in data.items():
                     if key.startswith("Macro") and key[5:].isdigit():
                         macro_index = int(key[5:])
+                        macro_path = f"{path}.{key}" if path else key
 
                         # Initialize macro if not exists
                         if macro_index not in macros:
@@ -300,6 +301,7 @@ def extract_macro_information(preset_path):
                                 "name": f"Macro {macro_index}",  # Default name
                                 "parameters": [],
                                 "value": None,
+                                "path": macro_path,
                             }
 
                         # Check if it has a custom name
@@ -310,6 +312,9 @@ def extract_macro_information(preset_path):
                                 macros[macro_index]["value"] = value["value"]
                         else:
                             macros[macro_index]["value"] = value
+
+                        # Store the first path encountered for this macro index
+                        macros[macro_index].setdefault("path", macro_path)
 
                     # Recursively search in nested dictionaries
                     new_path = f"{path}.{key}" if path else key
@@ -409,7 +414,10 @@ def update_preset_macro_names(preset_path, macro_updates):
     
     Args:
         preset_path: Path to the .ablpreset file
-        macro_updates: Dictionary mapping macro indices to new custom names
+        macro_updates: Dictionary mapping macro indices to update info. Each
+            value may be a string (new name) or a dict with keys:
+            - name: new custom name
+            - path: optional path to the macro parameter
         
     Returns:
         dict: Result with keys:
@@ -430,38 +438,43 @@ def update_preset_macro_names(preset_path, macro_updates):
                 # If this is a device with parameters that might contain macros
                 if "parameters" in data and isinstance(data["parameters"], dict):
                     params = data["parameters"]
-                    
+
                     # Look for Macro keys in parameters
                     for key in params.keys():
                         if key.startswith("Macro") and key[5:].isdigit():
                             macro_index = int(key[5:])
-                            
-                            # If we have an update for this macro
-                            if macro_index in macro_updates:
-                                # Skip top-level parameters (they should remain as simple values)
-                                if path == "":
-                                    # For top-level parameters, we don't modify the structure
-                                    # They should remain as simple values
-                                    continue
-                                
-                                # For device parameters (not top-level), we can add customName
-                                # If it's already an object with customName
-                                new_name = macro_updates[macro_index]
+                            upd = macro_updates.get(macro_index)
+                            if upd is None:
+                                continue
 
-                                if isinstance(params[key], dict) and "value" in params[key]:
-                                    if new_name:
-                                        params[key]["customName"] = new_name
-                                    else:
-                                        params[key].pop("customName", None)
-                                    updated_count += 1
+                            # Skip top-level parameters unless an explicit path matches
+                            macro_path = f"{path}.parameters.{key}" if path else f"parameters.{key}"
+
+                            target_name = upd
+                            target_path = None
+                            if isinstance(upd, dict):
+                                target_name = upd.get("name")
+                                target_path = upd.get("path")
+
+                            if path == "" and not target_path:
+                                continue
+                            if target_path and target_path != macro_path:
+                                continue
+
+                            if isinstance(params[key], dict) and "value" in params[key]:
+                                if target_name:
+                                    params[key]["customName"] = target_name
                                 else:
-                                    if new_name:
-                                        original_value = params[key]
-                                        params[key] = {
-                                            "value": original_value,
-                                            "customName": new_name
-                                        }
-                                        updated_count += 1
+                                    params[key].pop("customName", None)
+                                updated_count += 1
+                            else:
+                                if target_name:
+                                    original_value = params[key]
+                                    params[key] = {
+                                        "value": original_value,
+                                        "customName": target_name,
+                                    }
+                                    updated_count += 1
                 
                 # Recursively search in nested structures
                 for key, value in data.items():

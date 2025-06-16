@@ -115,7 +115,10 @@ def update_macro_values(preset_path, macro_updates, output_path=None):
 
     Args:
         preset_path: Path to the source preset.
-        macro_updates: Mapping of macro index to new value (as strings).
+        macro_updates: Mapping of macro index to update info. Each value can
+            be either the new value directly or a dict with keys:
+            - value: new macro value
+            - path: optional path to the macro parameter
         output_path: Optional path for the modified preset. If omitted, the
             source preset is overwritten.
 
@@ -149,23 +152,36 @@ def update_macro_values(preset_path, macro_updates, output_path=None):
 
         updated = 0
 
-        def update_macros(obj):
+        def update_macros(obj, cur_path=""):
             nonlocal updated
             if isinstance(obj, dict):
                 for key, val in obj.items():
                     if key.startswith("Macro") and key[5:].isdigit():
                         idx = int(key[5:])
-                        if idx in macro_updates:
-                            new_val = macro_updates[idx]
-                            if isinstance(val, dict) and "value" in val:
-                                val["value"] = cast_value(new_val, val["value"])
+                        upd = macro_updates.get(idx)
+                        macro_path = f"{cur_path}.{key}" if cur_path else key
+                        if isinstance(upd, dict):
+                            target_val = upd.get("value")
+                            target_path = upd.get("path")
+                            if target_path and target_path != macro_path:
+                                # Not the macro we want to update
+                                pass
                             else:
-                                obj[key] = cast_value(new_val, val)
+                                if isinstance(val, dict) and "value" in val:
+                                    val["value"] = cast_value(target_val, val["value"])
+                                else:
+                                    obj[key] = cast_value(target_val, val)
+                                updated += 1
+                        elif upd is not None:
+                            if isinstance(val, dict) and "value" in val:
+                                val["value"] = cast_value(upd, val["value"])
+                            else:
+                                obj[key] = cast_value(upd, val)
                             updated += 1
-                    update_macros(val)
+                    update_macros(val, f"{cur_path}.{key}" if cur_path else key)
             elif isinstance(obj, list):
-                for item in obj:
-                    update_macros(item)
+                for i, item in enumerate(obj):
+                    update_macros(item, f"{cur_path}[{i}]")
 
         update_macros(preset_data)
 
