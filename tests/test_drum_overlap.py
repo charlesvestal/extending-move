@@ -39,7 +39,6 @@ def test_truncate_overlapping_notes(tmp_path):
     assert abs(out[0]["duration"] - 0.5) < 1e-6
     assert out[1]["startTime"] == 0.5
 
-
 def test_overlap_after_reverse(tmp_path):
     set_path = tmp_path / "set_rev.abl"
     create_drum_set(set_path)
@@ -59,4 +58,3 @@ def test_overlap_after_reverse(tmp_path):
     out = data["notes"]
     assert len(out) == 3
     assert abs(out[1]["duration"] - 0.5) < 1e-6
-
