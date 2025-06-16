@@ -1,6 +1,7 @@
 import json
 import os
 from typing import Any, Dict, List, Tuple
+from .trig_conditions import apply_trig_conditions
 from core.set_backup_handler import backup_set, write_latest_timestamp
 from core.synth_preset_inspector_handler import (
     load_drift_schema,
@@ -226,6 +227,10 @@ def save_clip(
         track_obj = song["tracks"][track]
         clip_obj = track_obj["clipSlots"][clip]["clip"]
 
+        notes, new_end, has_cond = apply_trig_conditions(notes, loop_start, loop_end)
+        loop_end = new_end
+        if has_cond:
+            region_end = max(region_end, new_end)
         if _contains_drum_rack(track_obj.get("devices", [])):
             notes = _truncate_overlap_notes(notes)
 

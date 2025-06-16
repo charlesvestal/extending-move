@@ -92,8 +92,8 @@ export function initSetInspector() {
       n: n.noteNumber,
       g: Math.round(n.duration * ticksPerBeat),
       v: Math.round(n.velocity || 100),
-      a: n.automations || null
-
+      a: n.automations || null,
+      c: n.condition || null
     }));
     recomputeOverlay();
     if (piano.setHighlightRow) piano.setHighlightRow(null);
@@ -673,6 +673,9 @@ export function initSetInspector() {
   const pulsesInput = document.getElementById('euclid_pulses');
   const rotateInput = document.getElementById('euclid_rotate');
   const repeatBox = document.getElementById('euclid_repeat');
+  const trigModal = document.getElementById('trigModal');
+  const trigInput = document.getElementById('trig_condition');
+  const trigInfo = document.getElementById('trig_region_info');
   if (euclidModal) {
     const okBtn = document.getElementById('euclid_ok');
     const cancelBtn = document.getElementById('euclid_cancel');
@@ -800,6 +803,58 @@ export function initSetInspector() {
     }
   }
 
+  if (trigModal) {
+    const okBtn2 = document.getElementById('trig_ok');
+    const cancelBtn2 = document.getElementById('trig_cancel');
+    const closeBtn2 = trigModal.querySelector('.modal-close');
+
+    function formatLen(len) {
+      const bars = Math.floor(len);
+      const rem16 = Math.round(len * 16) % 16;
+      return rem16 ? `${bars} bars, ${rem16}/16` : `${bars} bars`;
+    }
+
+    function updateHint() {
+      const val = trigInput.value.trim();
+      let cycle = 1;
+      const m = val.match(/^(\d+)\s*:\s*(\d+)$/);
+      if (m) cycle = parseInt(m[2]);
+      const loopLen = (piano.markend - piano.markstart) / ticksPerBeat;
+      trigInfo.textContent = `Region will be extended to ${formatLen(loopLen * cycle)}`;
+    }
+
+    function openTrig(row) {
+      trigModal.dataset.row = row;
+      trigInput.value = '1:2';
+      updateHint();
+      trigModal.classList.remove('hidden');
+    }
+
+    function applyTrig() {
+      const row = parseInt(trigModal.dataset.row || '60');
+      const cond = trigInput.value.trim();
+      let targets = (piano.sequence || []).filter(ev => ev.f);
+      if (!targets.length) targets = (piano.sequence || []).filter(ev => ev.n === row && ev.t >= piano.markstart && ev.t < piano.markend);
+      targets.forEach(ev => { ev.c = cond; });
+      if (piano.redraw) piano.redraw();
+      trigModal.classList.add('hidden');
+    }
+
+    function cancelTrig() {
+      trigModal.classList.add('hidden');
+    }
+
+    if (okBtn2) okBtn2.addEventListener('click', applyTrig);
+    if (cancelBtn2) cancelBtn2.addEventListener('click', cancelTrig);
+    if (closeBtn2) closeBtn2.addEventListener('click', cancelTrig);
+    trigInput.addEventListener('input', updateHint);
+    window.addEventListener('click', e => { if (e.target === trigModal) cancelTrig(); });
+
+    if (piano) {
+      piano.addEventListener('trigcond', e => openTrig(e.detail.row));
+    }
+  }
+
 
   if (saveClipForm) saveClipForm.addEventListener('submit', () => {
     if (piano && notesInput) {
@@ -813,6 +868,7 @@ export function initSetInspector() {
           offVelocity: 0.0
         };
         if (ev.a) note.automations = ev.a;
+        if (ev.c) note.condition = ev.c;
         return note;
       }));
     }
