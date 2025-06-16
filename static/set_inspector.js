@@ -140,9 +140,13 @@ export function initSetInspector() {
   let defaultEditMode = piano ? (piano.editmode || piano.getAttribute('editmode') || 'dragpoly') : 'dragpoly';
   const drawToggle = document.getElementById('note_draw_toggle');
   if (drawToggle) {
-    drawToggle.checked = defaultEditMode.startsWith('draw');
-    drawToggle.addEventListener('change', () => {
-      defaultEditMode = drawToggle.checked ? 'drawpoly' : 'dragpoly';
+    function updateDrawIcon() {
+      drawToggle.textContent = defaultEditMode.startsWith('draw') ? '✏️' : '🎹';
+    }
+    updateDrawIcon();
+    drawToggle.addEventListener('click', () => {
+      defaultEditMode = defaultEditMode.startsWith('draw') ? 'dragpoly' : 'drawpoly';
+      updateDrawIcon();
       updateControls();
     });
   }

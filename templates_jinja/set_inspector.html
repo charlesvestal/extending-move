@@ -73,8 +73,8 @@
     <label for="envelope_select">Envelope:</label>
     <select id="envelope_select">{{ clip_options | safe }}</select>
     <span id="envValue" style="margin-left:0.5rem; font-size:0.8em;"></span>
-    <label for="note_draw_toggle" style="margin-left:1rem;">Draw Notes</label>
-    <input id="note_draw_toggle" type="checkbox">
+    <label for="note_draw_toggle" style="margin-left:1rem;">Note Mode:</label>
+    <button id="note_draw_toggle" type="button">🎹</button>
   </div>
   <small>Right click to select or transform, use arrow keys to nudge. {% if drum_track %}<strong>Drum track detected.</strong> Notes cannot overlap.{% endif %}</small>
   <div style="margin-top:1rem; display:flex; align-items:flex-start;">
