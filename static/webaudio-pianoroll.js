@@ -151,6 +151,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
     border-radius:4px;
     position: relative;
     z-index:1001;
+}
 #probability-modal.hidden,#everyn-modal.hidden{display:none;}
 #wac-gridres{
     position:absolute;
