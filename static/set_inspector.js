@@ -43,6 +43,7 @@ export function initSetInspector() {
   const velCanvas = document.getElementById('velocityCanvas');
   const vctx = velCanvas ? velCanvas.getContext('2d') : null;
   const piano = document.getElementById('clipEditor');
+  if (piano) piano.drumtrack = isDrumTrack;
   const timebase = piano ? parseInt(piano.getAttribute('timebase') || '16', 10) : 16;
   const xruler = piano ? parseInt(piano.getAttribute('xruler') || '24', 10) : 24;
   const yruler = piano ? parseInt(piano.getAttribute('yruler') || '24', 10) : 24;

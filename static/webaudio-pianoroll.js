@@ -75,6 +75,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 preload:            {type:Number, value:1.0},
                 tempo:              {type:Number, value:120, observer:'updateTimer'},
                 enable:             {type:Boolean, value:true},
+                drumtrack:          {type:Boolean, value:false},
             },
         };
         this.defineprop();
@@ -180,6 +181,26 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
 
         this.sortSequence=function(){
             this.sequence.sort((x,y)=>{return x.t-y.t;});
+        };
+        this.truncateOverlaps=function(){
+            if(!this.drumtrack) return;
+            const byPitch={};
+            for(const ev of this.sequence){
+                (byPitch[ev.n]=byPitch[ev.n]||[]).push(ev);
+            }
+            let out=[];
+            for(const list of Object.values(byPitch)){
+                list.sort((a,b)=>a.t-b.t);
+                for(let i=0;i<list.length-1;i++){
+                    const cur=list[i], nxt=list[i+1];
+                    if(cur.t+cur.g>nxt.t){
+                        cur.g=nxt.t-cur.t;
+                    }
+                }
+                out=out.concat(list.filter(ev=>ev.g>0));
+            }
+            out.sort((a,b)=>a.t-b.t);
+            this.sequence=out;
         };
         this.findNextEv=function(tick){
             for(let i=0;i<this.sequence.length;++i){
@@ -479,6 +500,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 const ev={t:t,c:0x90,n:n,g:g,v:v,f:f};
                 this.sequence.push(ev);
                 this.sortSequence();
+                this.truncateOverlaps();
                 this.redraw();
                 return ev;
             }
@@ -549,6 +571,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
             }));
             this.sequence=this.sequence.concat(copies);
             this.sortSequence();
+            this.truncateOverlaps();
             this.redraw();
         };
 
@@ -563,6 +586,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 ev.g=Math.max(1,Math.round(ev.g*factor));
             }
             this.sortSequence();
+            this.truncateOverlaps();
             this.redraw();
         };
 
@@ -576,6 +600,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                     ev.t=Math.round(ev.t/this.grid)*this.grid;
             }
             this.sortSequence();
+            this.truncateOverlaps();
             this.redraw();
         };
 
@@ -602,6 +627,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 }
             }
             this.sortSequence();
+            this.truncateOverlaps();
             this.redraw();
         };
         this.moveSelectedNote=function(dt,dn){
@@ -649,6 +675,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 ev.t=start+end-(ev.t+ev.g);
             }
             this.sortSequence();
+            this.truncateOverlaps();
             this.redraw();
         };
 
@@ -663,6 +690,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                 ev.n=minN+maxN-ev.n;
             }
             this.sortSequence();
+            this.truncateOverlaps();
             this.redraw();
         };
         this.selectAllNotes=function(){
