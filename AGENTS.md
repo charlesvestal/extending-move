@@ -465,6 +465,12 @@ The Set Inspector includes a clip editor based on a piano roll interface. It all
 
 Use the route `/set-inspector` and add a link in `base.html` with `active_tab="set-inspector"`.
 
+The clip editor relies on `static/webaudio-pianoroll.js` and `static/set_inspector.js`. Key features include:
+- **Shift-click** note selection for quick multi-note edits
+- **Euclidean rhythm fill** accessible from the context menu
+- **Pitch bend overlay** visualization and editing
+- Automatic prevention of overlapping notes when editing **drum tracks**
+
 
 ## Best Practices
 
