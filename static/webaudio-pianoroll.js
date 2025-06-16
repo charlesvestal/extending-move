@@ -132,7 +132,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
     opacity:0.5;
     pointer-events:none;
 }
-#probability-modal, #everyn-modal {
+.modal {
     /* Modal styling borrowed from templates */
     position: fixed;
     top: 0;
@@ -151,8 +151,7 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
     border-radius:4px;
     position: relative;
     z-index:1001;
-}
-.modal.hidden{display:none;}
+#probability-modal.hidden,#everyn-modal.hidden{display:none;}
 #wac-gridres{
     position:absolute;
     top:30px;
