@@ -92,7 +92,8 @@ export function initSetInspector() {
       n: n.noteNumber,
       g: Math.round(n.duration * ticksPerBeat),
       v: Math.round(n.velocity || 100),
-      a: n.automations || null
+      a: n.automations || null,
+      c: n.cond || null
 
     }));
     recomputeOverlay();
@@ -800,6 +801,71 @@ export function initSetInspector() {
     }
   }
 
+  // Trig condition modal setup
+  const trigModal = document.getElementById('trigModal');
+  const trigSelect = document.getElementById('trig_select');
+  const trigInfo = document.getElementById('trig_info');
+  if (trigModal) {
+    const okBtn = document.getElementById('trig_ok');
+    const cancelBtn = document.getElementById('trig_cancel');
+    const closeBtn = trigModal.querySelector('.modal-close');
+
+    function loopsFor(cond) {
+      if (!cond) return 1;
+      if (cond.includes(':')) {
+        const parts = cond.split(':');
+        return Math.max(1, parseInt(parts[1]));
+      }
+      if (cond.startsWith('p')) {
+        const val = parseInt(cond.slice(1));
+        return val ? Math.round(100 / val) : 1;
+      }
+      return 1;
+    }
+
+    function updateInfo() {
+      const loops = loopsFor(trigSelect.value);
+      const len = piano.markend - piano.markstart;
+      const total = loops * len;
+      const bars = Math.floor(total);
+      const beats = Math.round((total - bars) * 16);
+      trigInfo.textContent = `Region will be extended to ${bars} bars, ${beats}/16`;
+    }
+
+    function openTrigModal() {
+      trigSelect.value = '1:2';
+      updateInfo();
+      trigModal.classList.remove('hidden');
+    }
+
+    function applyTrig() {
+      const cond = trigSelect.value;
+      const loops = loopsFor(cond);
+      const sel = piano.selectedNotes();
+      sel.forEach(o => { o.ev.c = cond; });
+      const len = piano.markend - piano.markstart;
+      const total = loops * len;
+      if (piano.xrange < total) piano.xrange = total;
+      if (piano.markend < piano.markstart + total) piano.markend = piano.markstart + total;
+      if (piano.redraw) piano.redraw();
+      trigModal.classList.add('hidden');
+    }
+
+    function cancelTrig() {
+      trigModal.classList.add('hidden');
+    }
+
+    trigSelect.addEventListener('change', updateInfo);
+    if (okBtn) okBtn.addEventListener('click', applyTrig);
+    if (cancelBtn) cancelBtn.addEventListener('click', cancelTrig);
+    if (closeBtn) closeBtn.addEventListener('click', cancelTrig);
+    window.addEventListener('click', e => { if (e.target === trigModal) cancelTrig(); });
+
+    if (piano) {
+      piano.addEventListener('trigcondition', openTrigModal);
+    }
+  }
+
 
   if (saveClipForm) saveClipForm.addEventListener('submit', () => {
     if (piano && notesInput) {
@@ -813,6 +879,7 @@ export function initSetInspector() {
           offVelocity: 0.0
         };
         if (ev.a) note.automations = ev.a;
+        if (ev.c) note.cond = ev.c;
         return note;
       }));
     }
