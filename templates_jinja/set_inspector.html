@@ -79,7 +79,7 @@
   <small>Right click to select or transform, use arrow keys to nudge. {% if drum_track %}<strong>Drum track detected.</strong> Notes cannot overlap.{% endif %}</small>
   <div style="margin-top:1rem; display:flex; align-items:flex-start;">
     <div style="position:relative; width:900px; height:360px; border:1px solid #ccc;">
-      <webaudio-pianoroll id="clipEditor" width="900" height="300" editmode="dragpoly" wheelzoom="0" xscroll="1" yscroll="1" timebase="16" xrange="{{ (region | default(4.0)) * 4 }}" markstart="{{ (loop_start | default(0.0)) * 4 }}" markend="{{ (loop_end | default(region)) * 4 }}" showcursor="false"></webaudio-pianoroll>
+      <webaudio-pianoroll id="clipEditor" width="900" height="300" editmode="dragpoly" wheelzoom="0" xscroll="1" yscroll="1" timebase="16" xrange="{{ (region | default(4.0)) * 4 }}" markstart="{{ (loop_start | default(0.0)) * 4 }}" markend="{{ (loop_end | default(region)) * 4 }}" showcursor="false" drumtrack="{{ 'true' if drum_track else 'false' }}"></webaudio-pianoroll>
       <canvas id="clipCanvas" width="836" height="300" style="position:absolute; left:64px; top:0; pointer-events:none;"></canvas>
       <canvas id="velocityCanvas" width="836" height="60" style="position:absolute; left:64px; top:300px;"></canvas>
     </div>
@@ -110,7 +110,7 @@
   </form>
   {% endif %}
   <p>Current version: {{ current_ts }}</p>
-  <div id="clipData" data-notes='{{ notes | tojson }}' data-envelopes='{{ envelopes | tojson }}' data-region='{{ region | default(4.0) }}' data-loop-start='{{ loop_start | default(0.0) }}' data-loop-end='{{ loop_end | default(region) }}' data-param-ranges='{{ param_ranges_json | safe }}'></div>
+  <div id="clipData" data-notes='{{ notes | tojson }}' data-envelopes='{{ envelopes | tojson }}' data-region='{{ region | default(4.0) }}' data-loop-start='{{ loop_start | default(0.0) }}' data-loop-end='{{ loop_end | default(region) }}' data-param-ranges='{{ param_ranges_json | safe }}' data-drum-track='{{ "true" if drum_track else "false" }}'></div>
   <style>
     .modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:1000; }
     .modal.hidden { display:none; }
