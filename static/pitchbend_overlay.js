@@ -1,11 +1,15 @@
 export const BASE_NOTE = 36;
 export const SEMI_UNIT = 170.6458282470703;
 
+export function noteNumberToPitchbend(n) {
+  return (n - BASE_NOTE) * SEMI_UNIT;
+}
+
 export function computeOverlayNotes(sequence, selectedRow, ticksPerBeat) {
   const overlay = [];
   if (selectedRow === null || selectedRow === undefined) return overlay;
   if (!sequence || !ticksPerBeat) return overlay;
-  sequence.forEach(ev => {
+  sequence.forEach((ev, idx) => {
     if (ev.n !== selectedRow) return;
     const pb = ev.a && ev.a.PitchBend;
     if (!pb || !pb.length) return;
@@ -14,6 +18,7 @@ export function computeOverlayNotes(sequence, selectedRow, ticksPerBeat) {
     const viz = BASE_NOTE + semis;
     if (viz < 0 || viz > 127) return;
     overlay.push({
+      index: idx,
       noteNumber: viz,
       startTime: ev.t / ticksPerBeat,
       duration: ev.g / ticksPerBeat
