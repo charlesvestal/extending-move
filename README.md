@@ -7,6 +7,8 @@ Tools for extending the Ableton Move. This project provides a companion webserve
 
 [Demo on YouTube](https://www.youtube.com/watch?v=MCmaCifzgbg)
 
+Come talk to us on [Discord](https://discord.gg/yP7SjqDrZG).
+
 ## Installation instructions
 
 [Quick installation video](https://youtu.be/gPiR7Zyu3lc)
