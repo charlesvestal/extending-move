@@ -1280,9 +1280,10 @@ customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement 
                     case "E": this.canvas.style.cursor="e-resize"; break;
                     case "B": this.canvas.style.cursor="w-resize"; break;
                     case "N": this.canvas.style.cursor="move"; break;
-                    case "n": this.canvas.style.cursor="pointer"; break;
-                    case "s": this.canvas.style.cursor="pointer"; break;
-                    }
+                    default:
+                        this.updateCursor();
+                        break;
+                }
                 }
         };
         this.pointermove=function(ev) {
