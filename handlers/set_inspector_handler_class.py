@@ -213,6 +213,7 @@ class SetInspectorHandler(BaseHandler):
                 "clip_index": clip_idx,
                 "track_name": result.get("track_name"),
                 "clip_name": result.get("clip_name"),
+                "drum_track": result.get("is_drum_track"),
                 "backups": backups,
                 "current_ts": get_current_timestamp(set_path),
             }

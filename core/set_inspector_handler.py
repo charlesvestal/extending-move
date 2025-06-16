@@ -41,6 +41,17 @@ def _track_display_name(track_obj: Dict[str, Any], idx: int) -> str:
     return track_obj.get("name") or f"Track {idx + 1}"
 
 
+def _contains_drum_rack(obj: Any) -> bool:
+    """Recursively check if a track's devices include a drumRack."""
+    if isinstance(obj, dict):
+        if obj.get("kind") == "drumRack":
+            return True
+        return any(_contains_drum_rack(v) for v in obj.values())
+    if isinstance(obj, list):
+        return any(_contains_drum_rack(item) for item in obj)
+    return False
+
+
 def list_clips(set_path: str) -> Dict[str, Any]:
     """Return list of clips in the set."""
     try:
@@ -78,6 +89,7 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
         region_length = region_end
         track_name = _track_display_name(track_obj, track)
         clip_name = clip_obj.get("name") or f"Clip {clip + 1}"
+        drum_track = _contains_drum_rack(track_obj.get("devices", []))
         param_map: Dict[int, str] = {}
         param_context: Dict[int, str] = {}
         _collect_param_ids.pad_counter = [1]
@@ -136,6 +148,7 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
             "param_ranges": param_ranges,
             "track_name": track_name,
             "clip_name": clip_name,
+            "is_drum_track": drum_track,
         }
     except Exception as e:
         return {"success": False, "message": f"Failed to read clip: {e}"}
