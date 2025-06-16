@@ -37,6 +37,7 @@ export function initSetInspector() {
   const loopStart = parseFloat(dataDiv.dataset.loopStart || '0');
   const loopEnd = parseFloat(dataDiv.dataset.loopEnd || String(region));
   const paramRanges = JSON.parse(dataDiv.dataset.paramRanges || '{}');
+  const drumMode = dataDiv.dataset.drumMode === '1';
   const canvas = document.getElementById('clipCanvas');
   const ctx = canvas.getContext('2d');
   const velCanvas = document.getElementById('velocityCanvas');
@@ -92,6 +93,7 @@ export function initSetInspector() {
       a: n.automations || null
 
     }));
+    enforceDrumMode();
     recomputeOverlay();
     if (piano.setHighlightRow) piano.setHighlightRow(null);
     if (!piano.hasAttribute('xrange')) piano.xrange = region * ticksPerBeat;
@@ -137,11 +139,15 @@ export function initSetInspector() {
   }
 
   let defaultEditMode = piano ? (piano.editmode || piano.getAttribute('editmode') || 'dragpoly') : 'dragpoly';
+  if (drumMode) {
+    defaultEditMode = defaultEditMode.replace('poly', 'mono');
+  }
   const drawToggle = document.getElementById('note_draw_toggle');
   if (drawToggle) {
     drawToggle.checked = defaultEditMode.startsWith('draw');
     drawToggle.addEventListener('change', () => {
-      defaultEditMode = drawToggle.checked ? 'drawpoly' : 'dragpoly';
+      const base = drawToggle.checked ? 'draw' : 'drag';
+      defaultEditMode = drumMode ? base + 'mono' : base + 'poly';
       updateControls();
     });
   }
@@ -324,6 +330,33 @@ export function initSetInspector() {
     overlayNotes = [];
     if (!overlayActive || overlayRow === null || !piano) return;
     overlayNotes = computeOverlayNotes(piano.sequence || [], overlayRow, ticksPerBeat);
+  }
+
+  function enforceDrumMode() {
+    if (!drumMode || !piano) return;
+    const byPitch = {};
+    (piano.sequence || []).forEach(ev => {
+      (byPitch[ev.n] ||= []).push(ev);
+    });
+    for (const list of Object.values(byPitch)) {
+      list.sort((a, b) => a.t - b.t);
+      for (let i = 0; i < list.length - 1; i++) {
+        const A = list[i];
+        const B = list[i + 1];
+        if (A.t + A.g > B.t) {
+          const newDur = B.t - A.t;
+          if (newDur <= 0) {
+            const idx = piano.sequence.indexOf(A);
+            if (idx >= 0) piano.sequence.splice(idx, 1);
+            list.splice(i, 1);
+            i--;
+            continue;
+          }
+          A.g = newDur;
+        }
+      }
+    }
+    piano.sortSequence();
   }
 
   function updateLegend() {
@@ -520,6 +553,7 @@ export function initSetInspector() {
       tailEnv = [];
       draw();
     }
+    enforceDrumMode();
   }
 
   let velDragging = false;
@@ -560,6 +594,7 @@ export function initSetInspector() {
   }
   function endVel() {
     velDragging = false;
+    enforceDrumMode();
   }
 
   canvas.addEventListener('mousedown', startDraw);
@@ -711,6 +746,7 @@ export function initSetInspector() {
 
 
   if (saveClipForm) saveClipForm.addEventListener('submit', () => {
+    enforceDrumMode();
     if (piano && notesInput) {
       const seq = piano.sequence || [];
       notesInput.value = JSON.stringify(seq.map(ev => {
