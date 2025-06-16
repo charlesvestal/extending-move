@@ -43,8 +43,9 @@ Here’s what you can do with Extending Move:
   - Reverse or time stretch samples to a target BPM and length with different algorithms for melodic or rhythmic content
 
 - **Set Inspector**
-  - View notes and envelopes for sets and clips
-  - Edit envelopes and draw your own curves
+  - Edit notes and envelopes for sets and clips
+  - Perform transformations and generate random or euclidean rhythms for your clips
+
 - **Clip Editor**
   - Modify clip notes and envelopes in a piano roll
   - Adjust region length and loop points
