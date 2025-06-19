@@ -1,4 +1,5 @@
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -174,13 +175,23 @@ def test_pitchbend_edit_preserves_other_automations(tmp_path):
 
 
 def test_set_read_only_round_trip(tmp_path):
-    set_path = tmp_path / "set.abl"
-    create_simple_set(set_path)
+    root = tmp_path / "uuid" / "SetA"
+    song = root / "Song.abl"
+    sample_dir = root / "Samples"
+    sample_dir.mkdir(parents=True)
+    sample_file = sample_dir / "kick.wav"
+    sample_file.write_text("data")
+    create_simple_set(song)
 
-    assert not sih.is_read_only(str(set_path))
-    res = sih.set_read_only(str(set_path), True)
+    assert not sih.is_read_only(str(song))
+    res = sih.set_read_only(str(song), True)
     assert res["success"], res.get("message")
-    assert sih.is_read_only(str(set_path))
-    res = sih.set_read_only(str(set_path), False)
+    for p in (song, sample_file, sample_dir, root, root.parent):
+        assert os.stat(p).st_mode & 0o222 == 0
+    assert sih.is_read_only(str(song))
+
+    res = sih.set_read_only(str(song), False)
     assert res["success"], res.get("message")
-    assert not sih.is_read_only(str(set_path))
+    for p in (song, sample_file, sample_dir, root, root.parent):
+        assert os.stat(p).st_mode & 0o222 != 0
+    assert not sih.is_read_only(str(song))

@@ -280,22 +280,42 @@ def save_clip(
         return {"success": False, "message": f"Failed to save clip: {e}"}
 
 def is_read_only(set_path: str) -> bool:
-    """Return True if the set file lacks write permissions."""
+    """Return True if ``set_path`` is not writable."""
     try:
         if not os.path.isfile(set_path):
             return False
-        return os.stat(set_path).st_mode & 0o222 == 0
+        return (os.stat(set_path).st_mode & 0o222) == 0
     except Exception:
         return False
 
 
 def set_read_only(set_path: str, read_only: bool) -> Dict[str, Any]:
-    """Update file permissions to make the set read-only or writable."""
+    """Recursively update permissions to toggle read-only mode for a set."""
     try:
         if not os.path.isfile(set_path):
             return {"success": False, "message": "Set file not found"}
-        os.chmod(set_path, 0o444 if read_only else 0o644)
-        return {"success": True, "message": "Permissions updated", "read_only": read_only}
+
+        root_dir = os.path.dirname(os.path.dirname(set_path))
+        file_mode = 0o444 if read_only else 0o644
+        dir_mode = 0o555 if read_only else 0o755
+
+        for dirpath, dirnames, filenames in os.walk(root_dir):
+            try:
+                os.chmod(dirpath, dir_mode)
+            except Exception:
+                pass
+            for fname in filenames:
+                fpath = os.path.join(dirpath, fname)
+                try:
+                    os.chmod(fpath, file_mode)
+                except Exception:
+                    pass
+
+        return {
+            "success": True,
+            "message": "Permissions updated",
+            "read_only": read_only,
+        }
     except Exception as e:
         return {"success": False, "message": f"Failed to update permissions: {e}"}
 
