@@ -1,3 +1,5 @@
+// Modified from https://github.com/g200kg/webaudio-pianoroll
+// Licensed under the Apache License, Version 2.0
 customElements.define("webaudio-pianoroll", class Pianoroll extends HTMLElement {
     constructor(){
         super();
