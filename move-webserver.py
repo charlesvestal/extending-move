@@ -351,6 +351,7 @@ def set_inspector_route():
         param_ranges_json=result.get("param_ranges_json", "{}"),
         backups=result.get("backups", []),
         current_ts=result.get("current_ts"),
+        read_only=result.get("read_only", False),
         active_tab="set-inspector",
     )
 

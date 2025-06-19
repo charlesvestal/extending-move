@@ -25,6 +25,13 @@
     {{ clip_grid | safe }}
     <span id="selected-clip-name" style="margin-left:1rem;"></span>
   </form>
+  <form method="post" action="{{ host_prefix }}/set-inspector" style="margin-bottom:1rem;">
+    <input type="hidden" name="action" value="toggle_read_only">
+    <input type="hidden" name="set_path" value="{{ selected_set }}">
+    <input type="hidden" name="make_read_only" value="{{ 'false' if read_only else 'true' }}">
+    <button type="submit">{{ 'Make Read-Write' if read_only else 'Make Read-Only' }}</button>
+  </form>
+  <p>Status: {{ 'Read-Only' if read_only else 'Editable' }}</p>
   {% if backups %}
   <form method="post" action="{{ host_prefix }}/set-inspector" style="margin-bottom:1rem;">
     <input type="hidden" name="action" value="restore_backup">
@@ -96,6 +103,13 @@
     <input type="hidden" name="loop_end" id="loop_end_input">
     <button id="saveClipBtn" type="submit">Save Clip</button>
   </form>
+  <form method="post" action="{{ host_prefix }}/set-inspector" style="margin-top:0.5rem;">
+    <input type="hidden" name="action" value="toggle_read_only">
+    <input type="hidden" name="set_path" value="{{ selected_set }}">
+    <input type="hidden" name="make_read_only" value="{{ 'false' if read_only else 'true' }}">
+    <button type="submit">{{ 'Make Read-Write' if read_only else 'Make Read-Only' }}</button>
+  </form>
+  <p>Status: {{ 'Read-Only' if read_only else 'Editable' }}</p>
   {% if backups %}
   <form method="post" action="{{ host_prefix }}/set-inspector" style="margin-top:0.5rem;">
     <input type="hidden" name="action" value="restore_backup">

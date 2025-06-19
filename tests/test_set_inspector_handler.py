@@ -171,3 +171,16 @@ def test_pitchbend_edit_preserves_other_automations(tmp_path):
     pb = saved_note["automations"]["PitchBend"]
     assert len(pb) == 1 and pb[0]["time"] == 0.0
     assert abs(pb[0]["value"] - val) < 1e-6
+
+
+def test_set_read_only_round_trip(tmp_path):
+    set_path = tmp_path / "set.abl"
+    create_simple_set(set_path)
+
+    assert not sih.is_read_only(str(set_path))
+    res = sih.set_read_only(str(set_path), True)
+    assert res["success"], res.get("message")
+    assert sih.is_read_only(str(set_path))
+    res = sih.set_read_only(str(set_path), False)
+    assert res["success"], res.get("message")
+    assert not sih.is_read_only(str(set_path))
