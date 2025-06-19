@@ -1,5 +1,11 @@
 from handlers.base_handler import BaseHandler
-from core.set_inspector_handler import list_clips, get_clip_data, save_envelope
+from core.set_inspector_handler import (
+    list_clips,
+    get_clip_data,
+    save_envelope,
+    set_read_only,
+    is_read_only,
+)
 from core.list_msets_handler import list_msets
 from core.set_backup_handler import (
     list_backups,
@@ -94,6 +100,7 @@ class SetInspectorHandler(BaseHandler):
             "loop_end": 4.0,
             "param_ranges_json": "{}",
             "backups": [],
+            "read_only": False,
         }
 
     def handle_post(self, form):
@@ -142,6 +149,7 @@ class SetInspectorHandler(BaseHandler):
             set_name = os.path.basename(os.path.dirname(set_path))
             pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
             backups = list_backups(set_path)
+            ro_state = is_read_only(set_path)
             return {
                 "pad_grid": pad_grid,
                 "message": result.get("message"),
@@ -158,6 +166,7 @@ class SetInspectorHandler(BaseHandler):
                 "param_ranges_json": "{}",
                 "backups": backups,
                 "current_ts": get_current_timestamp(set_path),
+                "read_only": ro_state,
             }
         elif action == "show_clip":
             set_path = form.getvalue("set_path")
@@ -194,6 +203,7 @@ class SetInspectorHandler(BaseHandler):
             set_name = os.path.basename(os.path.dirname(set_path))
             pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
             backups = list_backups(set_path)
+            ro_state = is_read_only(set_path)
             return {
                 "pad_grid": pad_grid,
                 "message": result.get("message"),
@@ -216,6 +226,7 @@ class SetInspectorHandler(BaseHandler):
                 "drum_track": result.get("is_drum_track"),
                 "backups": backups,
                 "current_ts": get_current_timestamp(set_path),
+                "read_only": ro_state,
             }
         elif action == "save_envelope":
             set_path = form.getvalue("set_path")
@@ -265,6 +276,7 @@ class SetInspectorHandler(BaseHandler):
             env_opts = '<option value="">No Envelope</option>' + env_opts
             set_name = os.path.basename(os.path.dirname(set_path))
             pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
+            ro_state = is_read_only(set_path)
             return {
                 "pad_grid": pad_grid,
                 "message": result.get("message"),
@@ -286,6 +298,7 @@ class SetInspectorHandler(BaseHandler):
                 "clip_name": clip_data.get("clip_name"),
                 "backups": backups,
                 "current_ts": get_current_timestamp(set_path),
+                "read_only": ro_state,
             }
         elif action == "save_clip":
             set_path = form.getvalue("set_path")
@@ -356,6 +369,7 @@ class SetInspectorHandler(BaseHandler):
             env_opts = '<option value="">No Envelope</option>' + env_opts
             set_name = os.path.basename(os.path.dirname(set_path))
             pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
+            ro_state = is_read_only(set_path)
             return {
                 "pad_grid": pad_grid,
                 "message": result.get("message"),
@@ -377,6 +391,50 @@ class SetInspectorHandler(BaseHandler):
                 "clip_name": clip_data.get("clip_name"),
                 "backups": backups,
                 "current_ts": get_current_timestamp(set_path),
+                "read_only": ro_state,
+            }
+        elif action == "toggle_read_only":
+            set_path = form.getvalue("set_path")
+            ro_val = form.getvalue("make_read_only")
+            if not set_path or ro_val not in ("true", "false"):
+                pad_grid = self.generate_pad_grid(used, color_map, name_map)
+                return self.format_error_response("Missing parameters", pad_grid=pad_grid)
+            entry = next(
+                (m for m in msets if os.path.join(MSETS_DIRECTORY, m["uuid"], m["mset_name"], "Song.abl") == set_path),
+                None,
+            )
+            if entry:
+                selected_idx = int(entry.get("mset_id"))
+            perm_result = set_read_only(set_path, ro_val == "true")
+            if not perm_result.get("success"):
+                pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
+                return self.format_error_response(perm_result.get("message"), pad_grid=pad_grid)
+            result = list_clips(set_path)
+            if not result.get("success"):
+                pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
+                return self.format_error_response(result.get("message"), pad_grid=pad_grid)
+            clip_grid = self.generate_clip_grid(result.get("clips", []))
+            set_name = os.path.basename(os.path.dirname(set_path))
+            pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
+            backups = list_backups(set_path)
+            ro_state = is_read_only(set_path)
+            return {
+                "pad_grid": pad_grid,
+                "message": perm_result.get("message"),
+                "message_type": "success",
+                "selected_set": set_path,
+                "set_name": set_name,
+                "clip_grid": clip_grid,
+                "selected_clip": None,
+                "notes": [],
+                "envelopes": [],
+                "region": 4.0,
+                "loop_start": 0.0,
+                "loop_end": 4.0,
+                "param_ranges_json": "{}",
+                "backups": backups,
+                "current_ts": get_current_timestamp(set_path),
+                "read_only": ro_state,
             }
         elif action == "restore_backup":
             set_path = form.getvalue("set_path")
@@ -401,6 +459,7 @@ class SetInspectorHandler(BaseHandler):
             set_name = os.path.basename(os.path.dirname(set_path))
             pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
             backups = list_backups(set_path)
+            ro_state = is_read_only(set_path)
             return {
                 "pad_grid": pad_grid,
                 "message": "Backup restored",
@@ -417,6 +476,7 @@ class SetInspectorHandler(BaseHandler):
                 "param_ranges_json": "{}",
                 "backups": backups,
                 "current_ts": get_current_timestamp(set_path),
+                "read_only": ro_state,
             }
         else:
             return self.format_error_response("Unknown action", pad_grid=pad_grid)
