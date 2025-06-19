@@ -1,5 +1,6 @@
 import json
 import os
+import subprocess
 from typing import Any, Dict, List, Tuple
 
 from core.set_backup_handler import backup_set, write_latest_timestamp
@@ -286,6 +287,30 @@ def is_read_only(set_path: str) -> bool:
             return False
         return (os.stat(set_path).st_mode & 0o222) == 0
     except Exception:
+        return False
+
+
+def is_synced(set_path: str) -> bool:
+    """Return True if ``set_path`` has cached SHA attributes."""
+    if not os.path.isfile(set_path):
+        return False
+    try:
+        subprocess.check_output(
+            ["getfattr", "--only-values", "-n", "user.cached-sha", set_path],
+            stderr=subprocess.DEVNULL,
+        )
+        subprocess.check_output(
+            [
+                "getfattr",
+                "--only-values",
+                "-n",
+                "user.cached-sha-last-write-time",
+                set_path,
+            ],
+            stderr=subprocess.DEVNULL,
+        )
+        return True
+    except subprocess.CalledProcessError:
         return False
 
 

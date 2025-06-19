@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+import subprocess
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
@@ -195,3 +196,19 @@ def test_set_read_only_round_trip(tmp_path):
     for p in (song, sample_file, sample_dir, root, root.parent):
         assert os.stat(p).st_mode & 0o222 != 0
     assert not sih.is_read_only(str(song))
+
+
+def test_is_synced(tmp_path):
+    song = tmp_path / "Song.abl"
+    create_simple_set(song)
+    assert not sih.is_synced(str(song))
+    subprocess.check_call(["setfattr", "-n", "user.cached-sha", "-v", "abc", str(song)])
+    subprocess.check_call([
+        "setfattr",
+        "-n",
+        "user.cached-sha-last-write-time",
+        "-v",
+        "1",
+        str(song),
+    ])
+    assert sih.is_synced(str(song))

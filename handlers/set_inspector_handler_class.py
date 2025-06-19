@@ -5,6 +5,7 @@ from core.set_inspector_handler import (
     save_envelope,
     set_read_only,
     is_read_only,
+    is_synced,
 )
 from core.list_msets_handler import list_msets
 from core.set_backup_handler import (
@@ -101,6 +102,7 @@ class SetInspectorHandler(BaseHandler):
             "param_ranges_json": "{}",
             "backups": [],
             "read_only": False,
+            "synced": False,
         }
 
     def handle_post(self, form):
@@ -150,6 +152,7 @@ class SetInspectorHandler(BaseHandler):
             pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
             backups = list_backups(set_path)
             ro_state = is_read_only(set_path)
+            sync_state = is_synced(set_path)
             return {
                 "pad_grid": pad_grid,
                 "message": result.get("message"),
@@ -167,6 +170,7 @@ class SetInspectorHandler(BaseHandler):
                 "backups": backups,
                 "current_ts": get_current_timestamp(set_path),
                 "read_only": ro_state,
+                "synced": sync_state,
             }
         elif action == "show_clip":
             set_path = form.getvalue("set_path")
@@ -204,6 +208,7 @@ class SetInspectorHandler(BaseHandler):
             pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
             backups = list_backups(set_path)
             ro_state = is_read_only(set_path)
+            sync_state = is_synced(set_path)
             return {
                 "pad_grid": pad_grid,
                 "message": result.get("message"),
@@ -227,6 +232,7 @@ class SetInspectorHandler(BaseHandler):
                 "backups": backups,
                 "current_ts": get_current_timestamp(set_path),
                 "read_only": ro_state,
+                "synced": sync_state,
             }
         elif action == "save_envelope":
             set_path = form.getvalue("set_path")
@@ -277,6 +283,7 @@ class SetInspectorHandler(BaseHandler):
             set_name = os.path.basename(os.path.dirname(set_path))
             pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
             ro_state = is_read_only(set_path)
+            sync_state = is_synced(set_path)
             return {
                 "pad_grid": pad_grid,
                 "message": result.get("message"),
@@ -299,6 +306,7 @@ class SetInspectorHandler(BaseHandler):
                 "backups": backups,
                 "current_ts": get_current_timestamp(set_path),
                 "read_only": ro_state,
+                "synced": sync_state,
             }
         elif action == "save_clip":
             set_path = form.getvalue("set_path")
@@ -370,6 +378,7 @@ class SetInspectorHandler(BaseHandler):
             set_name = os.path.basename(os.path.dirname(set_path))
             pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
             ro_state = is_read_only(set_path)
+            sync_state = is_synced(set_path)
             return {
                 "pad_grid": pad_grid,
                 "message": result.get("message"),
@@ -392,6 +401,7 @@ class SetInspectorHandler(BaseHandler):
                 "backups": backups,
                 "current_ts": get_current_timestamp(set_path),
                 "read_only": ro_state,
+                "synced": sync_state,
             }
         elif action == "toggle_read_only":
             set_path = form.getvalue("set_path")
@@ -418,6 +428,7 @@ class SetInspectorHandler(BaseHandler):
             pad_grid = self.generate_pad_grid(used, color_map, name_map, selected_idx)
             backups = list_backups(set_path)
             ro_state = is_read_only(set_path)
+            sync_state = is_synced(set_path)
             return {
                 "pad_grid": pad_grid,
                 "message": perm_result.get("message"),
@@ -435,6 +446,7 @@ class SetInspectorHandler(BaseHandler):
                 "backups": backups,
                 "current_ts": get_current_timestamp(set_path),
                 "read_only": ro_state,
+                "synced": sync_state,
             }
         elif action == "restore_backup":
             set_path = form.getvalue("set_path")
@@ -477,6 +489,7 @@ class SetInspectorHandler(BaseHandler):
                 "backups": backups,
                 "current_ts": get_current_timestamp(set_path),
                 "read_only": ro_state,
+                "synced": sync_state,
             }
         else:
             return self.format_error_response("Unknown action", pad_grid=pad_grid)
