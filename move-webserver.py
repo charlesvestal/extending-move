@@ -352,7 +352,6 @@ def set_inspector_route():
         backups=result.get("backups", []),
         current_ts=result.get("current_ts"),
         read_only=result.get("read_only", False),
-        synced=result.get("synced", False),
         active_tab="set-inspector",
     )
 
