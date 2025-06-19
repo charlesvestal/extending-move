@@ -85,6 +85,17 @@ This project includes a statically linked binary of Rubber Band. The source code
 > * Ableton can’t offer individual support if something goes wrong.
 > * If issues do arise, the documented restore procedure is the fallback – you use this at your own risk. Information on this procedure can be found in Center Code under [Documentation](https://ableton.centercode.com/project/article/item.html?cap=ecd3942a1fe3405eb27a806608401a0b&arttypeid={e70be312-f44a-418b-bb74-ed1030e3a49a}&artid={C0A2D9E2-D52F-4DEB-8BEE-356B65C8942E}).
 
+## Third-Party Licenses
+
+This project bundles or references several open-source libraries:
+
+- **[webaudio-pianoroll](https://github.com/g200kg/webaudio-pianoroll)** (Apache-2.0)
+- **[webaudio-controls](https://github.com/g200kg/webaudio-controls)** (Apache-2.0)
+- **[wavesurfer.js](https://github.com/katspaugh/wavesurfer.js)** (BSD-3-Clause)
+- **[JSZip](https://github.com/Stuk/jszip)** (MIT or GPLv3)
+
+Copies of these licenses are provided in the [`third_party`](third_party) directory.
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
