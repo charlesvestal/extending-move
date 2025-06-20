@@ -221,7 +221,9 @@ class RestoreHandler(BaseHandler):
             f'  c.forEach((col, idx) => {{' \
             f'    const item = document.createElement("div");' \
             f'    item.className = "dropdown-item";' \
-            f'    item.innerHTML = `<span class="preview-square" style="background-color: rgb(${{col[0]}}, ${{col[1]}}, ${{col[2]}});"></span> <span class="label">${{n[idx]}}</span>`;' \
+            f'    item.dataset.idx = idx;' \
+            f'    item.textContent = idx + 1;' \
+            f'    item.style.borderColor = `rgb(${{col[0]}}, ${{col[1]}}, ${{col[2]}})`;' \
             f'    item.addEventListener("click", () => {{selected = idx; hidden.value = idx + 1; update(); close();}});' \
             f'    menu.appendChild(item);' \
             f'  }});' \
@@ -239,12 +241,22 @@ class RestoreHandler(BaseHandler):
             f'  }}' \
             f' }}' \
             f' function update() {{' \
-            f'  const col = c[selected];' \
-            f'  toggle.querySelector(".preview-square").style.backgroundColor = `rgb(${{col[0]}}, ${{col[1]}}, ${{col[2]}})`;'
+            f'  toggle.querySelector(".preview-square").style.backgroundColor = `rgb(${{c[selected][0]}}, ${{c[selected][1]}}, ${{c[selected][2]}})`;'
             f'  toggle.querySelector(".preview-label").textContent = n[selected];' \
+            f'  menu.querySelectorAll(".dropdown-item").forEach((it, idx) => {{' \
+            f'    const col = c[idx];' \
+            f'    if(idx === selected) {{' \
+            f'      it.style.backgroundColor = `rgb(${{col[0]}}, ${{col[1]}}, ${{col[2]}})`;' \
+            f'      const b = col[0]*0.299 + col[1]*0.587 + col[2]*0.114;' \
+            f'      it.style.color = b < 186 ? "#fff" : "#000";' \
+            f'    }} else {{' \
+            f'      it.style.backgroundColor = "transparent";' \
+            f'      it.style.color = "#000";' \
+            f'    }}' \
+            f'  }});' \
             f'  previewPad();' \
             f' }}' \
-            f' function openMenu() {{ menu.style.display = "block"; open = true; }}' \
+            f' function openMenu() {{ menu.style.display = "grid"; open = true; }}' \
             f' function close() {{ menu.style.display = "none"; open = false; }}' \
             f' toggle.addEventListener("click", e => {{ e.stopPropagation(); open ? close() : openMenu(); }});' \
             f' document.addEventListener("click", e => {{ if (open && !container.contains(e.target)) close(); }});' \
@@ -258,9 +270,7 @@ class RestoreHandler(BaseHandler):
             f'.color-dropdown .dropdown-toggle {{ border: 1px solid #ddd; border-radius: 4px; padding: 0.5rem; cursor: pointer; display: flex; align-items: center; background: #fff; }}' \
             f'.color-dropdown .preview-square {{ width: 16px; height: 16px; margin-right: 8px; border: 1px solid #ccc; }}' \
             f'.color-dropdown .arrow {{ margin-left: auto; }}' \
-            f'.color-dropdown .dropdown-menu {{ position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #ddd; border-radius: 4px; max-height: 200px; overflow-y: auto; z-index: 1000; }}' \
-            f'.color-dropdown .dropdown-item {{ padding: 0.5rem; display: flex; align-items: center; cursor: pointer; }}' \
-            f'.color-dropdown .dropdown-item:hover {{ background-color: #f0f0f0; }}' \
-            f'.color-dropdown .dropdown-item .preview-square {{ margin-right: 8px; }}' \
+            f'.color-dropdown .dropdown-menu {{ position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #ddd; border-radius: 4px; max-height: 200px; overflow-y: auto; z-index: 1000; display:grid; grid-template-columns: repeat(5, 1fr); gap:4px; padding:4px; }}' \
+            f'.color-dropdown .dropdown-item {{ width:24px; height:24px; border-radius:50%; border:2px solid #ccc; display:flex; align-items:center; justify-content:center; font-size:0.75rem; cursor:pointer; }}' \
             f'</style>'
         )
