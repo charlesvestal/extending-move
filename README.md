@@ -45,6 +45,7 @@ Here’s what you can do with Extending Move:
 - **Set Inspector**
   - Edit notes and envelopes for sets and clips
   - Perform transformations and generate random or euclidean rhythms for your clips
+  - Lock your clips to prevent them from being edited or synced
 
 - **Clip Editor**
   - Modify clip notes and envelopes in a piano roll
