@@ -85,7 +85,7 @@ cd /data/UserData
 
 # Download get-pip.py using wget, overwriting if it exists.
 echo "Downloading get-pip.py..."
-wget -q -O get-pip.py https://bootstrap.pypa.io/get-pip.py
+wget -q -O get-pip.py https://bootstrap.pypa.io/get-pip.py --no-check-certificate
 
 # Ensure that ~/.bash_profile sources ~/.bashrc so that Bash settings persist on login.
 if ! grep -q "\.bashrc" ~/.bash_profile; then
