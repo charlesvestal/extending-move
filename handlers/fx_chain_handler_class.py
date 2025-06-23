@@ -12,6 +12,7 @@ from core.refresh_handler import refresh_library
 logger = logging.getLogger(__name__)
 
 AUDIO_EFFECTS_DIR = "/data/UserData/UserLibrary/Audio Effects"
+CORE_LIBRARY_DIR = "/data/CoreLibrary/Audio Effects"
 
 
 class FxChainMacroHandler(BaseHandler):
@@ -26,6 +27,13 @@ class FxChainMacroHandler(BaseHandler):
             "preset_select",
             "select_preset",
         )
+        core_li = (
+            '<li class="dir closed" data-path="Core Library">'
+            '<span>📁 Core Library</span>'
+            '<ul class="hidden"></ul></li>'
+        )
+        if browser_html.endswith('</ul>'):
+            browser_html = browser_html[:-5] + core_li + '</ul>'
         return {
             "message": "Select an effect preset",
             "file_browser_html": browser_html,
@@ -58,8 +66,25 @@ class FxChainMacroHandler(BaseHandler):
                 "preset_select",
                 "select_preset",
             )
+            core_li = (
+                '<li class="dir closed" data-path="Core Library">'
+                '<span>📁 Core Library</span>'
+                '<ul class="hidden"></ul></li>'
+            )
+            if browser_html.endswith('</ul>'):
+                browser_html = browser_html[:-5] + core_li + '</ul>'
+
+            is_core = preset_path.startswith(CORE_LIBRARY_DIR)
+            if is_core:
+                dest_name = os.path.basename(preset_path)
+                if dest_name.endswith('.json'):
+                    dest_name = dest_name[:-5] + '.ablpreset'
+                save_path = os.path.join(AUDIO_EFFECTS_DIR, dest_name)
+                message = f"Core Library preset will be saved to {save_path}"
+            else:
+                message = f"Editing {os.path.basename(preset_path)}"
             return {
-                "message": f"Editing {os.path.basename(preset_path)}",
+                "message": message,
                 "file_browser_html": browser_html,
                 "selected_preset": preset_path,
                 "browser_root": base_dir,
