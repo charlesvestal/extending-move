@@ -1,0 +1,132 @@
+{
+  "BaseDrive": {
+    "type": "number",
+    "options": [],
+    "min": -24.60000228881836,
+    "max": 29.09999656677246,
+    "decimals": 4
+  },
+  "BassShaperThreshold": {
+    "type": "number",
+    "options": [],
+    "min": -50.0,
+    "max": -40.0
+  },
+  "ColorDepth": {
+    "type": "number",
+    "options": [],
+    "min": -24.0,
+    "max": 13.400001525878906,
+    "decimals": 4
+  },
+  "ColorFrequency": {
+    "type": "number",
+    "options": [],
+    "min": 30.0,
+    "max": 1000.0,
+    "decimals": 4
+  },
+  "ColorOn": {
+    "type": "boolean",
+    "options": []
+  },
+  "ColorWidth": {
+    "type": "number",
+    "options": [],
+    "min": 0.2539682686328888,
+    "max": 0.8897637724876404,
+    "decimals": 4
+  },
+  "DryWet": {
+    "type": "number",
+    "options": [],
+    "min": 0.658730149269104,
+    "max": 1.0,
+    "decimals": 4
+  },
+  "Enabled": {
+    "type": "boolean",
+    "options": []
+  },
+  "Oversampling": {
+    "type": "boolean",
+    "options": []
+  },
+  "PostClip": {
+    "type": "enum",
+    "options": [
+      "off",
+      "on"
+    ]
+  },
+  "PostDrive": {
+    "type": "number",
+    "options": [],
+    "min": -28.295522689819336,
+    "max": 0.0,
+    "decimals": 4
+  },
+  "PreDcFilter": {
+    "type": "boolean",
+    "options": []
+  },
+  "PreDrive": {
+    "type": "number",
+    "options": [],
+    "min": -10.857142448425293,
+    "max": 22.11023712158203,
+    "decimals": 4
+  },
+  "Type": {
+    "type": "enum",
+    "options": [
+      "Analog Clip",
+      "Bass Shaper",
+      "Digital Clip",
+      "Hard Curve",
+      "Medium Curve",
+      "Sinoid Fold",
+      "Soft Sine",
+      "Waveshaper"
+    ]
+  },
+  "WsCurve": {
+    "type": "number",
+    "options": [],
+    "min": 0.05000000074505806,
+    "max": 0.10199999809265137,
+    "decimals": 4
+  },
+  "WsDamp": {
+    "type": "number",
+    "options": [],
+    "min": 0.0,
+    "max": 0.046875,
+    "decimals": 4
+  },
+  "WsDepth": {
+    "type": "number",
+    "options": [],
+    "min": 0.0,
+    "max": 1.0
+  },
+  "WsDrive": {
+    "type": "number",
+    "options": [],
+    "min": 1.0,
+    "max": 1.0
+  },
+  "WsLin": {
+    "type": "number",
+    "options": [],
+    "min": 0.5,
+    "max": 0.5,
+    "decimals": 1
+  },
+  "WsPeriod": {
+    "type": "number",
+    "options": [],
+    "min": 0.0,
+    "max": 0.0
+  }
+}

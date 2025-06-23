@@ -73,6 +73,14 @@ def _has_kind(data: Union[dict, list], kind: str) -> bool:
     if isinstance(data, list):
         return any(_has_kind(item, kind) for item in data)
     return False
+FX_KINDS={"autoFilter","channelEq","chorus","compressor","delay","reverb","saturator","phaser","redux2","audioEffectRack"}
+
+def _check_fx_file(p: str) -> bool:
+    for k in FX_KINDS:
+        if _check_json_file(p, k):
+            return True
+    return False
+
 
 
 FILTERS: dict[str, Callable[[str], bool]] = {
@@ -95,8 +103,11 @@ FILTERS: dict[str, Callable[[str], bool]] = {
     "melodicsampler": lambda p: (
         p.lower().endswith(".ablpreset")
         or p.lower().endswith(".json")
-    )
-    and _check_json_file(p, "melodicSampler"),
+    ) and _check_json_file(p, "melodicSampler"),
+    "fx": lambda p: (
+        p.lower().endswith(".ablpreset")
+        or p.lower().endswith(".json")
+    ) and _check_fx_file(p),
 }
 
 

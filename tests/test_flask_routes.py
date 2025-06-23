@@ -748,3 +748,37 @@ def test_set_inspector_post(client, monkeypatch):
 
 
 
+
+def test_fx_chain_get(client, monkeypatch):
+    def fake_get():
+        return {
+            'file_browser_html': '<ul></ul>',
+            'message': '',
+            'selected_preset': None,
+            'browser_root': '/tmp',
+            'browser_filter': 'fx',
+            'effect_kinds': [],
+            'chain_data': None,
+        }
+    monkeypatch.setattr(move_webserver.fx_chain_handler, 'handle_get', fake_get)
+    resp = client.get('/fx-chain')
+    assert resp.status_code == 200
+    assert b'class="file-browser"' in resp.data
+
+
+def test_fx_chain_post(client, monkeypatch):
+    def fake_post(form):
+        return {
+            'message': 'ok',
+            'message_type': 'success',
+            'file_browser_html': '<ul></ul>',
+            'browser_root': '/tmp',
+            'browser_filter': 'fx',
+            'effect_kinds': [],
+            'chain_data': {'effects': []},
+            'selected_preset': 'x',
+        }
+    monkeypatch.setattr(move_webserver.fx_chain_handler, 'handle_post', fake_post)
+    resp = client.post('/fx-chain', data={'action': 'select_preset', 'preset_select': 'x'})
+    assert resp.status_code == 200
+    assert b'ok' in resp.data

@@ -1,0 +1,200 @@
+{
+  "AllPassGain": {
+    "type": "number",
+    "options": [],
+    "min": 0.31305554509162903,
+    "max": 0.9599999785423279,
+    "decimals": 4
+  },
+  "AllPassSize": {
+    "type": "number",
+    "options": [],
+    "min": 0.17817460000514984,
+    "max": 1.0,
+    "decimals": 4
+  },
+  "BandFreq": {
+    "type": "number",
+    "options": [],
+    "min": 265.2108154296875,
+    "max": 7123.693359375,
+    "decimals": 4
+  },
+  "BandHighOn": {
+    "type": "boolean",
+    "options": []
+  },
+  "BandLowOn": {
+    "type": "boolean",
+    "options": []
+  },
+  "BandWidth": {
+    "type": "number",
+    "options": [],
+    "min": 2.9791667461395264,
+    "max": 6.875,
+    "decimals": 4
+  },
+  "ChorusOn": {
+    "type": "boolean",
+    "options": []
+  },
+  "CutOn": {
+    "type": "boolean",
+    "options": []
+  },
+  "DecayTime": {
+    "type": "number",
+    "options": [],
+    "min": 600.0001831054688,
+    "max": 19522.20703125,
+    "decimals": 4
+  },
+  "DiffuseDelay": {
+    "type": "number",
+    "options": [],
+    "min": 0.0,
+    "max": 0.9841269850730896,
+    "decimals": 4
+  },
+  "EarlyReflectModDepth": {
+    "type": "number",
+    "options": [],
+    "min": 2.6361758708953857,
+    "max": 55.0,
+    "decimals": 4
+  },
+  "EarlyReflectModFreq": {
+    "type": "number",
+    "options": [],
+    "min": 0.07999999821186066,
+    "max": 1.0627338886260986,
+    "decimals": 4
+  },
+  "Enabled": {
+    "type": "boolean",
+    "options": []
+  },
+  "FlatOn": {
+    "type": "boolean",
+    "options": []
+  },
+  "FreezeOn": {
+    "type": "boolean",
+    "options": []
+  },
+  "HighFilterType": {
+    "type": "enum",
+    "options": [
+      "Shelf"
+    ]
+  },
+  "MixDiffuse": {
+    "type": "number",
+    "options": [],
+    "min": 1.0,
+    "max": 1.995300054550171,
+    "decimals": 4
+  },
+  "MixDirect": {
+    "type": "number",
+    "options": [],
+    "min": 0.19685038924217224,
+    "max": 0.5,
+    "decimals": 4
+  },
+  "MixReflect": {
+    "type": "number",
+    "options": [],
+    "min": 0.029999999329447746,
+    "max": 1.995300054550171,
+    "decimals": 4
+  },
+  "PreDelay": {
+    "type": "number",
+    "options": [],
+    "min": 0.949999988079071,
+    "max": 103.61170959472656,
+    "decimals": 4
+  },
+  "RoomSize": {
+    "type": "number",
+    "options": [],
+    "min": 0.26640886068344116,
+    "max": 499.99993896484375,
+    "decimals": 4
+  },
+  "RoomType": {
+    "type": "enum",
+    "options": [
+      "SuperEco"
+    ]
+  },
+  "ShelfHiFreq": {
+    "type": "number",
+    "options": [],
+    "min": 110.05611419677734,
+    "max": 7057.31591796875,
+    "decimals": 4
+  },
+  "ShelfHiGain": {
+    "type": "number",
+    "options": [],
+    "min": 0.21666666865348816,
+    "max": 0.7333333492279053,
+    "decimals": 4
+  },
+  "ShelfHighOn": {
+    "type": "boolean",
+    "options": []
+  },
+  "ShelfLoFreq": {
+    "type": "number",
+    "options": [],
+    "min": 58.900001525878906,
+    "max": 1614.2037353515625,
+    "decimals": 4
+  },
+  "ShelfLoGain": {
+    "type": "number",
+    "options": [],
+    "min": 0.20000000298023224,
+    "max": 1.0,
+    "decimals": 4
+  },
+  "ShelfLowOn": {
+    "type": "boolean",
+    "options": []
+  },
+  "SizeModDepth": {
+    "type": "number",
+    "options": [],
+    "min": 0.019999999552965164,
+    "max": 3.1163108348846436,
+    "decimals": 4
+  },
+  "SizeModFreq": {
+    "type": "number",
+    "options": [],
+    "min": 0.019999999552965164,
+    "max": 5.90379524230957,
+    "decimals": 4
+  },
+  "SizeSmoothing": {
+    "type": "enum",
+    "options": [
+      "Fast"
+    ]
+  },
+  "SpinOn": {
+    "type": "boolean",
+    "options": []
+  },
+  "StereoSeparation": {
+    "type": "number",
+    "options": [],
+    "min": 82.66000366210938,
+    "max": 120.0,
+    "decimals": 4
+  }
+}
