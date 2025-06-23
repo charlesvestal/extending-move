@@ -1,0 +1,15 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "channelEq",
+  "name": "Mid Accent",
+  "parameters": {
+    "Enabled": true,
+    "Gain": 0.7943263053894043,
+    "HighShelfGain": 1.0,
+    "HighpassOn": false,
+    "LowShelfGain": 1.0,
+    "MidFrequency": 1000.0,
+    "MidGain": 1.8114473819732666
+  },
+  "deviceData": {}
+}

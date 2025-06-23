@@ -1,0 +1,28 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "saturator",
+  "name": "Gritty Bass",
+  "parameters": {
+    "BaseDrive": 22.700002670288086,
+    "BassShaperThreshold": -50.0,
+    "ColorDepth": -5.480316162109375,
+    "ColorFrequency": 309.21832275390625,
+    "ColorOn": true,
+    "ColorWidth": 0.8188976645469666,
+    "DryWet": 0.658730149269104,
+    "Enabled": true,
+    "Oversampling": false,
+    "PostClip": "on",
+    "PostDrive": 0.0,
+    "PreDcFilter": false,
+    "PreDrive": -4.0,
+    "Type": "Medium Curve",
+    "WsCurve": 0.05000000074505806,
+    "WsDamp": 0.0,
+    "WsDepth": 0.0,
+    "WsDrive": 1.0,
+    "WsLin": 0.5,
+    "WsPeriod": 0.0
+  },
+  "deviceData": {}
+}

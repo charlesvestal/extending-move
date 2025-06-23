@@ -1,0 +1,19 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "redux2",
+  "name": "Dirt & Grit",
+  "parameters": {
+    "BitDepth": 4,
+    "DryWet": 1.0,
+    "EcoProcessing": true,
+    "EnablePostFilter": true,
+    "EnablePreFilter": false,
+    "Enabled": true,
+    "Jitter": 0.2998866140842438,
+    "PostFilterValue": 4.0,
+    "QuantizerDcShift": false,
+    "QuantizerShape": 0.2777777910232544,
+    "SampleRate": 9963.53125
+  },
+  "deviceData": {}
+}

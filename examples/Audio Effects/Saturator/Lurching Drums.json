@@ -1,0 +1,28 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "saturator",
+  "name": "Lurching Drums",
+  "parameters": {
+    "BaseDrive": -22.960628509521484,
+    "BassShaperThreshold": -50.0,
+    "ColorDepth": 3.2099990844726563,
+    "ColorFrequency": 30.0,
+    "ColorOn": true,
+    "ColorWidth": 0.6614173054695129,
+    "DryWet": 1.0,
+    "Enabled": true,
+    "Oversampling": false,
+    "PostClip": "on",
+    "PostDrive": -8.217519760131836,
+    "PreDcFilter": true,
+    "PreDrive": 9.714285850524902,
+    "Type": "Sinoid Fold",
+    "WsCurve": 0.05000000074505806,
+    "WsDamp": 0.0,
+    "WsDepth": 0.0,
+    "WsDrive": 1.0,
+    "WsLin": 0.5,
+    "WsPeriod": 0.0
+  },
+  "deviceData": {}
+}

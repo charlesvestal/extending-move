@@ -1,0 +1,15 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "channelEq",
+  "name": "High Shelf",
+  "parameters": {
+    "Enabled": true,
+    "Gain": 1.1220215559005737,
+    "HighShelfGain": 0.5011858344078064,
+    "HighpassOn": false,
+    "LowShelfGain": 1.0,
+    "MidFrequency": 1500.0001220703125,
+    "MidGain": 1.0
+  },
+  "deviceData": {}
+}

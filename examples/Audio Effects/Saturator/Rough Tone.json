@@ -1,0 +1,28 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "saturator",
+  "name": "Rough Tone",
+  "parameters": {
+    "BaseDrive": 3.4285714626312256,
+    "BassShaperThreshold": -50.0,
+    "ColorDepth": 13.400001525878906,
+    "ColorFrequency": 278.0,
+    "ColorOn": true,
+    "ColorWidth": 0.2539682686328888,
+    "DryWet": 1.0,
+    "Enabled": true,
+    "Oversampling": false,
+    "PostClip": "on",
+    "PostDrive": -5.142857074737549,
+    "PreDcFilter": true,
+    "PreDrive": 4.818897247314453,
+    "Type": "Waveshaper",
+    "WsCurve": 0.10199999809265137,
+    "WsDamp": 0.046875,
+    "WsDepth": 1.0,
+    "WsDrive": 1.0,
+    "WsLin": 0.5,
+    "WsPeriod": 0.0
+  },
+  "deviceData": {}
+}

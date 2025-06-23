@@ -1,0 +1,28 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "saturator",
+  "name": "Sinoid Fold",
+  "parameters": {
+    "BaseDrive": 0.4200000762939453,
+    "BassShaperThreshold": -50.0,
+    "ColorDepth": 5.480316162109375,
+    "ColorFrequency": 178.38296508789063,
+    "ColorOn": true,
+    "ColorWidth": 0.8503937125205994,
+    "DryWet": 1.0,
+    "Enabled": true,
+    "Oversampling": false,
+    "PostClip": "on",
+    "PostDrive": -4.857142925262451,
+    "PreDcFilter": false,
+    "PreDrive": 8.0,
+    "Type": "Sinoid Fold",
+    "WsCurve": 0.05000000074505806,
+    "WsDamp": 0.0,
+    "WsDepth": 0.0,
+    "WsDrive": 1.0,
+    "WsLin": 0.5,
+    "WsPeriod": 0.0
+  },
+  "deviceData": {}
+}

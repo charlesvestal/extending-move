@@ -1,0 +1,22 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "chorus",
+  "name": "Chorus Classic",
+  "parameters": {
+    "Amount": 0.5873016119003296,
+    "DryWet": 1.0,
+    "Enabled": true,
+    "Feedback": 0.0,
+    "HighpassEnabled": true,
+    "HighpassFrequency": 20.0,
+    "InvertFeedback": false,
+    "Mode": "Classic",
+    "OutputGain": 0.9999999403953552,
+    "Rate": 0.6199194192886353,
+    "Shaping": 0.0,
+    "VibratoOffset": 0.0,
+    "Warmth": 0.0,
+    "Width": 1.0
+  },
+  "deviceData": {}
+}
