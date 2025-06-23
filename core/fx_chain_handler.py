@@ -1,73 +1,85 @@
 #!/usr/bin/env python3
-"""Utilities for building Audio Effect Rack chains."""
+"""Utilities for creating Audio Effect Rack presets."""
 
 import os
 import json
 import logging
+from typing import Dict, List
+
 from core.refresh_handler import refresh_library
 
 logger = logging.getLogger(__name__)
 
-# Map effect kinds to example preset paths used for extracting parameters
-DEFAULT_EFFECT_PRESETS = {
-    "autoFilter": os.path.join("examples", "Audio Effects", "Auto Filter", "Default Filter.json"),
-    "reverb": os.path.join("examples", "Audio Effects", "Reverb", "Default Reverb.json"),
-    "redux2": os.path.join("examples", "Audio Effects", "Redux", "Default Redux.json"),
-    "phaser": os.path.join("examples", "Audio Effects", "Phaser-Flanger", "Phaser Default.json"),
-    "delay": os.path.join("examples", "Audio Effects", "Delay", "Time Delay.json"),
-    "compressor": os.path.join("examples", "Audio Effects", "Dynamics", "Fast.json"),
-    "chorus": os.path.join("examples", "Audio Effects", "Chorus-Ensemble", "Chorus Default.json"),
-    "channelEq": os.path.join("examples", "Audio Effects", "Channel EQ", "Default EQ.json"),
-    "saturator": os.path.join("examples", "Audio Effects", "Saturator", "Default Saturator.json"),
-}
-
-USER_FX_DIR = os.path.join("/data/UserData/UserLibrary/Audio Effects")
+CORE_FX_DIR = "/data/CoreLibrary/Audio Effects"
+USER_FX_DIR = "/data/UserData/UserLibrary/Audio Effects"
 
 
-def get_effect_parameters(effect_kind):
-    """Return the parameter names for the given effect kind."""
-    preset = DEFAULT_EFFECT_PRESETS.get(effect_kind)
-    if not preset or not os.path.exists(preset):
-        return []
-    try:
-        with open(preset, "r") as f:
-            data = json.load(f)
-        params = data.get("parameters", {})
-        return sorted(params.keys())
-    except Exception as exc:
-        logger.warning("Failed to read preset %s: %s", preset, exc)
-        return []
+def load_fx_presets(base_dir: str = CORE_FX_DIR) -> Dict[str, Dict[str, dict]]:
+    """Scan the Core Library and load all effect presets with parameters."""
+    presets: Dict[str, Dict[str, dict]] = {}
+    if not os.path.exists(base_dir):
+        return presets
+
+    for root, _dirs, files in os.walk(base_dir):
+        kind = os.path.basename(root)
+        for file in files:
+            if not file.endswith((".json", ".ablpreset")):
+                continue
+            path = os.path.join(root, file)
+            try:
+                with open(path, "r") as f:
+                    data = json.load(f)
+                params = data.get("parameters", {})
+                presets.setdefault(kind, {})[os.path.splitext(file)[0]] = {
+                    "path": path,
+                    "parameters": {
+                        k: (v.get("value") if isinstance(v, dict) else v)
+                        for k, v in params.items()
+                    },
+                    "kind": data.get("kind", kind),
+                    "deviceData": data.get("deviceData", {}),
+                }
+            except Exception as exc:
+                logger.warning("Failed to load preset %s: %s", path, exc)
+    return presets
 
 
-def create_fx_chain(effect_kinds, knob_map, preset_name):
-    """Create an Audio Effect Rack preset.
+def create_fx_chain(
+    preset_paths: List[str],
+    knob_map: Dict[int, Dict[str, str]],
+    preset_name: str,
+    param_values: Dict[int, Dict[str, str]] | None = None,
+) -> Dict[str, object]:
+    """Create an Audio Effect Rack preset from selected effect presets."""
 
-    Args:
-        effect_kinds: List of effect names (strings). Up to four entries.
-        knob_map: Mapping of macro index to {"effect_index": int, "parameter": str}
-        preset_name: Name of the new preset (with or without extension).
-
-    Returns:
-        dict with success, message, path.
-    """
+    param_values = param_values or {}
     try:
         devices = []
-        for kind in effect_kinds:
-            if not kind:
+        for idx, path in enumerate(preset_paths):
+            if not path:
                 continue
-            preset = DEFAULT_EFFECT_PRESETS.get(kind)
-            if not preset or not os.path.exists(preset):
+            if not os.path.exists(path):
                 continue
-            with open(preset, "r") as f:
+            with open(path, "r") as f:
                 data = json.load(f)
-            dev = {
-                "presetUri": None,
-                "kind": kind,
-                "name": "",
-                "parameters": data.get("parameters", {}),
-                "deviceData": data.get("deviceData", {}),
-            }
-            devices.append(dev)
+            params = data.get("parameters", {})
+            for key, val in param_values.get(idx, {}).items():
+                if key in params:
+                    if isinstance(params[key], dict) and "value" in params[key]:
+                        params[key]["value"] = val
+                    else:
+                        params[key] = val
+                else:
+                    params[key] = val
+            devices.append(
+                {
+                    "presetUri": None,
+                    "kind": data.get("kind"),
+                    "name": data.get("name", ""),
+                    "parameters": params,
+                    "deviceData": data.get("deviceData", {}),
+                }
+            )
 
         rack = {
             "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
@@ -79,10 +91,17 @@ def create_fx_chain(effect_kinds, knob_map, preset_name):
                     "name": "",
                     "color": 0,
                     "devices": devices,
-                    "mixer": {"pan": 0.0, "solo-cue": False, "speakerOn": True, "volume": 0.0, "sends": []},
+                    "mixer": {
+                        "pan": 0.0,
+                        "solo-cue": False,
+                        "speakerOn": True,
+                        "volume": 0.0,
+                        "sends": [],
+                    },
                 }
             ],
         }
+
         for i in range(8):
             rack["parameters"][f"Macro{i}"] = 0.0
 
@@ -104,7 +123,10 @@ def create_fx_chain(effect_kinds, knob_map, preset_name):
                     "rangeMin": 0.0,
                     "rangeMax": 1.0,
                 }
-                rack["parameters"][f"Macro{macro_idx}"] = {"value": val["value"], "customName": param}
+                rack["parameters"][f"Macro{macro_idx}"] = {
+                    "value": val["value"],
+                    "customName": param,
+                }
             else:
                 params[param] = {
                     "value": val,
@@ -114,7 +136,10 @@ def create_fx_chain(effect_kinds, knob_map, preset_name):
                         "rangeMax": 1.0,
                     },
                 }
-                rack["parameters"][f"Macro{macro_idx}"] = {"value": val, "customName": param}
+                rack["parameters"][f"Macro{macro_idx}"] = {
+                    "value": val,
+                    "customName": param,
+                }
 
         os.makedirs(USER_FX_DIR, exist_ok=True)
         if not preset_name.endswith(".ablpreset") and not preset_name.endswith(".json"):
@@ -124,7 +149,11 @@ def create_fx_chain(effect_kinds, knob_map, preset_name):
             json.dump(rack, f, indent=2)
             f.write("\n")
         refresh_library()
-        return {"success": True, "message": f"Created preset {preset_name}", "path": dest}
+        return {
+            "success": True,
+            "message": f"Created preset {preset_name}",
+            "path": dest,
+        }
     except Exception as exc:
         logger.error("FX chain creation failed: %s", exc)
         return {"success": False, "message": f"Error creating FX chain: {exc}"}
