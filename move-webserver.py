@@ -46,6 +46,7 @@ from handlers.update_handler_class import UpdateHandler, REPO
 from handlers.adsr_handler_class import AdsrHandler
 from handlers.cyc_env_handler_class import CycEnvHandler
 from handlers.lfo_handler_class import LfoHandler
+from handlers.fx_chain_handler_class import FxChainMacroHandler
 from handlers.set_inspector_handler_class import SetInspectorHandler
 from core.refresh_handler import refresh_library
 from core.file_browser import generate_dir_html
@@ -136,6 +137,7 @@ update_handler = UpdateHandler()
 adsr_handler = AdsrHandler()
 cyc_env_handler = CycEnvHandler()
 lfo_handler = LfoHandler()
+fx_chain_handler = FxChainMacroHandler()
 set_inspector_handler = SetInspectorHandler()
 
 
@@ -761,6 +763,36 @@ def melodic_sampler_params():
         sample_name=sample_name,
         sample_path=sample_path,
         active_tab="melodic-sampler",
+    )
+
+
+@app.route("/fx-chain", methods=["GET", "POST"])
+def fx_chain():
+    if request.method == "POST":
+        form = SimpleForm(request.form.to_dict())
+        result = fx_chain_handler.handle_post(form)
+    else:
+        result = fx_chain_handler.handle_get()
+
+    message = result.get("message")
+    message_type = result.get("message_type")
+    success = message_type != "error" if message_type else False
+    browser_html = result.get("file_browser_html")
+    browser_root = result.get("browser_root")
+    selected_preset = result.get("selected_preset")
+    parameters = result.get("parameters", [])
+    macro_values = result.get("macro_values", {})
+    return render_template(
+        "fx_chain.html",
+        message=message,
+        success=success,
+        message_type=message_type,
+        file_browser_html=browser_html,
+        browser_root=browser_root,
+        selected_preset=selected_preset,
+        parameters=parameters,
+        macro_values=macro_values,
+        active_tab="fx-chain",
     )
 
 

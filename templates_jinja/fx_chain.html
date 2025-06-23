@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>FX Chain Macro Editor</h2>
+<p>{{ message }}</p>
+{% if not selected_preset %}
+<div class="file-browser" data-root="{{ browser_root }}" data-action="{{ host_prefix }}/fx-chain" data-field="preset_select" data-value="select_preset">
+    {{ file_browser_html | safe }}
+</div>
+{% else %}
+<form method="post" action="{{ host_prefix }}/fx-chain">
+    <input type="hidden" name="preset_select" value="{{ selected_preset }}">
+    <button type="submit" name="action" value="reset_preset">Choose Another Preset</button>
+    <p class="current-preset">Editing: {{ selected_preset }}</p>
+    <table>
+        <tr><th>Macro</th><th>Parameter</th><th>Name</th></tr>
+        {% for i in range(8) %}
+        <tr>
+            <td>{{ i + 1 }}</td>
+            <td>
+                <select name="macro_{{ i }}_param">
+                    <option value="">-- none --</option>
+                    {% for p in parameters %}
+                    <option value="{{ p.name }}||{{ p.path }}">{{ p.name }} ({{ p.path }})</option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td><input type="text" name="macro_{{ i }}_name" value="{{ macro_values.get(i, '') }}"></td>
+        </tr>
+        {% endfor %}
+    </table>
+    <input type="text" name="new_preset_name" placeholder="New preset name">
+    <button type="submit" name="action" value="save_mappings">Save Preset</button>
+</form>
+{% endif %}
+{% endblock %}
