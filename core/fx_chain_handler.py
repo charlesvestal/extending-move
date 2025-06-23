@@ -4,7 +4,6 @@ from typing import Any, Dict, List
 
 from .fx_browser_handler import load_fx_chain_schema
 from .synth_preset_inspector_handler import (
-    update_preset_macro_names,
     update_preset_parameter_mappings,
 )
 from .synth_param_editor_handler import update_macro_values
@@ -75,7 +74,12 @@ def save_fx_chain_with_macros(
 ) -> Dict[str, Any]:
     """Create an FX chain from ``source_preset`` with macro assignments."""
     try:
-        chain = build_fx_chain_from_preset(source_preset)
+        with open(source_preset, "r") as f:
+            source_data = json.load(f)
+
+        is_chain = source_data.get("kind") == "audioEffectRack"
+
+        chain = source_data if is_chain else build_fx_chain_from_preset(source_preset)
         with open(dest_path, "w") as f:
             json.dump(chain, f, indent=2)
             f.write("\n")
@@ -89,9 +93,12 @@ def save_fx_chain_with_macros(
             if "value" in m:
                 value_updates[idx] = str(m["value"])
             for p in m.get("parameters", []):
+                p_path = p.get("path")
+                if not is_chain and p_path:
+                    p_path = f"chains[0].devices[0].{p_path}"
                 upd = {
                     idx: {
-                        "parameter_path": p.get("path"),
+                        "parameter_path": p_path,
                         "rangeMin": p.get("rangeMin"),
                         "rangeMax": p.get("rangeMax"),
                     }
@@ -101,9 +108,29 @@ def save_fx_chain_with_macros(
                     return res
 
         if name_updates:
-            res = update_preset_macro_names(dest_path, name_updates)
-            if not res["success"]:
-                return res
+            try:
+                with open(dest_path, "r") as f:
+                    chain_data = json.load(f)
+                for n_idx, n_val in name_updates.items():
+                    macro_key = f"Macro{n_idx}"
+                    if macro_key in chain_data.get("parameters", {}):
+                        param = chain_data["parameters"][macro_key]
+                        if isinstance(param, dict):
+                            if n_val:
+                                param["customName"] = n_val
+                            else:
+                                param.pop("customName", None)
+                        else:
+                            if n_val:
+                                chain_data["parameters"][macro_key] = {
+                                    "value": param,
+                                    "customName": n_val,
+                                }
+                with open(dest_path, "w") as f:
+                    json.dump(chain_data, f, indent=2)
+                    f.write("\n")
+            except Exception as exc:
+                return {"success": False, "message": f"Error updating macro names: {exc}"}
         if value_updates:
             res = update_macro_values(dest_path, value_updates, dest_path)
             if not res["success"]:
