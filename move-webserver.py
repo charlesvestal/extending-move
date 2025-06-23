@@ -48,6 +48,7 @@ from handlers.cyc_env_handler_class import CycEnvHandler
 from handlers.lfo_handler_class import LfoHandler
 from handlers.set_inspector_handler_class import SetInspectorHandler
 from handlers.fx_browser_handler_class import FxBrowserHandler
+from handlers.fx_chain_editor_handler_class import FxChainEditorHandler
 from core.refresh_handler import refresh_library
 from core.file_browser import generate_dir_html
 
@@ -139,6 +140,7 @@ cyc_env_handler = CycEnvHandler()
 lfo_handler = LfoHandler()
 set_inspector_handler = SetInspectorHandler()
 fx_browser_handler = FxBrowserHandler()
+fx_chain_handler = FxChainEditorHandler()
 
 
 @app.before_request
@@ -802,6 +804,52 @@ def fx_browser():
         preset_selected=preset_selected,
         selected_preset=selected_preset,
         active_tab="fx-browser",
+    )
+
+
+@app.route("/fx-chain", methods=["GET", "POST"])
+def fx_chain():
+    if request.method == "POST":
+        form = SimpleForm(request.form.to_dict())
+        result = fx_chain_handler.handle_post(form)
+    else:
+        if "preset" in request.args:
+            form = SimpleForm({"action": "select_preset", "preset_select": request.args.get("preset")})
+            result = fx_chain_handler.handle_post(form)
+        else:
+            result = fx_chain_handler.handle_get()
+
+    message = result.get("message")
+    message_type = result.get("message_type")
+    success = message_type != "error" if message_type else False
+    browser_html = result.get("file_browser_html")
+    browser_root = result.get("browser_root")
+    browser_filter = result.get("browser_filter")
+    params_html = result.get("params_html", "")
+    selected_preset = result.get("selected_preset")
+    preset_selected = bool(selected_preset)
+    new_preset_name = result.get("new_preset_name", "")
+    macro_knobs_html = result.get("macro_knobs_html", "")
+    macros_json = result.get("macros_json", "[]")
+    available_params_json = result.get("available_params_json", "[]")
+    param_paths_json = result.get("param_paths_json", "{}")
+    return render_template(
+        "fx_chain_editor.html",
+        message=message,
+        success=success,
+        message_type=message_type,
+        file_browser_html=browser_html,
+        browser_root=browser_root,
+        browser_filter=browser_filter,
+        params_html=params_html,
+        preset_selected=preset_selected,
+        selected_preset=selected_preset,
+        macro_knobs_html=macro_knobs_html,
+        macros_json=macros_json,
+        available_params_json=available_params_json,
+        param_paths_json=param_paths_json,
+        new_preset_name=new_preset_name,
+        active_tab="fx-chain",
     )
 
 
