@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(python3 -m pytest --help 2 > /dev/null)",
+      "Bash(python3 -m pytest tests/ -v)",
+      "Bash(python3 -m pytest tests/test_fx_chain_handler.py -v)",
+      "Bash(python3:*)"
+    ],
+    "deny": []
+  }
+}
