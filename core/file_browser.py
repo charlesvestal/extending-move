@@ -100,8 +100,7 @@ FILTERS: dict[str, Callable[[str], bool]] = {
     "fxchain": lambda p: (
         p.lower().endswith(".ablpreset")
         or p.lower().endswith(".json")
-    )
-    and _check_json_file(p, "audioEffectRack"),
+    ),
 }
 
 
