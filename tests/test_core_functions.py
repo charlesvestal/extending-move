@@ -93,6 +93,7 @@ def test_generate_dir_html(tmp_path):
 
 def test_generate_dir_html_fxchain(tmp_path):
     (tmp_path / "a.json").write_text(json.dumps({"kind": "audioEffectRack"}))
+    (tmp_path / "c.json").write_text(json.dumps({"kind": "channelEq"}))
     (tmp_path / "b.txt").write_text("x")
 
     html = generate_dir_html(
@@ -104,6 +105,7 @@ def test_generate_dir_html_fxchain(tmp_path):
         filter_key="fxchain",
     )
     assert "a.json" in html
+    assert "c.json" in html
     assert "b.txt" not in html
 
 
