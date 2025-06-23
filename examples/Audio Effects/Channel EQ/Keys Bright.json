@@ -1,0 +1,15 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "channelEq",
+  "name": "Keys Bright",
+  "parameters": {
+    "Enabled": true,
+    "Gain": 0.8489664793014526,
+    "HighShelfGain": 2.004319906234741,
+    "HighpassOn": false,
+    "LowShelfGain": 0.5314741730690002,
+    "MidFrequency": 572.7157592773438,
+    "MidGain": 1.7834190130233765
+  },
+  "deviceData": {}
+}

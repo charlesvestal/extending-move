@@ -1,0 +1,19 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "redux2",
+  "name": "Some Dust",
+  "parameters": {
+    "BitDepth": 11,
+    "DryWet": 1.0,
+    "EcoProcessing": true,
+    "EnablePostFilter": false,
+    "EnablePreFilter": true,
+    "Enabled": true,
+    "Jitter": 0.43392542004585266,
+    "PostFilterValue": 1.625,
+    "QuantizerDcShift": true,
+    "QuantizerShape": 0.8888888955116272,
+    "SampleRate": 23205.826171875
+  },
+  "deviceData": {}
+}

@@ -1,0 +1,15 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "channelEq",
+  "name": "Vocal Curve",
+  "parameters": {
+    "Enabled": true,
+    "Gain": 1.0,
+    "HighShelfGain": 1.3553900718688965,
+    "HighpassOn": true,
+    "LowShelfGain": 0.8912506103515625,
+    "MidFrequency": 4192.9130859375,
+    "MidGain": 1.0449920892715454
+  },
+  "deviceData": {}
+}

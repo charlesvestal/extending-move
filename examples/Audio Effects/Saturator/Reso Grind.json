@@ -1,0 +1,28 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "saturator",
+  "name": "Reso Grind",
+  "parameters": {
+    "BaseDrive": -24.60000228881836,
+    "BassShaperThreshold": -50.0,
+    "ColorDepth": -24.0,
+    "ColorFrequency": 608.0,
+    "ColorOn": true,
+    "ColorWidth": 0.5600000023841858,
+    "DryWet": 1.0,
+    "Enabled": true,
+    "Oversampling": false,
+    "PostClip": "off",
+    "PostDrive": -28.295522689819336,
+    "PreDcFilter": true,
+    "PreDrive": 22.11023712158203,
+    "Type": "Hard Curve",
+    "WsCurve": 0.05000000074505806,
+    "WsDamp": 0.0,
+    "WsDepth": 0.0,
+    "WsDrive": 1.0,
+    "WsLin": 0.5,
+    "WsPeriod": 0.0
+  },
+  "deviceData": {}
+}

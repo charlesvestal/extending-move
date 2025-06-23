@@ -1,0 +1,28 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "saturator",
+  "name": "Hard Punch",
+  "parameters": {
+    "BaseDrive": -4.070000648498535,
+    "BassShaperThreshold": -50.0,
+    "ColorDepth": -1.7007875442504883,
+    "ColorFrequency": 255.78895568847656,
+    "ColorOn": true,
+    "ColorWidth": 0.5511810779571533,
+    "DryWet": 1.0,
+    "Enabled": true,
+    "Oversampling": false,
+    "PostClip": "off",
+    "PostDrive": -10.857142448425293,
+    "PreDcFilter": false,
+    "PreDrive": 6.857142925262451,
+    "Type": "Hard Curve",
+    "WsCurve": 0.05000000074505806,
+    "WsDamp": 0.0,
+    "WsDepth": 0.0,
+    "WsDrive": 1.0,
+    "WsLin": 0.5,
+    "WsPeriod": 0.0
+  },
+  "deviceData": {}
+}

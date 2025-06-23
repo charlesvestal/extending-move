@@ -1,0 +1,15 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "channelEq",
+  "name": "High End Boost",
+  "parameters": {
+    "Enabled": true,
+    "Gain": 0.8175188899040222,
+    "HighShelfGain": 1.412537693977356,
+    "HighpassOn": false,
+    "LowShelfGain": 1.0,
+    "MidFrequency": 1500.0001220703125,
+    "MidGain": 1.0
+  },
+  "deviceData": {}
+}
