@@ -38,6 +38,7 @@ from handlers.wavetable_param_editor_handler_class import (
 from handlers.melodic_sampler_param_editor_handler_class import (
     MelodicSamplerParamEditorHandler,
 )
+from handlers.audio_effect_rack_handler_class import AudioEffectRackHandler
 from handlers.drum_rack_inspector_handler_class import DrumRackInspectorHandler
 from handlers.file_placer_handler_class import FilePlacerHandler
 from handlers.refresh_handler_class import RefreshHandler
@@ -128,6 +129,7 @@ synth_handler = SynthPresetInspectorHandler()
 synth_param_handler = SynthParamEditorHandler()
 wavetable_param_handler = WavetableParamEditorHandler()
 melodic_sampler_param_handler = MelodicSamplerParamEditorHandler()
+audio_rack_handler = AudioEffectRackHandler()
 file_placer_handler = FilePlacerHandler()
 refresh_handler = RefreshHandler()
 drum_rack_handler = DrumRackInspectorHandler()
@@ -761,6 +763,28 @@ def melodic_sampler_params():
         sample_name=sample_name,
         sample_path=sample_path,
         active_tab="melodic-sampler",
+    )
+
+
+@app.route("/effects-rack", methods=["GET", "POST"])
+def effects_rack():
+    if request.method == "POST":
+        form = SimpleForm(request.form.to_dict())
+        result = audio_rack_handler.handle_post(form)
+    else:
+        result = audio_rack_handler.handle_get()
+
+    message = result.get("message")
+    message_type = result.get("message_type")
+    success = message_type != "error" if message_type else False
+    return render_template(
+        "effects_rack.html",
+        message=message,
+        success=success,
+        message_type=message_type,
+        effects=result.get("effects", []),
+        params_json=result.get("params_json", "{}"),
+        active_tab="effects-rack",
     )
 
 
