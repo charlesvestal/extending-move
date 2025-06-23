@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>FX Chain Editor</h2>
+{% if message %}
+<p class="{{ message_type if message_type else ('success' if success else 'error') }}">{{ message }}</p>
+{% endif %}
+{% if not chain_data %}
+<div class="file-browser" data-root="{{ browser_root }}" data-action="{{ host_prefix }}/fx-chain" data-field="preset_select" data-value="select_preset" data-filter="fx">
+    {{ file_browser_html | safe }}
+</div>
+<form method="post" action="{{ host_prefix }}/fx-chain">
+  <input type="hidden" name="action" value="new_chain">
+  <label>Name: <input type="text" name="new_chain_name"></label><br>
+  {% for i in range(4) %}
+  <label>Effect {{ i+1 }}:
+    <select name="effect{{ i }}">
+      <option value="">None</option>
+      {% for kind in effect_kinds %}
+      <option value="{{ kind }}">{{ kind }}</option>
+      {% endfor %}
+    </select>
+  </label><br>
+  {% endfor %}
+  <button type="submit">Create New Chain</button>
+</form>
+{% else %}
+<form method="post" action="{{ host_prefix }}/fx-chain">
+  <input type="hidden" name="action" value="save_chain">
+  <label>Name: <input type="text" name="chain_name" value="{{ chain_data.name }}"></label><br>
+  {% for eff in chain_data.effects %}
+    {% set idx = loop.index0 %}
+    <h3>Effect {{ idx+1 }} - {{ eff.kind }}</h3>
+    <input type="hidden" name="effect{{ idx }}_kind" value="{{ eff.kind }}">
+    {% for p,val in eff.parameters.items() %}
+      <label>{{ p }}:<input type="text" name="effect{{ idx }}_{{ p }}" value="{{ val.value if val is mapping else val }}"></label><br>
+    {% endfor %}
+  {% endfor %}
+  <h3>Macro Mappings</h3>
+  {% for i in range(8) %}
+    <label>Macro {{ i }}:
+      <select name="macro{{ i }}">
+        <option value="">None</option>
+        {% for eff in chain_data.effects %}
+          {% set idx = loop.index0 %}
+          {% for p in eff.parameters.keys() %}
+            {% set val = idx|string + ':' + p %}
+            <option value="{{ val }}" {% if chain_data.macros[i] and chain_data.macros[i].effect_index == idx and chain_data.macros[i].param == p %}selected{% endif %}>Effect {{ idx+1 }} {{ p }}</option>
+          {% endfor %}
+        {% endfor %}
+      </select>
+    </label><br>
+  {% endfor %}
+  <button type="submit">Save Chain</button>
+</form>
+{% endif %}
+{% endblock %}

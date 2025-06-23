@@ -1,0 +1,173 @@
+{
+  "DelayLine_CompatibilityMode": {
+    "type": "enum",
+    "options": [
+      "D"
+    ]
+  },
+  "DelayLine_Link": {
+    "type": "boolean",
+    "options": []
+  },
+  "DelayLine_OffsetL": {
+    "type": "number",
+    "options": [],
+    "min": -0.33000001311302185,
+    "max": 0.07218751311302185,
+    "decimals": 4
+  },
+  "DelayLine_OffsetR": {
+    "type": "number",
+    "options": [],
+    "min": -0.33000001311302185,
+    "max": 0.031218737363815308,
+    "decimals": 4
+  },
+  "DelayLine_PingPong": {
+    "type": "boolean",
+    "options": []
+  },
+  "DelayLine_PingPongDelayTimeL": {
+    "type": "number",
+    "options": [],
+    "min": 1.0,
+    "max": 1.0
+  },
+  "DelayLine_PingPongDelayTimeR": {
+    "type": "number",
+    "options": [],
+    "min": 1.0,
+    "max": 1.0
+  },
+  "DelayLine_SimpleDelayTimeL": {
+    "type": "number",
+    "options": [],
+    "min": 100.0,
+    "max": 100.0
+  },
+  "DelayLine_SimpleDelayTimeR": {
+    "type": "number",
+    "options": [],
+    "min": 100.0,
+    "max": 100.0
+  },
+  "DelayLine_SmoothingMode": {
+    "type": "enum",
+    "options": [
+      "Fade",
+      "Repitch"
+    ]
+  },
+  "DelayLine_SyncL": {
+    "type": "boolean",
+    "options": []
+  },
+  "DelayLine_SyncR": {
+    "type": "boolean",
+    "options": []
+  },
+  "DelayLine_SyncedSixteenthL": {
+    "type": "enum",
+    "options": [
+      "1",
+      "2",
+      "3",
+      "4"
+    ]
+  },
+  "DelayLine_SyncedSixteenthR": {
+    "type": "enum",
+    "options": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ]
+  },
+  "DelayLine_TimeL": {
+    "type": "number",
+    "options": [],
+    "min": 0.0010000000474974513,
+    "max": 0.3749999403953552,
+    "decimals": 4
+  },
+  "DelayLine_TimeR": {
+    "type": "number",
+    "options": [],
+    "min": 0.0010000000474974513,
+    "max": 0.40207386016845703,
+    "decimals": 4
+  },
+  "DryWet": {
+    "type": "number",
+    "options": [],
+    "min": 0.20000000298023224,
+    "max": 0.7539682388305664,
+    "decimals": 4
+  },
+  "DryWetMode": {
+    "type": "enum",
+    "options": [
+      "Equal-loudness"
+    ]
+  },
+  "EcoProcessing": {
+    "type": "boolean",
+    "options": []
+  },
+  "Enabled": {
+    "type": "boolean",
+    "options": []
+  },
+  "Feedback": {
+    "type": "number",
+    "options": [],
+    "min": 0.0,
+    "max": 0.7841269969940186,
+    "decimals": 4
+  },
+  "Filter_Bandwidth": {
+    "type": "number",
+    "options": [],
+    "min": 2.401315689086914,
+    "max": 9.0,
+    "decimals": 4
+  },
+  "Filter_Frequency": {
+    "type": "number",
+    "options": [],
+    "min": 173.30467224121094,
+    "max": 4020.581298828125,
+    "decimals": 4
+  },
+  "Filter_On": {
+    "type": "boolean",
+    "options": []
+  },
+  "Freeze": {
+    "type": "boolean",
+    "options": []
+  },
+  "Modulation_AmountFilter": {
+    "type": "number",
+    "options": [],
+    "min": 0.0,
+    "max": 0.84375,
+    "decimals": 4
+  },
+  "Modulation_AmountTime": {
+    "type": "number",
+    "options": [],
+    "min": 0.0,
+    "max": 0.8799999952316284,
+    "decimals": 4
+  },
+  "Modulation_Frequency": {
+    "type": "number",
+    "options": [],
+    "min": 0.2723929286003113,
+    "max": 5.029735088348389,
+    "decimals": 4
+  }
+}
