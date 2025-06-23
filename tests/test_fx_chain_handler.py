@@ -1,7 +1,11 @@
 import json
 from pathlib import Path
 
-from core.effect_chain_handler import extract_effect_parameters, apply_macro_mappings
+from core.effect_chain_handler import (
+    extract_effect_parameters,
+    apply_macro_mappings,
+    validate_fx_chain_preset,
+)
 
 
 def create_fx_preset(path: Path):
@@ -44,4 +48,8 @@ def test_apply_macro_mappings(tmp_path):
     gain = data["chains"][0]["devices"][0]["parameters"]["Gain"]
     assert gain["macroMapping"]["macroIndex"] == 0
     assert data["parameters"]["Macro0"] == 0.0
+
+    # Ensure resulting preset validates against the FX chain schema
+    val = validate_fx_chain_preset(str(dest))
+    assert val["success"], val.get("message")
 
