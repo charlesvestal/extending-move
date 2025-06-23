@@ -1,0 +1,105 @@
+{
+  "Attack": {
+    "type": "number",
+    "options": [],
+    "min": 0.10000000149011612,
+    "max": 30.000001907348633,
+    "decimals": 4
+  },
+  "AutoReleaseControlOnOff": {
+    "type": "boolean",
+    "options": []
+  },
+  "DryWet": {
+    "type": "number",
+    "options": [],
+    "min": 1.0,
+    "max": 1.0
+  },
+  "Enabled": {
+    "type": "boolean",
+    "options": []
+  },
+  "ExpansionRatio": {
+    "type": "number",
+    "options": [],
+    "min": 1.149999976158142,
+    "max": 1.149999976158142,
+    "decimals": 4
+  },
+  "Gain": {
+    "type": "number",
+    "options": [],
+    "min": 0.0,
+    "max": 0.0
+  },
+  "GainCompensation": {
+    "type": "boolean",
+    "options": []
+  },
+  "Knee": {
+    "type": "number",
+    "options": [],
+    "min": 0.10000000149011612,
+    "max": 9.0,
+    "decimals": 4
+  },
+  "LogEnvelope": {
+    "type": "boolean",
+    "options": []
+  },
+  "Model": {
+    "type": "enum",
+    "options": [
+      "Peak",
+      "RMS"
+    ]
+  },
+  "Ratio": {
+    "type": "number",
+    "options": [],
+    "min": 2.0,
+    "max": 8.0
+  },
+  "Release": {
+    "type": "number",
+    "options": [],
+    "min": 30.0,
+    "max": 30.0
+  },
+  "SideChainEq_Freq": {
+    "type": "number",
+    "options": [],
+    "min": 80.0,
+    "max": 80.0
+  },
+  "SideChainEq_Gain": {
+    "type": "number",
+    "options": [],
+    "min": 0.0,
+    "max": 0.0
+  },
+  "SideChainEq_Mode": {
+    "type": "enum",
+    "options": [
+      "High pass"
+    ]
+  },
+  "SideChainEq_On": {
+    "type": "boolean",
+    "options": []
+  },
+  "SideChainEq_Q": {
+    "type": "number",
+    "options": [],
+    "min": 0.4099999964237213,
+    "max": 0.7071067690849304,
+    "decimals": 4
+  },
+  "Threshold": {
+    "type": "number",
+    "options": [],
+    "min": 1.0,
+    "max": 1.0
+  }
+}

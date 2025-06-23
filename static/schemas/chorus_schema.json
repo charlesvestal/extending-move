@@ -1,0 +1,92 @@
+{
+  "Amount": {
+    "type": "number",
+    "options": [],
+    "min": 0.1031746044754982,
+    "max": 1.0,
+    "decimals": 4
+  },
+  "DryWet": {
+    "type": "number",
+    "options": [],
+    "min": 0.5,
+    "max": 1.0,
+    "decimals": 4
+  },
+  "Enabled": {
+    "type": "boolean",
+    "options": []
+  },
+  "Feedback": {
+    "type": "number",
+    "options": [],
+    "min": 0.0,
+    "max": 0.8014286160469055,
+    "decimals": 4
+  },
+  "HighpassEnabled": {
+    "type": "boolean",
+    "options": []
+  },
+  "HighpassFrequency": {
+    "type": "number",
+    "options": [],
+    "min": 20.0,
+    "max": 90.42745208740234,
+    "decimals": 4
+  },
+  "InvertFeedback": {
+    "type": "boolean",
+    "options": []
+  },
+  "Mode": {
+    "type": "enum",
+    "options": [
+      "Classic",
+      "Ensemble",
+      "Vibrato"
+    ]
+  },
+  "OutputGain": {
+    "type": "number",
+    "options": [],
+    "min": 0.9999999403953552,
+    "max": 1.259763240814209,
+    "decimals": 4
+  },
+  "Rate": {
+    "type": "number",
+    "options": [],
+    "min": 0.23969697952270508,
+    "max": 7.2805609703063965,
+    "decimals": 4
+  },
+  "Shaping": {
+    "type": "number",
+    "options": [],
+    "min": 0.0,
+    "max": 1.0,
+    "decimals": 4
+  },
+  "VibratoOffset": {
+    "type": "number",
+    "options": [],
+    "min": 0.0,
+    "max": 180.0,
+    "decimals": 1
+  },
+  "Warmth": {
+    "type": "number",
+    "options": [],
+    "min": 0.0,
+    "max": 0.26960694789886475,
+    "decimals": 4
+  },
+  "Width": {
+    "type": "number",
+    "options": [],
+    "min": 0.859375,
+    "max": 1.0,
+    "decimals": 4
+  }
+}

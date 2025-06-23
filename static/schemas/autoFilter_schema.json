@@ -1,0 +1,291 @@
+{
+  "DryWet": {
+    "type": "number",
+    "options": [],
+    "min": 1.0,
+    "max": 1.0
+  },
+  "Enabled": {
+    "type": "boolean",
+    "options": []
+  },
+  "Envelope_Amount": {
+    "type": "number",
+    "options": [],
+    "min": 0.0,
+    "max": 1.0,
+    "decimals": 4
+  },
+  "Envelope_Attack": {
+    "type": "number",
+    "options": [],
+    "min": 0.0010000000474974513,
+    "max": 0.0019108913838863373,
+    "decimals": 4
+  },
+  "Envelope_HoldOn": {
+    "type": "boolean",
+    "options": []
+  },
+  "Envelope_Release": {
+    "type": "number",
+    "options": [],
+    "min": 0.13112400472164154,
+    "max": 0.25,
+    "decimals": 4
+  },
+  "Envelope_SahOn": {
+    "type": "boolean",
+    "options": []
+  },
+  "Envelope_SahRate": {
+    "type": "number",
+    "options": [],
+    "min": -4,
+    "max": -4
+  },
+  "Filter_Circuit": {
+    "type": "enum",
+    "options": [
+      "DFM",
+      "SVF"
+    ]
+  },
+  "Filter_DjControl": {
+    "type": "number",
+    "options": [],
+    "min": 0.0,
+    "max": 0.0
+  },
+  "Filter_Drive": {
+    "type": "number",
+    "options": [],
+    "min": 0.0,
+    "max": 0.4000000059604645,
+    "decimals": 4
+  },
+  "Filter_Frequency": {
+    "type": "number",
+    "options": [],
+    "min": 103.5894775390625,
+    "max": 9999.998046875,
+    "decimals": 4
+  },
+  "Filter_Morph": {
+    "type": "number",
+    "options": [],
+    "min": 0.0,
+    "max": 0.296875,
+    "decimals": 4
+  },
+  "Filter_MorphSlope": {
+    "type": "enum",
+    "options": [
+      "24dB"
+    ]
+  },
+  "Filter_Resonance": {
+    "type": "number",
+    "options": [],
+    "min": 0.0,
+    "max": 0.60317462682724,
+    "decimals": 4
+  },
+  "Filter_Slope": {
+    "type": "enum",
+    "options": [
+      "12dB",
+      "24dB"
+    ]
+  },
+  "Filter_Type": {
+    "type": "enum",
+    "options": [
+      "Comb",
+      "DJ",
+      "Low-pass",
+      "Vowel"
+    ]
+  },
+  "Filter_VowelFormant": {
+    "type": "number",
+    "options": [],
+    "min": 0.0,
+    "max": 0.15000000596046448,
+    "decimals": 4
+  },
+  "Filter_VowelPitch": {
+    "type": "number",
+    "options": [],
+    "min": -3,
+    "max": 0
+  },
+  "HiQuality": {
+    "type": "boolean",
+    "options": []
+  },
+  "HostVisualisationRate": {
+    "type": "number",
+    "options": [],
+    "min": 0.019999999552965164,
+    "max": 0.019999999552965164,
+    "decimals": 4
+  },
+  "InternalSideChainGain": {
+    "type": "number",
+    "options": [],
+    "min": 1.0,
+    "max": 1.0
+  },
+  "Lfo_Amount": {
+    "type": "number",
+    "options": [],
+    "min": 0.0,
+    "max": 0.25,
+    "decimals": 2
+  },
+  "Lfo_Frequency": {
+    "type": "number",
+    "options": [],
+    "min": 0.75,
+    "max": 1.0,
+    "decimals": 2
+  },
+  "Lfo_Morph": {
+    "type": "number",
+    "options": [],
+    "min": 0.0,
+    "max": 0.0
+  },
+  "Lfo_Phase": {
+    "type": "number",
+    "options": [],
+    "min": 0.0,
+    "max": 90.0,
+    "decimals": 4
+  },
+  "Lfo_PhaseOffset": {
+    "type": "number",
+    "options": [],
+    "min": 0.0,
+    "max": 0.0
+  },
+  "Lfo_QuantizationMode": {
+    "type": "enum",
+    "options": [
+      "None"
+    ]
+  },
+  "Lfo_SahRate": {
+    "type": "number",
+    "options": [],
+    "min": -4,
+    "max": -4
+  },
+  "Lfo_Sixteenth": {
+    "type": "number",
+    "options": [],
+    "min": 16,
+    "max": 16
+  },
+  "Lfo_Smoothing": {
+    "type": "number",
+    "options": [],
+    "min": 0.0,
+    "max": 0.0
+  },
+  "Lfo_Spin": {
+    "type": "number",
+    "options": [],
+    "min": 0.0,
+    "max": 0.0
+  },
+  "Lfo_Steps": {
+    "type": "number",
+    "options": [],
+    "min": 8,
+    "max": 8
+  },
+  "Lfo_StereoMode": {
+    "type": "enum",
+    "options": [
+      "Phase"
+    ]
+  },
+  "Lfo_SyncedRate": {
+    "type": "number",
+    "options": [],
+    "min": 4,
+    "max": 6
+  },
+  "Lfo_Time": {
+    "type": "number",
+    "options": [],
+    "min": 1.0000001192092896,
+    "max": 1.0000001192092896,
+    "decimals": 4
+  },
+  "Lfo_TimeMode": {
+    "type": "enum",
+    "options": [
+      "Rate",
+      "Synced"
+    ]
+  },
+  "Lfo_Waveform": {
+    "type": "enum",
+    "options": [
+      "Sine",
+      "Triangle"
+    ]
+  },
+  "Output": {
+    "type": "number",
+    "options": [],
+    "min": 0.3981052041053772,
+    "max": 1.0,
+    "decimals": 4
+  },
+  "SideChainEq_Freq": {
+    "type": "number",
+    "options": [],
+    "min": 199.99998474121094,
+    "max": 995.3352661132812,
+    "decimals": 4
+  },
+  "SideChainEq_Gain": {
+    "type": "number",
+    "options": [],
+    "min": 0.0,
+    "max": 0.0
+  },
+  "SideChainEq_Mode": {
+    "type": "enum",
+    "options": [
+      "High pass"
+    ]
+  },
+  "SideChainEq_On": {
+    "type": "boolean",
+    "options": []
+  },
+  "SideChainEq_Q": {
+    "type": "number",
+    "options": [],
+    "min": 0.7071067094802856,
+    "max": 3.7638254165649414,
+    "decimals": 4
+  },
+  "SideChainListen": {
+    "type": "boolean",
+    "options": []
+  },
+  "SideChainMono": {
+    "type": "boolean",
+    "options": []
+  },
+  "SoftClipOn": {
+    "type": "boolean",
+    "options": []
+  }
+}

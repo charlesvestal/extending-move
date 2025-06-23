@@ -1,0 +1,197 @@
+{
+  "CenterFrequency": {
+    "type": "number",
+    "options": [],
+    "min": 77.3109130859375,
+    "max": 1543.8038330078125,
+    "decimals": 4
+  },
+  "DoublerDelayTime": {
+    "type": "number",
+    "options": [],
+    "min": 0.026972541585564613,
+    "max": 0.07999999821186066,
+    "decimals": 4
+  },
+  "DryWet": {
+    "type": "number",
+    "options": [],
+    "min": 0.5952380895614624,
+    "max": 1.0,
+    "decimals": 4
+  },
+  "Enabled": {
+    "type": "boolean",
+    "options": []
+  },
+  "Feedback": {
+    "type": "number",
+    "options": [],
+    "min": 0.0,
+    "max": 0.7734375,
+    "decimals": 4
+  },
+  "FlangerDelayTime": {
+    "type": "number",
+    "options": [],
+    "min": 0.0015799448592588305,
+    "max": 0.01918903924524784,
+    "decimals": 4
+  },
+  "InvertWet": {
+    "type": "boolean",
+    "options": []
+  },
+  "Mode": {
+    "type": "enum",
+    "options": [
+      "Doubler",
+      "Flanger",
+      "Phaser"
+    ]
+  },
+  "ModulationBlend": {
+    "type": "number",
+    "options": [],
+    "min": 0.0,
+    "max": 0.9453125,
+    "decimals": 4
+  },
+  "Modulation_Amount": {
+    "type": "number",
+    "options": [],
+    "min": 0.3888888955116272,
+    "max": 1.0,
+    "decimals": 4
+  },
+  "Modulation_DutyCycle": {
+    "type": "number",
+    "options": [],
+    "min": 0.0,
+    "max": 0.0
+  },
+  "Modulation_EnvelopeAmount": {
+    "type": "number",
+    "options": [],
+    "min": 0.0,
+    "max": 0.828125,
+    "decimals": 4
+  },
+  "Modulation_EnvelopeAttack": {
+    "type": "number",
+    "options": [],
+    "min": 0.006000000052154064,
+    "max": 0.012947656214237213,
+    "decimals": 4
+  },
+  "Modulation_EnvelopeEnabled": {
+    "type": "boolean",
+    "options": []
+  },
+  "Modulation_EnvelopeRelease": {
+    "type": "number",
+    "options": [],
+    "min": 0.20000000298023224,
+    "max": 0.20000000298023224,
+    "decimals": 4
+  },
+  "Modulation_Frequency": {
+    "type": "number",
+    "options": [],
+    "min": 0.08778024464845657,
+    "max": 0.6324555277824402,
+    "decimals": 4
+  },
+  "Modulation_Frequency2": {
+    "type": "number",
+    "options": [],
+    "min": 0.010000000707805157,
+    "max": 0.20000000298023224,
+    "decimals": 4
+  },
+  "Modulation_LfoBlend": {
+    "type": "number",
+    "options": [],
+    "min": 0.0,
+    "max": 0.046875,
+    "decimals": 4
+  },
+  "Modulation_PhaseOffset": {
+    "type": "number",
+    "options": [],
+    "min": 0.0,
+    "max": 180.0
+  },
+  "Modulation_Spin": {
+    "type": "number",
+    "options": [],
+    "min": 0.0,
+    "max": 0.3359375,
+    "decimals": 4
+  },
+  "Modulation_SpinEnabled": {
+    "type": "boolean",
+    "options": []
+  },
+  "Modulation_Sync": {
+    "type": "boolean",
+    "options": []
+  },
+  "Modulation_Sync2": {
+    "type": "boolean",
+    "options": []
+  },
+  "Modulation_SyncedRate": {
+    "type": "number",
+    "options": [],
+    "min": 0,
+    "max": 14
+  },
+  "Modulation_SyncedRate2": {
+    "type": "number",
+    "options": [],
+    "min": 4,
+    "max": 12
+  },
+  "Modulation_Waveform": {
+    "type": "enum",
+    "options": [
+      "Sine",
+      "Triangle"
+    ]
+  },
+  "Notches": {
+    "type": "number",
+    "options": [],
+    "min": 4,
+    "max": 35
+  },
+  "OutputGain": {
+    "type": "number",
+    "options": [],
+    "min": 0.6309606432914734,
+    "max": 1.5243134498596191,
+    "decimals": 4
+  },
+  "SafeBassFrequency": {
+    "type": "number",
+    "options": [],
+    "min": 99.99999237060547,
+    "max": 150.0,
+    "decimals": 4
+  },
+  "Spread": {
+    "type": "number",
+    "options": [],
+    "min": 0.15937499701976776,
+    "max": 1.0,
+    "decimals": 4
+  },
+  "Warmth": {
+    "type": "number",
+    "options": [],
+    "min": 0.0,
+    "max": 0.375,
+    "decimals": 4
+  }
+}
