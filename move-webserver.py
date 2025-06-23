@@ -47,6 +47,7 @@ from handlers.adsr_handler_class import AdsrHandler
 from handlers.cyc_env_handler_class import CycEnvHandler
 from handlers.lfo_handler_class import LfoHandler
 from handlers.set_inspector_handler_class import SetInspectorHandler
+from handlers.fx_chain_handler_class import FxChainHandler
 from core.refresh_handler import refresh_library
 from core.file_browser import generate_dir_html
 
@@ -128,6 +129,7 @@ synth_handler = SynthPresetInspectorHandler()
 synth_param_handler = SynthParamEditorHandler()
 wavetable_param_handler = WavetableParamEditorHandler()
 melodic_sampler_param_handler = MelodicSamplerParamEditorHandler()
+fx_chain_handler = FxChainHandler()
 file_placer_handler = FilePlacerHandler()
 refresh_handler = RefreshHandler()
 drum_rack_handler = DrumRackInspectorHandler()
@@ -761,6 +763,30 @@ def melodic_sampler_params():
         sample_name=sample_name,
         sample_path=sample_path,
         active_tab="melodic-sampler",
+    )
+
+
+@app.route("/fx-chain", methods=["GET", "POST"])
+def fx_chain():
+    if request.method == "POST":
+        form = SimpleForm(request.form.to_dict())
+        result = fx_chain_handler.handle_post(form)
+    else:
+        result = fx_chain_handler.handle_get()
+
+    message = result.get("message")
+    message_type = result.get("message_type")
+    success = message_type != "error" if message_type else False
+    effects = result.get("effects", [])
+    effect_params_json = result.get("effect_params_json", "{}")
+    return render_template(
+        "fx_chain.html",
+        message=message,
+        success=success,
+        message_type=message_type,
+        effects=effects,
+        effect_params_json=effect_params_json,
+        active_tab="fx-chain",
     )
 
 

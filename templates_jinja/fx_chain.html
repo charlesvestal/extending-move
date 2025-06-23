@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>FX Chain Editor</h2>
+<p><em>Select up to four effects and map their parameters to the eight macro knobs.</em></p>
+{% if message %}
+  <p class="{{ message_type if message_type else ('success' if success else 'error') }}">{{ message }}</p>
+{% endif %}
+<form method="post" action="{{ host_prefix }}/fx-chain" id="fx-form">
+  <div class="effect-selects">
+    {% for i in range(1,5) %}
+    <label>Effect {{ i }}:
+      <select name="effect{{ i }}" id="effect{{ i }}" class="effect-select">
+        <option value="">-- None --</option>
+        {% for e in effects %}
+        <option value="{{ e }}">{{ e }}</option>
+        {% endfor %}
+      </select>
+    </label><br>
+    {% endfor %}
+  </div>
+  <h3>Macro Assignments</h3>
+  <table>
+    <tr><th>Knob</th><th>Effect</th><th>Parameter</th></tr>
+    {% for i in range(8) %}
+    <tr>
+      <td>{{ i+1 }}</td>
+      <td>
+        <select name="knob{{ i }}_effect" data-knob="{{ i }}" class="knob-effect">
+          <option value="">--</option>
+          <option value="1">Effect 1</option>
+          <option value="2">Effect 2</option>
+          <option value="3">Effect 3</option>
+          <option value="4">Effect 4</option>
+        </select>
+      </td>
+      <td>
+        <select name="knob{{ i }}_param" data-knob="{{ i }}" class="knob-param" data-effect-slot="1">
+          <option value="">-- Select Parameter --</option>
+        </select>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  <label>Preset Name:
+    <input type="text" name="preset_name" required>
+  </label>
+  <button type="submit">Create FX Chain</button>
+</form>
+<input type="hidden" id="effect-params-data" value='{{ effect_params_json|safe }}'>
+{% endblock %}
+{% block scripts %}
+<script src="{{ host_prefix }}/static/fx_chain.js"></script>
+{% endblock %}
