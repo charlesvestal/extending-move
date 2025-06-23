@@ -272,6 +272,8 @@ def browse_dir():
     filter_key = request.args.get("filter")
     CORE_LABEL = "Core Library"
     CORE_ROOT = "/data/CoreLibrary/Track Presets"
+    if root.endswith("Audio Effects"):
+        CORE_ROOT = "/data/CoreLibrary/Audio Effects"
     if path == CORE_LABEL or path.startswith(CORE_LABEL + os.sep):
         sub = path[len(CORE_LABEL) :].lstrip(os.sep)
         html = generate_dir_html(
