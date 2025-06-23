@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Audio Effects Rack Editor</h2>
+{% if message %}
+  <p class="{{ message_type if message_type else 'info' }}">{{ message }}</p>
+{% endif %}
+<form method="post" action="{{ host_prefix }}/effects-rack">
+  <input type="hidden" name="action" value="save_rack">
+  <label>Preset Name: <input type="text" name="preset_name" required></label>
+  <table class="rack-table">
+    <tr><th>Slot</th><th>Effect</th><th>Macro Parameter</th></tr>
+    {% for i in range(4) %}
+    <tr>
+      <td>{{ i + 1 }}</td>
+      <td>
+        <select name="effect_{{ i }}" id="effect_{{ i }}">
+          <option value="">--None--</option>
+          {% for e in effects %}
+          <option value="{{ e.path }}">{{ e.name }}</option>
+          {% endfor %}
+        </select>
+      </td>
+      <td>
+        <select name="macro_{{ i }}_param" id="macro_{{ i }}_param">
+          <option value="">--None--</option>
+        </select>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  <button type="submit">Save Rack</button>
+</form>
+<script id="effects-data" type="application/json">{{ params_json|safe }}</script>
+{% endblock %}
+{% block scripts %}
+<script src="{{ host_prefix }}/static/effects_rack.js"></script>
+{% endblock %}
