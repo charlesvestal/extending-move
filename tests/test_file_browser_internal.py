@@ -53,6 +53,12 @@ def test_check_json_file_missing(tmp_path):
     assert _check_json_file(str(missing), "drift") is False
 
 
+def test_check_json_file_fxchain(tmp_path):
+    p = tmp_path / "fx.json"
+    p.write_text(json.dumps({"kind": "audioEffectRack"}))
+    assert _check_json_file(str(p), "audioEffectRack") is True
+
+
 def test_has_kind_nested():
     data = {"x": [{"kind": "drift"}, {"y": {"kind": "other"}}]}
     assert _has_kind(data, "drift") is True

@@ -3,7 +3,7 @@
 <h2>FX Chain Macro Editor</h2>
 <p>{{ message }}</p>
 {% if not selected_preset %}
-<div class="file-browser" data-root="{{ browser_root }}" data-action="{{ host_prefix }}/fx-chain" data-field="preset_select" data-value="select_preset">
+<div class="file-browser" data-root="{{ browser_root }}" data-action="{{ host_prefix }}/fx-chain" data-field="preset_select" data-value="select_preset" data-filter="fxchain">
     {{ file_browser_html | safe }}
 </div>
 {% else %}

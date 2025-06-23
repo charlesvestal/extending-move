@@ -97,6 +97,11 @@ FILTERS: dict[str, Callable[[str], bool]] = {
         or p.lower().endswith(".json")
     )
     and _check_json_file(p, "melodicSampler"),
+    "fxchain": lambda p: (
+        p.lower().endswith(".ablpreset")
+        or p.lower().endswith(".json")
+    )
+    and _check_json_file(p, "audioEffectRack"),
 }
 
 

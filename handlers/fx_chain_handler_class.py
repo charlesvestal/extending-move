@@ -26,6 +26,7 @@ class FxChainMacroHandler(BaseHandler):
             "/fx-chain",
             "preset_select",
             "select_preset",
+            filter_key="fxchain",
         )
         core_li = (
             '<li class="dir closed" data-path="Core Library">'
@@ -65,6 +66,7 @@ class FxChainMacroHandler(BaseHandler):
                 "/fx-chain",
                 "preset_select",
                 "select_preset",
+                filter_key="fxchain",
             )
             core_li = (
                 '<li class="dir closed" data-path="Core Library">'
