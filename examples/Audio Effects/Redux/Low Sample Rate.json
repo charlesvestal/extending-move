@@ -1,0 +1,19 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "redux2",
+  "name": "Low Sample Rate",
+  "parameters": {
+    "BitDepth": 16,
+    "DryWet": 1.0,
+    "EcoProcessing": true,
+    "EnablePostFilter": true,
+    "EnablePreFilter": false,
+    "Enabled": true,
+    "Jitter": 0.0,
+    "PostFilterValue": 2.375,
+    "QuantizerDcShift": false,
+    "QuantizerShape": 1.0,
+    "SampleRate": 3999.999267578125
+  },
+  "deviceData": {}
+}

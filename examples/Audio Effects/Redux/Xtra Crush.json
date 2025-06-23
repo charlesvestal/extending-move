@@ -1,0 +1,19 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "redux2",
+  "name": "Xtra Crush",
+  "parameters": {
+    "BitDepth": 2,
+    "DryWet": 1.0,
+    "EcoProcessing": true,
+    "EnablePostFilter": true,
+    "EnablePreFilter": false,
+    "Enabled": true,
+    "Jitter": 0.07281431555747986,
+    "PostFilterValue": 3.75,
+    "QuantizerDcShift": true,
+    "QuantizerShape": 0.1746031790971756,
+    "SampleRate": 7432.99365234375
+  },
+  "deviceData": {}
+}

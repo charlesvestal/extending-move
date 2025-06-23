@@ -1,0 +1,15 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "channelEq",
+  "name": "Drum Smoother",
+  "parameters": {
+    "Enabled": true,
+    "Gain": 0.8203353881835938,
+    "HighShelfGain": 1.431401014328003,
+    "HighpassOn": true,
+    "LowShelfGain": 2.5385196208953857,
+    "MidFrequency": 1063.1971435546875,
+    "MidGain": 1.658821702003479
+  },
+  "deviceData": {}
+}

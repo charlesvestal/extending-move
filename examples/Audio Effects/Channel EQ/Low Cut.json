@@ -1,0 +1,15 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "channelEq",
+  "name": "Low Cut",
+  "parameters": {
+    "Enabled": true,
+    "Gain": 1.0,
+    "HighShelfGain": 1.0,
+    "HighpassOn": true,
+    "LowShelfGain": 1.0,
+    "MidFrequency": 1500.0001220703125,
+    "MidGain": 1.0
+  },
+  "deviceData": {}
+}

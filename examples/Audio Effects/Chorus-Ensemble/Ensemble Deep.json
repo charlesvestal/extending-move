@@ -1,0 +1,22 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "chorus",
+  "name": "Ensemble Deep",
+  "parameters": {
+    "Amount": 0.8095238208770752,
+    "DryWet": 0.7460317611694336,
+    "Enabled": true,
+    "Feedback": 0.25,
+    "HighpassEnabled": true,
+    "HighpassFrequency": 20.0,
+    "InvertFeedback": false,
+    "Mode": "Ensemble",
+    "OutputGain": 1.259763240814209,
+    "Rate": 0.5483837127685547,
+    "Shaping": 0.0,
+    "VibratoOffset": 0.0,
+    "Warmth": 0.10479619354009628,
+    "Width": 1.0
+  },
+  "deviceData": {}
+}

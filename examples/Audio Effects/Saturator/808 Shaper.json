@@ -1,0 +1,28 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "saturator",
+  "name": "808 Shaper",
+  "parameters": {
+    "BaseDrive": 5.399999618530273,
+    "BassShaperThreshold": -50.0,
+    "ColorDepth": 0.0,
+    "ColorFrequency": 1000.0,
+    "ColorOn": true,
+    "ColorWidth": 0.30000001192092896,
+    "DryWet": 1.0,
+    "Enabled": true,
+    "Oversampling": false,
+    "PostClip": "off",
+    "PostDrive": 0.0,
+    "PreDcFilter": false,
+    "PreDrive": 2.0,
+    "Type": "Bass Shaper",
+    "WsCurve": 0.05000000074505806,
+    "WsDamp": 0.0,
+    "WsDepth": 0.0,
+    "WsDrive": 1.0,
+    "WsLin": 0.5,
+    "WsPeriod": 0.0
+  },
+  "deviceData": {}
+}

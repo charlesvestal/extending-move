@@ -1,0 +1,15 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "channelEq",
+  "name": "Mid Focus",
+  "parameters": {
+    "Enabled": true,
+    "Gain": 1.2589285373687744,
+    "HighShelfGain": 0.18000000715255737,
+    "HighpassOn": true,
+    "LowShelfGain": 0.18000000715255737,
+    "MidFrequency": 4059.62060546875,
+    "MidGain": 2.1601195335388184
+  },
+  "deviceData": {}
+}

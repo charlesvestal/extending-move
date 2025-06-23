@@ -1,0 +1,28 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "saturator",
+  "name": "Basic Soft",
+  "parameters": {
+    "BaseDrive": -9.142857551574707,
+    "BassShaperThreshold": -50.0,
+    "ColorDepth": 3.4285714626312256,
+    "ColorFrequency": 364.872314453125,
+    "ColorOn": true,
+    "ColorWidth": 0.30000001192092896,
+    "DryWet": 1.0,
+    "Enabled": true,
+    "Oversampling": false,
+    "PostClip": "off",
+    "PostDrive": -12.571428298950195,
+    "PreDcFilter": false,
+    "PreDrive": 11.428571701049805,
+    "Type": "Soft Sine",
+    "WsCurve": 0.05000000074505806,
+    "WsDamp": 0.0,
+    "WsDepth": 0.0,
+    "WsDrive": 1.0,
+    "WsLin": 0.5,
+    "WsPeriod": 0.0
+  },
+  "deviceData": {}
+}

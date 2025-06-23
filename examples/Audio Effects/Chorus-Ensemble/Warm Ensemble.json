@@ -1,0 +1,22 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "chorus",
+  "name": "Warm Ensemble",
+  "parameters": {
+    "Amount": 0.9682539701461792,
+    "DryWet": 0.9920634627342224,
+    "Enabled": true,
+    "Feedback": 0.25928571820259094,
+    "HighpassEnabled": true,
+    "HighpassFrequency": 29.80657386779785,
+    "InvertFeedback": true,
+    "Mode": "Ensemble",
+    "OutputGain": 1.1220215559005737,
+    "Rate": 0.2900104224681854,
+    "Shaping": 0.0,
+    "VibratoOffset": 67.5,
+    "Warmth": 0.2392028123140335,
+    "Width": 0.859375
+  },
+  "deviceData": {}
+}

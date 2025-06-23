@@ -1,0 +1,19 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "redux2",
+  "name": "Chiptune Filter",
+  "parameters": {
+    "BitDepth": 1,
+    "DryWet": 1.0,
+    "EcoProcessing": true,
+    "EnablePostFilter": true,
+    "EnablePreFilter": false,
+    "Enabled": true,
+    "Jitter": 0.0,
+    "PostFilterValue": -2.0,
+    "QuantizerDcShift": false,
+    "QuantizerShape": 1.0,
+    "SampleRate": 22491.37890625
+  },
+  "deviceData": {}
+}
