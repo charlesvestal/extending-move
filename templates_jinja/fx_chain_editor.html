@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>FX Chain Builder</h2>
+<p><em>Select an effect or chain preset and assign macro knobs.</em></p>
+{% if message %}
+  <p class="{{ message_type if message_type else ('success' if success else 'error') }}">{{ message }}</p>
+{% endif %}
+{% if not preset_selected %}
+<div class="file-browser" data-root="{{ browser_root }}" data-action="{{ host_prefix }}/fx-chain" data-field="preset_select" data-value="select_preset" data-filter="audiofx">
+    {{ file_browser_html | safe }}
+</div>
+{% else %}
+<form method="post" action="{{ host_prefix }}/fx-chain" id="fx-chain-form">
+  <input type="hidden" name="action" id="action-input" value="save_chain">
+  <input type="hidden" name="preset_select" value="{{ selected_preset }}">
+  <label>File Name: <input type="text" name="new_preset_name" id="new-preset-name" value="{{ new_preset_name }}"></label>
+  <div class="macro-knobs-section">
+      <h3>Macros</h3>
+      {{ macro_knobs_html | safe }}
+  </div>
+  <input type="hidden" name="macros_data" id="macros-data-input" value='{{ macros_json }}'>
+  <input type="hidden" id="available-params-input" value='{{ available_params_json }}'>
+  <input type="hidden" id="param-paths-input" value='{{ param_paths_json }}'>
+  <div id="macro-sidebar" class="macro-sidebar hidden">
+      <h3 id="macro-sidebar-title"></h3>
+      <label>Custom Name: <input type="text" id="macro-name-input" placeholder="No name specified"></label>
+      <div class="macro-assigned-list"></div>
+      <div class="macro-add-section">
+          <button type="button" id="macro-add-param">Add</button>
+      </div>
+      <button type="button" id="macro-sidebar-close">Close</button>
+  </div>
+  <div id="sidebar-overlay" class="sidebar-overlay hidden"></div>
+  <div class="param-list">
+      {{ params_html | safe }}
+  </div>
+  <div class="preset-actions">
+      <button type="submit" id="save-chain-btn">Save Chain</button>
+      <button type="submit" onclick="document.getElementById('action-input').value='reset_preset';">Choose Another</button>
+  </div>
+</form>
+{% endif %}
+{% endblock %}
+{% block scripts %}
+<script type="module" src="{{ host_prefix }}/static/file_browser.js"></script>
+<script src="{{ host_prefix }}/static/macro_sidebar.js"></script>
+{% endblock %}
