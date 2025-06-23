@@ -47,6 +47,7 @@ from handlers.adsr_handler_class import AdsrHandler
 from handlers.cyc_env_handler_class import CycEnvHandler
 from handlers.lfo_handler_class import LfoHandler
 from handlers.set_inspector_handler_class import SetInspectorHandler
+from handlers.fx_browser_handler_class import FxBrowserHandler
 from core.refresh_handler import refresh_library
 from core.file_browser import generate_dir_html
 
@@ -137,6 +138,7 @@ adsr_handler = AdsrHandler()
 cyc_env_handler = CycEnvHandler()
 lfo_handler = LfoHandler()
 set_inspector_handler = SetInspectorHandler()
+fx_browser_handler = FxBrowserHandler()
 
 
 @app.before_request
@@ -269,7 +271,10 @@ def browse_dir():
     action_value = request.args.get("action_value", "")
     filter_key = request.args.get("filter")
     CORE_LABEL = "Core Library"
-    CORE_ROOT = "/data/CoreLibrary/Track Presets"
+    if filter_key == "audiofx":
+        CORE_ROOT = "/data/CoreLibrary/Audio Effects"
+    else:
+        CORE_ROOT = "/data/CoreLibrary/Track Presets"
     if path == CORE_LABEL or path.startswith(CORE_LABEL + os.sep):
         sub = path[len(CORE_LABEL) :].lstrip(os.sep)
         html = generate_dir_html(
@@ -761,6 +766,42 @@ def melodic_sampler_params():
         sample_name=sample_name,
         sample_path=sample_path,
         active_tab="melodic-sampler",
+    )
+
+
+@app.route("/fx-browser", methods=["GET", "POST"])
+def fx_browser():
+    if request.method == "POST":
+        form = SimpleForm(request.form.to_dict())
+        result = fx_browser_handler.handle_post(form)
+    else:
+        if "preset" in request.args:
+            form = SimpleForm({"action": "select_preset", "preset_select": request.args.get("preset")})
+            result = fx_browser_handler.handle_post(form)
+        else:
+            result = fx_browser_handler.handle_get()
+
+    message = result.get("message")
+    message_type = result.get("message_type")
+    success = message_type != "error" if message_type else False
+    browser_html = result.get("file_browser_html")
+    browser_root = result.get("browser_root")
+    browser_filter = result.get("browser_filter")
+    params_html = result.get("params_html", "")
+    selected_preset = result.get("selected_preset")
+    preset_selected = bool(selected_preset)
+    return render_template(
+        "fx_browser.html",
+        message=message,
+        success=success,
+        message_type=message_type,
+        file_browser_html=browser_html,
+        browser_root=browser_root,
+        browser_filter=browser_filter,
+        params_html=params_html,
+        preset_selected=preset_selected,
+        selected_preset=selected_preset,
+        active_tab="fx-browser",
     )
 
 

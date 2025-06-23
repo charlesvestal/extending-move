@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>FX Browser</h2>
+<p><em>Browse audio effects and chains. Selecting a preset shows its parameters.</em></p>
+{% if message %}
+  <p class="{{ message_type if message_type else ('success' if success else 'error') }}">{{ message }}</p>
+{% endif %}
+{% if not selected_preset %}
+<div class="file-browser" data-root="{{ browser_root }}" data-action="{{ host_prefix }}/fx-browser" data-field="preset_select" data-value="select_preset" data-filter="audiofx">
+    {{ file_browser_html | safe }}
+</div>
+{% else %}
+<form method="post" action="{{ host_prefix }}/fx-browser" style="margin-bottom:1em;">
+  <input type="hidden" name="action" value="reset_preset">
+  <button type="submit">Choose Another Preset</button>
+</form>
+<div class="fx-params">
+  {{ params_html | safe }}
+</div>
+{% endif %}
+{% endblock %}
+{% block scripts %}
+<script type="module" src="{{ host_prefix }}/static/file_browser.js"></script>
+{% endblock %}

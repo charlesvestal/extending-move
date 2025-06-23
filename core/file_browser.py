@@ -75,6 +75,25 @@ def _has_kind(data: Union[dict, list], kind: str) -> bool:
     return False
 
 
+def _check_audio_fx(file_path: str) -> bool:
+    """Return True if ``file_path`` is an audio effect or rack preset."""
+    kinds = [
+        "autoFilter",
+        "channelEq",
+        "chorus",
+        "delay",
+        "phaser",
+        "redux2",
+        "reverb",
+        "saturator",
+        "audioEffectRack",
+    ]
+    for k in kinds:
+        if _check_json_file(file_path, k):
+            return True
+    return False
+
+
 FILTERS: dict[str, Callable[[str], bool]] = {
     "wav": lambda p: p.lower().endswith(".wav"),
     "drift": lambda p: (
@@ -97,6 +116,11 @@ FILTERS: dict[str, Callable[[str], bool]] = {
         or p.lower().endswith(".json")
     )
     and _check_json_file(p, "melodicSampler"),
+    "audiofx": lambda p: (
+        p.lower().endswith(".ablpreset")
+        or p.lower().endswith(".json")
+    )
+    and _check_audio_fx(p),
 }
 
 
