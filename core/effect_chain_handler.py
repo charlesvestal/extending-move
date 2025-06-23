@@ -10,6 +10,15 @@ from .synth_preset_inspector_handler import (
     update_preset_macro_names,
     extract_macro_information,
 )
+from jsonschema import validate, ValidationError
+
+# Location of the FX chain schema relative to this file
+FX_CHAIN_SCHEMA_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(__file__)),
+    "static",
+    "schemas",
+    "fx_chain_schema.json",
+)
 
 logger = logging.getLogger(__name__)
 
@@ -63,8 +72,32 @@ def apply_macro_mappings(preset_path, macro_data, output_path=None, name_updates
             if not name_result["success"]:
                 return name_result
 
+        valid = validate_fx_chain_preset(dest)
+        if not valid["success"]:
+            return valid
+
         return {"success": True, "message": result["message"], "path": dest}
     except Exception as exc:
         logger.error("Macro mapping failed: %s", exc)
         return {"success": False, "message": f"Error applying macro mappings: {exc}"}
+
+
+def validate_fx_chain_preset(preset_path):
+    """Validate an FX chain preset against the schema."""
+    try:
+        with open(FX_CHAIN_SCHEMA_PATH) as f:
+            schema = json.load(f)
+        with open(preset_path) as f:
+            data = json.load(f)
+        validate(instance=data, schema=schema)
+        return {"success": True, "message": "Preset is valid"}
+    except FileNotFoundError:
+        logger.warning("FX chain schema not found at %s", FX_CHAIN_SCHEMA_PATH)
+        return {"success": True, "message": "Schema missing; skipping validation"}
+    except ValidationError as exc:
+        logger.error("Preset validation failed: %s", exc)
+        return {"success": False, "message": f"Preset validation failed: {exc}"}
+    except Exception as exc:
+        logger.error("Error during validation: %s", exc)
+        return {"success": False, "message": f"Error validating preset: {exc}"}
 
