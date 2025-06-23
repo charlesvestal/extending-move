@@ -91,6 +91,22 @@ def test_generate_dir_html(tmp_path):
     assert 'new.wav' in html2
 
 
+def test_generate_dir_html_fxchain(tmp_path):
+    (tmp_path / "a.json").write_text(json.dumps({"kind": "audioEffectRack"}))
+    (tmp_path / "b.txt").write_text("x")
+
+    html = generate_dir_html(
+        str(tmp_path),
+        "",
+        "/fx",
+        "file",
+        "select",
+        filter_key="fxchain",
+    )
+    assert "a.json" in html
+    assert "b.txt" not in html
+
+
 def test_time_stretch_wav(tmp_path, monkeypatch):
     sr = 22050
     t = np.linspace(0, 1, sr, endpoint=False)
