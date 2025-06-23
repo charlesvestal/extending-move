@@ -8,7 +8,7 @@
   <input type="hidden" name="action" value="save_rack">
   <label>Preset Name: <input type="text" name="preset_name" required></label>
   <table class="rack-table">
-    <tr><th>Slot</th><th>Effect</th><th>Macro Parameter</th></tr>
+    <tr><th>Slot</th><th>Device</th><th>Macro Parameter</th></tr>
     {% for i in range(4) %}
     <tr>
       <td>{{ i + 1 }}</td>
@@ -16,7 +16,7 @@
         <select name="effect_{{ i }}" id="effect_{{ i }}">
           <option value="">--None--</option>
           {% for e in effects %}
-          <option value="{{ e.path }}">{{ e.name }}</option>
+          <option value="{{ e.kind }}">{{ e.name }}</option>
           {% endfor %}
         </select>
       </td>

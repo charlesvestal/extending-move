@@ -1,44 +1,75 @@
 import os
 import json
 
+SCHEMA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "static", "schemas")
+
 DEFAULT_OUTPUT_DIR = "/data/UserData/UserLibrary/Audio Effects"
 
-
-def list_audio_effect_presets():
-    """Return a list of available audio effect preset file paths."""
-    base_dirs = [DEFAULT_OUTPUT_DIR, os.path.join("examples", "Audio Effects")]
-    presets = []
-    for base in base_dirs:
-        if not os.path.exists(base):
-            continue
-        for root, _dirs, files in os.walk(base):
-            for f in files:
-                if f.lower().endswith((".json", ".ablpreset")):
-                    presets.append(os.path.join(root, f))
-    return presets
+SUPPORTED_DEVICES = [
+    "autoFilter",
+    "reverb",
+    "redux2",
+    "phaser",
+    "delay",
+    "compressor",
+    "chorus",
+    "channelEq",
+    "saturator",
+]
 
 
-def extract_effect_parameters(preset_path):
-    """Extract parameter names from an audio effect preset."""
+def load_effect_schema(kind):
+    """Load the parameter schema for a given device kind."""
+    path = os.path.join(SCHEMA_DIR, f"{kind}_schema.json")
     try:
-        with open(preset_path, "r") as f:
-            data = json.load(f)
-        params = []
-        for key in data.get("parameters", {}):
-            if key != "Enabled" and not key.startswith("Macro"):
-                params.append(key)
-        return params
+        with open(path, "r") as f:
+            return json.load(f)
     except Exception:
-        return []
+        return {}
 
 
-def create_effect_rack(effect_paths, macro_map, output_path, name="Effect Rack"):
-    """Create an audio effect rack preset."""
+def list_available_devices():
+    """Return the list of supported device kinds."""
+    return SUPPORTED_DEVICES
+
+
+def extract_effect_parameters(kind):
+    """Return a list of parameter names for the given device kind."""
+    schema = load_effect_schema(kind)
+    params = []
+    for name in schema.keys():
+        if name != "Enabled" and not name.startswith("Macro"):
+            params.append(name)
+    return params
+
+
+def create_device_from_schema(kind):
+    """Create a minimal device object using the parameter schema."""
+    schema = load_effect_schema(kind)
+    params = {}
+    for name, info in schema.items():
+        if name.startswith("Macro"):
+            continue
+        if name == "Enabled":
+            params[name] = True
+            continue
+        t = info.get("type")
+        if t == "number":
+            params[name] = info.get("min", 0.0)
+        elif t == "boolean":
+            params[name] = False
+        elif t == "enum":
+            opts = info.get("options")
+            params[name] = opts[0] if opts else ""
+        else:
+            params[name] = 0
+    return {"kind": kind, "name": kind, "parameters": params}
+
+
+def create_effect_rack(device_kinds, macro_map, output_path, name="Effect Rack"):
+    """Create an audio effect rack preset from device kinds."""
     try:
-        devices = []
-        for p in effect_paths:
-            with open(p, "r") as f:
-                devices.append(json.load(f))
+        devices = [create_device_from_schema(k) for k in device_kinds]
         rack = {
             "kind": "audioEffectRack",
             "name": name,
