@@ -1,21 +1,30 @@
 {% extends "base.html" %}
 {% block content %}
 <h2>FX Chain Editor</h2>
-<p><em>Select up to four effects and map their parameters to the eight macro knobs.</em></p>
+<p><em>Select up to four effects, choose a preset for each, edit parameters and map them to macros.</em></p>
 {% if message %}
   <p class="{{ message_type if message_type else ('success' if success else 'error') }}">{{ message }}</p>
 {% endif %}
 <form method="post" action="{{ host_prefix }}/fx-chain" id="fx-form">
   <div class="effect-selects">
     {% for i in range(1,5) %}
-    <label>Effect {{ i }}:
-      <select name="effect{{ i }}" id="effect{{ i }}" class="effect-select">
-        <option value="">-- None --</option>
-        {% for e in effects %}
-        <option value="{{ e }}">{{ e }}</option>
-        {% endfor %}
-      </select>
-    </label><br>
+    <fieldset class="effect-slot">
+      <legend>Effect {{ i }}</legend>
+      <label>Type:
+        <select name="effect{{ i }}" id="effect{{ i }}" class="effect-select">
+          <option value="">-- None --</option>
+          {% for e in effects %}
+          <option value="{{ e }}">{{ e }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Preset:
+        <select name="effect{{ i }}_preset" id="effect{{ i }}_preset" class="preset-select">
+          <option value="">-- Select Preset --</option>
+        </select>
+      </label>
+      <div class="params" id="effect{{ i }}_params"></div>
+    </fieldset>
     {% endfor %}
   </div>
   <h3>Macro Assignments</h3>
@@ -46,7 +55,7 @@
   </label>
   <button type="submit">Create FX Chain</button>
 </form>
-<input type="hidden" id="effect-params-data" value='{{ effect_params_json|safe }}'>
+<input type="hidden" id="fx-presets-data" value='{{ presets_json|safe }}'>
 {% endblock %}
 {% block scripts %}
 <script src="{{ host_prefix }}/static/fx_chain.js"></script>

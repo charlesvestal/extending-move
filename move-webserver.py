@@ -778,14 +778,14 @@ def fx_chain():
     message_type = result.get("message_type")
     success = message_type != "error" if message_type else False
     effects = result.get("effects", [])
-    effect_params_json = result.get("effect_params_json", "{}")
+    presets_json = result.get("presets_json", "{}")
     return render_template(
         "fx_chain.html",
         message=message,
         success=success,
         message_type=message_type,
         effects=effects,
-        effect_params_json=effect_params_json,
+        presets_json=presets_json,
         active_tab="fx-chain",
     )
 
