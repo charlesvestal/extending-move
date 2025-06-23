@@ -1,0 +1,61 @@
+{
+  "Enabled": {
+    "type": "boolean",
+    "options": []
+  },
+  "Macro0": {
+    "type": "number",
+    "options": [],
+    "min": 63.35280227661133,
+    "max": 63.35280227661133,
+    "decimals": 4
+  },
+  "Macro1": {
+    "type": "number",
+    "options": [],
+    "min": 63.5,
+    "max": 63.5,
+    "decimals": 1
+  },
+  "Macro2": {
+    "type": "number",
+    "options": [],
+    "min": 63.35280227661133,
+    "max": 63.35280227661133,
+    "decimals": 4
+  },
+  "Macro3": {
+    "type": "number",
+    "options": [],
+    "min": 24.60405158996582,
+    "max": 32.8900260925293,
+    "decimals": 4
+  },
+  "Macro4": {
+    "type": "number",
+    "options": [],
+    "min": 29.73539161682129,
+    "max": 51.38686752319336,
+    "decimals": 4
+  },
+  "Macro5": {
+    "type": "number",
+    "options": [],
+    "min": 44.9728889465332,
+    "max": 85.1494369506836,
+    "decimals": 4
+  },
+  "Macro6": {
+    "type": "number",
+    "options": [],
+    "min": 3.527777910232544,
+    "max": 17.63888931274414,
+    "decimals": 4
+  },
+  "Macro7": {
+    "type": "number",
+    "options": [],
+    "min": 127.0,
+    "max": 127.0
+  }
+}
