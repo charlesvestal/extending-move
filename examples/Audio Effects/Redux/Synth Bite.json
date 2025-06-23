@@ -1,0 +1,19 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "redux2",
+  "name": "Synth Bite",
+  "parameters": {
+    "BitDepth": 16,
+    "DryWet": 1.0,
+    "EcoProcessing": true,
+    "EnablePostFilter": false,
+    "EnablePreFilter": false,
+    "Enabled": true,
+    "Jitter": 0.0,
+    "PostFilterValue": 0.0,
+    "QuantizerDcShift": false,
+    "QuantizerShape": 0.01587301678955555,
+    "SampleRate": 10368.509765625
+  },
+  "deviceData": {}
+}

@@ -1,0 +1,22 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "chorus",
+  "name": "Vibrato Spacial",
+  "parameters": {
+    "Amount": 0.1031746044754982,
+    "DryWet": 0.7936508059501648,
+    "Enabled": true,
+    "Feedback": 0.2750000059604645,
+    "HighpassEnabled": true,
+    "HighpassFrequency": 54.70047378540039,
+    "InvertFeedback": true,
+    "Mode": "Vibrato",
+    "OutputGain": 0.9999999403953552,
+    "Rate": 3.9619123935699463,
+    "Shaping": 0.1484375,
+    "VibratoOffset": 180.0,
+    "Warmth": 0.024000000208616257,
+    "Width": 0.859375
+  },
+  "deviceData": {}
+}

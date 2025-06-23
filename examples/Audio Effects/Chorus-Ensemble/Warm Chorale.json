@@ -1,0 +1,22 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "chorus",
+  "name": "Warm Chorale",
+  "parameters": {
+    "Amount": 0.9047619104385376,
+    "DryWet": 1.0,
+    "Enabled": true,
+    "Feedback": 0.4635714292526245,
+    "HighpassEnabled": true,
+    "HighpassFrequency": 90.42745208740234,
+    "InvertFeedback": true,
+    "Mode": "Classic",
+    "OutputGain": 1.2589285373687744,
+    "Rate": 0.23969697952270508,
+    "Shaping": 0.0,
+    "VibratoOffset": 67.5,
+    "Warmth": 0.26960694789886475,
+    "Width": 0.859375
+  },
+  "deviceData": {}
+}

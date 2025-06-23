@@ -1,0 +1,22 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "chorus",
+  "name": "Vibrato Kaleidoscope",
+  "parameters": {
+    "Amount": 1.0,
+    "DryWet": 0.5,
+    "Enabled": true,
+    "Feedback": 0.2435714304447174,
+    "HighpassEnabled": true,
+    "HighpassFrequency": 20.0,
+    "InvertFeedback": false,
+    "Mode": "Vibrato",
+    "OutputGain": 0.9999999403953552,
+    "Rate": 1.6614632606506348,
+    "Shaping": 1.0,
+    "VibratoOffset": 180.0,
+    "Warmth": 0.01042114943265915,
+    "Width": 1.0
+  },
+  "deviceData": {}
+}

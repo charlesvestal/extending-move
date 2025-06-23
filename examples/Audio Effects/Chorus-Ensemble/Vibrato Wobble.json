@@ -1,0 +1,22 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "chorus",
+  "name": "Vibrato Wobble",
+  "parameters": {
+    "Amount": 0.25196850299835205,
+    "DryWet": 1.0,
+    "Enabled": true,
+    "Feedback": 0.0,
+    "HighpassEnabled": true,
+    "HighpassFrequency": 20.0,
+    "InvertFeedback": false,
+    "Mode": "Vibrato",
+    "OutputGain": 1.2589285373687744,
+    "Rate": 0.8140498399734497,
+    "Shaping": 0.0,
+    "VibratoOffset": 0.0,
+    "Warmth": 0.10479619354009628,
+    "Width": 1.0
+  },
+  "deviceData": {}
+}

@@ -1,0 +1,146 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "audioEffectRack",
+  "name": "Fast",
+  "lockId": 1001,
+  "lockSeal": -100211998,
+  "parameters": {
+    "Enabled": true,
+    "Macro0": 63.35280227661133,
+    "Macro1": 63.5,
+    "Macro2": 63.35280227661133,
+    "Macro3": {
+      "value": 24.60405158996582,
+      "customName": "Comp Hi Pass"
+    },
+    "Macro4": {
+      "value": 51.38686752319336,
+      "customName": "Release"
+    },
+    "Macro5": {
+      "value": 85.1494369506836,
+      "customName": "Threshold"
+    },
+    "Macro6": 7.055555820465088,
+    "Macro7": 127.0
+  },
+  "chains": [
+    {
+      "name": "",
+      "color": 0,
+      "devices": [
+        {
+          "presetUri": null,
+          "kind": "channelEq",
+          "name": "",
+          "parameters": {
+            "Enabled": true,
+            "Gain": 1.0,
+            "HighShelfGain": {
+              "value": 0.9999999403953552,
+              "macroMapping": {
+                "macroIndex": 2,
+                "rangeMin": 0.18000000715255737,
+                "rangeMax": 5.599999904632568
+              }
+            },
+            "HighpassOn": false,
+            "LowShelfGain": {
+              "value": 0.9999999403953552,
+              "macroMapping": {
+                "macroIndex": 0,
+                "rangeMin": 0.18000000715255737,
+                "rangeMax": 5.599999904632568
+              }
+            },
+            "MidFrequency": 579.9998779296875,
+            "MidGain": {
+              "value": 1.0,
+              "macroMapping": {
+                "macroIndex": 1,
+                "rangeMin": 0.25,
+                "rangeMax": 4.0
+              }
+            }
+          },
+          "deviceData": {}
+        },
+        {
+          "presetUri": null,
+          "kind": "compressor",
+          "name": "",
+          "parameters": {
+            "Attack": 2.999999523162842,
+            "AutoReleaseControlOnOff": false,
+            "DryWet": {
+              "value": 1.0,
+              "macroMapping": {
+                "macroIndex": 7,
+                "rangeMin": 0.0,
+                "rangeMax": 1.0
+              }
+            },
+            "Enabled": {
+              "value": true,
+              "macroMapping": {
+                "macroIndex": 7,
+                "rangeMin": 1.0,
+                "rangeMax": 127.0
+              }
+            },
+            "ExpansionRatio": 1.149999976158142,
+            "Gain": {
+              "value": 0.0,
+              "macroMapping": {
+                "macroIndex": 6,
+                "rangeMin": 0.0,
+                "rangeMax": 36.0
+              }
+            },
+            "GainCompensation": false,
+            "Knee": 6.0,
+            "LogEnvelope": true,
+            "Model": "Peak",
+            "Ratio": 4.0,
+            "Release": {
+              "value": 30.0,
+              "macroMapping": {
+                "macroIndex": 4,
+                "rangeMin": 1.0,
+                "rangeMax": 1000.0
+              }
+            },
+            "SideChainEq_Freq": {
+              "value": 80.0,
+              "macroMapping": {
+                "macroIndex": 3,
+                "rangeMin": 30.0,
+                "rangeMax": 15000.0
+              }
+            },
+            "SideChainEq_Gain": 0.0,
+            "SideChainEq_Mode": "High pass",
+            "SideChainEq_On": true,
+            "SideChainEq_Q": 0.7071067690849304,
+            "Threshold": {
+              "value": 1.0,
+              "macroMapping": {
+                "macroIndex": 5,
+                "rangeMin": 0.003162277629598975,
+                "rangeMax": 1.0
+              }
+            }
+          },
+          "deviceData": {}
+        }
+      ],
+      "mixer": {
+        "pan": 0.0,
+        "solo-cue": false,
+        "speakerOn": true,
+        "volume": 0.0,
+        "sends": []
+      }
+    }
+  ]
+}

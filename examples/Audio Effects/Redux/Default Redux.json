@@ -1,0 +1,19 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "redux2",
+  "name": "Default Redux",
+  "parameters": {
+    "BitDepth": 16,
+    "DryWet": 1.0,
+    "EcoProcessing": true,
+    "EnablePostFilter": false,
+    "EnablePreFilter": false,
+    "Enabled": true,
+    "Jitter": 0.0,
+    "PostFilterValue": 0.0,
+    "QuantizerDcShift": false,
+    "QuantizerShape": 0.0,
+    "SampleRate": 40000.0
+  },
+  "deviceData": {}
+}

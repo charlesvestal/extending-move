@@ -1,0 +1,19 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "redux2",
+  "name": "Sampler Vintage",
+  "parameters": {
+    "BitDepth": 12,
+    "DryWet": 1.0,
+    "EcoProcessing": true,
+    "EnablePostFilter": false,
+    "EnablePreFilter": false,
+    "Enabled": true,
+    "Jitter": 0.014172336086630821,
+    "PostFilterValue": 0.0,
+    "QuantizerDcShift": true,
+    "QuantizerShape": 1.0,
+    "SampleRate": 13044.294921875
+  },
+  "deviceData": {}
+}
