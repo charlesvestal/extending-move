@@ -17,17 +17,18 @@ if not os.path.exists(USER_LIBRARY_DIR) and os.path.exists("examples/Audio Effec
     USER_LIBRARY_DIR = "examples/Audio Effects"
 
 # Parameters that cannot be assigned to macro knobs but should remain editable.
+# Each line notes the device where the parameter originates.
 EXCLUDED_MACRO_PARAMS = {
-    "DelayLine_CompatibilityMode",
-    "DryWetMode",
-    "EcoProcessing",
-    "Enabled",
-    "Oversampling",
-    "HiQuality",
-    "HostVisualisationRate",
-    "InternalSideChainGain",
-    "SideChainListen",
-    "SideChainMono",
+    "DelayLine_CompatibilityMode",  # Delay
+    "DryWetMode",  # Delay
+    "EcoProcessing",  # Delay / Redux
+    "Enabled",  # Dynamics
+    "Oversampling",  # Saturator
+    "HiQuality",  # Auto Filter
+    "HostVisualisationRate",  # Auto Filter
+    "InternalSideChainGain",  # Auto Filter
+    "SideChainListen",  # Auto Filter
+    "SideChainMono",  # Auto Filter
 }
 
 
