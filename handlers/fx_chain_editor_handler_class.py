@@ -16,6 +16,20 @@ USER_LIBRARY_DIR = "/data/UserData/UserLibrary/Audio Effects"
 if not os.path.exists(USER_LIBRARY_DIR) and os.path.exists("examples/Audio Effects"):
     USER_LIBRARY_DIR = "examples/Audio Effects"
 
+# Parameters that cannot be assigned to macro knobs but should remain editable.
+EXCLUDED_MACRO_PARAMS = {
+    "DelayLine_CompatibilityMode",
+    "DryWetMode",
+    "EcoProcessing",
+    "Enabled",
+    "Oversampling",
+    "HiQuality",
+    "HostVisualisationRate",
+    "InternalSideChainGain",
+    "SideChainListen",
+    "SideChainMono",
+}
+
 
 class FxChainEditorHandler(BaseHandler):
     def handle_get(self):
@@ -102,8 +116,16 @@ class FxChainEditorHandler(BaseHandler):
                 macro_knobs_html = ""
                 macros_json = "[]"
             params_html = self.generate_params_html(param_info["parameters"], mapped_info)
-            available_params_json = json.dumps([p["name"] for p in param_info["parameters"]])
-            param_paths_json = json.dumps(param_info.get("parameter_paths", {}))
+            params_for_macros = [
+                p for p in param_info["parameters"] if p["name"] not in EXCLUDED_MACRO_PARAMS
+            ]
+            paths_for_macros = {
+                k: v
+                for k, v in param_info.get("parameter_paths", {}).items()
+                if k not in EXCLUDED_MACRO_PARAMS
+            }
+            available_params_json = json.dumps([p["name"] for p in params_for_macros])
+            param_paths_json = json.dumps(paths_for_macros)
         else:
             macro_info = extract_macro_information(preset_path)
             macro_knobs_html = self.generate_macro_knobs_html(macro_info.get("macros", []))
