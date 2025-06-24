@@ -31,36 +31,53 @@ def build_fx_chain_from_preset(preset_path: str) -> Dict[str, Any]:
 
 
 def extract_fx_parameters(preset_path: str) -> Dict[str, Any]:
-    """Return parameter names, values and paths from an effect or chain."""
+    """Return parameter information from an effect or chain.
+
+    The result includes a nested ``device`` structure for rendering and a flat
+    list of parameters with their JSON paths for macro mapping.
+    """
     try:
         with open(preset_path, "r") as f:
             data = json.load(f)
 
-        params: List[Dict[str, Any]] = []
+        flat_params: List[Dict[str, Any]] = []
         paths: Dict[str, str] = {}
 
-        def walk(obj: Any, path: str = ""):
-            if isinstance(obj, dict):
-                if path.endswith("parameters"):
-                    for key, val in obj.items():
-                        if key in IGNORED_PARAMS or key.startswith("Macro"):
-                            continue
-                        value = val.get("value") if isinstance(val, dict) else val
-                        params.append({"name": key, "value": value})
-                        paths.setdefault(key, f"{path}.{key}")
-                for k, v in obj.items():
-                    walk(v, f"{path}.{k}" if path else k)
-            elif isinstance(obj, list):
-                for i, item in enumerate(obj):
-                    walk(item, f"{path}[{i}]")
+        def parse_device(dev: Dict[str, Any], base: str = "") -> Dict[str, Any]:
+            """Recursively collect parameters and child devices."""
+            kind = dev.get("kind", "unknown")
+            params: List[Dict[str, Any]] = []
 
-        walk(data)
+            for key, val in dev.get("parameters", {}).items():
+                if key in IGNORED_PARAMS or key.startswith("Macro"):
+                    continue
+                value = val.get("value") if isinstance(val, dict) else val
+                param_path = f"{base}.parameters.{key}" if base else f"parameters.{key}"
+                params.append({"name": key, "value": value})
+                flat_params.append({"name": key, "value": value})
+                paths.setdefault(key, param_path)
+
+            children: List[Dict[str, Any]] = []
+            for i, chain in enumerate(dev.get("chains", [])):
+                for j, child in enumerate(chain.get("devices", [])):
+                    cpath = f"{base}.chains[{i}].devices[{j}]" if base else f"chains[{i}].devices[{j}]"
+                    children.append(parse_device(child, cpath))
+
+            for j, child in enumerate(dev.get("devices", [])):
+                cpath = f"{base}.devices[{j}]" if base else f"devices[{j}]"
+                children.append(parse_device(child, cpath))
+
+            return {"kind": kind, "parameters": params, "children": children}
+
+        device_info = parse_device(data)
 
         return {
             "success": True,
-            "parameters": params,
+            "device": device_info,
+            "parameters": flat_params,
             "parameter_paths": paths,
-            "message": f"Found {len(params)} parameters",
+            "kind": data.get("kind"),
+            "message": f"Found {len(flat_params)} parameters",
         }
     except Exception as exc:
         logger.error("Error extracting FX parameters: %s", exc)
