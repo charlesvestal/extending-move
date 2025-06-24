@@ -1,0 +1,103 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "audioEffectRack",
+  "name": "Custom FX Chain",
+  "parameters": {
+    "lockId": 1001,
+    "lockSeal": -100211998,
+    "Macro0": {
+      "value": 0.0,
+      "customName": "FlatOn"
+    },
+    "Macro1": {
+      "value": 0.0,
+      "customName": "Macro 2"
+    },
+    "Macro2": {
+      "value": 0.0,
+      "customName": "Macro 3"
+    },
+    "Macro3": {
+      "value": 0.0,
+      "customName": "Macro 4"
+    },
+    "Macro4": {
+      "value": 0.0,
+      "customName": "Macro 5"
+    },
+    "Macro5": {
+      "value": 0.0,
+      "customName": "Macro 6"
+    },
+    "Macro6": {
+      "value": 0.0,
+      "customName": "Macro 7"
+    },
+    "Macro7": {
+      "value": 0.0,
+      "customName": "Macro 8"
+    }
+  },
+  "deviceData": {},
+  "chains": [
+    {
+      "name": "",
+      "color": 0,
+      "devices": [
+        {
+          "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+          "kind": "reverb",
+          "name": "Default Reverb",
+          "parameters": {
+            "AllPassGain": 0.6000000238418579,
+            "AllPassSize": 0.4000000059604645,
+            "BandFreq": 830.0,
+            "BandHighOn": false,
+            "BandLowOn": true,
+            "BandWidth": 5.849999904632568,
+            "ChorusOn": true,
+            "CutOn": true,
+            "DecayTime": 1200.0,
+            "DiffuseDelay": 0.5,
+            "EarlyReflectModDepth": 17.5,
+            "EarlyReflectModFreq": 0.2976999878883362,
+            "Enabled": true,
+            "FlatOn": {
+              "value": true,
+              "macroMapping": {
+                "macroIndex": 0
+              }
+            },
+            "FreezeOn": false,
+            "HighFilterType": "Shelf",
+            "MixDiffuse": 1.0,
+            "MixDirect": 0.3499999940395355,
+            "MixReflect": 1.0,
+            "PreDelay": 2.5,
+            "RoomSize": 100.0,
+            "RoomType": "SuperEco",
+            "ShelfHiFreq": 4500.0,
+            "ShelfHiGain": 0.699999988079071,
+            "ShelfHighOn": true,
+            "ShelfLoFreq": 90.0,
+            "ShelfLoGain": 1.0,
+            "ShelfLowOn": true,
+            "SizeModDepth": 0.019999999552965164,
+            "SizeModFreq": 0.019999999552965164,
+            "SizeSmoothing": "Fast",
+            "SpinOn": true,
+            "StereoSeparation": 100.0
+          },
+          "deviceData": {}
+        }
+      ],
+      "mixer": {
+        "pan": 0.0,
+        "solo-cue": false,
+        "speakerOn": true,
+        "volume": 0.8509035110473633,
+        "sends": []
+      }
+    }
+  ]
+}
