@@ -13,6 +13,7 @@
 <form method="post" action="{{ host_prefix }}/fx-chain" id="fx-chain-form">
   <input type="hidden" name="action" id="action-input" value="save_chain">
   <input type="hidden" name="preset_select" value="{{ selected_preset }}">
+  <input type="hidden" name="param_count" value="{{ param_count }}">
   <label>File Name: <input type="text" name="new_preset_name" id="new-preset-name" value="{{ new_preset_name }}"></label>
   <div class="macro-knobs-section">
       <h3>Macros</h3>
@@ -43,5 +44,12 @@
 {% endblock %}
 {% block scripts %}
 <script type="module" src="{{ host_prefix }}/static/file_browser.js"></script>
+<script src="{{ host_prefix }}/static/shared.js"></script>
+<script src="{{ host_prefix }}/static/input-knobs.js"></script>
+<script src="{{ host_prefix }}/static/params_knobs.js"></script>
+<script src="{{ host_prefix }}/static/rect-slider.js"></script>
+<script>
+window.driftSchema = {{ schema_json|safe }};
+</script>
 <script src="{{ host_prefix }}/static/macro_sidebar.js"></script>
 {% endblock %}

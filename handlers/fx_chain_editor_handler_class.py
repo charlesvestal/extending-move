@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 import os
 import json
+import math
 
 from handlers.base_handler import BaseHandler
 from core.file_browser import generate_dir_html
 from core.fx_chain_handler import (
     extract_fx_parameters,
     save_fx_chain_with_macros,
+    update_fx_parameter_values,
 )
 from core.synth_preset_inspector_handler import extract_macro_information
 from core.refresh_handler import refresh_library
@@ -47,6 +49,8 @@ class FxChainEditorHandler(BaseHandler):
             "available_params_json": "[]",
             "param_paths_json": "{}",
             "new_preset_name": "",
+            "schema_json": "{}",
+            "param_count": 0,
         }
 
     def handle_post(self, form):
@@ -58,6 +62,20 @@ class FxChainEditorHandler(BaseHandler):
         if not preset_path:
             return self.format_error_response("No preset selected")
 
+        try:
+            with open(preset_path, "r") as f:
+                preset_data = json.load(f)
+        except Exception:
+            preset_data = {}
+
+        effect_kind = preset_data.get("kind")
+        if effect_kind == "audioEffectRack":
+            chains = preset_data.get("chains", [])
+            if chains and len(chains) == 1:
+                devs = chains[0].get("devices", [])
+                if devs and len(devs) == 1:
+                    effect_kind = devs[0].get("kind")
+
         message = ""
         if action == "save_chain":
             macros_data_str = form.getvalue("macros_data") or "[]"
@@ -65,6 +83,23 @@ class FxChainEditorHandler(BaseHandler):
                 macros = json.loads(macros_data_str)
             except Exception:
                 macros = []
+            try:
+                pcount = int(form.getvalue("param_count", "0"))
+            except ValueError:
+                pcount = 0
+            param_updates = {}
+            for i in range(pcount):
+                pname = form.getvalue(f"param_{i}_name")
+                pval = form.getvalue(f"param_{i}_value")
+                if pname is None or pval is None:
+                    continue
+                if effect_kind == "channelEq" and pname in {"Gain", "HighShelfGain", "LowShelfGain", "MidGain"}:
+                    try:
+                        db_val = float(pval)
+                        pval = str(10 ** (db_val / 20))
+                    except Exception:
+                        pass
+                param_updates[pname] = pval
             new_name = form.getvalue("new_preset_name")
             if not new_name:
                 new_name = os.path.basename(preset_path)
@@ -82,6 +117,11 @@ class FxChainEditorHandler(BaseHandler):
             else:
                 message += f" Library refresh failed: {refresh_message}"
             preset_path = output_path
+            if param_updates:
+                upd = update_fx_parameter_values(preset_path, param_updates, preset_path)
+                if not upd["success"]:
+                    return self.format_error_response(upd["message"])
+                message += f" {upd['message']}"
         elif action == "select_preset":
             message = f"Selected preset: {os.path.basename(preset_path)}"
         else:
@@ -91,6 +131,8 @@ class FxChainEditorHandler(BaseHandler):
         params_html = ""
         available_params_json = "[]"
         param_paths_json = "{}"
+        param_count = 0
+        schema_json = "{}"
         if param_info["success"]:
             mapped_info = {}
             macro_info = extract_macro_information(preset_path)
@@ -101,9 +143,14 @@ class FxChainEditorHandler(BaseHandler):
             else:
                 macro_knobs_html = ""
                 macros_json = "[]"
-            params_html = self.generate_params_html(param_info["parameters"], mapped_info)
+            params_html = self.generate_params_html(param_info["parameters"], mapped_info, effect_kind)
             available_params_json = json.dumps([p["name"] for p in param_info["parameters"]])
             param_paths_json = json.dumps(param_info.get("parameter_paths", {}))
+            param_count = len(param_info["parameters"])
+            if effect_kind == "channelEq":
+                from core.fx_browser_handler import load_audio_effects_schema
+                schema = load_audio_effects_schema().get("channelEq", {}).get("parameters", {})
+                schema_json = json.dumps(schema)
         else:
             macro_info = extract_macro_information(preset_path)
             macro_knobs_html = self.generate_macro_knobs_html(macro_info.get("macros", []))
@@ -137,9 +184,67 @@ class FxChainEditorHandler(BaseHandler):
             "available_params_json": available_params_json,
             "param_paths_json": param_paths_json,
             "new_preset_name": os.path.basename(preset_path),
+            "schema_json": schema_json,
+            "param_count": param_count,
         }
 
-    def generate_params_html(self, params, mapped):
+    def generate_params_html(self, params, mapped, effect_kind=None):
+        if effect_kind == "channelEq":
+            order = [
+                "Enabled",
+                "Gain",
+                "HighShelfGain",
+                "HighpassOn",
+                "LowShelfGain",
+                "MidFrequency",
+                "MidGain",
+            ]
+            values = {p["name"]: p["value"] for p in params}
+            html = ["<div class=\"param-panel\"><div class=\"param-items\">"]
+            idx = 0
+            for name in order:
+                if name not in values:
+                    continue
+                val = values[name]
+                cls = "param-item"
+                if name in mapped:
+                    cls += f" param-mapped macro-{mapped[name]['macro_index']}"
+                html.append(f'<div class="{cls}" data-name="{name}">')
+                html.append(f'<span class="param-label">{name}</span>')
+                if name in {"Enabled", "HighpassOn"}:
+                    checked = "checked" if str(val).lower() in ("1", "true") else ""
+                    html.append(
+                        f'<input type="checkbox" class="param-toggle input-switch" id="param_{idx}_toggle" '
+                        f'data-target="param_{idx}_value" data-true-value="1" data-false-value="0" {checked}>'
+                    )
+                    html.append(f'<input type="hidden" name="param_{idx}_value" value="{int(bool(val))}">')
+                elif name == "MidFrequency":
+                    html.append(
+                        f'<input id="param_{idx}_dial" type="range" class="param-dial input-knob" '
+                        f'data-target="param_{idx}_value" data-display="param_{idx}_disp" value="{val}" '
+                        f'min="120" max="750000" step="1" data-unit="Hz" data-decimals="0">'
+                    )
+                    html.append(f'<span id="param_{idx}_disp" class="param-number"></span>')
+                    html.append(f'<input type="hidden" name="param_{idx}_value" value="{val}">')
+                else:
+                    db = 0.0
+                    try:
+                        db = 20 * math.log10(float(val))
+                    except Exception:
+                        pass
+                    html.append(
+                        f'<input id="param_{idx}_dial" type="range" class="param-dial input-knob" '
+                        f'data-target="param_{idx}_value" data-display="param_{idx}_disp" value="{db:.1f}" '
+                        f'min="-15" max="15" step="0.1" data-unit="dB" data-decimals="1">'
+                    )
+                    html.append(f'<span id="param_{idx}_disp" class="param-number"></span>')
+                    html.append(f'<input type="hidden" name="param_{idx}_value" value="{db:.1f}">')
+                html.append(f'<input type="hidden" name="param_{idx}_name" value="{name}">')
+                html.append('</div>')
+                idx += 1
+            html.append('</div></div>')
+            return "".join(html)
+
         html = []
         for p in params:
             name = p.get("name")

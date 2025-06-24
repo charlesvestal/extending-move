@@ -60,12 +60,12 @@
     "kind": "channelEq",
     "parameters": {
       "Enabled": {"type": "boolean", "default": true},
-      "Gain": {"type": "float", "min": 0.0, "max": 2.0, "default": 1.0},
-      "HighShelfGain": {"type": "float", "min": 0.0, "max": 10.0, "default": 1.0},
+      "Gain": {"type": "float", "min": 0.25, "max": 4.0, "default": 1.0, "unit": "dB", "curve": "log"},
+      "HighShelfGain": {"type": "float", "min": 0.18, "max": 5.62, "default": 1.0, "unit": "dB", "curve": "log"},
       "HighpassOn": {"type": "boolean", "default": false},
-      "LowShelfGain": {"type": "float", "min": 0.0, "max": 10.0, "default": 1.0},
-      "MidFrequency": {"type": "float", "min": 100.0, "max": 10000.0, "default": 1500.0},
-      "MidGain": {"type": "float", "min": 0.0, "max": 10.0, "default": 1.0}
+      "LowShelfGain": {"type": "float", "min": 0.18, "max": 5.62, "default": 1.0, "unit": "dB", "curve": "log"},
+      "MidFrequency": {"type": "float", "min": 120.0, "max": 750000.0, "default": 1500.0, "unit": "Hz", "curve": "log"},
+      "MidGain": {"type": "float", "min": 0.25, "max": 4.0, "default": 1.0, "unit": "dB", "curve": "log"}
     }
   },
   
