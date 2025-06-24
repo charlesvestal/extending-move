@@ -19,6 +19,7 @@
       {{ macro_knobs_html | safe }}
   </div>
   <input type="hidden" name="macros_data" id="macros-data-input" value='{{ macros_json }}'>
+  <input type="hidden" name="param_count" value="{{ param_count }}">
   <input type="hidden" id="available-params-input" value='{{ available_params_json }}'>
   <input type="hidden" id="param-paths-input" value='{{ param_paths_json }}'>
   <div id="macro-sidebar" class="macro-sidebar hidden">
@@ -44,4 +45,8 @@
 {% block scripts %}
 <script type="module" src="{{ host_prefix }}/static/file_browser.js"></script>
 <script src="{{ host_prefix }}/static/macro_sidebar.js"></script>
+<script>
+  window.inputKnobsOptions = { knobDiameter: 32 };
+</script>
+<script src="{{ host_prefix }}/static/input-knobs.js"></script>
 {% endblock %}
