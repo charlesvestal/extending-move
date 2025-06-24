@@ -471,6 +471,17 @@ The clip editor relies on `static/webaudio-pianoroll.js` and `static/set_inspect
 - **Pitch bend overlay** visualization and editing
 - Automatic prevention of overlapping notes when editing **drum tracks**
 
+### Example: FX Chain Editor
+
+This tool builds custom audio effect chains and allows mapping parameters to macro knobs:
+
+- Core: `core/fx_chain_handler.py`
+- Web Handler: `handlers/fx_chain_editor_handler_class.py`
+- Template: `templates_jinja/fx_chain_editor.html`
+
+Use the route `/fx-chain` and add a link in `base.html` with `active_tab="fx-chain"`.
+It relies on `static/macro_sidebar.js` for assigning parameters and saving macro mappings.
+
 
 ## Best Practices
 
