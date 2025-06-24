@@ -147,7 +147,7 @@ class FxChainEditorHandler(BaseHandler):
             available_params_json = json.dumps([p["name"] for p in param_info["parameters"]])
             param_paths_json = json.dumps(param_info.get("parameter_paths", {}))
             param_count = len(param_info["parameters"])
-            if effect_kind in {"channelEq", "chorus", "delay"}:
+            if effect_kind in {"channelEq", "chorus", "delay", "autoFilter"}:
                 from core.fx_browser_handler import load_audio_effects_schema
                 schema = load_audio_effects_schema().get(effect_kind, {}).get("parameters", {})
                 schema_json = json.dumps(schema)
@@ -293,7 +293,7 @@ class FxChainEditorHandler(BaseHandler):
             html.append('</div></div>')
             return "".join(html)
 
-        if effect_kind in {"chorus", "delay"}:
+        if effect_kind in {"chorus", "delay", "autoFilter"}:
             from core.fx_browser_handler import load_audio_effects_schema
             schema = load_audio_effects_schema().get(effect_kind, {}).get("parameters", {})
             if effect_kind == "chorus":
@@ -313,7 +313,7 @@ class FxChainEditorHandler(BaseHandler):
                     "Warmth",
                     "Width",
                 ]
-            else:
+            elif effect_kind == "delay":
                 order = [
                     "DelayLine_CompatibilityMode",
                     "DelayLine_Link",
@@ -343,6 +343,56 @@ class FxChainEditorHandler(BaseHandler):
                     "Modulation_AmountFilter",
                     "Modulation_AmountTime",
                     "Modulation_Frequency",
+                ]
+            else:  # autoFilter
+                order = [
+                    "DryWet",
+                    "Enabled",
+                    "Output",
+                    "HiQuality",
+                    "HostVisualisationRate",
+                    "InternalSideChainGain",
+                    "SoftClipOn",
+                    "Filter_Circuit",
+                    "Filter_DjControl",
+                    "Filter_Drive",
+                    "Filter_Morph",
+                    "Filter_Frequency",
+                    "Filter_MorphSlope",
+                    "Filter_Slope",
+                    "Filter_Resonance",
+                    "Filter_Type",
+                    "Filter_VowelFormant",
+                    "Filter_VowelPitch",
+                    "Envelope_Amount",
+                    "Envelope_Attack",
+                    "Envelope_HoldOn",
+                    "Envelope_Release",
+                    "Envelope_SahOn",
+                    "Envelope_SahRate",
+                    "Lfo_Amount",
+                    "Lfo_Frequency",
+                    "Lfo_Morph",
+                    "Lfo_Phase",
+                    "Lfo_PhaseOffset",
+                    "Lfo_QuantizationMode",
+                    "Lfo_SahRate",
+                    "Lfo_Sixteenth",
+                    "Lfo_Smoothing",
+                    "Lfo_Spin",
+                    "Lfo_Steps",
+                    "Lfo_StereoMode",
+                    "Lfo_SyncedRate",
+                    "Lfo_Time",
+                    "Lfo_TimeMode",
+                    "Lfo_Waveform",
+                    "SideChainEq_Freq",
+                    "SideChainEq_Gain",
+                    "SideChainEq_Mode",
+                    "SideChainEq_On",
+                    "SideChainEq_Q",
+                    "SideChainListen",
+                    "SideChainMono",
                 ]
             values = {p["name"]: p["value"] for p in params}
             html = ["<div class=\"param-panel\"><div class=\"param-items\">"]

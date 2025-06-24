@@ -833,6 +833,8 @@ def fx_chain():
     macros_json = result.get("macros_json", "[]")
     available_params_json = result.get("available_params_json", "[]")
     param_paths_json = result.get("param_paths_json", "{}")
+    param_count = result.get("param_count", 0)
+    schema_json = result.get("schema_json", "{}")
     return render_template(
         "fx_chain_editor.html",
         message=message,
@@ -848,6 +850,8 @@ def fx_chain():
         macros_json=macros_json,
         available_params_json=available_params_json,
         param_paths_json=param_paths_json,
+        param_count=param_count,
+        schema_json=schema_json,
         new_preset_name=new_preset_name,
         active_tab="fx-chain",
     )
