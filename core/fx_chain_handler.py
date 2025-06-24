@@ -5,6 +5,8 @@ from typing import Any, Dict, List
 from .fx_browser_handler import load_fx_chain_schema
 from .synth_preset_inspector_handler import (
     update_preset_parameter_mappings,
+    delete_parameter_mapping,
+    extract_macro_information,
 )
 from .synth_param_editor_handler import update_macro_values
 
@@ -101,6 +103,9 @@ def save_fx_chain_with_macros(
             json.dump(chain, f, indent=2)
             f.write("\n")
 
+        existing = extract_macro_information(dest_path)
+        existing_mapped = existing.get("mapped_parameters", {}) if existing.get("success") else {}
+
         name_updates: Dict[int, str] = {}
         value_updates: Dict[int, str] = {}
         for m in macros:
@@ -110,6 +115,7 @@ def save_fx_chain_with_macros(
             if "value" in m:
                 value_updates[idx] = str(m["value"])
             for p in m.get("parameters", []):
+                pname = p.get("name")
                 p_path = p.get("path")
                 if not is_chain and p_path:
                     p_path = f"chains[0].devices[0].{p_path}"
@@ -123,6 +129,11 @@ def save_fx_chain_with_macros(
                 res = update_preset_parameter_mappings(dest_path, upd)
                 if not res["success"]:
                     return res
+                if pname:
+                    existing_mapped.pop(pname, None)
+
+        for pname, info in existing_mapped.items():
+            delete_parameter_mapping(dest_path, info["path"])
 
         if name_updates:
             try:
