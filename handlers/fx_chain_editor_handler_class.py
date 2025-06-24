@@ -38,6 +38,100 @@ EXCLUDED_MACRO_PARAMS = {
     },
 }
 
+# Default macro assignments for single effects. Keys correspond to the
+# device folder names used in the library and values are ordered lists of
+# parameter names that should be mapped to the eight macro knobs.
+DEFAULT_MACRO_PARAMS = {
+    "Auto Filter": [
+        "Filter_Frequency",
+        "Filter_Resonance",
+        "Filter_Type",
+        "Filter_Drive",
+        "Lfo_Waveform",
+        "Lfo_Amount",
+        "Lfo_Frequency",
+        "DryWet",
+    ],
+    "Channel EQ": [
+        "LowShelfGain",
+        "MidGain",
+        "MidFrequency",
+        "HighShelfGain",
+        "HighpassOn",
+        "Gain",
+    ],
+    "Chorus-Ensemble": [
+        "Mode",
+        "Rate",
+        "Amount",
+        "Feedback",
+        "HighpassFrequency",
+        "Width",
+        "Warmth",
+        "DryWet",
+    ],
+    "Delay": [
+        "DelayLine_TimeL",
+        "Feedback",
+        "Filter_Frequency",
+        "Filter_Bandwidth",
+        "Modulation_Frequency",
+        "Modulation_AmountFilter",
+        "Modulation_AmountTime",
+        "DryWet",
+    ],
+    "Dynamics": [
+        "LowShelfGain",
+        "MidGain",
+        "HighShelfGain",
+        "SideChainEq_Freq",
+        "Release",
+        "Threshold",
+        "Gain",
+        "DryWet",
+    ],
+    "Phaser-Flanger": [
+        "Mode",
+        "Modulation_Frequency",
+        "Modulation_Amount",
+        "Feedback",
+        "DoublerDelayTime",
+        "Notches",
+        "Warmth",
+        "DryWet",
+    ],
+    "Redux": [
+        "SampleRate",
+        "Jitter",
+        "BitDepth",
+        "QuantizerShape",
+        "EnablePreFilter",
+        "EnablePostFilter",
+        "PostFilterValue",
+        "DryWet",
+    ],
+    "Reverb": [
+        "DecayTime",
+        "RoomSize",
+        "BandFreq",
+        "PreDelay",
+        "StereoSeparation",
+        "ShelfLoGain",
+        "ShelfHiGain",
+        "DryWet",
+    ],
+    "Saturator": [
+        "BaseDrive",
+        "Type",
+        "ColorDepth",
+        "ColorFrequency",
+        "ColorWidth",
+        "WsDepth",
+        "PostDrive",
+        "DryWet",
+    ],
+}
+
 
 class FxChainEditorHandler(BaseHandler):
     def handle_get(self):
@@ -117,13 +211,33 @@ class FxChainEditorHandler(BaseHandler):
             mapped_info = {}
             macro_info = extract_macro_information(preset_path)
             if macro_info["success"]:
+                macros = macro_info.get("macros", [])
                 mapped_info = macro_info.get("mapped_parameters", {})
-                macro_knobs_html = self.generate_macro_knobs_html(macro_info["macros"])
-                macros_json = json.dumps(macro_info["macros"])
             else:
-                macro_knobs_html = ""
-                macros_json = "[]"
-            params_html = self.generate_params_html(param_info["parameters"], mapped_info)
+                macros = []
+                mapped_info = {}
+
+            if not any(m.get("parameters") for m in macros) and param_info.get("kind") != "audioEffectRack":
+                device_folder = os.path.basename(os.path.dirname(preset_path))
+                defaults = DEFAULT_MACRO_PARAMS.get(device_folder)
+                if defaults:
+                    macros = []
+                    mapped_info = {}
+                    for i, pname in enumerate(defaults):
+                        ppath = param_info.get("parameter_paths", {}).get(pname)
+                        if not ppath:
+                            continue
+                        macros.append({
+                            "index": i,
+                            "name": f"Macro {i}",
+                            "value": 0.0,
+                            "parameters": [{"name": pname, "path": ppath}],
+                        })
+                        mapped_info[pname] = {"macro_index": i}
+
+            macro_knobs_html = self.generate_macro_knobs_html(macros)
+            macros_json = json.dumps(macros)
+            params_html = self.generate_params_html(param_info["device"], mapped_info)
             device_folder = os.path.basename(os.path.dirname(preset_path))
             excluded = EXCLUDED_MACRO_PARAMS.get(device_folder, set())
             params_for_macros = [
@@ -171,15 +285,21 @@ class FxChainEditorHandler(BaseHandler):
             "new_preset_name": os.path.basename(preset_path),
         }
 
-    def generate_params_html(self, params, mapped):
-        html = []
-        for p in params:
+    def generate_params_html(self, device, mapped, depth=0):
+        """Render parameters for a device and its children."""
+        indent = depth * 20
+        html = [f'<div class="fx-device" style="margin-left:{indent}px">']
+        html.append(f'<h4>{device.get("kind", "device")}</h4>')
+        for p in device.get("parameters", []):
             name = p.get("name")
             value = p.get("value")
             cls = "param-item"
             if name in mapped:
                 cls += f" param-mapped macro-{mapped[name]['macro_index']}"
             html.append(f'<div class="{cls}" data-name="{name}">{name}: {value}</div>')
+        for child in device.get("children", []):
+            html.append(self.generate_params_html(child, mapped, depth + 1))
+        html.append('</div>')
         return "".join(html)
 
     def generate_macro_knobs_html(self, macros):
