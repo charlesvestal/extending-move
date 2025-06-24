@@ -147,9 +147,9 @@ class FxChainEditorHandler(BaseHandler):
             available_params_json = json.dumps([p["name"] for p in param_info["parameters"]])
             param_paths_json = json.dumps(param_info.get("parameter_paths", {}))
             param_count = len(param_info["parameters"])
-            if effect_kind == "channelEq":
+            if effect_kind in {"channelEq", "chorus", "delay"}:
                 from core.fx_browser_handler import load_audio_effects_schema
-                schema = load_audio_effects_schema().get("channelEq", {}).get("parameters", {})
+                schema = load_audio_effects_schema().get(effect_kind, {}).get("parameters", {})
                 schema_json = json.dumps(schema)
         else:
             macro_info = extract_macro_information(preset_path)
@@ -187,6 +187,54 @@ class FxChainEditorHandler(BaseHandler):
             "schema_json": schema_json,
             "param_count": param_count,
         }
+
+    def build_param_item(self, idx, name, value, meta, mapped):
+        """Return HTML for a single parameter control."""
+        cls = "param-item"
+        if name in mapped:
+            cls += f" param-mapped macro-{mapped[name]['macro_index']}"
+        html = [f'<div class="{cls}" data-name="{name}">']
+        html.append(f'<span class="param-label">{name}</span>')
+        p_type = meta.get("type")
+        if p_type == "boolean":
+            checked = "checked" if str(value).lower() in ("1", "true") else ""
+            html.append(
+                f'<input type="checkbox" class="param-toggle input-switch" id="param_{idx}_toggle" '
+                f'data-target="param_{idx}_value" data-true-value="1" data-false-value="0" {checked}>'
+            )
+            html.append(f'<input type="hidden" name="param_{idx}_value" value="{int(bool(value))}">')
+        elif p_type == "enum":
+            opts = meta.get("values", [])
+            html.append(f'<select class="param-select" name="param_{idx}_value">')
+            for opt in opts:
+                sel = " selected" if str(value) == str(opt) else ""
+                html.append(f'<option value="{opt}"{sel}>{opt}</option>')
+            html.append('</select>')
+            html.append(f'<input type="hidden" name="param_{idx}_value" value="{value}">')
+        else:
+            attrs = []
+            if "min" in meta:
+                attrs.append(f'min="{meta["min"]}"')
+            if "max" in meta:
+                attrs.append(f'max="{meta["max"]}"')
+            if "step" in meta:
+                attrs.append(f'step="{meta["step"]}"')
+            if "unit" in meta:
+                attrs.append(f'data-unit="{meta["unit"]}"')
+            if "decimals" in meta:
+                attrs.append(f'data-decimals="{meta["decimals"]}"')
+            if "curve" in meta:
+                attrs.append(f'data-curve="{meta["curve"]}"')
+            attr_str = " ".join(attrs)
+            html.append(
+                f'<input id="param_{idx}_dial" type="range" class="param-dial input-knob" '
+                f'data-target="param_{idx}_value" data-display="param_{idx}_disp" value="{value}" {attr_str}>'
+            )
+            html.append(f'<span id="param_{idx}_disp" class="param-number"></span>')
+            html.append(f'<input type="hidden" name="param_{idx}_value" value="{value}">')
+        html.append(f'<input type="hidden" name="param_{idx}_name" value="{name}">')
+        html.append('</div>')
+        return "".join(html)
 
     def generate_params_html(self, params, mapped, effect_kind=None):
         if effect_kind == "channelEq":
@@ -244,6 +292,69 @@ class FxChainEditorHandler(BaseHandler):
                 idx += 1
             html.append('</div></div>')
             return "".join(html)
+
+        if effect_kind in {"chorus", "delay"}:
+            from core.fx_browser_handler import load_audio_effects_schema
+            schema = load_audio_effects_schema().get(effect_kind, {}).get("parameters", {})
+            if effect_kind == "chorus":
+                order = [
+                    "Enabled",
+                    "Amount",
+                    "DryWet",
+                    "Feedback",
+                    "HighpassEnabled",
+                    "HighpassFrequency",
+                    "InvertFeedback",
+                    "Mode",
+                    "OutputGain",
+                    "Rate",
+                    "Shaping",
+                    "VibratoOffset",
+                    "Warmth",
+                    "Width",
+                ]
+            else:
+                order = [
+                    "DelayLine_CompatibilityMode",
+                    "DelayLine_Link",
+                    "DelayLine_OffsetL",
+                    "DelayLine_OffsetR",
+                    "DelayLine_PingPong",
+                    "DelayLine_PingPongDelayTimeL",
+                    "DelayLine_PingPongDelayTimeR",
+                    "DelayLine_SimpleDelayTimeL",
+                    "DelayLine_SimpleDelayTimeR",
+                    "DelayLine_SmoothingMode",
+                    "DelayLine_SyncL",
+                    "DelayLine_SyncR",
+                    "DelayLine_SyncedSixteenthL",
+                    "DelayLine_SyncedSixteenthR",
+                    "DelayLine_TimeL",
+                    "DelayLine_TimeR",
+                    "DryWet",
+                    "DryWetMode",
+                    "EcoProcessing",
+                    "Enabled",
+                    "Feedback",
+                    "Filter_Bandwidth",
+                    "Filter_Frequency",
+                    "Filter_On",
+                    "Freeze",
+                    "Modulation_AmountFilter",
+                    "Modulation_AmountTime",
+                    "Modulation_Frequency",
+                ]
+            values = {p["name"]: p["value"] for p in params}
+            html = ["<div class=\"param-panel\"><div class=\"param-items\">"]
+            idx = 0
+            for name in order:
+                if name not in values:
+                    continue
+                meta = schema.get(name, {})
+                html.append(self.build_param_item(idx, name, values[name], meta, mapped))
+                idx += 1
+            html.append('</div></div>')
+            return ''.join(html)
 
         html = []
         for p in params:

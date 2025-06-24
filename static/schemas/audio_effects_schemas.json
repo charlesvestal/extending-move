@@ -2,275 +2,1318 @@
   "autoFilter": {
     "kind": "autoFilter",
     "parameters": {
-      "DryWet": {"type": "float", "min": 0.0, "max": 1.0, "default": 1.0},
-      "Enabled": {"type": "boolean", "default": true},
-      "Output": {"type": "float", "min": 0.0, "max": 1.0, "default": 1.0},
-      "HiQuality": {"type": "boolean", "default": false},
-      "HostVisualisationRate": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.02},
-      "InternalSideChainGain": {"type": "float", "min": 0.0, "max": 10.0, "default": 1.0},
-      "SoftClipOn": {"type": "boolean", "default": false},
-      
-      "Filter_Circuit": {"type": "enum", "values": ["SVF"], "default": "SVF"},
-      "Filter_DjControl": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0},
-      "Filter_Drive": {"type": "float", "min": 0.0, "max": 10.0, "default": 0.0},
-      "Filter_Morph": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0},
-      "Filter_Frequency": {"type": "float", "min": 20.0, "max": 20000.0, "default": 2500.0},
-      "Filter_MorphSlope": {"type": "enum", "values": ["12dB", "24dB"], "default": "24dB"},
-      "Filter_Slope": {"type": "enum", "values": ["12dB", "24dB"], "default": "24dB"},
-      "Filter_Resonance": {"type": "float", "min": 0.0, "max": 10.0, "default": 0.0},
-      "Filter_Type": {"type": "enum", "values": ["Low-pass", "High-pass", "Band-pass", "Notch"], "default": "Low-pass"},
-      "Filter_VowelFormant": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0},
-      "Filter_VowelPitch": {"type": "integer", "min": -12, "max": 12, "default": 0},
-      
-      "Envelope_Amount": {"type": "float", "min": -1.0, "max": 1.0, "default": 0.0},
-      "Envelope_Attack": {"type": "float", "min": 0.001, "max": 10.0, "default": 0.001},
-      "Envelope_HoldOn": {"type": "boolean", "default": true},
-      "Envelope_Release": {"type": "float", "min": 0.001, "max": 10.0, "default": 0.25},
-      "Envelope_SahOn": {"type": "boolean", "default": false},
-      "Envelope_SahRate": {"type": "integer", "min": -8, "max": 8, "default": -4},
-      
-      "Lfo_Amount": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0},
-      "Lfo_Frequency": {"type": "float", "min": 0.01, "max": 100.0, "default": 1.0},
-      "Lfo_Morph": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0},
-      "Lfo_Phase": {"type": "float", "min": 0.0, "max": 360.0, "default": 0.0},
-      "Lfo_PhaseOffset": {"type": "float", "min": 0.0, "max": 360.0, "default": 0.0},
-      "Lfo_QuantizationMode": {"type": "enum", "values": ["None", "Steps"], "default": "None"},
-      "Lfo_SahRate": {"type": "integer", "min": -8, "max": 8, "default": -4},
-      "Lfo_Sixteenth": {"type": "integer", "min": 1, "max": 64, "default": 16},
-      "Lfo_Smoothing": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0},
-      "Lfo_Spin": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0},
-      "Lfo_Steps": {"type": "integer", "min": 2, "max": 32, "default": 8},
-      "Lfo_StereoMode": {"type": "enum", "values": ["Phase", "Spin"], "default": "Phase"},
-      "Lfo_SyncedRate": {"type": "integer", "min": 1, "max": 32, "default": 4},
-      "Lfo_Time": {"type": "float", "min": 0.01, "max": 100.0, "default": 1.0},
-      "Lfo_TimeMode": {"type": "enum", "values": ["Rate", "Synced"], "default": "Rate"},
-      "Lfo_Waveform": {"type": "enum", "values": ["Sine", "Triangle", "Square", "Sawtooth", "Noise"], "default": "Sine"},
-      
-      "SideChainEq_Freq": {"type": "float", "min": 20.0, "max": 20000.0, "default": 200.0},
-      "SideChainEq_Gain": {"type": "float", "min": -12.0, "max": 12.0, "default": 0.0},
-      "SideChainEq_Mode": {"type": "enum", "values": ["High pass", "Low pass"], "default": "High pass"},
-      "SideChainEq_On": {"type": "boolean", "default": false},
-      "SideChainEq_Q": {"type": "float", "min": 0.1, "max": 10.0, "default": 0.707},
-      "SideChainListen": {"type": "boolean", "default": false},
-      "SideChainMono": {"type": "boolean", "default": false}
+      "DryWet": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 1.0
+      },
+      "Enabled": {
+        "type": "boolean",
+        "default": true
+      },
+      "Output": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 1.0
+      },
+      "HiQuality": {
+        "type": "boolean",
+        "default": false
+      },
+      "HostVisualisationRate": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.02
+      },
+      "InternalSideChainGain": {
+        "type": "float",
+        "min": 0.0,
+        "max": 10.0,
+        "default": 1.0
+      },
+      "SoftClipOn": {
+        "type": "boolean",
+        "default": false
+      },
+      "Filter_Circuit": {
+        "type": "enum",
+        "values": [
+          "SVF"
+        ],
+        "default": "SVF"
+      },
+      "Filter_DjControl": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.0
+      },
+      "Filter_Drive": {
+        "type": "float",
+        "min": 0.0,
+        "max": 10.0,
+        "default": 0.0
+      },
+      "Filter_Morph": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.0
+      },
+      "Filter_Frequency": {
+        "type": "float",
+        "min": 20.0,
+        "max": 20000.0,
+        "default": 2500.0
+      },
+      "Filter_MorphSlope": {
+        "type": "enum",
+        "values": [
+          "12dB",
+          "24dB"
+        ],
+        "default": "24dB"
+      },
+      "Filter_Slope": {
+        "type": "enum",
+        "values": [
+          "12dB",
+          "24dB"
+        ],
+        "default": "24dB"
+      },
+      "Filter_Resonance": {
+        "type": "float",
+        "min": 0.0,
+        "max": 10.0,
+        "default": 0.0
+      },
+      "Filter_Type": {
+        "type": "enum",
+        "values": [
+          "Low-pass",
+          "High-pass",
+          "Band-pass",
+          "Notch"
+        ],
+        "default": "Low-pass"
+      },
+      "Filter_VowelFormant": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.0
+      },
+      "Filter_VowelPitch": {
+        "type": "integer",
+        "min": -12,
+        "max": 12,
+        "default": 0
+      },
+      "Envelope_Amount": {
+        "type": "float",
+        "min": -1.0,
+        "max": 1.0,
+        "default": 0.0
+      },
+      "Envelope_Attack": {
+        "type": "float",
+        "min": 0.001,
+        "max": 10.0,
+        "default": 0.001
+      },
+      "Envelope_HoldOn": {
+        "type": "boolean",
+        "default": true
+      },
+      "Envelope_Release": {
+        "type": "float",
+        "min": 0.001,
+        "max": 10.0,
+        "default": 0.25
+      },
+      "Envelope_SahOn": {
+        "type": "boolean",
+        "default": false
+      },
+      "Envelope_SahRate": {
+        "type": "integer",
+        "min": -8,
+        "max": 8,
+        "default": -4
+      },
+      "Lfo_Amount": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.0
+      },
+      "Lfo_Frequency": {
+        "type": "float",
+        "min": 0.01,
+        "max": 100.0,
+        "default": 1.0
+      },
+      "Lfo_Morph": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.0
+      },
+      "Lfo_Phase": {
+        "type": "float",
+        "min": 0.0,
+        "max": 360.0,
+        "default": 0.0
+      },
+      "Lfo_PhaseOffset": {
+        "type": "float",
+        "min": 0.0,
+        "max": 360.0,
+        "default": 0.0
+      },
+      "Lfo_QuantizationMode": {
+        "type": "enum",
+        "values": [
+          "None",
+          "Steps"
+        ],
+        "default": "None"
+      },
+      "Lfo_SahRate": {
+        "type": "integer",
+        "min": -8,
+        "max": 8,
+        "default": -4
+      },
+      "Lfo_Sixteenth": {
+        "type": "integer",
+        "min": 1,
+        "max": 64,
+        "default": 16
+      },
+      "Lfo_Smoothing": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.0
+      },
+      "Lfo_Spin": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.0
+      },
+      "Lfo_Steps": {
+        "type": "integer",
+        "min": 2,
+        "max": 32,
+        "default": 8
+      },
+      "Lfo_StereoMode": {
+        "type": "enum",
+        "values": [
+          "Phase",
+          "Spin"
+        ],
+        "default": "Phase"
+      },
+      "Lfo_SyncedRate": {
+        "type": "integer",
+        "min": 1,
+        "max": 32,
+        "default": 4
+      },
+      "Lfo_Time": {
+        "type": "float",
+        "min": 0.01,
+        "max": 100.0,
+        "default": 1.0
+      },
+      "Lfo_TimeMode": {
+        "type": "enum",
+        "values": [
+          "Rate",
+          "Synced"
+        ],
+        "default": "Rate"
+      },
+      "Lfo_Waveform": {
+        "type": "enum",
+        "values": [
+          "Sine",
+          "Triangle",
+          "Square",
+          "Sawtooth",
+          "Noise"
+        ],
+        "default": "Sine"
+      },
+      "SideChainEq_Freq": {
+        "type": "float",
+        "min": 20.0,
+        "max": 20000.0,
+        "default": 200.0
+      },
+      "SideChainEq_Gain": {
+        "type": "float",
+        "min": -12.0,
+        "max": 12.0,
+        "default": 0.0
+      },
+      "SideChainEq_Mode": {
+        "type": "enum",
+        "values": [
+          "High pass",
+          "Low pass"
+        ],
+        "default": "High pass"
+      },
+      "SideChainEq_On": {
+        "type": "boolean",
+        "default": false
+      },
+      "SideChainEq_Q": {
+        "type": "float",
+        "min": 0.1,
+        "max": 10.0,
+        "default": 0.707
+      },
+      "SideChainListen": {
+        "type": "boolean",
+        "default": false
+      },
+      "SideChainMono": {
+        "type": "boolean",
+        "default": false
+      }
     }
   },
-  
   "channelEq": {
     "kind": "channelEq",
     "parameters": {
-      "Enabled": {"type": "boolean", "default": true},
-      "Gain": {"type": "float", "min": 0.25, "max": 4.0, "default": 1.0, "unit": "dB", "curve": "log"},
-      "HighShelfGain": {"type": "float", "min": 0.18, "max": 5.62, "default": 1.0, "unit": "dB", "curve": "log"},
-      "HighpassOn": {"type": "boolean", "default": false},
-      "LowShelfGain": {"type": "float", "min": 0.18, "max": 5.62, "default": 1.0, "unit": "dB", "curve": "log"},
-      "MidFrequency": {"type": "float", "min": 120.0, "max": 750000.0, "default": 1500.0, "unit": "Hz", "curve": "log"},
-      "MidGain": {"type": "float", "min": 0.25, "max": 4.0, "default": 1.0, "unit": "dB", "curve": "log"}
+      "Enabled": {
+        "type": "boolean",
+        "default": true
+      },
+      "Gain": {
+        "type": "float",
+        "min": 0.25,
+        "max": 4.0,
+        "default": 1.0,
+        "unit": "dB",
+        "curve": "log"
+      },
+      "HighShelfGain": {
+        "type": "float",
+        "min": 0.18,
+        "max": 5.62,
+        "default": 1.0,
+        "unit": "dB",
+        "curve": "log"
+      },
+      "HighpassOn": {
+        "type": "boolean",
+        "default": false
+      },
+      "LowShelfGain": {
+        "type": "float",
+        "min": 0.18,
+        "max": 5.62,
+        "default": 1.0,
+        "unit": "dB",
+        "curve": "log"
+      },
+      "MidFrequency": {
+        "type": "float",
+        "min": 120.0,
+        "max": 750000.0,
+        "default": 1500.0,
+        "unit": "Hz",
+        "curve": "log"
+      },
+      "MidGain": {
+        "type": "float",
+        "min": 0.25,
+        "max": 4.0,
+        "default": 1.0,
+        "unit": "dB",
+        "curve": "log"
+      }
     }
   },
-  
   "chorus": {
     "kind": "chorus",
     "parameters": {
-      "Amount": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.5},
-      "DryWet": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.5},
-      "Enabled": {"type": "boolean", "default": true},
-      "Feedback": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0},
-      "HighpassEnabled": {"type": "boolean", "default": false},
-      "HighpassFrequency": {"type": "float", "min": 20.0, "max": 1000.0, "default": 20.0},
-      "InvertFeedback": {"type": "boolean", "default": false},
-      "Mode": {"type": "enum", "values": ["Classic", "Vintage", "Modern"], "default": "Classic"},
-      "OutputGain": {"type": "float", "min": 0.0, "max": 2.0, "default": 1.0},
-      "Rate": {"type": "float", "min": 0.01, "max": 20.0, "default": 0.9},
-      "Shaping": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0},
-      "VibratoOffset": {"type": "float", "min": -1.0, "max": 1.0, "default": 0.0},
-      "Warmth": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0},
-      "Width": {"type": "float", "min": 0.0, "max": 2.0, "default": 1.0}
+      "Amount": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.5,
+        "unit": "%"
+      },
+      "DryWet": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.5,
+        "unit": "%"
+      },
+      "Enabled": {
+        "type": "boolean",
+        "default": true
+      },
+      "Feedback": {
+        "type": "float",
+        "min": 0.0,
+        "max": 0.99,
+        "default": 0.0,
+        "unit": "%"
+      },
+      "HighpassEnabled": {
+        "type": "boolean",
+        "default": false
+      },
+      "HighpassFrequency": {
+        "type": "float",
+        "min": 20.0,
+        "max": 2000.0,
+        "default": 20.0,
+        "unit": "Hz",
+        "decimals": 3
+      },
+      "InvertFeedback": {
+        "type": "boolean",
+        "default": false
+      },
+      "Mode": {
+        "type": "enum",
+        "values": [
+          "Classic",
+          "Ensemble",
+          "Vibrato"
+        ],
+        "default": "Classic"
+      },
+      "OutputGain": {
+        "type": "float",
+        "min": 0.0,
+        "max": 2.0,
+        "default": 1.0,
+        "unit": "dB"
+      },
+      "Rate": {
+        "type": "float",
+        "min": 0.1,
+        "max": 15000.0,
+        "default": 0.9,
+        "unit": "Hz",
+        "decimals": 3
+      },
+      "Shaping": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.0,
+        "unit": "%"
+      },
+      "VibratoOffset": {
+        "type": "float",
+        "min": 0.0,
+        "max": 180.0,
+        "default": 0.0,
+        "unit": "\u00ba"
+      },
+      "Warmth": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.0,
+        "unit": "%"
+      },
+      "Width": {
+        "type": "float",
+        "min": 0.0,
+        "max": 2.0,
+        "default": 1.0,
+        "unit": "%"
+      }
     }
   },
-  
   "delay": {
     "kind": "delay",
     "parameters": {
-      "DryWet": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.5},
-      "DryWetMode": {"type": "enum", "values": ["Equal-loudness", "Equal-gain"], "default": "Equal-loudness"},
-      "EcoProcessing": {"type": "boolean", "default": false},
-      "Enabled": {"type": "boolean", "default": true},
-      "Feedback": {"type": "float", "min": 0.0, "max": 0.98, "default": 0.0},
-      "Freeze": {"type": "boolean", "default": false},
-      
-      "DelayLine_CompatibilityMode": {"type": "enum", "values": ["D", "R"], "default": "D"},
-      "DelayLine_Link": {"type": "boolean", "default": true},
-      "DelayLine_OffsetL": {"type": "float", "min": -1000.0, "max": 1000.0, "default": 0.0},
-      "DelayLine_OffsetR": {"type": "float", "min": -1000.0, "max": 1000.0, "default": 0.0},
-      "DelayLine_PingPong": {"type": "boolean", "default": false},
-      "DelayLine_PingPongDelayTimeL": {"type": "float", "min": 0.1, "max": 5000.0, "default": 1.0},
-      "DelayLine_PingPongDelayTimeR": {"type": "float", "min": 0.1, "max": 5000.0, "default": 1.0},
-      "DelayLine_SimpleDelayTimeL": {"type": "float", "min": 0.1, "max": 5000.0, "default": 100.0},
-      "DelayLine_SimpleDelayTimeR": {"type": "float", "min": 0.1, "max": 5000.0, "default": 100.0},
-      "DelayLine_SmoothingMode": {"type": "enum", "values": ["Repitch", "Fade"], "default": "Repitch"},
-      "DelayLine_SyncL": {"type": "boolean", "default": false},
-      "DelayLine_SyncR": {"type": "boolean", "default": false},
-      "DelayLine_SyncedSixteenthL": {"type": "enum", "values": ["1", "2", "4", "8", "16"], "default": "1"},
-      "DelayLine_SyncedSixteenthR": {"type": "enum", "values": ["1", "2", "4", "8", "16"], "default": "4"},
-      "DelayLine_TimeL": {"type": "float", "min": 0.1, "max": 5000.0, "default": 100.0},
-      "DelayLine_TimeR": {"type": "float", "min": 0.1, "max": 5000.0, "default": 100.0},
-      
-      "Filter_Bandwidth": {"type": "float", "min": 0.1, "max": 10.0, "default": 1.0},
-      "Filter_Frequency": {"type": "float", "min": 20.0, "max": 20000.0, "default": 1000.0},
-      "Filter_On": {"type": "boolean", "default": false},
-      
-      "Modulation_AmountFilter": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0},
-      "Modulation_AmountTime": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0},
-      "Modulation_Frequency": {"type": "float", "min": 0.01, "max": 20.0, "default": 0.5}
+      "DryWet": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.5,
+        "unit": "%"
+      },
+      "DryWetMode": {
+        "type": "enum",
+        "values": [
+          "Equal-loudness",
+          "Equal-gain"
+        ],
+        "default": "Equal-loudness"
+      },
+      "EcoProcessing": {
+        "type": "boolean",
+        "default": false
+      },
+      "Enabled": {
+        "type": "boolean",
+        "default": true
+      },
+      "Feedback": {
+        "type": "float",
+        "min": 0.0,
+        "max": 0.95,
+        "default": 0.0
+      },
+      "Freeze": {
+        "type": "boolean",
+        "default": false
+      },
+      "DelayLine_CompatibilityMode": {
+        "type": "enum",
+        "values": [
+          "D",
+          "R"
+        ],
+        "default": "D"
+      },
+      "DelayLine_Link": {
+        "type": "boolean",
+        "default": true
+      },
+      "DelayLine_OffsetL": {
+        "type": "float",
+        "min": -33.0,
+        "max": 33.0,
+        "default": 0.0,
+        "unit": "%"
+      },
+      "DelayLine_OffsetR": {
+        "type": "float",
+        "min": -33.0,
+        "max": 33.0,
+        "default": 0.0,
+        "unit": "%"
+      },
+      "DelayLine_PingPong": {
+        "type": "boolean",
+        "default": false
+      },
+      "DelayLine_PingPongDelayTimeL": {
+        "type": "float",
+        "min": 1.0,
+        "max": 999.0,
+        "default": 1.0,
+        "unit": "ms",
+        "decimals": 0
+      },
+      "DelayLine_PingPongDelayTimeR": {
+        "type": "float",
+        "min": 1.0,
+        "max": 999.0,
+        "default": 1.0,
+        "unit": "ms",
+        "decimals": 0
+      },
+      "DelayLine_SimpleDelayTimeL": {
+        "type": "float",
+        "min": 1.0,
+        "max": 300.0,
+        "default": 100.0,
+        "unit": "ms",
+        "decimals": 0
+      },
+      "DelayLine_SimpleDelayTimeR": {
+        "type": "float",
+        "min": 1.0,
+        "max": 300.0,
+        "default": 100.0,
+        "unit": "ms",
+        "decimals": 0
+      },
+      "DelayLine_SmoothingMode": {
+        "type": "enum",
+        "values": [
+          "repitch",
+          "fade",
+          "jump"
+        ],
+        "default": "repitch"
+      },
+      "DelayLine_SyncL": {
+        "type": "boolean",
+        "default": false
+      },
+      "DelayLine_SyncR": {
+        "type": "boolean",
+        "default": false
+      },
+      "DelayLine_SyncedSixteenthL": {
+        "type": "enum",
+        "values": [
+          "1/16",
+          "2/16",
+          "3/16",
+          "4/16",
+          "5/16",
+          "6/16",
+          "8/16",
+          "16/16"
+        ],
+        "default": "1/16"
+      },
+      "DelayLine_SyncedSixteenthR": {
+        "type": "enum",
+        "values": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "8",
+          "16"
+        ],
+        "default": "1"
+      },
+      "DelayLine_TimeL": {
+        "type": "float",
+        "min": 0.001,
+        "max": 5.0,
+        "default": 0.1,
+        "unit": "s",
+        "decimals": 3
+      },
+      "DelayLine_TimeR": {
+        "type": "float",
+        "min": 0.001,
+        "max": 5.0,
+        "default": 0.1,
+        "unit": "s",
+        "decimals": 3
+      },
+      "Filter_Bandwidth": {
+        "type": "float",
+        "min": 0.5,
+        "max": 9.0,
+        "default": 1.0,
+        "decimals": 2
+      },
+      "Filter_Frequency": {
+        "type": "float",
+        "min": 50.0,
+        "max": 18000.0,
+        "default": 1000.0,
+        "unit": "Hz",
+        "decimals": 3
+      },
+      "Filter_On": {
+        "type": "boolean",
+        "default": false
+      },
+      "Modulation_AmountFilter": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.0,
+        "unit": "%"
+      },
+      "Modulation_AmountTime": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.0,
+        "unit": "%"
+      },
+      "Modulation_Frequency": {
+        "type": "float",
+        "min": 0.01,
+        "max": 40.0,
+        "default": 0.5,
+        "unit": "Hz",
+        "decimals": 3
+      }
     }
   },
-  
   "phaser": {
     "kind": "phaser",
     "parameters": {
-      "CenterFrequency": {"type": "float", "min": 20.0, "max": 20000.0, "default": 1000.0},
-      "DoublerDelayTime": {"type": "float", "min": 0.001, "max": 1.0, "default": 0.08},
-      "DryWet": {"type": "float", "min": 0.0, "max": 1.0, "default": 1.0},
-      "Enabled": {"type": "boolean", "default": true},
-      "Feedback": {"type": "float", "min": -1.0, "max": 1.0, "default": 0.0},
-      "FlangerDelayTime": {"type": "float", "min": 0.001, "max": 0.02, "default": 0.0025},
-      "InvertWet": {"type": "boolean", "default": false},
-      "Mode": {"type": "enum", "values": ["Phaser", "Flanger", "Doubler"], "default": "Phaser"},
-      "ModulationBlend": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0},
-      "Notches": {"type": "integer", "min": 2, "max": 12, "default": 4},
-      "OutputGain": {"type": "float", "min": 0.0, "max": 2.0, "default": 1.0},
-      "SafeBassFrequency": {"type": "float", "min": 20.0, "max": 500.0, "default": 100.0},
-      "Spread": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.5},
-      "Warmth": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0},
-      
-      "Modulation_Amount": {"type": "float", "min": 0.0, "max": 1.0, "default": 1.0},
-      "Modulation_DutyCycle": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0},
-      "Modulation_EnvelopeAmount": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0},
-      "Modulation_EnvelopeAttack": {"type": "float", "min": 0.001, "max": 10.0, "default": 0.01},
-      "Modulation_EnvelopeEnabled": {"type": "boolean", "default": false},
-      "Modulation_EnvelopeRelease": {"type": "float", "min": 0.001, "max": 10.0, "default": 0.1},
-      "Modulation_Frequency": {"type": "float", "min": 0.01, "max": 20.0, "default": 0.2},
-      "Modulation_Frequency2": {"type": "float", "min": 0.01, "max": 20.0, "default": 0.2},
-      "Modulation_LfoBlend": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0},
-      "Modulation_PhaseOffset": {"type": "float", "min": 0.0, "max": 360.0, "default": 0.0},
-      "Modulation_Spin": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0},
-      "Modulation_SpinEnabled": {"type": "boolean", "default": false},
-      "Modulation_Sync": {"type": "boolean", "default": false},
-      "Modulation_Sync2": {"type": "boolean", "default": false},
-      "Modulation_SyncedRate": {"type": "integer", "min": 1, "max": 32, "default": 4},
-      "Modulation_SyncedRate2": {"type": "integer", "min": 1, "max": 32, "default": 4},
-      "Modulation_Waveform": {"type": "enum", "values": ["Triangle", "Sine", "Square", "Sawtooth"], "default": "Triangle"}
+      "CenterFrequency": {
+        "type": "float",
+        "min": 20.0,
+        "max": 20000.0,
+        "default": 1000.0
+      },
+      "DoublerDelayTime": {
+        "type": "float",
+        "min": 0.001,
+        "max": 1.0,
+        "default": 0.08
+      },
+      "DryWet": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 1.0
+      },
+      "Enabled": {
+        "type": "boolean",
+        "default": true
+      },
+      "Feedback": {
+        "type": "float",
+        "min": -1.0,
+        "max": 1.0,
+        "default": 0.0
+      },
+      "FlangerDelayTime": {
+        "type": "float",
+        "min": 0.001,
+        "max": 0.02,
+        "default": 0.0025
+      },
+      "InvertWet": {
+        "type": "boolean",
+        "default": false
+      },
+      "Mode": {
+        "type": "enum",
+        "values": [
+          "Phaser",
+          "Flanger",
+          "Doubler"
+        ],
+        "default": "Phaser"
+      },
+      "ModulationBlend": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.0
+      },
+      "Notches": {
+        "type": "integer",
+        "min": 2,
+        "max": 12,
+        "default": 4
+      },
+      "OutputGain": {
+        "type": "float",
+        "min": 0.0,
+        "max": 2.0,
+        "default": 1.0
+      },
+      "SafeBassFrequency": {
+        "type": "float",
+        "min": 20.0,
+        "max": 500.0,
+        "default": 100.0
+      },
+      "Spread": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.5
+      },
+      "Warmth": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.0
+      },
+      "Modulation_Amount": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 1.0
+      },
+      "Modulation_DutyCycle": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.0
+      },
+      "Modulation_EnvelopeAmount": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.0
+      },
+      "Modulation_EnvelopeAttack": {
+        "type": "float",
+        "min": 0.001,
+        "max": 10.0,
+        "default": 0.01
+      },
+      "Modulation_EnvelopeEnabled": {
+        "type": "boolean",
+        "default": false
+      },
+      "Modulation_EnvelopeRelease": {
+        "type": "float",
+        "min": 0.001,
+        "max": 10.0,
+        "default": 0.1
+      },
+      "Modulation_Frequency": {
+        "type": "float",
+        "min": 0.01,
+        "max": 20.0,
+        "default": 0.2
+      },
+      "Modulation_Frequency2": {
+        "type": "float",
+        "min": 0.01,
+        "max": 20.0,
+        "default": 0.2
+      },
+      "Modulation_LfoBlend": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.0
+      },
+      "Modulation_PhaseOffset": {
+        "type": "float",
+        "min": 0.0,
+        "max": 360.0,
+        "default": 0.0
+      },
+      "Modulation_Spin": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.0
+      },
+      "Modulation_SpinEnabled": {
+        "type": "boolean",
+        "default": false
+      },
+      "Modulation_Sync": {
+        "type": "boolean",
+        "default": false
+      },
+      "Modulation_Sync2": {
+        "type": "boolean",
+        "default": false
+      },
+      "Modulation_SyncedRate": {
+        "type": "integer",
+        "min": 1,
+        "max": 32,
+        "default": 4
+      },
+      "Modulation_SyncedRate2": {
+        "type": "integer",
+        "min": 1,
+        "max": 32,
+        "default": 4
+      },
+      "Modulation_Waveform": {
+        "type": "enum",
+        "values": [
+          "Triangle",
+          "Sine",
+          "Square",
+          "Sawtooth"
+        ],
+        "default": "Triangle"
+      }
     }
   },
-  
   "redux2": {
     "kind": "redux2",
     "parameters": {
-      "BitDepth": {"type": "integer", "min": 1, "max": 32, "default": 16},
-      "DryWet": {"type": "float", "min": 0.0, "max": 1.0, "default": 1.0},
-      "EcoProcessing": {"type": "boolean", "default": false},
-      "Enabled": {"type": "boolean", "default": true},
-      "EnablePostFilter": {"type": "boolean", "default": false},
-      "EnablePreFilter": {"type": "boolean", "default": false},
-      "Jitter": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0},
-      "PostFilterValue": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0},
-      "QuantizerDcShift": {"type": "boolean", "default": false},
-      "QuantizerShape": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0},
-      "SampleRate": {"type": "float", "min": 50.0, "max": 48000.0, "default": 40000.0}
+      "BitDepth": {
+        "type": "integer",
+        "min": 1,
+        "max": 32,
+        "default": 16
+      },
+      "DryWet": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 1.0
+      },
+      "EcoProcessing": {
+        "type": "boolean",
+        "default": false
+      },
+      "Enabled": {
+        "type": "boolean",
+        "default": true
+      },
+      "EnablePostFilter": {
+        "type": "boolean",
+        "default": false
+      },
+      "EnablePreFilter": {
+        "type": "boolean",
+        "default": false
+      },
+      "Jitter": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.0
+      },
+      "PostFilterValue": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.0
+      },
+      "QuantizerDcShift": {
+        "type": "boolean",
+        "default": false
+      },
+      "QuantizerShape": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.0
+      },
+      "SampleRate": {
+        "type": "float",
+        "min": 50.0,
+        "max": 48000.0,
+        "default": 40000.0
+      }
     }
   },
-  
   "reverb": {
     "kind": "reverb",
     "parameters": {
-      "AllPassGain": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6},
-      "AllPassSize": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.4},
-      "BandFreq": {"type": "float", "min": 100.0, "max": 10000.0, "default": 830.0},
-      "BandHighOn": {"type": "boolean", "default": false},
-      "BandLowOn": {"type": "boolean", "default": false},
-      "BandWidth": {"type": "float", "min": 0.1, "max": 10.0, "default": 5.85},
-      "ChorusOn": {"type": "boolean", "default": false},
-      "CutOn": {"type": "boolean", "default": false},
-      "DecayTime": {"type": "float", "min": 50.0, "max": 10000.0, "default": 1200.0},
-      "DryWet": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.5},
-      "EarlyReflectModDepth": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0},
-      "EarlyReflectModFreq": {"type": "float", "min": 0.01, "max": 20.0, "default": 1.0},
-      "Enabled": {"type": "boolean", "default": true},
-      "FlatOn": {"type": "boolean", "default": false},
-      "FreezeOn": {"type": "boolean", "default": false},
-      "MixDiffuse": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6},
-      "MixDirect": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.25},
-      "MixReflect": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.25},
-      "PreDelay": {"type": "float", "min": 0.0, "max": 1000.0, "default": 2.5},
-      "RoomSize": {"type": "float", "min": 1.0, "max": 1000.0, "default": 100.0},
-      "RoomType": {"type": "enum", "values": ["SuperEco", "Eco", "Normal", "Quality"], "default": "SuperEco"},
-      "ShelfHiFreq": {"type": "float", "min": 1000.0, "max": 20000.0, "default": 5000.0},
-      "ShelfHiGain": {"type": "float", "min": -12.0, "max": 12.0, "default": 0.0},
-      "ShelfHighOn": {"type": "boolean", "default": false},
-      "ShelfLoFreq": {"type": "float", "min": 20.0, "max": 1000.0, "default": 200.0},
-      "ShelfLoGain": {"type": "float", "min": -12.0, "max": 12.0, "default": 0.0},
-      "ShelfLowOn": {"type": "boolean", "default": false},
-      "SizeModDepth": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0},
-      "SizeModFreq": {"type": "float", "min": 0.01, "max": 20.0, "default": 1.0},
-      "SizeSmoothing": {"type": "enum", "values": ["Fast", "Slow"], "default": "Fast"},
-      "SpinOn": {"type": "boolean", "default": false},
-      "StereoSeparation": {"type": "float", "min": 0.0, "max": 100.0, "default": 100.0}
+      "AllPassGain": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.6
+      },
+      "AllPassSize": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.4
+      },
+      "BandFreq": {
+        "type": "float",
+        "min": 100.0,
+        "max": 10000.0,
+        "default": 830.0
+      },
+      "BandHighOn": {
+        "type": "boolean",
+        "default": false
+      },
+      "BandLowOn": {
+        "type": "boolean",
+        "default": false
+      },
+      "BandWidth": {
+        "type": "float",
+        "min": 0.1,
+        "max": 10.0,
+        "default": 5.85
+      },
+      "ChorusOn": {
+        "type": "boolean",
+        "default": false
+      },
+      "CutOn": {
+        "type": "boolean",
+        "default": false
+      },
+      "DecayTime": {
+        "type": "float",
+        "min": 50.0,
+        "max": 10000.0,
+        "default": 1200.0
+      },
+      "DryWet": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.5
+      },
+      "EarlyReflectModDepth": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.0
+      },
+      "EarlyReflectModFreq": {
+        "type": "float",
+        "min": 0.01,
+        "max": 20.0,
+        "default": 1.0
+      },
+      "Enabled": {
+        "type": "boolean",
+        "default": true
+      },
+      "FlatOn": {
+        "type": "boolean",
+        "default": false
+      },
+      "FreezeOn": {
+        "type": "boolean",
+        "default": false
+      },
+      "MixDiffuse": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.6
+      },
+      "MixDirect": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.25
+      },
+      "MixReflect": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.25
+      },
+      "PreDelay": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1000.0,
+        "default": 2.5
+      },
+      "RoomSize": {
+        "type": "float",
+        "min": 1.0,
+        "max": 1000.0,
+        "default": 100.0
+      },
+      "RoomType": {
+        "type": "enum",
+        "values": [
+          "SuperEco",
+          "Eco",
+          "Normal",
+          "Quality"
+        ],
+        "default": "SuperEco"
+      },
+      "ShelfHiFreq": {
+        "type": "float",
+        "min": 1000.0,
+        "max": 20000.0,
+        "default": 5000.0
+      },
+      "ShelfHiGain": {
+        "type": "float",
+        "min": -12.0,
+        "max": 12.0,
+        "default": 0.0
+      },
+      "ShelfHighOn": {
+        "type": "boolean",
+        "default": false
+      },
+      "ShelfLoFreq": {
+        "type": "float",
+        "min": 20.0,
+        "max": 1000.0,
+        "default": 200.0
+      },
+      "ShelfLoGain": {
+        "type": "float",
+        "min": -12.0,
+        "max": 12.0,
+        "default": 0.0
+      },
+      "ShelfLowOn": {
+        "type": "boolean",
+        "default": false
+      },
+      "SizeModDepth": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.0
+      },
+      "SizeModFreq": {
+        "type": "float",
+        "min": 0.01,
+        "max": 20.0,
+        "default": 1.0
+      },
+      "SizeSmoothing": {
+        "type": "enum",
+        "values": [
+          "Fast",
+          "Slow"
+        ],
+        "default": "Fast"
+      },
+      "SpinOn": {
+        "type": "boolean",
+        "default": false
+      },
+      "StereoSeparation": {
+        "type": "float",
+        "min": 0.0,
+        "max": 100.0,
+        "default": 100.0
+      }
     }
   },
-  
   "saturator": {
     "kind": "saturator",
     "parameters": {
-      "BaseDrive": {"type": "float", "min": 0.0, "max": 36.0, "default": 0.0},
-      "BassShaperThreshold": {"type": "float", "min": -96.0, "max": 0.0, "default": -50.0},
-      "ColorDepth": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0},
-      "ColorFrequency": {"type": "float", "min": 100.0, "max": 10000.0, "default": 1000.0},
-      "ColorOn": {"type": "boolean", "default": false},
-      "ColorWidth": {"type": "float", "min": 0.1, "max": 5.0, "default": 0.3},
-      "DryWet": {"type": "float", "min": 0.0, "max": 1.0, "default": 1.0},
-      "Enabled": {"type": "boolean", "default": true},
-      "Oversampling": {"type": "boolean", "default": false},
-      "PostClip": {"type": "enum", "values": ["off", "soft", "hard"], "default": "off"},
-      "PostDrive": {"type": "float", "min": 0.0, "max": 36.0, "default": 0.0},
-      "PreDcFilter": {"type": "boolean", "default": false},
-      "PreDrive": {"type": "float", "min": 0.0, "max": 36.0, "default": 0.0},
-      "Type": {"type": "enum", "values": ["Analog Clip", "Digital Clip", "Tube", "Tape", "Warm"], "default": "Analog Clip"},
-      "WsCurve": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.05},
-      "WsDamp": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0},
-      "WsDepth": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0},
-      "WsDrive": {"type": "float", "min": 0.0, "max": 10.0, "default": 1.0},
-      "WsLin": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.5},
-      "WsPeriod": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0}
+      "BaseDrive": {
+        "type": "float",
+        "min": 0.0,
+        "max": 36.0,
+        "default": 0.0
+      },
+      "BassShaperThreshold": {
+        "type": "float",
+        "min": -96.0,
+        "max": 0.0,
+        "default": -50.0
+      },
+      "ColorDepth": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.0
+      },
+      "ColorFrequency": {
+        "type": "float",
+        "min": 100.0,
+        "max": 10000.0,
+        "default": 1000.0
+      },
+      "ColorOn": {
+        "type": "boolean",
+        "default": false
+      },
+      "ColorWidth": {
+        "type": "float",
+        "min": 0.1,
+        "max": 5.0,
+        "default": 0.3
+      },
+      "DryWet": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 1.0
+      },
+      "Enabled": {
+        "type": "boolean",
+        "default": true
+      },
+      "Oversampling": {
+        "type": "boolean",
+        "default": false
+      },
+      "PostClip": {
+        "type": "enum",
+        "values": [
+          "off",
+          "soft",
+          "hard"
+        ],
+        "default": "off"
+      },
+      "PostDrive": {
+        "type": "float",
+        "min": 0.0,
+        "max": 36.0,
+        "default": 0.0
+      },
+      "PreDcFilter": {
+        "type": "boolean",
+        "default": false
+      },
+      "PreDrive": {
+        "type": "float",
+        "min": 0.0,
+        "max": 36.0,
+        "default": 0.0
+      },
+      "Type": {
+        "type": "enum",
+        "values": [
+          "Analog Clip",
+          "Digital Clip",
+          "Tube",
+          "Tape",
+          "Warm"
+        ],
+        "default": "Analog Clip"
+      },
+      "WsCurve": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.05
+      },
+      "WsDamp": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.0
+      },
+      "WsDepth": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.0
+      },
+      "WsDrive": {
+        "type": "float",
+        "min": 0.0,
+        "max": 10.0,
+        "default": 1.0
+      },
+      "WsLin": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.5
+      },
+      "WsPeriod": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.0
+      }
     }
   },
-  
   "audioEffectRack": {
     "kind": "audioEffectRack",
     "parameters": {
-      "lockId": {"type": "integer", "min": 1000, "max": 9999, "default": 1001},
-      "lockSeal": {"type": "integer", "min": -999999999, "max": 999999999, "default": -100211998},
-      "Macro0": {"type": "macroParam", "default": {"value": 0.0, "customName": "Macro 1"}},
-      "Macro1": {"type": "macroParam", "default": {"value": 0.0, "customName": "Macro 2"}},
-      "Macro2": {"type": "macroParam", "default": {"value": 0.0, "customName": "Macro 3"}},
-      "Macro3": {"type": "macroParam", "default": {"value": 0.0, "customName": "Macro 4"}},
-      "Macro4": {"type": "macroParam", "default": {"value": 0.0, "customName": "Macro 5"}},
-      "Macro5": {"type": "macroParam", "default": {"value": 0.0, "customName": "Macro 6"}},
-      "Macro6": {"type": "macroParam", "default": {"value": 0.0, "customName": "Macro 7"}},
-      "Macro7": {"type": "macroParam", "default": {"value": 0.0, "customName": "Macro 8"}}
+      "lockId": {
+        "type": "integer",
+        "min": 1000,
+        "max": 9999,
+        "default": 1001
+      },
+      "lockSeal": {
+        "type": "integer",
+        "min": -999999999,
+        "max": 999999999,
+        "default": -100211998
+      },
+      "Macro0": {
+        "type": "macroParam",
+        "default": {
+          "value": 0.0,
+          "customName": "Macro 1"
+        }
+      },
+      "Macro1": {
+        "type": "macroParam",
+        "default": {
+          "value": 0.0,
+          "customName": "Macro 2"
+        }
+      },
+      "Macro2": {
+        "type": "macroParam",
+        "default": {
+          "value": 0.0,
+          "customName": "Macro 3"
+        }
+      },
+      "Macro3": {
+        "type": "macroParam",
+        "default": {
+          "value": 0.0,
+          "customName": "Macro 4"
+        }
+      },
+      "Macro4": {
+        "type": "macroParam",
+        "default": {
+          "value": 0.0,
+          "customName": "Macro 5"
+        }
+      },
+      "Macro5": {
+        "type": "macroParam",
+        "default": {
+          "value": 0.0,
+          "customName": "Macro 6"
+        }
+      },
+      "Macro6": {
+        "type": "macroParam",
+        "default": {
+          "value": 0.0,
+          "customName": "Macro 7"
+        }
+      },
+      "Macro7": {
+        "type": "macroParam",
+        "default": {
+          "value": 0.0,
+          "customName": "Macro 8"
+        }
+      }
     },
     "chains": {
       "type": "array",
       "items": {
-        "name": {"type": "string", "default": ""},
-        "color": {"type": "integer", "min": 0, "max": 69, "default": 0},
-        "devices": {"type": "array", "items": "deviceReference"},
+        "name": {
+          "type": "string",
+          "default": ""
+        },
+        "color": {
+          "type": "integer",
+          "min": 0,
+          "max": 69,
+          "default": 0
+        },
+        "devices": {
+          "type": "array",
+          "items": "deviceReference"
+        },
         "mixer": {
-          "pan": {"type": "float", "min": -1.0, "max": 1.0, "default": 0.0},
-          "solo-cue": {"type": "boolean", "default": false},
-          "speakerOn": {"type": "boolean", "default": true},
-          "volume": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.85},
-          "sends": {"type": "array", "default": []}
+          "pan": {
+            "type": "float",
+            "min": -1.0,
+            "max": 1.0,
+            "default": 0.0
+          },
+          "solo-cue": {
+            "type": "boolean",
+            "default": false
+          },
+          "speakerOn": {
+            "type": "boolean",
+            "default": true
+          },
+          "volume": {
+            "type": "float",
+            "min": 0.0,
+            "max": 1.0,
+            "default": 0.85
+          },
+          "sends": {
+            "type": "array",
+            "default": []
+          }
         }
       }
     }
