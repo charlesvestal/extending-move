@@ -46,6 +46,7 @@ class FxChainEditorHandler(BaseHandler):
             "macros_json": "[]",
             "available_params_json": "[]",
             "param_paths_json": "{}",
+            "param_count": 0,
             "new_preset_name": "",
         }
 
@@ -65,6 +66,16 @@ class FxChainEditorHandler(BaseHandler):
                 macros = json.loads(macros_data_str)
             except Exception:
                 macros = []
+            try:
+                count = int(form.getvalue("param_count", "0"))
+            except ValueError:
+                count = 0
+            param_updates = {}
+            for i in range(count):
+                n = form.getvalue(f"param_{i}_name")
+                v = form.getvalue(f"param_{i}_value")
+                if n is not None and v is not None:
+                    param_updates[n] = v
             new_name = form.getvalue("new_preset_name")
             if not new_name:
                 new_name = os.path.basename(preset_path)
@@ -72,7 +83,12 @@ class FxChainEditorHandler(BaseHandler):
                 new_name += ".ablpreset"
             output_path = os.path.join(USER_LIBRARY_DIR, new_name)
             os.makedirs(os.path.dirname(output_path), exist_ok=True)
-            result = save_fx_chain_with_macros(preset_path, macros, output_path)
+            result = save_fx_chain_with_macros(
+                preset_path,
+                macros,
+                output_path,
+                param_updates=param_updates,
+            )
             if not result["success"]:
                 return self.format_error_response(result["message"])
             refresh_success, refresh_message = refresh_library()
@@ -104,10 +120,12 @@ class FxChainEditorHandler(BaseHandler):
             params_html = self.generate_params_html(param_info["parameters"], mapped_info)
             available_params_json = json.dumps([p["name"] for p in param_info["parameters"]])
             param_paths_json = json.dumps(param_info.get("parameter_paths", {}))
+            param_count = len(param_info["parameters"])
         else:
             macro_info = extract_macro_information(preset_path)
             macro_knobs_html = self.generate_macro_knobs_html(macro_info.get("macros", []))
             macros_json = json.dumps(macro_info.get("macros", []))
+            param_count = 0
 
         browser_html = generate_dir_html(
             USER_LIBRARY_DIR,
@@ -136,18 +154,25 @@ class FxChainEditorHandler(BaseHandler):
             "macros_json": macros_json,
             "available_params_json": available_params_json,
             "param_paths_json": param_paths_json,
+            "param_count": param_count,
             "new_preset_name": os.path.basename(preset_path),
         }
 
     def generate_params_html(self, params, mapped):
         html = []
-        for p in params:
+        for i, p in enumerate(params):
             name = p.get("name")
             value = p.get("value")
             cls = "param-item"
             if name in mapped:
                 cls += f" param-mapped macro-{mapped[name]['macro_index']}"
-            html.append(f'<div class="{cls}" data-name="{name}">{name}: {value}</div>')
+            html.append(
+                f'<div class="{cls}" data-name="{name}">'
+                f'<label>{name}: '
+                f'<input type="text" name="param_{i}_value" value="{value}"></label>'
+                f'<input type="hidden" name="param_{i}_name" value="{name}">'
+                f'</div>'
+            )
         return "".join(html)
 
     def generate_macro_knobs_html(self, macros):
