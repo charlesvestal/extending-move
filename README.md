@@ -53,8 +53,12 @@ Here’s what you can do with Extending Move:
 
 - **Sample Reversal**
   - Create reversed versions of any WAV file
-  - Use reversed file in drum kit or sample presets    
- 
+  - Use reversed file in drum kit or sample presets
+
+- **FX Chain Builder**
+  - Select an effect preset or entire chain and map parameters to macros
+  - Save custom chains to your User Library with macro assignments
+
 - **MIDI Import**
   - Upload MIDI files to create new Melodic or Drum Sets
   - New Sets created with either a default Drift or 808 kit for customization
