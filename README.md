@@ -15,6 +15,8 @@ Come talk to us on [Discord](https://discord.gg/yP7SjqDrZG).
 - Clone or download the repository.
 - Run utility-scripts/setup-ssh-and-install-on-move.command
 - Follow the instructions!
+- Optional: run `utility-scripts/generate_fx_macro_presets.py` to create
+  macro test presets for all included audio effects.
   
 ## Features
 
