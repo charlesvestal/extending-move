@@ -139,3 +139,82 @@ def save_fx_chain_with_macros(
     except Exception as exc:
         logger.error("Failed to save FX chain: %s", exc)
         return {"success": False, "message": f"Error saving chain: {exc}"}
+
+
+def update_fx_parameter_values(
+    preset_path: str,
+    param_updates: Dict[str, str],
+    output_path: str | None = None,
+) -> Dict[str, Any]:
+    """Update parameter values in an FX preset or chain."""
+    try:
+        with open(preset_path, "r") as f:
+            data = json.load(f)
+
+        info = extract_fx_parameters(preset_path)
+        if not info["success"]:
+            return info
+
+        paths = info.get("parameter_paths", {})
+
+        def get_parent_and_key(obj: Any, path: str):
+            parts = path.split(".")
+            cur = obj
+            for part in parts[:-1]:
+                if part.endswith("]") and "[" in part:
+                    name, idx = part[:-1].split("[")
+                    cur = cur.get(name, []) if name else cur
+                    idx = int(idx)
+                    if not isinstance(cur, list) or idx >= len(cur):
+                        return None, None
+                    cur = cur[idx]
+                else:
+                    cur = cur.get(part)
+                    if cur is None:
+                        return None, None
+            return cur, parts[-1]
+
+        def cast(val_str: str, original: Any):
+            if isinstance(original, bool):
+                try:
+                    return bool(int(val_str))
+                except ValueError:
+                    return original
+            if isinstance(original, int) and not isinstance(original, bool):
+                try:
+                    return int(float(val_str))
+                except ValueError:
+                    return original
+            if isinstance(original, float):
+                try:
+                    return float(val_str)
+                except ValueError:
+                    return original
+            return val_str
+
+        updated = 0
+        for name, val in param_updates.items():
+            p_path = paths.get(name)
+            if not p_path:
+                continue
+            parent, key = get_parent_and_key(data, p_path)
+            if parent is None or key not in parent:
+                continue
+            target = parent[key]
+            if isinstance(target, dict) and "value" in target:
+                orig = target["value"]
+                target["value"] = cast(val, orig)
+            else:
+                orig = target
+                parent[key] = cast(val, orig)
+            updated += 1
+
+        dest = output_path or preset_path
+        with open(dest, "w") as f:
+            json.dump(data, f, indent=2)
+            f.write("\n")
+
+        return {"success": True, "message": f"Updated {updated} parameters", "path": dest}
+    except Exception as exc:
+        logger.error("Failed to update FX params: %s", exc)
+        return {"success": False, "message": f"Error updating parameters: {exc}"}
