@@ -16,6 +16,28 @@ USER_LIBRARY_DIR = "/data/UserData/UserLibrary/Audio Effects"
 if not os.path.exists(USER_LIBRARY_DIR) and os.path.exists("examples/Audio Effects"):
     USER_LIBRARY_DIR = "examples/Audio Effects"
 
+# Parameters that cannot be assigned to macro knobs but should remain editable.
+# Keys are device folder names and values are sets of parameters that belong to
+# that device. This avoids excluding parameters with common names on other
+# effects.
+EXCLUDED_MACRO_PARAMS = {
+    "Delay": {
+        "DelayLine_CompatibilityMode",
+        "DryWetMode",
+        "EcoProcessing",
+    },
+    "Redux": {"EcoProcessing"},
+    "Dynamics": {"Enabled"},
+    "Saturator": {"Oversampling"},
+    "Auto Filter": {
+        "HiQuality",
+        "HostVisualisationRate",
+        "InternalSideChainGain",
+        "SideChainListen",
+        "SideChainMono",
+    },
+}
+
 
 class FxChainEditorHandler(BaseHandler):
     def handle_get(self):
@@ -102,8 +124,18 @@ class FxChainEditorHandler(BaseHandler):
                 macro_knobs_html = ""
                 macros_json = "[]"
             params_html = self.generate_params_html(param_info["parameters"], mapped_info)
-            available_params_json = json.dumps([p["name"] for p in param_info["parameters"]])
-            param_paths_json = json.dumps(param_info.get("parameter_paths", {}))
+            device_folder = os.path.basename(os.path.dirname(preset_path))
+            excluded = EXCLUDED_MACRO_PARAMS.get(device_folder, set())
+            params_for_macros = [
+                p for p in param_info["parameters"] if p["name"] not in excluded
+            ]
+            paths_for_macros = {
+                k: v
+                for k, v in param_info.get("parameter_paths", {}).items()
+                if k not in excluded
+            }
+            available_params_json = json.dumps([p["name"] for p in params_for_macros])
+            param_paths_json = json.dumps(paths_for_macros)
         else:
             macro_info = extract_macro_information(preset_path)
             macro_knobs_html = self.generate_macro_knobs_html(macro_info.get("macros", []))
