@@ -1,0 +1,101 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "audioEffectRack",
+  "name": "Custom FX Chain",
+  "parameters": {
+    "lockId": 1001,
+    "lockSeal": -100211998,
+    "Macro0": {
+      "value": 0.0,
+      "customName": "Modulation_Waveform"
+    },
+    "Macro1": {
+      "value": 0.0,
+      "customName": "Macro 2"
+    },
+    "Macro2": {
+      "value": 0.0,
+      "customName": "Macro 3"
+    },
+    "Macro3": {
+      "value": 0.0,
+      "customName": "Macro 4"
+    },
+    "Macro4": {
+      "value": 0.0,
+      "customName": "Macro 5"
+    },
+    "Macro5": {
+      "value": 0.0,
+      "customName": "Macro 6"
+    },
+    "Macro6": {
+      "value": 0.0,
+      "customName": "Macro 7"
+    },
+    "Macro7": {
+      "value": 0.0,
+      "customName": "Macro 8"
+    }
+  },
+  "deviceData": {},
+  "chains": [
+    {
+      "name": "",
+      "color": 0,
+      "devices": [
+        {
+          "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+          "kind": "phaser",
+          "name": "Doubler Ether",
+          "parameters": {
+            "CenterFrequency": 999.9998779296875,
+            "DoublerDelayTime": 0.026972541585564613,
+            "DryWet": 0.7063491940498352,
+            "Enabled": true,
+            "Feedback": 0.2199999988079071,
+            "FlangerDelayTime": 0.002500000176951289,
+            "InvertWet": false,
+            "Mode": "Doubler",
+            "ModulationBlend": 0.0,
+            "Modulation_Amount": 0.3888888955116272,
+            "Modulation_DutyCycle": 0.0,
+            "Modulation_EnvelopeAmount": 0.0,
+            "Modulation_EnvelopeAttack": 0.006000000052154064,
+            "Modulation_EnvelopeEnabled": true,
+            "Modulation_EnvelopeRelease": 0.20000000298023224,
+            "Modulation_Frequency": 0.6324555277824402,
+            "Modulation_Frequency2": 0.20000000298023224,
+            "Modulation_LfoBlend": 0.0,
+            "Modulation_PhaseOffset": 0.0,
+            "Modulation_Spin": 0.0,
+            "Modulation_SpinEnabled": false,
+            "Modulation_Sync": false,
+            "Modulation_Sync2": true,
+            "Modulation_SyncedRate": 2,
+            "Modulation_SyncedRate2": 4,
+            "Modulation_Waveform": {
+              "value": "Triangle",
+              "macroMapping": {
+                "macroIndex": 0
+              }
+            },
+            "Notches": 4,
+            "OutputGain": 1.5243134498596191,
+            "SafeBassFrequency": 99.99999237060547,
+            "Spread": 0.5,
+            "Warmth": 0.1349206417798996
+          },
+          "deviceData": {}
+        }
+      ],
+      "mixer": {
+        "pan": 0.0,
+        "solo-cue": false,
+        "speakerOn": true,
+        "volume": 0.8509035110473633,
+        "sends": []
+      }
+    }
+  ]
+}

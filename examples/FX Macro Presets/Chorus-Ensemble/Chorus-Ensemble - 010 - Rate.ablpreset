@@ -1,0 +1,84 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "audioEffectRack",
+  "name": "Custom FX Chain",
+  "parameters": {
+    "lockId": 1001,
+    "lockSeal": -100211998,
+    "Macro0": {
+      "value": 0.0,
+      "customName": "Rate"
+    },
+    "Macro1": {
+      "value": 0.0,
+      "customName": "Macro 2"
+    },
+    "Macro2": {
+      "value": 0.0,
+      "customName": "Macro 3"
+    },
+    "Macro3": {
+      "value": 0.0,
+      "customName": "Macro 4"
+    },
+    "Macro4": {
+      "value": 0.0,
+      "customName": "Macro 5"
+    },
+    "Macro5": {
+      "value": 0.0,
+      "customName": "Macro 6"
+    },
+    "Macro6": {
+      "value": 0.0,
+      "customName": "Macro 7"
+    },
+    "Macro7": {
+      "value": 0.0,
+      "customName": "Macro 8"
+    }
+  },
+  "deviceData": {},
+  "chains": [
+    {
+      "name": "",
+      "color": 0,
+      "devices": [
+        {
+          "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+          "kind": "chorus",
+          "name": "Chorus Subtle Funk",
+          "parameters": {
+            "Amount": 0.4047619104385376,
+            "DryWet": 0.7460317611694336,
+            "Enabled": true,
+            "Feedback": 0.22785714268684387,
+            "HighpassEnabled": true,
+            "HighpassFrequency": 20.0,
+            "InvertFeedback": false,
+            "Mode": "Classic",
+            "OutputGain": 1.259763240814209,
+            "Rate": {
+              "value": 0.5483837127685547,
+              "macroMapping": {
+                "macroIndex": 0
+              }
+            },
+            "Shaping": 0.0,
+            "VibratoOffset": 0.0,
+            "Warmth": 0.011545630171895027,
+            "Width": 0.859375
+          },
+          "deviceData": {}
+        }
+      ],
+      "mixer": {
+        "pan": 0.0,
+        "solo-cue": false,
+        "speakerOn": true,
+        "volume": 0.8509035110473633,
+        "sends": []
+      }
+    }
+  ]
+}

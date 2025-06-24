@@ -1,0 +1,117 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "audioEffectRack",
+  "name": "Custom FX Chain",
+  "parameters": {
+    "lockId": 1001,
+    "lockSeal": -100211998,
+    "Macro0": {
+      "value": 0.0,
+      "customName": "Lfo_PhaseOffset"
+    },
+    "Macro1": {
+      "value": 0.0,
+      "customName": "Macro 2"
+    },
+    "Macro2": {
+      "value": 0.0,
+      "customName": "Macro 3"
+    },
+    "Macro3": {
+      "value": 0.0,
+      "customName": "Macro 4"
+    },
+    "Macro4": {
+      "value": 0.0,
+      "customName": "Macro 5"
+    },
+    "Macro5": {
+      "value": 0.0,
+      "customName": "Macro 6"
+    },
+    "Macro6": {
+      "value": 0.0,
+      "customName": "Macro 7"
+    },
+    "Macro7": {
+      "value": 0.0,
+      "customName": "Macro 8"
+    }
+  },
+  "deviceData": {},
+  "chains": [
+    {
+      "name": "",
+      "color": 0,
+      "devices": [
+        {
+          "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+          "kind": "autoFilter",
+          "name": "Default Filter",
+          "parameters": {
+            "DryWet": 1.0,
+            "Enabled": true,
+            "Envelope_Amount": 0.0,
+            "Envelope_Attack": 0.0010000000474974513,
+            "Envelope_HoldOn": true,
+            "Envelope_Release": 0.25,
+            "Envelope_SahOn": false,
+            "Envelope_SahRate": -4,
+            "Filter_Circuit": "SVF",
+            "Filter_DjControl": 0.0,
+            "Filter_Drive": 0.0,
+            "Filter_Frequency": 9999.998046875,
+            "Filter_Morph": 0.0,
+            "Filter_MorphSlope": "24dB",
+            "Filter_Resonance": 0.0,
+            "Filter_Slope": "24dB",
+            "Filter_Type": "Low-pass",
+            "Filter_VowelFormant": 0.0,
+            "Filter_VowelPitch": 0,
+            "HiQuality": false,
+            "HostVisualisationRate": 0.019999999552965164,
+            "InternalSideChainGain": 1.0,
+            "Lfo_Amount": 0.0,
+            "Lfo_Frequency": 1.0,
+            "Lfo_Morph": 0.0,
+            "Lfo_Phase": 0.0,
+            "Lfo_PhaseOffset": {
+              "value": 0.0,
+              "macroMapping": {
+                "macroIndex": 0
+              }
+            },
+            "Lfo_QuantizationMode": "None",
+            "Lfo_SahRate": -4,
+            "Lfo_Sixteenth": 16,
+            "Lfo_Smoothing": 0.0,
+            "Lfo_Spin": 0.0,
+            "Lfo_Steps": 8,
+            "Lfo_StereoMode": "Phase",
+            "Lfo_SyncedRate": 4,
+            "Lfo_Time": 1.0000001192092896,
+            "Lfo_TimeMode": "Rate",
+            "Lfo_Waveform": "Sine",
+            "Output": 1.0,
+            "SideChainEq_Freq": 199.99998474121094,
+            "SideChainEq_Gain": 0.0,
+            "SideChainEq_Mode": "High pass",
+            "SideChainEq_On": false,
+            "SideChainEq_Q": 0.7071067094802856,
+            "SideChainListen": false,
+            "SideChainMono": true,
+            "SoftClipOn": false
+          },
+          "deviceData": {}
+        }
+      ],
+      "mixer": {
+        "pan": 0.0,
+        "solo-cue": false,
+        "speakerOn": true,
+        "volume": 0.8509035110473633,
+        "sends": []
+      }
+    }
+  ]
+}

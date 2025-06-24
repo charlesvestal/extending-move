@@ -1,0 +1,98 @@
+{
+  "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+  "kind": "audioEffectRack",
+  "name": "Custom FX Chain",
+  "parameters": {
+    "lockId": 1001,
+    "lockSeal": -100211998,
+    "Macro0": {
+      "value": 0.0,
+      "customName": "DryWet"
+    },
+    "Macro1": {
+      "value": 0.0,
+      "customName": "Macro 2"
+    },
+    "Macro2": {
+      "value": 0.0,
+      "customName": "Macro 3"
+    },
+    "Macro3": {
+      "value": 0.0,
+      "customName": "Macro 4"
+    },
+    "Macro4": {
+      "value": 0.0,
+      "customName": "Macro 5"
+    },
+    "Macro5": {
+      "value": 0.0,
+      "customName": "Macro 6"
+    },
+    "Macro6": {
+      "value": 0.0,
+      "customName": "Macro 7"
+    },
+    "Macro7": {
+      "value": 0.0,
+      "customName": "Macro 8"
+    }
+  },
+  "deviceData": {},
+  "chains": [
+    {
+      "name": "",
+      "color": 0,
+      "devices": [
+        {
+          "$schema": "http://tech.ableton.com/schema/song/1.5.1/devicePreset.json",
+          "kind": "delay",
+          "name": "Fast Phase",
+          "parameters": {
+            "DelayLine_CompatibilityMode": "D",
+            "DelayLine_Link": true,
+            "DelayLine_OffsetL": 0.0,
+            "DelayLine_OffsetR": 0.0,
+            "DelayLine_PingPong": true,
+            "DelayLine_PingPongDelayTimeL": 1.0,
+            "DelayLine_PingPongDelayTimeR": 1.0,
+            "DelayLine_SimpleDelayTimeL": 100.0,
+            "DelayLine_SimpleDelayTimeR": 100.0,
+            "DelayLine_SmoothingMode": "Repitch",
+            "DelayLine_SyncL": false,
+            "DelayLine_SyncR": false,
+            "DelayLine_SyncedSixteenthL": "4",
+            "DelayLine_SyncedSixteenthR": "4",
+            "DelayLine_TimeL": 0.0012234988389536738,
+            "DelayLine_TimeR": 0.0017748335376381874,
+            "DryWet": {
+              "value": 0.4523809552192688,
+              "macroMapping": {
+                "macroIndex": 0
+              }
+            },
+            "DryWetMode": "Equal-loudness",
+            "EcoProcessing": true,
+            "Enabled": true,
+            "Feedback": 0.7690476179122925,
+            "Filter_Bandwidth": 3.590909242630005,
+            "Filter_Frequency": 2379.816650390625,
+            "Filter_On": true,
+            "Freeze": false,
+            "Modulation_AmountFilter": 0.84375,
+            "Modulation_AmountTime": 0.0,
+            "Modulation_Frequency": 3.1956372261047363
+          },
+          "deviceData": {}
+        }
+      ],
+      "mixer": {
+        "pan": 0.0,
+        "solo-cue": false,
+        "speakerOn": true,
+        "volume": 0.8509035110473633,
+        "sends": []
+      }
+    }
+  ]
+}
