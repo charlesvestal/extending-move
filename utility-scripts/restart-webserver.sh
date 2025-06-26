@@ -90,10 +90,9 @@ fi
 
 # Wait for the server to respond on configured port (allow time for warm-up)
 # The webserver performs an extensive warm-up that can take close to a minute
-# on first start. The original timeout of 30 seconds was not sufficient,
-# causing false negatives. Increase the wait time to 90 seconds to accommodate
-# the warm-up process.
-for i in {1..90}; do
+# on first start. To avoid false negatives, increase the wait time to three
+# minutes (180 seconds) to accommodate slower devices.
+for i in {1..180}; do
     if command -v curl >/dev/null 2>&1; then
         if curl -sf http://localhost:${PORT}/ > /dev/null; then
             PORT_READY=true
