@@ -1,48 +1,48 @@
 /* Add Ableton Sans font faces with correct filenames */
 @font-face {
     font-family: 'Ableton Sans';
-    src: url('/static/fonts/ableton-sans-regular.2667c981.woff2') format('woff2'),
-         url('/static/fonts/ableton-sans-regular.96781b02.woff') format('woff');
+    src: url('/static/fonts/ableton-sans-regular-CxOK2wUQ.woff2') format('woff2'),
+         url('/static/fonts/ableton-sans-regular-BBLEzwGd.woff') format('woff');
     font-weight: 400;
     font-style: normal;
 }
 
 @font-face {
     font-family: 'Ableton Sans';
-    src: url('/static/fonts/ableton-sans-regular-italic.57c63ecd.woff2') format('woff2'),
-         url('/static/fonts/ableton-sans-regular-italic.3396038c.woff') format('woff');
+    src: url('/static/fonts/ableton-sans-regular-italic-Cz4rtsE0.woff2') format('woff2'),
+         url('/static/fonts/ableton-sans-regular-italic-CwuTUkh4.woff') format('woff');
     font-weight: 400;
     font-style: italic;
 }
 
 @font-face {
     font-family: 'Ableton Sans';
-    src: url('/static/fonts/ableton-sans-medium.0cbbf7a5.woff2') format('woff2'),
-         url('/static/fonts/ableton-sans-medium.1dc02bda.woff') format('woff');
+    src: url('/static/fonts/ableton-sans-medium-DKI7Fj66.woff2') format('woff2'),
+         url('/static/fonts/ableton-sans-medium-l8niK0Nq.woff') format('woff');
     font-weight: 500;
     font-style: normal;
 }
 
 @font-face {
     font-family: 'Ableton Sans';
-    src: url('/static/fonts/ableton-sans-medium-italic.0b876bb7.woff2') format('woff2'),
-         url('/static/fonts/ableton-sans-medium-italic.2f6b17c5.woff') format('woff');
+    src: url('/static/fonts/ableton-sans-medium-italic-CsFZ0s3n.woff2') format('woff2'),
+         url('/static/fonts/ableton-sans-medium-italic-Q8V0j6nQ.woff') format('woff');
     font-weight: 500;
     font-style: italic;
 }
 
 @font-face {
     font-family: 'Ableton Sans';
-    src: url('/static/fonts/ableton-sans-bold.3852fc5e.woff2') format('woff2'),
-         url('/static/fonts/ableton-sans-bold.72207915.woff') format('woff');
+    src: url('/static/fonts/ableton-sans-bold-DR8zhDCe.woff2') format('woff2'),
+         url('/static/fonts/ableton-sans-bold-CbWIyFrd.woff') format('woff');
     font-weight: 700;
     font-style: normal;
 }
 
 @font-face {
     font-family: 'Ableton Sans';
-    src: url('/static/fonts/ableton-sans-bold-italic.472dc9f8.woff2') format('woff2'),
-         url('/static/fonts/ableton-sans-bold-italic.e6c549c2.woff') format('woff');
+    src: url('/static/fonts/ableton-sans-bold-italic-D_a3n1lh.woff2') format('woff2'),
+         url('/static/fonts/ableton-sans-bold-italic-Bb-o8Uua.woff') format('woff');
     font-weight: 700;
     font-style: italic;
 }
