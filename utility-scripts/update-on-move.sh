@@ -40,13 +40,25 @@ REMOTE_DIR="/data/UserData/extending-move"
 
 # --- Version check: ensure Move version is within tested range ---
 HIGHEST_TESTED_VERSION="1.5.1"
-INSTALLED_VERSION=$(ssh -T "${REMOTE_USER}@${REMOTE_HOST}" "/opt/move/Move -v" | awk '{print $3}')
-if ! printf "%s\n%s\n" "$HIGHEST_TESTED_VERSION" "$INSTALLED_VERSION" | sort -V | head -n1 | grep -qx "$HIGHEST_TESTED_VERSION"; then
-  read -p "Warning: Installed Move ($INSTALLED_VERSION) > tested ($HIGHEST_TESTED_VERSION). Continue? [y/N] " confirm
-  if [[ ! $confirm =~ ^[Yy]$ ]]; then
-    echo "Aborting."
-    exit 1
-  fi
+# Grab version no matter the result
+INSTALLED_VERSION=$( 
+    ssh "${REMOTE_USER}@${REMOTE_HOST}" "/opt/move/Move -v" \
+    | sed -nE 's/.*Version:.*([0-9]+\.[0-9]+\.[0-9]+).*/\1/p' || true 
+)
+# Check to see if we got a version that's not empty
+if [[ -z "$INSTALLED_VERSION" ]]; then 
+    echo "Error: Could not determine Move version." >&2 
+    exit 1 
+fi
+
+LATEST_VERSION=$(printf "%s\n%s\n" "$HIGHEST_TESTED_VERSION" "$INSTALLED_VERSION" | sort -V | tail -n1)
+
+if [ "$LATEST_VERSION" != "$HIGHEST_TESTED_VERSION" ]; then
+    read -p "Warning: Installed Move version ($INSTALLED_VERSION) is newer than highest tested ($HIGHEST_TESTED_VERSION). Continue? [y/N] " confirm
+    if [[ ! $confirm =~ ^[Yy]$ ]]; then
+        echo "Aborting installation."
+        exit 1
+    fi
 fi
 
 # --- Ensure remote directory exists ---
