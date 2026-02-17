@@ -120,4 +120,3 @@ fi
 
 echo "Webserver started successfully with PID: $NEW_PID"
 EOF
-exit 0
