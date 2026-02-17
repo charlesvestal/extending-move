@@ -58,7 +58,16 @@ REMOTE_HOST="move.local"
 
 # Version check: ensure Move version is within tested range
 HIGHEST_TESTED_VERSION="1.5.1"
-INSTALLED_VERSION=$(ssh "${REMOTE_USER}@${REMOTE_HOST}" "/opt/move/Move -v" | awk '{print $3}')
+# Grab version no matter the result
+INSTALLED_VERSION=$( 
+    ssh "${REMOTE_USER}@${REMOTE_HOST}" "/opt/move/Move -v" \
+    | sed -nE 's/.*Version:.*([0-9]+\.[0-9]+\.[0-9]+).*/\1/p' || true 
+)
+# Check to see if we got a version that's not empty
+if [[ -z "$INSTALLED_VERSION" ]]; then 
+    echo "Error: Could not determine Move version." >&2 
+    exit 1 
+fi
 # Determine if installed version exceeds highest tested
 LATEST_VERSION=$(printf "%s\n%s\n" "$HIGHEST_TESTED_VERSION" "$INSTALLED_VERSION" | sort -V | tail -n1)
 if [ "$LATEST_VERSION" != "$HIGHEST_TESTED_VERSION" ]; then
