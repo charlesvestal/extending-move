@@ -4,6 +4,7 @@ set -euo pipefail
 # Check for flags
 DEV_MODE=false
 OVERWRITE=false
+NON_INTERACTIVE=false
 for arg in "$@"; do
   case "$arg" in
     --dev)
@@ -11,6 +12,9 @@ for arg in "$@"; do
       ;;
     --overwrite)
       OVERWRITE=true
+      ;;
+    --non-interactive|-y)
+      NON_INTERACTIVE=true
       ;;
   esac
 done
@@ -39,11 +43,11 @@ REMOTE_HOST="move.local"
 REMOTE_DIR="/data/UserData/extending-move"
 
 # --- Version check: ensure Move version is within tested range ---
-HIGHEST_TESTED_VERSION="1.5.1"
+HIGHEST_TESTED_VERSION="1.8.5"
 # Grab version no matter the result
 INSTALLED_VERSION=$( 
-    ssh "${REMOTE_USER}@${REMOTE_HOST}" "/opt/move/Move -v" \
-    | sed -nE 's/.*Version:.*([0-9]+\.[0-9]+\.[0-9]+).*/\1/p' || true 
+    ssh "${REMOTE_USER}@${REMOTE_HOST}" "/opt/move/Move -v" 2>/dev/null \
+    | sed -nE 's/.*[Vv]ersion:?[[:space:]]+([0-9]+\.[0-9]+\.[0-9]+).*/\1/p' || true
 )
 # Check to see if we got a version that's not empty
 if [[ -z "$INSTALLED_VERSION" ]]; then 
@@ -54,10 +58,15 @@ fi
 LATEST_VERSION=$(printf "%s\n%s\n" "$HIGHEST_TESTED_VERSION" "$INSTALLED_VERSION" | sort -V | tail -n1)
 
 if [ "$LATEST_VERSION" != "$HIGHEST_TESTED_VERSION" ]; then
-    read -p "Warning: Installed Move version ($INSTALLED_VERSION) is newer than highest tested ($HIGHEST_TESTED_VERSION). Continue? [y/N] " confirm
-    if [[ ! $confirm =~ ^[Yy]$ ]]; then
-        echo "Aborting installation."
-        exit 1
+    echo "Warning: Installed Move version ($INSTALLED_VERSION) is newer than highest tested ($HIGHEST_TESTED_VERSION)."
+    if [ "$NON_INTERACTIVE" = false ]; then
+        read -p "Continue? [y/N] " confirm
+        if [[ ! $confirm =~ ^[Yy]$ ]]; then
+            echo "Aborting installation."
+            exit 1
+        fi
+    else
+        echo "Non-interactive mode: continuing anyway."
     fi
 fi
 
