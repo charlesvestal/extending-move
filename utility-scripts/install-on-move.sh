@@ -1,45 +1,58 @@
 #!/bin/bash
 set -euo pipefail
 
-# Clear the screen and display a prominent warning message.
-clear
-echo ""
-echo "**************************************************************"
-echo "*                                                            *"
-echo "*   WARNING:                                                 *"
-echo "*                                                            *"
-echo "*   Are you sure you want to install the extending-move      *"
-echo "*   packages on your Move? This is UNSUPPORTED by Ableton.   *"
-echo "*                                                            *"
-echo "*   The authors of these packages accept no liability for    *"
-echo "*   any damage you incur by proceeding.                      *"
-echo "*                                                            *"
-echo "**************************************************************"
-echo ""
-echo "Type 'yes' to proceed: "
-read -r response
-if [ "$response" != "yes" ]; then
-    echo "Installation aborted."
-    exit 1
-fi
+# Parse flags
+NON_INTERACTIVE=false
+for arg in "$@"; do
+    case "$arg" in
+        --non-interactive|-y) NON_INTERACTIVE=true ;;
+    esac
+done
 
-# Port selection
-echo "Choose a port for the webserver:" >&2
-echo "1) 909 - New school (default)" >&2
-echo "2) 808 - Old school" >&2
-echo "3) 707 - Backbeat" >&2
-echo "4) 606 - Vintage" >&2
-echo "5) Custom" >&2
-read -p "Selection [1]: " port_choice
-case "$port_choice" in
-    2) PORT=808 ;;
-    3) PORT=707 ;;
-    4) PORT=606 ;;
-    5)
-        read -p "Enter custom port number: " PORT
-        ;;
-    *) PORT=909 ;;
-esac
+if [ "$NON_INTERACTIVE" = false ]; then
+    # Clear the screen and display a prominent warning message.
+    clear
+    echo ""
+    echo "**************************************************************"
+    echo "*                                                            *"
+    echo "*   WARNING:                                                 *"
+    echo "*                                                            *"
+    echo "*   Are you sure you want to install the extending-move      *"
+    echo "*   packages on your Move? This is UNSUPPORTED by Ableton.   *"
+    echo "*                                                            *"
+    echo "*   The authors of these packages accept no liability for    *"
+    echo "*   any damage you incur by proceeding.                      *"
+    echo "*                                                            *"
+    echo "**************************************************************"
+    echo ""
+    echo "Type 'yes' to proceed: "
+    read -r response
+    if [ "$response" != "yes" ]; then
+        echo "Installation aborted."
+        exit 1
+    fi
+
+    # Port selection
+    echo "Choose a port for the webserver:" >&2
+    echo "1) 909 - New school (default)" >&2
+    echo "2) 808 - Old school" >&2
+    echo "3) 707 - Backbeat" >&2
+    echo "4) 606 - Vintage" >&2
+    echo "5) Custom" >&2
+    read -p "Selection [1]: " port_choice
+    case "$port_choice" in
+        2) PORT=808 ;;
+        3) PORT=707 ;;
+        4) PORT=606 ;;
+        5)
+            read -p "Enter custom port number: " PORT
+            ;;
+        *) PORT=909 ;;
+    esac
+else
+    echo "Running in non-interactive mode (defaults: port=909, auto-confirm)..."
+    PORT=909
+fi
 
 # Validate port number
 if ! [[ "$PORT" =~ ^[0-9]+$ ]] || [ "$PORT" -le 0 ] || [ "$PORT" -ge 65536 ]; then
@@ -57,11 +70,11 @@ REMOTE_USER="ableton"
 REMOTE_HOST="move.local"
 
 # Version check: ensure Move version is within tested range
-HIGHEST_TESTED_VERSION="1.5.1"
+HIGHEST_TESTED_VERSION="1.8.5"
 # Grab version no matter the result
 INSTALLED_VERSION=$( 
-    ssh "${REMOTE_USER}@${REMOTE_HOST}" "/opt/move/Move -v" \
-    | sed -nE 's/.*Version:.*([0-9]+\.[0-9]+\.[0-9]+).*/\1/p' || true 
+    ssh "${REMOTE_USER}@${REMOTE_HOST}" "/opt/move/Move -v" 2>/dev/null \
+    | sed -nE 's/.*[Vv]ersion:?[[:space:]]+([0-9]+\.[0-9]+\.[0-9]+).*/\1/p' || true
 )
 # Check to see if we got a version that's not empty
 if [[ -z "$INSTALLED_VERSION" ]]; then 
@@ -71,10 +84,15 @@ fi
 # Determine if installed version exceeds highest tested
 LATEST_VERSION=$(printf "%s\n%s\n" "$HIGHEST_TESTED_VERSION" "$INSTALLED_VERSION" | sort -V | tail -n1)
 if [ "$LATEST_VERSION" != "$HIGHEST_TESTED_VERSION" ]; then
-    read -p "Warning: Installed Move version ($INSTALLED_VERSION) is newer than highest tested ($HIGHEST_TESTED_VERSION). Continue? [y/N] " confirm
-    if [[ ! $confirm =~ ^[Yy]$ ]]; then
-        echo "Aborting installation."
-        exit 1
+    echo "Warning: Installed Move version ($INSTALLED_VERSION) is newer than highest tested ($HIGHEST_TESTED_VERSION)."
+    if [ "$NON_INTERACTIVE" = false ]; then
+        read -p "Continue? [y/N] " confirm
+        if [[ ! $confirm =~ ^[Yy]$ ]]; then
+            echo "Aborting installation."
+            exit 1
+        fi
+    else
+        echo "Non-interactive mode: continuing anyway."
     fi
 fi
 
@@ -126,7 +144,20 @@ if [ ! -f "${SCRIPT_DIR}/update-on-move.sh" ]; then
     echo "Error: update-on-move.sh not found in ${SCRIPT_DIR}"
     exit 1
 fi
-"${SCRIPT_DIR}/update-on-move.sh"
+if [ "$NON_INTERACTIVE" = true ]; then
+    "${SCRIPT_DIR}/update-on-move.sh" --non-interactive
+else
+    "${SCRIPT_DIR}/update-on-move.sh"
+fi
+
+# Set up auto-start so the webserver survives reboots
+echo ""
+echo "Setting up auto-start for the webserver..."
+if [ -f "${SCRIPT_DIR}/setup-autostart-on-move.sh" ]; then
+    bash "${SCRIPT_DIR}/setup-autostart-on-move.sh"
+else
+    echo "Warning: setup-autostart-on-move.sh not found, skipping auto-start setup."
+fi
 
 echo
 echo "**************************************************************"
@@ -138,8 +169,10 @@ echo "*   http://move.local:${PORT}                                    *"
 echo "*                                                            *"
 echo "**************************************************************"
 echo
-printf "Would you like to open the tools in your browser? (y/n): "
-read -r response
-if [ "$response" = "y" ] || [ "$response" = "Y" ]; then
-    open "http://move.local:${PORT}"
+if [ "$NON_INTERACTIVE" = false ]; then
+    printf "Would you like to open the tools in your browser? (y/n): "
+    read -r response
+    if [ "$response" = "y" ] || [ "$response" = "Y" ]; then
+        open "http://move.local:${PORT}"
+    fi
 fi

@@ -7,7 +7,7 @@ Tools for extending the Ableton Move. This project provides a companion webserve
 
 [Demo on YouTube](https://www.youtube.com/watch?v=MCmaCifzgbg)
 
-Come talk to us on [Discord](https://discord.gg/yP7SjqDrZG).
+Come talk to us on [Discord](https://discord.gg/GHWaZCC9bQ).
 
 ## Installation instructions
 
@@ -65,7 +65,7 @@ Here’s what you can do with Extending Move:
 Many thanks to the contributors who have helped discover and document Move's capabilities:
 bobbyd, void, deets, djhardrich, fedpep, manuz, poga, void, and many more.
 
-Interested in chatting about more Move hacking? Come talk to us on [Discord](https://discord.gg/yP7SjqDrZG).
+Interested in chatting about more Move hacking? Come talk to us on [Discord](https://discord.gg/GHWaZCC9bQ).
 
 ## Documentation
 
