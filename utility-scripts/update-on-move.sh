@@ -43,10 +43,10 @@ REMOTE_HOST="move.local"
 REMOTE_DIR="/data/UserData/extending-move"
 
 # --- Version check: ensure Move version is within tested range ---
-HIGHEST_TESTED_VERSION="1.8.5"
-# Grab version no matter the result
-INSTALLED_VERSION=$( 
-    ssh "${REMOTE_USER}@${REMOTE_HOST}" "/opt/move/Move -v" 2>/dev/null \
+HIGHEST_TESTED_VERSION="2.0.0"
+# Grab version no matter the result (Move v2+ prints to stderr with log prefixes)
+INSTALLED_VERSION=$(
+    ssh "${REMOTE_USER}@${REMOTE_HOST}" "/opt/move/Move -v" 2>&1 \
     | sed -nE 's/.*[Vv]ersion:?[[:space:]]+([0-9]+\.[0-9]+\.[0-9]+).*/\1/p' || true
 )
 # Check to see if we got a version that's not empty
