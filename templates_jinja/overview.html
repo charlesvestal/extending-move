@@ -1,0 +1,337 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Move Over (view)</h2>
+
+<div class="overview-stats">
+    <div class="overview-stat-box">
+        <div class="overview-stat-label">STORAGE: <span id="disk-text">—</span></div>
+        <div class="overview-bar-track"><div class="overview-bar-fill" id="disk-fill" style="width:0%"></div></div>
+    </div>
+    <div class="overview-stat-box">
+        <div class="overview-stat-label">MEMORY: <span id="mem-text">—</span></div>
+        <div class="overview-bar-track"><div class="overview-bar-fill overview-bar-mem" id="mem-fill" style="width:0%"></div></div>
+        <div class="overview-stat-label" style="margin-top:6px;">LOAD: <span id="load-text">—</span></div>
+    </div>
+</div>
+
+<div id="overview-loading" style="color:#888;margin:1rem 0;">Loading sets…</div>
+<div id="overview-error" style="color:#d73a49;margin:1rem 0;"></div>
+
+<div id="overview-content" style="display:none;">
+    <div class="overview-pad-grid" id="pad-grid"></div>
+
+    <div style="margin:1rem 0;">
+        <label style="display:inline;font-weight:400;margin-right:0.5rem;">Filter by Camelot key:</label>
+        <button class="overview-filter-btn active" onclick="filterByCamelot(null, this)">All</button>
+        <span id="camelot-filter-btns"></span>
+    </div>
+
+    <table class="overview-table" id="sets-table">
+        <thead>
+            <tr>
+                <th>Pad</th>
+                <th>Name</th>
+                <th>BPM</th>
+                <th>Key</th>
+                <th>Mode</th>
+                <th>Camelot</th>
+            </tr>
+        </thead>
+        <tbody id="sets-tbody"></tbody>
+    </table>
+
+    <div style="color:#888;font-size:0.75rem;margin-top:0.75rem;">
+        Sets refresh every 30s &nbsp;·&nbsp; Active pad updates every 2s
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+    .overview-stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+    .overview-stat-box {
+        background: #f5f5f5;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+    }
+    .overview-stat-label { margin-bottom: 0.4rem; }
+    .overview-bar-track {
+        background: #e0e0e0;
+        border-radius: 2px;
+        height: 12px;
+        overflow: hidden;
+    }
+    .overview-bar-fill {
+        height: 100%;
+        background: #0000ff;
+        border-radius: 2px;
+        transition: width 0.4s;
+    }
+    .overview-bar-mem { background: #8b5cf6; }
+
+    .overview-pad-grid {
+        display: grid;
+        grid-template-columns: repeat(8, 1fr);
+        gap: 0.4rem;
+        margin-bottom: 1.5rem;
+        max-width: 640px;
+    }
+    .overview-pad-cell {
+        border-radius: 4px;
+        padding: 0.4rem 0.25rem;
+        text-align: center;
+        font-size: 0.7rem;
+        font-weight: 500;
+        aspect-ratio: 4/3;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: #f0f0f0;
+        border: 2px solid transparent;
+        box-sizing: border-box;
+        overflow: hidden;
+    }
+    .overview-pad-cell.active {
+        border-color: #ff764d;
+        box-shadow: 0 0 0 2px rgba(255,118,77,0.3);
+        animation: overview-pulse 2s ease-in-out infinite;
+    }
+    .overview-pad-cell .pad-num {
+        font-size: 0.6rem;
+        color: #888;
+        line-height: 1;
+    }
+    .overview-pad-cell .pad-name {
+        font-size: 0.65rem;
+        word-break: break-word;
+        line-height: 1.2;
+        max-height: 2.4em;
+        overflow: hidden;
+    }
+    .overview-pad-cell .pad-bpm {
+        font-size: 0.6rem;
+        color: #555;
+    }
+    @keyframes overview-pulse {
+        0%, 100% { box-shadow: 0 0 0 2px rgba(255,118,77,0.3); }
+        50%       { box-shadow: 0 0 0 5px rgba(255,118,77,0.5); }
+    }
+
+    .overview-filter-btn {
+        background: transparent;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        padding: 0.2rem 0.6rem;
+        font-size: 0.8rem;
+        color: #444;
+        cursor: pointer;
+        margin-right: 0.25rem;
+        margin-bottom: 0.25rem;
+        font-family: 'Ableton Sans', Arial, sans-serif;
+    }
+    .overview-filter-btn.active {
+        background: #0000ff;
+        border-color: #0000ff;
+        color: white;
+    }
+
+    .overview-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.875rem;
+    }
+    .overview-table th {
+        text-align: left;
+        padding: 0.4rem 0.6rem;
+        border-bottom: 2px solid #ddd;
+        font-weight: 500;
+        color: #444;
+    }
+    .overview-table td {
+        padding: 0.35rem 0.6rem;
+        border-bottom: 1px solid #eee;
+    }
+    .overview-table tr.active-row td {
+        background: #fff5f0;
+        font-weight: 500;
+    }
+    .camelot-badge {
+        display: inline-block;
+        padding: 0.1rem 0.4rem;
+        border-radius: 3px;
+        font-size: 0.75rem;
+        background: #f0f0f0;
+        border: 1px solid #ccc;
+    }
+    .color-dot {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-right: 0.3rem;
+        vertical-align: middle;
+        border: 1px solid rgba(0,0,0,0.15);
+    }
+    .now-playing-badge {
+        display: inline-block;
+        background: #ff764d;
+        color: white;
+        font-size: 0.65rem;
+        padding: 0.1rem 0.35rem;
+        border-radius: 2px;
+        margin-left: 0.4rem;
+        vertical-align: middle;
+    }
+</style>
+
+<script>
+    let allSets = [];
+    let currentSlot = null;
+    let activeCamelot = null;
+
+    async function loadData() {
+        try {
+            const res = await fetch('/overview/api/data');
+            const d = await res.json();
+            if (d.error) {
+                document.getElementById('overview-error').textContent = 'Error: ' + d.error;
+                return;
+            }
+            allSets = d.sets || [];
+            currentSlot = d.current_slot;
+            document.getElementById('overview-loading').style.display = 'none';
+            document.getElementById('overview-content').style.display = '';
+
+            if (d.disk) {
+                document.getElementById('disk-text').textContent =
+                    `${d.disk.used_gb} GB / ${d.disk.total_gb} GB — ${d.disk.percent_used}%`;
+                const df = document.getElementById('disk-fill');
+                df.style.width = d.disk.percent_used + '%';
+                df.style.background = d.disk.percent_used > 80 ? '#d73a49' : '#0000ff';
+            }
+
+            buildCamelotFilters(allSets);
+            render(allSets, currentSlot);
+        } catch (e) {
+            document.getElementById('overview-error').textContent = 'Failed to load data.';
+        }
+    }
+
+    function buildCamelotFilters(sets) {
+        const codes = [...new Set(sets.map(s => s.camelot).filter(Boolean))].sort();
+        const container = document.getElementById('camelot-filter-btns');
+        container.innerHTML = '';
+        codes.forEach(code => {
+            const btn = document.createElement('button');
+            btn.className = 'overview-filter-btn';
+            btn.textContent = code;
+            btn.onclick = () => filterByCamelot(code, btn);
+            container.appendChild(btn);
+        });
+    }
+
+    function filterByCamelot(code, btn) {
+        activeCamelot = code;
+        document.querySelectorAll('.overview-filter-btn').forEach(b => b.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+        const filtered = code ? allSets.filter(s => s.camelot === code) : allSets;
+        render(filtered, currentSlot);
+    }
+
+    function render(sets, activeSlot) {
+        renderPadGrid(sets, activeSlot);
+        renderTable(sets, activeSlot);
+    }
+
+    function renderPadGrid(sets, activeSlot) {
+        const grid = document.getElementById('pad-grid');
+        grid.innerHTML = '';
+        const bySlot = {};
+        sets.forEach(s => { if (s.slot != null) bySlot[s.slot] = s; });
+        for (let i = 0; i < 32; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'overview-pad-cell';
+            const s = bySlot[i];
+            if (s) {
+                if (s.color_css) cell.style.background = s.color_css + '33';
+                if (s.color_css) cell.style.borderColor = s.color_css;
+                if (s.slot == activeSlot) cell.classList.add('active');
+                cell.innerHTML = `
+                    <div class="pad-num">${i + 1}</div>
+                    <div class="pad-name">${s.name}</div>
+                    ${s.bpm ? `<div class="pad-bpm">${s.bpm} BPM</div>` : ''}
+                `;
+            } else {
+                cell.innerHTML = `<div class="pad-num">${i + 1}</div>`;
+            }
+            grid.appendChild(cell);
+        }
+    }
+
+    function renderTable(sets, activeSlot) {
+        const tbody = document.getElementById('sets-tbody');
+        tbody.innerHTML = '';
+        const sorted = [...sets].sort((a, b) => (a.slot ?? 999) - (b.slot ?? 999));
+        sorted.forEach(s => {
+            const tr = document.createElement('tr');
+            if (s.slot == activeSlot) tr.className = 'active-row';
+            const dot = s.color_css ? `<span class="color-dot" style="background:${s.color_css}"></span>` : '';
+            const playing = s.slot == activeSlot ? '<span class="now-playing-badge">NOW PLAYING</span>' : '';
+            tr.innerHTML = `
+                <td>${s.slot != null ? s.slot + 1 : '—'}</td>
+                <td>${dot}${s.name}${playing}</td>
+                <td>${s.bpm ?? '—'}</td>
+                <td>${s.key ?? '—'}</td>
+                <td>${s.mode ?? '—'}</td>
+                <td>${s.camelot ? `<span class="camelot-badge">${s.camelot}</span>` : '—'}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    async function pollActiveSlot() {
+        try {
+            const res = await fetch('/overview/api/active-slot');
+            const d = await res.json();
+            if (d.current_slot != null && d.current_slot !== currentSlot) {
+                currentSlot = d.current_slot;
+                const filtered = activeCamelot ? allSets.filter(s => s.camelot === activeCamelot) : allSets;
+                render(filtered, currentSlot);
+            }
+        } catch (e) {}
+    }
+
+    async function pollSystemStats() {
+        try {
+            const res = await fetch('/overview/api/system');
+            const d = await res.json();
+            if (d.mem_pct != null) {
+                document.getElementById('mem-text').textContent =
+                    `${d.mem_used_mb} MB / ${d.mem_total_mb} MB — ${d.mem_pct}%`;
+                const mf = document.getElementById('mem-fill');
+                mf.style.width = d.mem_pct + '%';
+                mf.style.background = d.mem_pct > 80 ? '#d73a49' : '#8b5cf6';
+            }
+            if (d.load_1 != null) {
+                document.getElementById('load-text').textContent =
+                    `${d.load_1.toFixed(2)} / ${d.load_5.toFixed(2)} / ${d.load_15.toFixed(2)} (1m/5m/15m)`;
+            }
+        } catch (e) {}
+    }
+
+    loadData();
+    pollSystemStats();
+    setInterval(loadData, 30000);
+    setInterval(pollActiveSlot, 2000);
+    setInterval(pollSystemStats, 5000);
+</script>
+{% endblock %}

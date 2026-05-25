@@ -9,6 +9,7 @@
 <body class="page-{{ active_tab }}">
     <h1 id="header">Move - Extended</h1>
     <nav class="tab">
+        <a href="{{ host_prefix }}/overview" class="{% if active_tab == 'overview' %}active{% endif %}">Overview</a>
         <a href="{{ host_prefix }}/restore" class="{% if active_tab == 'restore' %}active{% endif %}">Restore</a>
         <a href="{{ host_prefix }}/slice" class="{% if active_tab == 'slice' %}active{% endif %}">Slice</a>
         <a href="{{ host_prefix }}/chord" class="{% if active_tab == 'chord' %}active{% endif %}">Chords</a>
