@@ -1,5 +1,6 @@
 import os
 import subprocess
+import json
 from core.config import MSETS_DIRECTORY
 
 def get_xattr_value(relative_path, attr):
@@ -22,6 +23,18 @@ def get_xattr_value(relative_path, attr):
         return output
     except subprocess.CalledProcessError:
         return "Unknown"
+
+def _parse_bpm_from_song(set_path):
+    """Parse BPM from Song.abl file. Returns None if not found."""
+    try:
+        abl_path = os.path.join(set_path, 'Song.abl')
+        with open(abl_path, 'r') as f:
+            data = json.load(f)
+        tempo = data.get('tempo')
+        return round(float(tempo), 1) if tempo else None
+    except Exception:
+        return None
+
 
 def list_msets(return_free_ids=False):
     """
@@ -58,6 +71,13 @@ def list_msets(return_free_ids=False):
             mset_extmodified = get_xattr_value(uuid, "user.was-externally-modified")
 
             mset_id_value = int(mset_id) if mset_id.isdigit() else 9999
+
+            # Parse BPM from Song.abl
+            bpm = None
+            if mset_folders:
+                set_path = os.path.join(uuid_path, mset_folders[0])
+                bpm = _parse_bpm_from_song(set_path)
+
             msets.append({
                 "uuid": uuid,
                 "mset_name": mset_name,
@@ -65,7 +85,8 @@ def list_msets(return_free_ids=False):
                 "mset_color": mset_color if mset_color.isdigit() else "Unknown",
                 "mset_cloudstate": mset_cloudstate,
                 "mset_modifiedtime": mset_modifiedtime,
-                "mset_extmodified": mset_extmodified
+                "mset_extmodified": mset_extmodified,
+                "bpm": bpm
             })
 
             if 0 <= mset_id_value <= 31:

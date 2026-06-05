@@ -33,6 +33,39 @@
         <a href="http://github.com/charlesvestal/extending-move/">GitHub</a> |
         <a href="https://discord.gg/GHWaZCC9bQ">Discord</a>
     </footer>
+    <script>
+    // Shared pad grid styling - matches Overview page behavior
+    (function() {
+        function updatePadOpacity() {
+            // Reset all pad backgrounds to 0.2 opacity
+            document.querySelectorAll('.pad-grid .pad-cell').forEach(cell => {
+                const bg = cell.style.backgroundColor;
+                if (bg && bg.includes('rgba')) {
+                    cell.style.backgroundColor = bg.replace(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*[\d.]+\)/, 'rgba($1, $2, $3, 0.2)');
+                }
+            });
+            // Increase opacity to 0.4 for selected pad
+            const checked = document.querySelector('.pad-grid input[type="radio"]:checked');
+            if (checked) {
+                const label = document.querySelector('label[for="' + checked.id + '"]');
+                if (label) {
+                    const bg = label.style.backgroundColor;
+                    if (bg && bg.includes('rgba')) {
+                        label.style.backgroundColor = bg.replace(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*[\d.]+\)/, 'rgba($1, $2, $3, 0.4)');
+                    }
+                    label.classList.add('active');
+                }
+            }
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            const padGrid = document.querySelector('.pad-grid');
+            if (padGrid) {
+                updatePadOpacity();
+                padGrid.addEventListener('change', updatePadOpacity);
+            }
+        });
+    })();
+    </script>
     {% block scripts %}{% endblock %}
 </body>
 </html>
