@@ -12,21 +12,51 @@
             <input type="hidden" name="action" value="upload_midi" />
             <div class="form-group">
                 <label for="midi_type">MIDI Type:</label>
-                <select name="midi_type" id="midi_type" required>
+                <select name="midi_type" id="midi_type" required onchange="updateTrackOptions()">
                     <option value="melodic" selected>Melodic MIDI</option>
                     <option value="drum">Drum MIDI (808)</option>
                     <option value="multichannel">Multi-Channel (≤4 channels)</option>
+                    <option value="assigntotrack">Assign to Track (1-4)</option>
                 </select>
-                <small>Melodic: Single track. Drum: Maps to 16 pads. Multi-Channel: Each MIDI channel becomes a separate track (max 4).</small>
+                <small>Melodic/Drum: Single track. Multi-Channel: Each MIDI channel becomes separate track. Assign to Track: Place on specific track slot.</small>
+            </div>
+            <div class="form-group" id="track-select-group" style="display:none;">
+                <label for="target_track">Target Track:</label>
+                <select name="target_track" id="target_track">
+                    <option value="1" selected>Track 1</option>
+                    <option value="2">Track 2</option>
+                    <option value="3">Track 3</option>
+                    <option value="4">Track 4</option>
+                </select>
+                <small>Select which track slot to place this MIDI on</small>
+            </div>
+            <div class="form-group" id="set-mode-group" style="display:none;">
+                <label>Set Mode:</label>
+                <div>
+                    <input type="radio" name="set_mode" id="set_mode_new" value="new" checked onchange="updateSetModeFields()">
+                    <label for="set_mode_new" style="display:inline;font-weight:normal;">Create New Set</label>
+                </div>
+                <div>
+                    <input type="radio" name="set_mode" id="set_mode_existing" value="existing" onchange="updateSetModeFields()">
+                    <label for="set_mode_existing" style="display:inline;font-weight:normal;">Add to Existing Set</label>
+                </div>
+            </div>
+            <div class="form-group" id="new-set-name-group" style="display:none;">
+                <label for="set_name">New Set Name:</label>
+                <input type="text" name="set_name" id="set_name" placeholder="My MIDI Set" />
+                <small>Required when creating a new set</small>
+            </div>
+            <div class="form-group" id="existing-set-select-group" style="display:none;">
+                <label for="existing_set_name">Select Existing Set:</label>
+                <select name="existing_set_name" id="existing_set_name">
+                    {{ existing_set_options | safe }}
+                </select>
+                <small>Required when adding to existing set</small>
             </div>
             <div class="form-group">
                 <label for="midi_file">MIDI File:</label>
                 <input type="file" name="midi_file" id="midi_file" accept=".mid,.midi" required />
                 <small>Supported formats: .mid, .midi</small>
-            </div>
-            <div class="form-group">
-                <label for="set_name">Set Name:</label>
-                <input type="text" name="set_name" id="set_name" placeholder="My MIDI Set" required />
             </div>
             <div class="form-group">
                 <label for="tempo">Tempo (BPM):</label>
@@ -45,4 +75,44 @@
         </form>
     </div>
 </div>
+<script>
+function updateTrackOptions() {
+    const midiType = document.getElementById('midi_type').value;
+    const trackGroup = document.getElementById('track-select-group');
+    const setModeGroup = document.getElementById('set-mode-group');
+    
+    if (midiType === 'assigntotrack') {
+        trackGroup.style.display = 'block';
+        setModeGroup.style.display = 'block';
+        updateSetModeFields();
+    } else {
+        trackGroup.style.display = 'none';
+        setModeGroup.style.display = 'none';
+        document.getElementById('new-set-name-group').style.display = 'none';
+        document.getElementById('existing-set-select-group').style.display = 'none';
+        // Re-enable set_name for non-assign-to-track modes
+        document.getElementById('set_name').required = true;
+    }
+}
+
+function updateSetModeFields() {
+    const isNew = document.getElementById('set_mode_new').checked;
+    const newSetGroup = document.getElementById('new-set-name-group');
+    const existingSetGroup = document.getElementById('existing-set-select-group');
+    const setNameInput = document.getElementById('set_name');
+    const existingSetSelect = document.getElementById('existing_set_name');
+    
+    if (isNew) {
+        newSetGroup.style.display = 'block';
+        existingSetGroup.style.display = 'none';
+        setNameInput.required = true;
+        existingSetSelect.required = false;
+    } else {
+        newSetGroup.style.display = 'none';
+        existingSetGroup.style.display = 'block';
+        setNameInput.required = false;
+        existingSetSelect.required = true;
+    }
+}
+</script>
 {% endblock %}

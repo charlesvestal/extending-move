@@ -493,3 +493,174 @@ def generate_multichannel_midi_set(set_name: str, midi_file_path: str, tempo: fl
             'success': False,
             'message': f"Failed to process multi-channel MIDI file: {str(e)}"
         }
+
+
+def assign_midi_to_track(set_name: str, midi_file_path: str, target_track: int, 
+                         existing_set_path: str = None, tempo: float = None) -> Dict[str, Any]:
+    """
+    Assign a single-track MIDI file to a specific track slot (1-4) in a set.
+    Can create a new set or append to an existing set.
+    
+    Args:
+        set_name: Name for the new set (or name of existing set)
+        midi_file_path: Path to the uploaded MIDI file
+        target_track: Track number 1-4 to place the MIDI on
+        existing_set_path: If provided, load this set and add to it. If None, create new set.
+        tempo: Tempo in BPM (if None, will try to detect from MIDI or use 120)
+        
+    Returns:
+        Result dictionary with success status and message
+    """
+    try:
+        # Validate track number
+        if target_track < 1 or target_track > 4:
+            return {
+                'success': False,
+                'message': f"Invalid track number {target_track}. Must be 1-4."
+            }
+        
+        # Load and parse the MIDI file
+        mid = mido.MidiFile(midi_file_path)
+        
+        # Detect tempo
+        detected_tempo = 120.0
+        for track in mid.tracks:
+            for msg in track:
+                if msg.type == 'set_tempo':
+                    detected_tempo = 60000000 / msg.tempo
+                    break
+            if detected_tempo != 120.0:
+                break
+        
+        if tempo is None:
+            tempo = detected_tempo
+        
+        # Extract notes from first track with note data
+        ticks_per_beat = mid.ticks_per_beat
+        notes = []
+        current_time = 0
+        active_notes = {}
+        
+        note_track = None
+        for track in mid.tracks:
+            has_notes = any(msg.type in ['note_on', 'note_off'] for msg in track)
+            if has_notes:
+                note_track = track
+                break
+        
+        if note_track is None:
+            return {'success': False, 'message': "No note data found in MIDI file"}
+        
+        for msg in note_track:
+            current_time += msg.time
+            
+            if msg.type == 'note_on' and msg.velocity > 0:
+                active_notes[msg.note] = {
+                    'start_time': current_time / ticks_per_beat,
+                    'velocity': msg.velocity
+                }
+            elif msg.type == 'note_off' or (msg.type == 'note_on' and msg.velocity == 0):
+                if msg.note in active_notes:
+                    start_beat = active_notes[msg.note]['start_time']
+                    duration = (current_time / ticks_per_beat) - start_beat
+                    
+                    if duration > 0:
+                        notes.append({
+                            'noteNumber': msg.note,
+                            'startTime': start_beat,
+                            'duration': duration,
+                            'velocity': float(active_notes[msg.note]['velocity']),
+                            'offVelocity': 0.0
+                        })
+                    
+                    del active_notes[msg.note]
+        
+        # Handle remaining active notes
+        final_time = current_time / ticks_per_beat
+        for note_num, data in active_notes.items():
+            duration = final_time - data['start_time']
+            if duration > 0:
+                notes.append({
+                    'noteNumber': note_num,
+                    'startTime': data['start_time'],
+                    'duration': duration,
+                    'velocity': float(data['velocity']),
+                    'offVelocity': 0.0
+                })
+        
+        if not notes:
+            return {'success': False, 'message': "No valid notes found in MIDI file"}
+        
+        notes.sort(key=lambda x: x['startTime'])
+        
+        # Calculate clip length
+        max_end_time = max(note['startTime'] + note['duration'] for note in notes)
+        clip_length = max(4.0, ((int(max_end_time) // 4) + 1) * 4.0)
+        
+        # Load existing set or create new
+        if existing_set_path and os.path.exists(existing_set_path):
+            # Load existing set
+            with open(existing_set_path, 'r') as f:
+                song = json.load(f)
+            mode = "updated"
+        else:
+            # Create new set from template
+            template_path = os.path.join(os.path.dirname(__file__), '..', 'examples', 'Sets', 'midi_template.abl')
+            song = load_set_template(template_path)
+            mode = "created"
+        
+        # Validate track index
+        track_idx = target_track - 1  # Convert 1-4 to 0-3
+        if track_idx >= len(song['tracks']):
+            return {
+                'success': False,
+                'message': f"Track {target_track} does not exist in set (max {len(song['tracks'])} tracks)"
+            }
+        
+        # Assign notes to target track
+        track = song['tracks'][track_idx]
+        if track['clipSlots'] and len(track['clipSlots']) > 0:
+            clip_slot = track['clipSlots'][0]
+            if clip_slot.get('clip') is None:
+                # Create clip structure if missing
+                clip_slot['clip'] = {
+                    'notes': notes,
+                    'region': {'start': 0.0, 'end': clip_length, 'loop': {'start': 0.0, 'end': clip_length}},
+                    'enabled': True
+                }
+            else:
+                clip = clip_slot['clip']
+                clip['notes'] = notes
+                clip['region']['end'] = clip_length
+                clip['region']['loop']['end'] = clip_length
+            track['name'] = f"Track {target_track}"
+        else:
+            return {
+                'success': False,
+                'message': f"Track {target_track} has no clip slots available"
+            }
+        
+        # Update tempo
+        song['tempo'] = tempo
+        
+        # Save
+        output_dir = "/data/UserData/UserLibrary/Sets"
+        os.makedirs(output_dir, exist_ok=True)
+        output_path = os.path.join(output_dir, set_name)
+        if not output_path.endswith('.abl'):
+            output_path += '.abl'
+        
+        with open(output_path, 'w') as f:
+            json.dump(song, f, indent=2)
+        
+        return {
+            'success': True,
+            'message': f"Set '{set_name}' {mode} - Track {target_track} now has {len(notes)} notes",
+            'path': output_path
+        }
+        
+    except Exception as e:
+        return {
+            'success': False,
+            'message': f"Failed to assign MIDI to track: {str(e)}"
+        }

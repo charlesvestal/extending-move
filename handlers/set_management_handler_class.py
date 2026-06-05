@@ -6,7 +6,8 @@ import shutil
 import logging
 from core.set_management_handler import (
     create_set, generate_midi_set_from_file, generate_drum_set_from_file,
-    generate_c_major_chord_example, generate_multichannel_midi_set
+    generate_c_major_chord_example, generate_multichannel_midi_set,
+    assign_midi_to_track
 )
 from core.list_msets_handler import list_msets
 from core.restore_handler import restore_ablbundle
@@ -30,11 +31,21 @@ class SetManagementHandler(BaseHandler):
         name_map = {int(m["mset_id"]): m["mset_name"] for m in msets}
         bpm_map = {int(m["mset_id"]): str(m["bpm"]) for m in msets if m.get("bpm")}
         pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map, name_map, bpm_map, free_only=True)
+        # Get existing sets for dropdown
+        existing_sets = [(m["mset_name"], m.get("bpm", "—")) for m in msets]
+        existing_set_options = '<option value="" disabled selected>-- Select Existing Set --</option>'
+        for name, bpm in sorted(existing_sets):
+            existing_set_options += f'<option value="{name}">{name} ({bpm} BPM)</option>'
+        
+        # Debug info
+        debug_msg = f"Found {len(msets)} sets for dropdown"
+        
         return {
             'pad_options': pad_options,
             'pad_color_options': pad_color_options,
             'pad_grid': pad_grid,
-            'message': 'Upload a MIDI file to generate a set',
+            'existing_set_options': existing_set_options,
+            'message': f'Upload a MIDI file to generate a set ({debug_msg})',
             'message_type': 'info'
         }
 
@@ -53,6 +64,11 @@ class SetManagementHandler(BaseHandler):
         name_map = {int(m["mset_id"]): m["mset_name"] for m in msets}
         bpm_map = {int(m["mset_id"]): str(m["bpm"]) for m in msets if m.get("bpm")}
         pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map, name_map, bpm_map, free_only=True)
+        # Get existing sets for dropdown
+        existing_sets = [(m["mset_name"], m.get("bpm", "—")) for m in msets]
+        existing_set_options = '<option value="" disabled selected>-- Select Existing Set --</option>'
+        for name, bpm in sorted(existing_sets):
+            existing_set_options += f'<option value="{name}">{name} ({bpm} BPM)</option>'
 
         if action == 'upload_midi':
             # Generate set from uploaded MIDI file
@@ -63,6 +79,7 @@ class SetManagementHandler(BaseHandler):
                     pad_options=pad_options,
                     pad_color_options=pad_color_options,
                     pad_grid=pad_grid,
+                    existing_set_options=existing_set_options,
                 )
             
             # Handle file upload
@@ -72,6 +89,7 @@ class SetManagementHandler(BaseHandler):
                     pad_options=pad_options,
                     pad_color_options=pad_color_options,
                     pad_grid=pad_grid,
+                    existing_set_options=existing_set_options,
                 )
             
             fileitem = form['midi_file']
@@ -81,6 +99,7 @@ class SetManagementHandler(BaseHandler):
                     pad_options=pad_options,
                     pad_color_options=pad_color_options,
                     pad_grid=pad_grid,
+                    existing_set_options=existing_set_options,
                 )
             
             # Check file extension
@@ -91,6 +110,7 @@ class SetManagementHandler(BaseHandler):
                     pad_options=pad_options,
                     pad_color_options=pad_color_options,
                     pad_grid=pad_grid,
+                    existing_set_options=existing_set_options,
                 )
             
             # Save uploaded file temporarily
@@ -101,6 +121,7 @@ class SetManagementHandler(BaseHandler):
                     pad_options=pad_options,
                     pad_color_options=pad_color_options,
                     pad_grid=pad_grid,
+                    existing_set_options=existing_set_options,
                 )
             
             try:
@@ -114,6 +135,40 @@ class SetManagementHandler(BaseHandler):
                     result = generate_drum_set_from_file(set_name, filepath, tempo)
                 elif midi_type == 'multichannel':
                     result = generate_multichannel_midi_set(set_name, filepath, tempo)
+                elif midi_type == 'assigntotrack':
+                    # Handle assign to track mode
+                    target_track_str = form.getvalue('target_track', '1')
+                    target_track = int(target_track_str) if target_track_str.isdigit() else 1
+                    set_mode = form.getvalue('set_mode', 'new')
+                    
+                    if set_mode == 'existing':
+                        # Use existing set name from dropdown
+                        existing_set_name = form.getvalue('existing_set_name', '')
+                        if not existing_set_name:
+                            return self.format_error_response(
+                                "Please select an existing set",
+                                pad_options=pad_options,
+                                pad_color_options=pad_color_options,
+                                pad_grid=pad_grid,
+                            )
+                        existing_path = os.path.join("/data/UserData/UserLibrary/Sets", existing_set_name)
+                        if not existing_path.endswith('.abl'):
+                            existing_path += '.abl'
+                        # Use the existing set name for saving
+                        final_set_name = existing_set_name
+                    else:
+                        # Create new set - validate name
+                        if not set_name:
+                            return self.format_error_response(
+                                "Please enter a name for the new set",
+                                pad_options=pad_options,
+                                pad_color_options=pad_color_options,
+                                pad_grid=pad_grid,
+                            )
+                        existing_path = None
+                        final_set_name = set_name
+                    
+                    result = assign_midi_to_track(final_set_name, filepath, target_track, existing_path, tempo)
                 else:
                     result = generate_midi_set_from_file(set_name, filepath, tempo)
 
@@ -195,13 +250,13 @@ class SetManagementHandler(BaseHandler):
             name_map = {int(m["mset_id"]): m["mset_name"] for m in msets_updated}
             bpm_map = {int(m["mset_id"]): str(m["bpm"]) for m in msets_updated if m.get("bpm")}
             pad_grid = self.generate_pad_grid(updated_ids.get("used", set()), color_map, name_map, bpm_map, free_only=True)
-            return self.format_success_response(restore_result['message'], pad_options=updated_pad_options, pad_color_options=pad_color_options, pad_grid=pad_grid)
+            return self.format_success_response(restore_result['message'], pad_options=updated_pad_options, pad_color_options=pad_color_options, pad_grid=pad_grid, existing_set_options=existing_set_options)
         else:
             color_map = {int(m["mset_id"]): int(m["mset_color"]) for m in msets if str(m["mset_color"]).isdigit()}
             name_map = {int(m["mset_id"]): m["mset_name"] for m in msets}
             bpm_map = {int(m["mset_id"]): str(m["bpm"]) for m in msets if m.get("bpm")}
             pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map, name_map, bpm_map, free_only=True)
-            return self.format_error_response(restore_result.get('message'), pad_options=pad_options, pad_color_options=pad_color_options, pad_grid=pad_grid)
+            return self.format_error_response(restore_result.get('message'), pad_options=pad_options, pad_color_options=pad_color_options, pad_grid=pad_grid, existing_set_options=existing_set_options)
 
     def generate_color_options(self, input_name="pad_color", pad_input_name="pad_index"):
         """Return HTML for the custom color dropdown with pad preview."""
