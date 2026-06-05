@@ -282,6 +282,22 @@ def overview_api_system():
     return jsonify(get_system_stats())
 
 
+@app.route("/overview/api/restore", methods=["POST"])
+def overview_api_restore():
+    """Handle set restore from Overview page."""
+    from flask import request
+    # Use the same form wrapper as other handlers
+    form = FieldStorageWrapper(request.form, request.files)
+    result = overview_handler.handle_post_restore(form)
+    return jsonify(result)
+
+
+@app.route("/overview/api/colors")
+def overview_api_colors():
+    """Return pad colors for color picker."""
+    return jsonify(overview_handler.generate_color_options_json())
+
+
 @app.route("/")
 def index():
     return redirect("/overview")
@@ -454,38 +470,8 @@ def lfo_route():
 
 @app.route("/restore", methods=["GET", "POST"])
 def restore():
-    message = None
-    success = False
-    message_type = None
-    options_html = ""
-    color_options = ""
-    pad_grid = ""
-    if request.method == "POST":
-        form_data = request.form.to_dict()
-        if "ablbundle" in request.files:
-            form_data["ablbundle"] = FileField(request.files["ablbundle"])
-        form = SimpleForm(form_data)
-        result = restore_handler.handle_post(form)
-        message = result.get("message")
-        message_type = result.get("message_type")
-        success = message_type != "error"
-        options_html = result.get("options", options_html)
-        color_options = result.get("color_options", color_options)
-        pad_grid = result.get("pad_grid", pad_grid)
-    context = restore_handler.handle_get()
-    options_html = context.get("options", options_html)
-    color_options = context.get("color_options", color_options)
-    pad_grid = context.get("pad_grid", pad_grid)
-    return render_template(
-        "restore.html",
-        message=message,
-        success=success,
-        message_type=message_type,
-        options_html=options_html,
-        color_options=color_options,
-        pad_grid=pad_grid,
-        active_tab="restore",
-    )
+    """Restore page now redirects to Overview where restore functionality is integrated."""
+    return redirect("/overview")
 
 
 @app.route("/slice", methods=["GET", "POST"])

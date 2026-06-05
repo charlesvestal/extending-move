@@ -19,6 +19,41 @@
 <div id="overview-error" style="color:#d73a49;margin:1rem 0;"></div>
 
 <div id="overview-content" style="display:none;">
+    <!-- Restore Mode Toggle -->
+    <div style="margin-bottom:1rem;">
+        <button id="restore-mode-btn" class="overview-filter-btn" onclick="toggleRestoreMode()">+ Restore Set</button>
+    </div>
+
+    <!-- Restore Form (shown when in restore mode) -->
+    <div id="restore-form-container" style="display:none;margin-bottom:1.5rem;padding:1rem;background:var(--ov-bg2);border:1px solid var(--ov-border);border-radius:4px;">
+        <div id="restore-message" style="margin-bottom:1rem;"></div>
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:flex-end;">
+            <div>
+                <label for="ablbundle" style="font-size:0.8rem;">Set file (.ablbundle/.abl):</label>
+                <input type="file" id="ablbundle" name="ablbundle" accept=".ablbundle,.abl" style="margin-bottom:0;">
+            </div>
+            <div>
+                <label style="font-size:0.8rem;">Pad Color:</label>
+                <div class="color-dropdown" id="color-dropdown">
+                    <div class="dropdown-toggle" onclick="toggleColorDropdown()">
+                        <span class="color-preview" id="selected-color-preview"></span>
+                        <span id="selected-color-name">Select...</span>
+                        <span class="dropdown-arrow">▼</span>
+                    </div>
+                    <div class="dropdown-menu" id="color-dropdown-menu" style="display:none;"></div>
+                </div>
+                <input type="hidden" id="pad_color" name="pad_color" value="">
+            </div>
+            <div id="target-pad-display" style="font-size:0.9rem;color:var(--ov-text-mid);">
+                Click a <strong>free pad</strong> below
+            </div>
+            <input type="hidden" id="target_pad" name="target_pad" value="">
+            <button id="restore-btn" onclick="submitRestore()" disabled style="margin:0;">Upload & Restore</button>
+            <button type="button" onclick="toggleRestoreMode()" style="margin:0;background:transparent;color:var(--ov-text);">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Main Pad Grid (shared between view and restore modes) -->
     <div class="overview-pad-grid" id="pad-grid"></div>
 
     <div style="margin:1rem 0;">
@@ -240,6 +275,99 @@
         margin-left: 0.4rem;
         vertical-align: middle;
     }
+    /* Color dropdown for restore */
+    .color-dropdown {
+        position: relative;
+        display: inline-block;
+        min-width: 200px;
+    }
+    .dropdown-toggle {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        border: 1px solid var(--ov-border);
+        border-radius: 4px;
+        cursor: pointer;
+        background: var(--ov-bg);
+    }
+    .dropdown-toggle:hover {
+        border-color: #999;
+    }
+    .color-preview {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border-radius: 3px;
+        border: 1px solid rgba(0,0,0,0.2);
+    }
+    .dropdown-arrow {
+        margin-left: auto;
+        font-size: 0.7rem;
+    }
+    .dropdown-menu {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: var(--ov-bg);
+        border: 1px solid var(--ov-border);
+        border-radius: 4px;
+        margin-top: 2px;
+        max-height: 300px;
+        overflow-y: auto;
+        z-index: 100;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        cursor: pointer;
+    }
+    .dropdown-item:hover {
+        background: var(--ov-bg2);
+    }
+    /* Restore mode - main grid free pads are selectable */
+    #pad-grid.restore-mode .overview-pad-cell.free {
+        cursor: pointer;
+        border: 2px dashed #ccc;
+    }
+    #pad-grid.restore-mode .overview-pad-cell.free:hover {
+        border-color: #0000ff;
+        border-style: solid;
+    }
+    #pad-grid.restore-mode .overview-pad-cell.free.selected {
+        border-color: #0000ff !important;
+        border-style: solid !important;
+        background: rgba(0,0,255,0.15) !important;
+    }
+    #pad-grid.restore-mode .overview-pad-cell.occupied {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+    #app-wrap.dark #pad-grid.restore-mode .overview-pad-cell.free {
+        border-color: #444;
+    }
+    #app-wrap.dark #pad-grid.restore-mode .overview-pad-cell.free:hover,
+    #app-wrap.dark #pad-grid.restore-mode .overview-pad-cell.free.selected {
+        border-color: #4dd9d9 !important;
+    }
+    #app-wrap.dark #pad-grid.restore-mode .overview-pad-cell.free.selected {
+        background: rgba(77,217,217,0.2) !important;
+    }
+    /* Restore form button styling */
+    #restore-mode-btn.active {
+        background: #0000ff;
+        border-color: #0000ff;
+        color: white;
+    }
+    #app-wrap.dark #restore-mode-btn.active {
+        background: #4dd9d9;
+        border-color: #4dd9d9;
+        color: #000;
+    }
 </style>
 
 <script>
@@ -301,6 +429,10 @@
         renderTable(sets, activeSlot);
     }
 
+    // Restore mode state
+    let restoreMode = false;
+    let selectedTargetPad = null;
+
     function renderPadGrid(sets, activeSlot) {
         const grid = document.getElementById('pad-grid');
         grid.innerHTML = '';
@@ -311,9 +443,10 @@
             for (let col = 0; col < 8; col++) {
                 const i = row * 8 + col;
                 const cell = document.createElement('div');
-                cell.className = 'overview-pad-cell';
                 const s = bySlot[i];
                 if (s) {
+                    // Occupied pad
+                    cell.className = 'overview-pad-cell occupied';
                     const isDark = document.getElementById('app-wrap').classList.contains('dark');
                     const isActive = s.slot == activeSlot;
                     if (s.color_css) cell.style.borderColor = s.color_css;
@@ -331,6 +464,13 @@
                         ${s.bpm ? `<div class="pad-bpm">${s.bpm} BPM</div>` : ''}
                     `;
                 } else {
+                    // Free pad
+                    cell.className = 'overview-pad-cell free';
+                    cell.dataset.padNum = i + 1;
+                    // Add click handler for restore mode
+                    if (restoreMode) {
+                        cell.onclick = () => selectTargetPad(i + 1, cell);
+                    }
                     cell.innerHTML = `<div class="pad-num">${i + 1}</div>`;
                 }
                 grid.appendChild(cell);
@@ -391,10 +531,220 @@
 
     // Overview page now uses global dark mode from base.html
 
+    // ==================== RESTORE FUNCTIONALITY ====================
+    let padColors = [];
+    let padColorNames = [];
+
+    async function loadPadColors() {
+        try {
+            const res = await fetch('/overview/api/colors');
+            const data = await res.json();
+            padColors = data.colors;
+            padColorNames = data.names;
+            buildColorDropdown();
+            // Select first color by default
+            if (padColors.length > 0) {
+                selectColor(0);
+            }
+        } catch (e) {
+            console.error('Failed to load pad colors:', e);
+        }
+    }
+
+    function buildColorDropdown() {
+        const menu = document.getElementById('color-dropdown-menu');
+        menu.innerHTML = '';
+        padColors.forEach((color, idx) => {
+            const item = document.createElement('div');
+            item.className = 'dropdown-item';
+            item.onclick = () => selectColor(idx);
+            item.innerHTML = `
+                <span class="color-preview" style="background:rgb(${color[0]},${color[1]},${color[2]})"></span>
+                <span>${padColorNames[idx]}</span>
+            `;
+            menu.appendChild(item);
+        });
+    }
+
+    function toggleColorDropdown() {
+        const menu = document.getElementById('color-dropdown-menu');
+        menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function selectColor(idx) {
+        const color = padColors[idx];
+        document.getElementById('selected-color-preview').style.background = `rgb(${color[0]},${color[1]},${color[2]})`;
+        document.getElementById('selected-color-name').textContent = padColorNames[idx];
+        document.getElementById('pad_color').value = idx + 1; // 1-indexed color ID
+        document.getElementById('color-dropdown-menu').style.display = 'none';
+        updateRestoreButton();
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        const dropdown = document.getElementById('color-dropdown');
+        if (!dropdown.contains(e.target)) {
+            document.getElementById('color-dropdown-menu').style.display = 'none';
+        }
+    });
+
+    function renderRestoreGrid(sets) {
+        restoreAllSets = sets;
+        const grid = document.getElementById('restore-pad-grid');
+        grid.innerHTML = '';
+        const bySlot = {};
+        sets.forEach(s => { if (s.slot != null) bySlot[s.slot] = s; });
+
+        // Build rows bottom-to-top to match physical Move hardware layout
+        for (let row = 3; row >= 0; row--) {
+            for (let col = 0; col < 8; col++) {
+                const i = row * 8 + col;
+                const cell = document.createElement('div');
+                const s = bySlot[i];
+                const isDark = document.getElementById('app-wrap').classList.contains('dark');
+
+                if (s) {
+                    // Occupied pad
+                    cell.className = 'overview-pad-cell occupied';
+                    const isActive = s.slot == activeSlot;
+                    if (s.color_css) cell.style.borderColor = s.color_css;
+                    const toRgba = (css, alpha) => css ? css.replace('rgb(', 'rgba(').replace(')', `, ${alpha})`) : null;
+                    if (isActive) {
+                        cell.style.background = toRgba(s.color_css, 0.4) || (isDark ? 'rgba(255,180,0,0.4)' : 'rgba(255,180,0,0.4)');
+                    } else if (s.color_css) {
+                        cell.style.background = toRgba(s.color_css, isDark ? 0.08 : 0.2);
+                    }
+                    if (isActive) cell.classList.add('active');
+                    cell.title = s.name;
+                    cell.innerHTML = `
+                        <div class="pad-num">${i + 1}</div>
+                        <div class="pad-name">${s.name}</div>
+                        ${s.bpm ? `<div class="pad-bpm">${s.bpm} BPM</div>` : ''}
+                    `;
+                } else {
+                    // Free pad - selectable in restore mode
+                    cell.className = 'overview-pad-cell free';
+                    cell.dataset.padNum = i + 1;
+                    // Add click handler only in restore mode
+                    if (restoreMode) {
+                        cell.onclick = () => selectTargetPad(i + 1, cell);
+                    }
+                    cell.innerHTML = `<div class="pad-num">${i + 1}</div>`;
+                }
+                grid.appendChild(cell);
+            }
+        }
+    }
+
+    function toggleRestoreMode() {
+        restoreMode = !restoreMode;
+        const btn = document.getElementById('restore-mode-btn');
+        const form = document.getElementById('restore-form-container');
+        const grid = document.getElementById('pad-grid');
+
+        if (restoreMode) {
+            btn.textContent = '✕ Cancel Restore';
+            btn.classList.add('active');
+            form.style.display = 'block';
+            grid.classList.add('restore-mode');
+        } else {
+            btn.textContent = '+ Restore Set';
+            btn.classList.remove('active');
+            form.style.display = 'none';
+            grid.classList.remove('restore-mode');
+            // Clear selection
+            selectedTargetPad = null;
+            document.getElementById('target_pad').value = '';
+            document.getElementById('target-pad-display').innerHTML = 'Click a <strong>free pad</strong> below';
+            document.querySelectorAll('#pad-grid .overview-pad-cell.free').forEach(c => {
+                c.classList.remove('selected');
+            });
+        }
+        // Re-render grid to add/remove click handlers
+        const filtered = activeCamelot ? allSets.filter(s => s.camelot === activeCamelot) : allSets;
+        render(filtered, currentSlot);
+    }
+
+    function selectTargetPad(padNum, cellElement) {
+        // Deselect previous
+        document.querySelectorAll('#pad-grid .overview-pad-cell.free').forEach(c => {
+            c.classList.remove('selected');
+        });
+
+        // Select new
+        selectedTargetPad = padNum;
+        cellElement.classList.add('selected');
+        document.getElementById('target_pad').value = padNum;
+        document.getElementById('target-pad-display').textContent = `Pad ${padNum}`;
+        updateRestoreButton();
+    }
+
+    function updateRestoreButton() {
+        const hasFile = document.getElementById('ablbundle').files.length > 0;
+        const hasColor = document.getElementById('pad_color').value !== '';
+        const hasPad = selectedTargetPad !== null;
+        document.getElementById('restore-btn').disabled = !(hasFile && hasColor && hasPad);
+    }
+
+    async function submitRestore() {
+        const btn = document.getElementById('restore-btn');
+        const msg = document.getElementById('restore-message');
+        btn.disabled = true;
+        btn.textContent = 'Restoring...';
+
+        const formData = new FormData();
+        formData.append('ablbundle', document.getElementById('ablbundle').files[0]);
+        formData.append('pad_color', document.getElementById('pad_color').value);
+        formData.append('target_pad', document.getElementById('target_pad').value);
+
+        try {
+            const res = await fetch('/overview/api/restore', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await res.json();
+
+            if (result.success) {
+                msg.innerHTML = `<p class="success">${result.message}</p>`;
+                // Reset form
+                document.getElementById('ablbundle').value = '';
+                selectedTargetPad = null;
+                document.getElementById('target_pad').value = '';
+                document.getElementById('target-pad-display').innerHTML = 'Click a <strong>free pad</strong> below';
+                document.querySelectorAll('#pad-grid .overview-pad-cell.free').forEach(c => {
+                    c.classList.remove('selected');
+                });
+                selectColor(0); // Reset to first color
+                // Exit restore mode after short delay
+                setTimeout(() => {
+                    toggleRestoreMode();
+                    msg.innerHTML = '';
+                }, 2000);
+                // Reload data to show new set
+                await loadData();
+            } else {
+                msg.innerHTML = `<p class="error">${result.message}</p>`;
+            }
+        } catch (e) {
+            msg.innerHTML = `<p class="error">Error: ${e.message}</p>`;
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Upload & Restore';
+        }
+    }
+
+    // Event listeners
+    document.getElementById('ablbundle').addEventListener('change', updateRestoreButton);
+
+    // Initialize
+    loadPadColors();
+
+    // ==================== END RESTORE FUNCTIONALITY ====================
+
     loadData();
     pollSystemStats();
     setInterval(loadData, 30000);
-    setInterval(pollActiveSlot, 2000);
-    setInterval(pollSystemStats, 5000);
+    setInterval(pollActiveSlot, 2002);
+    setInterval(pollSystemStats, 5005);
 </script>
 {% endblock %}
