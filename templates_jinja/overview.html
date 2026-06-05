@@ -2,10 +2,7 @@
 
 {% block content %}
 <div id="overview-wrap">
-<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
-    <h2 style="margin-bottom:0;">Move Over (view)</h2>
-    <button id="theme-toggle" onclick="toggleTheme()" style="font-size:0.8rem;padding:0.3rem 0.8rem;margin:0;">🌙 Dark</button>
-</div>
+<h2 style="margin-bottom:0;">Move Over (view)</h2>
 <div class="overview-stats">
     <div class="overview-stat-box">
         <div class="overview-stat-label">STORAGE: <span id="disk-text">—</span></div>
@@ -63,7 +60,9 @@
         --ov-pad-empty:  #f0f0f0;
         --ov-bar-track:  #e0e0e0;
     }
-    #overview-wrap.dark {
+    /* Overview uses global dark mode - override variables for dark theme */
+    #app-wrap.dark #overview-wrap {
+        font-family: monospace;
         --ov-bg:         #0a0a0a;
         --ov-bg2:        #111111;
         --ov-border:     #2a2a2a;
@@ -72,33 +71,22 @@
         --ov-text-mid:   #888888;
         --ov-pad-empty:  #151515;
         --ov-bar-track:  #1e1e1e;
-        --ov-accent:     #4dd9d9;
-        font-family: monospace;
-        background: #0a0a0a;
-        padding: 1rem;
-        border-radius: 4px;
-        margin: -2rem;
     }
-    #overview-wrap.dark h2 {
-        color: #4dd9d9;
-        font-family: monospace;
-    }
-    #overview-wrap.dark .overview-filter-btn.active {
+    #app-wrap.dark #overview-wrap .overview-filter-btn.active {
         background: rgba(77,217,217,0.15);
         border-color: #4dd9d9;
         color: #4dd9d9;
     }
-    #overview-wrap.dark .overview-filter-btn {
+    #app-wrap.dark #overview-wrap .overview-filter-btn {
         border-color: #333;
         color: #aaa;
         font-family: monospace;
     }
-    #overview-wrap.dark .overview-table th,
-    #overview-wrap.dark .overview-table td {
-        color: var(--ov-text);
+    #app-wrap.dark #overview-wrap .overview-table th,
+    #app-wrap.dark #overview-wrap .overview-table td {
         font-family: monospace;
     }
-    #overview-wrap.dark .camelot-badge {
+    #app-wrap.dark #overview-wrap .camelot-badge {
         font-family: monospace;
     }
     .overview-stats {
@@ -326,7 +314,7 @@
                 cell.className = 'overview-pad-cell';
                 const s = bySlot[i];
                 if (s) {
-                    const isDark = document.getElementById('overview-wrap').classList.contains('dark');
+                    const isDark = document.getElementById('app-wrap').classList.contains('dark');
                     const isActive = s.slot == activeSlot;
                     if (s.color_css) cell.style.borderColor = s.color_css;
                     const toRgba = (css, alpha) => css ? css.replace('rgb(', 'rgba(').replace(')', `, ${alpha})`) : null;
@@ -401,20 +389,7 @@
         } catch (e) {}
     }
 
-    function toggleTheme() {
-        const wrap = document.getElementById('overview-wrap');
-        const btn = document.getElementById('theme-toggle');
-        const isDark = wrap.classList.toggle('dark');
-        btn.textContent = isDark ? '☀️ Light' : '🌙 Dark';
-        localStorage.setItem('overview-theme', isDark ? 'dark' : 'light');
-    }
-
-    (function() {
-        if (localStorage.getItem('overview-theme') === 'dark') {
-            document.getElementById('overview-wrap').classList.add('dark');
-            document.getElementById('theme-toggle').textContent = '☀️ Light';
-        }
-    })();
+    // Overview page now uses global dark mode from base.html
 
     loadData();
     pollSystemStats();

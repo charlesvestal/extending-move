@@ -47,6 +47,41 @@
     font-style: italic;
 }
 
+/* Global Dark Mode Theme Variables */
+#app-wrap {
+    /* Light mode (default) */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f5f5f5;
+    --bg-tertiary: #f0f0f0;
+    --border-color: #dddddd;
+    --text-primary: #262626;
+    --text-secondary: #555555;
+    --text-dim: #888888;
+    --accent-color: #ff764d;
+    --link-color: #0000ff;
+    --tab-bg: #e0e0e0;
+    --tab-active-bg: #ffffff;
+    --input-bg: #ffffff;
+    --input-border: #cccccc;
+}
+
+#app-wrap.dark {
+    /* Dark mode - matches Overview page dark theme */
+    --bg-primary: #0a0a0a;
+    --bg-secondary: #111111;
+    --bg-tertiary: #151515;
+    --border-color: #2a2a2a;
+    --text-primary: #e0e0e0;
+    --text-secondary: #888888;
+    --text-dim: #555555;
+    --accent-color: #4dd9d9;
+    --link-color: #4dd9d9;
+    --tab-bg: #1e1e1e;
+    --tab-active-bg: #0a0a0a;
+    --input-bg: #111111;
+    --input-border: #333333;
+}
+
 /* Base styles */
 body {
     font-family: 'Ableton Sans', Arial, sans-serif;
@@ -57,6 +92,17 @@ body {
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+}
+
+#app-wrap {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    padding: 1rem;
+}
+
+#app-wrap.dark body {
+    background-color: #0a0a0a;
 }
 
 .text-lg {
@@ -171,6 +217,39 @@ h3 {
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
+/* Dark mode overrides for common elements */
+#app-wrap.dark h1,
+#app-wrap.dark h2,
+#app-wrap.dark h3,
+#app-wrap.dark h4 {
+    color: var(--text-primary);
+}
+
+#app-wrap.dark .tab a {
+    color: var(--text-secondary);
+}
+
+#app-wrap.dark .tab a:hover {
+    color: var(--text-primary);
+}
+
+#app-wrap.dark .tab a.active {
+    color: var(--accent-color);
+}
+
+#app-wrap.dark .tabcontent {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+#app-wrap.dark a {
+    color: var(--link-color);
+}
+
+#app-wrap.dark #footer a {
+    color: var(--link-color);
+}
+
 /* Form elements */
 input[type="text"],
 input[type="number"],
@@ -226,6 +305,28 @@ input[type="submit"] {
 
 .drum-grid button {
     margin-left: 0.5rem;
+}
+
+/* Dark mode for form elements */
+#app-wrap.dark input[type="text"],
+#app-wrap.dark input[type="number"],
+#app-wrap.dark input[type="file"],
+#app-wrap.dark select {
+    background-color: var(--input-bg);
+    border-color: var(--input-border);
+    color: var(--text-primary);
+}
+
+#app-wrap.dark label,
+#app-wrap.dark .slice-even-group label,
+#app-wrap.dark .slice-transient-group label {
+    color: var(--text-secondary);
+}
+
+#app-wrap.dark button,
+#app-wrap.dark input[type="submit"] {
+    background-color: var(--accent-color);
+    color: #000;
 }
 
 button:hover, 
@@ -339,6 +440,35 @@ body.page-melodic-sampler .waveform-container {
 .current-preset {
     font-weight: 500;
     margin-bottom: 1rem;
+}
+
+/* Dark mode for messages and UI elements */
+#app-wrap.dark .success {
+    color: #4dd9d9;
+    background-color: rgba(77, 217, 217, 0.1);
+}
+
+#app-wrap.dark .error {
+    color: #ff6b6b;
+    background-color: rgba(255, 107, 107, 0.1);
+}
+
+#app-wrap.dark .info {
+    color: #4dd9d9;
+    background-color: rgba(77, 217, 217, 0.1);
+}
+
+#app-wrap.dark .file-browser {
+    background-color: var(--bg-secondary);
+    border-color: var(--border-color);
+}
+
+#app-wrap.dark .chord-preview {
+    background-color: var(--bg-secondary);
+}
+
+#app-wrap.dark .file-tree .file-entry button {
+    color: var(--link-color);
 }
 
 /* Chord grid styling */
@@ -526,6 +656,27 @@ nav.breadcrumbs form {
     box-shadow: 0 0 0 3px rgba(255, 118, 77, 0.5);
     animation: pad-pulse 2s ease-in-out infinite;
     opacity: 1 !important;
+}
+
+/* Dark mode pad grid overrides */
+#app-wrap.dark .pad-grid {
+    --pg-bg: #0a0a0a;
+    --pg-bg2: #111111;
+    --pg-border: #2a2a2a;
+    --pg-text: #e0e0e0;
+    --pg-text-dim: #555555;
+    --pg-text-mid: #888888;
+    --pg-pad-empty: #151515;
+    --pg-pad-occupied-bg: var(--pg-bg2);
+}
+
+#app-wrap.dark .pad-cell.free:hover {
+    border-color: #4dd9d9;
+}
+
+#app-wrap.dark .pad-cell.active {
+    border-color: #ff764d !important;
+    box-shadow: 0 0 0 3px rgba(255, 118, 77, 0.5);
 }
 
 @keyframes pad-pulse {
