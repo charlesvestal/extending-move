@@ -15,7 +15,9 @@
                 <select name="midi_type" id="midi_type" required>
                     <option value="melodic" selected>Melodic MIDI</option>
                     <option value="drum">Drum MIDI (808)</option>
+                    <option value="multichannel">Multi-Channel (≤4 channels)</option>
                 </select>
+                <small>Melodic: Single track. Drum: Maps to 16 pads. Multi-Channel: Each MIDI channel becomes a separate track (max 4).</small>
             </div>
             <div class="form-group">
                 <label for="midi_file">MIDI File:</label>

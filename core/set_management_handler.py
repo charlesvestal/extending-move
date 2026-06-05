@@ -335,3 +335,161 @@ def generate_drum_set_from_file(set_name: str, midi_file_path: str, tempo: float
 
     except Exception as e:
         return {'success': False, 'message': f"Failed to process drum MIDI file: {str(e)}"}
+
+
+def generate_multichannel_midi_set(set_name: str, midi_file_path: str, tempo: float = None) -> Dict[str, Any]:
+    """
+    Generate an Ableton Live set from a multi-channel MIDI file.
+    Each MIDI channel (up to 4) becomes a separate track with its own clip.
+    
+    Args:
+        set_name: Name for the new set
+        midi_file_path: Path to the uploaded MIDI file
+        tempo: Tempo in BPM (if None, will try to detect from MIDI or use 120)
+        
+    Returns:
+        Result dictionary with success status and message
+    """
+    try:
+        # Load the MIDI file
+        mid = mido.MidiFile(midi_file_path)
+        
+        # Try to detect tempo from MIDI file
+        detected_tempo = 120.0
+        for track in mid.tracks:
+            for msg in track:
+                if msg.type == 'set_tempo':
+                    detected_tempo = 60000000 / msg.tempo
+                    break
+            if detected_tempo != 120.0:
+                break
+        
+        if tempo is None:
+            tempo = detected_tempo
+        
+        # Extract notes grouped by channel
+        ticks_per_beat = mid.ticks_per_beat
+        channel_notes = {}  # channel -> list of notes
+        
+        for track in mid.tracks:
+            current_time = 0
+            active_notes = {}  # (channel, note) -> start_time
+            
+            for msg in track:
+                current_time += msg.time
+                
+                if msg.type == 'note_on' and msg.velocity > 0:
+                    key = (msg.channel, msg.note)
+                    active_notes[key] = {
+                        'start_time': current_time / ticks_per_beat,
+                        'velocity': msg.velocity
+                    }
+                elif msg.type == 'note_off' or (msg.type == 'note_on' and msg.velocity == 0):
+                    key = (msg.channel, msg.note)
+                    if key in active_notes:
+                        start_beat = active_notes[key]['start_time']
+                        duration = (current_time / ticks_per_beat) - start_beat
+                        
+                        if duration > 0:
+                            channel = msg.channel
+                            if channel not in channel_notes:
+                                channel_notes[channel] = []
+                            
+                            channel_notes[channel].append({
+                                'noteNumber': msg.note,
+                                'startTime': start_beat,
+                                'duration': duration,
+                                'velocity': float(active_notes[key]['velocity']),
+                                'offVelocity': 0.0
+                            })
+                        
+                        del active_notes[key]
+            
+            # Handle any remaining active notes at end of track
+            final_time = current_time / ticks_per_beat
+            for (channel, note_num), data in active_notes.items():
+                duration = final_time - data['start_time']
+                if duration > 0:
+                    if channel not in channel_notes:
+                        channel_notes[channel] = []
+                    
+                    channel_notes[channel].append({
+                        'noteNumber': note_num,
+                        'startTime': data['start_time'],
+                        'duration': duration,
+                        'velocity': float(data['velocity']),
+                        'offVelocity': 0.0
+                    })
+        
+        # Filter out channels with no notes
+        channel_notes = {ch: notes for ch, notes in channel_notes.items() if notes}
+        
+        if not channel_notes:
+            return {'success': False, 'message': "No note data found in MIDI file"}
+        
+        # Check channel limit
+        if len(channel_notes) > 4:
+            return {
+                'success': False,
+                'message': f"MIDI file contains {len(channel_notes)} channels with notes. Maximum supported is 4 channels."
+            }
+        
+        # Load the template
+        template_path = os.path.join(os.path.dirname(__file__), '..', 'examples', 'Sets', 'midi_template.abl')
+        song = load_set_template(template_path)
+        
+        # Calculate clip length based on all notes
+        max_end_time = 0
+        for notes in channel_notes.values():
+            if notes:
+                channel_max = max(note['startTime'] + note['duration'] for note in notes)
+                max_end_time = max(max_end_time, channel_max)
+        
+        clip_length = max(4.0, ((int(max_end_time) // 4) + 1) * 4.0)
+        
+        # Get channels sorted
+        channels = sorted(channel_notes.keys())
+        
+        # Assign notes to tracks (up to 4)
+        for i, channel in enumerate(channels[:4]):
+            notes = channel_notes[channel]
+            notes.sort(key=lambda x: x['startTime'])
+            
+            # Use the i-th track's first clip slot
+            if i < len(song['tracks']):
+                track = song['tracks'][i]
+                if track['clipSlots']:
+                    clip = track['clipSlots'][0]['clip']
+                    clip['notes'] = notes
+                    clip['region']['end'] = clip_length
+                    clip['region']['loop']['end'] = clip_length
+                    # Name the track based on channel
+                    track['name'] = f"Ch {channel + 1}"
+        
+        # Update tempo
+        song['tempo'] = tempo
+        
+        # Save the modified set
+        output_dir = "/data/UserData/UserLibrary/Sets"
+        os.makedirs(output_dir, exist_ok=True)
+        output_path = os.path.join(output_dir, set_name)
+        if not output_path.endswith('.abl'):
+            output_path += '.abl'
+        
+        with open(output_path, 'w') as f:
+            json.dump(song, f, indent=2)
+        
+        # Build success message
+        channel_summary = ", ".join([f"Ch {ch+1}: {len(notes)} notes" for ch, notes in channel_notes.items()])
+        
+        return {
+            'success': True,
+            'message': f"Multi-channel set '{set_name}' generated successfully ({len(channel_notes)} channels - {channel_summary})",
+            'path': output_path
+        }
+        
+    except Exception as e:
+        return {
+            'success': False,
+            'message': f"Failed to process multi-channel MIDI file: {str(e)}"
+        }

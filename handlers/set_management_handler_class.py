@@ -6,7 +6,7 @@ import shutil
 import logging
 from core.set_management_handler import (
     create_set, generate_midi_set_from_file, generate_drum_set_from_file,
-    generate_c_major_chord_example
+    generate_c_major_chord_example, generate_multichannel_midi_set
 )
 from core.list_msets_handler import list_msets
 from core.restore_handler import restore_ablbundle
@@ -112,6 +112,8 @@ class SetManagementHandler(BaseHandler):
                 midi_type = form.getvalue('midi_type', 'melodic')
                 if midi_type == 'drum':
                     result = generate_drum_set_from_file(set_name, filepath, tempo)
+                elif midi_type == 'multichannel':
+                    result = generate_multichannel_midi_set(set_name, filepath, tempo)
                 else:
                     result = generate_midi_set_from_file(set_name, filepath, tempo)
 
