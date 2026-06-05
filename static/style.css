@@ -460,33 +460,103 @@ nav.breadcrumbs form {
     margin-bottom: 1rem;
 }
 
-/* Pad grid for set management */
+/* Pad grid for set management - matches Overview page styling */
 .pad-grid {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-    max-width: 600px;
+    gap: 0.35rem;
+    margin-bottom: 1.5rem;
+    max-width: 1100px;
+    /* CSS variables for theming (mirrors Overview page) */
+    --pg-bg: #ffffff;
+    --pg-bg2: #f5f5f5;
+    --pg-border: #dddddd;
+    --pg-text: #262626;
+    --pg-text-dim: #888888;
+    --pg-text-mid: #555555;
+    --pg-pad-empty: #f0f0f0;
+    --pg-pad-occupied-bg: var(--pg-bg2);
 }
 
 .pad-cell {
-    box-shadow: inset 0 0 0 2px transparent;
+    background: var(--pg-pad-empty);
+    color: var(--pg-text);
     border-radius: 4px;
-    padding: 0.5rem;
+    padding: 0.35rem 0.25rem;
     text-align: center;
-    font-weight: 600;
+    font-size: 0.8rem;
+    font-weight: 500;
     box-sizing: border-box;
-    aspect-ratio: 4 / 3; 
+    aspect-ratio: 4/3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid transparent;
+    overflow: hidden;
 }
 
 .pad-cell.free {
     cursor: pointer;
-    background: #f0f0f0;
+}
+
+.pad-cell.free:hover {
+    border-color: #0000ff;
 }
 
 .pad-cell.occupied {
-    cursor: default;
-    background: #ffeef0;
+    cursor: pointer;
+    /* Semi-transparent background to match Overview page (alpha 0.2) */
+    background: var(--pg-pad-occupied-bg);
+}
+
+/* Disabled pads (non-selectable) - reduced opacity like Overview */
+.pad-grid input[type="radio"]:disabled + label {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Occupied pads that are disabled (on restore/midi pages) */
+.pad-grid input[type="radio"]:disabled + label.occupied {
+    opacity: 0.6;
+}
+
+.pad-cell.active {
+    border-color: #ff764d !important;
+    box-shadow: 0 0 0 3px rgba(255, 118, 77, 0.5);
+    animation: pad-pulse 2s ease-in-out infinite;
+    opacity: 1 !important;
+}
+
+@keyframes pad-pulse {
+    0%, 100% { box-shadow: 0 0 0 2px rgba(255, 118, 77, 0.3); }
+    50% { box-shadow: 0 0 0 5px rgba(255, 118, 77, 0.5); }
+}
+
+.pad-cell .pad-num {
+    color: var(--pg-text-dim);
+    font-size: 0.7rem;
+    line-height: 1;
+}
+
+.pad-cell .pad-name {
+    font-size: 0.75rem;
+    line-height: 1.2;
+    width: 100%;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    line-clamp: 4;
+}
+
+.pad-cell .pad-bpm {
+    color: var(--pg-text-mid);
+    font-size: 0.7rem;
+}
+
+.pad-cell.free .pad-num {
+    color: #aaa;
 }
 
 .pad-grid input[type="radio"] {
@@ -494,8 +564,8 @@ nav.breadcrumbs form {
 }
 
 .pad-grid input[type="radio"]:checked + label {
-    box-shadow: inset 0 0 0 2px #333;
-    background: #d0e8ff;
+    border-color: #ff764d;
+    box-shadow: 0 0 0 3px rgba(255, 118, 77, 0.5);
 }
 
 .pad-grid label {
