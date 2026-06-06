@@ -74,150 +74,155 @@ class SetManagementHandler(BaseHandler):
             existing_set_options += f'<option value="{name}">{name} ({bpm} BPM)</option>'
 
         if action == 'upload_midi':
-            # Generate set from uploaded MIDI file
+            # Handle multi-file MIDI upload with track assignments
             set_name = form.getvalue('set_name', '')
-            midi_type = form.getvalue('midi_type', 'melodic')
+            set_mode = form.getvalue('set_mode', 'new')
             
-            # For assign-to-track with existing set, we don't need set_name
+            # Validate set name for new sets
             pad_color_for_clip = None
-            if midi_type == 'assigntotrack':
-                set_mode = form.getvalue('set_mode', 'new')
-                if set_mode == 'new':
-                    if not set_name:
-                        return self.format_error_response(
-                            "Please enter a name for the new set",
-                            pad_options=pad_options,
-                            pad_color_options=pad_color_options,
-                            clip_color_options=clip_color_options,
-                            pad_grid=pad_grid,
-                            existing_set_options=existing_set_options,
-                        )
-                    # Get pad color early for new sets (will be used as clip color)
-                    pad_color_str = form.getvalue('pad_color', '1')
-                    pad_color_for_clip = int(pad_color_str) if pad_color_str and pad_color_str.isdigit() else 1
-                # For existing set mode, we'll validate existing_set_name later
-            elif not set_name:
-                # For non-assign-to-track modes, set_name is always required
-                return self.format_error_response(
-                    "Missing required parameter: set_name",
-                    pad_options=pad_options,
-                    pad_color_options=pad_color_options,
-                    clip_color_options=clip_color_options,
-                    pad_grid=pad_grid,
-                    existing_set_options=existing_set_options,
-                )
+            if set_mode == 'new':
+                if not set_name:
+                    return self.format_error_response(
+                        "Please enter a name for the new set",
+                        pad_options=pad_options,
+                        pad_color_options=pad_color_options,
+                        clip_color_options=clip_color_options,
+                        pad_grid=pad_grid,
+                        existing_set_options=existing_set_options,
+                    )
+                # Get pad color early for new sets (will be used as clip color)
+                pad_color_str = form.getvalue('pad_color', '1')
+                pad_color_for_clip = int(pad_color_str) if pad_color_str and pad_color_str.isdigit() else 1
             
-            # Handle file upload
-            if 'midi_file' not in form:
-                return self.format_error_response(
-                    "No MIDI file uploaded",
-                    pad_options=pad_options,
-                    pad_color_options=pad_color_options,
-                    clip_color_options=clip_color_options,
-                    pad_grid=pad_grid,
-                    existing_set_options=existing_set_options,
-                )
-            
-            fileitem = form['midi_file']
-            if not fileitem.filename:
-                return self.format_error_response(
-                    "No MIDI file selected",
-                    pad_options=pad_options,
-                    pad_color_options=pad_color_options,
-                    clip_color_options=clip_color_options,
-                    pad_grid=pad_grid,
-                    existing_set_options=existing_set_options,
-                )
-            
-            # Check file extension
-            filename = fileitem.filename.lower()
-            if not (filename.endswith('.mid') or filename.endswith('.midi')):
-                return self.format_error_response(
-                    "Invalid file type. Please upload a .mid or .midi file",
-                    pad_options=pad_options,
-                    pad_color_options=pad_color_options,
-                    clip_color_options=clip_color_options,
-                    pad_grid=pad_grid,
-                    existing_set_options=existing_set_options,
-                )
-            
-            # Save uploaded file temporarily
-            success, filepath, error_response = self.handle_file_upload(form, 'midi_file')
-            if not success:
-                return self.format_error_response(
-                    error_response.get('message', "Failed to upload MIDI file"),
-                    pad_options=pad_options,
-                    pad_color_options=pad_color_options,
-                    clip_color_options=clip_color_options,
-                    pad_grid=pad_grid,
-                    existing_set_options=existing_set_options,
-                )
-            
-            try:
-                # Get tempo if provided
-                tempo_str = form.getvalue('tempo')
-                tempo = float(tempo_str) if tempo_str and tempo_str.strip() else None
-
-                # Dispatch based on MIDI type
-                midi_type = form.getvalue('midi_type', 'melodic')
-                if midi_type == 'drum':
-                    result = generate_drum_set_from_file(set_name, filepath, tempo)
-                elif midi_type == 'multichannel':
-                    result = generate_multichannel_midi_set(set_name, filepath, tempo)
-                elif midi_type == 'assigntotrack':
-                    # Handle assign to track mode
-                    target_track_str = form.getvalue('target_track', '1')
-                    target_track = int(target_track_str) if target_track_str.isdigit() else 1
-                    set_mode = form.getvalue('set_mode', 'new')
-                    
-                    if set_mode == 'existing':
-                        # Use existing set name from dropdown
-                        existing_set_name = form.getvalue('existing_set_name', '')
-                        if not existing_set_name:
-                            return self.format_error_response(
-                                "Please select an existing set",
-                                pad_options=pad_options,
-                                pad_color_options=pad_color_options,
-                                clip_color_options=clip_color_options,
-                                pad_grid=pad_grid,
-                                existing_set_options=existing_set_options,
-                            )
-                        # Find the set's UUID to construct correct path
-                        existing_uuid = None
-                        for m in msets:
-                            if m["mset_name"] == existing_set_name:
-                                existing_uuid = m["uuid"]
-                                break
-                        if existing_uuid:
-                            existing_path = os.path.join("/data/UserData/UserLibrary/Sets", existing_uuid, existing_set_name, "Song.abl")
-                        else:
-                            # Fallback - try direct path
-                            existing_path = os.path.join("/data/UserData/UserLibrary/Sets", existing_set_name)
-                            if not existing_path.endswith('.abl'):
-                                existing_path += '.abl'
-                        # Use the existing set name for saving
-                        final_set_name = existing_set_name
-                    else:
-                        # Create new set - name already validated above
-                        existing_path = None
-                        final_set_name = set_name
-                    
-                    # Get clip color - use selected clip color for existing sets, pad color for new sets
-                    clip_color = None
-                    if set_mode == 'existing':
-                        clip_color_str = form.getvalue('clip_color', '1')
-                        clip_color = int(clip_color_str) if clip_color_str.isdigit() else 1
-                    else:
-                        # For new sets, use the pad color as clip color
-                        clip_color = pad_color_for_clip
-                    
-                    result = assign_midi_to_track(final_set_name, filepath, target_track, existing_path, tempo, clip_color)
+            # Validate existing set selection for existing mode
+            existing_path = None
+            final_set_name = set_name
+            if set_mode == 'existing':
+                existing_set_name = form.getvalue('existing_set_name', '')
+                if not existing_set_name:
+                    return self.format_error_response(
+                        "Please select an existing set",
+                        pad_options=pad_options,
+                        pad_color_options=pad_color_options,
+                        clip_color_options=clip_color_options,
+                        pad_grid=pad_grid,
+                        existing_set_options=existing_set_options,
+                    )
+                # Find the set's UUID to construct correct path
+                existing_uuid = None
+                for m in msets:
+                    if m["mset_name"] == existing_set_name:
+                        existing_uuid = m["uuid"]
+                        break
+                if existing_uuid:
+                    existing_path = os.path.join("/data/UserData/UserLibrary/Sets", existing_uuid, existing_set_name, "Song.abl")
                 else:
-                    result = generate_midi_set_from_file(set_name, filepath, tempo)
-
+                    # Fallback - try direct path
+                    existing_path = os.path.join("/data/UserData/UserLibrary/Sets", existing_set_name)
+                    if not existing_path.endswith('.abl'):
+                        existing_path += '.abl'
+                final_set_name = existing_set_name
+            
+            # Handle file uploads - support multiple files
+            file_list = []
+            if 'midi_files' in form:
+                # Handle multiple files
+                files = form.getlist('midi_files') if hasattr(form, 'getlist') else [form['midi_files']]
+                for i, fileitem in enumerate(files):
+                    if fileitem.filename:
+                        file_list.append((i, fileitem))
+            
+            if not file_list:
+                return self.format_error_response(
+                    "No MIDI files uploaded",
+                    pad_options=pad_options,
+                    pad_color_options=pad_color_options,
+                    clip_color_options=clip_color_options,
+                    pad_grid=pad_grid,
+                    existing_set_options=existing_set_options,
+                )
+            
+            # Get clip color for existing sets (new sets use pad_color_for_clip per file)
+            clip_color = None
+            if set_mode == 'existing':
+                clip_color_str = form.getvalue('clip_color', '1')
+                clip_color = int(clip_color_str) if clip_color_str.isdigit() else 1
+            
+            # Get tempo if provided
+            tempo_str = form.getvalue('tempo')
+            tempo = float(tempo_str) if tempo_str and tempo_str.strip() else None
+            
+            # Process each file with its track assignment
+            temp_files = []
+            results = []
+            try:
+                for i, fileitem in file_list:
+                    # Get track assignment for this file
+                    track_str = form.getvalue(f'track_{i}', '1')
+                    target_track = int(track_str) if track_str.isdigit() else 1
+                    
+                    # Save uploaded file temporarily
+                    success, filepath, error_response = self.save_uploaded_file(fileitem)
+                    if not success:
+                        results.append({'success': False, 'message': f"File {fileitem.filename}: {error_response.get('message', 'Upload failed')}"})
+                        continue
+                    
+                    temp_files.append(filepath)
+                    
+                    # Determine clip color for this file
+                    file_clip_color = clip_color if set_mode == 'existing' else pad_color_for_clip
+                    
+                    # Process the MIDI file
+                    result = assign_midi_to_track(final_set_name, filepath, target_track, existing_path, tempo, file_clip_color)
+                    result['filename'] = fileitem.filename
+                    result['track'] = target_track
+                    results.append(result)
+                    
+                    # For subsequent files, use the updated existing_path (set was created/modified)
+                    if existing_path is None and result.get('success'):
+                        # First file created the set, update path for subsequent files
+                        output_dir = "/data/UserData/UserLibrary/Sets"
+                        existing_path = os.path.join(output_dir, final_set_name)
+                        if not existing_path.endswith('.abl'):
+                            existing_path += '.abl'
+                
+                # Aggregate results
+                success_count = sum(1 for r in results if r.get('success'))
+                failure_count = len(results) - success_count
+                
+                if failure_count == 0:
+                    # All succeeded
+                    if len(results) == 1:
+                        result = results[0]
+                    else:
+                        # Build summary message
+                        track_summary = []
+                        for r in results:
+                            track_summary.append(f"{r['filename']} → Track {r['track']}")
+                        result = {
+                            'success': True,
+                            'message': f"Successfully imported {success_count} file(s): " + ", ".join(track_summary)
+                        }
+                elif success_count == 0:
+                    # All failed
+                    errors = [f"{r['filename']}: {r.get('message', 'Unknown error')}" for r in results]
+                    result = {
+                        'success': False,
+                        'message': "All imports failed: " + "; ".join(errors)
+                    }
+                else:
+                    # Mixed results
+                    success_files = [r['filename'] for r in results if r.get('success')]
+                    failed_files = [f"{r['filename']}: {r.get('message', 'Unknown error')}" for r in results if not r.get('success')]
+                    result = {
+                        'success': True,  # Partial success
+                        'message': f"Partial success: {success_count} succeeded ({', '.join(success_files)}), {failure_count} failed ({'; '.join(failed_files)})"
+                    }
+            
             finally:
-                # Clean up uploaded file
-                self.cleanup_upload(filepath)
+                # Clean up all temporary files
+                for filepath in temp_files:
+                    self.cleanup_upload(filepath)
 
         else:
             return self.format_error_response(
@@ -240,16 +245,14 @@ class SetManagementHandler(BaseHandler):
             )
 
         # Check if this is "add to existing set" mode - skip restore/bundle
-        is_add_to_existing = (
-            midi_type == 'assigntotrack' and
-            form.getvalue('set_mode', 'new') == 'existing'
-        )
+        is_add_to_existing = set_mode == 'existing'
 
         if is_add_to_existing:
             # For existing set mode, file is already saved - just return success
             # The set stays on its original pad
+            existing_set_name = form.getvalue('existing_set_name', '')
             return self.format_success_response(
-                f"MIDI assigned to {form.getvalue('target_track', '1')} in existing set '{form.getvalue('existing_set_name', '')}'",
+                f"{result.get('message', 'MIDI imported')} in existing set '{existing_set_name}'",
                 pad_options=pad_options,
                 pad_color_options=pad_color_options,
                 clip_color_options=clip_color_options,

@@ -164,6 +164,43 @@ class BaseHandler:
         except Exception as e:
             return False, None, {"message": f"Error saving uploaded file: {str(e)}", "message_type": "error"}
 
+    def save_uploaded_file(self, file_item) -> Tuple[bool, Optional[str], Optional[Dict[str, str]]]:
+        """
+        Save a single uploaded file item to a temporary directory.
+        
+        Args:
+            file_item: The file item from the form (has .filename and .file attributes)
+        
+        Returns:
+            tuple: (success, filepath, error_response)
+            - success: True if upload succeeded, False otherwise
+            - filepath: Path to saved file if successful, None otherwise
+            - error_response: Error response dict if failed, None if successful
+        
+        The caller is responsible for cleaning up the uploaded file
+        by calling cleanup_upload() when the file is no longer needed.
+        """
+        if not hasattr(file_item, "filename") or not file_item.filename:
+            return False, None, {"message": "Bad Request: Invalid file item", "message_type": "error"}
+
+        try:
+            filename = os.path.basename(file_item.filename)
+            filepath = os.path.join(self.upload_dir, filename)
+            
+            # Ensure upload directory exists
+            os.makedirs(self.upload_dir, exist_ok=True)
+            
+            # Save the file
+            with open(filepath, "wb") as f:
+                shutil.copyfileobj(file_item.file, f)
+            
+            if not os.path.exists(filepath):
+                return False, None, {"message": "File upload failed: File not saved", "message_type": "error"}
+            
+            return True, filepath, None
+        except Exception as e:
+            return False, None, {"message": f"Error saving uploaded file: {str(e)}", "message_type": "error"}
+
     def format_success_response(self, message: str, **kwargs) -> Dict[str, Any]:
         """
         Format a success response with optional additional data.
