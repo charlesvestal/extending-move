@@ -638,11 +638,16 @@ def assign_midi_to_track(set_name: str, midi_file_path: str, target_track: int,
                     'message': f"Track {target_track} has no empty clip slots available"
                 }
             
-            # Create new clip in the empty slot
+            # Create new clip in the empty slot with all required fields
             new_clip = {
+                'isPlaying': False,
+                'name': '',
+                'isEnabled': True,
+                'region': {'start': 0.0, 'end': clip_length, 'loop': {'start': 0.0, 'end': clip_length, 'isEnabled': True}},
+                'grooveId': 1,
                 'notes': notes,
-                'region': {'start': 0.0, 'end': clip_length, 'loop': {'start': 0.0, 'end': clip_length}},
-                'enabled': True
+                'stepEditorScrollPosition': 0.0,
+                'envelopes': []
             }
             # Apply clip color if provided
             if clip_color:
