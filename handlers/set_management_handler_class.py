@@ -79,17 +79,22 @@ class SetManagementHandler(BaseHandler):
             midi_type = form.getvalue('midi_type', 'melodic')
             
             # For assign-to-track with existing set, we don't need set_name
+            pad_color_for_clip = None
             if midi_type == 'assigntotrack':
                 set_mode = form.getvalue('set_mode', 'new')
-                if set_mode == 'new' and not set_name:
-                    return self.format_error_response(
-                        "Please enter a name for the new set",
-                        pad_options=pad_options,
-                        pad_color_options=pad_color_options,
-                        clip_color_options=clip_color_options,
-                        pad_grid=pad_grid,
-                        existing_set_options=existing_set_options,
-                    )
+                if set_mode == 'new':
+                    if not set_name:
+                        return self.format_error_response(
+                            "Please enter a name for the new set",
+                            pad_options=pad_options,
+                            pad_color_options=pad_color_options,
+                            clip_color_options=clip_color_options,
+                            pad_grid=pad_grid,
+                            existing_set_options=existing_set_options,
+                        )
+                    # Get pad color early for new sets (will be used as clip color)
+                    pad_color_str = form.getvalue('pad_color', '1')
+                    pad_color_for_clip = int(pad_color_str) if pad_color_str and pad_color_str.isdigit() else 1
                 # For existing set mode, we'll validate existing_set_name later
             elif not set_name:
                 # For non-assign-to-track modes, set_name is always required
@@ -197,11 +202,14 @@ class SetManagementHandler(BaseHandler):
                         existing_path = None
                         final_set_name = set_name
                     
-                    # Get clip color for existing set mode
+                    # Get clip color - use selected clip color for existing sets, pad color for new sets
                     clip_color = None
                     if set_mode == 'existing':
                         clip_color_str = form.getvalue('clip_color', '1')
                         clip_color = int(clip_color_str) if clip_color_str.isdigit() else 1
+                    else:
+                        # For new sets, use the pad color as clip color
+                        clip_color = pad_color_for_clip
                     
                     result = assign_midi_to_track(final_set_name, filepath, target_track, existing_path, tempo, clip_color)
                 else:
