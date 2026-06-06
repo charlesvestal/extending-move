@@ -515,6 +515,7 @@ def midi_upload():
     pad_options = context.get("pad_options", "")
     pad_color_options = context.get("pad_color_options", "")
     pad_grid = context.get("pad_grid", "")
+    existing_set_options = context.get("existing_set_options", "")
     if request.method == "POST":
         form_data = request.form.to_dict()
         if "midi_file" in request.files:
@@ -527,6 +528,7 @@ def midi_upload():
         pad_options = result.get("pad_options", pad_options)
         pad_color_options = result.get("pad_color_options", pad_color_options)
         pad_grid = result.get("pad_grid", pad_grid)
+        existing_set_options = result.get("existing_set_options", existing_set_options)
     else:
         message = context.get("message")
         message_type = context.get("message_type")
@@ -539,6 +541,7 @@ def midi_upload():
         pad_options=pad_options,
         pad_color_options=pad_color_options,
         pad_grid=pad_grid,
+        existing_set_options=existing_set_options,
         active_tab="midi-upload",
     )
 
