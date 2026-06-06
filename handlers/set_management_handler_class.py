@@ -286,8 +286,6 @@ class SetManagementHandler(BaseHandler):
         # Parse pad assignment (only for new set creation)
         pad_selected = form.getvalue('pad_index')
         pad_color = form.getvalue('pad_color')
-        import logging
-        logging.info(f"DEBUG: pad_selected={pad_selected}, pad_color={pad_color}")
         if not pad_selected or not pad_selected.isdigit():
             return self.format_error_response(
                 "Invalid pad selection",
