@@ -49,10 +49,9 @@
             <div class="form-group" id="existing-set-select-group" style="display:none;">
                 <label for="existing_set_name">Select Existing Set:</label>
                 <select name="existing_set_name" id="existing_set_name">
-                    <option value="">-- DEBUG: Options below --</option>
                     {{ existing_set_options | safe }}
                 </select>
-                <small>Required when adding to existing set. Raw: {{ existing_set_options[:100] | safe }}...</small>
+                <small>Required when adding to existing set</small>
             </div>
             <div class="form-group">
                 <label for="midi_file">MIDI File:</label>

@@ -37,15 +37,12 @@ class SetManagementHandler(BaseHandler):
         for name, bpm in sorted(existing_sets):
             existing_set_options += f'<option value="{name}">{name} ({bpm} BPM)</option>'
         
-        # Debug info
-        debug_msg = f"Found {len(msets)} sets, options length: {len(existing_set_options)} chars"
-        
         return {
             'pad_options': pad_options,
             'pad_color_options': pad_color_options,
             'pad_grid': pad_grid,
             'existing_set_options': existing_set_options,
-            'message': f'Upload a MIDI file to generate a set ({debug_msg})',
+            'message': 'Upload a MIDI file to generate a set',
             'message_type': 'info'
         }
 
@@ -175,15 +172,11 @@ class SetManagementHandler(BaseHandler):
                                 break
                         if existing_uuid:
                             existing_path = os.path.join("/data/UserData/UserLibrary/Sets", existing_uuid, existing_set_name, "Song.abl")
-                            import logging
-                            logging.info(f"Found existing set {existing_set_name} with UUID {existing_uuid}, path: {existing_path}")
                         else:
                             # Fallback - try direct path
                             existing_path = os.path.join("/data/UserData/UserLibrary/Sets", existing_set_name)
                             if not existing_path.endswith('.abl'):
                                 existing_path += '.abl'
-                            import logging
-                            logging.warning(f"Could not find UUID for {existing_set_name}, using fallback: {existing_path}")
                         # Use the existing set name for saving
                         final_set_name = existing_set_name
                     else:
