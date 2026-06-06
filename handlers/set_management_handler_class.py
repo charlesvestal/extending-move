@@ -203,7 +203,8 @@ class SetManagementHandler(BaseHandler):
                             track_summary.append(f"{r['filename']} → Track {r['track']}")
                         result = {
                             'success': True,
-                            'message': f"Successfully imported {success_count} file(s): " + ", ".join(track_summary)
+                            'message': f"Successfully imported {success_count} file(s): " + ", ".join(track_summary),
+                            'path': results[0].get('path')  # Include path from first result for new set bundling
                         }
                 elif success_count == 0:
                     # All failed
@@ -216,9 +217,16 @@ class SetManagementHandler(BaseHandler):
                     # Mixed results
                     success_files = [r['filename'] for r in results if r.get('success')]
                     failed_files = [f"{r['filename']}: {r.get('message', 'Unknown error')}" for r in results if not r.get('success')]
+                    # Find path from first successful result
+                    first_success_path = None
+                    for r in results:
+                        if r.get('success') and r.get('path'):
+                            first_success_path = r.get('path')
+                            break
                     result = {
                         'success': True,  # Partial success
-                        'message': f"Partial success: {success_count} succeeded ({', '.join(success_files)}), {failure_count} failed ({'; '.join(failed_files)})"
+                        'message': f"Partial success: {success_count} succeeded ({', '.join(success_files)}), {failure_count} failed ({'; '.join(failed_files)})",
+                        'path': first_success_path  # Include path if any succeeded (for new set bundling)
                     }
             
             finally:
@@ -262,6 +270,19 @@ class SetManagementHandler(BaseHandler):
                 existing_set_options=existing_set_options
             )
 
+        # For new set creation, check if any files succeeded (path is required)
+        set_path = result.get('path')
+        if not set_path:
+            # All files failed - return the error without trying to bundle
+            return self.format_error_response(
+                result.get('message', 'Failed to create set'),
+                pad_options=pad_options,
+                pad_color_options=pad_color_options,
+                clip_color_options=clip_color_options,
+                pad_grid=pad_grid,
+                existing_set_options=existing_set_options
+            )
+
         # Parse pad assignment (only for new set creation)
         pad_selected = form.getvalue('pad_index')
         pad_color = form.getvalue('pad_color')
@@ -287,17 +308,6 @@ class SetManagementHandler(BaseHandler):
             )
         pad_selected_int = int(pad_selected) - 1
         pad_color_int = int(pad_color)
-        # Prepare bundling of generated set
-        set_path = result.get('path')
-        if not set_path:
-            return self.format_error_response(
-                "Internal error: missing set path",
-                pad_options=pad_options,
-                pad_color_options=pad_color_options,
-                clip_color_options=clip_color_options,
-                pad_grid=pad_grid,
-                existing_set_options=existing_set_options,
-            )
         # Create temp directory for bundling
         with tempfile.TemporaryDirectory() as tmpdir:
             song_abl_path = os.path.join(tmpdir, 'Song.abl')
