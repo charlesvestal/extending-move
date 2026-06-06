@@ -629,10 +629,20 @@ def assign_midi_to_track(set_name: str, midi_file_path: str, target_track: int,
                     'enabled': True
                 }
             else:
+                # Merge new notes with existing clip
                 clip = clip_slot['clip']
-                clip['notes'] = notes
-                clip['region']['end'] = clip_length
-                clip['region']['loop']['end'] = clip_length
+                existing_notes = clip.get('notes', [])
+                # Offset new notes to start after existing notes
+                if existing_notes:
+                    last_note_end = max(n.get('position', 0) + n.get('duration', 0) for n in existing_notes)
+                    for note in notes:
+                        note['position'] = note.get('position', 0) + last_note_end
+                # Append new notes to existing
+                clip['notes'] = existing_notes + notes
+                # Update clip length to accommodate all notes
+                total_end = max(n.get('position', 0) + n.get('duration', 0) for n in clip['notes'])
+                clip['region']['end'] = total_end
+                clip['region']['loop']['end'] = total_end
             track['name'] = f"Track {target_track}"
         else:
             return {
