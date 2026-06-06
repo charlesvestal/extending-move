@@ -175,11 +175,15 @@ class SetManagementHandler(BaseHandler):
                                 break
                         if existing_uuid:
                             existing_path = os.path.join("/data/UserData/UserLibrary/Sets", existing_uuid, existing_set_name, "Song.abl")
+                            import logging
+                            logging.info(f"Found existing set {existing_set_name} with UUID {existing_uuid}, path: {existing_path}")
                         else:
                             # Fallback - try direct path
                             existing_path = os.path.join("/data/UserData/UserLibrary/Sets", existing_set_name)
                             if not existing_path.endswith('.abl'):
                                 existing_path += '.abl'
+                            import logging
+                            logging.warning(f"Could not find UUID for {existing_set_name}, using fallback: {existing_path}")
                         # Use the existing set name for saving
                         final_set_name = existing_set_name
                     else:
