@@ -70,15 +70,17 @@
                 <input type="number" name="tempo" id="tempo" min="20" max="300" placeholder="Auto-detect from MIDI" />
                 <small>Leave blank to use tempo from MIDI file (or default 120 BPM)</small>
             </div>
-           <div class="form-group">
-                <label for="pad_color_dropdown">Pad Color:</label>
-                {{ pad_color_options | safe }}
+            <div id="new-set-extras">
+                <div class="form-group">
+                    <label for="pad_color_dropdown">Pad Color:</label>
+                    {{ pad_color_options | safe }}
+                </div>
+                <div class="form-group">
+                    <label>Select Pad:</label>
+                    {{ pad_grid | safe }}
+                </div>
             </div>
-            <div class="form-group">
-                <label>Select Pad:</label>
-                {{ pad_grid | safe }}
-            </div>
-            <button type="submit" >Generate Set from MIDI</button>
+            <button type="submit">Generate Set from MIDI</button>
         </form>
     </div>
 </div>
@@ -88,6 +90,7 @@ function updateTrackOptions() {
     const trackGroup = document.getElementById('track-select-group');
     const setModeGroup = document.getElementById('set-mode-group');
     const newSetGroup = document.getElementById('new-set-name-group');
+    const newSetExtras = document.getElementById('new-set-extras');
     const clipColorGroup = document.getElementById('clip-color-group');
     
     if (midiType === 'assigntotrack') {
@@ -97,8 +100,9 @@ function updateTrackOptions() {
     } else {
         trackGroup.style.display = 'none';
         setModeGroup.style.display = 'none';
-        // For non-assign-to-track, always show set name and hide others
+        // For non-assign-to-track, always show set name and pad selection
         newSetGroup.style.display = 'block';
+        newSetExtras.style.display = 'block';
         document.getElementById('set_name').required = true;
         document.getElementById('existing-set-select-group').style.display = 'none';
         document.getElementById('existing_set_name').required = false;
@@ -111,6 +115,7 @@ function updateSetModeFields() {
     const newSetGroup = document.getElementById('new-set-name-group');
     const existingSetGroup = document.getElementById('existing-set-select-group');
     const clipColorGroup = document.getElementById('clip-color-group');
+    const newSetExtras = document.getElementById('new-set-extras');
     const setNameInput = document.getElementById('set_name');
     const existingSetSelect = document.getElementById('existing_set_name');
     
@@ -118,12 +123,14 @@ function updateSetModeFields() {
         newSetGroup.style.display = 'block';
         existingSetGroup.style.display = 'none';
         clipColorGroup.style.display = 'none';
+        newSetExtras.style.display = 'block';
         setNameInput.required = true;
         existingSetSelect.required = false;
     } else {
         newSetGroup.style.display = 'none';
         existingSetGroup.style.display = 'block';
         clipColorGroup.style.display = 'block';
+        newSetExtras.style.display = 'none';
         setNameInput.required = false;
         existingSetSelect.required = true;
     }
