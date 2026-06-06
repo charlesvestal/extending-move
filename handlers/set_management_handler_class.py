@@ -27,6 +27,12 @@ class SetManagementHandler(BaseHandler):
         pad_options = ''.join(f'<option value="{pad}">{pad}</option>' for pad in free_pads)
         pad_options = '<option value="" disabled selected>-- Select Pad --</option>' + pad_options
         pad_color_options = self.generate_color_options()
+        # Simple option-based color dropdown for clip color
+        clip_color_options = ''.join(
+            f'<option value="{i}">{PAD_COLOR_LABELS[i]}</option>' 
+            for i in sorted(PAD_COLORS)
+        )
+        clip_color_options = '<option value="" disabled selected>-- Select Color --</option>' + clip_color_options
         color_map = {int(m["mset_id"]): int(m["mset_color"]) for m in msets if str(m["mset_color"]).isdigit()}
         name_map = {int(m["mset_id"]): m["mset_name"] for m in msets}
         bpm_map = {int(m["mset_id"]): str(m["bpm"]) for m in msets if m.get("bpm")}
@@ -40,6 +46,7 @@ class SetManagementHandler(BaseHandler):
         return {
             'pad_options': pad_options,
             'pad_color_options': pad_color_options,
+            'clip_color_options': clip_color_options,
             'pad_grid': pad_grid,
             'existing_set_options': existing_set_options,
             'message': 'Upload a MIDI file to generate a set',
@@ -56,7 +63,14 @@ class SetManagementHandler(BaseHandler):
         msets, ids = list_msets(return_free_ids=True)
         free_pads = sorted([pad_id + 1 for pad_id in ids.get("free", [])])
         pad_options = ''.join(f'<option value="{pad}">{pad}</option>' for pad in free_pads)
+        pad_options = '<option value="" disabled selected>-- Select Pad --</option>' + pad_options
         pad_color_options = self.generate_color_options()
+        # Simple option-based color dropdown for clip color
+        clip_color_options = ''.join(
+            f'<option value="{i}">{PAD_COLOR_LABELS[i]}</option>' 
+            for i in sorted(PAD_COLORS)
+        )
+        clip_color_options = '<option value="" disabled selected>-- Select Color --</option>' + clip_color_options
         color_map = {int(m["mset_id"]): int(m["mset_color"]) for m in msets if str(m["mset_color"]).isdigit()}
         name_map = {int(m["mset_id"]): m["mset_name"] for m in msets}
         bpm_map = {int(m["mset_id"]): str(m["bpm"]) for m in msets if m.get("bpm")}
@@ -80,6 +94,7 @@ class SetManagementHandler(BaseHandler):
                         "Please enter a name for the new set",
                         pad_options=pad_options,
                         pad_color_options=pad_color_options,
+                        clip_color_options=clip_color_options,
                         pad_grid=pad_grid,
                         existing_set_options=existing_set_options,
                     )
@@ -90,6 +105,7 @@ class SetManagementHandler(BaseHandler):
                     "Missing required parameter: set_name",
                     pad_options=pad_options,
                     pad_color_options=pad_color_options,
+                    clip_color_options=clip_color_options,
                     pad_grid=pad_grid,
                     existing_set_options=existing_set_options,
                 )
@@ -100,6 +116,7 @@ class SetManagementHandler(BaseHandler):
                     "No MIDI file uploaded",
                     pad_options=pad_options,
                     pad_color_options=pad_color_options,
+                    clip_color_options=clip_color_options,
                     pad_grid=pad_grid,
                     existing_set_options=existing_set_options,
                 )
@@ -110,6 +127,7 @@ class SetManagementHandler(BaseHandler):
                     "No MIDI file selected",
                     pad_options=pad_options,
                     pad_color_options=pad_color_options,
+                    clip_color_options=clip_color_options,
                     pad_grid=pad_grid,
                     existing_set_options=existing_set_options,
                 )
@@ -121,6 +139,7 @@ class SetManagementHandler(BaseHandler):
                     "Invalid file type. Please upload a .mid or .midi file",
                     pad_options=pad_options,
                     pad_color_options=pad_color_options,
+                    clip_color_options=clip_color_options,
                     pad_grid=pad_grid,
                     existing_set_options=existing_set_options,
                 )
@@ -132,6 +151,7 @@ class SetManagementHandler(BaseHandler):
                     error_response.get('message', "Failed to upload MIDI file"),
                     pad_options=pad_options,
                     pad_color_options=pad_color_options,
+                    clip_color_options=clip_color_options,
                     pad_grid=pad_grid,
                     existing_set_options=existing_set_options,
                 )
@@ -161,6 +181,7 @@ class SetManagementHandler(BaseHandler):
                                 "Please select an existing set",
                                 pad_options=pad_options,
                                 pad_color_options=pad_color_options,
+                                clip_color_options=clip_color_options,
                                 pad_grid=pad_grid,
                                 existing_set_options=existing_set_options,
                             )
@@ -203,6 +224,7 @@ class SetManagementHandler(BaseHandler):
                 f"Unknown action: {action}",
                 pad_options=pad_options,
                 pad_color_options=pad_color_options,
+                clip_color_options=clip_color_options,
                 pad_grid=pad_grid,
             )
 
@@ -212,6 +234,7 @@ class SetManagementHandler(BaseHandler):
                 result.get('message', 'Operation failed'),
                 pad_options=pad_options,
                 pad_color_options=pad_color_options,
+                clip_color_options=clip_color_options,
                 pad_grid=pad_grid,
                 existing_set_options=existing_set_options,
             )
@@ -229,6 +252,7 @@ class SetManagementHandler(BaseHandler):
                 f"MIDI assigned to {form.getvalue('target_track', '1')} in existing set '{form.getvalue('existing_set_name', '')}'",
                 pad_options=pad_options,
                 pad_color_options=pad_color_options,
+                clip_color_options=clip_color_options,
                 pad_grid=pad_grid,
                 existing_set_options=existing_set_options
             )
@@ -243,6 +267,7 @@ class SetManagementHandler(BaseHandler):
                 "Invalid pad selection",
                 pad_options=pad_options,
                 pad_color_options=pad_color_options,
+                clip_color_options=clip_color_options,
                 pad_grid=pad_grid,
                 existing_set_options=existing_set_options,
             )
@@ -251,6 +276,7 @@ class SetManagementHandler(BaseHandler):
                 "Invalid pad color",
                 pad_options=pad_options,
                 pad_color_options=pad_color_options,
+                clip_color_options=clip_color_options,
                 pad_grid=pad_grid,
                 existing_set_options=existing_set_options,
             )
@@ -263,6 +289,7 @@ class SetManagementHandler(BaseHandler):
                 "Internal error: missing set path",
                 pad_options=pad_options,
                 pad_color_options=pad_color_options,
+                clip_color_options=clip_color_options,
                 pad_grid=pad_grid,
                 existing_set_options=existing_set_options,
             )
@@ -295,13 +322,13 @@ class SetManagementHandler(BaseHandler):
             name_map = {int(m["mset_id"]): m["mset_name"] for m in msets_updated}
             bpm_map = {int(m["mset_id"]): str(m["bpm"]) for m in msets_updated if m.get("bpm")}
             pad_grid = self.generate_pad_grid(updated_ids.get("used", set()), color_map, name_map, bpm_map, free_only=True)
-            return self.format_success_response(restore_result['message'], pad_options=updated_pad_options, pad_color_options=pad_color_options, pad_grid=pad_grid, existing_set_options=existing_set_options)
+            return self.format_success_response(restore_result['message'], pad_options=updated_pad_options, pad_color_options=pad_color_options, clip_color_options=clip_color_options, pad_grid=pad_grid, existing_set_options=existing_set_options)
         else:
             color_map = {int(m["mset_id"]): int(m["mset_color"]) for m in msets if str(m["mset_color"]).isdigit()}
             name_map = {int(m["mset_id"]): m["mset_name"] for m in msets}
             bpm_map = {int(m["mset_id"]): str(m["bpm"]) for m in msets if m.get("bpm")}
             pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map, name_map, bpm_map, free_only=True)
-            return self.format_error_response(restore_result.get('message'), pad_options=pad_options, pad_color_options=pad_color_options, pad_grid=pad_grid, existing_set_options=existing_set_options)
+            return self.format_error_response(restore_result.get('message'), pad_options=pad_options, pad_color_options=pad_color_options, clip_color_options=clip_color_options, pad_grid=pad_grid, existing_set_options=existing_set_options)
 
     def generate_color_options(self, input_name="pad_color", pad_input_name="pad_index"):
         """Return HTML for the custom color dropdown with pad preview."""

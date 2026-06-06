@@ -514,6 +514,7 @@ def midi_upload():
     context = set_management_handler.handle_get()
     pad_options = context.get("pad_options", "")
     pad_color_options = context.get("pad_color_options", "")
+    clip_color_options = context.get("clip_color_options", "")
     pad_grid = context.get("pad_grid", "")
     existing_set_options = context.get("existing_set_options", "")
     if request.method == "POST":
@@ -527,6 +528,7 @@ def midi_upload():
         success = message_type != "error"
         pad_options = result.get("pad_options", pad_options)
         pad_color_options = result.get("pad_color_options", pad_color_options)
+        clip_color_options = result.get("clip_color_options", clip_color_options)
         pad_grid = result.get("pad_grid", pad_grid)
         existing_set_options = result.get("existing_set_options", existing_set_options)
     else:
@@ -540,6 +542,7 @@ def midi_upload():
         message_type=message_type,
         pad_options=pad_options,
         pad_color_options=pad_color_options,
+        clip_color_options=clip_color_options,
         pad_grid=pad_grid,
         existing_set_options=existing_set_options,
         active_tab="midi-upload",
