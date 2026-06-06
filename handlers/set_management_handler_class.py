@@ -203,7 +203,24 @@ class SetManagementHandler(BaseHandler):
                 existing_set_options=existing_set_options,
             )
 
-        # Parse pad assignment
+        # Check if this is "add to existing set" mode - skip restore/bundle
+        is_add_to_existing = (
+            midi_type == 'assigntotrack' and
+            form.getvalue('set_mode', 'new') == 'existing'
+        )
+
+        if is_add_to_existing:
+            # For existing set mode, file is already saved - just return success
+            # The set stays on its original pad
+            return self.format_success_response(
+                f"MIDI assigned to {form.getvalue('target_track', '1')} in existing set '{form.getvalue('existing_set_name', '')}'",
+                pad_options=pad_options,
+                pad_color_options=pad_color_options,
+                pad_grid=pad_grid,
+                existing_set_options=existing_set_options
+            )
+
+        # Parse pad assignment (only for new set creation)
         pad_selected = form.getvalue('pad_index')
         pad_color = form.getvalue('pad_color')
         if not pad_selected or not pad_selected.isdigit():
@@ -246,7 +263,7 @@ class SetManagementHandler(BaseHandler):
             # Restore to device
             restore_result = restore_ablbundle(bundle_path, pad_selected_int, pad_color_int)
             os.remove(bundle_path)
-        
+
         if restore_result.get('success'):
             # Clean up the original .abl file after successful placement
             try:
