@@ -27,12 +27,8 @@ class SetManagementHandler(BaseHandler):
         pad_options = ''.join(f'<option value="{pad}">{pad}</option>' for pad in free_pads)
         pad_options = '<option value="" disabled selected>-- Select Pad --</option>' + pad_options
         pad_color_options = self.generate_color_options()
-        # Simple option-based color dropdown for clip color
-        clip_color_options = ''.join(
-            f'<option value="{i}">{PAD_COLOR_LABELS[i]}</option>' 
-            for i in sorted(PAD_COLORS)
-        )
-        clip_color_options = '<option value="" disabled selected>-- Select Color --</option>' + clip_color_options
+        # Generate color dropdown with swatches for clip color (same visual style as pad color)
+        clip_color_options = self.generate_color_options(input_name="clip_color")
         color_map = {int(m["mset_id"]): int(m["mset_color"]) for m in msets if str(m["mset_color"]).isdigit()}
         name_map = {int(m["mset_id"]): m["mset_name"] for m in msets}
         bpm_map = {int(m["mset_id"]): str(m["bpm"]) for m in msets if m.get("bpm")}
@@ -65,12 +61,8 @@ class SetManagementHandler(BaseHandler):
         pad_options = ''.join(f'<option value="{pad}">{pad}</option>' for pad in free_pads)
         pad_options = '<option value="" disabled selected>-- Select Pad --</option>' + pad_options
         pad_color_options = self.generate_color_options()
-        # Simple option-based color dropdown for clip color
-        clip_color_options = ''.join(
-            f'<option value="{i}">{PAD_COLOR_LABELS[i]}</option>' 
-            for i in sorted(PAD_COLORS)
-        )
-        clip_color_options = '<option value="" disabled selected>-- Select Color --</option>' + clip_color_options
+        # Generate color dropdown with swatches for clip color
+        clip_color_options = self.generate_color_options(input_name="clip_color")
         color_map = {int(m["mset_id"]): int(m["mset_color"]) for m in msets if str(m["mset_color"]).isdigit()}
         name_map = {int(m["mset_id"]): m["mset_name"] for m in msets}
         bpm_map = {int(m["mset_id"]): str(m["bpm"]) for m in msets if m.get("bpm")}
