@@ -38,7 +38,7 @@ class SetManagementHandler(BaseHandler):
             existing_set_options += f'<option value="{name}">{name} ({bpm} BPM)</option>'
         
         # Debug info
-        debug_msg = f"Found {len(msets)} sets for dropdown"
+        debug_msg = f"Found {len(msets)} sets, options length: {len(existing_set_options)} chars"
         
         return {
             'pad_options': pad_options,
