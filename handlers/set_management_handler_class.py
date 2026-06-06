@@ -191,6 +191,7 @@ class SetManagementHandler(BaseHandler):
                 pad_options=pad_options,
                 pad_color_options=pad_color_options,
                 pad_grid=pad_grid,
+                existing_set_options=existing_set_options,
             )
 
         # Parse pad assignment
@@ -202,6 +203,7 @@ class SetManagementHandler(BaseHandler):
                 pad_options=pad_options,
                 pad_color_options=pad_color_options,
                 pad_grid=pad_grid,
+                existing_set_options=existing_set_options,
             )
         if not pad_color or not pad_color.isdigit():
             return self.format_error_response(
@@ -209,6 +211,7 @@ class SetManagementHandler(BaseHandler):
                 pad_options=pad_options,
                 pad_color_options=pad_color_options,
                 pad_grid=pad_grid,
+                existing_set_options=existing_set_options,
             )
         pad_selected_int = int(pad_selected) - 1
         pad_color_int = int(pad_color)
@@ -220,6 +223,7 @@ class SetManagementHandler(BaseHandler):
                 pad_options=pad_options,
                 pad_color_options=pad_color_options,
                 pad_grid=pad_grid,
+                existing_set_options=existing_set_options,
             )
         # Create temp directory for bundling
         with tempfile.TemporaryDirectory() as tmpdir:
