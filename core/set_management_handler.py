@@ -655,8 +655,9 @@ def assign_midi_to_track(set_name: str, midi_file_path: str, target_track: int,
                 'message': f"Track {target_track} has no clip slots available"
             }
         
-        # Update tempo
-        song['tempo'] = tempo
+        # Only update tempo when creating new set, preserve existing set's tempo
+        if mode == "created":
+            song['tempo'] = tempo
         
         # Save - use same path if updating existing set
         if existing_set_path and mode == "updated":
