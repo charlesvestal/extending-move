@@ -126,10 +126,12 @@ class SetManagementHandler(BaseHandler):
             # Handle file uploads - support multiple files
             file_list = []
             if 'midi_files' in form:
-                # Handle multiple files
-                files = form.getlist('midi_files') if hasattr(form, 'getlist') else [form['midi_files']]
+                # Handle multiple files - form['midi_files'] is now a list of FileField objects
+                files = form['midi_files']
+                if not isinstance(files, list):
+                    files = [files]
                 for i, fileitem in enumerate(files):
-                    if fileitem.filename:
+                    if hasattr(fileitem, 'filename') and fileitem.filename:
                         file_list.append((i, fileitem))
             
             if not file_list:

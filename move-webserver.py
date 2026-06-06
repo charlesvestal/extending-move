@@ -519,8 +519,11 @@ def midi_upload():
     existing_set_options = context.get("existing_set_options", "")
     if request.method == "POST":
         form_data = request.form.to_dict()
-        if "midi_file" in request.files:
-            form_data["midi_file"] = FileField(request.files["midi_file"])
+        # Handle multiple MIDI files
+        if "midi_files" in request.files:
+            files = request.files.getlist("midi_files")
+            if files:
+                form_data["midi_files"] = [FileField(f) for f in files]
         form = SimpleForm(form_data)
         result = set_management_handler.handle_post(form)
         message = result.get("message")
