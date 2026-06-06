@@ -643,12 +643,21 @@ def assign_midi_to_track(set_name: str, midi_file_path: str, target_track: int,
         # Update tempo
         song['tempo'] = tempo
         
-        # Save
-        output_dir = "/data/UserData/UserLibrary/Sets"
-        os.makedirs(output_dir, exist_ok=True)
-        output_path = os.path.join(output_dir, set_name)
-        if not output_path.endswith('.abl'):
-            output_path += '.abl'
+        # Save - use same path if updating existing set
+        if existing_set_path and mode == "updated":
+            output_path = existing_set_path
+        else:
+            # Create new set
+            output_dir = "/data/UserData/UserLibrary/Sets"
+            os.makedirs(output_dir, exist_ok=True)
+            output_path = os.path.join(output_dir, set_name)
+            if not output_path.endswith('.abl'):
+                output_path += '.abl'
+        
+        # Ensure directory exists
+        output_dir = os.path.dirname(output_path)
+        if output_dir:
+            os.makedirs(output_dir, exist_ok=True)
         
         with open(output_path, 'w') as f:
             json.dump(song, f, indent=2)

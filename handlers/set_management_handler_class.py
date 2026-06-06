@@ -167,9 +167,19 @@ class SetManagementHandler(BaseHandler):
                                 pad_grid=pad_grid,
                                 existing_set_options=existing_set_options,
                             )
-                        existing_path = os.path.join("/data/UserData/UserLibrary/Sets", existing_set_name)
-                        if not existing_path.endswith('.abl'):
-                            existing_path += '.abl'
+                        # Find the set's UUID to construct correct path
+                        existing_uuid = None
+                        for m in msets:
+                            if m["mset_name"] == existing_set_name:
+                                existing_uuid = m["uuid"]
+                                break
+                        if existing_uuid:
+                            existing_path = os.path.join("/data/UserData/UserLibrary/Sets", existing_uuid, existing_set_name, "Song.abl")
+                        else:
+                            # Fallback - try direct path
+                            existing_path = os.path.join("/data/UserData/UserLibrary/Sets", existing_set_name)
+                            if not existing_path.endswith('.abl'):
+                                existing_path += '.abl'
                         # Use the existing set name for saving
                         final_set_name = existing_set_name
                     else:
