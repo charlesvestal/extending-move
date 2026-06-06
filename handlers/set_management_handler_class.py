@@ -184,7 +184,13 @@ class SetManagementHandler(BaseHandler):
                         existing_path = None
                         final_set_name = set_name
                     
-                    result = assign_midi_to_track(final_set_name, filepath, target_track, existing_path, tempo)
+                    # Get clip color for existing set mode
+                    clip_color = None
+                    if set_mode == 'existing':
+                        clip_color_str = form.getvalue('clip_color', '1')
+                        clip_color = int(clip_color_str) if clip_color_str.isdigit() else 1
+                    
+                    result = assign_midi_to_track(final_set_name, filepath, target_track, existing_path, tempo, clip_color)
                 else:
                     result = generate_midi_set_from_file(set_name, filepath, tempo)
 

@@ -41,10 +41,25 @@
                     <label for="set_mode_existing" style="display:inline;font-weight:normal;">Add to Existing Set</label>
                 </div>
             </div>
-            <div class="form-group" id="new-set-name-group" style="display:none;">
+            <div class="form-group" id="new-set-name-group">
                 <label for="set_name">New Set Name:</label>
-                <input type="text" name="set_name" id="set_name" placeholder="My MIDI Set" />
+                <input type="text" name="set_name" id="set_name" placeholder="My MIDI Set" required />
                 <small>Required when creating a new set</small>
+            </div>
+            <div class="form-group" id="clip-color-group" style="display:none;">
+                <label for="clip_color">Clip Color:</label>
+                <select name="clip_color" id="clip_color">
+                    <option value="1">Pink</option>
+                    <option value="2">Red</option>
+                    <option value="3">Orange</option>
+                    <option value="4">Yellow</option>
+                    <option value="5">Green</option>
+                    <option value="6">Teal</option>
+                    <option value="7">Blue</option>
+                    <option value="8">Purple</option>
+                    <option value="9">Gray</option>
+                </select>
+                <small>Color for the new clip when adding to existing set</small>
             </div>
             <div class="form-group" id="existing-set-select-group" style="display:none;">
                 <label for="existing_set_name">Select Existing Set:</label>
@@ -80,6 +95,8 @@ function updateTrackOptions() {
     const midiType = document.getElementById('midi_type').value;
     const trackGroup = document.getElementById('track-select-group');
     const setModeGroup = document.getElementById('set-mode-group');
+    const newSetGroup = document.getElementById('new-set-name-group');
+    const clipColorGroup = document.getElementById('clip-color-group');
     
     if (midiType === 'assigntotrack') {
         trackGroup.style.display = 'block';
@@ -88,10 +105,12 @@ function updateTrackOptions() {
     } else {
         trackGroup.style.display = 'none';
         setModeGroup.style.display = 'none';
-        document.getElementById('new-set-name-group').style.display = 'none';
-        document.getElementById('existing-set-select-group').style.display = 'none';
-        // Re-enable set_name for non-assign-to-track modes
+        // For non-assign-to-track, always show set name and hide others
+        newSetGroup.style.display = 'block';
         document.getElementById('set_name').required = true;
+        document.getElementById('existing-set-select-group').style.display = 'none';
+        document.getElementById('existing_set_name').required = false;
+        clipColorGroup.style.display = 'none';
     }
 }
 
@@ -99,20 +118,28 @@ function updateSetModeFields() {
     const isNew = document.getElementById('set_mode_new').checked;
     const newSetGroup = document.getElementById('new-set-name-group');
     const existingSetGroup = document.getElementById('existing-set-select-group');
+    const clipColorGroup = document.getElementById('clip-color-group');
     const setNameInput = document.getElementById('set_name');
     const existingSetSelect = document.getElementById('existing_set_name');
     
     if (isNew) {
         newSetGroup.style.display = 'block';
         existingSetGroup.style.display = 'none';
+        clipColorGroup.style.display = 'none';
         setNameInput.required = true;
         existingSetSelect.required = false;
     } else {
         newSetGroup.style.display = 'none';
         existingSetGroup.style.display = 'block';
+        clipColorGroup.style.display = 'block';
         setNameInput.required = false;
         existingSetSelect.required = true;
     }
 }
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    updateTrackOptions();
+});
 </script>
 {% endblock %}

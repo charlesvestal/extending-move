@@ -496,7 +496,7 @@ def generate_multichannel_midi_set(set_name: str, midi_file_path: str, tempo: fl
 
 
 def assign_midi_to_track(set_name: str, midi_file_path: str, target_track: int, 
-                         existing_set_path: str = None, tempo: float = None) -> Dict[str, Any]:
+                         existing_set_path: str = None, tempo: float = None, clip_color: int = None) -> Dict[str, Any]:
     """
     Assign a single-track MIDI file to a specific track slot (1-4) in a set.
     Can create a new set or append to an existing set.
@@ -507,6 +507,7 @@ def assign_midi_to_track(set_name: str, midi_file_path: str, target_track: int,
         target_track: Track number 1-4 to place the MIDI on
         existing_set_path: If provided, load this set and add to it. If None, create new set.
         tempo: Tempo in BPM (if None, will try to detect from MIDI or use 120)
+        clip_color: Color ID for new clip (1-9) when adding to existing set
         
     Returns:
         Result dictionary with success status and message
@@ -634,11 +635,15 @@ def assign_midi_to_track(set_name: str, midi_file_path: str, target_track: int,
                 }
             
             # Create new clip in the empty slot
-            track['clipSlots'][empty_slot_idx]['clip'] = {
+            new_clip = {
                 'notes': notes,
                 'region': {'start': 0.0, 'end': clip_length, 'loop': {'start': 0.0, 'end': clip_length}},
                 'enabled': True
             }
+            # Apply clip color if provided
+            if clip_color:
+                new_clip['color'] = clip_color
+            track['clipSlots'][empty_slot_idx]['clip'] = new_clip
             track['name'] = f"Track {target_track}"
         else:
             return {
