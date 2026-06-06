@@ -49,15 +49,7 @@
             <div class="form-group" id="clip-color-group" style="display:none;">
                 <label for="clip_color">Clip Color:</label>
                 <select name="clip_color" id="clip_color">
-                    <option value="1">Pink</option>
-                    <option value="2">Red</option>
-                    <option value="3">Orange</option>
-                    <option value="4">Yellow</option>
-                    <option value="5">Green</option>
-                    <option value="6">Teal</option>
-                    <option value="7">Blue</option>
-                    <option value="8">Purple</option>
-                    <option value="9">Gray</option>
+                    {{ pad_color_options | safe }}
                 </select>
                 <small>Color for the new clip when adding to existing set</small>
             </div>
