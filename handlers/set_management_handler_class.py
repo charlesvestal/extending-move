@@ -72,8 +72,23 @@ class SetManagementHandler(BaseHandler):
 
         if action == 'upload_midi':
             # Generate set from uploaded MIDI file
-            set_name = form.getvalue('set_name')
-            if not set_name:
+            set_name = form.getvalue('set_name', '')
+            midi_type = form.getvalue('midi_type', 'melodic')
+            
+            # For assign-to-track with existing set, we don't need set_name
+            if midi_type == 'assigntotrack':
+                set_mode = form.getvalue('set_mode', 'new')
+                if set_mode == 'new' and not set_name:
+                    return self.format_error_response(
+                        "Please enter a name for the new set",
+                        pad_options=pad_options,
+                        pad_color_options=pad_color_options,
+                        pad_grid=pad_grid,
+                        existing_set_options=existing_set_options,
+                    )
+                # For existing set mode, we'll validate existing_set_name later
+            elif not set_name:
+                # For non-assign-to-track modes, set_name is always required
                 return self.format_error_response(
                     "Missing required parameter: set_name",
                     pad_options=pad_options,
@@ -150,6 +165,7 @@ class SetManagementHandler(BaseHandler):
                                 pad_options=pad_options,
                                 pad_color_options=pad_color_options,
                                 pad_grid=pad_grid,
+                                existing_set_options=existing_set_options,
                             )
                         existing_path = os.path.join("/data/UserData/UserLibrary/Sets", existing_set_name)
                         if not existing_path.endswith('.abl'):
@@ -157,14 +173,7 @@ class SetManagementHandler(BaseHandler):
                         # Use the existing set name for saving
                         final_set_name = existing_set_name
                     else:
-                        # Create new set - validate name
-                        if not set_name:
-                            return self.format_error_response(
-                                "Please enter a name for the new set",
-                                pad_options=pad_options,
-                                pad_color_options=pad_color_options,
-                                pad_grid=pad_grid,
-                            )
+                        # Create new set - name already validated above
                         existing_path = None
                         final_set_name = set_name
                     
