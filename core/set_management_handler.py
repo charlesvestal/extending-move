@@ -608,6 +608,10 @@ def assign_midi_to_track(set_name: str, midi_file_path: str, target_track: int,
             # Create new set from template
             template_path = os.path.join(os.path.dirname(__file__), '..', 'examples', 'Sets', 'midi_template.abl')
             song = load_set_template(template_path)
+            # Clear any existing clips from template
+            for track in song.get('tracks', []):
+                for slot in track.get('clipSlots', []):
+                    slot['clip'] = None
             mode = "created"
         
         # Validate track index
