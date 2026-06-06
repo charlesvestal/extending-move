@@ -617,32 +617,28 @@ def assign_midi_to_track(set_name: str, midi_file_path: str, target_track: int,
                 'message': f"Track {target_track} does not exist in set (max {len(song['tracks'])} tracks)"
             }
         
-        # Assign notes to target track
+        # Assign notes to target track - find first empty clip slot
         track = song['tracks'][track_idx]
         if track['clipSlots'] and len(track['clipSlots']) > 0:
-            clip_slot = track['clipSlots'][0]
-            if clip_slot.get('clip') is None:
-                # Create clip structure if missing
-                clip_slot['clip'] = {
-                    'notes': notes,
-                    'region': {'start': 0.0, 'end': clip_length, 'loop': {'start': 0.0, 'end': clip_length}},
-                    'enabled': True
+            # Find first empty clip slot
+            empty_slot_idx = None
+            for idx, slot in enumerate(track['clipSlots']):
+                if slot.get('clip') is None:
+                    empty_slot_idx = idx
+                    break
+            
+            if empty_slot_idx is None:
+                return {
+                    'success': False,
+                    'message': f"Track {target_track} has no empty clip slots available"
                 }
-            else:
-                # Merge new notes with existing clip
-                clip = clip_slot['clip']
-                existing_notes = clip.get('notes', [])
-                # Offset new notes to start after existing notes
-                if existing_notes:
-                    last_note_end = max(n.get('position', 0) + n.get('duration', 0) for n in existing_notes)
-                    for note in notes:
-                        note['position'] = note.get('position', 0) + last_note_end
-                # Append new notes to existing
-                clip['notes'] = existing_notes + notes
-                # Update clip length to accommodate all notes
-                total_end = max(n.get('position', 0) + n.get('duration', 0) for n in clip['notes'])
-                clip['region']['end'] = total_end
-                clip['region']['loop']['end'] = total_end
+            
+            # Create new clip in the empty slot
+            track['clipSlots'][empty_slot_idx]['clip'] = {
+                'notes': notes,
+                'region': {'start': 0.0, 'end': clip_length, 'loop': {'start': 0.0, 'end': clip_length}},
+                'enabled': True
+            }
             track['name'] = f"Track {target_track}"
         else:
             return {
