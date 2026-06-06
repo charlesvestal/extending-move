@@ -37,7 +37,13 @@ class SetInspectorHandler(BaseHandler):
                 status = 'occupied' if entry else 'free'
                 disabled = '' if entry else 'disabled'
                 color_id = entry.get("color") if entry else None
-                style = f' style="background-color: {rgb_string(int(color_id))}"' if color_id else ''
+                # Use clip color or default gray for clips without color
+                if color_id:
+                    style = f' style="background-color: {rgb_string(int(color_id))}"'
+                elif entry:
+                    style = ' style="background-color: rgb(200, 200, 200)"'  # Default gray for clips
+                else:
+                    style = ''
                 name_attr = f' data-name="{entry.get("name", "")}"' if entry else ''
                 cells.append(
                     f'<input type="radio" id="clip_{track}_{clip}" name="clip_select" value="{value}"{checked} {disabled}>'
