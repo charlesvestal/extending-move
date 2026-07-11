@@ -11,6 +11,7 @@ from core.set_management_handler import (
 )
 from core.list_msets_handler import list_msets
 from core.restore_handler import restore_ablbundle
+from core.refresh_handler import refresh_library
 from core.pad_colors import PAD_COLORS, PAD_COLOR_LABELS
 import json
 
@@ -258,8 +259,8 @@ class SetManagementHandler(BaseHandler):
         is_add_to_existing = set_mode == 'existing'
 
         if is_add_to_existing:
-            # For existing set mode, file is already saved - just return success
-            # The set stays on its original pad
+            # For existing set mode, file is already saved - refresh library so Move picks up the change
+            refresh_library()
             existing_set_name = form.getvalue('existing_set_name', '')
             return self.format_success_response(
                 f"{result.get('message', 'MIDI imported')} in existing set '{existing_set_name}'",

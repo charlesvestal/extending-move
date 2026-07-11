@@ -1,6 +1,7 @@
 import os
 import json
 import copy
+import math
 import mido
 from typing import Dict, List, Any, Optional
 
@@ -190,7 +191,7 @@ def generate_midi_set_from_file(set_name: str, midi_file_path: str, tempo: float
         
         # Calculate clip length (round up to nearest bar)
         max_end_time = max(note['startTime'] + note['duration'] for note in notes)
-        clip_length = max(4.0, ((int(max_end_time) // 4) + 1) * 4.0)
+        clip_length = max(4.0, math.ceil(max_end_time / 4.0) * 4.0)
         
         # Load the template
         template_path = os.path.join(os.path.dirname(__file__), '..', 'examples', 'Sets', 'midi_template.abl')
@@ -307,9 +308,9 @@ def generate_drum_set_from_file(set_name: str, midi_file_path: str, tempo: float
                 'offVelocity': n['offVelocity']
             })
 
-        # Determine clip length as nearest bar (4 beats)
+        # Determine clip length (round up to nearest bar)
         max_end = max(n['startTime'] + n['duration'] for n in mapped_notes)
-        clip_length = max(4.0, ((int(max_end) // 4) + 1) * 4.0)
+        clip_length = max(4.0, math.ceil(max_end / 4.0) * 4.0)
 
         # Load the 808 template
         template_path = os.path.join(os.path.dirname(__file__), '..', 'examples', 'Sets', '808.abl')
@@ -445,7 +446,7 @@ def generate_multichannel_midi_set(set_name: str, midi_file_path: str, tempo: fl
                 channel_max = max(note['startTime'] + note['duration'] for note in notes)
                 max_end_time = max(max_end_time, channel_max)
         
-        clip_length = max(4.0, ((int(max_end_time) // 4) + 1) * 4.0)
+        clip_length = max(4.0, math.ceil(max_end_time / 4.0) * 4.0)
         
         # Get channels sorted
         channels = sorted(channel_notes.keys())
@@ -596,7 +597,7 @@ def assign_midi_to_track(set_name: str, midi_file_path: str, target_track: int,
         
         # Calculate clip length
         max_end_time = max(note['startTime'] + note['duration'] for note in notes)
-        clip_length = max(4.0, ((int(max_end_time) // 4) + 1) * 4.0)
+        clip_length = max(4.0, math.ceil(max_end_time / 4.0) * 4.0)
         
         # Load existing set or create new
         if existing_set_path and os.path.exists(existing_set_path):
@@ -640,8 +641,9 @@ def assign_midi_to_track(set_name: str, midi_file_path: str, target_track: int,
             
             # Create new clip in the empty slot with all required fields
             new_clip = {
-                'isPlaying': False,
+                'isPlaying': True,
                 'name': '',
+                'color': clip_color if clip_color else 1,
                 'isEnabled': True,
                 'region': {'start': 0.0, 'end': clip_length, 'loop': {'start': 0.0, 'end': clip_length, 'isEnabled': True}},
                 'grooveId': 1,
@@ -649,9 +651,6 @@ def assign_midi_to_track(set_name: str, midi_file_path: str, target_track: int,
                 'stepEditorScrollPosition': 0.0,
                 'envelopes': []
             }
-            # Apply clip color if provided
-            if clip_color:
-                new_clip['color'] = clip_color
             track['clipSlots'][empty_slot_idx]['clip'] = new_clip
             track['name'] = f"Track {target_track}"
         else:
