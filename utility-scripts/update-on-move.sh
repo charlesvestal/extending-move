@@ -42,34 +42,6 @@ REMOTE_USER="ableton"
 REMOTE_HOST="move.local"
 REMOTE_DIR="/data/UserData/extending-move"
 
-# --- Version check: ensure Move version is within tested range ---
-HIGHEST_TESTED_VERSION="2.0.0"
-# Grab version no matter the result (Move v2+ prints to stderr with log prefixes)
-INSTALLED_VERSION=$(
-    ssh "${REMOTE_USER}@${REMOTE_HOST}" "/opt/move/Move -v" 2>&1 \
-    | sed -nE 's/.*[Vv]ersion:?[[:space:]]+([0-9]+\.[0-9]+\.[0-9]+).*/\1/p' || true
-)
-# Check to see if we got a version that's not empty
-if [[ -z "$INSTALLED_VERSION" ]]; then 
-    echo "Error: Could not determine Move version." >&2 
-    exit 1 
-fi
-
-LATEST_VERSION=$(printf "%s\n%s\n" "$HIGHEST_TESTED_VERSION" "$INSTALLED_VERSION" | sort -V | tail -n1)
-
-if [ "$LATEST_VERSION" != "$HIGHEST_TESTED_VERSION" ]; then
-    echo "Warning: Installed Move version ($INSTALLED_VERSION) is newer than highest tested ($HIGHEST_TESTED_VERSION)."
-    if [ "$NON_INTERACTIVE" = false ]; then
-        read -p "Continue? [y/N] " confirm
-        if [[ ! $confirm =~ ^[Yy]$ ]]; then
-            echo "Aborting installation."
-            exit 1
-        fi
-    else
-        echo "Non-interactive mode: continuing anyway."
-    fi
-fi
-
 # --- Ensure remote directory exists ---
 if [ "$OVERWRITE" = true ]; then
   echo "Overwrite enabled: deleting ${REMOTE_DIR} on ${REMOTE_HOST}…"
