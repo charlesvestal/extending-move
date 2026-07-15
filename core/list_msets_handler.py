@@ -4,6 +4,8 @@ import json
 from core.config import MSETS_DIRECTORY
 from core.pad_colors import move_color_to_ui
 
+_BPM_CACHE = {}
+
 def get_xattr_value(relative_path, attr):
     """
     Retrieve the extended attribute value for a given file or directory.
@@ -29,10 +31,16 @@ def _parse_bpm_from_song(set_path):
     """Parse BPM from Song.abl file. Returns None if not found."""
     try:
         abl_path = os.path.join(set_path, 'Song.abl')
+        modified_ns = os.stat(abl_path).st_mtime_ns
+        cached = _BPM_CACHE.get(abl_path)
+        if cached and cached[0] == modified_ns:
+            return cached[1]
         with open(abl_path, 'r') as f:
             data = json.load(f)
         tempo = data.get('tempo')
-        return round(float(tempo), 1) if tempo else None
+        bpm = round(float(tempo), 1) if tempo else None
+        _BPM_CACHE[abl_path] = (modified_ns, bpm)
+        return bpm
     except Exception:
         return None
 
