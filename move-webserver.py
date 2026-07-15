@@ -285,9 +285,10 @@ def overview_api_system():
 @app.route("/overview/api/restore", methods=["POST"])
 def overview_api_restore():
     """Handle set restore from Overview page."""
-    from flask import request
-    # Use the same form wrapper as other handlers
-    form = FieldStorageWrapper(request.form, request.files)
+    form_data = request.form.to_dict()
+    if "ablbundle" in request.files:
+        form_data["ablbundle"] = FileField(request.files["ablbundle"])
+    form = SimpleForm(form_data)
     result = overview_handler.handle_post_restore(form)
     return jsonify(result)
 
