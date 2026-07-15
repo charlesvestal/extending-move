@@ -415,16 +415,43 @@
         sorted.forEach(s => {
             const tr = document.createElement('tr');
             if (s.slot == activeSlot) tr.className = 'active-row';
-            const dot = s.color_css ? `<span class="color-dot" style="background:${s.color_css}"></span>` : '';
-            const playing = s.slot == activeSlot ? '<span class="now-playing-badge">NOW PLAYING</span>' : '';
-            tr.innerHTML = `
-                <td>${s.slot != null ? s.slot + 1 : '—'}</td>
-                <td>${dot}${s.name}${playing}</td>
-                <td>${s.bpm ?? '—'}</td>
-                <td>${s.key ?? '—'}</td>
-                <td>${s.mode ?? '—'}</td>
-                <td>${s.camelot ? `<span class="camelot-badge">${s.camelot}</span>` : '—'}</td>
-            `;
+
+            const padCell = document.createElement('td');
+            padCell.textContent = s.slot != null ? s.slot + 1 : '—';
+            tr.appendChild(padCell);
+
+            const nameCell = document.createElement('td');
+            if (s.color_css) {
+                const dot = document.createElement('span');
+                dot.className = 'color-dot';
+                dot.style.background = s.color_css;
+                nameCell.appendChild(dot);
+            }
+            nameCell.append(document.createTextNode(s.name ?? '—'));
+            if (s.slot == activeSlot) {
+                const playing = document.createElement('span');
+                playing.className = 'now-playing-badge';
+                playing.textContent = 'NOW PLAYING';
+                nameCell.appendChild(playing);
+            }
+            tr.appendChild(nameCell);
+
+            [s.bpm, s.key, s.mode].forEach(value => {
+                const cell = document.createElement('td');
+                cell.textContent = value ?? '—';
+                tr.appendChild(cell);
+            });
+
+            const camelotCell = document.createElement('td');
+            if (s.camelot) {
+                const badge = document.createElement('span');
+                badge.className = 'camelot-badge';
+                badge.textContent = s.camelot;
+                camelotCell.appendChild(badge);
+            } else {
+                camelotCell.textContent = '—';
+            }
+            tr.appendChild(camelotCell);
             tbody.appendChild(tr);
         });
     }

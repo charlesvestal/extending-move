@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import html
 import os
 import shutil
 import logging
@@ -80,8 +81,8 @@ class BaseHandler:
                     style = f' style="background-color: rgba({rgb}, 0.2); border-color: rgb({rgb});"'
                 else:
                     style = ""
-                name = name_map.get(idx, "")
-                bpm = bpm_map.get(idx, "")
+                name = html.escape(str(name_map.get(idx, "")))
+                bpm = html.escape(str(bpm_map.get(idx, "")))
 
                 # Build inner content like Overview page
                 if has_set:

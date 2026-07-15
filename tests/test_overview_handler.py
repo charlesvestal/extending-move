@@ -35,6 +35,32 @@ def test_generate_pad_grid_html_uses_shared_grid(monkeypatch):
     assert '120.0 BPM' in html
 
 
+def test_generate_pad_grid_html_escapes_set_names(monkeypatch):
+    malicious_name = '<img src=x onerror="alert(1)">'
+    monkeypatch.setattr(
+        overview_module,
+        "get_sets_data",
+        lambda: {
+            "sets": [
+                {
+                    "slot": 5,
+                    "xattr_color": 1,
+                    "color_id": 1,
+                    "name": malicious_name,
+                    "bpm": 120.0,
+                    "camelot": "8B",
+                }
+            ],
+            "current_slot": None,
+        },
+    )
+
+    html = OverviewHandler().generate_pad_grid_html()
+
+    assert malicious_name not in html
+    assert "&lt;img src=x onerror=&quot;alert(1)&quot;&gt;" in html
+
+
 def test_generate_pad_grid_html_restore_mode_selects_only_free_pads(monkeypatch):
     monkeypatch.setattr(
         overview_module,
