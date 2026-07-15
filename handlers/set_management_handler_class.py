@@ -10,7 +10,7 @@ from core.set_management_handler import (
 )
 from core.list_msets_handler import list_msets
 from core.restore_handler import restore_ablbundle
-from core.pad_colors import PAD_COLORS, PAD_COLOR_LABELS, rgb_string
+from core.pad_colors import PAD_COLORS, PAD_COLOR_LABELS
 import json
 
 logger = logging.getLogger(__name__)
@@ -27,7 +27,9 @@ class SetManagementHandler(BaseHandler):
         pad_options = '<option value="" disabled selected>-- Select Pad --</option>' + pad_options
         pad_color_options = self.generate_color_options()
         color_map = {int(m["mset_id"]): int(m["mset_color"]) for m in msets if str(m["mset_color"]).isdigit()}
-        pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map)
+        name_map = {int(m["mset_id"]): m["mset_name"] for m in msets}
+        bpm_map = {int(m["mset_id"]): str(m["bpm"]) for m in msets if m.get("bpm")}
+        pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map, name_map, bpm_map, free_only=True)
         return {
             'pad_options': pad_options,
             'pad_color_options': pad_color_options,
@@ -48,7 +50,9 @@ class SetManagementHandler(BaseHandler):
         pad_options = ''.join(f'<option value="{pad}">{pad}</option>' for pad in free_pads)
         pad_color_options = self.generate_color_options()
         color_map = {int(m["mset_id"]): int(m["mset_color"]) for m in msets if str(m["mset_color"]).isdigit()}
-        pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map)
+        name_map = {int(m["mset_id"]): m["mset_name"] for m in msets}
+        bpm_map = {int(m["mset_id"]): str(m["bpm"]) for m in msets if m.get("bpm")}
+        pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map, name_map, bpm_map, free_only=True)
 
         if action == 'upload_midi':
             # Generate set from uploaded MIDI file
@@ -186,32 +190,16 @@ class SetManagementHandler(BaseHandler):
             updated_pad_options = ''.join(f'<option value="{pad}">{pad}</option>' for pad in updated_free_pads)
             updated_pad_options = '<option value="" disabled selected>-- Select Pad --</option>' + updated_pad_options
             color_map = {int(m["mset_id"]): int(m["mset_color"]) for m in msets_updated if str(m["mset_color"]).isdigit()}
-            pad_grid = self.generate_pad_grid(updated_ids.get("used", set()), color_map)
+            name_map = {int(m["mset_id"]): m["mset_name"] for m in msets_updated}
+            bpm_map = {int(m["mset_id"]): str(m["bpm"]) for m in msets_updated if m.get("bpm")}
+            pad_grid = self.generate_pad_grid(updated_ids.get("used", set()), color_map, name_map, bpm_map, free_only=True)
             return self.format_success_response(restore_result['message'], pad_options=updated_pad_options, pad_color_options=pad_color_options, pad_grid=pad_grid)
         else:
             color_map = {int(m["mset_id"]): int(m["mset_color"]) for m in msets if str(m["mset_color"]).isdigit()}
-            pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map)
+            name_map = {int(m["mset_id"]): m["mset_name"] for m in msets}
+            bpm_map = {int(m["mset_id"]): str(m["bpm"]) for m in msets if m.get("bpm")}
+            pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map, name_map, bpm_map, free_only=True)
             return self.format_error_response(restore_result.get('message'), pad_options=pad_options, pad_color_options=pad_color_options, pad_grid=pad_grid)
-
-    def generate_pad_grid(self, used_ids, color_map):
-        """Return HTML for a 32-pad grid showing occupied pads with colors."""
-        cells = []
-        # Pad numbering starts with 1 on the bottom-left
-        for row in range(4):
-            for col in range(8):
-                idx = (3 - row) * 8 + col
-                num = idx + 1
-                occupied = idx in used_ids
-                status = 'occupied' if occupied else 'free'
-                disabled = 'disabled' if occupied else ''
-                color_id = color_map.get(idx)
-                style = f' style="background-color: {rgb_string(color_id)}"' if color_id else ''
-                label_text = "" if not occupied else ""
-                cells.append(
-                    f'<input type="radio" id="pad_{num}" name="pad_index" value="{num}" {disabled}>'
-                    f'<label for="pad_{num}" class="pad-cell {status}"{style}>{label_text}</label>'
-                )
-        return '<div class="pad-grid">' + ''.join(cells) + '</div>'
 
     def generate_color_options(self, input_name="pad_color", pad_input_name="pad_index"):
         """Return HTML for the custom color dropdown with pad preview."""

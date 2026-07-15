@@ -1,9 +1,37 @@
+import os
 import sys
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 
 from core import list_msets_handler as lmh
+
+
+def test_parse_bpm_cache_invalidates_when_song_changes(tmp_path, monkeypatch):
+    song_path = tmp_path / "SetA" / "Song.abl"
+    song_path.parent.mkdir()
+    song_path.write_text('{"tempo": 120}')
+    lmh._BPM_CACHE.clear()
+    calls = 0
+    original_load = lmh.json.load
+
+    def tracking_load(file):
+        nonlocal calls
+        calls += 1
+        return original_load(file)
+
+    monkeypatch.setattr(lmh.json, "load", tracking_load)
+
+    assert lmh._parse_bpm_from_song(str(song_path.parent)) == 120.0
+    assert lmh._parse_bpm_from_song(str(song_path.parent)) == 120.0
+    assert calls == 1
+
+    song_path.write_text('{"tempo": 140}')
+    stat = song_path.stat()
+    os.utime(song_path, ns=(stat.st_atime_ns, stat.st_mtime_ns + 1))
+
+    assert lmh._parse_bpm_from_song(str(song_path.parent)) == 140.0
+    assert calls == 2
 
 
 def test_list_msets_no_directory(tmp_path, monkeypatch):

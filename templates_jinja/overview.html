@@ -1,0 +1,651 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div id="overview-wrap">
+<h2 style="margin-bottom:0;">Move Over (view)</h2>
+<div class="overview-stats">
+    <div class="overview-stat-box">
+        <div class="overview-stat-label">STORAGE: <span id="disk-text">—</span></div>
+        <div class="overview-bar-track"><div class="overview-bar-fill" id="disk-fill" style="width:0%"></div></div>
+    </div>
+    <div class="overview-stat-box">
+        <div class="overview-stat-label">MEMORY: <span id="mem-text">—</span></div>
+        <div class="overview-bar-track"><div class="overview-bar-fill overview-bar-mem" id="mem-fill" style="width:0%"></div></div>
+        <div class="overview-stat-label" style="margin-top:6px;">LOAD: <span id="load-text">—</span></div>
+    </div>
+</div>
+
+<div id="overview-loading" style="color:#888;margin:1rem 0;">Loading sets…</div>
+<div id="overview-error" style="color:#d73a49;margin:1rem 0;"></div>
+
+<div id="overview-content" style="display:none;">
+    <!-- Restore Mode Toggle -->
+    <div style="margin-bottom:1rem;">
+        <button id="restore-mode-btn" class="overview-filter-btn" onclick="toggleRestoreMode()">+ Restore Set</button>
+    </div>
+
+    <!-- Restore Form (shown when in restore mode) -->
+    <div id="restore-form-container" style="display:none;margin-bottom:1.5rem;padding:1rem;background:var(--ov-bg2);border:1px solid var(--ov-border);border-radius:4px;">
+        <div id="restore-message" style="margin-bottom:1rem;"></div>
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:flex-end;">
+            <div>
+                <label for="ablbundle" style="font-size:0.8rem;">Set file (.ablbundle/.abl):</label>
+                <input type="file" id="ablbundle" name="ablbundle" accept=".ablbundle,.abl" style="margin-bottom:0;">
+            </div>
+            <div>
+                <label style="font-size:0.8rem;">Pad Color:</label>
+                <div class="color-dropdown" id="color-dropdown">
+                    <div class="dropdown-toggle" onclick="toggleColorDropdown()">
+                        <span class="color-preview" id="selected-color-preview"></span>
+                        <span id="selected-color-name">Select...</span>
+                        <span class="dropdown-arrow">▼</span>
+                    </div>
+                    <div class="dropdown-menu" id="color-dropdown-menu" style="display:none;"></div>
+                </div>
+                <input type="hidden" id="pad_color" name="pad_color" value="">
+            </div>
+            <div id="target-pad-display" style="font-size:0.9rem;color:var(--ov-text-mid);">
+                Click a <strong>free pad</strong> below
+            </div>
+            <input type="hidden" id="target_pad" name="target_pad" value="">
+            <button id="restore-btn" onclick="submitRestore()" disabled style="margin:0;">Upload & Restore</button>
+            <button type="button" onclick="toggleRestoreMode()" style="margin:0;background:transparent;color:var(--ov-text);">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Main Pad Grid (shared between view and restore modes) -->
+    <div id="pad-grid">{{ pad_grid|safe }}</div>
+
+    <div style="margin:1rem 0;">
+        <label style="display:inline;font-weight:400;margin-right:0.5rem;">Filter by Camelot key:</label>
+        <button class="overview-filter-btn active" onclick="filterByCamelot(null, this)">All Keys</button>
+        <span id="camelot-filter-btns"></span>
+    </div>
+
+    <table class="overview-table" id="sets-table">
+        <thead>
+            <tr>
+                <th>Pad</th>
+                <th>Name</th>
+                <th>BPM</th>
+                <th>Key</th>
+                <th>Mode</th>
+                <th>Camelot</th>
+            </tr>
+        </thead>
+        <tbody id="sets-tbody"></tbody>
+    </table>
+
+    <div style="color:#888;font-size:0.75rem;margin-top:0.75rem;">
+        Sets refresh every 30s &nbsp;·&nbsp; Active pad updates every 2s
+    </div>
+</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+    #overview-wrap {
+        --ov-bg:         #ffffff;
+        --ov-bg2:        #f5f5f5;
+        --ov-border:     #dddddd;
+        --ov-text:       #262626;
+        --ov-text-dim:   #888888;
+        --ov-text-mid:   #555555;
+        --ov-pad-empty:  #f0f0f0;
+        --ov-bar-track:  #e0e0e0;
+    }
+    /* Overview uses global dark mode - override variables for dark theme */
+    #app-wrap.dark #overview-wrap {
+        font-family: monospace;
+        --ov-bg:         #0a0a0a;
+        --ov-bg2:        #111111;
+        --ov-border:     #2a2a2a;
+        --ov-text:       #e0e0e0;
+        --ov-text-dim:   #555555;
+        --ov-text-mid:   #888888;
+        --ov-pad-empty:  #151515;
+        --ov-bar-track:  #1e1e1e;
+    }
+    #app-wrap.dark #overview-wrap .overview-filter-btn.active {
+        background: rgba(77,217,217,0.15);
+        border-color: #4dd9d9;
+        color: #4dd9d9;
+    }
+    #app-wrap.dark #overview-wrap .overview-filter-btn {
+        border-color: #333;
+        color: #aaa;
+        font-family: monospace;
+    }
+    #app-wrap.dark #overview-wrap .overview-table th,
+    #app-wrap.dark #overview-wrap .overview-table td {
+        font-family: monospace;
+    }
+    #app-wrap.dark #overview-wrap .camelot-badge {
+        font-family: monospace;
+    }
+    .overview-stats {
+        color: var(--ov-text);
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+    .overview-stat-box {
+        background: var(--ov-bg2);
+        border: 1px solid var(--ov-border);
+        border-radius: 4px;
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+    }
+    .overview-stat-label { margin-bottom: 0.4rem; }
+    .overview-bar-track {
+        background: var(--ov-bar-track);
+        border-radius: 2px;
+        height: 12px;
+        overflow: hidden;
+    }
+    .overview-bar-fill {
+        height: 100%;
+        background: #0000ff;
+        border-radius: 2px;
+        transition: width 0.4s;
+    }
+    .overview-bar-mem { background: #8b5cf6; }
+
+    .overview-filter-btn {
+        background: transparent;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        padding: 0.2rem 0.6rem;
+        font-size: 0.8rem;
+        color: #444;
+        cursor: pointer;
+        margin-right: 0.25rem;
+        margin-bottom: 0.25rem;
+        font-family: 'Ableton Sans', Arial, sans-serif;
+    }
+    .overview-filter-btn.active {
+        background: #0000ff;
+        border-color: #0000ff;
+        color: white;
+    }
+
+    .overview-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.875rem;
+    }
+    .overview-table th {
+        color: var(--ov-text-dim);
+        border-bottom-color: var(--ov-border);
+        text-align: left;
+        padding: 0.4rem 0.6rem;
+        border-bottom: 2px solid var(--ov-border);
+        font-weight: 500;
+    }
+    .overview-table td {
+        border-bottom-color: var(--ov-border);
+        padding: 0.35rem 0.6rem;
+        border-bottom: 1px solid var(--ov-border);
+    }
+    .overview-table tr.active-row td {
+        background: var(--ov-bg2);
+        font-weight: 500;
+    }
+    .camelot-badge {
+        background: var(--ov-bg2);
+        border-color: var(--ov-border);
+        color: var(--ov-text);
+        display: inline-block;
+        padding: 0.1rem 0.4rem;
+        border-radius: 3px;
+        font-size: 0.75rem;
+        border: 1px solid var(--ov-border);
+    }
+    .color-dot {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-right: 0.3rem;
+        vertical-align: middle;
+        border: 1px solid rgba(0,0,0,0.15);
+    }
+    .now-playing-badge {
+        display: inline-block;
+        background: #ff764d;
+        color: white;
+        font-size: 0.65rem;
+        padding: 0.1rem 0.35rem;
+        border-radius: 2px;
+        margin-left: 0.4rem;
+        vertical-align: middle;
+    }
+    /* Color dropdown for restore */
+    .color-dropdown {
+        position: relative;
+        display: inline-block;
+        min-width: 200px;
+    }
+    .dropdown-toggle {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        border: 1px solid var(--ov-border);
+        border-radius: 4px;
+        cursor: pointer;
+        background: var(--ov-bg);
+    }
+    .dropdown-toggle:hover {
+        border-color: #999;
+    }
+    .color-preview {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border-radius: 3px;
+        border: 1px solid rgba(0,0,0,0.2);
+    }
+    .dropdown-arrow {
+        margin-left: auto;
+        font-size: 0.7rem;
+    }
+    .dropdown-menu {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: var(--ov-bg);
+        border: 1px solid var(--ov-border);
+        border-radius: 4px;
+        margin-top: 2px;
+        max-height: 300px;
+        overflow-y: auto;
+        z-index: 100;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        cursor: pointer;
+    }
+    .dropdown-item:hover {
+        background: var(--ov-bg2);
+    }
+    /* Restore mode - main grid free pads are selectable */
+    #pad-grid.restore-mode .pad-cell.free {
+        cursor: pointer;
+        border: 2px dashed #ccc;
+    }
+    #pad-grid.restore-mode .pad-cell.free:hover {
+        border-color: #0000ff;
+        border-style: solid;
+    }
+    #pad-grid.restore-mode .pad-cell.free.selected {
+        border-color: #0000ff !important;
+        border-style: solid !important;
+        background: rgba(0,0,255,0.15) !important;
+    }
+    #pad-grid.restore-mode .pad-cell.occupied {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+    #app-wrap.dark #pad-grid.restore-mode .pad-cell.free {
+        border-color: #444;
+    }
+    #app-wrap.dark #pad-grid.restore-mode .pad-cell.free:hover,
+    #app-wrap.dark #pad-grid.restore-mode .pad-cell.free.selected {
+        border-color: #4dd9d9 !important;
+    }
+    #app-wrap.dark #pad-grid.restore-mode .pad-cell.free.selected {
+        background: rgba(77,217,217,0.2) !important;
+    }
+    /* Restore form button styling */
+    #restore-mode-btn.active {
+        background: #0000ff;
+        border-color: #0000ff;
+        color: white;
+    }
+    #app-wrap.dark #restore-mode-btn.active {
+        background: #4dd9d9;
+        border-color: #4dd9d9;
+        color: #000;
+    }
+</style>
+
+<script>
+    let allSets = [];
+    let currentSlot = null;
+    let activeCamelot = null;
+
+    async function loadData() {
+        try {
+            const res = await fetch('/overview/api/data');
+            const d = await res.json();
+            if (d.error) {
+                document.getElementById('overview-error').textContent = 'Error: ' + d.error;
+                return;
+            }
+            allSets = d.sets || [];
+            currentSlot = d.current_slot;
+            document.getElementById('overview-loading').style.display = 'none';
+            document.getElementById('overview-content').style.display = '';
+
+            if (d.disk) {
+                document.getElementById('disk-text').textContent =
+                    `${d.disk.used_gb} GB / ${d.disk.total_gb} GB — ${d.disk.percent_used}%`;
+                const df = document.getElementById('disk-fill');
+                df.style.width = d.disk.percent_used + '%';
+                df.style.background = d.disk.percent_used > 80 ? '#d73a49' : '#0000ff';
+            }
+
+            buildCamelotFilters(allSets);
+            render(allSets, currentSlot);
+        } catch (e) {
+            document.getElementById('overview-error').textContent = 'Failed to load data.';
+        }
+    }
+
+    function buildCamelotFilters(sets) {
+        const codes = [...new Set(sets.map(s => s.camelot).filter(Boolean))].sort();
+        const container = document.getElementById('camelot-filter-btns');
+        container.innerHTML = '';
+        codes.forEach(code => {
+            const btn = document.createElement('button');
+            btn.className = 'overview-filter-btn';
+            btn.textContent = code;
+            btn.onclick = () => filterByCamelot(code, btn);
+            container.appendChild(btn);
+        });
+    }
+
+    function filterByCamelot(code, btn) {
+        activeCamelot = code;
+        document.querySelectorAll('.overview-filter-btn').forEach(b => b.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+        const filtered = code ? allSets.filter(s => s.camelot === code) : allSets;
+        render(filtered, currentSlot);
+    }
+
+    function render(sets, activeSlot) {
+        refreshPadGrid();
+        renderTable(sets, activeSlot);
+    }
+
+    // Restore mode state
+    let restoreMode = false;
+    let selectedTargetPad = null;
+
+    async function refreshPadGrid() {
+        const params = new URLSearchParams();
+        if (restoreMode) {
+            params.set('restore_mode', '1');
+        } else if (activeCamelot) {
+            params.set('camelot', activeCamelot);
+        }
+        const res = await fetch(`/overview/api/grid?${params}`);
+        const data = await res.json();
+        const grid = document.getElementById('pad-grid');
+        grid.innerHTML = data.pad_grid;
+        grid.classList.toggle('restore-mode', restoreMode);
+
+        if (!restoreMode) return;
+
+        grid.querySelectorAll('input[name="overview_pad"]:not(:disabled)').forEach(input => {
+            input.addEventListener('change', () => selectTargetPad(Number(input.value)));
+        });
+
+        if (selectedTargetPad !== null) {
+            const input = document.getElementById(`pad_${selectedTargetPad}`);
+            if (input) {
+                input.checked = true;
+                input.nextElementSibling.classList.add('selected');
+            }
+        }
+    }
+
+    function renderTable(sets, activeSlot) {
+        const tbody = document.getElementById('sets-tbody');
+        tbody.innerHTML = '';
+        const sorted = [...sets].sort((a, b) => (a.slot ?? 999) - (b.slot ?? 999));
+        sorted.forEach(s => {
+            const tr = document.createElement('tr');
+            if (s.slot == activeSlot) tr.className = 'active-row';
+
+            const padCell = document.createElement('td');
+            padCell.textContent = s.slot != null ? s.slot + 1 : '—';
+            tr.appendChild(padCell);
+
+            const nameCell = document.createElement('td');
+            if (s.color_css) {
+                const dot = document.createElement('span');
+                dot.className = 'color-dot';
+                dot.style.background = s.color_css;
+                nameCell.appendChild(dot);
+            }
+            nameCell.append(document.createTextNode(s.name ?? '—'));
+            if (s.slot == activeSlot) {
+                const playing = document.createElement('span');
+                playing.className = 'now-playing-badge';
+                playing.textContent = 'NOW PLAYING';
+                nameCell.appendChild(playing);
+            }
+            tr.appendChild(nameCell);
+
+            [s.bpm, s.key, s.mode].forEach(value => {
+                const cell = document.createElement('td');
+                cell.textContent = value ?? '—';
+                tr.appendChild(cell);
+            });
+
+            const camelotCell = document.createElement('td');
+            if (s.camelot) {
+                const badge = document.createElement('span');
+                badge.className = 'camelot-badge';
+                badge.textContent = s.camelot;
+                camelotCell.appendChild(badge);
+            } else {
+                camelotCell.textContent = '—';
+            }
+            tr.appendChild(camelotCell);
+            tbody.appendChild(tr);
+        });
+    }
+
+    async function pollActiveSlot() {
+        try {
+            const res = await fetch('/overview/api/active-slot');
+            const d = await res.json();
+            if (d.current_slot != null && d.current_slot !== currentSlot) {
+                currentSlot = d.current_slot;
+                const filtered = activeCamelot ? allSets.filter(s => s.camelot === activeCamelot) : allSets;
+                render(filtered, currentSlot);
+            }
+        } catch (e) {}
+    }
+
+    async function pollSystemStats() {
+        try {
+            const res = await fetch('/overview/api/system');
+            const d = await res.json();
+            if (d.mem_pct != null) {
+                document.getElementById('mem-text').textContent =
+                    `${d.mem_used_mb} MB / ${d.mem_total_mb} MB — ${d.mem_pct}%`;
+                const mf = document.getElementById('mem-fill');
+                mf.style.width = d.mem_pct + '%';
+                mf.style.background = d.mem_pct > 80 ? '#d73a49' : '#8b5cf6';
+            }
+            if (d.load_1 != null) {
+                document.getElementById('load-text').textContent =
+                    `${d.load_1.toFixed(2)} / ${d.load_5.toFixed(2)} / ${d.load_15.toFixed(2)} (1m/5m/15m)`;
+            }
+        } catch (e) {}
+    }
+
+    // Overview page now uses global dark mode from base.html
+
+    // ==================== RESTORE FUNCTIONALITY ====================
+    let padColors = [];
+    let padColorNames = [];
+
+    async function loadPadColors() {
+        try {
+            const res = await fetch('/overview/api/colors');
+            const data = await res.json();
+            padColors = data.colors;
+            padColorNames = data.names;
+            buildColorDropdown();
+            // Select first color by default
+            if (padColors.length > 0) {
+                selectColor(0);
+            }
+        } catch (e) {
+            console.error('Failed to load pad colors:', e);
+        }
+    }
+
+    function buildColorDropdown() {
+        const menu = document.getElementById('color-dropdown-menu');
+        menu.innerHTML = '';
+        padColors.forEach((color, idx) => {
+            const item = document.createElement('div');
+            item.className = 'dropdown-item';
+            item.onclick = () => selectColor(idx);
+            item.innerHTML = `
+                <span class="color-preview" style="background:rgb(${color[0]},${color[1]},${color[2]})"></span>
+                <span>${padColorNames[idx]}</span>
+            `;
+            menu.appendChild(item);
+        });
+    }
+
+    function toggleColorDropdown() {
+        const menu = document.getElementById('color-dropdown-menu');
+        menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function selectColor(idx) {
+        const color = padColors[idx];
+        document.getElementById('selected-color-preview').style.background = `rgb(${color[0]},${color[1]},${color[2]})`;
+        document.getElementById('selected-color-name').textContent = padColorNames[idx];
+        document.getElementById('pad_color').value = idx + 1; // 1-indexed color ID
+        document.getElementById('color-dropdown-menu').style.display = 'none';
+        updateRestoreButton();
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        const dropdown = document.getElementById('color-dropdown');
+        if (!dropdown.contains(e.target)) {
+            document.getElementById('color-dropdown-menu').style.display = 'none';
+        }
+    });
+
+    async function toggleRestoreMode() {
+        restoreMode = !restoreMode;
+        const btn = document.getElementById('restore-mode-btn');
+        const form = document.getElementById('restore-form-container');
+
+        if (restoreMode) {
+            btn.textContent = '✕ Cancel Restore';
+            btn.classList.add('active');
+            form.style.display = 'block';
+        } else {
+            btn.textContent = '+ Restore Set';
+            btn.classList.remove('active');
+            form.style.display = 'none';
+            selectedTargetPad = null;
+            document.getElementById('target_pad').value = '';
+            document.getElementById('target-pad-display').innerHTML = 'Click a <strong>free pad</strong> below';
+        }
+
+        await refreshPadGrid();
+    }
+
+    function selectTargetPad(padNum) {
+        document.querySelectorAll('#pad-grid .pad-cell.free').forEach(cell => {
+            cell.classList.remove('selected');
+        });
+
+        selectedTargetPad = padNum;
+        const input = document.getElementById(`pad_${padNum}`);
+        input.checked = true;
+        input.nextElementSibling.classList.add('selected');
+        document.getElementById('target_pad').value = padNum;
+        document.getElementById('target-pad-display').textContent = `Pad ${padNum}`;
+        updateRestoreButton();
+    }
+
+    function updateRestoreButton() {
+        const hasFile = document.getElementById('ablbundle').files.length > 0;
+        const hasColor = document.getElementById('pad_color').value !== '';
+        const hasPad = selectedTargetPad !== null;
+        document.getElementById('restore-btn').disabled = !(hasFile && hasColor && hasPad);
+    }
+
+    async function submitRestore() {
+        const btn = document.getElementById('restore-btn');
+        const msg = document.getElementById('restore-message');
+        btn.disabled = true;
+        btn.textContent = 'Restoring...';
+
+        const formData = new FormData();
+        formData.append('ablbundle', document.getElementById('ablbundle').files[0]);
+        formData.append('pad_color', document.getElementById('pad_color').value);
+        formData.append('target_pad', document.getElementById('target_pad').value);
+
+        try {
+            const res = await fetch('/overview/api/restore', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await res.json();
+
+            if (result.success) {
+                msg.innerHTML = `<p class="success">${result.message}</p>`;
+                // Reset form
+                document.getElementById('ablbundle').value = '';
+                selectedTargetPad = null;
+                document.getElementById('target_pad').value = '';
+                document.getElementById('target-pad-display').innerHTML = 'Click a <strong>free pad</strong> below';
+                document.querySelectorAll('#pad-grid .pad-cell.free').forEach(c => {
+                    c.classList.remove('selected');
+                });
+                selectColor(0); // Reset to first color
+                // Exit restore mode after short delay
+                setTimeout(() => {
+                    toggleRestoreMode();
+                    msg.innerHTML = '';
+                }, 2000);
+                // Reload data to show new set
+                await loadData();
+            } else {
+                msg.innerHTML = `<p class="error">${result.message}</p>`;
+            }
+        } catch (e) {
+            msg.innerHTML = `<p class="error">Error: ${e.message}</p>`;
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Upload & Restore';
+        }
+    }
+
+    // Event listeners
+    document.getElementById('ablbundle').addEventListener('change', updateRestoreButton);
+
+    // Initialize
+    loadPadColors();
+
+    // ==================== END RESTORE FUNCTIONALITY ====================
+
+    loadData();
+    pollSystemStats();
+    setInterval(loadData, 30000);
+    setInterval(pollActiveSlot, 2002);
+    setInterval(pollSystemStats, 5005);
+</script>
+{% endblock %}
