@@ -69,7 +69,7 @@ class BaseHandler:
                     disabled = "" if has_set else "disabled"
 
                 status = "occupied" if has_set else "free"
-                checked = "checked" if selected_idx is not None and idx == selected_idx else ""
+                checked = " checked" if selected_idx is not None and idx == selected_idx else ""
                 color_id = color_map.get(idx)
                 # Generate semi-transparent background + solid border like Overview page
                 if color_id:
