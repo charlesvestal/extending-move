@@ -101,26 +101,16 @@ def test_lfo_get(client, monkeypatch):
     assert b'id="amount"' in resp.data
     assert b'id="attack"' in resp.data
 
-def test_restore_get(client, monkeypatch):
-    def fake_get():
-        return {'options': '<option value="1">1</option>', 'pad_grid': '<div class="pad-grid"></div>', 'message': ''}
-    monkeypatch.setattr(move_webserver.restore_handler, 'handle_get', fake_get)
+def test_restore_get(client):
     resp = client.get('/restore')
-    assert resp.status_code == 200
-    assert b'class="pad-grid"' in resp.data
+    assert resp.status_code == 302
+    assert resp.headers['Location'].endswith('/overview')
 
-def test_restore_post(client, monkeypatch):
-    def fake_handle_post(form):
-        return {'message': 'restored', 'message_type': 'success', 'pad_grid': '<div class="pad-grid"></div>', 'options': ''}
-    monkeypatch.setattr(move_webserver.restore_handler, 'handle_post', fake_handle_post)
-    data = {
-        'action': 'restore_ablbundle',
-        'mset_index': '1',
-        'mset_color': '1'
-    }
-    resp = client.post('/restore', data=data, content_type='multipart/form-data')
-    assert resp.status_code == 200
-    assert b'restored' in resp.data
+
+def test_restore_post(client):
+    resp = client.post('/restore')
+    assert resp.status_code == 302
+    assert resp.headers['Location'].endswith('/overview')
 
 
 def test_overview_restore_post(client, monkeypatch):
@@ -486,7 +476,7 @@ def test_refresh_get(client, monkeypatch):
 def test_index_redirect(client):
     resp = client.get('/')
     assert resp.status_code == 302
-    assert resp.headers['Location'].endswith('/restore')
+    assert resp.headers['Location'].endswith('/overview')
 
 
 def test_browse_dir(client, tmp_path):

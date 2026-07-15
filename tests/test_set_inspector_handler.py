@@ -39,7 +39,7 @@ def test_generate_pad_grid():
     assert html.count('class="pad-cell occupied"') == 2
     assert html.count('name="pad_index"') == 32
     # Selected pad should have "checked" attribute
-    assert 'inspect_pad_32" name="pad_index" value="32" checked' in html
+    assert 'id="pad_32" name="pad_index" value="32" checked' in html
 
 
 def test_generate_clip_grid():
