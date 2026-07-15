@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Optional
 
 from core.config import MSETS_DIRECTORY
-from core.pad_colors import PAD_COLORS
+from core.pad_colors import PAD_COLORS, move_color_to_ui
 
 SETTINGS_FILE = '/data/UserData/settings/Settings.json'
 SETS_ROOT = MSETS_DIRECTORY
@@ -96,7 +96,8 @@ def get_sets_data() -> dict:
             scale = parsed.get('scale')
             camelot = _key_to_camelot(key, scale) if key and scale else None
 
-            rgb = PAD_COLORS.get(xattr_color)
+            color_id = move_color_to_ui(xattr_color)
+            rgb = PAD_COLORS.get(color_id)
             color_css = f'rgb({rgb[0]},{rgb[1]},{rgb[2]})' if rgb else None
 
             sets_data.append({
@@ -110,6 +111,7 @@ def get_sets_data() -> dict:
                 'camelot':     camelot,
                 'slot':        slot,
                 'xattr_color': xattr_color,
+                'color_id':    color_id,
                 'color_css':   color_css,
             })
     except Exception:

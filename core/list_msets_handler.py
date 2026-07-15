@@ -2,6 +2,7 @@ import os
 import subprocess
 import json
 from core.config import MSETS_DIRECTORY
+from core.pad_colors import move_color_to_ui
 
 def get_xattr_value(relative_path, attr):
     """
@@ -71,6 +72,7 @@ def list_msets(return_free_ids=False):
             mset_extmodified = get_xattr_value(uuid, "user.was-externally-modified")
 
             mset_id_value = int(mset_id) if mset_id.isdigit() else 9999
+            mset_color_value = int(mset_color) if mset_color.isdigit() else None
 
             # Parse BPM from Song.abl
             bpm = None
@@ -82,7 +84,7 @@ def list_msets(return_free_ids=False):
                 "uuid": uuid,
                 "mset_name": mset_name,
                 "mset_id": mset_id_value,
-                "mset_color": mset_color if mset_color.isdigit() else "Unknown",
+                "mset_color": move_color_to_ui(mset_color_value) if mset_color_value is not None else "Unknown",
                 "mset_cloudstate": mset_cloudstate,
                 "mset_modifiedtime": mset_modifiedtime,
                 "mset_extmodified": mset_extmodified,

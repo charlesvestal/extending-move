@@ -261,13 +261,24 @@ def warm_up_modules():
 @app.route("/overview")
 def overview():
     """Render the Move Over (view) overview page."""
-    return render_template("overview.html", active_tab="overview")
+    return render_template(
+        "overview.html",
+        active_tab="overview",
+        pad_grid=overview_handler.generate_pad_grid_html(),
+    )
 
 
 @app.route("/overview/api/data")
 def overview_api_data():
     """Return full sets data as JSON."""
     return jsonify(get_sets_data())
+
+
+@app.route("/overview/api/grid")
+def overview_api_grid():
+    restore_mode = request.args.get("restore_mode") == "1"
+    camelot = request.args.get("camelot")
+    return jsonify({"pad_grid": overview_handler.generate_pad_grid_html(restore_mode, camelot)})
 
 
 @app.route("/overview/api/active-slot")

@@ -29,8 +29,10 @@ class BaseHandler:
         name_map: Optional[Dict[int, str]] = None,
         bpm_map: Optional[Dict[int, str]] = None,
         selected_idx: Optional[int] = None,
+        active_idx: Optional[int] = None,
         input_name: str = "pad_index",
         free_only: bool = False,
+        view_only: bool = False,
     ) -> str:
         """Generate HTML for a 32-pad grid showing set occupancy with colors, names, and BPM.
 
@@ -69,6 +71,7 @@ class BaseHandler:
                     disabled = "" if has_set else "disabled"
 
                 status = "occupied" if has_set else "free"
+                active = " active" if active_idx is not None and idx == active_idx else ""
                 checked = " checked" if selected_idx is not None and idx == selected_idx else ""
                 color_id = color_map.get(idx)
                 # Generate semi-transparent background + solid border like Overview page
@@ -90,9 +93,10 @@ class BaseHandler:
 
                 cells.append(
                     f'<input type="radio" id="pad_{num}" name="{input_name}" value="{num}"{checked} {disabled}>'
-                    f'<label for="pad_{num}" class="pad-cell {status}"{style}>{inner_html}</label>'
+                    f'<label for="pad_{num}" class="pad-cell {status}{active}"{style}>{inner_html}</label>'
                 )
-        return '<div class="pad-grid">' + "".join(cells) + "</div>"
+        grid_class = "pad-grid view-only" if view_only else "pad-grid"
+        return f'<div class="{grid_class}">' + "".join(cells) + "</div>"
 
     def __init__(self):
         """
