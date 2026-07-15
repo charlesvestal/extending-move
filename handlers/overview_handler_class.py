@@ -13,6 +13,38 @@ class OverviewHandler(BaseHandler):
         """Return full sets data as JSON."""
         return get_sets_data()
 
+    def generate_pad_grid_html(self, restore_mode=False, camelot=None):
+        data = get_sets_data()
+        sets = data.get("sets", [])
+        if camelot and not restore_mode:
+            sets = [set_data for set_data in sets if set_data.get("camelot") == camelot]
+        used_ids = {set_data["slot"] for set_data in sets if set_data.get("slot") is not None}
+        color_map = {
+            set_data["slot"]: set_data["color_id"]
+            for set_data in sets
+            if set_data.get("slot") is not None and set_data.get("color_id") is not None
+        }
+        name_map = {
+            set_data["slot"]: set_data["name"]
+            for set_data in sets
+            if set_data.get("slot") is not None
+        }
+        bpm_map = {
+            set_data["slot"]: str(set_data["bpm"])
+            for set_data in sets
+            if set_data.get("slot") is not None and set_data.get("bpm") is not None
+        }
+        return self.generate_pad_grid(
+            used_ids,
+            color_map,
+            name_map,
+            bpm_map,
+            active_idx=data.get("current_slot"),
+            input_name="overview_pad",
+            free_only=restore_mode,
+            view_only=not restore_mode,
+        )
+
     def handle_get_active_slot(self):
         """Return only the current active pad slot."""
         return {'current_slot': get_active_slot()}
