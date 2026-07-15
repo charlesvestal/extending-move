@@ -53,6 +53,10 @@ class OverviewHandler(BaseHandler):
                 result = restore_abl(filepath, pad_selected, pad_color)
 
             self.cleanup_upload(filepath)
+            if result.get("success"):
+                result["message"] = result["message"].replace(
+                    f"pad {pad_selected}", f"pad {pad_selected + 1}"
+                )
             return result
 
         except Exception as e:
