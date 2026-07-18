@@ -6,7 +6,7 @@ import os
 import time
 import subprocess
 import sys
-from typing import List, Dict, Any, Tuple
+from typing import List, Dict, Any, Tuple, Optional
 
 import requests
 import importlib.util
@@ -17,7 +17,7 @@ from handlers.base_handler import BaseHandler
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
 
 
-def _headers() -> dict | None:
+def _headers() -> Optional[dict]:
     if GITHUB_TOKEN:
         return {"Authorization": f"token {GITHUB_TOKEN}"}
     return None
@@ -47,7 +47,7 @@ logger = logging.getLogger(__name__)
 
 def fetch_commits_since(
     repo: str, branch: str, since_sha: str, limit: int = 50
-) -> Tuple[List[Dict[str, Any]], bool, str | None]:
+) -> Tuple[List[Dict[str, Any]], bool, Optional[str]]:
     """Return commits on ``branch`` after ``since_sha`` limited to ``limit`` commits.
 
     Returns ``(commits, truncated, error_message)`` where ``truncated`` indicates
@@ -56,7 +56,7 @@ def fetch_commits_since(
     url = f"https://api.github.com/repos/{repo}/commits?sha={branch}"
     commits: List[Dict[str, Any]] = []
     truncated = False
-    error_message: str | None = None
+    error_message: Optional[str] = None
     headers = _headers()
     while url and len(commits) < limit:
         try:
@@ -95,7 +95,7 @@ class UpdateHandler(BaseHandler):
     def __init__(self) -> None:
         super().__init__()
         self._last_check = 0.0
-        self._cached_info: Dict[str, Any] | None = None
+        self._cached_info: Optional[Dict[str, Any]] = None
 
     def check_for_update(self) -> Dict[str, Any]:
         now = time.time()
@@ -122,7 +122,7 @@ class UpdateHandler(BaseHandler):
         has_update = last_sha != latest_sha
         commits: List[Dict[str, Any]]
         truncated: bool
-        commit_error: str | None = None
+        commit_error: Optional[str] = None
         if has_update:
             commits, truncated, commit_error = fetch_commits_since(
                 REPO, branch, last_sha, limit=50

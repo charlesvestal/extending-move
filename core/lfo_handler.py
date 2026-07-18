@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Defaults for the LFO visualizer."""
 
-from typing import Dict
+from typing import Dict, Union
 
 
-def get_lfo_defaults() -> Dict[str, float | str]:
+def get_lfo_defaults() -> Dict[str, Union[float, str]]:
     """Return default values for the LFO visualizer."""
     return {
         "shape": "sine",

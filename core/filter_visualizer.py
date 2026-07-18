@@ -1,3 +1,5 @@
+from typing import Optional
+
 import numpy as np
 from scipy import signal
 
@@ -98,7 +100,7 @@ def compute_filter_response(
 
 def compute_chain_response(
     filter1: dict,
-    filter2: dict | None = None,
+    filter2: Optional[dict] = None,
     routing: str = "Serial",
     sr: int = 44100,
     n: int = 512,

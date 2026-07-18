@@ -4,6 +4,7 @@ import json
 import logging
 import shutil
 import re
+from typing import Optional
 
 from handlers.base_handler import BaseHandler
 from core.file_browser import generate_dir_html
@@ -929,7 +930,7 @@ class WavetableParamEditorHandler(BaseHandler):
             ordered.extend(items.values())
         return ordered
 
-    def _arrange_lfo_panel(self, items: dict, idx: int | None = None) -> list:
+    def _arrange_lfo_panel(self, items: dict, idx: Optional[int] = None) -> list:
         """Return LFO panel rows with a visualization canvas."""
         ordered = []
         canvas_id = f"lfo{idx}-canvas" if idx else "lfo-canvas"
