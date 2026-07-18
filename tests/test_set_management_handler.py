@@ -211,3 +211,36 @@ def test_assign_midi_to_track_invalid_track(monkeypatch, tmp_path):
     assert not result["success"]
     assert "Invalid track number" in result["message"]
 
+
+def test_sanitize_set_name_rejects_traversal():
+    """Path traversal attempts in set_name are rejected."""
+    assert sm.sanitize_set_name("../../../etc/passwd") is None
+    assert sm.sanitize_set_name("..") is None
+    assert sm.sanitize_set_name("foo/bar") is None
+    assert sm.sanitize_set_name("foo\\bar") is None
+    assert sm.sanitize_set_name("") is None
+    assert sm.sanitize_set_name(None) is None
+    # Valid names pass through
+    assert sm.sanitize_set_name("My Set") == "My Set"
+    assert sm.sanitize_set_name("Set-123") == "Set-123"
+
+
+def test_assign_midi_to_track_rejects_traversal(monkeypatch, tmp_path):
+    """Path traversal in set_name is rejected before any file operations."""
+    midi_path = tmp_path / "trav.mid"
+    _make_midi(midi_path)
+
+    result = sm.assign_midi_to_track("../../../etc/evil", str(midi_path), target_track=1)
+    assert not result["success"]
+    assert "Invalid set name" in result["message"]
+
+
+def test_generate_drum_set_from_file_rejects_traversal(monkeypatch, tmp_path):
+    """Path traversal in set_name is rejected for drum import."""
+    midi_path = tmp_path / "d.mid"
+    _make_midi(midi_path)
+
+    result = sm.generate_drum_set_from_file("../../evil", str(midi_path), tempo=120.0)
+    assert not result["success"]
+    assert "Invalid set name" in result["message"]
+

@@ -2,10 +2,25 @@ import os
 import json
 import copy
 import math
+import re
 import mido
 from typing import Dict, List, Any, Optional
 
 from core.utils import load_set_template
+
+
+def sanitize_set_name(set_name: str) -> Optional[str]:
+    """Sanitize set_name to prevent path traversal.
+    Returns a safe name or None if the name is invalid."""
+    if not set_name or not isinstance(set_name, str):
+        return None
+    # Reject any path separators or traversal attempts
+    if '/' in set_name or '\\' in set_name or '..' in set_name:
+        return None
+    # Allow alphanumeric, spaces, hyphens, underscores
+    if not re.match(r'^[\w\s\-]+$', set_name):
+        return None
+    return set_name
 
 def create_set(set_name):
     """
@@ -100,6 +115,10 @@ def generate_midi_set_from_file(set_name: str, midi_file_path: str, tempo: float
         Result dictionary with success status and message
     """
     try:
+        safe_name = sanitize_set_name(set_name)
+        if not safe_name:
+            return {'success': False, 'message': 'Invalid set name: use only letters, numbers, spaces, hyphens, and underscores'}
+        
         # Load the MIDI file
         mid = mido.MidiFile(midi_file_path)
         
@@ -236,6 +255,10 @@ def generate_drum_set_from_file(set_name: str, midi_file_path: str, tempo: float
     mapping incoming notes to 16 pads starting at MIDI note 36.
     """
     try:
+        safe_name = sanitize_set_name(set_name)
+        if not safe_name:
+            return {'success': False, 'message': 'Invalid set name: use only letters, numbers, spaces, hyphens, and underscores'}
+        
         # Load the MIDI file
         mid = mido.MidiFile(midi_file_path)
 
@@ -514,6 +537,10 @@ def assign_midi_to_track(set_name: str, midi_file_path: str, target_track: int,
         Result dictionary with success status and message
     """
     try:
+        safe_name = sanitize_set_name(set_name)
+        if not safe_name:
+            return {'success': False, 'message': 'Invalid set name: use only letters, numbers, spaces, hyphens, and underscores'}
+        
         # Validate track number
         if target_track < 1 or target_track > 4:
             return {

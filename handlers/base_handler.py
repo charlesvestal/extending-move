@@ -3,6 +3,7 @@ import html
 import os
 import shutil
 import logging
+import tempfile
 from typing import Dict, Any, Optional, Tuple, Set
 from core.pad_colors import rgb_string
 
@@ -153,10 +154,12 @@ class BaseHandler:
 
         try:
             filename = os.path.basename(file_field.filename)
-            filepath = os.path.join(self.upload_dir, filename)
-            
-            # Ensure upload directory exists
-            os.makedirs(self.upload_dir, exist_ok=True)
+            # Use a unique temp name to avoid collisions between concurrent uploads
+            fd, filepath = tempfile.mkstemp(
+                suffix=os.path.splitext(filename)[1],
+                dir=self.upload_dir,
+            )
+            os.close(fd)
             
             # Save the file
             with open(filepath, "wb") as f:
@@ -190,10 +193,13 @@ class BaseHandler:
 
         try:
             filename = os.path.basename(file_item.filename)
-            filepath = os.path.join(self.upload_dir, filename)
-            
-            # Ensure upload directory exists
-            os.makedirs(self.upload_dir, exist_ok=True)
+            # Use a unique temp name to avoid collisions between concurrent uploads
+            # with the same basename (e.g. two files named clip.mid)
+            fd, filepath = tempfile.mkstemp(
+                suffix=os.path.splitext(filename)[1],
+                dir=self.upload_dir,
+            )
+            os.close(fd)
             
             # Save the file
             with open(filepath, "wb") as f:

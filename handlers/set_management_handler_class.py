@@ -138,6 +138,16 @@ class SetManagementHandler(BaseHandler):
                     files = [files]
                 for i, fileitem in enumerate(files):
                     if hasattr(fileitem, 'filename') and fileitem.filename:
+                        # Server-side extension validation
+                        if not fileitem.filename.lower().endswith(('.mid', '.midi')):
+                            return self.format_error_response(
+                                f"File '{fileitem.filename}' is not a MIDI file. Only .mid and .midi files are accepted.",
+                                pad_options=pad_options,
+                                pad_color_options=pad_color_options,
+                                clip_color_options=clip_color_options,
+                                pad_grid=pad_grid,
+                                existing_set_options=existing_set_options,
+                            )
                         file_list.append((i, fileitem))
             
             if not file_list:
