@@ -6,6 +6,7 @@ import mido
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 
 import core.set_management_handler as sm
+from handlers.set_management_handler_class import SetManagementHandler
 
 
 def patch_output(monkeypatch, tmp_path):
@@ -243,4 +244,81 @@ def test_generate_drum_set_from_file_rejects_traversal(monkeypatch, tmp_path):
     result = sm.generate_drum_set_from_file("../../evil", str(midi_path), tempo=120.0)
     assert not result["success"]
     assert "Invalid set name" in result["message"]
+
+
+class _FakeFileItem:
+    def __init__(self, filename, data=b"data"):
+        self.filename = filename
+        self.file = __import__("io").BytesIO(data)
+
+
+class _FakeForm(dict):
+    def getvalue(self, key, default=None):
+        return self.get(key, default)
+
+
+def test_existing_set_uuid_not_found_errors(monkeypatch):
+    """When UUID is not found for an existing set, handler returns a clear error."""
+    handler = SetManagementHandler()
+
+    # Mock list_msets to return sets that don't match the requested name
+    monkeypatch.setattr(
+        "handlers.set_management_handler_class.list_msets",
+        lambda return_free_ids=False: ([], {"used": set(), "free": list(range(32))})
+    )
+
+    form = _FakeForm()
+    form["action"] = "upload_midi"
+    form["midi_type"] = "melodic"
+    form["set_mode"] = "existing"
+    form["existing_set_name"] = "Nonexistent Set"
+    form["midi_files"] = _FakeFileItem("test.mid")
+
+    result = handler.handle_post(form)
+    assert result["message_type"] == "error"
+    assert "Could not find" in result["message"]
+
+
+def test_partial_failure_reports_error(monkeypatch, tmp_path):
+    """When some files in a batch fail, result is success:False with details."""
+    handler = SetManagementHandler()
+
+    monkeypatch.setattr(
+        "handlers.set_management_handler_class.list_msets",
+        lambda return_free_ids=False: ([], {"used": set(), "free": list(range(32))})
+    )
+
+    # Mock save_uploaded_file to return temp paths
+    monkeypatch.setattr(handler, "save_uploaded_file", lambda f: (True, str(tmp_path / f.filename), None))
+    monkeypatch.setattr(handler, "cleanup_upload", lambda p: None)
+
+    # Mock assign_midi_to_track: first call succeeds, second fails
+    call_count = [0]
+    def fake_assign(set_name, midi_path, target_track, existing_path, tempo, clip_color):
+        call_count[0] += 1
+        if call_count[0] == 1:
+            return {"success": True, "message": "ok", "path": str(tmp_path / "out.abl")}
+        return {"success": False, "message": "Track 2 has no empty clip slots"}
+
+    monkeypatch.setattr("handlers.set_management_handler_class.assign_midi_to_track", fake_assign)
+
+    # Create temp files so save_uploaded_file's returned paths exist
+    (tmp_path / "a.mid").write_bytes(b"data")
+    (tmp_path / "b.mid").write_bytes(b"data")
+
+    form = _FakeForm()
+    form["action"] = "upload_midi"
+    form["midi_type"] = "melodic"
+    form["set_mode"] = "new"
+    form["set_name"] = "TestSet"
+    form["pad_color"] = "1"
+    form["track_0"] = "1"
+    form["track_1"] = "2"
+    form["midi_files"] = [_FakeFileItem("a.mid"), _FakeFileItem("b.mid")]
+
+    result = handler.handle_post(form)
+    assert result["message_type"] == "error"
+    assert "Partial failure" in result["message"]
+    assert "a.mid" in result["message"]
+    assert "b.mid" in result["message"]
 

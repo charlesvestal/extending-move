@@ -123,10 +123,14 @@ class SetManagementHandler(BaseHandler):
                 if existing_uuid:
                     existing_path = os.path.join("/data/UserData/UserLibrary/Sets", existing_uuid, existing_set_name, "Song.abl")
                 else:
-                    # Fallback - try direct path
-                    existing_path = os.path.join("/data/UserData/UserLibrary/Sets", existing_set_name)
-                    if not existing_path.endswith('.abl'):
-                        existing_path += '.abl'
+                    return self.format_error_response(
+                        f"Could not find set '{existing_set_name}' in the library. It may have been renamed or removed.",
+                        pad_options=pad_options,
+                        pad_color_options=pad_color_options,
+                        clip_color_options=clip_color_options,
+                        pad_grid=pad_grid,
+                        existing_set_options=existing_set_options,
+                    )
                 final_set_name = existing_set_name
             
             # Handle file uploads - support multiple files
@@ -248,7 +252,7 @@ class SetManagementHandler(BaseHandler):
                             'message': "All imports failed: " + "; ".join(errors)
                         }
                     else:
-                        # Mixed results
+                        # Mixed results - report as error so user sees red banner
                         success_files = [r['filename'] for r in results if r.get('success')]
                         failed_files = [f"{r['filename']}: {r.get('message', 'Unknown error')}" for r in results if not r.get('success')]
                         # Find path from first successful result
@@ -258,9 +262,9 @@ class SetManagementHandler(BaseHandler):
                                 first_success_path = r.get('path')
                                 break
                         result = {
-                            'success': True,  # Partial success
-                            'message': f"Partial success: {success_count} succeeded ({', '.join(success_files)}), {failure_count} failed ({'; '.join(failed_files)})",
-                            'path': first_success_path  # Include path if any succeeded (for new set bundling)
+                            'success': False,
+                            'message': f"Partial failure: {success_count} succeeded ({', '.join(success_files)}), {failure_count} failed ({'; '.join(failed_files)})",
+                            'path': first_success_path
                         }
                 
                 finally:
