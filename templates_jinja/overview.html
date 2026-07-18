@@ -54,7 +54,7 @@
     </div>
 
     <!-- Main Pad Grid (shared between view and restore modes) -->
-    <div class="overview-pad-grid" id="pad-grid"></div>
+    <div id="pad-grid">{{ pad_grid|safe }}</div>
 
     <div style="margin:1rem 0;">
         <label style="display:inline;font-weight:400;margin-right:0.5rem;">Filter by Camelot key:</label>
@@ -152,59 +152,6 @@
         transition: width 0.4s;
     }
     .overview-bar-mem { background: #8b5cf6; }
-
-    .overview-pad-grid {
-        display: grid;
-        grid-template-columns: repeat(8, 1fr);
-        gap: 0.35rem;
-        margin-bottom: 1.5rem;
-        max-width: 1100px;
-    }
-    .overview-pad-cell {
-        background: var(--ov-pad-empty);
-        color: var(--ov-text);
-        border-radius: 4px;
-        padding: 0.35rem 0.25rem;
-        text-align: center;
-        font-size: 0.8rem;
-        font-weight: 500;
-        aspect-ratio: 4/3;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        border: 2px solid transparent;
-        box-sizing: border-box;
-        overflow: hidden;
-    }
-    .overview-pad-cell.active {
-        border-color: #ff764d !important;
-        box-shadow: 0 0 0 3px rgba(255,118,77,0.5);
-        animation: overview-pulse 2s ease-in-out infinite;
-    }
-    .overview-pad-cell .pad-num {
-        color: var(--ov-text-dim);
-        font-size: 0.7rem;
-        line-height: 1;
-    }
-    .overview-pad-cell .pad-name {
-        font-size: 0.75rem;
-        line-height: 1.2;
-        width: 100%;
-        overflow: hidden;
-        display: -webkit-box;
-        -webkit-line-clamp: 4;
-        -webkit-box-orient: vertical;
-        line-clamp: 4;
-    }
-    .overview-pad-cell .pad-bpm {
-        color: var(--ov-text-mid);
-        font-size: 0.7rem;
-    }
-    @keyframes overview-pulse {
-        0%, 100% { box-shadow: 0 0 0 2px rgba(255,118,77,0.3); }
-        50%       { box-shadow: 0 0 0 5px rgba(255,118,77,0.5); }
-    }
 
     .overview-filter-btn {
         background: transparent;
@@ -330,31 +277,31 @@
         background: var(--ov-bg2);
     }
     /* Restore mode - main grid free pads are selectable */
-    #pad-grid.restore-mode .overview-pad-cell.free {
+    #pad-grid.restore-mode .pad-cell.free {
         cursor: pointer;
         border: 2px dashed #ccc;
     }
-    #pad-grid.restore-mode .overview-pad-cell.free:hover {
+    #pad-grid.restore-mode .pad-cell.free:hover {
         border-color: #0000ff;
         border-style: solid;
     }
-    #pad-grid.restore-mode .overview-pad-cell.free.selected {
+    #pad-grid.restore-mode .pad-cell.free.selected {
         border-color: #0000ff !important;
         border-style: solid !important;
         background: rgba(0,0,255,0.15) !important;
     }
-    #pad-grid.restore-mode .overview-pad-cell.occupied {
+    #pad-grid.restore-mode .pad-cell.occupied {
         opacity: 0.4;
         cursor: not-allowed;
     }
-    #app-wrap.dark #pad-grid.restore-mode .overview-pad-cell.free {
+    #app-wrap.dark #pad-grid.restore-mode .pad-cell.free {
         border-color: #444;
     }
-    #app-wrap.dark #pad-grid.restore-mode .overview-pad-cell.free:hover,
-    #app-wrap.dark #pad-grid.restore-mode .overview-pad-cell.free.selected {
+    #app-wrap.dark #pad-grid.restore-mode .pad-cell.free:hover,
+    #app-wrap.dark #pad-grid.restore-mode .pad-cell.free.selected {
         border-color: #4dd9d9 !important;
     }
-    #app-wrap.dark #pad-grid.restore-mode .overview-pad-cell.free.selected {
+    #app-wrap.dark #pad-grid.restore-mode .pad-cell.free.selected {
         background: rgba(77,217,217,0.2) !important;
     }
     /* Restore form button styling */
@@ -425,7 +372,7 @@
     }
 
     function render(sets, activeSlot) {
-        renderPadGrid(sets, activeSlot);
+        refreshPadGrid();
         renderTable(sets, activeSlot);
     }
 
@@ -433,47 +380,30 @@
     let restoreMode = false;
     let selectedTargetPad = null;
 
-    function renderPadGrid(sets, activeSlot) {
+    async function refreshPadGrid() {
+        const params = new URLSearchParams();
+        if (restoreMode) {
+            params.set('restore_mode', '1');
+        } else if (activeCamelot) {
+            params.set('camelot', activeCamelot);
+        }
+        const res = await fetch(`/overview/api/grid?${params}`);
+        const data = await res.json();
         const grid = document.getElementById('pad-grid');
-        grid.innerHTML = '';
-        const bySlot = {};
-        sets.forEach(s => { if (s.slot != null) bySlot[s.slot] = s; });
-        // Build rows bottom-to-top to match physical Move hardware layout
-        for (let row = 3; row >= 0; row--) {
-            for (let col = 0; col < 8; col++) {
-                const i = row * 8 + col;
-                const cell = document.createElement('div');
-                const s = bySlot[i];
-                if (s) {
-                    // Occupied pad
-                    cell.className = 'overview-pad-cell occupied';
-                    const isDark = document.getElementById('app-wrap').classList.contains('dark');
-                    const isActive = s.slot == activeSlot;
-                    if (s.color_css) cell.style.borderColor = s.color_css;
-                    const toRgba = (css, alpha) => css ? css.replace('rgb(', 'rgba(').replace(')', `, ${alpha})`) : null;
-                    if (isActive) {
-                        cell.style.background = toRgba(s.color_css, 0.4) || (isDark ? 'rgba(255,180,0,0.4)' : 'rgba(255,180,0,0.4)');
-                    } else if (s.color_css) {
-                        cell.style.background = toRgba(s.color_css, isDark ? 0.08 : 0.2);
-                    }
-                    if (isActive) cell.classList.add('active');
-                    cell.title = s.name;
-                    cell.innerHTML = `
-                        <div class="pad-num">${i + 1}</div>
-                        <div class="pad-name">${s.name}</div>
-                        ${s.bpm ? `<div class="pad-bpm">${s.bpm} BPM</div>` : ''}
-                    `;
-                } else {
-                    // Free pad
-                    cell.className = 'overview-pad-cell free';
-                    cell.dataset.padNum = i + 1;
-                    // Add click handler for restore mode
-                    if (restoreMode) {
-                        cell.onclick = () => selectTargetPad(i + 1, cell);
-                    }
-                    cell.innerHTML = `<div class="pad-num">${i + 1}</div>`;
-                }
-                grid.appendChild(cell);
+        grid.innerHTML = data.pad_grid;
+        grid.classList.toggle('restore-mode', restoreMode);
+
+        if (!restoreMode) return;
+
+        grid.querySelectorAll('input[name="overview_pad"]:not(:disabled)').forEach(input => {
+            input.addEventListener('change', () => selectTargetPad(Number(input.value)));
+        });
+
+        if (selectedTargetPad !== null) {
+            const input = document.getElementById(`pad_${selectedTargetPad}`);
+            if (input) {
+                input.checked = true;
+                input.nextElementSibling.classList.add('selected');
             }
         }
     }
@@ -485,16 +415,43 @@
         sorted.forEach(s => {
             const tr = document.createElement('tr');
             if (s.slot == activeSlot) tr.className = 'active-row';
-            const dot = s.color_css ? `<span class="color-dot" style="background:${s.color_css}"></span>` : '';
-            const playing = s.slot == activeSlot ? '<span class="now-playing-badge">NOW PLAYING</span>' : '';
-            tr.innerHTML = `
-                <td>${s.slot != null ? s.slot + 1 : '—'}</td>
-                <td>${dot}${s.name}${playing}</td>
-                <td>${s.bpm ?? '—'}</td>
-                <td>${s.key ?? '—'}</td>
-                <td>${s.mode ?? '—'}</td>
-                <td>${s.camelot ? `<span class="camelot-badge">${s.camelot}</span>` : '—'}</td>
-            `;
+
+            const padCell = document.createElement('td');
+            padCell.textContent = s.slot != null ? s.slot + 1 : '—';
+            tr.appendChild(padCell);
+
+            const nameCell = document.createElement('td');
+            if (s.color_css) {
+                const dot = document.createElement('span');
+                dot.className = 'color-dot';
+                dot.style.background = s.color_css;
+                nameCell.appendChild(dot);
+            }
+            nameCell.append(document.createTextNode(s.name ?? '—'));
+            if (s.slot == activeSlot) {
+                const playing = document.createElement('span');
+                playing.className = 'now-playing-badge';
+                playing.textContent = 'NOW PLAYING';
+                nameCell.appendChild(playing);
+            }
+            tr.appendChild(nameCell);
+
+            [s.bpm, s.key, s.mode].forEach(value => {
+                const cell = document.createElement('td');
+                cell.textContent = value ?? '—';
+                tr.appendChild(cell);
+            });
+
+            const camelotCell = document.createElement('td');
+            if (s.camelot) {
+                const badge = document.createElement('span');
+                badge.className = 'camelot-badge';
+                badge.textContent = s.camelot;
+                camelotCell.appendChild(badge);
+            } else {
+                camelotCell.textContent = '—';
+            }
+            tr.appendChild(camelotCell);
             tbody.appendChild(tr);
         });
     }
@@ -588,92 +545,36 @@
         }
     });
 
-    function renderRestoreGrid(sets) {
-        restoreAllSets = sets;
-        const grid = document.getElementById('restore-pad-grid');
-        grid.innerHTML = '';
-        const bySlot = {};
-        sets.forEach(s => { if (s.slot != null) bySlot[s.slot] = s; });
-
-        // Build rows bottom-to-top to match physical Move hardware layout
-        for (let row = 3; row >= 0; row--) {
-            for (let col = 0; col < 8; col++) {
-                const i = row * 8 + col;
-                const cell = document.createElement('div');
-                const s = bySlot[i];
-                const isDark = document.getElementById('app-wrap').classList.contains('dark');
-
-                if (s) {
-                    // Occupied pad
-                    cell.className = 'overview-pad-cell occupied';
-                    const isActive = s.slot == activeSlot;
-                    if (s.color_css) cell.style.borderColor = s.color_css;
-                    const toRgba = (css, alpha) => css ? css.replace('rgb(', 'rgba(').replace(')', `, ${alpha})`) : null;
-                    if (isActive) {
-                        cell.style.background = toRgba(s.color_css, 0.4) || (isDark ? 'rgba(255,180,0,0.4)' : 'rgba(255,180,0,0.4)');
-                    } else if (s.color_css) {
-                        cell.style.background = toRgba(s.color_css, isDark ? 0.08 : 0.2);
-                    }
-                    if (isActive) cell.classList.add('active');
-                    cell.title = s.name;
-                    cell.innerHTML = `
-                        <div class="pad-num">${i + 1}</div>
-                        <div class="pad-name">${s.name}</div>
-                        ${s.bpm ? `<div class="pad-bpm">${s.bpm} BPM</div>` : ''}
-                    `;
-                } else {
-                    // Free pad - selectable in restore mode
-                    cell.className = 'overview-pad-cell free';
-                    cell.dataset.padNum = i + 1;
-                    // Add click handler only in restore mode
-                    if (restoreMode) {
-                        cell.onclick = () => selectTargetPad(i + 1, cell);
-                    }
-                    cell.innerHTML = `<div class="pad-num">${i + 1}</div>`;
-                }
-                grid.appendChild(cell);
-            }
-        }
-    }
-
-    function toggleRestoreMode() {
+    async function toggleRestoreMode() {
         restoreMode = !restoreMode;
         const btn = document.getElementById('restore-mode-btn');
         const form = document.getElementById('restore-form-container');
-        const grid = document.getElementById('pad-grid');
 
         if (restoreMode) {
             btn.textContent = '✕ Cancel Restore';
             btn.classList.add('active');
             form.style.display = 'block';
-            grid.classList.add('restore-mode');
         } else {
             btn.textContent = '+ Restore Set';
             btn.classList.remove('active');
             form.style.display = 'none';
-            grid.classList.remove('restore-mode');
-            // Clear selection
             selectedTargetPad = null;
             document.getElementById('target_pad').value = '';
             document.getElementById('target-pad-display').innerHTML = 'Click a <strong>free pad</strong> below';
-            document.querySelectorAll('#pad-grid .overview-pad-cell.free').forEach(c => {
-                c.classList.remove('selected');
-            });
         }
-        // Re-render grid to add/remove click handlers
-        const filtered = activeCamelot ? allSets.filter(s => s.camelot === activeCamelot) : allSets;
-        render(filtered, currentSlot);
+
+        await refreshPadGrid();
     }
 
-    function selectTargetPad(padNum, cellElement) {
-        // Deselect previous
-        document.querySelectorAll('#pad-grid .overview-pad-cell.free').forEach(c => {
-            c.classList.remove('selected');
+    function selectTargetPad(padNum) {
+        document.querySelectorAll('#pad-grid .pad-cell.free').forEach(cell => {
+            cell.classList.remove('selected');
         });
 
-        // Select new
         selectedTargetPad = padNum;
-        cellElement.classList.add('selected');
+        const input = document.getElementById(`pad_${padNum}`);
+        input.checked = true;
+        input.nextElementSibling.classList.add('selected');
         document.getElementById('target_pad').value = padNum;
         document.getElementById('target-pad-display').textContent = `Pad ${padNum}`;
         updateRestoreButton();
@@ -711,7 +612,7 @@
                 selectedTargetPad = null;
                 document.getElementById('target_pad').value = '';
                 document.getElementById('target-pad-display').innerHTML = 'Click a <strong>free pad</strong> below';
-                document.querySelectorAll('#pad-grid .overview-pad-cell.free').forEach(c => {
+                document.querySelectorAll('#pad-grid .pad-cell.free').forEach(c => {
                     c.classList.remove('selected');
                 });
                 selectColor(0); // Reset to first color

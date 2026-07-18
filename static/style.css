@@ -714,6 +714,11 @@ nav.breadcrumbs form {
     display: none;
 }
 
+.pad-grid.view-only label {
+    cursor: default;
+    pointer-events: none;
+}
+
 .pad-grid input[type="radio"]:checked + label {
     border-color: #ff764d;
     box-shadow: 0 0 0 3px rgba(255, 118, 77, 0.5);
