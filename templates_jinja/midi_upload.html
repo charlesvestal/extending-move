@@ -38,10 +38,21 @@
                 </select>
                 <small>Required when adding to existing set</small>
             </div>
+            <div class="form-group" id="midi-type-group">
+                <label>MIDI Type:</label>
+                <div>
+                    <input type="radio" name="midi_type" id="midi_type_melodic" value="melodic" checked onchange="updateMidiTypeFields()">
+                    <label for="midi_type_melodic" style="display:inline;font-weight:normal;">Melodic (multi-file, per-track)</label>
+                </div>
+                <div>
+                    <input type="radio" name="midi_type" id="midi_type_drum" value="drum" onchange="updateMidiTypeFields()">
+                    <label for="midi_type_drum" style="display:inline;font-weight:normal;">Drum (808 pad mapping, single file)</label>
+                </div>
+            </div>
             <div class="form-group">
                 <label for="midi_files">MIDI File(s):</label>
                 <input type="file" name="midi_files" id="midi_files" accept=".mid,.midi" multiple required onchange="handleFileSelect()" />
-                <small>Supported formats: .mid, .midi. Select multiple files to assign to different tracks.</small>
+                <small id="midi-files-hint">Supported formats: .mid, .midi. Select multiple files to assign to different tracks.</small>
             </div>
             <div id="file-track-assignments" style="margin-bottom:1rem;">
                 <!-- Dynamic track assignments will appear here -->
@@ -102,7 +113,30 @@ function handleFileSelect() {
     container.innerHTML = html;
 }
 
+function updateMidiTypeFields() {
+    const isDrum = document.getElementById('midi_type_drum').checked;
+    const fileInput = document.getElementById('midi_files');
+    const filesHint = document.getElementById('midi-files-hint');
+    const trackAssignments = document.getElementById('file-track-assignments');
+    const setModeGroup = document.getElementById('set-mode-group');
+
+    if (isDrum) {
+        fileInput.removeAttribute('multiple');
+        filesHint.textContent = 'Supported formats: .mid, .midi. Single file for drum pad mapping.';
+        trackAssignments.innerHTML = '';
+        // Force new set mode for drum import
+        document.getElementById('set_mode_new').checked = true;
+        setModeGroup.style.display = 'none';
+        updateSetModeFields();
+    } else {
+        fileInput.setAttribute('multiple', '');
+        filesHint.textContent = 'Supported formats: .mid, .midi. Select multiple files to assign to different tracks.';
+        setModeGroup.style.display = 'block';
+    }
+}
+
 function updateSetModeFields() {
+    const isDrum = document.getElementById('midi_type_drum').checked;
     const isNew = document.getElementById('set_mode_new').checked;
     const newSetGroup = document.getElementById('new-set-name-group');
     const existingSetGroup = document.getElementById('existing-set-select-group');
@@ -112,7 +146,7 @@ function updateSetModeFields() {
     const setNameInput = document.getElementById('set_name');
     const existingSetSelect = document.getElementById('existing_set_name');
     
-    if (isNew) {
+    if (isNew || isDrum) {
         newSetGroup.style.display = 'block';
         existingSetGroup.style.display = 'none';
         clipColorGroup.style.display = 'none';
@@ -133,6 +167,7 @@ function updateSetModeFields() {
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
+    updateMidiTypeFields();
     updateSetModeFields();
 });
 </script>

@@ -447,6 +447,30 @@ def test_midi_upload_post(client, monkeypatch):
     assert resp.status_code == 200
     assert b'ok' in resp.data
 
+
+def test_midi_upload_drum_post(client, monkeypatch):
+    def fake_post(form):
+        assert form.getvalue('midi_type') == 'drum'
+        return {
+            'message': 'drum set created',
+            'message_type': 'success',
+            'pad_options': '<option value="2">2</option>',
+            'pad_color_options': '<option value="1">1</option>',
+            'pad_grid': '<div class="pad-grid"></div>'
+        }
+    monkeypatch.setattr(move_webserver.set_management_handler, 'handle_post', fake_post)
+    f = (io.BytesIO(b'data'), 'drum.mid')
+    data = {
+        'action': 'upload_midi',
+        'midi_type': 'drum',
+        'set_name': 'DrumSet',
+        'pad_color': '1',
+        'midi_file': f
+    }
+    resp = client.post('/midi-upload', data=data, content_type='multipart/form-data')
+    assert resp.status_code == 200
+    assert b'drum set created' in resp.data
+
 def test_place_files_post(client, monkeypatch):
     def fake_place(form):
         return {'message': 'placed', 'message_type': 'success'}

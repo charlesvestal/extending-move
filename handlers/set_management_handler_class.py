@@ -78,6 +78,11 @@ class SetManagementHandler(BaseHandler):
             # Handle multi-file MIDI upload with track assignments
             set_name = form.getvalue('set_name', '')
             set_mode = form.getvalue('set_mode', 'new')
+            midi_type = form.getvalue('midi_type', 'melodic')
+            
+            # Drum mode always creates a new set
+            if midi_type == 'drum':
+                set_mode = 'new'
             
             # Validate set name for new sets
             pad_color_for_clip = None
@@ -155,85 +160,103 @@ class SetManagementHandler(BaseHandler):
             tempo_str = form.getvalue('tempo')
             tempo = float(tempo_str) if tempo_str and tempo_str.strip() else None
             
-            # Process each file with its track assignment
-            temp_files = []
-            results = []
-            try:
-                for i, fileitem in file_list:
-                    # Get track assignment for this file
-                    track_str = form.getvalue(f'track_{i}', '1')
-                    target_track = int(track_str) if track_str.isdigit() else 1
-                    
-                    # Save uploaded file temporarily
+            # Drum import: single file, 808 pad mapping
+            if midi_type == 'drum':
+                temp_files = []
+                try:
+                    i, fileitem = file_list[0]
                     success, filepath, error_response = self.save_uploaded_file(fileitem)
                     if not success:
-                        results.append({'success': False, 'message': f"File {fileitem.filename}: {error_response.get('message', 'Upload failed')}"})
-                        continue
-                    
-                    temp_files.append(filepath)
-                    
-                    # Determine clip color for this file
-                    file_clip_color = clip_color if set_mode == 'existing' else pad_color_for_clip
-                    
-                    # Process the MIDI file
-                    result = assign_midi_to_track(final_set_name, filepath, target_track, existing_path, tempo, file_clip_color)
-                    result['filename'] = fileitem.filename
-                    result['track'] = target_track
-                    results.append(result)
-                    
-                    # For subsequent files, use the updated existing_path (set was created/modified)
-                    if existing_path is None and result.get('success'):
-                        # First file created the set, update path for subsequent files
-                        output_dir = "/data/UserData/UserLibrary/Sets"
-                        existing_path = os.path.join(output_dir, final_set_name)
-                        if not existing_path.endswith('.abl'):
-                            existing_path += '.abl'
-                
-                # Aggregate results
-                success_count = sum(1 for r in results if r.get('success'))
-                failure_count = len(results) - success_count
-                
-                if failure_count == 0:
-                    # All succeeded
-                    if len(results) == 1:
-                        result = results[0]
+                        result = {'success': False, 'message': f"Upload failed: {error_response.get('message', 'Unknown error')}"}
                     else:
-                        # Build summary message
-                        track_summary = []
-                        for r in results:
-                            track_summary.append(f"{r['filename']} → Track {r['track']}")
-                        result = {
-                            'success': True,
-                            'message': f"Successfully imported {success_count} file(s): " + ", ".join(track_summary),
-                            'path': results[0].get('path')  # Include path from first result for new set bundling
-                        }
-                elif success_count == 0:
-                    # All failed
-                    errors = [f"{r['filename']}: {r.get('message', 'Unknown error')}" for r in results]
-                    result = {
-                        'success': False,
-                        'message': "All imports failed: " + "; ".join(errors)
-                    }
-                else:
-                    # Mixed results
-                    success_files = [r['filename'] for r in results if r.get('success')]
-                    failed_files = [f"{r['filename']}: {r.get('message', 'Unknown error')}" for r in results if not r.get('success')]
-                    # Find path from first successful result
-                    first_success_path = None
-                    for r in results:
-                        if r.get('success') and r.get('path'):
-                            first_success_path = r.get('path')
-                            break
-                    result = {
-                        'success': True,  # Partial success
-                        'message': f"Partial success: {success_count} succeeded ({', '.join(success_files)}), {failure_count} failed ({'; '.join(failed_files)})",
-                        'path': first_success_path  # Include path if any succeeded (for new set bundling)
-                    }
+                        temp_files.append(filepath)
+                        result = generate_drum_set_from_file(set_name, filepath, tempo=tempo)
+                        result['filename'] = fileitem.filename
+                finally:
+                    for fp in temp_files:
+                        self.cleanup_upload(fp)
             
-            finally:
-                # Clean up all temporary files
-                for filepath in temp_files:
-                    self.cleanup_upload(filepath)
+            # Melodic import: multi-file, per-track assignment
+            else:
+                # Process each file with its track assignment
+                temp_files = []
+                results = []
+                try:
+                    for i, fileitem in file_list:
+                        # Get track assignment for this file
+                        track_str = form.getvalue(f'track_{i}', '1')
+                        target_track = int(track_str) if track_str.isdigit() else 1
+                        
+                        # Save uploaded file temporarily
+                        success, filepath, error_response = self.save_uploaded_file(fileitem)
+                        if not success:
+                            results.append({'success': False, 'message': f"File {fileitem.filename}: {error_response.get('message', 'Upload failed')}"})
+                            continue
+                        
+                        temp_files.append(filepath)
+                        
+                        # Determine clip color for this file
+                        file_clip_color = clip_color if set_mode == 'existing' else pad_color_for_clip
+                        
+                        # Process the MIDI file
+                        result = assign_midi_to_track(final_set_name, filepath, target_track, existing_path, tempo, file_clip_color)
+                        result['filename'] = fileitem.filename
+                        result['track'] = target_track
+                        results.append(result)
+                        
+                        # For subsequent files, use the updated existing_path (set was created/modified)
+                        if existing_path is None and result.get('success'):
+                            # First file created the set, update path for subsequent files
+                            output_dir = "/data/UserData/UserLibrary/Sets"
+                            existing_path = os.path.join(output_dir, final_set_name)
+                            if not existing_path.endswith('.abl'):
+                                existing_path += '.abl'
+                    
+                    # Aggregate results
+                    success_count = sum(1 for r in results if r.get('success'))
+                    failure_count = len(results) - success_count
+                    
+                    if failure_count == 0:
+                        # All succeeded
+                        if len(results) == 1:
+                            result = results[0]
+                        else:
+                            # Build summary message
+                            track_summary = []
+                            for r in results:
+                                track_summary.append(f"{r['filename']} → Track {r['track']}")
+                            result = {
+                                'success': True,
+                                'message': f"Successfully imported {success_count} file(s): " + ", ".join(track_summary),
+                                'path': results[0].get('path')  # Include path from first result for new set bundling
+                            }
+                    elif success_count == 0:
+                        # All failed
+                        errors = [f"{r['filename']}: {r.get('message', 'Unknown error')}" for r in results]
+                        result = {
+                            'success': False,
+                            'message': "All imports failed: " + "; ".join(errors)
+                        }
+                    else:
+                        # Mixed results
+                        success_files = [r['filename'] for r in results if r.get('success')]
+                        failed_files = [f"{r['filename']}: {r.get('message', 'Unknown error')}" for r in results if not r.get('success')]
+                        # Find path from first successful result
+                        first_success_path = None
+                        for r in results:
+                            if r.get('success') and r.get('path'):
+                                first_success_path = r.get('path')
+                                break
+                        result = {
+                            'success': True,  # Partial success
+                            'message': f"Partial success: {success_count} succeeded ({', '.join(success_files)}), {failure_count} failed ({'; '.join(failed_files)})",
+                            'path': first_success_path  # Include path if any succeeded (for new set bundling)
+                        }
+                
+                finally:
+                    # Clean up all temporary files
+                    for filepath in temp_files:
+                        self.cleanup_upload(filepath)
 
         else:
             return self.format_error_response(
