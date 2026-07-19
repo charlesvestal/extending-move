@@ -3,10 +3,13 @@ import json
 import copy
 import math
 import re
+import logging
 import mido
 from typing import Dict, List, Any, Optional
 
 from core.utils import load_set_template
+
+logger = logging.getLogger(__name__)
 
 
 def sanitize_set_name(set_name: str) -> Optional[str]:
@@ -723,6 +726,11 @@ def assign_midi_to_track(set_name: str, midi_file_path: str, target_track: int,
         
         with open(output_path, 'w') as f:
             json.dump(song, f, indent=2)
+        
+        # Debug: verify clips were written
+        clip_count = sum(1 for t in song.get('tracks', []) for s in t.get('clipSlots', []) if s.get('clip') is not None)
+        logger.info("assign_midi_to_track: saved %s, mode=%s, track=%d, slot=%d, notes=%d, total_clips=%d, path=%s",
+                     set_name, mode, target_track, empty_slot_idx, len(notes), clip_count, output_path)
         
         return {
             'success': True,

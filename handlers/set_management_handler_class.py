@@ -348,6 +348,15 @@ class SetManagementHandler(BaseHandler):
         with tempfile.TemporaryDirectory() as tmpdir:
             song_abl_path = os.path.join(tmpdir, 'Song.abl')
             shutil.copy(set_path, song_abl_path)
+            # Debug: verify clips in the file being bundled
+            try:
+                import json as _json
+                with open(song_abl_path, 'r') as _f:
+                    _data = _json.load(_f)
+                _clip_count = sum(1 for t in _data.get('tracks', []) for s in t.get('clipSlots', []) if s.get('clip') is not None)
+                logger.info("Bundling: set_path=%s, clips_in_file=%d", set_path, _clip_count)
+            except Exception as _e:
+                logger.warning("Bundling: could not verify clips: %s", _e)
             # Name bundle based on set name without .abl extension
             base_path, _ = os.path.splitext(set_path)
             bundle_path = base_path + '.ablbundle'
@@ -355,6 +364,7 @@ class SetManagementHandler(BaseHandler):
                 zf.write(song_abl_path, 'Song.abl')
             # Restore to device
             restore_result = restore_ablbundle(bundle_path, pad_selected_int, pad_color_int)
+            logger.info("Restore result: success=%s, message=%s", restore_result.get('success'), restore_result.get('message'))
             os.remove(bundle_path)
 
         if restore_result.get('success'):
