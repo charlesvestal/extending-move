@@ -627,20 +627,37 @@ def assign_midi_to_track(set_name: str, midi_file_path: str, target_track: int,
         clip_length = max(4.0, math.ceil(max_end_time / 4.0) * 4.0)
         
         # Load existing set or create new
+        template_clip = None
         if existing_set_path and os.path.exists(existing_set_path):
             # Load existing set
             with open(existing_set_path, 'r') as f:
                 song = json.load(f)
             mode = "updated"
+            # Find an existing clip to use as template for new clips
+            for t in song.get('tracks', []):
+                for slot in t.get('clipSlots', []):
+                    if slot.get('clip') is not None:
+                        template_clip = copy.deepcopy(slot['clip'])
+                        break
+                if template_clip:
+                    break
         else:
             # Create new set from template
             template_path = os.path.join(os.path.dirname(__file__), '..', 'examples', 'Sets', 'midi_template.abl')
             song = load_set_template(template_path)
-            # Clear any existing clips from template
+            # Store a copy of the template's clip structure before clearing
+            template_clip = copy.deepcopy(song['tracks'][0]['clipSlots'][0]['clip'])
+            # Clear all clips from template
             for track in song.get('tracks', []):
                 for slot in track.get('clipSlots', []):
                     slot['clip'] = None
             mode = "created"
+        
+        # Fallback: load template clip if we didn't find one
+        if template_clip is None:
+            template_path = os.path.join(os.path.dirname(__file__), '..', 'examples', 'Sets', 'midi_template.abl')
+            tmpl = load_set_template(template_path)
+            template_clip = copy.deepcopy(tmpl['tracks'][0]['clipSlots'][0]['clip'])
         
         # Validate track index
         track_idx = target_track - 1  # Convert 1-4 to 0-3
@@ -666,18 +683,16 @@ def assign_midi_to_track(set_name: str, midi_file_path: str, target_track: int,
                     'message': f"Track {target_track} has no empty clip slots available"
                 }
             
-            # Create new clip in the empty slot with all required fields
-            new_clip = {
-                'isPlaying': True,
-                'name': '',
-                'color': clip_color if clip_color else 1,
-                'isEnabled': True,
-                'region': {'start': 0.0, 'end': clip_length, 'loop': {'start': 0.0, 'end': clip_length, 'isEnabled': True}},
-                'grooveId': 1,
-                'notes': notes,
-                'stepEditorScrollPosition': 0.0,
-                'envelopes': []
-            }
+            # Create new clip from template structure with our notes
+            new_clip = copy.deepcopy(template_clip)
+            new_clip['isPlaying'] = True
+            new_clip['name'] = ''
+            new_clip['color'] = clip_color if clip_color else 1
+            new_clip['isEnabled'] = True
+            new_clip['region'] = {'start': 0.0, 'end': clip_length, 'loop': {'start': 0.0, 'end': clip_length, 'isEnabled': True}}
+            new_clip['notes'] = notes
+            new_clip['stepEditorScrollPosition'] = 0.0
+            new_clip['envelopes'] = []
             track['clipSlots'][empty_slot_idx]['clip'] = new_clip
             track['name'] = f"Track {target_track}"
         else:

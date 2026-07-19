@@ -88,7 +88,11 @@ def test_generate_drum_set_from_file(monkeypatch, tmp_path):
 
 MINIMAL_TEMPLATE = {
     "tracks": [
-        {"clipSlots": [{"clip": None}, {"clip": None}]},
+        {"clipSlots": [{"clip": {
+            "isPlaying": True, "name": "", "color": 1, "isEnabled": True,
+            "region": {"start": 0.0, "end": 4.0, "loop": {"start": 0.0, "end": 4.0, "isEnabled": True}},
+            "grooveId": 1, "notes": [], "stepEditorScrollPosition": 0.0, "envelopes": []
+        }}, {"clip": None}]},
         {"clipSlots": [{"clip": None}, {"clip": None}]},
         {"clipSlots": [{"clip": None}, {"clip": None}]},
         {"clipSlots": [{"clip": None}, {"clip": None}]},
