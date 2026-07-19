@@ -322,3 +322,53 @@ def test_partial_failure_reports_error(monkeypatch, tmp_path):
     assert "a.mid" in result["message"]
     assert "b.mid" in result["message"]
 
+
+def test_new_set_restore_calls_refresh_library(monkeypatch, tmp_path):
+    """After successful new set restore, refresh_library() should be called."""
+    handler = SetManagementHandler()
+
+    monkeypatch.setattr(
+        "handlers.set_management_handler_class.list_msets",
+        lambda return_free_ids=False: ([], {"used": set(), "free": list(range(32))})
+    )
+
+    monkeypatch.setattr(handler, "save_uploaded_file", lambda f: (True, str(tmp_path / f.filename), None))
+    monkeypatch.setattr(handler, "cleanup_upload", lambda p: None)
+
+    # Mock assign_midi_to_track to succeed
+    monkeypatch.setattr(
+        "handlers.set_management_handler_class.assign_midi_to_track",
+        lambda *a, **kw: {"success": True, "message": "ok", "path": str(tmp_path / "out.abl")}
+    )
+
+    # Create the .abl file so bundling can copy it
+    (tmp_path / "out.abl").write_text("{}")
+
+    # Mock restore_ablbundle to succeed
+    monkeypatch.setattr(
+        "handlers.set_management_handler_class.restore_ablbundle",
+        lambda *a, **kw: {"success": True, "message": "Restored"}
+    )
+
+    # Track refresh_library calls
+    refresh_called = [False]
+    def track_refresh():
+        refresh_called[0] = True
+    monkeypatch.setattr("handlers.set_management_handler_class.refresh_library", track_refresh)
+
+    (tmp_path / "test.mid").write_bytes(b"data")
+
+    form = _FakeForm()
+    form["action"] = "upload_midi"
+    form["midi_type"] = "melodic"
+    form["set_mode"] = "new"
+    form["set_name"] = "TestSet"
+    form["pad_index"] = "1"
+    form["pad_color"] = "1"
+    form["track_0"] = "1"
+    form["midi_files"] = [_FakeFileItem("test.mid")]
+
+    result = handler.handle_post(form)
+    assert result["message_type"] == "success"
+    assert refresh_called[0], "refresh_library() was not called after new set restore"
+

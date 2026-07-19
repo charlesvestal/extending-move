@@ -364,6 +364,9 @@ class SetManagementHandler(BaseHandler):
             except Exception as e:
                 logger.warning("Failed to clean up set file %s: %s", set_path, e)
 
+            # Refresh library so Move picks up the new set
+            refresh_library()
+
             # Refresh pad list after successful placement
             msets_updated, updated_ids = list_msets(return_free_ids=True)
             updated_free_pads = sorted([pad_id + 1 for pad_id in updated_ids.get("free", [])])
