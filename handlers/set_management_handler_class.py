@@ -3,6 +3,7 @@ import os
 import zipfile
 import tempfile
 import shutil
+import subprocess
 import logging
 from core.set_management_handler import (
     create_set, generate_midi_set_from_file, generate_drum_set_from_file,
@@ -102,6 +103,7 @@ class SetManagementHandler(BaseHandler):
             
             # Validate existing set selection for existing mode
             existing_path = None
+            existing_uuid = None
             final_set_name = set_name
             if set_mode == 'existing':
                 existing_set_name = form.getvalue('existing_set_name', '')
@@ -115,7 +117,6 @@ class SetManagementHandler(BaseHandler):
                         existing_set_options=existing_set_options,
                     )
                 # Find the set's UUID to construct correct path
-                existing_uuid = None
                 for m in msets:
                     if m["mset_name"] == existing_set_name:
                         existing_uuid = m["uuid"]
@@ -296,7 +297,14 @@ class SetManagementHandler(BaseHandler):
         is_add_to_existing = set_mode == 'existing'
 
         if is_add_to_existing:
-            # For existing set mode, file is already saved - refresh library so Move picks up the change
+            # For existing set mode, file is already saved
+            # Set was-externally-modified so Move reloads the Song.abl
+            if existing_uuid:
+                uuid_dir = os.path.join("/data/UserData/UserLibrary/Sets", existing_uuid)
+                try:
+                    subprocess.run(["setfattr", "-n", "user.was-externally-modified", "-v", "true", uuid_dir], check=True)
+                except Exception as e:
+                    logger.warning("Failed to set was-externally-modified: %s", e)
             refresh_library()
             existing_set_name = form.getvalue('existing_set_name', '')
             return self.format_success_response(
@@ -348,15 +356,6 @@ class SetManagementHandler(BaseHandler):
         with tempfile.TemporaryDirectory() as tmpdir:
             song_abl_path = os.path.join(tmpdir, 'Song.abl')
             shutil.copy(set_path, song_abl_path)
-            # Debug: verify clips in the file being bundled
-            try:
-                import json as _json
-                with open(song_abl_path, 'r') as _f:
-                    _data = _json.load(_f)
-                _clip_count = sum(1 for t in _data.get('tracks', []) for s in t.get('clipSlots', []) if s.get('clip') is not None)
-                logger.info("Bundling: set_path=%s, clips_in_file=%d", set_path, _clip_count)
-            except Exception as _e:
-                logger.warning("Bundling: could not verify clips: %s", _e)
             # Name bundle based on set name without .abl extension
             base_path, _ = os.path.splitext(set_path)
             bundle_path = base_path + '.ablbundle'
@@ -364,7 +363,6 @@ class SetManagementHandler(BaseHandler):
                 zf.write(song_abl_path, 'Song.abl')
             # Restore to device
             restore_result = restore_ablbundle(bundle_path, pad_selected_int, pad_color_int)
-            logger.info("Restore result: success=%s, message=%s", restore_result.get('success'), restore_result.get('message'))
             os.remove(bundle_path)
 
         if restore_result.get('success'):

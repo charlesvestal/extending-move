@@ -55,7 +55,7 @@ if [ -f "$PID_FILE" ]; then
   fi
   rm -f "$PID_FILE"
 else
-  pkill -f 'python3 move-webserver.py' || true
+  pkill -f 'python3.*move-webserver.py' || true
 fi
 
 # Clean up any old log file
