@@ -101,26 +101,44 @@ def test_lfo_get(client, monkeypatch):
     assert b'id="amount"' in resp.data
     assert b'id="attack"' in resp.data
 
-def test_restore_get(client, monkeypatch):
-    def fake_get():
-        return {'options': '<option value="1">1</option>', 'pad_grid': '<div class="pad-grid"></div>', 'message': ''}
-    monkeypatch.setattr(move_webserver.restore_handler, 'handle_get', fake_get)
+def test_restore_get(client):
     resp = client.get('/restore')
-    assert resp.status_code == 200
-    assert b'class="pad-grid"' in resp.data
+    assert resp.status_code == 302
+    assert resp.headers['Location'].endswith('/overview')
 
-def test_restore_post(client, monkeypatch):
-    def fake_handle_post(form):
-        return {'message': 'restored', 'message_type': 'success', 'pad_grid': '<div class="pad-grid"></div>', 'options': ''}
-    monkeypatch.setattr(move_webserver.restore_handler, 'handle_post', fake_handle_post)
-    data = {
-        'action': 'restore_ablbundle',
-        'mset_index': '1',
-        'mset_color': '1'
-    }
-    resp = client.post('/restore', data=data, content_type='multipart/form-data')
+
+def test_restore_post(client):
+    resp = client.post('/restore')
+    assert resp.status_code == 302
+    assert resp.headers['Location'].endswith('/overview')
+
+
+def test_overview_restore_post(client, monkeypatch):
+    def fake_handle_post_restore(form):
+        assert form.getvalue('target_pad') == '8'
+        assert form.getvalue('pad_color') == '4'
+        assert form['ablbundle'].filename == 'test.ablbundle'
+        assert form['ablbundle'].file.read() == b'bundle-data'
+        return {'success': True, 'message': 'restored'}
+
+    monkeypatch.setattr(
+        move_webserver.overview_handler,
+        'handle_post_restore',
+        fake_handle_post_restore,
+    )
+    resp = client.post(
+        '/overview/api/restore',
+        data={
+            'target_pad': '8',
+            'pad_color': '4',
+            'ablbundle': (io.BytesIO(b'bundle-data'), 'test.ablbundle'),
+        },
+        content_type='multipart/form-data',
+    )
+
     assert resp.status_code == 200
-    assert b'restored' in resp.data
+    assert resp.json == {'success': True, 'message': 'restored'}
+
 
 def test_slice_post(client, monkeypatch):
     def fake_handle_post(form):
@@ -429,6 +447,30 @@ def test_midi_upload_post(client, monkeypatch):
     assert resp.status_code == 200
     assert b'ok' in resp.data
 
+
+def test_midi_upload_drum_post(client, monkeypatch):
+    def fake_post(form):
+        assert form.getvalue('midi_type') == 'drum'
+        return {
+            'message': 'drum set created',
+            'message_type': 'success',
+            'pad_options': '<option value="2">2</option>',
+            'pad_color_options': '<option value="1">1</option>',
+            'pad_grid': '<div class="pad-grid"></div>'
+        }
+    monkeypatch.setattr(move_webserver.set_management_handler, 'handle_post', fake_post)
+    f = (io.BytesIO(b'data'), 'drum.mid')
+    data = {
+        'action': 'upload_midi',
+        'midi_type': 'drum',
+        'set_name': 'DrumSet',
+        'pad_color': '1',
+        'midi_file': f
+    }
+    resp = client.post('/midi-upload', data=data, content_type='multipart/form-data')
+    assert resp.status_code == 200
+    assert b'drum set created' in resp.data
+
 def test_place_files_post(client, monkeypatch):
     def fake_place(form):
         return {'message': 'placed', 'message_type': 'success'}
@@ -458,7 +500,7 @@ def test_refresh_get(client, monkeypatch):
 def test_index_redirect(client):
     resp = client.get('/')
     assert resp.status_code == 302
-    assert resp.headers['Location'].endswith('/restore')
+    assert resp.headers['Location'].endswith('/overview')
 
 
 def test_browse_dir(client, tmp_path):

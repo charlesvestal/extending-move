@@ -39,7 +39,7 @@ def test_generate_pad_grid():
     assert html.count('class="pad-cell occupied"') == 2
     assert html.count('name="pad_index"') == 32
     # Selected pad should have "checked" attribute
-    assert 'inspect_pad_32" name="pad_index" value="32" checked' in html
+    assert 'id="pad_32" name="pad_index" value="32" checked' in html
 
 
 def test_generate_clip_grid():
@@ -195,3 +195,20 @@ def test_set_read_only_round_trip(tmp_path):
     for p in (song, sample_file, sample_dir, root, root.parent):
         assert os.stat(p).st_mode & 0o222 != 0
     assert not sih.is_read_only(str(song))
+
+
+def test_get_clip_data_null_clip(tmp_path):
+    """get_clip_data should return a clear error for empty clip slots."""
+    song = tmp_path / "Song.abl"
+    track = {
+        "name": "Track1",
+        "devices": [],
+        "clipSlots": [
+            {"clip": None},
+            {"clip": None},
+        ],
+    }
+    song.write_text(json.dumps({"tracks": [track]}))
+    result = sih.get_clip_data(str(song), 0, 0)
+    assert not result["success"]
+    assert "empty" in result["message"].lower()

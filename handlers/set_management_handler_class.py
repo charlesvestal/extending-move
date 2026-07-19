@@ -3,14 +3,17 @@ import os
 import zipfile
 import tempfile
 import shutil
+import subprocess
 import logging
 from core.set_management_handler import (
     create_set, generate_midi_set_from_file, generate_drum_set_from_file,
-    generate_c_major_chord_example
+    generate_c_major_chord_example, generate_multichannel_midi_set,
+    assign_midi_to_track
 )
 from core.list_msets_handler import list_msets
 from core.restore_handler import restore_ablbundle
-from core.pad_colors import PAD_COLORS, PAD_COLOR_LABELS, rgb_string
+from core.refresh_handler import refresh_library
+from core.pad_colors import PAD_COLORS, PAD_COLOR_LABELS
 import json
 
 logger = logging.getLogger(__name__)
@@ -26,12 +29,24 @@ class SetManagementHandler(BaseHandler):
         pad_options = ''.join(f'<option value="{pad}">{pad}</option>' for pad in free_pads)
         pad_options = '<option value="" disabled selected>-- Select Pad --</option>' + pad_options
         pad_color_options = self.generate_color_options()
+        # Generate color dropdown with swatches for clip color (same visual style as pad color)
+        clip_color_options = self.generate_color_options(input_name="clip_color")
         color_map = {int(m["mset_id"]): int(m["mset_color"]) for m in msets if str(m["mset_color"]).isdigit()}
-        pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map)
+        name_map = {int(m["mset_id"]): m["mset_name"] for m in msets}
+        bpm_map = {int(m["mset_id"]): str(m["bpm"]) for m in msets if m.get("bpm")}
+        pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map, name_map, bpm_map, free_only=True)
+        # Get existing sets for dropdown
+        existing_sets = [(m["mset_name"], m.get("bpm", "—")) for m in msets]
+        existing_set_options = '<option value="" disabled selected>-- Select Existing Set --</option>'
+        for name, bpm in sorted(existing_sets):
+            existing_set_options += f'<option value="{name}">{name} ({bpm} BPM)</option>'
+        
         return {
             'pad_options': pad_options,
             'pad_color_options': pad_color_options,
+            'clip_color_options': clip_color_options,
             'pad_grid': pad_grid,
+            'existing_set_options': existing_set_options,
             'message': 'Upload a MIDI file to generate a set',
             'message_type': 'info'
         }
@@ -46,80 +61,224 @@ class SetManagementHandler(BaseHandler):
         msets, ids = list_msets(return_free_ids=True)
         free_pads = sorted([pad_id + 1 for pad_id in ids.get("free", [])])
         pad_options = ''.join(f'<option value="{pad}">{pad}</option>' for pad in free_pads)
+        pad_options = '<option value="" disabled selected>-- Select Pad --</option>' + pad_options
         pad_color_options = self.generate_color_options()
+        # Generate color dropdown with swatches for clip color
+        clip_color_options = self.generate_color_options(input_name="clip_color")
         color_map = {int(m["mset_id"]): int(m["mset_color"]) for m in msets if str(m["mset_color"]).isdigit()}
-        pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map)
+        name_map = {int(m["mset_id"]): m["mset_name"] for m in msets}
+        bpm_map = {int(m["mset_id"]): str(m["bpm"]) for m in msets if m.get("bpm")}
+        pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map, name_map, bpm_map, free_only=True)
+        # Get existing sets for dropdown
+        existing_sets = [(m["mset_name"], m.get("bpm", "—")) for m in msets]
+        existing_set_options = '<option value="" disabled selected>-- Select Existing Set --</option>'
+        for name, bpm in sorted(existing_sets):
+            existing_set_options += f'<option value="{name}">{name} ({bpm} BPM)</option>'
 
         if action == 'upload_midi':
-            # Generate set from uploaded MIDI file
-            set_name = form.getvalue('set_name')
-            if not set_name:
-                return self.format_error_response(
-                    "Missing required parameter: set_name",
-                    pad_options=pad_options,
-                    pad_color_options=pad_color_options,
-                    pad_grid=pad_grid,
-                )
+            # Handle multi-file MIDI upload with track assignments
+            set_name = form.getvalue('set_name', '')
+            set_mode = form.getvalue('set_mode', 'new')
+            midi_type = form.getvalue('midi_type', 'melodic')
             
-            # Handle file upload
-            if 'midi_file' not in form:
-                return self.format_error_response(
-                    "No MIDI file uploaded",
-                    pad_options=pad_options,
-                    pad_color_options=pad_color_options,
-                    pad_grid=pad_grid,
-                )
+            # Drum mode always creates a new set
+            if midi_type == 'drum':
+                set_mode = 'new'
             
-            fileitem = form['midi_file']
-            if not fileitem.filename:
-                return self.format_error_response(
-                    "No MIDI file selected",
-                    pad_options=pad_options,
-                    pad_color_options=pad_color_options,
-                    pad_grid=pad_grid,
-                )
+            # Validate set name for new sets
+            pad_color_for_clip = None
+            if set_mode == 'new':
+                if not set_name:
+                    return self.format_error_response(
+                        "Please enter a name for the new set",
+                        pad_options=pad_options,
+                        pad_color_options=pad_color_options,
+                        clip_color_options=clip_color_options,
+                        pad_grid=pad_grid,
+                        existing_set_options=existing_set_options,
+                    )
+                # Get pad color early for new sets (will be used as clip color)
+                pad_color_str = form.getvalue('pad_color', '1')
+                pad_color_for_clip = int(pad_color_str) if pad_color_str and pad_color_str.isdigit() else 1
             
-            # Check file extension
-            filename = fileitem.filename.lower()
-            if not (filename.endswith('.mid') or filename.endswith('.midi')):
-                return self.format_error_response(
-                    "Invalid file type. Please upload a .mid or .midi file",
-                    pad_options=pad_options,
-                    pad_color_options=pad_color_options,
-                    pad_grid=pad_grid,
-                )
-            
-            # Save uploaded file temporarily
-            success, filepath, error_response = self.handle_file_upload(form, 'midi_file')
-            if not success:
-                return self.format_error_response(
-                    error_response.get('message', "Failed to upload MIDI file"),
-                    pad_options=pad_options,
-                    pad_color_options=pad_color_options,
-                    pad_grid=pad_grid,
-                )
-            
-            try:
-                # Get tempo if provided
-                tempo_str = form.getvalue('tempo')
-                tempo = float(tempo_str) if tempo_str and tempo_str.strip() else None
-
-                # Dispatch based on MIDI type
-                midi_type = form.getvalue('midi_type', 'melodic')
-                if midi_type == 'drum':
-                    result = generate_drum_set_from_file(set_name, filepath, tempo)
+            # Validate existing set selection for existing mode
+            existing_path = None
+            existing_uuid = None
+            final_set_name = set_name
+            if set_mode == 'existing':
+                existing_set_name = form.getvalue('existing_set_name', '')
+                if not existing_set_name:
+                    return self.format_error_response(
+                        "Please select an existing set",
+                        pad_options=pad_options,
+                        pad_color_options=pad_color_options,
+                        clip_color_options=clip_color_options,
+                        pad_grid=pad_grid,
+                        existing_set_options=existing_set_options,
+                    )
+                # Find the set's UUID to construct correct path
+                for m in msets:
+                    if m["mset_name"] == existing_set_name:
+                        existing_uuid = m["uuid"]
+                        break
+                if existing_uuid:
+                    existing_path = os.path.join("/data/UserData/UserLibrary/Sets", existing_uuid, existing_set_name, "Song.abl")
                 else:
-                    result = generate_midi_set_from_file(set_name, filepath, tempo)
-
-            finally:
-                # Clean up uploaded file
-                self.cleanup_upload(filepath)
+                    return self.format_error_response(
+                        f"Could not find set '{existing_set_name}' in the library. It may have been renamed or removed.",
+                        pad_options=pad_options,
+                        pad_color_options=pad_color_options,
+                        clip_color_options=clip_color_options,
+                        pad_grid=pad_grid,
+                        existing_set_options=existing_set_options,
+                    )
+                final_set_name = existing_set_name
+            
+            # Handle file uploads - support multiple files
+            file_list = []
+            if 'midi_files' in form:
+                # Handle multiple files - form['midi_files'] is now a list of FileField objects
+                files = form['midi_files']
+                if not isinstance(files, list):
+                    files = [files]
+                for i, fileitem in enumerate(files):
+                    if hasattr(fileitem, 'filename') and fileitem.filename:
+                        # Server-side extension validation
+                        if not fileitem.filename.lower().endswith(('.mid', '.midi')):
+                            return self.format_error_response(
+                                f"File '{fileitem.filename}' is not a MIDI file. Only .mid and .midi files are accepted.",
+                                pad_options=pad_options,
+                                pad_color_options=pad_color_options,
+                                clip_color_options=clip_color_options,
+                                pad_grid=pad_grid,
+                                existing_set_options=existing_set_options,
+                            )
+                        file_list.append((i, fileitem))
+            
+            if not file_list:
+                return self.format_error_response(
+                    "No MIDI files uploaded",
+                    pad_options=pad_options,
+                    pad_color_options=pad_color_options,
+                    clip_color_options=clip_color_options,
+                    pad_grid=pad_grid,
+                    existing_set_options=existing_set_options,
+                )
+            
+            # Get clip color for existing sets (new sets use pad_color_for_clip per file)
+            clip_color = None
+            if set_mode == 'existing':
+                clip_color_str = form.getvalue('clip_color', '1')
+                clip_color = int(clip_color_str) if clip_color_str.isdigit() else 1
+            
+            # Get tempo if provided
+            tempo_str = form.getvalue('tempo')
+            tempo = float(tempo_str) if tempo_str and tempo_str.strip() else None
+            
+            # Drum import: single file, 808 pad mapping
+            if midi_type == 'drum':
+                temp_files = []
+                try:
+                    i, fileitem = file_list[0]
+                    success, filepath, error_response = self.save_uploaded_file(fileitem)
+                    if not success:
+                        result = {'success': False, 'message': f"Upload failed: {error_response.get('message', 'Unknown error')}"}
+                    else:
+                        temp_files.append(filepath)
+                        result = generate_drum_set_from_file(set_name, filepath, tempo=tempo)
+                        result['filename'] = fileitem.filename
+                finally:
+                    for fp in temp_files:
+                        self.cleanup_upload(fp)
+            
+            # Melodic import: multi-file, per-track assignment
+            else:
+                # Process each file with its track assignment
+                temp_files = []
+                results = []
+                try:
+                    for i, fileitem in file_list:
+                        # Get track assignment for this file
+                        track_str = form.getvalue(f'track_{i}', '1')
+                        target_track = int(track_str) if track_str.isdigit() else 1
+                        
+                        # Save uploaded file temporarily
+                        success, filepath, error_response = self.save_uploaded_file(fileitem)
+                        if not success:
+                            results.append({'success': False, 'message': f"File {fileitem.filename}: {error_response.get('message', 'Upload failed')}"})
+                            continue
+                        
+                        temp_files.append(filepath)
+                        
+                        # Determine clip color for this file
+                        file_clip_color = clip_color if set_mode == 'existing' else pad_color_for_clip
+                        
+                        # Process the MIDI file
+                        result = assign_midi_to_track(final_set_name, filepath, target_track, existing_path, tempo, file_clip_color)
+                        result['filename'] = fileitem.filename
+                        result['track'] = target_track
+                        results.append(result)
+                        
+                        # For subsequent files, use the updated existing_path (set was created/modified)
+                        if existing_path is None and result.get('success'):
+                            # First file created the set, update path for subsequent files
+                            output_dir = "/data/UserData/UserLibrary/Sets"
+                            existing_path = os.path.join(output_dir, final_set_name)
+                            if not existing_path.endswith('.abl'):
+                                existing_path += '.abl'
+                    
+                    # Aggregate results
+                    success_count = sum(1 for r in results if r.get('success'))
+                    failure_count = len(results) - success_count
+                    
+                    if failure_count == 0:
+                        # All succeeded
+                        if len(results) == 1:
+                            result = results[0]
+                        else:
+                            # Build summary message
+                            track_summary = []
+                            for r in results:
+                                track_summary.append(f"{r['filename']} → Track {r['track']}")
+                            result = {
+                                'success': True,
+                                'message': f"Successfully imported {success_count} file(s): " + ", ".join(track_summary),
+                                'path': results[0].get('path')  # Include path from first result for new set bundling
+                            }
+                    elif success_count == 0:
+                        # All failed
+                        errors = [f"{r['filename']}: {r.get('message', 'Unknown error')}" for r in results]
+                        result = {
+                            'success': False,
+                            'message': "All imports failed: " + "; ".join(errors)
+                        }
+                    else:
+                        # Mixed results - report as error so user sees red banner
+                        success_files = [r['filename'] for r in results if r.get('success')]
+                        failed_files = [f"{r['filename']}: {r.get('message', 'Unknown error')}" for r in results if not r.get('success')]
+                        # Find path from first successful result
+                        first_success_path = None
+                        for r in results:
+                            if r.get('success') and r.get('path'):
+                                first_success_path = r.get('path')
+                                break
+                        result = {
+                            'success': False,
+                            'message': f"Partial failure: {success_count} succeeded ({', '.join(success_files)}), {failure_count} failed ({'; '.join(failed_files)})",
+                            'path': first_success_path
+                        }
+                
+                finally:
+                    # Clean up all temporary files
+                    for filepath in temp_files:
+                        self.cleanup_upload(filepath)
 
         else:
             return self.format_error_response(
                 f"Unknown action: {action}",
                 pad_options=pad_options,
                 pad_color_options=pad_color_options,
+                clip_color_options=clip_color_options,
                 pad_grid=pad_grid,
             )
 
@@ -129,10 +288,48 @@ class SetManagementHandler(BaseHandler):
                 result.get('message', 'Operation failed'),
                 pad_options=pad_options,
                 pad_color_options=pad_color_options,
+                clip_color_options=clip_color_options,
                 pad_grid=pad_grid,
+                existing_set_options=existing_set_options,
             )
 
-        # Parse pad assignment
+        # Check if this is "add to existing set" mode - skip restore/bundle
+        is_add_to_existing = set_mode == 'existing'
+
+        if is_add_to_existing:
+            # For existing set mode, file is already saved
+            # Set was-externally-modified so Move reloads the Song.abl
+            if existing_uuid:
+                uuid_dir = os.path.join("/data/UserData/UserLibrary/Sets", existing_uuid)
+                try:
+                    subprocess.run(["setfattr", "-n", "user.was-externally-modified", "-v", "true", uuid_dir], check=True)
+                except Exception as e:
+                    logger.warning("Failed to set was-externally-modified: %s", e)
+            refresh_library()
+            existing_set_name = form.getvalue('existing_set_name', '')
+            return self.format_success_response(
+                f"{result.get('message', 'MIDI imported')} in existing set '{existing_set_name}'",
+                pad_options=pad_options,
+                pad_color_options=pad_color_options,
+                clip_color_options=clip_color_options,
+                pad_grid=pad_grid,
+                existing_set_options=existing_set_options
+            )
+
+        # For new set creation, check if any files succeeded (path is required)
+        set_path = result.get('path')
+        if not set_path:
+            # All files failed - return the error without trying to bundle
+            return self.format_error_response(
+                result.get('message', 'Failed to create set'),
+                pad_options=pad_options,
+                pad_color_options=pad_color_options,
+                clip_color_options=clip_color_options,
+                pad_grid=pad_grid,
+                existing_set_options=existing_set_options
+            )
+
+        # Parse pad assignment (only for new set creation)
         pad_selected = form.getvalue('pad_index')
         pad_color = form.getvalue('pad_color')
         if not pad_selected or not pad_selected.isdigit():
@@ -140,26 +337,21 @@ class SetManagementHandler(BaseHandler):
                 "Invalid pad selection",
                 pad_options=pad_options,
                 pad_color_options=pad_color_options,
+                clip_color_options=clip_color_options,
                 pad_grid=pad_grid,
+                existing_set_options=existing_set_options,
             )
         if not pad_color or not pad_color.isdigit():
             return self.format_error_response(
                 "Invalid pad color",
                 pad_options=pad_options,
                 pad_color_options=pad_color_options,
+                clip_color_options=clip_color_options,
                 pad_grid=pad_grid,
+                existing_set_options=existing_set_options,
             )
         pad_selected_int = int(pad_selected) - 1
         pad_color_int = int(pad_color)
-        # Prepare bundling of generated set
-        set_path = result.get('path')
-        if not set_path:
-            return self.format_error_response(
-                "Internal error: missing set path",
-                pad_options=pad_options,
-                pad_color_options=pad_color_options,
-                pad_grid=pad_grid,
-            )
         # Create temp directory for bundling
         with tempfile.TemporaryDirectory() as tmpdir:
             song_abl_path = os.path.join(tmpdir, 'Song.abl')
@@ -172,7 +364,7 @@ class SetManagementHandler(BaseHandler):
             # Restore to device
             restore_result = restore_ablbundle(bundle_path, pad_selected_int, pad_color_int)
             os.remove(bundle_path)
-        
+
         if restore_result.get('success'):
             # Clean up the original .abl file after successful placement
             try:
@@ -180,38 +372,25 @@ class SetManagementHandler(BaseHandler):
             except Exception as e:
                 logger.warning("Failed to clean up set file %s: %s", set_path, e)
 
+            # Refresh library so Move picks up the new set
+            refresh_library()
+
             # Refresh pad list after successful placement
             msets_updated, updated_ids = list_msets(return_free_ids=True)
             updated_free_pads = sorted([pad_id + 1 for pad_id in updated_ids.get("free", [])])
             updated_pad_options = ''.join(f'<option value="{pad}">{pad}</option>' for pad in updated_free_pads)
             updated_pad_options = '<option value="" disabled selected>-- Select Pad --</option>' + updated_pad_options
             color_map = {int(m["mset_id"]): int(m["mset_color"]) for m in msets_updated if str(m["mset_color"]).isdigit()}
-            pad_grid = self.generate_pad_grid(updated_ids.get("used", set()), color_map)
-            return self.format_success_response(restore_result['message'], pad_options=updated_pad_options, pad_color_options=pad_color_options, pad_grid=pad_grid)
+            name_map = {int(m["mset_id"]): m["mset_name"] for m in msets_updated}
+            bpm_map = {int(m["mset_id"]): str(m["bpm"]) for m in msets_updated if m.get("bpm")}
+            pad_grid = self.generate_pad_grid(updated_ids.get("used", set()), color_map, name_map, bpm_map, free_only=True)
+            return self.format_success_response(restore_result['message'], pad_options=updated_pad_options, pad_color_options=pad_color_options, clip_color_options=clip_color_options, pad_grid=pad_grid, existing_set_options=existing_set_options)
         else:
             color_map = {int(m["mset_id"]): int(m["mset_color"]) for m in msets if str(m["mset_color"]).isdigit()}
-            pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map)
-            return self.format_error_response(restore_result.get('message'), pad_options=pad_options, pad_color_options=pad_color_options, pad_grid=pad_grid)
-
-    def generate_pad_grid(self, used_ids, color_map):
-        """Return HTML for a 32-pad grid showing occupied pads with colors."""
-        cells = []
-        # Pad numbering starts with 1 on the bottom-left
-        for row in range(4):
-            for col in range(8):
-                idx = (3 - row) * 8 + col
-                num = idx + 1
-                occupied = idx in used_ids
-                status = 'occupied' if occupied else 'free'
-                disabled = 'disabled' if occupied else ''
-                color_id = color_map.get(idx)
-                style = f' style="background-color: {rgb_string(color_id)}"' if color_id else ''
-                label_text = "" if not occupied else ""
-                cells.append(
-                    f'<input type="radio" id="pad_{num}" name="pad_index" value="{num}" {disabled}>'
-                    f'<label for="pad_{num}" class="pad-cell {status}"{style}>{label_text}</label>'
-                )
-        return '<div class="pad-grid">' + ''.join(cells) + '</div>'
+            name_map = {int(m["mset_id"]): m["mset_name"] for m in msets}
+            bpm_map = {int(m["mset_id"]): str(m["bpm"]) for m in msets if m.get("bpm")}
+            pad_grid = self.generate_pad_grid(ids.get("used", set()), color_map, name_map, bpm_map, free_only=True)
+            return self.format_error_response(restore_result.get('message'), pad_options=pad_options, pad_color_options=pad_color_options, clip_color_options=clip_color_options, pad_grid=pad_grid, existing_set_options=existing_set_options)
 
     def generate_color_options(self, input_name="pad_color", pad_input_name="pad_index"):
         """Return HTML for the custom color dropdown with pad preview."""

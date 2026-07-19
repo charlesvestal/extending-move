@@ -7,40 +7,168 @@
 <div  >
     <div  >
         <h3>Upload MIDI File</h3>
-        <p>Upload a MIDI file to generate an Ableton Live set with the notes from the file.</p>
+        <p>Upload one or more MIDI files and assign each to a track slot (1-4). Multiple files can target the same track - they'll fill empty clip slots.</p>
         <form method="post" action="{{ host_prefix }}/midi-upload" enctype="multipart/form-data">
             <input type="hidden" name="action" value="upload_midi" />
-            <div class="form-group">
-                <label for="midi_type">MIDI Type:</label>
-                <select name="midi_type" id="midi_type" required>
-                    <option value="melodic" selected>Melodic MIDI</option>
-                    <option value="drum">Drum MIDI (808)</option>
-                </select>
+            <div class="form-group" id="set-mode-group">
+                <label>Set Mode:</label>
+                <div>
+                    <input type="radio" name="set_mode" id="set_mode_new" value="new" checked onchange="updateSetModeFields()">
+                    <label for="set_mode_new" style="display:inline;font-weight:normal;">Create New Set</label>
+                </div>
+                <div>
+                    <input type="radio" name="set_mode" id="set_mode_existing" value="existing" onchange="updateSetModeFields()">
+                    <label for="set_mode_existing" style="display:inline;font-weight:normal;">Add to Existing Set</label>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="midi_file">MIDI File:</label>
-                <input type="file" name="midi_file" id="midi_file" accept=".mid,.midi" required />
-                <small>Supported formats: .mid, .midi</small>
-            </div>
-            <div class="form-group">
-                <label for="set_name">Set Name:</label>
+            <div class="form-group" id="new-set-name-group">
+                <label for="set_name">New Set Name:</label>
                 <input type="text" name="set_name" id="set_name" placeholder="My MIDI Set" required />
+                <small>Required when creating a new set</small>
+            </div>
+            <div class="form-group" id="clip-color-group" style="display:none;">
+                <label for="clip_color">Clip Color:</label>
+                {{ clip_color_options | safe }}
+                <small>Color for the new clip when adding to existing set</small>
+            </div>
+            <div class="form-group" id="existing-set-select-group" style="display:none;">
+                <label for="existing_set_name">Select Existing Set:</label>
+                <select name="existing_set_name" id="existing_set_name">
+                    {{ existing_set_options | safe }}
+                </select>
+                <small>Required when adding to existing set</small>
+            </div>
+            <div class="form-group" id="midi-type-group">
+                <label>MIDI Type:</label>
+                <div>
+                    <input type="radio" name="midi_type" id="midi_type_melodic" value="melodic" checked onchange="updateMidiTypeFields()">
+                    <label for="midi_type_melodic" style="display:inline;font-weight:normal;">Melodic (multi-file, per-track)</label>
+                </div>
+                <div>
+                    <input type="radio" name="midi_type" id="midi_type_drum" value="drum" onchange="updateMidiTypeFields()">
+                    <label for="midi_type_drum" style="display:inline;font-weight:normal;">Drum (808 pad mapping, single file)</label>
+                </div>
             </div>
             <div class="form-group">
+                <label for="midi_files">MIDI File(s):</label>
+                <input type="file" name="midi_files" id="midi_files" accept=".mid,.midi" multiple required onchange="handleFileSelect()" />
+                <small id="midi-files-hint">Supported formats: .mid, .midi. Select multiple files to assign to different tracks.</small>
+            </div>
+            <div id="file-track-assignments" style="margin-bottom:1rem;">
+                <!-- Dynamic track assignments will appear here -->
+            </div>
+            <div class="form-group" id="tempo-group">
                 <label for="tempo">Tempo (BPM):</label>
                 <input type="number" name="tempo" id="tempo" min="20" max="300" placeholder="Auto-detect from MIDI" />
                 <small>Leave blank to use tempo from MIDI file (or default 120 BPM)</small>
             </div>
-           <div class="form-group">
-                <label for="pad_color_dropdown">Pad Color:</label>
-                {{ pad_color_options | safe }}
+            <div id="new-set-extras">
+                <div class="form-group">
+                    <label for="pad_color_dropdown">Pad Color:</label>
+                    {{ pad_color_options | safe }}
+                </div>
+                <div class="form-group">
+                    <label>Select Pad:</label>
+                    {{ pad_grid | safe }}
+                </div>
             </div>
-            <div class="form-group">
-                <label>Select Pad:</label>
-                {{ pad_grid | safe }}
-            </div>
-            <button type="submit" >Generate Set from MIDI</button>
+            <button type="submit">Generate Set from MIDI</button>
         </form>
     </div>
 </div>
+<script>
+let selectedFiles = [];
+
+function handleFileSelect() {
+    const fileInput = document.getElementById('midi_files');
+    const container = document.getElementById('file-track-assignments');
+    selectedFiles = Array.from(fileInput.files);
+    
+    if (selectedFiles.length === 0) {
+        container.innerHTML = '';
+        return;
+    }
+    
+    // Build track assignment UI for each file
+    let html = '<div style="border:1px solid #ccc; padding:0.5rem; border-radius:4px;">';
+    html += '<strong>Track Assignments:</strong>';
+    html += '<div style="margin-top:0.5rem;">';
+    
+    selectedFiles.forEach((file, index) => {
+        html += '<div style="display:flex; align-items:center; margin-bottom:0.5rem; gap:0.5rem;">';
+        html += '<span style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' + file.name + '</span>';
+        html += '<select name="track_' + index + '" style="width:auto;">';
+        html += '<option value="1" selected>Track 1</option>';
+        html += '<option value="2">Track 2</option>';
+        html += '<option value="3">Track 3</option>';
+        html += '<option value="4">Track 4</option>';
+        html += '</select>';
+        html += '</div>';
+    });
+    
+    html += '</div>';
+    html += '<small>Assign each file to a track slot. Multiple files can use the same track.</small>';
+    html += '</div>';
+    
+    container.innerHTML = html;
+}
+
+function updateMidiTypeFields() {
+    const isDrum = document.getElementById('midi_type_drum').checked;
+    const fileInput = document.getElementById('midi_files');
+    const filesHint = document.getElementById('midi-files-hint');
+    const trackAssignments = document.getElementById('file-track-assignments');
+    const setModeGroup = document.getElementById('set-mode-group');
+
+    if (isDrum) {
+        fileInput.removeAttribute('multiple');
+        filesHint.textContent = 'Supported formats: .mid, .midi. Single file for drum pad mapping.';
+        trackAssignments.innerHTML = '';
+        // Force new set mode for drum import
+        document.getElementById('set_mode_new').checked = true;
+        setModeGroup.style.display = 'none';
+        updateSetModeFields();
+    } else {
+        fileInput.setAttribute('multiple', '');
+        filesHint.textContent = 'Supported formats: .mid, .midi. Select multiple files to assign to different tracks.';
+        setModeGroup.style.display = 'block';
+    }
+}
+
+function updateSetModeFields() {
+    const isDrum = document.getElementById('midi_type_drum').checked;
+    const isNew = document.getElementById('set_mode_new').checked;
+    const newSetGroup = document.getElementById('new-set-name-group');
+    const existingSetGroup = document.getElementById('existing-set-select-group');
+    const clipColorGroup = document.getElementById('clip-color-group');
+    const newSetExtras = document.getElementById('new-set-extras');
+    const tempoGroup = document.getElementById('tempo-group');
+    const setNameInput = document.getElementById('set_name');
+    const existingSetSelect = document.getElementById('existing_set_name');
+    
+    if (isNew || isDrum) {
+        newSetGroup.style.display = 'block';
+        existingSetGroup.style.display = 'none';
+        clipColorGroup.style.display = 'none';
+        newSetExtras.style.display = 'block';
+        tempoGroup.style.display = 'block';
+        setNameInput.required = true;
+        existingSetSelect.required = false;
+    } else {
+        newSetGroup.style.display = 'none';
+        existingSetGroup.style.display = 'block';
+        clipColorGroup.style.display = 'block';
+        newSetExtras.style.display = 'none';
+        tempoGroup.style.display = 'none';
+        setNameInput.required = false;
+        existingSetSelect.required = true;
+    }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    updateMidiTypeFields();
+    updateSetModeFields();
+});
+</script>
 {% endblock %}

@@ -127,6 +127,8 @@ def get_clip_data(set_path: str, track: int, clip: int) -> Dict[str, Any]:
             song = json.load(f)
         track_obj = song["tracks"][track]
         clip_obj = track_obj["clipSlots"][clip]["clip"]
+        if clip_obj is None:
+            return {"success": False, "message": f"Clip {clip + 1} on Track {track + 1} is empty"}
         notes = clip_obj.get("notes", [])
         envelopes = clip_obj.get("envelopes", [])
         region_info = clip_obj.get("region", {})

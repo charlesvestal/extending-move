@@ -55,6 +55,12 @@ PAD_COLOR_LABELS = {
     25: "Fuchsia",
 }
 
+def move_color_to_ui(color_id):
+    if color_id == 0:
+        return 1
+    return color_id
+
+
 def rgb_string(color_id):
     rgb = PAD_COLORS.get(color_id)
     if rgb:
