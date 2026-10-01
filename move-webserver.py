@@ -47,6 +47,8 @@ from handlers.adsr_handler_class import AdsrHandler
 from handlers.cyc_env_handler_class import CycEnvHandler
 from handlers.lfo_handler_class import LfoHandler
 from handlers.set_inspector_handler_class import SetInspectorHandler
+from handlers.overview_handler_class import OverviewHandler
+from core.overview_handler import get_sets_data, get_active_slot, get_system_stats
 from core.refresh_handler import refresh_library
 from core.file_browser import generate_dir_html
 
@@ -137,6 +139,7 @@ adsr_handler = AdsrHandler()
 cyc_env_handler = CycEnvHandler()
 lfo_handler = LfoHandler()
 set_inspector_handler = SetInspectorHandler()
+overview_handler = OverviewHandler()
 
 
 @app.before_request
@@ -255,9 +258,61 @@ def warm_up_modules():
     logger.info("Module warm-up finished in %.3fs", time.perf_counter() - overall_start)
 
 
+@app.route("/overview")
+def overview():
+    """Render the Move Over (view) overview page."""
+    return render_template(
+        "overview.html",
+        active_tab="overview",
+        pad_grid=overview_handler.generate_pad_grid_html(),
+    )
+
+
+@app.route("/overview/api/data")
+def overview_api_data():
+    """Return full sets data as JSON."""
+    return jsonify(get_sets_data())
+
+
+@app.route("/overview/api/grid")
+def overview_api_grid():
+    restore_mode = request.args.get("restore_mode") == "1"
+    camelot = request.args.get("camelot")
+    return jsonify({"pad_grid": overview_handler.generate_pad_grid_html(restore_mode, camelot)})
+
+
+@app.route("/overview/api/active-slot")
+def overview_api_active_slot():
+    """Return only the current active pad slot."""
+    return jsonify({"current_slot": get_active_slot()})
+
+
+@app.route("/overview/api/system")
+def overview_api_system():
+    """Return CPU load and memory stats."""
+    return jsonify(get_system_stats())
+
+
+@app.route("/overview/api/restore", methods=["POST"])
+def overview_api_restore():
+    """Handle set restore from Overview page."""
+    form_data = request.form.to_dict()
+    if "ablbundle" in request.files:
+        form_data["ablbundle"] = FileField(request.files["ablbundle"])
+    form = SimpleForm(form_data)
+    result = overview_handler.handle_post_restore(form)
+    return jsonify(result)
+
+
+@app.route("/overview/api/colors")
+def overview_api_colors():
+    """Return pad colors for color picker."""
+    return jsonify(overview_handler.generate_color_options_json())
+
+
 @app.route("/")
 def index():
-    return redirect("/restore")
+    return redirect("/overview")
 
 
 @app.route("/browse-dir")
@@ -427,38 +482,8 @@ def lfo_route():
 
 @app.route("/restore", methods=["GET", "POST"])
 def restore():
-    message = None
-    success = False
-    message_type = None
-    options_html = ""
-    color_options = ""
-    pad_grid = ""
-    if request.method == "POST":
-        form_data = request.form.to_dict()
-        if "ablbundle" in request.files:
-            form_data["ablbundle"] = FileField(request.files["ablbundle"])
-        form = SimpleForm(form_data)
-        result = restore_handler.handle_post(form)
-        message = result.get("message")
-        message_type = result.get("message_type")
-        success = message_type != "error"
-        options_html = result.get("options", options_html)
-        color_options = result.get("color_options", color_options)
-        pad_grid = result.get("pad_grid", pad_grid)
-    context = restore_handler.handle_get()
-    options_html = context.get("options", options_html)
-    color_options = context.get("color_options", color_options)
-    pad_grid = context.get("pad_grid", pad_grid)
-    return render_template(
-        "restore.html",
-        message=message,
-        success=success,
-        message_type=message_type,
-        options_html=options_html,
-        color_options=color_options,
-        pad_grid=pad_grid,
-        active_tab="restore",
-    )
+    """Restore page now redirects to Overview where restore functionality is integrated."""
+    return redirect("/overview")
 
 
 @app.route("/slice", methods=["GET", "POST"])
