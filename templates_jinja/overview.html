@@ -592,6 +592,12 @@
         const msg = document.getElementById('restore-message');
         btn.disabled = true;
         btn.textContent = 'Restoring...';
+        const showMessage = (cls, text) => {
+            const p = document.createElement('p');
+            p.className = cls;
+            p.textContent = text;
+            msg.replaceChildren(p);
+        };
 
         const formData = new FormData();
         formData.append('ablbundle', document.getElementById('ablbundle').files[0]);
@@ -606,7 +612,7 @@
             const result = await res.json();
 
             if (result.success) {
-                msg.innerHTML = `<p class="success">${result.message}</p>`;
+                showMessage('success', result.message);
                 // Reset form
                 document.getElementById('ablbundle').value = '';
                 selectedTargetPad = null;
@@ -624,10 +630,10 @@
                 // Reload data to show new set
                 await loadData();
             } else {
-                msg.innerHTML = `<p class="error">${result.message}</p>`;
+                showMessage('error', result.message);
             }
         } catch (e) {
-            msg.innerHTML = `<p class="error">Error: ${e.message}</p>`;
+            showMessage('error', `Error: ${e.message}`);
         } finally {
             btn.disabled = false;
             btn.textContent = 'Upload & Restore';

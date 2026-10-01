@@ -44,6 +44,12 @@ def _parse_song_abl(set_path: str) -> dict:
         return {}
 
 
+_ENHARMONICS = {
+    'C#': 'Db', 'Db': 'C#', 'D#': 'Eb', 'Eb': 'D#', 'F#': 'Gb', 'Gb': 'F#',
+    'G#': 'Ab', 'Ab': 'G#', 'A#': 'Bb', 'Bb': 'A#',
+}
+
+
 def _key_to_camelot(key: str, scale: str) -> Optional[str]:
     """Map a key + scale to a Camelot wheel code."""
     TABLE = {
@@ -62,7 +68,9 @@ def _key_to_camelot(key: str, scale: str) -> Optional[str]:
     }
     if not key or not scale:
         return None
-    return TABLE.get((key, scale.lower()))
+    scale = scale.lower()
+    # Song.abl roots are spelled with a fixed mix of sharps/flats, so try the enharmonic too.
+    return TABLE.get((key, scale)) or TABLE.get((_ENHARMONICS.get(key), scale))
 
 
 def get_sets_data() -> dict:

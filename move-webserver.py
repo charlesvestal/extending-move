@@ -25,7 +25,6 @@ import pyrubberband.pyrb as pyrb
 from core.time_stretch_handler import get_rubberband_binary
 from wsgiref.simple_server import make_server, WSGIServer
 from handlers.reverse_handler_class import ReverseHandler
-from handlers.restore_handler_class import RestoreHandler
 from handlers.slice_handler_class import SliceHandler
 from handlers.set_management_handler_class import SetManagementHandler
 from handlers.synth_preset_inspector_handler_class import (
@@ -123,7 +122,6 @@ class ThreadingWSGIServer(ThreadingMixIn, WSGIServer):
 
 app = Flask(__name__, template_folder="templates_jinja")
 reverse_handler = ReverseHandler()
-restore_handler = RestoreHandler()
 slice_handler = SliceHandler()
 set_management_handler = SetManagementHandler()
 synth_handler = SynthPresetInspectorHandler()

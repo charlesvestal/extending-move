@@ -38,7 +38,6 @@ extending-move/
 │   ├── slice_handler_class.py             # Slice kit creation interface
 │   ├── refresh_handler_class.py           # Library refresh interface
 │   ├── reverse_handler_class.py           # WAV reversal interface
-│   ├── restore_handler_class.py           # Move Set restoration interface
 │   ├── drum_rack_inspector_handler_class.py  # Preset inspection interface
 │   ├── synth_preset_inspector_handler_class.py  # Legacy macro management interface
 │   ├── synth_param_editor_handler_class.py  # Drift preset editor interface
@@ -50,7 +49,7 @@ extending-move/
 │   ├── chord.html               # Chord generation interface
 │   ├── slice.html               # Waveform slicing interface
 │   ├── reverse.html             # WAV reversal interface
-│   ├── restore.html             # Move Set restoration
+│   ├── overview.html            # Set overview and restore
 │   ├── drum_rack_inspector.html # Drum rack inspection
 │   ├── synth_params.html        # Drift preset editor (parameters & macros)
 │   └── midi_upload.html         # MIDI file upload and set creation
