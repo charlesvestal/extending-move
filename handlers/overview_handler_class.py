@@ -4,6 +4,7 @@ import logging
 from handlers.base_handler import BaseHandler
 from core.overview_handler import get_sets_data, get_active_slot, get_system_stats
 from core.restore_handler import restore_ablbundle, restore_abl
+from core.list_msets_handler import list_msets_free
 from core.pad_colors import PAD_COLORS, PAD_COLOR_LABELS
 import json
 
@@ -75,8 +76,20 @@ class OverviewHandler(BaseHandler):
                 self.cleanup_upload(filepath)
                 return {"success": False, "message": "Please select a pad color."}
 
-            pad_selected = int(pad_selected) - 1  # Convert to internal ID (0-31)
+            pad_num = int(pad_selected)
             pad_color = int(pad_color)
+
+            # Validate here with 1-based pad numbers; the core reports 0-based indices.
+            if not 1 <= pad_num <= 32:
+                self.cleanup_upload(filepath)
+                return {"success": False, "message": f"Invalid pad {pad_num}. Must be between 1 and 32."}
+            if not 1 <= pad_color <= len(PAD_COLORS):
+                self.cleanup_upload(filepath)
+                return {"success": False, "message": f"Invalid pad color {pad_color}. Must be between 1 and {len(PAD_COLORS)}."}
+            pad_selected = pad_num - 1
+            if pad_selected not in list_msets_free():
+                self.cleanup_upload(filepath)
+                return {"success": False, "message": f"Pad {pad_num} is already in use."}
 
             # Execute restore
             if filepath.lower().endswith('.ablbundle'):
@@ -85,10 +98,9 @@ class OverviewHandler(BaseHandler):
                 result = restore_abl(filepath, pad_selected, pad_color)
 
             self.cleanup_upload(filepath)
-            if result.get("success"):
-                result["message"] = result["message"].replace(
-                    f"pad {pad_selected}", f"pad {pad_selected + 1}"
-                )
+            suffix = f"pad {pad_selected}"
+            if result.get("success") and result["message"].endswith(suffix):
+                result["message"] = result["message"][:-len(suffix)] + f"pad {pad_num}"
             return result
 
         except Exception as e:

@@ -3,45 +3,25 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 
-from handlers.restore_handler_class import RestoreHandler
+from handlers.base_handler import BaseHandler
 from handlers.overview_handler_class import OverviewHandler
 import handlers.overview_handler_class as overview_module
 
 
-def test_generate_pad_options_empty():
-    h = RestoreHandler()
-    html = h.generate_pad_options([])
-    assert 'No pads available' in html
-
-
-def test_generate_pad_options_some():
-    h = RestoreHandler()
-    html = h.generate_pad_options([2, 4])
-    assert html.count('<option') == 2
-    assert 'selected' in html.split('<option')[1]
-
-
 def test_generate_pad_grid():
-    h = RestoreHandler()
+    h = BaseHandler()
     html = h.generate_pad_grid({0, 31}, {0: 1}, input_name="mset_index", free_only=True)
     assert html.count('class="pad-cell occupied"') == 2
     assert 'id="pad_1" name="mset_index" value="1" disabled' in html
     assert 'background-color: rgba(' in html
 
-def test_generate_color_options_custom():
-    h = RestoreHandler()
-    html = h.generate_color_options("clr", "pad")
-    assert 'id="clr_dropdown"' in html
-    assert 'name="clr"' in html
-    assert 'padName = "pad"' in html
-    assert 'color-dropdown' in html
+
+class Form(dict):
+    def getvalue(self, name, default=None):
+        return self.get(name, default)
 
 
-def test_overview_restore_message_uses_ui_pad_number(monkeypatch, tmp_path):
-    class Form(dict):
-        def getvalue(self, name, default=None):
-            return self.get(name, default)
-
+def _overview_handler(monkeypatch, tmp_path, free=range(32)):
     upload_path = tmp_path / "test.abl"
     upload_path.write_text("{}")
     handler = OverviewHandler()
@@ -50,6 +30,29 @@ def test_overview_restore_message_uses_ui_pad_number(monkeypatch, tmp_path):
         "handle_file_upload",
         lambda form, field_name: (True, str(upload_path), None),
     )
+    monkeypatch.setattr(overview_module, "list_msets_free", lambda: list(free))
+    return handler
+
+
+def test_overview_restore_reports_ui_pad_numbers(monkeypatch, tmp_path):
+    def fail(*args):
+        raise AssertionError("restore should not run")
+
+    monkeypatch.setattr(overview_module, "restore_abl", fail)
+    handler = _overview_handler(monkeypatch, tmp_path, free=[i for i in range(32) if i != 5])
+
+    result = handler.handle_post_restore(Form({"target_pad": "6", "pad_color": "1"}))
+    assert result == {"success": False, "message": "Pad 6 is already in use."}
+
+    result = handler.handle_post_restore(Form({"target_pad": "33", "pad_color": "1"}))
+    assert result["message"] == "Invalid pad 33. Must be between 1 and 32."
+
+    result = handler.handle_post_restore(Form({"target_pad": "7", "pad_color": "26"}))
+    assert result["message"] == "Invalid pad color 26. Must be between 1 and 25."
+
+
+def test_overview_restore_message_uses_ui_pad_number(monkeypatch, tmp_path):
+    handler = _overview_handler(monkeypatch, tmp_path)
     monkeypatch.setattr(
         overview_module,
         "restore_abl",

@@ -85,3 +85,14 @@ def test_generate_pad_grid_html_restore_mode_selects_only_free_pads(monkeypatch)
     assert 'class="pad-grid"' in html
     assert 'id="pad_6" name="overview_pad" value="6" disabled' in html
     assert 'id="pad_7" name="overview_pad" value="7" ' in html
+
+
+def test_key_to_camelot_covers_every_root_note():
+    from core.overview_handler import _ROOT_NOTE_NAMES, _key_to_camelot
+
+    for scale in ("major", "minor"):
+        codes = {_key_to_camelot(key, scale) for key in _ROOT_NOTE_NAMES}
+        assert None not in codes
+        assert len(codes) == 12
+    assert _key_to_camelot("Eb", "minor") == "2A"
+    assert _key_to_camelot("C#", "major") == "3B"
