@@ -7,9 +7,13 @@
     <link rel="stylesheet" href="{{ host_prefix }}/static/style.css">
 </head>
 <body class="page-{{ active_tab }}">
-    <h1 id="header">Move - Extended</h1>
+    <div id="app-wrap">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+        <h1 id="header">Move - Extended</h1>
+        <button id="theme-toggle" onclick="toggleTheme()" style="font-size:0.8rem;padding:0.3rem 0.8rem;margin:0;">🌙 Dark</button>
+    </div>
     <nav class="tab">
-        <a href="{{ host_prefix }}/restore" class="{% if active_tab == 'restore' %}active{% endif %}">Restore</a>
+        <a href="{{ host_prefix }}/overview" class="{% if active_tab == 'overview' %}active{% endif %}">Overview</a>
         <a href="{{ host_prefix }}/slice" class="{% if active_tab == 'slice' %}active{% endif %}">Slice</a>
         <a href="{{ host_prefix }}/chord" class="{% if active_tab == 'chord' %}active{% endif %}">Chords</a>
         <a href="{{ host_prefix }}/drum-rack-inspector" class="{% if active_tab == 'drum-rack-inspector' %}active{% endif %}">Drums</a>
@@ -32,6 +36,82 @@
         <a href="http://github.com/charlesvestal/extending-move/">GitHub</a> |
         <a href="https://discord.gg/GHWaZCC9bQ">Discord</a>
     </footer>
+    </div>
+    <script>
+    // Shared pad grid styling - matches Overview page behavior
+    (function() {
+        function updatePadOpacity() {
+            // Reset all pad backgrounds to 0.2 opacity
+            document.querySelectorAll('.pad-grid .pad-cell').forEach(cell => {
+                const bg = cell.style.backgroundColor;
+                if (bg && bg.includes('rgba')) {
+                    cell.style.backgroundColor = bg.replace(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*[\d.]+\)/, 'rgba($1, $2, $3, 0.2)');
+                }
+            });
+            // Increase opacity to 0.4 for selected pad
+            const checked = document.querySelector('.pad-grid input[type="radio"]:checked');
+            if (checked) {
+                const label = document.querySelector('label[for="' + checked.id + '"]');
+                if (label) {
+                    const bg = label.style.backgroundColor;
+                    if (bg && bg.includes('rgba')) {
+                        label.style.backgroundColor = bg.replace(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*[\d.]+\)/, 'rgba($1, $2, $3, 0.4)');
+                    }
+                    label.classList.add('active');
+                }
+            }
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            const padGrid = document.querySelector('.pad-grid');
+            if (padGrid) {
+                updatePadOpacity();
+                padGrid.addEventListener('change', updatePadOpacity);
+            }
+        });
+    })();
+    </script>
+    <script>
+    // Global theme toggle
+    function toggleTheme() {
+        const wrap = document.getElementById('app-wrap');
+        const btn = document.getElementById('theme-toggle');
+        const isDark = wrap.classList.toggle('dark');
+        btn.textContent = isDark ? '☀️ Light' : '🌙 Dark';
+        localStorage.setItem('move-theme', isDark ? 'dark' : 'light');
+        // Update pad grid opacity for dark mode
+        updatePadGridForTheme(isDark);
+    }
+    
+    function updatePadGridForTheme(isDark) {
+        document.querySelectorAll('.pad-grid .pad-cell').forEach(cell => {
+            const bg = cell.style.backgroundColor;
+            if (bg && bg.includes('rgba')) {
+                // In dark mode, use 0.08 opacity, in light mode use 0.2
+                const newAlpha = isDark ? '0.08' : '0.2';
+                cell.style.backgroundColor = bg.replace(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*[\d.]+\)/, `rgba($1, $2, $3, ${newAlpha})`);
+            }
+        });
+    }
+    
+    (function() {
+        // Restore theme preference on page load
+        if (localStorage.getItem('move-theme') === 'dark') {
+            document.getElementById('app-wrap').classList.add('dark');
+            document.getElementById('theme-toggle').textContent = '☀️ Light';
+        }
+    })();
+    
+    // Initialize pad grid opacity after DOM is ready
+    document.addEventListener('DOMContentLoaded', function() {
+        const isDark = document.getElementById('app-wrap').classList.contains('dark');
+        if (isDark && typeof updatePadGridForTheme === 'function') {
+            // Small delay to ensure pad grid is rendered
+            setTimeout(function() {
+                updatePadGridForTheme(true);
+            }, 0);
+        }
+    });
+    </script>
     {% block scripts %}{% endblock %}
 </body>
 </html>
